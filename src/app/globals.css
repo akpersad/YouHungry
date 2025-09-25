@@ -1,17 +1,17 @@
 @import "tailwindcss";
 
 :root {
-  /* Design System Colors - Updated Palette */
+  /* Design System Colors - Infrared Accent System */
   /* Primary Colors (for backgrounds/headings) */
-  --color-primary: #386641; /* Rich Green */
-  --color-primary-light: #4a7c59;
-  --color-primary-dark: #2d4f33;
-  --color-secondary: #6f4e37; /* Earthy Brown */
-  --color-secondary-light: #8b6f47;
-  --color-secondary-dark: #5a3e2c;
-  --color-accent: #9a2229; /* Deep Red */
-  --color-accent-light: #b52d35;
-  --color-accent-dark: #7d1b21;
+  --color-primary: #ff3366; /* Vibrant Infrared */
+  --color-primary-light: #ff6699;
+  --color-primary-dark: #cc1144;
+  --color-secondary: #ff4477; /* Muted Infrared */
+  --color-secondary-light: #ff6699;
+  --color-secondary-dark: #cc1144;
+  --color-accent: #ff3366; /* Primary Infrared Accent */
+  --color-accent-light: #ff6699;
+  --color-accent-dark: #cc1144;
 
   /* Secondary Colors (for accents/buttons) */
   --color-warm-yellow: #ffd23f;
@@ -23,10 +23,10 @@
   --color-text-muted: #6b6b6b;
   --color-text-white: #ffffff; /* Pure White for dark backgrounds */
 
-  /* Background Colors */
-  --color-background: #fff8e1; /* Creamy Off-white */
+  /* Background Colors - Monochrome System */
+  --color-background: #fafafa; /* Off-white */
   --color-background-light: #ffffff;
-  --color-background-dark: #f5f0e1;
+  --color-background-dark: #f5f5f5;
   --color-surface: #ffffff;
   --color-surface-light: #fafafa;
   --color-surface-dark: #f5f5f5;
@@ -278,6 +278,42 @@ body {
 
 .card-elevated {
   @apply shadow-md;
+}
+
+/* Modal and Overlay Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-content {
+  background-color: var(--color-surface);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xl);
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow: auto;
+  z-index: 1001;
+}
+
+/* Clerk Modal Overrides */
+.cl-modalContent {
+  background-color: var(--color-surface) !important;
+  border-radius: var(--radius-xl) !important;
+  box-shadow: var(--shadow-xl) !important;
+}
+
+.cl-modalOverlay {
+  background-color: rgba(0, 0, 0, 0.5) !important;
+  z-index: 1000 !important;
 }
 
 /* Mobile-first responsive utilities */
