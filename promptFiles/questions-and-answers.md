@@ -179,18 +179,57 @@ This document captures all questions asked during development and the decisions 
 
 **A**: Let's revisit when we're building iOS. For now, let's use what makes most sense for the Next.js app. I believe that would be context and the database that we're using.
 
+## 🔧 GraphQL Integration Decisions
+
+### Q: Should we integrate GraphQL into the You Hungry? app architecture?
+
+**A**: Yes, GraphQL will be integrated as a hybrid approach alongside existing REST APIs. GraphQL will handle complex queries, real-time features, and mobile optimization while REST APIs handle simple CRUD operations.
+
+### Q: Where does GraphQL provide the most value in this app?
+
+**A**: GraphQL excels in three key areas:
+
+1. **Restaurant Discovery & Decision Making** - Complex queries with filters, weights, and related data
+2. **Real-time Group Decision Updates** - Subscriptions for voting progress and decision status
+3. **Mobile Performance** - Selective data fetching and reduced network requests
+
+### Q: What's the implementation strategy for GraphQL?
+
+**A**: Three-phase approach:
+
+- **Phase 1 (Epic 2-3)**: Set up GraphQL server and schema, implement complex queries for restaurant discovery
+- **Phase 2 (Epic 4)**: Add real-time subscriptions for group decision making
+- **Phase 3 (Epic 6-7)**: Advanced features like analytics and notifications
+
+### Q: How will GraphQL work with the existing REST API structure?
+
+**A**: Hybrid architecture:
+
+- **REST APIs**: Simple CRUD operations (collections, users, basic restaurant management)
+- **GraphQL**: Complex queries, real-time features, flexible data fetching
+- **Shared**: MongoDB database and authentication (Clerk)
+
+### Q: What GraphQL features will be implemented?
+
+**A**:
+
+- **Queries**: Dashboard data, restaurant search with filters, decision history
+- **Mutations**: Vote submission, decision creation, collection management
+- **Subscriptions**: Real-time voting updates, decision progress, group activity
+
 ## 📊 Summary
 
 ### Key Decisions Made
 
 1. **Collections** instead of "buckets" with custom naming
 2. **30-day rolling weight system** with exponential weighting
-3. **Polling/refresh** instead of WebSockets for group decisions
-4. **PWA implementation** with offline capabilities
-5. **Aggressive caching** to minimize API costs
-6. **Mobile-first design** with Tailwind CSS
-7. **SMS opt-in** system for notifications
-8. **Separate weighting** for personal vs group decisions
+3. **GraphQL + REST hybrid architecture** for optimal performance
+4. **Real-time GraphQL subscriptions** for group decision making
+5. **PWA implementation** with offline capabilities
+6. **Aggressive caching** to minimize API costs
+7. **Mobile-first design** with Tailwind CSS
+8. **SMS opt-in** system for notifications
+9. **Separate weighting** for personal vs group decisions
 
 ### Pending Decisions
 

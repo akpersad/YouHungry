@@ -20,6 +20,10 @@ This document tracks all planned items that are not yet started, organized by ca
 - [ ] Implement restaurant search with Google Places API
 - [ ] Build restaurant management system
 - [ ] Create personal decision making algorithm
+- [ ] Set up GraphQL server with Apollo Server
+- [ ] Implement GraphQL schema for restaurants and collections
+- [ ] Create GraphQL resolvers for complex queries
+- [ ] Add GraphQL client with Apollo Client
 
 ## 📋 Medium Priority (Upcoming Sprints)
 
@@ -36,6 +40,10 @@ This document tracks all planned items that are not yet started, organized by ca
 - [ ] Create random selection for groups
 - [ ] Build decision management and timeouts
 - [ ] Add group decision notifications
+- [ ] Set up GraphQL subscriptions for real-time decision updates
+- [ ] Implement GraphQL mutations for vote submission
+- [ ] Add real-time voting progress tracking
+- [ ] Create GraphQL queries for decision analytics
 
 ### Mobile & PWA
 
@@ -43,6 +51,9 @@ This document tracks all planned items that are not yet started, organized by ca
 - [ ] Implement PWA capabilities and service workers
 - [ ] Add offline functionality and caching
 - [ ] Create mobile-specific navigation patterns
+- [ ] Implement GraphQL query caching for offline support
+- [ ] Add GraphQL subscription optimization for mobile
+- [ ] Create mobile-optimized GraphQL queries
 
 ## 🔮 Low Priority (Future Sprints)
 
@@ -59,6 +70,10 @@ This document tracks all planned items that are not yet started, organized by ca
 - [ ] Implement loading states and skeleton screens
 - [ ] Create accessibility testing suite
 - [ ] Add performance monitoring
+- [ ] Optimize GraphQL query performance
+- [ ] Implement GraphQL error handling and retry logic
+- [ ] Add GraphQL query complexity analysis
+- [ ] Create GraphQL performance monitoring
 
 ### Future Enhancements
 

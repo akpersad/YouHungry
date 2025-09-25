@@ -249,6 +249,110 @@ export async function GET(request: NextRequest) {
 
 ## 🎣 Custom Hooks
 
+### GraphQL Hooks
+
+```typescript
+// hooks/useGraphQL.ts
+import { useQuery, useMutation, useSubscription } from "@apollo/client";
+import {
+  GET_DASHBOARD_DATA,
+  SEARCH_RESTAURANTS,
+  SUBMIT_VOTE,
+} from "@/graphql/queries";
+
+// Dashboard data hook
+export function useDashboardData(userId: string) {
+  const { data, loading, error } = useQuery(GET_DASHBOARD_DATA, {
+    variables: { userId },
+    errorPolicy: "all",
+    notifyOnNetworkStatusChange: true,
+  });
+
+  return {
+    dashboardData: data?.user,
+    loading,
+    error,
+    refetch: () => data?.refetch(),
+  };
+}
+
+// Restaurant search hook
+export function useRestaurantSearch(filters: RestaurantFilters) {
+  const { data, loading, error, fetchMore } = useQuery(SEARCH_RESTAURANTS, {
+    variables: { filters },
+    errorPolicy: "all",
+  });
+
+  return {
+    restaurants: data?.restaurants,
+    loading,
+    error,
+    loadMore: () =>
+      fetchMore({
+        variables: {
+          filters: { ...filters, offset: data?.restaurants?.length || 0 },
+        },
+      }),
+  };
+}
+
+// Real-time decision updates hook
+export function useDecisionUpdates(decisionId: string) {
+  const { data, loading, error } = useSubscription(DECISION_UPDATED, {
+    variables: { decisionId },
+    errorPolicy: "all",
+  });
+
+  return {
+    decisionUpdate: data?.decisionUpdated,
+    loading,
+    error,
+  };
+}
+
+// Vote submission hook
+export function useSubmitVote() {
+  const [submitVote, { loading, error }] = useMutation(SUBMIT_VOTE, {
+    errorPolicy: "all",
+  });
+
+  const handleSubmitVote = async (decisionId: string, rankings: string[]) => {
+    try {
+      const result = await submitVote({
+        variables: { decisionId, rankings },
+        optimisticResponse: {
+          submitVote: {
+            success: true,
+            vote: {
+              user: { name: "You" },
+              rankings,
+            },
+          },
+        },
+      });
+      return result.data?.submitVote;
+    } catch (err) {
+      console.error("Vote submission error:", err);
+      throw err;
+    }
+  };
+
+  return {
+    submitVote: handleSubmitVote,
+    loading,
+    error,
+  };
+}
+```
+
+### GraphQL Hook Guidelines
+
+- **Error Handling**: Always use `errorPolicy: 'all'` for graceful degradation
+- **Loading States**: Provide loading states for better UX
+- **Optimistic Updates**: Use optimistic responses for immediate feedback
+- **Cache Management**: Leverage Apollo Client's normalized cache
+- **Network Status**: Use `notifyOnNetworkStatusChange` for better loading states
+
 ### Data Fetching Hook
 
 ```typescript
@@ -309,6 +413,86 @@ export function useRestaurants({
 - **Loading States**: Provide loading states for async operations
 - **Dependencies**: Properly manage useEffect dependencies
 - **Cleanup**: Clean up subscriptions and timers
+
+### GraphQL Implementation Guidelines
+
+#### Server-Side (API Routes)
+
+```typescript
+// app/api/graphql/route.ts
+import { ApolloServer } from "@apollo/server";
+import { startServerAndCreateNextHandler } from "@as-integrations/next";
+import { typeDefs } from "@/graphql/schema";
+import { resolvers } from "@/graphql/resolvers";
+import { authContext } from "@/lib/auth-context";
+
+const server = new ApolloServer({
+  typeDefs,
+  resolvers,
+  context: authContext,
+  introspection: process.env.NODE_ENV === "development",
+});
+
+export const handler = startServerAndCreateNextHandler(server, {
+  context: async (req, res) => {
+    return await authContext(req, res);
+  },
+});
+```
+
+#### Client-Side Setup
+
+```typescript
+// lib/apollo-client.ts
+import { ApolloClient, InMemoryCache, createHttpLink } from "@apollo/client";
+import { setContext } from "@apollo/client/link/context";
+
+const httpLink = createHttpLink({
+  uri: "/api/graphql",
+});
+
+const authLink = setContext((_, { headers }) => {
+  const token = getAuthToken(); // Get from Clerk or localStorage
+  return {
+    headers: {
+      ...headers,
+      authorization: token ? `Bearer ${token}` : "",
+    },
+  };
+});
+
+export const apolloClient = new ApolloClient({
+  link: authLink.concat(httpLink),
+  cache: new InMemoryCache({
+    typePolicies: {
+      Restaurant: {
+        fields: {
+          weight: {
+            merge: false, // Always use server value for weights
+          },
+        },
+      },
+    },
+  }),
+  defaultOptions: {
+    watchQuery: {
+      errorPolicy: "all",
+    },
+    query: {
+      errorPolicy: "all",
+    },
+  },
+});
+```
+
+#### GraphQL Best Practices
+
+- **Schema Design**: Design schema around user workflows, not database structure
+- **Query Optimization**: Use DataLoader for N+1 query problems
+- **Error Handling**: Implement comprehensive error handling and logging
+- **Security**: Validate all inputs and implement rate limiting
+- **Caching**: Use appropriate cache policies for different data types
+- **Subscriptions**: Use sparingly and implement proper cleanup
 
 ## 🎨 Styling Guidelines
 

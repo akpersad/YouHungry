@@ -54,6 +54,8 @@ This document outlines the major epics and user stories for the You Hungry? app 
    - Implement location-based restaurant discovery
    - Add restaurant details and metadata storage
    - Create restaurant search UI components
+   - **Set up GraphQL schema for complex restaurant queries**
+   - **Implement GraphQL resolvers for restaurant search with filters**
 
 3. **Restaurant Management**
 
@@ -67,6 +69,8 @@ This document outlines the major epics and user stories for the You Hungry? app 
    - Add 30-day rolling weight system
    - Create decision history tracking
    - Build decision result UI
+   - **Implement GraphQL queries for decision data with weights**
+   - **Add GraphQL mutations for personal decision submission**
 
 ## 👥 Epic 3: Social Features & Group Management
 
@@ -93,6 +97,8 @@ This document outlines the major epics and user stories for the You Hungry? app 
    - Add restaurants to group collections
    - Manage group collection permissions
    - Sync group collections across members
+   - **Implement GraphQL queries for group collections and members**
+   - **Add GraphQL mutations for group collection management**
 
 ## 🤝 Epic 4: Group Decision Making
 
@@ -106,6 +112,8 @@ This document outlines the major epics and user stories for the You Hungry? app 
    - Create voting interface and logic
    - Handle tie-breaking scenarios
    - Build consensus calculation algorithm
+   - **Set up GraphQL subscriptions for real-time voting updates**
+   - **Implement GraphQL mutations for vote submission and tracking**
 
 2. **Random Selection for Groups**
 
@@ -119,6 +127,8 @@ This document outlines the major epics and user stories for the You Hungry? app 
    - Send notifications to group members
    - Track decision status and progress
    - Handle incomplete decisions gracefully
+   - **Implement GraphQL subscriptions for decision status updates**
+   - **Add real-time decision progress tracking with GraphQL**
 
 ## 📱 Epic 5: Mobile-First Experience
 
@@ -165,6 +175,8 @@ This document outlines the major epics and user stories for the You Hungry? app 
    - Implement real-time updates for group activities
    - Add notification preferences and settings
    - Create notification history and management
+   - **Implement GraphQL subscriptions for real-time notifications**
+   - **Add GraphQL queries for notification history and preferences**
 
 3. **Email Notifications**
    - Set up email notification system
@@ -197,6 +209,8 @@ This document outlines the major epics and user stories for the You Hungry? app 
    - Implement group activity tracking
    - Add restaurant popularity metrics
    - Create data export capabilities
+   - **Implement GraphQL queries for complex analytics data**
+   - **Add GraphQL subscriptions for real-time analytics updates**
 
 ## 🎨 Epic 8: Polish & Optimization
 

@@ -18,8 +18,10 @@ This document outlines the technical architecture, technology stack, and impleme
 - **Runtime**: Node.js (Next.js API routes)
 - **Database**: MongoDB Atlas
 - **Authentication**: Clerk
+- **API Layer**: Hybrid REST + GraphQL architecture
+- **GraphQL**: Apollo Server with subscriptions for real-time features
 - **API Integration**: Google Places, Twilio, Google Address Validation
-- **Caching**: Redis (for API response caching)
+- **Caching**: Redis (for API response caching) + GraphQL query caching
 - **File Storage**: Vercel Blob (for user uploads)
 
 ### Development & Deployment
@@ -159,6 +161,65 @@ interface Friendship {
 
 ## 🔌 API Architecture
 
+### Hybrid API Strategy
+
+The app uses a hybrid approach combining REST and GraphQL:
+
+#### **REST API Routes**
+
+- **Simple CRUD operations**: Collections, users, basic restaurant management
+- **Authentication endpoints**: Clerk integration and user management
+- **External API proxies**: Google Places, Twilio, address validation
+- **File uploads**: Restaurant photos and user avatars
+
+#### **GraphQL API**
+
+- **Complex queries**: Restaurant discovery with filters and weights
+- **Real-time features**: Group decision updates and voting progress
+- **Flexible data fetching**: Dashboard data, decision history, analytics
+- **Mobile optimization**: Selective field fetching, reduced network requests
+
+#### **GraphQL Schema Structure**
+
+```typescript
+type User {
+  id: ID!
+  name: String!
+  collections: [Collection!]!
+  groups: [Group!]!
+  decisionHistory: [Decision!]!
+}
+
+type Collection {
+  id: ID!
+  name: String!
+  restaurants: [Restaurant!]!
+  owner: User!
+  type: CollectionType!
+}
+
+type Restaurant {
+  id: ID!
+  name: String!
+  photos: [String!]!
+  priceRange: String
+  rating: Float
+  cuisine: String
+  weight: Float # 30-day rolling weight for decisions
+  recentDecisions: [Decision!]!
+}
+
+type Decision {
+  id: ID!
+  status: DecisionStatus!
+  method: DecisionMethod!
+  participants: [User!]!
+  votes: [Vote!]!
+  result: Restaurant
+  deadline: DateTime!
+}
+```
+
 ### External APIs
 
 #### Google Places API
@@ -182,51 +243,209 @@ interface Friendship {
 
 ### Internal API Routes
 
-#### Authentication Routes
+#### REST API Routes (Simple Operations)
+
+##### Authentication Routes
 
 - `POST /api/auth/register` - User registration
 - `POST /api/auth/login` - User login
 - `GET /api/auth/profile` - Get user profile
 - `PUT /api/auth/profile` - Update user profile
 
-#### Collections Routes
+##### Collections Routes (CRUD Operations)
 
-- `GET /api/collections` - Get user collections
 - `POST /api/collections` - Create collection
 - `PUT /api/collections/[id]` - Update collection
 - `DELETE /api/collections/[id]` - Delete collection
 
-#### Restaurants Routes
+##### Restaurants Routes (Basic Operations)
 
-- `GET /api/restaurants/search` - Search restaurants
 - `POST /api/restaurants` - Add restaurant to collection
 - `PUT /api/restaurants/[id]` - Update restaurant details
 - `DELETE /api/restaurants/[id]` - Remove restaurant from collection
 
-#### Groups Routes
+##### Groups Routes (CRUD Operations)
 
-- `GET /api/groups` - Get user groups
 - `POST /api/groups` - Create group
 - `PUT /api/groups/[id]` - Update group
 - `DELETE /api/groups/[id]` - Delete group
 - `POST /api/groups/[id]/invite` - Invite user to group
 - `POST /api/groups/[id]/join` - Join group
 
-#### Decisions Routes
+##### Decisions Routes (Simple Operations)
 
 - `POST /api/decisions` - Start decision process
-- `GET /api/decisions/active` - Get active decisions
 - `POST /api/decisions/[id]/vote` - Submit vote
-- `GET /api/decisions/[id]/result` - Get decision result
+
+#### GraphQL API Routes (Complex Operations)
+
+##### GraphQL Endpoint
+
+- `POST /api/graphql` - Main GraphQL endpoint with queries, mutations, and subscriptions
+
+##### Key GraphQL Operations
+
+**Queries:**
+
+```graphql
+query GetDashboardData($userId: ID!) {
+  user(id: $userId) {
+    collections {
+      id
+      name
+      restaurants {
+        id
+        name
+        photos
+      }
+    }
+    groups {
+      id
+      name
+      members {
+        id
+        name
+      }
+    }
+    recentDecisions {
+      id
+      result
+      status
+    }
+  }
+}
+
+query SearchRestaurants($filters: RestaurantFilters!) {
+  restaurants(filters: $filters) {
+    id
+    name
+    photos
+    priceRange
+    rating
+    cuisine
+    weight
+    collections {
+      id
+      name
+    }
+  }
+}
+
+query GetDecisionData($decisionId: ID!) {
+  decision(id: $decisionId) {
+    id
+    status
+    method
+    deadline
+    collection {
+      restaurants {
+        id
+        name
+        photos
+      }
+    }
+    participants {
+      id
+      name
+    }
+    votes {
+      user {
+        name
+      }
+      rankings
+    }
+  }
+}
+```
+
+**Mutations:**
+
+```graphql
+mutation SubmitVote($decisionId: ID!, $rankings: [ID!]!) {
+  submitVote(decisionId: $decisionId, rankings: $rankings) {
+    success
+    vote {
+      user {
+        name
+      }
+      rankings
+    }
+  }
+}
+
+mutation StartDecision(
+  $collectionId: ID!
+  $method: DecisionMethod!
+  $deadline: DateTime!
+) {
+  startDecision(
+    collectionId: $collectionId
+    method: $method
+    deadline: $deadline
+  ) {
+    success
+    decision {
+      id
+      status
+      deadline
+    }
+  }
+}
+```
+
+**Subscriptions:**
+
+```graphql
+subscription DecisionUpdates($decisionId: ID!) {
+  decisionUpdated(decisionId: $decisionId) {
+    id
+    status
+    votes {
+      user {
+        name
+      }
+      rankings
+      submittedAt
+    }
+    currentLeader
+    timeRemaining
+  }
+}
+
+subscription GroupActivity($groupId: ID!) {
+  groupUpdated(groupId: $groupId) {
+    id
+    name
+    members {
+      id
+      name
+    }
+    collections {
+      id
+      name
+      restaurantCount
+    }
+  }
+}
+```
 
 ## 🚀 Performance Optimization
 
 ### Caching Strategy
 
+#### REST API Caching
+
 - **API Responses**: 30-day cache for restaurant data
 - **User Data**: 5-minute cache for user profiles
 - **Group Data**: 1-minute cache for group information
 - **Decision Data**: Real-time (no caching)
+
+#### GraphQL Caching
+
+- **Query Caching**: Apollo Client cache for dashboard and restaurant data
+- **Normalized Cache**: Automatic cache normalization for related data
+- **Cache Policies**: Different policies for queries vs subscriptions
+- **Offline Cache**: PWA offline support with GraphQL cache persistence
 
 ### Database Optimization
 
