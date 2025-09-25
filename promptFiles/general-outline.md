@@ -178,8 +178,8 @@ Two decision methods available:
 
 ### API Keys & Services
 
-- **MongoDB**: Cluster connection string and database name
-- **Clerk**: API keys for authentication
+- **MongoDB Atlas**: Cluster connection string and database name
+- **Clerk**: API keys for authentication and webhook secret
 - **Google Places API**: For restaurant search and data
 - **Google Address Validation API**: For address verification
 - **Twilio**: Account SID, Auth Token, and phone number (SMS notifications)
@@ -196,15 +196,33 @@ Two decision methods available:
 ### Environment Variables
 
 ```bash
-MONGODB_URI=mongodb+srv://...
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_...
-CLERK_SECRET_KEY=sk_...
+# Database
+MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/you-hungry?retryWrites=true&w=majority
+MONGODB_DATABASE=you-hungry
+
+# Authentication (Clerk)
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
+CLERK_SECRET_KEY=sk_test_...
+CLERK_WEBHOOK_SECRET=whsec_...  # Optional for development
+
+# Google APIs
 NEXT_PUBLIC_GOOGLE_PLACES_API_KEY=AIza...
 GOOGLE_ADDRESS_VALIDATION_API_KEY=AIza...
+
+# Twilio (SMS)
 TWILIO_ACCOUNT_SID=AC...
 TWILIO_AUTH_TOKEN=...
 TWILIO_PHONE_NUMBER=+1...
+
+# App Configuration
+NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
+
+### MongoDB Setup Clarification
+
+- **MONGODB_URI**: The full connection string to your MongoDB Atlas cluster
+- **MONGODB_DATABASE**: The specific database name within the cluster (e.g., "you-hungry")
+- The cluster can contain multiple databases, but we'll use the "you-hungry" database for this project
 
 ## 📚 Documentation Structure
 
@@ -220,6 +238,7 @@ This project maintains comprehensive documentation in the `promptFiles/` directo
 - **implementation-guidelines.md** - Coding standards and best practices
 - **design-system.md** - Visual design system and component library
 - **user-flows.md** - Complete user journey documentation
+- **post-deployment.md** - Production setup and deployment checklist
 
 ## 🎯 Success Metrics
 

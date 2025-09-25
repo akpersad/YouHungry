@@ -68,7 +68,13 @@ import { ButtonHTMLAttributes, forwardRef } from "react";
 import { cn } from "@/lib/utils";
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "primary" | "secondary" | "outline";
+  variant?:
+    | "primary"
+    | "secondary"
+    | "accent"
+    | "warm"
+    | "outline"
+    | "outline-accent";
   size?: "sm" | "md" | "lg";
   isLoading?: boolean;
 }
@@ -85,7 +91,10 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           {
             "btn-primary": variant === "primary",
             "btn-secondary": variant === "secondary",
+            "btn-accent": variant === "accent",
+            "btn-warm": variant === "warm",
             "btn-outline": variant === "outline",
+            "btn-outline-accent": variant === "outline-accent",
             "btn-sm": size === "sm",
             "btn-md": size === "md",
             "btn-lg": size === "lg",
@@ -322,10 +331,24 @@ const buttonClasses = cn(
 ```css
 /* globals.css */
 :root {
-  --color-primary: #527a51;
-  --color-secondary: #a3b18a;
-  --color-text: #1a2b1f;
-  --color-background: #dad7cd;
+  /* Primary Colors (for backgrounds/headings) */
+  --color-primary: #386641; /* Rich Green */
+  --color-secondary: #6f4e37; /* Earthy Brown */
+  --color-accent: #9a2229; /* Deep Red */
+
+  /* Secondary Colors (for accents/buttons) */
+  --color-warm-yellow: #ffd23f;
+  --color-creamy-off-white: #fff8e1;
+
+  /* Text Colors */
+  --color-text: #222222; /* Dark Gray/Black */
+  --color-text-white: #ffffff; /* Pure White for dark backgrounds */
+
+  /* Background Colors */
+  --color-background: #fff8e1; /* Creamy Off-white */
+  --color-surface: #ffffff;
+
+  /* Spacing */
   --spacing-xs: 0.25rem;
   --spacing-sm: 0.5rem;
   --spacing-md: 1rem;
@@ -452,8 +475,8 @@ self.addEventListener("fetch", (event) => {
   "description": "Decide where to eat with friends",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#DAD7CD",
-  "theme_color": "#527A51",
+  "background_color": "#fff8e1",
+  "theme_color": "#386641",
   "icons": [
     {
       "src": "/icon-192x192.png",
@@ -554,13 +577,19 @@ export const getCachedRestaurants = unstable_cache(
 /**
  * Button component with multiple variants and sizes
  *
- * @param variant - Visual style variant ('primary' | 'secondary' | 'outline')
+ * @param variant - Visual style variant ('primary' | 'secondary' | 'accent' | 'warm' | 'outline' | 'outline-accent')
  * @param size - Button size ('sm' | 'md' | 'lg')
  * @param isLoading - Whether the button is in loading state
  * @param children - Button content
  */
 interface ButtonProps {
-  variant?: "primary" | "secondary" | "outline";
+  variant?:
+    | "primary"
+    | "secondary"
+    | "accent"
+    | "warm"
+    | "outline"
+    | "outline-accent";
   size?: "sm" | "md" | "lg";
   isLoading?: boolean;
   children: React.ReactNode;
