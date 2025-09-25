@@ -1,6 +1,6 @@
 # User Experience Flows
 
-This document outlines the major user journeys and flows for the You Hungry app. Each flow includes the key screens, user actions, and system responses.
+This document outlines the major user journeys and flows for the You Hungry? app. Each flow includes the key screens, user actions, and system responses.
 
 ## 1. Registration & Onboarding Flow
 
