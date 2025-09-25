@@ -1,0 +1,182 @@
+# You Hungry? Database Schema Diagram
+# MongoDB Collections and Relationships
+
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                               DATABASE SCHEMA OVERVIEW                          │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────┐    1:N    ┌─────────────────┐
+│     USERS       │◄─────────►│   COLLECTIONS   │
+│                 │           │                 │
+│ • _id (PK)      │           │ • _id (PK)      │
+│ • clerkId (UK)  │           │ • name          │
+│ • email (UK)    │           │ • description   │
+│ • name          │           │ • type          │
+│ • city          │           │ • ownerId (FK)  │
+│ • profilePicture│           │ • restaurantIds │
+│ • smsOptIn      │           │ • createdAt     │
+│ • smsPhoneNumber│           │ • updatedAt     │
+│ • preferences   │           │                 │
+│ • createdAt     │           └─────────────────┘
+│ • updatedAt     │                     │
+└─────────────────┘                     │
+         │                              │ N:M
+         │ 1:N                          ▼
+         │                     ┌─────────────────┐
+         │                     │   RESTAURANTS   │
+         │                     │                 │
+         │                     │ • _id (PK)      │
+         │                     │ • googlePlaceId │
+         │                     │ • name          │
+         │                     │ • address       │
+         │                     │ • coordinates   │
+         │                     │ • cuisine       │
+         │                     │ • rating        │
+         │                     │ • priceRange    │
+         │                     │ • timeToPickUp  │
+         │                     │ • photos        │
+         │                     │ • phoneNumber   │
+         │                     │ • website       │
+         │                     │ • hours         │
+         │                     │ • cachedAt      │
+         │                     │ • lastUpdated   │
+         │                     │                 │
+         │                     └─────────────────┘
+         │                              │
+         │ N:M                          │ 1:N
+         ▼                              ▼
+┌─────────────────┐              ┌─────────────────┐
+│     GROUPS      │              │    DECISIONS    │
+│                 │              │                 │
+│ • _id (PK)      │              │ • _id (PK)      │
+│ • name          │              │ • type          │
+│ • description   │              │ • collectionId  │
+│ • adminIds      │              │ • groupId (FK)  │
+│ • memberIds     │              │ • participants  │
+│ • collectionIds │              │ • method        │
+│ • createdAt     │              │ • status        │
+│ • updatedAt     │              │ • deadline      │
+│                 │              │ • visitDate     │
+└─────────────────┘              │ • result        │
+         │                       │ • votes         │
+         │ 1:N                   │ • createdAt     │
+         ▼                       │ • updatedAt     │
+┌─────────────────┐              │                 │
+│   COLLECTIONS   │              └─────────────────┘
+│   (Group owned) │                       │
+│                 │                       │ N:M
+│ Same fields as  │                       ▼
+│ personal        │              ┌─────────────────┐
+│ collections     │              │     USERS       │
+│ but type="group"│              │  (Participants) │
+└─────────────────┘              └─────────────────┘
+         │
+         │ N:M
+         ▼
+┌─────────────────┐
+│   RESTAURANTS   │
+│ (Same as above) │
+└─────────────────┘
+
+
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                              FRIENDSHIP RELATIONSHIPS                          │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────┐    1:N    ┌─────────────────┐    1:N    ┌─────────────────┐
+│     USERS       │◄─────────►│   FRIENDSHIPS   │◄─────────►│     USERS       │
+│                 │           │                 │           │                 │
+│ • _id (PK)      │           │ • _id (PK)      │           │ • _id (PK)      │
+│ • clerkId (UK)  │           │ • requesterId   │           │ • clerkId (UK)  │
+│ • email (UK)    │           │ • addresseeId   │           │ • email (UK)    │
+│ • name          │           │ • status        │           │ • name          │
+│ • city          │           │ • createdAt     │           │ • city          │
+│ • profilePicture│           │ • updatedAt     │           │ • profilePicture│
+│ • smsOptIn      │           │                 │           │ • smsOptIn      │
+│ • smsPhoneNumber│           │                 │           │ • smsPhoneNumber│
+│ • preferences   │           │                 │           │ • preferences   │
+│ • createdAt     │           │                 │           │ • createdAt     │
+│ • updatedAt     │           │                 │           │ • updatedAt     │
+│                 │           │                 │           │                 │
+└─────────────────┘           └─────────────────┘           └─────────────────┘
+    (Requester)                    (Friendship)                (Addressee)
+
+
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                               RELATIONSHIP SUMMARY                             │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+1. USERS ↔ COLLECTIONS (1:N)
+   - Personal collections owned by users
+   - One user can have many personal collections
+
+2. GROUPS ↔ COLLECTIONS (1:N) 
+   - Group collections owned by groups
+   - One group can have many collections
+
+3. COLLECTIONS ↔ RESTAURANTS (N:M)
+   - Collections contain multiple restaurants
+   - Restaurants can be in multiple collections
+
+4. GROUPS ↔ USERS (N:M)
+   - Groups have multiple members and admins
+   - Users can belong to multiple groups
+
+5. DECISIONS ↔ COLLECTIONS (N:1)
+   - Decisions are made on specific collections
+   - Multiple decisions can be made on one collection
+
+6. DECISIONS ↔ GROUPS (N:1)
+   - Group decisions belong to specific groups
+   - Multiple decisions can belong to one group
+
+7. DECISIONS ↔ USERS (N:M)
+   - Decisions have multiple participants
+   - Users can participate in multiple decisions
+
+8. DECISIONS ↔ RESTAURANTS (N:1)
+   - Completed decisions result in one selected restaurant
+   - Multiple decisions can select the same restaurant
+
+9. FRIENDSHIPS ↔ USERS (N:1 each direction)
+   - Friendships connect two users (requester and addressee)
+   - Bidirectional relationship stored as single document
+
+
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                                KEY INDEXES                                     │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+USERS:
+- clerkId (unique)
+- email (unique)
+
+RESTAURANTS:
+- googlePlaceId (unique)
+- coordinates (2dsphere for geospatial queries)
+
+FRIENDSHIPS:
+- requesterId + addresseeId (compound)
+
+DECISIONS:
+- status + deadline (compound)
+
+COLLECTIONS:
+- ownerId + type (compound)
+
+
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                              DATA FLOW PATTERNS                                │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+Personal Decision Flow:
+USER → COLLECTION → RESTAURANTS → DECISION → SELECTED_RESTAURANT
+
+Group Decision Flow:
+GROUP → MEMBERS → COLLECTION → RESTAURANTS → DECISION → PARTICIPANTS → SELECTED_RESTAURANT
+
+Friendship Flow:
+USER_A → FRIENDSHIP → USER_B
+
+Collection Management:
+USER/GROUP → COLLECTION → RESTAURANTS (from Google Places API)
