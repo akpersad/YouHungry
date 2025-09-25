@@ -105,7 +105,7 @@ Two decision methods available:
 
 ### Technology Stack
 
-- **Frontend**: Next.js 14 with TypeScript
+- **Frontend**: Next.js 15 with TypeScript
 - **Styling**: Tailwind CSS with custom design system
 - **Database**: MongoDB Atlas
 - **Authentication**: Clerk

@@ -10,7 +10,7 @@ This document outlines the major epics and user stories for the You Hungry? app 
 
 1. **Project Setup & Configuration**
 
-   - Set up Next.js 14 with TypeScript
+   - Set up Next.js 15 with TypeScript
    - Configure Tailwind CSS with custom design system
    - Set up ESLint, Prettier, and development tools
    - Configure environment variables and secrets management

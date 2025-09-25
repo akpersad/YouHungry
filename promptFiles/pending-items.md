@@ -6,7 +6,7 @@ This document tracks all planned items that are not yet started, organized by ca
 
 ### Foundation & Setup
 
-- [ ] Set up Next.js 14 with TypeScript configuration
+- [ ] Set up Next.js 15 with TypeScript configuration
 - [ ] Configure Tailwind CSS with custom design system
 - [ ] Set up ESLint, Prettier, and development tools
 - [ ] Configure environment variables and secrets management
