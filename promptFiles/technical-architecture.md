@@ -9,8 +9,12 @@ This document outlines the technical architecture, technology stack, and impleme
 - **Framework**: Next.js 15 with App Router
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS with custom design system
-- **State Management**: React Context + Custom hooks
+- **State Management**: React Context + Custom hooks + TanStack Query
+- **Form Management**: React Hook Form with Zod integration
 - **UI Components**: Custom components with Tailwind
+- **Animations**: Framer Motion for smooth transitions and micro-interactions
+- **Drag & Drop**: @dnd-kit for restaurant ranking system
+- **Notifications**: React Hot Toast (Sonner) for user feedback
 - **PWA**: Service Workers, App Manifest, Offline capabilities
 
 ### Backend
@@ -28,9 +32,47 @@ This document outlines the technical architecture, technology stack, and impleme
 
 - **Hosting**: Vercel
 - **CI/CD**: GitHub Actions + Vercel
-- **Monitoring**: Vercel Analytics + Custom logging
+- **Monitoring**: Vercel Analytics + Custom logging + Web Vitals
 - **Testing**: Jest, React Testing Library, Playwright
-- **Code Quality**: ESLint, Prettier, Husky
+- **Code Quality**: ESLint, Prettier, Husky + lint-staged
+- **Bundle Analysis**: Next.js Bundle Analyzer
+- **Error Handling**: React Error Boundaries + Error monitoring
+
+## 🛠️ Enhanced Technology Stack
+
+### Form Management & Validation
+
+- **React Hook Form**: Industry-standard form management with minimal re-renders
+- **Zod Integration**: Type-safe validation with @hookform/resolvers
+- **Form DevTools**: Development debugging for form state
+
+### API State Management
+
+- **TanStack Query (React Query)**: Advanced caching, background updates, optimistic updates
+- **Stale-While-Revalidate**: Built-in support for your caching strategy
+- **Offline Support**: Essential for PWA capabilities
+- **GraphQL Integration**: Works seamlessly with Apollo Client
+
+### User Experience Enhancements
+
+- **Framer Motion**: Smooth animations and micro-interactions
+- **React Hot Toast (Sonner)**: Lightweight, accessible notifications
+- **@dnd-kit**: Modern drag-and-drop for restaurant ranking system
+- **Error Boundaries**: Graceful error handling and recovery
+
+### Development Experience
+
+- **Husky + lint-staged**: Pre-commit hooks for code quality
+- **Bundle Analyzer**: Performance monitoring and optimization
+- **TypeScript Strict Mode**: Enhanced type safety
+- **Web Vitals Monitoring**: Core performance metrics
+
+### Performance & Optimization
+
+- **Next.js Image Optimization**: Automatic image optimization for restaurant photos
+- **Code Splitting**: Automatic route-based code splitting
+- **Tree Shaking**: Eliminates unused code
+- **Service Worker**: Advanced caching strategies
 
 ## 🗄️ Database Schema
 
@@ -431,21 +473,30 @@ subscription GroupActivity($groupId: ID!) {
 
 ## 🚀 Performance Optimization
 
-### Caching Strategy
+### Enhanced Caching Strategy with TanStack Query
 
 #### REST API Caching
 
-- **API Responses**: 30-day cache for restaurant data
-- **User Data**: 5-minute cache for user profiles
-- **Group Data**: 1-minute cache for group information
-- **Decision Data**: Real-time (no caching)
+- **API Responses**: 30-day cache for restaurant data with stale-while-revalidate
+- **User Data**: 5-minute cache for user profiles with background updates
+- **Group Data**: 1-minute cache for group information with optimistic updates
+- **Decision Data**: Real-time with optimistic updates for voting
 
 #### GraphQL Caching
 
-- **Query Caching**: Apollo Client cache for dashboard and restaurant data
+- **Query Caching**: Apollo Client + TanStack Query integration for dashboard data
 - **Normalized Cache**: Automatic cache normalization for related data
 - **Cache Policies**: Different policies for queries vs subscriptions
-- **Offline Cache**: PWA offline support with GraphQL cache persistence
+- **Offline Cache**: PWA offline support with persistent cache
+- **Background Sync**: Automatic data synchronization when connection restored
+
+#### TanStack Query Benefits
+
+- **Automatic Background Updates**: Fresh data without user intervention
+- **Optimistic Updates**: Immediate UI feedback for actions
+- **Request Deduplication**: Prevents duplicate API calls
+- **Error Retry**: Automatic retry with exponential backoff
+- **Cache Invalidation**: Smart cache management for data consistency
 
 ### Database Optimization
 
@@ -582,3 +633,55 @@ subscription GroupActivity($groupId: ID!) {
 - **Scalability**: Design for future growth
 - **Internationalization**: Prepare for multi-language support
 - **Advanced Features**: Architecture supports future enhancements
+
+## 📋 Implementation Priority Roadmap
+
+### Phase 1: Foundation (Week 1)
+
+**Essential for core functionality**
+
+- [ ] **React Hook Form + Zod**: Form management and validation
+- [ ] **TanStack Query**: API state management and caching
+- [ ] **Husky + lint-staged**: Code quality enforcement
+- [ ] **TypeScript Strict Mode**: Enhanced type safety
+
+### Phase 2: User Experience (Week 2-3)
+
+**Core user interaction improvements**
+
+- [ ] **Framer Motion**: Smooth animations and transitions
+- [ ] **React Hot Toast**: User feedback and notifications
+- [ ] **@dnd-kit**: Restaurant ranking drag-and-drop system
+- [ ] **Error Boundaries**: Graceful error handling
+
+### Phase 3: Polish & Performance (Week 4+)
+
+**Production readiness and optimization**
+
+- [ ] **Bundle Analyzer**: Performance monitoring
+- [ ] **Web Vitals**: Core performance metrics
+- [ ] **Next.js Image Optimization**: Restaurant photo optimization
+- [ ] **Advanced Service Worker**: Enhanced PWA capabilities
+
+### Package Installation Commands
+
+```bash
+# Phase 1: Foundation
+npm install react-hook-form @hookform/resolvers @tanstack/react-query @tanstack/react-query-devtools
+npm install --save-dev husky lint-staged
+
+# Phase 2: User Experience
+npm install framer-motion sonner @dnd-kit/core @dnd-kit/sortable @dnd-kit/utilities
+
+# Phase 3: Performance & Monitoring
+npm install --save-dev @next/bundle-analyzer
+```
+
+### Integration Benefits
+
+- **Zero Learning Curve**: All technologies are industry standards
+- **Perfect Fit**: Each solves specific problems in your architecture
+- **Mobile-First**: Optimized for mobile and PWA experience
+- **Performance Focused**: Enhances speed and user experience
+- **Future-Proof**: Will work seamlessly with iOS conversion
+- **Type-Safe**: Full TypeScript integration throughout

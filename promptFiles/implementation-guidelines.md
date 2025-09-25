@@ -249,11 +249,64 @@ export async function GET(request: NextRequest) {
 
 ## 🎣 Custom Hooks
 
-### GraphQL Hooks
+### Enhanced API State Management with TanStack Query
+
+```typescript
+// hooks/useRestaurants.ts
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+
+// Restaurant search with TanStack Query
+export function useRestaurantSearch(filters: RestaurantFilters) {
+  return useQuery({
+    queryKey: ["restaurants", "search", filters],
+    queryFn: () => searchRestaurants(filters),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    cacheTime: 30 * 24 * 60 * 60 * 1000, // 30 days
+  });
+}
+
+// Optimistic updates for vote submission
+export function useSubmitVote() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: submitVote,
+    onMutate: async (newVote) => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ["decisions"] });
+
+      // Snapshot previous value
+      const previousDecisions = queryClient.getQueryData(["decisions"]);
+
+      // Optimistically update
+      queryClient.setQueryData(["decisions"], (old: any) => ({
+        ...old,
+        votes: [...old.votes, newVote],
+      }));
+
+      return { previousDecisions };
+    },
+    onError: (err, newVote, context) => {
+      // Rollback on error
+      queryClient.setQueryData(["decisions"], context?.previousDecisions);
+    },
+    onSettled: () => {
+      // Refetch after error or success
+      queryClient.invalidateQueries({ queryKey: ["decisions"] });
+    },
+  });
+}
+```
+
+### GraphQL Hooks (Enhanced with TanStack Query)
 
 ```typescript
 // hooks/useGraphQL.ts
 import { useQuery, useMutation, useSubscription } from "@apollo/client";
+import { useQuery as useTanStackQuery } from "@tanstack/react-query";
 import {
   GET_DASHBOARD_DATA,
   SEARCH_RESTAURANTS,
@@ -353,10 +406,91 @@ export function useSubmitVote() {
 - **Cache Management**: Leverage Apollo Client's normalized cache
 - **Network Status**: Use `notifyOnNetworkStatusChange` for better loading states
 
-### Data Fetching Hook
+### Form Management with React Hook Form + Zod
 
 ```typescript
-// hooks/useRestaurants.ts
+// hooks/useRestaurantForm.ts
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { toast } from "sonner";
+
+const restaurantFormSchema = z.object({
+  name: z.string().min(1, "Restaurant name is required"),
+  location: z.string().min(1, "Location is required"),
+  priceRange: z.enum(["$", "$$", "$$$", "$$$$"]).optional(),
+  timeToPickUp: z.number().min(1).max(120).optional(),
+  collectionIds: z.array(z.string()).min(1, "Select at least one collection"),
+});
+
+type RestaurantFormData = z.infer<typeof restaurantFormSchema>;
+
+export function useRestaurantForm() {
+  const form = useForm<RestaurantFormData>({
+    resolver: zodResolver(restaurantFormSchema),
+    defaultValues: {
+      collectionIds: [],
+    },
+  });
+
+  const onSubmit = async (data: RestaurantFormData) => {
+    try {
+      await addRestaurantToCollections(data);
+      toast.success("Restaurant added successfully!");
+      form.reset();
+    } catch (error) {
+      toast.error("Failed to add restaurant. Please try again.");
+    }
+  };
+
+  return {
+    form,
+    onSubmit: form.handleSubmit(onSubmit),
+    isSubmitting: form.formState.isSubmitting,
+    errors: form.formState.errors,
+  };
+}
+
+// Collection creation form
+const collectionFormSchema = z.object({
+  name: z.string().min(1).max(50, "Name must be 50 characters or less"),
+  description: z
+    .string()
+    .max(500, "Description must be 500 characters or less")
+    .optional(),
+  type: z.enum(["personal", "group"]),
+});
+
+export function useCollectionForm() {
+  const form = useForm<z.infer<typeof collectionFormSchema>>({
+    resolver: zodResolver(collectionFormSchema),
+    defaultValues: {
+      type: "personal",
+    },
+  });
+
+  const onSubmit = async (data: z.infer<typeof collectionFormSchema>) => {
+    try {
+      await createCollection(data);
+      toast.success("Collection created successfully!");
+      form.reset();
+    } catch (error) {
+      toast.error("Failed to create collection. Please try again.");
+    }
+  };
+
+  return {
+    form,
+    onSubmit: form.handleSubmit(onSubmit),
+    isSubmitting: form.formState.isSubmitting,
+  };
+}
+```
+
+### Data Fetching Hook (Legacy - Use TanStack Query Instead)
+
+```typescript
+// hooks/useRestaurants.ts - DEPRECATED: Use TanStack Query hooks above
 import { useState, useEffect } from "react";
 import { Restaurant } from "@/types/database";
 
@@ -406,6 +540,234 @@ export function useRestaurants({
 }
 ```
 
+### Drag & Drop Implementation with @dnd-kit
+
+```typescript
+// components/RestaurantRanking.tsx
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+
+interface RestaurantRankingProps {
+  restaurants: Restaurant[];
+  onRankingChange: (restaurants: Restaurant[]) => void;
+}
+
+export function RestaurantRanking({
+  restaurants,
+  onRankingChange,
+}: RestaurantRankingProps) {
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  function handleDragEnd(event: any) {
+    const { active, over } = event;
+
+    if (active.id !== over.id) {
+      const oldIndex = restaurants.findIndex((item) => item.id === active.id);
+      const newIndex = restaurants.findIndex((item) => item.id === over.id);
+
+      onRankingChange(arrayMove(restaurants, oldIndex, newIndex));
+    }
+  }
+
+  return (
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      onDragEnd={handleDragEnd}
+    >
+      <SortableContext
+        items={restaurants.map((r) => r.id)}
+        strategy={verticalListSortingStrategy}
+      >
+        {restaurants.map((restaurant) => (
+          <SortableRestaurantCard key={restaurant.id} restaurant={restaurant} />
+        ))}
+      </SortableContext>
+    </DndContext>
+  );
+}
+
+function SortableRestaurantCard({ restaurant }: { restaurant: Restaurant }) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: restaurant.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...listeners}
+      className="restaurant-ranking-card"
+    >
+      <RestaurantCard restaurant={restaurant} />
+    </div>
+  );
+}
+```
+
+### Animation Implementation with Framer Motion
+
+```typescript
+// components/AnimatedCard.tsx
+import { motion } from "framer-motion";
+import { useState } from "react";
+
+interface AnimatedCardProps {
+  children: React.ReactNode;
+  className?: string;
+}
+
+export function AnimatedCard({ children, className }: AnimatedCardProps) {
+  const [isHovered, setIsHovered] = useState(false);
+
+  return (
+    <motion.div
+      className={className}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      whileHover={{
+        scale: 1.02,
+        transition: { duration: 0.2 },
+      }}
+      whileTap={{ scale: 0.98 }}
+      onHoverStart={() => setIsHovered(true)}
+      onHoverEnd={() => setIsHovered(false)}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+// Page transition wrapper
+export function PageTransition({ children }: { children: React.ReactNode }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -20 }}
+      transition={{ duration: 0.3, ease: "easeInOut" }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+// Loading skeleton animation
+export function SkeletonCard() {
+  return (
+    <motion.div
+      className="skeleton-card"
+      animate={{
+        opacity: [0.5, 1, 0.5],
+      }}
+      transition={{
+        duration: 1.5,
+        repeat: Infinity,
+        ease: "easeInOut",
+      }}
+    >
+      <div className="skeleton-image" />
+      <div className="skeleton-content">
+        <div className="skeleton-title" />
+        <div className="skeleton-subtitle" />
+      </div>
+    </motion.div>
+  );
+}
+```
+
+### Notification System with Sonner
+
+```typescript
+// lib/notifications.ts
+import { toast } from "sonner";
+
+export const notifications = {
+  success: (message: string) => {
+    toast.success(message, {
+      duration: 4000,
+      position: "top-center",
+    });
+  },
+
+  error: (message: string) => {
+    toast.error(message, {
+      duration: 6000,
+      position: "top-center",
+    });
+  },
+
+  info: (message: string) => {
+    toast.info(message, {
+      duration: 4000,
+      position: "top-center",
+    });
+  },
+
+  loading: (message: string) => {
+    return toast.loading(message, {
+      position: "top-center",
+    });
+  },
+
+  dismiss: (toastId: string) => {
+    toast.dismiss(toastId);
+  },
+};
+
+// Usage examples
+export function useDecisionNotifications() {
+  const handleVoteSubmitted = () => {
+    notifications.success("Your vote has been submitted!");
+  };
+
+  const handleDecisionComplete = (restaurant: Restaurant) => {
+    notifications.success(`Decision made! You're going to ${restaurant.name}`);
+  };
+
+  const handleError = (error: string) => {
+    notifications.error(`Something went wrong: ${error}`);
+  };
+
+  return {
+    handleVoteSubmitted,
+    handleDecisionComplete,
+    handleError,
+  };
+}
+```
+
 ### Hook Guidelines
 
 - **Single Responsibility**: Each hook should have one clear purpose
@@ -413,6 +775,8 @@ export function useRestaurants({
 - **Loading States**: Provide loading states for async operations
 - **Dependencies**: Properly manage useEffect dependencies
 - **Cleanup**: Clean up subscriptions and timers
+- **TypeScript**: Use proper typing for all hooks
+- **Performance**: Use React.memo and useMemo where appropriate
 
 ### GraphQL Implementation Guidelines
 
@@ -551,6 +915,182 @@ const containerClasses = cn(
   "lg:w-1/3", // Desktop: third width
   "xl:w-1/4" // Large desktop: quarter width
 );
+```
+
+## 🛡️ Error Handling & Boundaries
+
+### Error Boundary Implementation
+
+```typescript
+// components/ErrorBoundary.tsx
+import React from "react";
+import { toast } from "sonner";
+
+interface ErrorBoundaryState {
+  hasError: boolean;
+  error?: Error;
+}
+
+interface ErrorBoundaryProps {
+  children: React.ReactNode;
+  fallback?: React.ComponentType<{ error: Error; resetError: () => void }>;
+}
+
+class ErrorBoundary extends React.Component<
+  ErrorBoundaryProps,
+  ErrorBoundaryState
+> {
+  constructor(props: ErrorBoundaryProps) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error("ErrorBoundary caught an error:", error, errorInfo);
+
+    // Send to error monitoring service
+    // errorReporting.captureException(error, { extra: errorInfo });
+
+    // Show user-friendly notification
+    toast.error("Something went wrong. Please try refreshing the page.");
+  }
+
+  resetError = () => {
+    this.setState({ hasError: false, error: undefined });
+  };
+
+  render() {
+    if (this.state.hasError) {
+      const FallbackComponent = this.props.fallback || DefaultErrorFallback;
+      return (
+        <FallbackComponent
+          error={this.state.error!}
+          resetError={this.resetError}
+        />
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
+function DefaultErrorFallback({
+  error,
+  resetError,
+}: {
+  error: Error;
+  resetError: () => void;
+}) {
+  return (
+    <div className="error-boundary">
+      <h2>Oops! Something went wrong</h2>
+      <p>We're sorry, but something unexpected happened.</p>
+      <button onClick={resetError} className="btn-primary">
+        Try Again
+      </button>
+    </div>
+  );
+}
+
+// Usage in app layout
+export function AppWithErrorBoundary({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <ErrorBoundary>
+      <ErrorBoundary fallback={RestaurantErrorFallback}>
+        {children}
+      </ErrorBoundary>
+    </ErrorBoundary>
+  );
+}
+
+function RestaurantErrorFallback({
+  error,
+  resetError,
+}: {
+  error: Error;
+  resetError: () => void;
+}) {
+  return (
+    <div className="restaurant-error-fallback">
+      <h3>Unable to load restaurants</h3>
+      <p>There was a problem loading restaurant data. Please try again.</p>
+      <button onClick={resetError} className="btn-secondary">
+        Retry
+      </button>
+    </div>
+  );
+}
+```
+
+### API Error Handling
+
+```typescript
+// lib/api-error-handler.ts
+export class APIError extends Error {
+  constructor(message: string, public status: number, public code?: string) {
+    super(message);
+    this.name = "APIError";
+  }
+}
+
+export function handleAPIError(error: unknown) {
+  if (error instanceof APIError) {
+    switch (error.status) {
+      case 400:
+        toast.error("Invalid request. Please check your input.");
+        break;
+      case 401:
+        toast.error("Please sign in to continue.");
+        break;
+      case 403:
+        toast.error("You don't have permission to perform this action.");
+        break;
+      case 404:
+        toast.error("The requested resource was not found.");
+        break;
+      case 429:
+        toast.error("Too many requests. Please try again later.");
+        break;
+      case 500:
+        toast.error("Server error. Please try again later.");
+        break;
+      default:
+        toast.error("An unexpected error occurred.");
+    }
+  } else {
+    toast.error("Network error. Please check your connection.");
+  }
+}
+
+// Usage in API calls
+export async function fetchWithErrorHandling<T>(
+  url: string,
+  options?: RequestInit
+): Promise<T> {
+  try {
+    const response = await fetch(url, options);
+
+    if (!response.ok) {
+      throw new APIError(
+        `HTTP ${response.status}: ${response.statusText}`,
+        response.status
+      );
+    }
+
+    return await response.json();
+  } catch (error) {
+    handleAPIError(error);
+    throw error;
+  }
+}
 ```
 
 ## 🧪 Testing Guidelines
