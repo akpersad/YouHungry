@@ -1,6 +1,5 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { CreateCollectionForm } from '../CreateCollectionForm';
-import { ClerkProvider } from '@clerk/nextjs';
 
 // Mock the useUser hook
 jest.mock('@clerk/nextjs', () => ({
@@ -36,12 +35,7 @@ describe('CreateCollectionForm', () => {
 
   it('renders form fields correctly', () => {
     render(
-      <ClerkProvider>
-        <CreateCollectionForm
-          onSuccess={mockOnSuccess}
-          onCancel={mockOnCancel}
-        />
-      </ClerkProvider>
+      <CreateCollectionForm onSuccess={mockOnSuccess} onCancel={mockOnCancel} />
     );
 
     expect(screen.getByLabelText('Collection Name')).toBeInTheDocument();
@@ -52,12 +46,7 @@ describe('CreateCollectionForm', () => {
 
   it('validates required fields', async () => {
     render(
-      <ClerkProvider>
-        <CreateCollectionForm
-          onSuccess={mockOnSuccess}
-          onCancel={mockOnCancel}
-        />
-      </ClerkProvider>
+      <CreateCollectionForm onSuccess={mockOnSuccess} onCancel={mockOnCancel} />
     );
 
     const submitButton = screen.getByText('Create Collection');
@@ -77,12 +66,7 @@ describe('CreateCollectionForm', () => {
     });
 
     render(
-      <ClerkProvider>
-        <CreateCollectionForm
-          onSuccess={mockOnSuccess}
-          onCancel={mockOnCancel}
-        />
-      </ClerkProvider>
+      <CreateCollectionForm onSuccess={mockOnSuccess} onCancel={mockOnCancel} />
     );
 
     const nameInput = screen.getByLabelText('Collection Name');
@@ -123,12 +107,7 @@ describe('CreateCollectionForm', () => {
     });
 
     render(
-      <ClerkProvider>
-        <CreateCollectionForm
-          onSuccess={mockOnSuccess}
-          onCancel={mockOnCancel}
-        />
-      </ClerkProvider>
+      <CreateCollectionForm onSuccess={mockOnSuccess} onCancel={mockOnCancel} />
     );
 
     const nameInput = screen.getByLabelText('Collection Name');
@@ -150,12 +129,7 @@ describe('CreateCollectionForm', () => {
     (fetch as jest.Mock).mockRejectedValueOnce(new Error('Network error'));
 
     render(
-      <ClerkProvider>
-        <CreateCollectionForm
-          onSuccess={mockOnSuccess}
-          onCancel={mockOnCancel}
-        />
-      </ClerkProvider>
+      <CreateCollectionForm onSuccess={mockOnSuccess} onCancel={mockOnCancel} />
     );
 
     const nameInput = screen.getByLabelText('Collection Name');
@@ -175,12 +149,7 @@ describe('CreateCollectionForm', () => {
 
   it('calls onCancel when cancel button is clicked', () => {
     render(
-      <ClerkProvider>
-        <CreateCollectionForm
-          onSuccess={mockOnSuccess}
-          onCancel={mockOnCancel}
-        />
-      </ClerkProvider>
+      <CreateCollectionForm onSuccess={mockOnSuccess} onCancel={mockOnCancel} />
     );
 
     fireEvent.click(screen.getByText('Cancel'));
@@ -194,12 +163,7 @@ describe('CreateCollectionForm', () => {
     });
 
     render(
-      <ClerkProvider>
-        <CreateCollectionForm
-          onSuccess={mockOnSuccess}
-          onCancel={mockOnCancel}
-        />
-      </ClerkProvider>
+      <CreateCollectionForm onSuccess={mockOnSuccess} onCancel={mockOnCancel} />
     );
 
     const nameInput = screen.getByLabelText('Collection Name');

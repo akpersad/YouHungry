@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
+    "analyze": "ANALYZE=true npm run build",
     "type-check": "tsc --noEmit",
     "start": "next start",
     "lint": "eslint",
@@ -32,6 +33,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@next/bundle-analyzer": "^15.5.4",
     "@tailwindcss/postcss": "^4",
     "@testing-library/jest-dom": "^6.1.4",
     "@testing-library/react": "^15.0.0",

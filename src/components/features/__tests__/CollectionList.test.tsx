@@ -1,6 +1,5 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { CollectionList } from '../CollectionList';
-import { ClerkProvider } from '@clerk/nextjs';
 
 // Mock the useUser hook
 jest.mock('@clerk/nextjs', () => ({
@@ -47,11 +46,7 @@ describe('CollectionList', () => {
       json: async () => ({ success: true, collections: [] }),
     });
 
-    render(
-      <ClerkProvider>
-        <CollectionList />
-      </ClerkProvider>
-    );
+    render(<CollectionList />);
 
     expect(screen.getByRole('status')).toBeInTheDocument();
   });
@@ -61,11 +56,7 @@ describe('CollectionList', () => {
       json: async () => ({ success: true, collections: [] }),
     });
 
-    render(
-      <ClerkProvider>
-        <CollectionList />
-      </ClerkProvider>
-    );
+    render(<CollectionList />);
 
     await waitFor(() => {
       expect(
@@ -83,11 +74,7 @@ describe('CollectionList', () => {
       json: async () => ({ success: true, collections: mockCollections }),
     });
 
-    render(
-      <ClerkProvider>
-        <CollectionList />
-      </ClerkProvider>
-    );
+    render(<CollectionList />);
 
     await waitFor(() => {
       expect(screen.getByText('Favorite Pizza Places')).toBeInTheDocument();
@@ -103,11 +90,7 @@ describe('CollectionList', () => {
       json: async () => ({ success: true, collections: [] }),
     });
 
-    render(
-      <ClerkProvider>
-        <CollectionList />
-      </ClerkProvider>
-    );
+    render(<CollectionList />);
 
     await waitFor(() => {
       expect(
@@ -135,11 +118,7 @@ describe('CollectionList', () => {
     // Mock window.confirm
     window.confirm = jest.fn(() => true);
 
-    render(
-      <ClerkProvider>
-        <CollectionList />
-      </ClerkProvider>
-    );
+    render(<CollectionList />);
 
     await waitFor(() => {
       expect(screen.getByText('Favorite Pizza Places')).toBeInTheDocument();
@@ -162,11 +141,7 @@ describe('CollectionList', () => {
   it('handles fetch error', async () => {
     (fetch as jest.Mock).mockRejectedValueOnce(new Error('Network error'));
 
-    render(
-      <ClerkProvider>
-        <CollectionList />
-      </ClerkProvider>
-    );
+    render(<CollectionList />);
 
     await waitFor(() => {
       expect(
