@@ -1,6 +1,6 @@
-import { auth } from "@clerk/nextjs/server";
-import { getUserByClerkId, createUser } from "./users";
-import { User } from "@/types/database";
+import { auth } from '@clerk/nextjs/server';
+import { getUserByClerkId, createUser } from './users';
+import { User } from '@/types/database';
 
 export async function getCurrentUser(): Promise<User | null> {
   const { userId } = await auth();
@@ -18,8 +18,8 @@ export async function getCurrentUser(): Promise<User | null> {
       // For development, we'll create a basic user record
       user = await createUser({
         clerkId: userId,
-        email: "user@example.com", // Placeholder for development
-        name: "User", // Placeholder for development
+        email: 'user@example.com', // Placeholder for development
+        name: 'User', // Placeholder for development
         smsOptIn: false,
         preferences: {
           notificationSettings: {
@@ -33,7 +33,7 @@ export async function getCurrentUser(): Promise<User | null> {
 
     return user;
   } catch (error) {
-    console.error("Error getting current user:", error);
+    console.error('Error getting current user:', error);
     return null;
   }
 }
@@ -42,7 +42,7 @@ export async function requireAuth(): Promise<User> {
   const user = await getCurrentUser();
 
   if (!user) {
-    throw new Error("Authentication required");
+    throw new Error('Authentication required');
   }
 
   return user;

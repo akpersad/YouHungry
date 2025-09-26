@@ -1,16 +1,16 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getCollectionsByUserId, createCollection } from "@/lib/collections";
-import { validateData, collectionSchema } from "@/lib/validation";
-import { ObjectId } from "mongodb";
+import { NextRequest, NextResponse } from 'next/server';
+import { getCollectionsByUserId, createCollection } from '@/lib/collections';
+import { validateData, collectionSchema } from '@/lib/validation';
+import { ObjectId } from 'mongodb';
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const userId = searchParams.get("userId");
+    const userId = searchParams.get('userId');
 
     if (!userId) {
       return NextResponse.json(
-        { success: false, error: "User ID is required" },
+        { success: false, error: 'User ID is required' },
         { status: 400 }
       );
     }
@@ -23,11 +23,11 @@ export async function GET(request: NextRequest) {
       count: collections.length,
     });
   } catch (error) {
-    console.error("Get collections error:", error);
+    console.error('Get collections error:', error);
     return NextResponse.json(
       {
         success: false,
-        error: "Internal server error",
+        error: 'Internal server error',
       },
       { status: 500 }
     );
@@ -47,14 +47,14 @@ export async function POST(request: NextRequest) {
     });
     if (!validation.success || !validation.data) {
       return NextResponse.json(
-        { success: false, error: "Invalid input", details: validation.error },
+        { success: false, error: 'Invalid input', details: validation.error },
         { status: 400 }
       );
     }
 
     if (!ownerId) {
       return NextResponse.json(
-        { success: false, error: "Owner ID is required" },
+        { success: false, error: 'Owner ID is required' },
         { status: 400 }
       );
     }
@@ -76,11 +76,11 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
-    console.error("Create collection error:", error);
+    console.error('Create collection error:', error);
     return NextResponse.json(
       {
         success: false,
-        error: "Internal server error",
+        error: 'Internal server error',
       },
       { status: 500 }
     );

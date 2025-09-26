@@ -6,20 +6,34 @@ This document tracks all planned items that are not yet started, organized by ca
 
 ### Foundation & Setup
 
-- [ ] Set up Next.js 15 with TypeScript configuration
-- [ ] Configure Tailwind CSS with custom design system
-- [ ] Set up ESLint, Prettier, and development tools
-- [ ] Configure environment variables and secrets management
-- [ ] Set up MongoDB Atlas cluster and connection
-- [ ] Design and implement database schema
-- [ ] Integrate Clerk for user authentication
+- [x] Set up Next.js 15 with TypeScript configuration
+- [x] Configure Tailwind CSS with custom design system
+- [x] Set up ESLint, Prettier, and development tools
+- [x] Configure environment variables and secrets management
+- [x] Set up MongoDB Atlas cluster and connection
+- [x] Design and implement database schema
+- [x] Integrate Clerk for user authentication
+- [x] Set up Jest testing framework with React Testing Library
+- [x] Implement pre-commit hooks with Husky and lint-staged
+- [x] Set up pre-push validation pipeline
 
-### Core Features
+### Core Feature Development
 
-- [ ] Create personal collections CRUD operations
 - [ ] Implement restaurant search with Google Places API
-- [ ] Build restaurant management system
-- [ ] Create personal decision making algorithm
+- [ ] Build collection CRUD operations
+- [ ] Create user dashboard with personal collections
+- [ ] Implement basic decision making algorithm
+- [ ] Add restaurant management functionality
+
+### Advanced Features (Future)
+
+- [ ] Implement drag-and-drop restaurant ranking system with @dnd-kit
+- [ ] Set up GraphQL server with Apollo Server
+- [ ] Implement GraphQL schema for restaurants and collections
+- [ ] Create GraphQL resolvers for complex queries
+- [ ] Add GraphQL client with Apollo Client
+- [ ] Implement React Hook Form with Zod integration
+- [ ] Set up TanStack Query for API state management
 
 ## 📋 Medium Priority (Upcoming Sprints)
 
@@ -36,13 +50,21 @@ This document tracks all planned items that are not yet started, organized by ca
 - [ ] Create random selection for groups
 - [ ] Build decision management and timeouts
 - [ ] Add group decision notifications
+- [ ] Set up GraphQL subscriptions for real-time decision updates
+- [ ] Implement GraphQL mutations for vote submission
+- [ ] Add real-time voting progress tracking
+- [ ] Create GraphQL queries for decision analytics
 
 ### Mobile & PWA
 
-- [ ] Optimize UI for mobile-first experience
+- [ ] Optimize UI for mobile-first experience with Framer Motion animations
 - [ ] Implement PWA capabilities and service workers
-- [ ] Add offline functionality and caching
-- [ ] Create mobile-specific navigation patterns
+- [ ] Add offline functionality and caching with TanStack Query
+- [ ] Create mobile-specific navigation patterns with bottom navigation
+- [ ] Implement GraphQL query caching for offline support
+- [ ] Add GraphQL subscription optimization for mobile
+- [ ] Create mobile-optimized GraphQL queries
+- [ ] Implement touch-friendly drag-and-drop interactions
 
 ## 🔮 Low Priority (Future Sprints)
 
@@ -55,10 +77,15 @@ This document tracks all planned items that are not yet started, organized by ca
 
 ### Polish & Optimization
 
-- [ ] Add comprehensive error handling
-- [ ] Implement loading states and skeleton screens
+- [ ] Add comprehensive error handling with Error Boundaries
+- [ ] Implement loading states and skeleton screens with Framer Motion
 - [ ] Create accessibility testing suite
-- [ ] Add performance monitoring
+- [ ] Add performance monitoring with Web Vitals and Bundle Analyzer
+- [ ] Optimize GraphQL query performance with TanStack Query
+- [ ] Implement GraphQL error handling and retry logic
+- [ ] Add GraphQL query complexity analysis
+- [ ] Create GraphQL performance monitoring
+- [ ] Implement user feedback system with toast notifications
 
 ### Future Enhancements
 

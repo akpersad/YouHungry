@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { UserButton } from "@clerk/nextjs";
-import { Card, CardContent } from "@/components/ui/Card";
+import { UserButton } from '@clerk/nextjs';
+import { Card, CardContent } from '@/components/ui/Card';
 
 export function UserProfile() {
   return (
@@ -10,7 +10,7 @@ export function UserProfile() {
         <UserButton
           appearance={{
             elements: {
-              avatarBox: "w-8 h-8",
+              avatarBox: 'w-8 h-8',
             },
           }}
         />

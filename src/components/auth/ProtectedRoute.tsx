@@ -1,15 +1,15 @@
-"use client";
+'use client';
 
-import { useUser } from "@clerk/nextjs";
-import { ReactNode } from "react";
-import { SignInButton } from "./SignInButton";
+import { useUser } from '@clerk/nextjs';
+import { ReactNode } from 'react';
+import { SignInButton } from './SignInButton';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/Card";
+} from '@/components/ui/Card';
 
 interface ProtectedRouteProps {
   children: ReactNode;

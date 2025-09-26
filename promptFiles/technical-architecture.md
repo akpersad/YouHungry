@@ -2,7 +2,7 @@
 
 This document outlines the technical architecture, technology stack, and implementation strategy for the You Hungry? app.
 
-## 🏗️ Technology Stack
+## 🏗️ Current Technology Stack (Implemented)
 
 ### Frontend
 
@@ -11,24 +11,56 @@ This document outlines the technical architecture, technology stack, and impleme
 - **Styling**: Tailwind CSS with custom design system
 - **State Management**: React Context + Custom hooks
 - **UI Components**: Custom components with Tailwind
-- **PWA**: Service Workers, App Manifest, Offline capabilities
+- **PWA**: Service Workers, App Manifest, Offline capabilities (planned)
 
 ### Backend
 
 - **Runtime**: Node.js (Next.js API routes)
 - **Database**: MongoDB Atlas
 - **Authentication**: Clerk
-- **API Integration**: Google Places, Twilio, Google Address Validation
-- **Caching**: Redis (for API response caching)
-- **File Storage**: Vercel Blob (for user uploads)
+- **API Layer**: REST architecture
+- **API Integration**: Google Places, Twilio, Google Address Validation (planned)
+- **File Storage**: Vercel Blob (for user uploads) (planned)
 
 ### Development & Deployment
 
 - **Hosting**: Vercel
-- **CI/CD**: GitHub Actions + Vercel
-- **Monitoring**: Vercel Analytics + Custom logging
+- **CI/CD**: GitHub Actions + Vercel (planned)
+- **Monitoring**: Vercel Analytics + Custom logging (planned)
+- **Testing**: Jest, React Testing Library (implemented), Playwright (planned)
+- **Code Quality**: ESLint, Prettier, Husky pre-commit hooks (implemented)
+- **Error Handling**: React Error Boundaries (planned)
+
+## 🚀 Future Technology Stack (As App Grows)
+
+### Advanced API Layer
+
+- **GraphQL**: Apollo Server with subscriptions for real-time features
+- **Hybrid Architecture**: REST + GraphQL for optimal performance
+- **Caching**: Redis for API response caching + GraphQL query caching
+
+### Enhanced Frontend Features
+
+- **Form Management**: React Hook Form with Zod integration
+- **API State Management**: TanStack Query for advanced caching and background updates
+- **Animations**: Framer Motion for smooth transitions and micro-interactions
+- **Drag & Drop**: @dnd-kit for restaurant ranking system
+- **Notifications**: React Hot Toast (Sonner) for user feedback
+
+### Development & Performance
+
+- **Code Quality**: Husky + lint-staged for pre-commit hooks
+- **Performance Monitoring**: Next.js Bundle Analyzer + Web Vitals
+- **TypeScript**: Strict mode configuration
 - **Testing**: Jest, React Testing Library, Playwright
-- **Code Quality**: ESLint, Prettier, Husky
+- **CI/CD**: GitHub Actions + Vercel automation
+
+### Advanced Features
+
+- **PWA**: Service Workers, App Manifest, Offline capabilities
+- **File Storage**: Vercel Blob for user uploads
+- **Real-time**: GraphQL subscriptions for group decision making
+- **Error Handling**: React Error Boundaries + Error monitoring
 
 ## 🗄️ Database Schema
 
@@ -73,7 +105,7 @@ interface Restaurant {
   };
   cuisine: string;
   rating: number;
-  priceRange?: "$" | "$$" | "$$$" | "$$$$";
+  priceRange?: '$' | '$$' | '$$$' | '$$$$';
   timeToPickUp?: number; // minutes
   photos?: string[];
   phoneNumber?: string;
@@ -93,7 +125,7 @@ interface Collection {
   _id: ObjectId;
   name: string;
   description?: string;
-  type: "personal" | "group";
+  type: 'personal' | 'group';
   ownerId: ObjectId; // User ID for personal, Group ID for group
   restaurantIds: ObjectId[];
   createdAt: Date;
@@ -121,12 +153,12 @@ interface Group {
 ```typescript
 interface Decision {
   _id: ObjectId;
-  type: "personal" | "group";
+  type: 'personal' | 'group';
   collectionId: ObjectId;
   groupId?: ObjectId;
   participants: ObjectId[]; // User IDs
-  method: "tiered" | "random";
-  status: "active" | "completed" | "expired";
+  method: 'tiered' | 'random';
+  status: 'active' | 'completed' | 'expired';
   deadline: Date;
   visitDate: Date;
   result?: {
@@ -151,13 +183,67 @@ interface Friendship {
   _id: ObjectId;
   requesterId: ObjectId;
   addresseeId: ObjectId;
-  status: "pending" | "accepted" | "declined";
+  status: 'pending' | 'accepted' | 'declined';
   createdAt: Date;
   updatedAt: Date;
 }
 ```
 
-## 🔌 API Architecture
+## 🔌 Current API Architecture
+
+### REST API Strategy
+
+The app currently uses a REST-only approach for simplicity and rapid development:
+
+#### **REST API Routes**
+
+- **Simple CRUD operations**: Collections, users, basic restaurant management
+- **Authentication endpoints**: Clerk integration and user management
+- **External API proxies**: Google Places, Twilio, address validation (planned)
+- **File uploads**: Restaurant photos and user avatars (planned)
+
+## 🔮 Future API Architecture (GraphQL Integration)
+
+### GraphQL Schema Structure (Future Implementation)
+
+```typescript
+type User {
+  id: ID!
+  name: String!
+  collections: [Collection!]!
+  groups: [Group!]!
+  decisionHistory: [Decision!]!
+}
+
+type Collection {
+  id: ID!
+  name: String!
+  restaurants: [Restaurant!]!
+  owner: User!
+  type: CollectionType!
+}
+
+type Restaurant {
+  id: ID!
+  name: String!
+  photos: [String!]!
+  priceRange: String
+  rating: Float
+  cuisine: String
+  weight: Float # 30-day rolling weight for decisions
+  recentDecisions: [Decision!]!
+}
+
+type Decision {
+  id: ID!
+  status: DecisionStatus!
+  method: DecisionMethod!
+  participants: [User!]!
+  votes: [Vote!]!
+  result: Restaurant
+  deadline: DateTime!
+}
+```
 
 ### External APIs
 
@@ -182,51 +268,231 @@ interface Friendship {
 
 ### Internal API Routes
 
-#### Authentication Routes
+#### REST API Routes (Simple Operations)
+
+##### Authentication Routes
 
 - `POST /api/auth/register` - User registration
 - `POST /api/auth/login` - User login
 - `GET /api/auth/profile` - Get user profile
 - `PUT /api/auth/profile` - Update user profile
 
-#### Collections Routes
+##### Collections Routes (CRUD Operations)
 
-- `GET /api/collections` - Get user collections
 - `POST /api/collections` - Create collection
 - `PUT /api/collections/[id]` - Update collection
 - `DELETE /api/collections/[id]` - Delete collection
 
-#### Restaurants Routes
+##### Restaurants Routes (Basic Operations)
 
-- `GET /api/restaurants/search` - Search restaurants
 - `POST /api/restaurants` - Add restaurant to collection
 - `PUT /api/restaurants/[id]` - Update restaurant details
 - `DELETE /api/restaurants/[id]` - Remove restaurant from collection
 
-#### Groups Routes
+##### Groups Routes (CRUD Operations)
 
-- `GET /api/groups` - Get user groups
 - `POST /api/groups` - Create group
 - `PUT /api/groups/[id]` - Update group
 - `DELETE /api/groups/[id]` - Delete group
 - `POST /api/groups/[id]/invite` - Invite user to group
 - `POST /api/groups/[id]/join` - Join group
 
-#### Decisions Routes
+##### Decisions Routes (Simple Operations)
 
 - `POST /api/decisions` - Start decision process
-- `GET /api/decisions/active` - Get active decisions
 - `POST /api/decisions/[id]/vote` - Submit vote
-- `GET /api/decisions/[id]/result` - Get decision result
 
-## 🚀 Performance Optimization
+### Current REST API Routes
 
-### Caching Strategy
+##### Collections Routes (CRUD Operations)
 
-- **API Responses**: 30-day cache for restaurant data
-- **User Data**: 5-minute cache for user profiles
-- **Group Data**: 1-minute cache for group information
-- **Decision Data**: Real-time (no caching)
+- `GET /api/collections` - Get user's collections
+- `POST /api/collections` - Create new collection
+- `PUT /api/collections/[id]` - Update collection
+- `DELETE /api/collections/[id]` - Delete collection
+
+##### Restaurants Routes (Basic Operations)
+
+- `GET /api/restaurants/search` - Search restaurants
+- `POST /api/restaurants` - Add restaurant to collection
+- `PUT /api/restaurants/[id]` - Update restaurant details
+- `DELETE /api/restaurants/[id]` - Remove restaurant from collection
+
+##### Groups Routes (CRUD Operations)
+
+- `GET /api/groups` - Get user's groups
+- `POST /api/groups` - Create group
+- `PUT /api/groups/[id]` - Update group
+- `DELETE /api/groups/[id]` - Delete group
+- `POST /api/groups/[id]/invite` - Invite user to group
+- `POST /api/groups/[id]/join` - Join group
+
+##### Decisions Routes (Simple Operations)
+
+- `GET /api/decisions` - Get user's decisions
+- `POST /api/decisions` - Start decision process
+- `POST /api/decisions/[id]/vote` - Submit vote
+- `GET /api/decisions/[id]` - Get decision details
+
+## 🔮 Future GraphQL API (Advanced Operations)
+
+### GraphQL Endpoint
+
+- `POST /api/graphql` - Main GraphQL endpoint with queries, mutations, and subscriptions
+
+### Key GraphQL Operations (Future Implementation)
+
+**Queries:**
+
+```graphql
+query GetDashboardData($userId: ID!) {
+  user(id: $userId) {
+    collections {
+      id
+      name
+      restaurants {
+        id
+        name
+        photos
+      }
+    }
+    groups {
+      id
+      name
+      members {
+        id
+        name
+      }
+    }
+    recentDecisions {
+      id
+      result
+      status
+    }
+  }
+}
+
+query SearchRestaurants($filters: RestaurantFilters!) {
+  restaurants(filters: $filters) {
+    id
+    name
+    photos
+    priceRange
+    rating
+    cuisine
+    weight
+    collections {
+      id
+      name
+    }
+  }
+}
+
+query GetDecisionData($decisionId: ID!) {
+  decision(id: $decisionId) {
+    id
+    status
+    method
+    deadline
+    collection {
+      restaurants {
+        id
+        name
+        photos
+      }
+    }
+    participants {
+      id
+      name
+    }
+    votes {
+      user {
+        name
+      }
+      rankings
+    }
+  }
+}
+```
+
+**Mutations:**
+
+```graphql
+mutation SubmitVote($decisionId: ID!, $rankings: [ID!]!) {
+  submitVote(decisionId: $decisionId, rankings: $rankings) {
+    success
+    vote {
+      user {
+        name
+      }
+      rankings
+    }
+  }
+}
+
+mutation StartDecision(
+  $collectionId: ID!
+  $method: DecisionMethod!
+  $deadline: DateTime!
+) {
+  startDecision(
+    collectionId: $collectionId
+    method: $method
+    deadline: $deadline
+  ) {
+    success
+    decision {
+      id
+      status
+      deadline
+    }
+  }
+}
+```
+
+**Subscriptions:**
+
+```graphql
+subscription DecisionUpdates($decisionId: ID!) {
+  decisionUpdated(decisionId: $decisionId) {
+    id
+    status
+    votes {
+      user {
+        name
+      }
+      rankings
+      submittedAt
+    }
+    currentLeader
+    timeRemaining
+  }
+}
+
+subscription GroupActivity($groupId: ID!) {
+  groupUpdated(groupId: $groupId) {
+    id
+    name
+    members {
+      id
+      name
+    }
+    collections {
+      id
+      name
+      restaurantCount
+    }
+  }
+}
+```
+
+## 🚀 Current Performance Optimization
+
+### Basic Caching Strategy
+
+- **API Responses**: Simple caching for restaurant data
+- **User Data**: Basic React state management
+- **Database Queries**: Optimized MongoDB queries
 
 ### Database Optimization
 
@@ -236,10 +502,43 @@ interface Friendship {
 
 ### Frontend Optimization
 
-- **Code Splitting**: Lazy load components
-- **Image Optimization**: Next.js Image component
+- **Code Splitting**: Automatic Next.js route-based splitting
+- **Image Optimization**: Next.js Image component (when implemented)
 - **Bundle Optimization**: Tree shaking, minification
+- **TypeScript**: Compile-time optimizations
+
+## 🔮 Future Performance Optimization (Advanced Features)
+
+### Enhanced Caching Strategy with TanStack Query
+
+#### REST API Caching
+
+- **API Responses**: 30-day cache for restaurant data with stale-while-revalidate
+- **User Data**: 5-minute cache for user profiles with background updates
+- **Group Data**: 1-minute cache for group information with optimistic updates
+- **Decision Data**: Real-time with optimistic updates for voting
+
+#### GraphQL Caching
+
+- **Query Caching**: Apollo Client + TanStack Query integration for dashboard data
+- **Normalized Cache**: Automatic cache normalization for related data
+- **Cache Policies**: Different policies for queries vs subscriptions
+- **Offline Cache**: PWA offline support with persistent cache
+- **Background Sync**: Automatic data synchronization when connection restored
+
+#### TanStack Query Benefits
+
+- **Automatic Background Updates**: Fresh data without user intervention
+- **Optimistic Updates**: Immediate UI feedback for actions
+- **Request Deduplication**: Prevents duplicate API calls
+- **Error Retry**: Automatic retry with exponential backoff
+- **Cache Invalidation**: Smart cache management for data consistency
+
+### Advanced Frontend Optimization
+
 - **PWA Caching**: Service worker caching strategy
+- **Advanced Code Splitting**: Component-level lazy loading
+- **Bundle Analysis**: Performance monitoring and optimization
 
 ## 🔒 Security Considerations
 
@@ -363,3 +662,68 @@ interface Friendship {
 - **Scalability**: Design for future growth
 - **Internationalization**: Prepare for multi-language support
 - **Advanced Features**: Architecture supports future enhancements
+
+## 📋 Current Implementation Status
+
+### ✅ Completed (Phase 1)
+
+**Core foundation implemented**
+
+- [x] **Next.js 15 + TypeScript**: Framework and language setup
+- [x] **Tailwind CSS**: Styling system with custom design
+- [x] **MongoDB + Clerk**: Database and authentication
+- [x] **Basic REST APIs**: Collections, restaurants, users
+- [x] **Component Library**: UI components with Tailwind
+
+### 🚧 In Progress (Phase 2)
+
+**Core features development**
+
+- [ ] **Restaurant Search**: Google Places API integration
+- [ ] **Collection Management**: CRUD operations
+- [ ] **User Dashboard**: Personal collections view
+- [ ] **Basic Decision Making**: Personal restaurant selection
+
+## 🔮 Future Implementation Roadmap
+
+### Phase 3: Enhanced User Experience (When Core Features Complete)
+
+**Advanced user interaction improvements**
+
+- [ ] **React Hook Form + Zod**: Form management and validation
+- [ ] **TanStack Query**: API state management and caching
+- [ ] **Framer Motion**: Smooth animations and transitions
+- [ ] **React Hot Toast**: User feedback and notifications
+- [ ] **@dnd-kit**: Restaurant ranking drag-and-drop system
+- [ ] **Error Boundaries**: Graceful error handling
+
+### Phase 4: Advanced Features (When App Grows)
+
+**Production readiness and optimization**
+
+- [ ] **GraphQL Integration**: Apollo Server + Client setup
+- [ ] **Real-time Features**: GraphQL subscriptions
+- [ ] **PWA Capabilities**: Service workers and offline support
+- [ ] **Bundle Analyzer**: Performance monitoring
+- [ ] **Web Vitals**: Core performance metrics
+- [ ] **Husky + lint-staged**: Code quality enforcement
+
+### Future Package Installation Commands
+
+```bash
+# Phase 3: Enhanced UX
+npm install react-hook-form @hookform/resolvers @tanstack/react-query @tanstack/react-query-devtools
+npm install framer-motion sonner @dnd-kit/core @dnd-kit/sortable @dnd-kit/utilities
+
+# Phase 4: Advanced Features
+npm install apollo-server-micro apollo-server-core graphql
+npm install --save-dev husky lint-staged @next/bundle-analyzer
+```
+
+### Implementation Strategy
+
+- **Current Focus**: Build core features with simple, proven technologies
+- **Future Enhancement**: Add advanced technologies when they solve specific problems
+- **Mobile-First**: All technologies optimized for mobile and PWA experience
+- **Type-Safe**: Full TypeScript integration throughout
+- **Performance**: Add optimization tools when performance becomes a concern
