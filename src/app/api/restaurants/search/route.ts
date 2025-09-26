@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { searchRestaurantsByCoordinates } from '@/lib/restaurants';
 import { validateData, restaurantSearchSchema } from '@/lib/validation';
-import { geocodeAddress } from '@/lib/google-places';
+import {
+  geocodeAddress,
+  searchRestaurantsWithGooglePlaces,
+} from '@/lib/google-places';
 
 export async function GET(request: NextRequest) {
   try {
@@ -121,11 +124,24 @@ export async function GET(request: NextRequest) {
 
       // Search restaurants by coordinates with filters
       const searchRadius = radius ? parseInt(radius) : 5000;
-      const restaurants = await searchRestaurantsByCoordinates(
-        latitude,
-        longitude,
-        searchRadius
-      );
+
+      let restaurants;
+      if (query) {
+        // If there's a query, use text search with location
+        const locationString = `${latitude},${longitude}`;
+        restaurants = await searchRestaurantsWithGooglePlaces(
+          query,
+          locationString,
+          searchRadius
+        );
+      } else {
+        // If no query, use nearby search
+        restaurants = await searchRestaurantsByCoordinates(
+          latitude,
+          longitude,
+          searchRadius
+        );
+      }
 
       // Apply filters to the results
       const filteredRestaurants = restaurants.filter((restaurant) => {

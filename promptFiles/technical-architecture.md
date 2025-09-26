@@ -256,6 +256,11 @@ type Decision {
 - **Caching Strategy**: 30-day cache for restaurant details
 - **Rate Limiting**: Batch requests, implement exponential backoff
 - **Cost Optimization**: Stale-while-revalidate pattern
+- **Search Implementation**:
+  - **Text Search API**: Used when specific restaurant name/cuisine query is provided
+  - **Nearby Search API**: Used for location-only searches (no query parameter)
+  - **Geocoding Integration**: Address validation and coordinate conversion for accurate location-based search
+  - **Query Processing**: Removes automatic "restaurant" suffix to allow precise searches like "McDonald's"
 
 #### Google Address Validation API
 
@@ -317,6 +322,10 @@ type Decision {
 ##### Restaurants Routes (Basic Operations)
 
 - `GET /api/restaurants/search` - Search restaurants
+  - **Query Parameters**: `q` (restaurant name/cuisine), `location` (address), `lat`/`lng` (coordinates), `radius`, `cuisine`, `minRating`, `maxPrice`, `minPrice`
+  - **Search Logic**: Uses Google Places Text Search API when query provided, Nearby Search API for location-only searches
+  - **Geocoding**: Automatically converts addresses to coordinates for accurate location-based search
+  - **Filtering**: Applies additional filters for cuisine, rating, and price level
 - `POST /api/restaurants` - Add restaurant to collection
 - `PUT /api/restaurants/[id]` - Update restaurant details
 - `DELETE /api/restaurants/[id]` - Remove restaurant from collection
@@ -721,7 +730,7 @@ The following environment variables are configured and ready for use:
 
 **Core features development**
 
-- [ ] **Restaurant Search**: Google Places API integration
+- [x] **Restaurant Search**: Google Places API integration with Text Search and Nearby Search APIs
 - [ ] **Collection Management**: CRUD operations
 - [ ] **User Dashboard**: Personal collections view
 - [ ] **Basic Decision Making**: Personal restaurant selection

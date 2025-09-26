@@ -43,6 +43,7 @@ This document tracks all items currently being worked on, organized by priority 
 - [x] **GraphQL Schema & Resolvers** - GraphQL integration for complex restaurant queries ✅ COMPLETED
 - [x] **Search Accuracy Improvements** - Fixed search to use geocoded coordinates instead of text-based location ✅ COMPLETED
 - [x] **Image Loading Fixes** - Resolved restaurant image loading issues with proper Next.js Image configuration ✅ COMPLETED
+- [x] **Restaurant Search Query Fix** - Fixed restaurant search to properly use Text Search API when query is provided ✅ COMPLETED
 - [ ] **Restaurant Management** - Add/remove restaurants from collections functionality
 
 ### Documentation & Planning
@@ -70,15 +71,15 @@ This document tracks all items currently being worked on, organized by priority 
 
 ### Current Sprint Status
 
-- **Items Started**: 19 items
-- **Items Completed**: 19 items (Epic 1 + Epic 2 Story 1 + Recent fixes)
+- **Items Started**: 20 items
+- **Items Completed**: 20 items (Epic 1 + Epic 2 Story 1 + Recent fixes)
 - **Items Blocked**: 0 items (All API keys configured)
 - **Sprint Progress**: 100% (Epic 1 completed, Epic 2 Story 1 completed with enhancements)
 
 ### Epic Progress
 
 - **Epic 1**: 100% complete ✅
-- **Epic 2**: 70% complete (Stories 1 & 2 completed, Story 2 enhanced with address validation and search improvements)
+- **Epic 2**: 75% complete (Stories 1 & 2 completed, Story 2 enhanced with address validation, search improvements, and query fix)
 - **Epic 3**: 0% complete (not started)
 - **Epic 4**: 0% complete (not started)
 

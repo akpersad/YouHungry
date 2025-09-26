@@ -48,6 +48,7 @@ This document tracks all completed items, organized by completion date and categ
 - [x] **Geocoding Integration** - Added geocoding functionality to convert addresses to coordinates for accurate location-based search
 - [x] **Search Accuracy Improvements** - Enhanced search to use geocoded coordinates instead of text-based location for better results
 - [x] **Error Handling Enhancement** - Added comprehensive error handling for geocoding API failures with user-friendly messages
+- [x] **Restaurant Search Query Fix** - Fixed restaurant search to properly use Text Search API when query is provided, ensuring specific restaurant names like "McDonald's" return only matching results instead of all nearby restaurants
 
 ## 📊 Completion Summary
 
@@ -55,7 +56,7 @@ This document tracks all completed items, organized by completion date and categ
 
 - **Planning & Documentation**: 4 items completed
 - **Project Setup**: 7 items completed
-- **Core Features**: 14 items completed
+- **Core Features**: 15 items completed
 - **Testing & Quality**: 8 items completed
 - **Environment & Configuration**: 3 items completed
 - **Social Features**: 0 items completed
@@ -90,7 +91,7 @@ This document tracks all completed items, organized by completion date and categ
 ### Overall Progress
 
 - **Total Items Planned**: 50+ items across all epics
-- **Items Completed**: 26 items
+- **Items Completed**: 27 items
 - **Completion Rate**: ~36% (foundation phase complete)
 - **Current Phase**: Personal Collections Management
 

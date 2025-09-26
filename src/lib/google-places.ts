@@ -144,7 +144,7 @@ export async function searchRestaurantsWithGooglePlaces(
   // Build the search URL
   const baseUrl = 'https://maps.googleapis.com/maps/api/place/textsearch/json';
   const params = new URLSearchParams({
-    query: `${query} restaurant`,
+    query: query, // Don't automatically append "restaurant" - let the user specify what they want
     key: apiKey,
     type: 'restaurant',
   });
