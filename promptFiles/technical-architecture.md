@@ -27,8 +27,8 @@ This document outlines the technical architecture, technology stack, and impleme
 - **Hosting**: Vercel
 - **CI/CD**: GitHub Actions + Vercel (planned)
 - **Monitoring**: Vercel Analytics + Custom logging (planned)
-- **Testing**: Jest, React Testing Library, Playwright (planned)
-- **Code Quality**: ESLint
+- **Testing**: Jest, React Testing Library (implemented), Playwright (planned)
+- **Code Quality**: ESLint, Prettier, Husky pre-commit hooks (implemented)
 - **Error Handling**: React Error Boundaries (planned)
 
 ## 🚀 Future Technology Stack (As App Grows)

@@ -86,18 +86,21 @@ Each epic contains multiple user stories that can be worked on in parallel where
 
 ### Testing Strategy
 
-- **Unit Tests**: Test individual components and functions
-- **Integration Tests**: Test component interactions
-- **E2E Tests**: Test complete user flows
-- **Accessibility Tests**: Verify WCAG AA compliance
-- **Performance Tests**: Ensure performance requirements are met
+- **Unit Tests**: Test individual components and functions (implemented with Jest + React Testing Library)
+- **Integration Tests**: Test component interactions (planned)
+- **E2E Tests**: Test complete user flows (planned)
+- **Accessibility Tests**: Verify WCAG AA compliance (planned)
+- **Performance Tests**: Ensure performance requirements are met (planned)
 
 ### Code Quality
 
 - **TypeScript**: Strict type checking enabled
 - **ESLint**: Code quality and style enforcement
 - **Prettier**: Consistent code formatting
-- **Husky**: Pre-commit hooks for quality checks
+- **Husky**: Pre-commit hooks for quality checks (implemented)
+- **Lint-staged**: Automated code formatting and linting on commit (implemented)
+- **Pre-push Validation**: Comprehensive validation pipeline (type-check, lint, test, build)
+- **Jest Testing**: Unit testing with React Testing Library (implemented)
 - **Code Reviews**: Self-review before marking complete
 
 ### User Experience
@@ -224,6 +227,34 @@ GOOGLE_ADDRESS_VALIDATION_API_KEY=AIza...
 TWILIO_ACCOUNT_SID=AC...
 TWILIO_AUTH_TOKEN=...
 TWILIO_PHONE_NUMBER=+1...
+```
+
+### Testing Commands
+
+```bash
+# Run all tests
+npm run test
+
+# Run tests in watch mode
+npm run test:watch
+
+# Run tests with coverage
+npm run test:coverage
+
+# Run type checking
+npm run type-check
+
+# Run linting
+npm run lint
+
+# Fix linting issues
+npm run lint:fix
+
+# Format code
+npm run format
+
+# Check formatting
+npm run format:check
 ```
 
 ## 📝 Best Practices
