@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import {
-  searchRestaurantsByCoordinates,
-  searchRestaurantsWithFilters,
-} from '@/lib/restaurants';
+import { searchRestaurantsByCoordinates } from '@/lib/restaurants';
 import { validateData, restaurantSearchSchema } from '@/lib/validation';
+import { geocodeAddress } from '@/lib/google-places';
 
 export async function GET(request: NextRequest) {
   try {
@@ -58,6 +56,56 @@ export async function GET(request: NextRequest) {
         );
       }
 
+      // Check if location is already coordinates (lat,lng format)
+      const coordinateMatch = location.match(/^(-?\d+\.?\d*),(-?\d+\.?\d*)$/);
+      let latitude: number;
+      let longitude: number;
+
+      if (coordinateMatch) {
+        // Location is already coordinates
+        latitude = parseFloat(coordinateMatch[1]);
+        longitude = parseFloat(coordinateMatch[2]);
+      } else {
+        // Geocode the address to get coordinates
+        try {
+          const coordinates = await geocodeAddress(location);
+          if (!coordinates) {
+            return NextResponse.json(
+              { error: 'Could not find coordinates for the provided address' },
+              { status: 400 }
+            );
+          }
+          latitude = coordinates.lat;
+          longitude = coordinates.lng;
+        } catch (error) {
+          console.error('Geocoding error:', error);
+
+          // Check if it's a REQUEST_DENIED error (API key issue)
+          if (
+            error instanceof Error &&
+            error.message.includes('REQUEST_DENIED')
+          ) {
+            return NextResponse.json(
+              {
+                error:
+                  'Google Geocoding API access denied. Please check your API key configuration and ensure the Geocoding API is enabled.',
+                details:
+                  'This usually means the API key is missing, invalid, or the Geocoding API is not enabled for your Google Cloud project.',
+              },
+              { status: 500 }
+            );
+          }
+
+          return NextResponse.json(
+            {
+              error: 'Failed to geocode address',
+              details: error instanceof Error ? error.message : 'Unknown error',
+            },
+            { status: 500 }
+          );
+        }
+      }
+
       // Build filters object
       const filters: {
         cuisine?: string;
@@ -71,17 +119,52 @@ export async function GET(request: NextRequest) {
       if (maxPrice) filters.maxPrice = parseInt(maxPrice);
       if (minPrice) filters.minPrice = parseInt(minPrice);
 
-      // Search restaurants with filters
-      const restaurants = await searchRestaurantsWithFilters(
-        query || 'restaurant', // Default to 'restaurant' if no query provided
-        location,
-        filters
+      // Search restaurants by coordinates with filters
+      const searchRadius = radius ? parseInt(radius) : 5000;
+      const restaurants = await searchRestaurantsByCoordinates(
+        latitude,
+        longitude,
+        searchRadius
       );
+
+      // Apply filters to the results
+      const filteredRestaurants = restaurants.filter((restaurant) => {
+        if (
+          filters.cuisine &&
+          !restaurant.cuisine
+            .toLowerCase()
+            .includes(filters.cuisine.toLowerCase())
+        ) {
+          return false;
+        }
+        if (filters.minRating && restaurant.rating < filters.minRating) {
+          return false;
+        }
+        if (filters.minPrice || filters.maxPrice) {
+          const priceLevel = restaurant.priceRange
+            ? restaurant.priceRange === '$'
+              ? 1
+              : restaurant.priceRange === '$$'
+                ? 2
+                : restaurant.priceRange === '$$$'
+                  ? 3
+                  : 4
+            : 0;
+
+          if (filters.minPrice && priceLevel < filters.minPrice) {
+            return false;
+          }
+          if (filters.maxPrice && priceLevel > filters.maxPrice) {
+            return false;
+          }
+        }
+        return true;
+      });
 
       return NextResponse.json({
         success: true,
-        restaurants,
-        count: restaurants.length,
+        restaurants: filteredRestaurants,
+        count: filteredRestaurants.length,
       });
     }
 

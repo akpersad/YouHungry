@@ -67,7 +67,11 @@ describe('RestaurantCard', () => {
 
     const photo = screen.getByAltText('Test Restaurant');
     expect(photo).toBeInTheDocument();
-    expect(photo).toHaveAttribute('src', 'https://example.com/photo1.jpg');
+    // Next.js Image component transforms the src URL, so we check for the pattern
+    expect(photo).toHaveAttribute(
+      'src',
+      expect.stringContaining('https%3A%2F%2Fexample.com%2Fphoto1.jpg')
+    );
   });
 
   it('renders hours information when available', () => {

@@ -26,7 +26,11 @@ describe('RestaurantImage', () => {
     );
     const img = screen.getByAltText('Test Restaurant');
     expect(img).toBeInTheDocument();
-    expect(img).toHaveAttribute('src', 'https://example.com/image.jpg');
+    // Next.js Image component transforms the src URL, so we check for the pattern
+    expect(img).toHaveAttribute(
+      'src',
+      expect.stringContaining('https%3A%2F%2Fexample.com%2Fimage.jpg')
+    );
   });
 
   it('should show different icons for different cuisines', () => {

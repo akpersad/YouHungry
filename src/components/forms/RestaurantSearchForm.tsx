@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card } from '@/components/ui/Card';
+import { AddressInput } from '@/components/ui/AddressInput';
 
 interface RestaurantSearchFormProps {
   onSearch: (query?: string, location: string, filters?: SearchFilters) => void;
@@ -26,10 +27,11 @@ export function RestaurantSearchForm({
   const [useCurrentLocation, setUseCurrentLocation] = useState(false);
   const [filters, setFilters] = useState<SearchFilters>({});
   const [showFilters, setShowFilters] = useState(false);
+  const [isAddressValid, setIsAddressValid] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!location.trim()) return;
+    if (!location.trim() || !isAddressValid) return;
 
     onSearch(query.trim() || undefined, location.trim(), filters);
   };
@@ -69,6 +71,15 @@ export function RestaurantSearchForm({
     }));
   };
 
+  const handleAddressSelect = (address: string) => {
+    setLocation(address);
+    setUseCurrentLocation(false);
+  };
+
+  const handleAddressValidationChange = (isValid: boolean) => {
+    setIsAddressValid(isValid);
+  };
+
   return (
     <Card className="p-6">
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -81,17 +92,18 @@ export function RestaurantSearchForm({
             Location (required)
           </label>
           <div className="flex gap-2">
-            <Input
-              id="location"
-              type="text"
-              placeholder="Enter address or city..."
+            <AddressInput
               value={location}
-              onChange={(e) => {
-                setLocation(e.target.value);
+              onChange={(value) => {
+                setLocation(value);
                 setUseCurrentLocation(false);
               }}
-              required
+              onAddressSelect={handleAddressSelect}
+              onValidationChange={handleAddressValidationChange}
+              placeholder="Enter address or city..."
               className="flex-1"
+              required
+              disabled={isLoading}
             />
             <Button
               type="button"
@@ -105,6 +117,11 @@ export function RestaurantSearchForm({
           {useCurrentLocation && (
             <p className="text-sm text-green-600 mt-1">
               ✓ Using current location
+            </p>
+          )}
+          {location && !isAddressValid && !useCurrentLocation && (
+            <p className="text-sm text-amber-600 mt-1">
+              ⚠ Address validation in progress...
             </p>
           )}
         </div>
@@ -230,12 +247,17 @@ export function RestaurantSearchForm({
         {/* Submit Button */}
         <Button
           type="submit"
-          disabled={!location.trim() || isLoading}
+          disabled={!location.trim() || !isAddressValid || isLoading}
           className="w-full"
           isLoading={isLoading}
         >
           {isLoading ? 'Searching...' : 'Search Restaurants'}
         </Button>
+        {location && !isAddressValid && !useCurrentLocation && (
+          <p className="text-sm text-red-600 text-center mt-2">
+            Please enter a valid address to search for restaurants
+          </p>
+        )}
       </form>
     </Card>
   );

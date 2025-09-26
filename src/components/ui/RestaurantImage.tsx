@@ -72,6 +72,7 @@ export function RestaurantImage({
         className={`object-cover ${!imageLoaded || imageError ? 'hidden' : ''}`}
         onError={() => setImageError(true)}
         onLoad={() => setImageLoaded(true)}
+        unoptimized={true}
       />
     </div>
   );

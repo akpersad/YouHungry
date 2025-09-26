@@ -111,10 +111,18 @@ function convertGooglePlaceToRestaurant(
       place.price_level !== undefined
         ? priceRangeMap[place.price_level]
         : undefined,
-    photos: place.photos?.map(
-      (photo) =>
-        `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photo_reference=${photo.photo_reference}&key=${process.env.GOOGLE_PLACES_API_KEY}`
-    ),
+    photos: place.photos?.map((photo) => {
+      const photoUrl = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photo_reference=${photo.photo_reference}&key=${process.env.GOOGLE_PLACES_API_KEY}`;
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Generated photo URL:', {
+          photoUrl,
+          photoReference: photo.photo_reference,
+          hasApiKey: !!process.env.GOOGLE_PLACES_API_KEY,
+          apiKeyLength: process.env.GOOGLE_PLACES_API_KEY?.length,
+        });
+      }
+      return photoUrl;
+    }),
     phoneNumber: place.formatted_phone_number,
     website: place.website,
     hours: Object.keys(hours).length > 0 ? hours : undefined,
@@ -164,6 +172,24 @@ export async function searchRestaurantsWithGooglePlaces(
 
     // Convert results to our Restaurant format
     const restaurants = data.results.map(convertGooglePlaceToRestaurant);
+
+    // Debug logging for photos
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Google Places search results:', {
+        totalResults: data.results.length,
+        restaurantsWithPhotos: restaurants.filter(
+          (r) => r.photos && r.photos.length > 0
+        ).length,
+        sampleRestaurant: restaurants[0]
+          ? {
+              name: restaurants[0].name,
+              hasPhotos: !!restaurants[0].photos,
+              photoCount: restaurants[0].photos?.length || 0,
+              firstPhoto: restaurants[0].photos?.[0],
+            }
+          : null,
+      });
+    }
 
     return restaurants as Restaurant[];
   } catch (error) {
@@ -252,9 +278,84 @@ export async function searchRestaurantsByLocation(
     // Convert results to our Restaurant format
     const restaurants = data.results.map(convertGooglePlaceToRestaurant);
 
+    // Debug logging for photos
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Google Places nearby search results:', {
+        totalResults: data.results.length,
+        restaurantsWithPhotos: restaurants.filter(
+          (r) => r.photos && r.photos.length > 0
+        ).length,
+        sampleRestaurant: restaurants[0]
+          ? {
+              name: restaurants[0].name,
+              hasPhotos: !!restaurants[0].photos,
+              photoCount: restaurants[0].photos?.length || 0,
+              firstPhoto: restaurants[0].photos?.[0],
+            }
+          : null,
+      });
+    }
+
     return restaurants as Restaurant[];
   } catch (error) {
     console.error('Google Places API nearby search error:', error);
+    throw error;
+  }
+}
+
+// Geocode an address to get coordinates
+export async function geocodeAddress(
+  address: string
+): Promise<{ lat: number; lng: number } | null> {
+  const apiKey = process.env.GOOGLE_PLACES_API_KEY;
+
+  if (!apiKey) {
+    throw new Error('Google Places API key not configured');
+  }
+
+  const baseUrl = 'https://maps.googleapis.com/maps/api/geocode/json';
+  const params = new URLSearchParams({
+    address,
+    key: apiKey,
+  });
+
+  try {
+    const response = await fetch(`${baseUrl}?${params.toString()}`);
+
+    if (!response.ok) {
+      throw new Error(`Google Geocoding API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    // Enhanced error logging for debugging
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Geocoding API response:', {
+        status: data.status,
+        error_message: data.error_message,
+        address,
+        hasResults: data.results && data.results.length > 0,
+      });
+    }
+
+    if (data.status !== 'OK' && data.status !== 'ZERO_RESULTS') {
+      const errorMessage = data.error_message || data.status;
+      throw new Error(
+        `Google Geocoding API error: ${data.status} - ${errorMessage}`
+      );
+    }
+
+    if (data.results && data.results.length > 0) {
+      const location = data.results[0].geometry.location;
+      return {
+        lat: location.lat,
+        lng: location.lng,
+      };
+    }
+
+    return null;
+  } catch (error) {
+    console.error('Geocoding error:', error);
     throw error;
   }
 }
