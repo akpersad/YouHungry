@@ -2,6 +2,20 @@
 
 This document outlines the major epics and user stories for the You Hungry? app development journey. Each epic represents a major functional area that must be completed sequentially.
 
+## 🚀 Future Technology Integration
+
+**Future technologies** (marked with "Future" in story titles) are strategically placed within epics where they provide the most value:
+
+- **Epic 1**: Enhanced development tools (Husky, lint-staged, Bundle Analyzer)
+- **Epic 2**: Form management (React Hook Form + Zod), API state management (TanStack Query)
+- **Epic 4**: Drag & drop ranking (@dnd-kit)
+- **Epic 5**: Animations and interactions (Framer Motion)
+- **Epic 6**: Toast notifications (Sonner)
+- **Epic 8**: Error boundaries and graceful error handling
+- **Epic 9**: GraphQL integration (Apollo Server + Client) + Performance benchmarking
+
+These technologies will be implemented when they solve specific problems in each epic, ensuring they add real value rather than being added prematurely.
+
 ## 🎯 Epic 1: Foundation & Authentication
 
 **Goal**: Establish core infrastructure, authentication, and basic user management
@@ -30,10 +44,17 @@ This document outlines the major epics and user stories for the You Hungry? app 
    - Configure protected routes and middleware
 
 4. **Basic UI Framework**
+
    - Create reusable component library
    - Implement responsive layout system
    - Set up navigation and routing
    - Establish design system implementation
+
+5. **Enhanced Development Tools (Future)**
+   - Install and configure Husky + lint-staged for code quality
+   - Enable TypeScript strict mode configuration
+   - Set up Next.js Bundle Analyzer for performance monitoring
+   - Configure Web Vitals monitoring for performance tracking
 
 ## 🏠 Epic 2: Personal Collections Management
 
@@ -57,20 +78,34 @@ This document outlines the major epics and user stories for the You Hungry? app 
    - **Set up GraphQL schema for complex restaurant queries**
    - **Implement GraphQL resolvers for restaurant search with filters**
 
-3. **Restaurant Management**
+3. **Enhanced Form Management (Future)**
+
+   - Install and configure React Hook Form with Zod integration
+   - Implement form validation and error handling
+   - Create reusable form components
+   - Add form state management and persistence
+
+4. **Restaurant Management**
 
    - Add restaurants to collections
    - Manage restaurant custom fields (Price Range, Time to Pick Up)
    - Remove restaurants from collections
    - View restaurant details and history
 
-4. **Personal Decision Making**
+5. **Personal Decision Making**
+
    - Implement random selection algorithm
    - Add 30-day rolling weight system
    - Create decision history tracking
    - Build decision result UI
    - **Implement GraphQL queries for decision data with weights**
    - **Add GraphQL mutations for personal decision submission**
+
+6. **Advanced API State Management (Future)**
+   - Install and configure TanStack Query for API state management
+   - Implement caching strategies and background updates
+   - Add optimistic updates for better UX
+   - Set up error handling and retry logic
 
 ## 👥 Epic 3: Social Features & Group Management
 
@@ -115,6 +150,14 @@ This document outlines the major epics and user stories for the You Hungry? app 
    - **Set up GraphQL subscriptions for real-time voting updates**
    - **Implement GraphQL mutations for vote submission and tracking**
 
+1a. **Drag & Drop Ranking Interface (Future)**
+
+- Install and configure @dnd-kit for drag-and-drop functionality
+- Create restaurant ranking interface with drag-and-drop
+- Implement sortable restaurant lists
+- Add visual feedback and animations for ranking
+- Handle touch-friendly interactions for mobile
+
 2. **Random Selection for Groups**
 
    - Extend random selection to group collections
@@ -142,6 +185,14 @@ This document outlines the major epics and user stories for the You Hungry? app 
    - Optimize touch interactions and gestures
    - Create mobile-specific navigation patterns
    - Test across different screen sizes
+
+1a. **Enhanced Animations & Interactions (Future)**
+
+- Install and configure Framer Motion for animations
+- Implement smooth transitions and micro-interactions
+- Add loading animations and skeleton screens
+- Create gesture-based interactions for mobile
+- Optimize animations for performance
 
 2. **PWA Implementation**
 
@@ -177,6 +228,14 @@ This document outlines the major epics and user stories for the You Hungry? app 
    - Create notification history and management
    - **Implement GraphQL subscriptions for real-time notifications**
    - **Add GraphQL queries for notification history and preferences**
+
+2a. **Toast Notification System (Future)**
+
+- Install and configure React Hot Toast (Sonner)
+- Implement user feedback notifications
+- Add success, error, and info toast types
+- Create notification positioning and styling
+- Handle notification queuing and dismissal
 
 3. **Email Notifications**
    - Set up email notification system
@@ -232,6 +291,14 @@ This document outlines the major epics and user stories for the You Hungry? app 
    - Optimize API calls and caching
    - Add monitoring and alerting
 
+2a. **Error Boundaries & Graceful Error Handling (Future)**
+
+- Implement React Error Boundaries for component error handling
+- Create fallback UI components for error states
+- Add error reporting and logging
+- Implement graceful degradation for failed features
+- Add user-friendly error messages and recovery options
+
 3. **Testing & Quality Assurance**
    - Implement comprehensive unit testing
    - Add integration and E2E testing
@@ -250,6 +317,33 @@ This document outlines the major epics and user stories for the You Hungry? app 
    - Configure production environment variables
    - Implement CI/CD workflows
    - Set up monitoring and logging
+
+1a. **Pre-GraphQL Performance Benchmarking (Future)**
+
+- Establish baseline performance metrics for current REST API
+- Measure API response times for complex queries (dashboard data, restaurant search)
+- Record bundle size and loading performance metrics
+- Document current caching effectiveness and hit rates
+- Create performance monitoring dashboard for tracking
+- Set up automated performance testing in CI/CD pipeline
+
+1b. **GraphQL Integration (Future)**
+
+- Install and configure Apollo Server for GraphQL API
+- Set up Apollo Client for frontend GraphQL queries
+- Implement GraphQL schema for complex data fetching
+- Add GraphQL subscriptions for real-time features
+- Migrate complex REST endpoints to GraphQL
+- Set up GraphQL playground and documentation
+
+1c. **Post-GraphQL Performance Analysis (Future)**
+
+- Measure API response times after GraphQL implementation
+- Compare bundle size and loading performance vs baseline
+- Analyze caching effectiveness and query efficiency
+- Document network request reduction and data fetching optimization
+- Evaluate real-time feature performance and user experience
+- Create performance comparison report with objective metrics
 
 2. **SEO & Marketing**
 
