@@ -5,6 +5,7 @@ import {
   searchRestaurantsWithGooglePlaces,
   getPlaceDetails,
   searchRestaurantsByLocation,
+  searchRestaurantsByLocationConsistent,
 } from './google-places';
 
 export async function getRestaurantById(
@@ -142,7 +143,12 @@ export async function searchRestaurantsByCoordinates(
   radius: number = 5000
 ): Promise<Restaurant[]> {
   try {
-    const googleResults = await searchRestaurantsByLocation(lat, lng, radius);
+    // Use the consistent search function to ensure stable results across different radius values
+    const googleResults = await searchRestaurantsByLocationConsistent(
+      lat,
+      lng,
+      radius
+    );
 
     // Store new restaurants in database
     await Promise.all(

@@ -16,6 +16,7 @@ interface SearchFilters {
   minRating?: number;
   maxPrice?: number;
   minPrice?: number;
+  distance?: number;
 }
 
 export function RestaurantSearchForm({
@@ -91,7 +92,7 @@ export function RestaurantSearchForm({
           >
             Location (required)
           </label>
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             <AddressInput
               value={location}
               onChange={(value) => {
@@ -101,7 +102,7 @@ export function RestaurantSearchForm({
               onAddressSelect={handleAddressSelect}
               onValidationChange={handleAddressValidationChange}
               placeholder="Enter address or city..."
-              className="flex-1"
+              className="w-full sm:flex-1"
               required
               disabled={isLoading}
             />
@@ -110,6 +111,7 @@ export function RestaurantSearchForm({
               variant="outline"
               onClick={handleCurrentLocation}
               disabled={isLoading}
+              className="w-full sm:w-auto sm:flex-shrink-0 sm:whitespace-nowrap"
             >
               📍 Use Current Location
             </Button>
@@ -124,6 +126,30 @@ export function RestaurantSearchForm({
               ⚠ Address validation in progress...
             </p>
           )}
+        </div>
+
+        {/* Distance */}
+        <div>
+          <label
+            htmlFor="distance"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
+            Search Radius
+          </label>
+          <select
+            id="distance"
+            value={filters.distance || 10}
+            onChange={(e) =>
+              handleFilterChange('distance', parseInt(e.target.value))
+            }
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="1">1 mile</option>
+            <option value="5">5 miles</option>
+            <option value="10">10 miles</option>
+            <option value="25">25 miles</option>
+            <option value="50">50 miles</option>
+          </select>
         </div>
 
         {/* Search Query */}

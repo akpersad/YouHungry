@@ -17,6 +17,7 @@ interface SearchFilters {
   minRating?: number;
   maxPrice?: number;
   minPrice?: number;
+  distance?: number;
 }
 
 export function RestaurantSearchPage({
@@ -49,6 +50,7 @@ export function RestaurantSearchPage({
         ...(filters?.minRating && { minRating: filters.minRating.toString() }),
         ...(filters?.maxPrice && { maxPrice: filters.maxPrice.toString() }),
         ...(filters?.minPrice && { minPrice: filters.minPrice.toString() }),
+        ...(filters?.distance && { distance: filters.distance.toString() }),
       });
 
       const response = await fetch(`/api/restaurants/search?${params}`);

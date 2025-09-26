@@ -5,6 +5,7 @@ import {
   geocodeAddress,
   searchRestaurantsWithGooglePlaces,
 } from '@/lib/google-places';
+import { calculateDistance } from '@/lib/utils';
 
 export async function GET(request: NextRequest) {
   try {
@@ -18,12 +19,17 @@ export async function GET(request: NextRequest) {
     const minRating = searchParams.get('minRating');
     const maxPrice = searchParams.get('maxPrice');
     const minPrice = searchParams.get('minPrice');
+    const distance = searchParams.get('distance');
 
     // Handle coordinate-based search
     if (lat && lng) {
       const latitude = parseFloat(lat);
       const longitude = parseFloat(lng);
-      const searchRadius = radius ? parseInt(radius) : 5000;
+      // Convert distance from miles to meters (1 mile = 1609.34 meters)
+      const distanceInMiles = distance ? parseInt(distance) : 10;
+      const searchRadius = radius
+        ? parseInt(radius)
+        : Math.round(distanceInMiles * 1609.34);
 
       if (isNaN(latitude) || isNaN(longitude)) {
         return NextResponse.json(
@@ -38,10 +44,34 @@ export async function GET(request: NextRequest) {
         searchRadius
       );
 
+      // Calculate distances and sort by distance, then by rating
+      const restaurantsWithDistance = restaurants.map((restaurant) => {
+        const distance = calculateDistance(
+          latitude,
+          longitude,
+          restaurant.coordinates.lat,
+          restaurant.coordinates.lng
+        );
+        return {
+          ...restaurant,
+          distance,
+        };
+      });
+
+      // Sort by distance first, then by rating (descending)
+      const sortedRestaurants = restaurantsWithDistance.sort((a, b) => {
+        // First sort by distance
+        if (Math.abs(a.distance - b.distance) > 0.1) {
+          return a.distance - b.distance;
+        }
+        // If distances are very close, sort by rating
+        return b.rating - a.rating;
+      });
+
       return NextResponse.json({
         success: true,
-        restaurants,
-        count: restaurants.length,
+        restaurants: sortedRestaurants,
+        count: sortedRestaurants.length,
       });
     }
 
@@ -123,7 +153,11 @@ export async function GET(request: NextRequest) {
       if (minPrice) filters.minPrice = parseInt(minPrice);
 
       // Search restaurants by coordinates with filters
-      const searchRadius = radius ? parseInt(radius) : 5000;
+      // Convert distance from miles to meters (1 mile = 1609.34 meters)
+      const distanceInMiles = distance ? parseInt(distance) : 10;
+      const searchRadius = radius
+        ? parseInt(radius)
+        : Math.round(distanceInMiles * 1609.34);
 
       let restaurants;
       if (query) {
@@ -177,10 +211,34 @@ export async function GET(request: NextRequest) {
         return true;
       });
 
+      // Calculate distances and sort by distance, then by rating
+      const restaurantsWithDistance = filteredRestaurants.map((restaurant) => {
+        const distance = calculateDistance(
+          latitude,
+          longitude,
+          restaurant.coordinates.lat,
+          restaurant.coordinates.lng
+        );
+        return {
+          ...restaurant,
+          distance,
+        };
+      });
+
+      // Sort by distance first, then by rating (descending)
+      const sortedRestaurants = restaurantsWithDistance.sort((a, b) => {
+        // First sort by distance
+        if (Math.abs(a.distance - b.distance) > 0.1) {
+          return a.distance - b.distance;
+        }
+        // If distances are very close, sort by rating
+        return b.rating - a.rating;
+      });
+
       return NextResponse.json({
         success: true,
-        restaurants: filteredRestaurants,
-        count: filteredRestaurants.length,
+        restaurants: sortedRestaurants,
+        count: sortedRestaurants.length,
       });
     }
 

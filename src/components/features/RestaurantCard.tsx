@@ -59,6 +59,11 @@ export function RestaurantCard({
             <span className="flex items-center">
               💰 {formatPriceRange(restaurant.priceRange)}
             </span>
+            {restaurant.distance && (
+              <span className="flex items-center">
+                📍 {restaurant.distance.toFixed(1)} mi
+              </span>
+            )}
             {restaurant.timeToPickUp && (
               <span className="flex items-center">
                 ⏱️ {restaurant.timeToPickUp} min

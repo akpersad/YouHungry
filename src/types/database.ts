@@ -40,6 +40,7 @@ export interface Restaurant {
   hours?: {
     [key: string]: string;
   };
+  distance?: number; // miles from search location
   cachedAt: Date;
   lastUpdated: Date;
 }

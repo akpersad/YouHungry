@@ -221,7 +221,7 @@ export function AddressInput({
   }, []);
 
   return (
-    <div className="relative">
+    <div className={`relative ${className}`}>
       <Input
         ref={inputRef}
         type="text"
@@ -231,7 +231,7 @@ export function AddressInput({
         onBlur={handleBlur}
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
-        className={`${className} ${validationError ? 'border-red-500' : isValid ? 'border-green-500' : ''}`}
+        className={`w-full ${validationError ? 'border-red-500' : isValid ? 'border-green-500' : ''}`}
         required={required}
         disabled={disabled}
         autoComplete="off"

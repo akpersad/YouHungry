@@ -1,4 +1,6 @@
 import { Restaurant } from '@/types/database';
+import { calculateDistance } from './utils';
+import { connectToDatabase } from './db';
 
 // Google Places API types
 interface GooglePlaceResult {
@@ -300,6 +302,167 @@ export async function searchRestaurantsByLocation(
   } catch (error) {
     console.error('Google Places API nearby search error:', error);
     throw error;
+  }
+}
+
+// Search restaurants by location with consistent results across different radius values
+// This function uses intelligent caching and progressive search to minimize API costs
+export async function searchRestaurantsByLocationConsistent(
+  lat: number,
+  lng: number,
+  requestedRadius: number = 5000,
+  type: string = 'restaurant'
+): Promise<Restaurant[]> {
+  const requestedRadiusInMiles = requestedRadius / 1609.34; // Convert meters to miles
+
+  // Check if we have cached results for this location
+  const cachedResults = await getCachedRestaurantsForLocation(lat, lng);
+
+  if (cachedResults && cachedResults.length > 0) {
+    // Use cached results and filter by requested radius
+    const restaurantsWithDistance = cachedResults.map((restaurant) => {
+      const distance = calculateDistance(
+        lat,
+        lng,
+        restaurant.coordinates.lat,
+        restaurant.coordinates.lng
+      );
+      return {
+        ...restaurant,
+        distance,
+      };
+    });
+
+    const filteredRestaurants = restaurantsWithDistance.filter(
+      (restaurant) => restaurant.distance <= requestedRadiusInMiles
+    );
+
+    // Sort by distance first, then by rating (descending)
+    const sortedRestaurants = filteredRestaurants.sort((a, b) => {
+      if (Math.abs(a.distance - b.distance) > 0.1) {
+        return a.distance - b.distance;
+      }
+      return b.rating - a.rating;
+    });
+
+    return sortedRestaurants.map(({ distance, ...restaurant }) => restaurant);
+  }
+
+  // No cached results, fetch from Google Places API
+  // Use a reasonable default radius (10 miles) to balance cost and coverage
+  const defaultRadius = 16093; // 10 miles in meters
+  const searchRadius = Math.max(requestedRadius, defaultRadius);
+
+  const googleResults = await searchRestaurantsByLocation(
+    lat,
+    lng,
+    searchRadius,
+    type
+  );
+
+  // Cache the results for future use
+  await cacheRestaurantsForLocation(lat, lng, googleResults);
+
+  // Calculate distances and filter by requested radius
+  const restaurantsWithDistance = googleResults.map((restaurant) => {
+    const distance = calculateDistance(
+      lat,
+      lng,
+      restaurant.coordinates.lat,
+      restaurant.coordinates.lng
+    );
+    return {
+      ...restaurant,
+      distance,
+    };
+  });
+
+  const filteredRestaurants = restaurantsWithDistance.filter(
+    (restaurant) => restaurant.distance <= requestedRadiusInMiles
+  );
+
+  // Sort by distance first, then by rating (descending)
+  const sortedRestaurants = filteredRestaurants.sort((a, b) => {
+    if (Math.abs(a.distance - b.distance) > 0.1) {
+      return a.distance - b.distance;
+    }
+    return b.rating - a.rating;
+  });
+
+  return sortedRestaurants.map(({ distance, ...restaurant }) => restaurant);
+}
+
+// Cache restaurants for a specific location
+async function cacheRestaurantsForLocation(
+  lat: number,
+  lng: number,
+  restaurants: Restaurant[]
+): Promise<void> {
+  try {
+    const db = await connectToDatabase();
+    const locationKey = `${lat.toFixed(4)},${lng.toFixed(4)}`;
+
+    const cacheData = {
+      locationKey,
+      lat,
+      lng,
+      restaurants,
+      cachedAt: new Date(),
+      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
+    };
+
+    // Store in a cache collection
+    await db
+      .collection('location_cache')
+      .replaceOne({ locationKey }, cacheData, { upsert: true });
+
+    console.log(
+      `Cached ${restaurants.length} restaurants for location ${locationKey}`
+    );
+  } catch (error) {
+    console.error('Error caching restaurants:', error);
+  }
+}
+
+// Get cached restaurants for a location
+async function getCachedRestaurantsForLocation(
+  lat: number,
+  lng: number
+): Promise<Restaurant[] | null> {
+  try {
+    const db = await connectToDatabase();
+    const locationKey = `${lat.toFixed(4)},${lng.toFixed(4)}`;
+
+    const cacheEntry = await db.collection('location_cache').findOne({
+      locationKey,
+      expiresAt: { $gt: new Date() }, // Only return if not expired
+    });
+
+    if (cacheEntry && cacheEntry.restaurants) {
+      console.log(`Using cached results for location ${locationKey}`);
+      return cacheEntry.restaurants;
+    }
+
+    return null;
+  } catch (error) {
+    console.error('Error getting cached restaurants:', error);
+    return null;
+  }
+}
+
+// Clean up expired cache entries (call this periodically)
+export async function cleanupExpiredCache(): Promise<void> {
+  try {
+    const db = await connectToDatabase();
+    const result = await db.collection('location_cache').deleteMany({
+      expiresAt: { $lt: new Date() },
+    });
+
+    if (result.deletedCount > 0) {
+      console.log(`Cleaned up ${result.deletedCount} expired cache entries`);
+    }
+  } catch (error) {
+    console.error('Error cleaning up cache:', error);
   }
 }
 
