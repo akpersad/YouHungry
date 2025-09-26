@@ -2,77 +2,65 @@
 
 This document outlines the technical architecture, technology stack, and implementation strategy for the You Hungry? app.
 
-## 🏗️ Technology Stack
+## 🏗️ Current Technology Stack (Implemented)
 
 ### Frontend
 
 - **Framework**: Next.js 15 with App Router
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS with custom design system
-- **State Management**: React Context + Custom hooks + TanStack Query
-- **Form Management**: React Hook Form with Zod integration
+- **State Management**: React Context + Custom hooks
 - **UI Components**: Custom components with Tailwind
-- **Animations**: Framer Motion for smooth transitions and micro-interactions
-- **Drag & Drop**: @dnd-kit for restaurant ranking system
-- **Notifications**: React Hot Toast (Sonner) for user feedback
-- **PWA**: Service Workers, App Manifest, Offline capabilities
+- **PWA**: Service Workers, App Manifest, Offline capabilities (planned)
 
 ### Backend
 
 - **Runtime**: Node.js (Next.js API routes)
 - **Database**: MongoDB Atlas
 - **Authentication**: Clerk
-- **API Layer**: Hybrid REST + GraphQL architecture
-- **GraphQL**: Apollo Server with subscriptions for real-time features
-- **API Integration**: Google Places, Twilio, Google Address Validation
-- **Caching**: Redis (for API response caching) + GraphQL query caching
-- **File Storage**: Vercel Blob (for user uploads)
+- **API Layer**: REST architecture
+- **API Integration**: Google Places, Twilio, Google Address Validation (planned)
+- **File Storage**: Vercel Blob (for user uploads) (planned)
 
 ### Development & Deployment
 
 - **Hosting**: Vercel
-- **CI/CD**: GitHub Actions + Vercel
-- **Monitoring**: Vercel Analytics + Custom logging + Web Vitals
+- **CI/CD**: GitHub Actions + Vercel (planned)
+- **Monitoring**: Vercel Analytics + Custom logging (planned)
+- **Testing**: Jest, React Testing Library, Playwright (planned)
+- **Code Quality**: ESLint
+- **Error Handling**: React Error Boundaries (planned)
+
+## 🚀 Future Technology Stack (As App Grows)
+
+### Advanced API Layer
+
+- **GraphQL**: Apollo Server with subscriptions for real-time features
+- **Hybrid Architecture**: REST + GraphQL for optimal performance
+- **Caching**: Redis for API response caching + GraphQL query caching
+
+### Enhanced Frontend Features
+
+- **Form Management**: React Hook Form with Zod integration
+- **API State Management**: TanStack Query for advanced caching and background updates
+- **Animations**: Framer Motion for smooth transitions and micro-interactions
+- **Drag & Drop**: @dnd-kit for restaurant ranking system
+- **Notifications**: React Hot Toast (Sonner) for user feedback
+
+### Development & Performance
+
+- **Code Quality**: Husky + lint-staged for pre-commit hooks
+- **Performance Monitoring**: Next.js Bundle Analyzer + Web Vitals
+- **TypeScript**: Strict mode configuration
 - **Testing**: Jest, React Testing Library, Playwright
-- **Code Quality**: ESLint, Prettier, Husky + lint-staged
-- **Bundle Analysis**: Next.js Bundle Analyzer
+- **CI/CD**: GitHub Actions + Vercel automation
+
+### Advanced Features
+
+- **PWA**: Service Workers, App Manifest, Offline capabilities
+- **File Storage**: Vercel Blob for user uploads
+- **Real-time**: GraphQL subscriptions for group decision making
 - **Error Handling**: React Error Boundaries + Error monitoring
-
-## 🛠️ Enhanced Technology Stack
-
-### Form Management & Validation
-
-- **React Hook Form**: Industry-standard form management with minimal re-renders
-- **Zod Integration**: Type-safe validation with @hookform/resolvers
-- **Form DevTools**: Development debugging for form state
-
-### API State Management
-
-- **TanStack Query (React Query)**: Advanced caching, background updates, optimistic updates
-- **Stale-While-Revalidate**: Built-in support for your caching strategy
-- **Offline Support**: Essential for PWA capabilities
-- **GraphQL Integration**: Works seamlessly with Apollo Client
-
-### User Experience Enhancements
-
-- **Framer Motion**: Smooth animations and micro-interactions
-- **React Hot Toast (Sonner)**: Lightweight, accessible notifications
-- **@dnd-kit**: Modern drag-and-drop for restaurant ranking system
-- **Error Boundaries**: Graceful error handling and recovery
-
-### Development Experience
-
-- **Husky + lint-staged**: Pre-commit hooks for code quality
-- **Bundle Analyzer**: Performance monitoring and optimization
-- **TypeScript Strict Mode**: Enhanced type safety
-- **Web Vitals Monitoring**: Core performance metrics
-
-### Performance & Optimization
-
-- **Next.js Image Optimization**: Automatic image optimization for restaurant photos
-- **Code Splitting**: Automatic route-based code splitting
-- **Tree Shaking**: Eliminates unused code
-- **Service Worker**: Advanced caching strategies
 
 ## 🗄️ Database Schema
 
@@ -201,27 +189,22 @@ interface Friendship {
 }
 ```
 
-## 🔌 API Architecture
+## 🔌 Current API Architecture
 
-### Hybrid API Strategy
+### REST API Strategy
 
-The app uses a hybrid approach combining REST and GraphQL:
+The app currently uses a REST-only approach for simplicity and rapid development:
 
 #### **REST API Routes**
 
 - **Simple CRUD operations**: Collections, users, basic restaurant management
 - **Authentication endpoints**: Clerk integration and user management
-- **External API proxies**: Google Places, Twilio, address validation
-- **File uploads**: Restaurant photos and user avatars
+- **External API proxies**: Google Places, Twilio, address validation (planned)
+- **File uploads**: Restaurant photos and user avatars (planned)
 
-#### **GraphQL API**
+## 🔮 Future API Architecture (GraphQL Integration)
 
-- **Complex queries**: Restaurant discovery with filters and weights
-- **Real-time features**: Group decision updates and voting progress
-- **Flexible data fetching**: Dashboard data, decision history, analytics
-- **Mobile optimization**: Selective field fetching, reduced network requests
-
-#### **GraphQL Schema Structure**
+### GraphQL Schema Structure (Future Implementation)
 
 ```typescript
 type User {
@@ -319,13 +302,45 @@ type Decision {
 - `POST /api/decisions` - Start decision process
 - `POST /api/decisions/[id]/vote` - Submit vote
 
-#### GraphQL API Routes (Complex Operations)
+### Current REST API Routes
 
-##### GraphQL Endpoint
+##### Collections Routes (CRUD Operations)
+
+- `GET /api/collections` - Get user's collections
+- `POST /api/collections` - Create new collection
+- `PUT /api/collections/[id]` - Update collection
+- `DELETE /api/collections/[id]` - Delete collection
+
+##### Restaurants Routes (Basic Operations)
+
+- `GET /api/restaurants/search` - Search restaurants
+- `POST /api/restaurants` - Add restaurant to collection
+- `PUT /api/restaurants/[id]` - Update restaurant details
+- `DELETE /api/restaurants/[id]` - Remove restaurant from collection
+
+##### Groups Routes (CRUD Operations)
+
+- `GET /api/groups` - Get user's groups
+- `POST /api/groups` - Create group
+- `PUT /api/groups/[id]` - Update group
+- `DELETE /api/groups/[id]` - Delete group
+- `POST /api/groups/[id]/invite` - Invite user to group
+- `POST /api/groups/[id]/join` - Join group
+
+##### Decisions Routes (Simple Operations)
+
+- `GET /api/decisions` - Get user's decisions
+- `POST /api/decisions` - Start decision process
+- `POST /api/decisions/[id]/vote` - Submit vote
+- `GET /api/decisions/[id]` - Get decision details
+
+## 🔮 Future GraphQL API (Advanced Operations)
+
+### GraphQL Endpoint
 
 - `POST /api/graphql` - Main GraphQL endpoint with queries, mutations, and subscriptions
 
-##### Key GraphQL Operations
+### Key GraphQL Operations (Future Implementation)
 
 **Queries:**
 
@@ -471,7 +486,28 @@ subscription GroupActivity($groupId: ID!) {
 }
 ```
 
-## 🚀 Performance Optimization
+## 🚀 Current Performance Optimization
+
+### Basic Caching Strategy
+
+- **API Responses**: Simple caching for restaurant data
+- **User Data**: Basic React state management
+- **Database Queries**: Optimized MongoDB queries
+
+### Database Optimization
+
+- **Indexes**: Optimized for common queries
+- **Connection Pooling**: Efficient database connections
+- **Query Optimization**: Minimize database calls
+
+### Frontend Optimization
+
+- **Code Splitting**: Automatic Next.js route-based splitting
+- **Image Optimization**: Next.js Image component (when implemented)
+- **Bundle Optimization**: Tree shaking, minification
+- **TypeScript**: Compile-time optimizations
+
+## 🔮 Future Performance Optimization (Advanced Features)
 
 ### Enhanced Caching Strategy with TanStack Query
 
@@ -498,18 +534,11 @@ subscription GroupActivity($groupId: ID!) {
 - **Error Retry**: Automatic retry with exponential backoff
 - **Cache Invalidation**: Smart cache management for data consistency
 
-### Database Optimization
+### Advanced Frontend Optimization
 
-- **Indexes**: Optimized for common queries
-- **Connection Pooling**: Efficient database connections
-- **Query Optimization**: Minimize database calls
-
-### Frontend Optimization
-
-- **Code Splitting**: Lazy load components
-- **Image Optimization**: Next.js Image component
-- **Bundle Optimization**: Tree shaking, minification
 - **PWA Caching**: Service worker caching strategy
+- **Advanced Code Splitting**: Component-level lazy loading
+- **Bundle Analysis**: Performance monitoring and optimization
 
 ## 🔒 Security Considerations
 
@@ -634,54 +663,67 @@ subscription GroupActivity($groupId: ID!) {
 - **Internationalization**: Prepare for multi-language support
 - **Advanced Features**: Architecture supports future enhancements
 
-## 📋 Implementation Priority Roadmap
+## 📋 Current Implementation Status
 
-### Phase 1: Foundation (Week 1)
+### ✅ Completed (Phase 1)
 
-**Essential for core functionality**
+**Core foundation implemented**
+
+- [x] **Next.js 15 + TypeScript**: Framework and language setup
+- [x] **Tailwind CSS**: Styling system with custom design
+- [x] **MongoDB + Clerk**: Database and authentication
+- [x] **Basic REST APIs**: Collections, restaurants, users
+- [x] **Component Library**: UI components with Tailwind
+
+### 🚧 In Progress (Phase 2)
+
+**Core features development**
+
+- [ ] **Restaurant Search**: Google Places API integration
+- [ ] **Collection Management**: CRUD operations
+- [ ] **User Dashboard**: Personal collections view
+- [ ] **Basic Decision Making**: Personal restaurant selection
+
+## 🔮 Future Implementation Roadmap
+
+### Phase 3: Enhanced User Experience (When Core Features Complete)
+
+**Advanced user interaction improvements**
 
 - [ ] **React Hook Form + Zod**: Form management and validation
 - [ ] **TanStack Query**: API state management and caching
-- [ ] **Husky + lint-staged**: Code quality enforcement
-- [ ] **TypeScript Strict Mode**: Enhanced type safety
-
-### Phase 2: User Experience (Week 2-3)
-
-**Core user interaction improvements**
-
 - [ ] **Framer Motion**: Smooth animations and transitions
 - [ ] **React Hot Toast**: User feedback and notifications
 - [ ] **@dnd-kit**: Restaurant ranking drag-and-drop system
 - [ ] **Error Boundaries**: Graceful error handling
 
-### Phase 3: Polish & Performance (Week 4+)
+### Phase 4: Advanced Features (When App Grows)
 
 **Production readiness and optimization**
 
+- [ ] **GraphQL Integration**: Apollo Server + Client setup
+- [ ] **Real-time Features**: GraphQL subscriptions
+- [ ] **PWA Capabilities**: Service workers and offline support
 - [ ] **Bundle Analyzer**: Performance monitoring
 - [ ] **Web Vitals**: Core performance metrics
-- [ ] **Next.js Image Optimization**: Restaurant photo optimization
-- [ ] **Advanced Service Worker**: Enhanced PWA capabilities
+- [ ] **Husky + lint-staged**: Code quality enforcement
 
-### Package Installation Commands
+### Future Package Installation Commands
 
 ```bash
-# Phase 1: Foundation
+# Phase 3: Enhanced UX
 npm install react-hook-form @hookform/resolvers @tanstack/react-query @tanstack/react-query-devtools
-npm install --save-dev husky lint-staged
-
-# Phase 2: User Experience
 npm install framer-motion sonner @dnd-kit/core @dnd-kit/sortable @dnd-kit/utilities
 
-# Phase 3: Performance & Monitoring
-npm install --save-dev @next/bundle-analyzer
+# Phase 4: Advanced Features
+npm install apollo-server-micro apollo-server-core graphql
+npm install --save-dev husky lint-staged @next/bundle-analyzer
 ```
 
-### Integration Benefits
+### Implementation Strategy
 
-- **Zero Learning Curve**: All technologies are industry standards
-- **Perfect Fit**: Each solves specific problems in your architecture
-- **Mobile-First**: Optimized for mobile and PWA experience
-- **Performance Focused**: Enhances speed and user experience
-- **Future-Proof**: Will work seamlessly with iOS conversion
+- **Current Focus**: Build core features with simple, proven technologies
+- **Future Enhancement**: Add advanced technologies when they solve specific problems
+- **Mobile-First**: All technologies optimized for mobile and PWA experience
 - **Type-Safe**: Full TypeScript integration throughout
+- **Performance**: Add optimization tools when performance becomes a concern

@@ -2,6 +2,23 @@
 
 This document provides detailed implementation guidelines, coding standards, and best practices for the You Hungry? app development.
 
+## 🎯 Implementation Strategy
+
+**Current Phase**: Focus on core features with simple, proven technologies
+**Future Phase**: Add advanced technologies when they solve specific problems
+
+### Current Technologies (Phase 1-2)
+
+- Next.js 15 + TypeScript + Tailwind CSS
+- MongoDB + Clerk authentication
+- Basic REST APIs
+- Simple React state management
+
+### Future Technologies (Phase 3+)
+
+- TanStack Query, React Hook Form, Framer Motion, @dnd-kit, GraphQL
+- See technical-architecture.md for detailed future technology roadmap
+
 ## 🎯 Core Principles
 
 ### 1. Mobile-First Development
@@ -249,7 +266,7 @@ export async function GET(request: NextRequest) {
 
 ## 🎣 Custom Hooks
 
-### Enhanced API State Management with TanStack Query
+### Enhanced API State Management with TanStack Query (Future Implementation)
 
 ```typescript
 // hooks/useRestaurants.ts
@@ -406,7 +423,7 @@ export function useSubmitVote() {
 - **Cache Management**: Leverage Apollo Client's normalized cache
 - **Network Status**: Use `notifyOnNetworkStatusChange` for better loading states
 
-### Form Management with React Hook Form + Zod
+### Form Management with React Hook Form + Zod (Future Implementation)
 
 ```typescript
 // hooks/useRestaurantForm.ts
@@ -540,7 +557,7 @@ export function useRestaurants({
 }
 ```
 
-### Drag & Drop Implementation with @dnd-kit
+### Drag & Drop Implementation with @dnd-kit (Future Implementation)
 
 ```typescript
 // components/RestaurantRanking.tsx

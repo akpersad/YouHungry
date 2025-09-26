@@ -14,30 +14,23 @@ This document tracks all planned items that are not yet started, organized by ca
 - [ ] Design and implement database schema
 - [ ] Integrate Clerk for user authentication
 
-### Enhanced Technology Stack Setup
+### Core Feature Development
 
-- [ ] Install and configure React Hook Form with Zod integration
-- [ ] Set up TanStack Query for API state management
-- [ ] Install and configure Husky + lint-staged for code quality
-- [ ] Enable TypeScript strict mode configuration
-- [ ] Install Framer Motion for animations and transitions
-- [ ] Set up React Hot Toast (Sonner) for notifications
-- [ ] Install @dnd-kit for drag-and-drop functionality
-- [ ] Implement Error Boundaries for graceful error handling
-- [ ] Configure Next.js Bundle Analyzer for performance monitoring
-- [ ] Set up Web Vitals monitoring for performance tracking
+- [ ] Implement restaurant search with Google Places API
+- [ ] Build collection CRUD operations
+- [ ] Create user dashboard with personal collections
+- [ ] Implement basic decision making algorithm
+- [ ] Add restaurant management functionality
 
-### Core Features
+### Advanced Features (Future)
 
-- [ ] Create personal collections CRUD operations with React Hook Form
-- [ ] Implement restaurant search with Google Places API and TanStack Query
-- [ ] Build restaurant management system with optimistic updates
-- [ ] Create personal decision making algorithm
 - [ ] Implement drag-and-drop restaurant ranking system with @dnd-kit
 - [ ] Set up GraphQL server with Apollo Server
 - [ ] Implement GraphQL schema for restaurants and collections
 - [ ] Create GraphQL resolvers for complex queries
-- [ ] Add GraphQL client with Apollo Client and TanStack Query integration
+- [ ] Add GraphQL client with Apollo Client
+- [ ] Implement React Hook Form with Zod integration
+- [ ] Set up TanStack Query for API state management
 
 ## 📋 Medium Priority (Upcoming Sprints)
 

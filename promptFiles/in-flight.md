@@ -15,8 +15,9 @@ This document tracks all items currently being worked on, organized by priority 
 
 ### High Priority (Next Sprint)
 
-- [ ] **API Integration Planning** - Planning Google Places, Twilio, and other API integrations
-- [ ] **Epic 2: Personal Collections Management** - Start implementing collection CRUD operations
+- [ ] **Core Feature Development** - Building restaurant search, collections, and basic decision making
+- [ ] **API Integration** - Google Places API integration for restaurant search
+- [ ] **Collection Management** - CRUD operations for personal collections
 
 ## ⏳ In Progress
 
