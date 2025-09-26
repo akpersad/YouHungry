@@ -23,32 +23,30 @@ These technologies will be implemented when they solve specific problems in each
 ### Stories:
 
 1. **Project Setup & Configuration**
-
    - Set up Next.js 15 with TypeScript
    - Configure Tailwind CSS with custom design system
    - Set up ESLint, Prettier, and development tools
    - Configure environment variables and secrets management
 
 2. **Database & Data Layer**
-
    - Set up MongoDB Atlas cluster
    - Design and implement database schema
    - Create data models and validation schemas
    - Set up database connection and utilities
 
 3. **Authentication System**
-
    - Integrate Clerk for user authentication
    - Implement registration and login flows
    - Set up user profile management
    - Configure protected routes and middleware
+   - **Unit test authentication components (SignInButton, SignOutButton, UserProfile)**
 
 4. **Basic UI Framework**
-
    - Create reusable component library
    - Implement responsive layout system
    - Set up navigation and routing
    - Establish design system implementation
+   - **Unit test all UI components (Button, Card, Input, Modal, etc.)**
 
 5. **Enhanced Development Tools (Future)**
    - Install and configure Husky + lint-staged for code quality
@@ -63,41 +61,39 @@ These technologies will be implemented when they solve specific problems in each
 ### Stories:
 
 1. **Collection CRUD Operations**
-
    - Create personal collections with custom naming
    - View and manage existing collections
    - Edit collection names and metadata
    - Delete collections with confirmation
+   - **Unit test collection CRUD operations and API endpoints**
 
 2. **Restaurant Search & Discovery**
-
    - Integrate Google Places API for restaurant search
    - Implement location-based restaurant discovery
    - Add restaurant details and metadata storage
    - Create restaurant search UI components
+   - **Unit test restaurant search functionality and API integration**
    - **Set up GraphQL schema for complex restaurant queries**
    - **Implement GraphQL resolvers for restaurant search with filters**
 
 3. **Enhanced Form Management (Future)**
-
    - Install and configure React Hook Form with Zod integration
    - Implement form validation and error handling
    - Create reusable form components
    - Add form state management and persistence
 
 4. **Restaurant Management**
-
    - Add restaurants to collections
    - Manage restaurant custom fields (Price Range, Time to Pick Up)
    - Remove restaurants from collections
    - View restaurant details and history
 
 5. **Personal Decision Making**
-
    - Implement random selection algorithm
    - Add 30-day rolling weight system
    - Create decision history tracking
    - Build decision result UI
+   - **Unit test decision algorithms and weight calculations**
    - **Implement GraphQL queries for decision data with weights**
    - **Add GraphQL mutations for personal decision submission**
 
@@ -114,14 +110,12 @@ These technologies will be implemented when they solve specific problems in each
 ### Stories:
 
 1. **Friend Management**
-
    - Add friends by email/username search
    - Send and accept friend requests
    - Manage friend list and relationships
    - Remove friends and handle edge cases
 
 2. **Group Creation & Management**
-
    - Create groups with custom names and descriptions
    - Invite friends to join groups
    - Manage group membership and roles
@@ -142,7 +136,6 @@ These technologies will be implemented when they solve specific problems in each
 ### Stories:
 
 1. **Tiered Choice System**
-
    - Implement ranking system for group members
    - Create voting interface and logic
    - Handle tie-breaking scenarios
@@ -159,7 +152,6 @@ These technologies will be implemented when they solve specific problems in each
 - Handle touch-friendly interactions for mobile
 
 2. **Random Selection for Groups**
-
    - Extend random selection to group collections
    - Implement group-specific weighting
    - Create group decision UI components
@@ -180,7 +172,6 @@ These technologies will be implemented when they solve specific problems in each
 ### Stories:
 
 1. **Mobile UI Optimization**
-
    - Implement mobile-first responsive design
    - Optimize touch interactions and gestures
    - Create mobile-specific navigation patterns
@@ -195,7 +186,6 @@ These technologies will be implemented when they solve specific problems in each
 - Optimize animations for performance
 
 2. **PWA Implementation**
-
    - Set up service workers for offline functionality
    - Implement app manifest and install prompts
    - Create offline data caching strategy
@@ -214,14 +204,12 @@ These technologies will be implemented when they solve specific problems in each
 ### Stories:
 
 1. **SMS Integration**
-
    - Integrate Twilio for SMS notifications
    - Create SMS opt-in/opt-out system
    - Implement group-specific notification preferences
    - Handle SMS delivery and error cases
 
 2. **In-App Notifications**
-
    - Create notification system for group decisions
    - Implement real-time updates for group activities
    - Add notification preferences and settings
@@ -250,14 +238,12 @@ These technologies will be implemented when they solve specific problems in each
 ### Stories:
 
 1. **Decision History**
-
    - Create comprehensive decision tracking
    - Implement history viewing and filtering
    - Add manual decision entry capability
    - Create history search and analytics
 
 2. **Weighting System**
-
    - Implement 30-day rolling weight algorithm
    - Create weight adjustment and reset logic
    - Add weight visualization and debugging
@@ -278,14 +264,12 @@ These technologies will be implemented when they solve specific problems in each
 ### Stories:
 
 1. **UI/UX Polish**
-
    - Refine animations and transitions
    - Improve accessibility compliance
    - Optimize color contrast and readability
    - Add micro-interactions and feedback
 
 2. **Performance & Reliability**
-
    - Implement comprehensive error handling
    - Add loading states and skeleton screens
    - Optimize API calls and caching
@@ -299,11 +283,12 @@ These technologies will be implemented when they solve specific problems in each
 - Implement graceful degradation for failed features
 - Add user-friendly error messages and recovery options
 
-3. **Testing & Quality Assurance**
-   - Implement comprehensive unit testing
-   - Add integration and E2E testing
+3. **Advanced Testing & Quality Assurance**
+   - Implement integration testing (full user workflows)
+   - Add E2E testing for critical user journeys
    - Create accessibility testing suite
    - Add performance testing and monitoring
+   - Optimize test coverage and remove redundant tests
 
 ## 🚀 Epic 9: Deployment & Launch
 
@@ -312,7 +297,6 @@ These technologies will be implemented when they solve specific problems in each
 ### Stories:
 
 1. **Production Deployment**
-
    - Set up Vercel deployment pipeline
    - Configure production environment variables
    - Implement CI/CD workflows
@@ -346,7 +330,6 @@ These technologies will be implemented when they solve specific problems in each
 - Create performance comparison report with objective metrics
 
 2. **SEO & Marketing**
-
    - Optimize for search engines
    - Create landing page and marketing content
    - Implement analytics and tracking
@@ -365,14 +348,12 @@ These technologies will be implemented when they solve specific problems in each
 ### Stories:
 
 1. **iOS App Preparation**
-
    - Document architecture for iOS conversion
    - Create component mapping and conversion plan
    - Identify platform-specific considerations
    - Plan state management migration strategy
 
 2. **Advanced Features**
-
    - Plan advanced search and filtering
    - Design recommendation system
    - Plan social features and sharing

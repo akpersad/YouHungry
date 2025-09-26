@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 // User validation schemas
 export const userProfileSchema = z.object({
@@ -23,7 +23,7 @@ export const userProfileSchema = z.object({
 export const collectionSchema = z.object({
   name: z.string().min(1).max(100),
   description: z.string().max(500).optional(),
-  type: z.enum(["personal", "group"]),
+  type: z.enum(['personal', 'group']),
 });
 
 // Restaurant validation schemas
@@ -33,7 +33,7 @@ export const restaurantSearchSchema = z.object({
 });
 
 export const restaurantUpdateSchema = z.object({
-  priceRange: z.enum(["$", "$$", "$$$", "$$$$"]).optional(),
+  priceRange: z.enum(['$', '$$', '$$$', '$$$$']).optional(),
   timeToPickUp: z.number().min(1).max(300).optional(), // 1-300 minutes
 });
 
@@ -50,7 +50,7 @@ export const groupInviteSchema = z.object({
 // Decision validation schemas
 export const decisionSchema = z.object({
   collectionId: z.string().min(1),
-  method: z.enum(["tiered", "random"]),
+  method: z.enum(['tiered', 'random']),
   deadline: z.date().optional(),
   visitDate: z.date(),
 });
@@ -74,10 +74,10 @@ export function validateData<T>(schema: z.ZodSchema<T>, data: unknown) {
       return {
         success: false,
         error: error.issues
-          .map((e) => `${e.path.join(".")}: ${e.message}`)
-          .join(", "),
+          .map((e) => `${e.path.join('.')}: ${e.message}`)
+          .join(', '),
       };
     }
-    return { success: false, error: "Validation failed" };
+    return { success: false, error: 'Validation failed' };
   }
 }

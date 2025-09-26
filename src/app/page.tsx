@@ -1,12 +1,12 @@
-import { MainLayout } from "@/components/layout/MainLayout";
+import { MainLayout } from '@/components/layout/MainLayout';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/Card";
-import { Button } from "@/components/ui/Button";
+} from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
 
 export default function Home() {
   return (
@@ -16,13 +16,13 @@ export default function Home() {
         <div className="text-center py-12">
           <h1
             className="text-4xl md:text-6xl font-bold mb-6"
-            style={{ color: "var(--color-text)" }}
+            style={{ color: 'var(--color-text)' }}
           >
             You Hungry?
           </h1>
           <p
             className="text-xl mb-8 mx-auto"
-            style={{ color: "var(--color-text-light)" }}
+            style={{ color: 'var(--color-text-light)' }}
           >
             Stop the endless &ldquo;where should we eat?&rdquo; debate. Let our
             smart decision engine help you and your friends choose the perfect
@@ -53,7 +53,7 @@ export default function Home() {
             <CardContent>
               <p
                 className="text-sm"
-                style={{ color: "var(--color-text-muted)" }}
+                style={{ color: 'var(--color-text-muted)' }}
               >
                 Create custom collections for different occasions, cuisines, or
                 groups of friends.
@@ -71,7 +71,7 @@ export default function Home() {
             <CardContent>
               <p
                 className="text-sm"
-                style={{ color: "var(--color-text-muted)" }}
+                style={{ color: 'var(--color-text-muted)' }}
               >
                 No more endless group chats. Get everyone&apos;s input and reach
                 a decision quickly.
@@ -90,7 +90,7 @@ export default function Home() {
             <CardContent>
               <p
                 className="text-sm"
-                style={{ color: "var(--color-text-muted)" }}
+                style={{ color: 'var(--color-text-muted)' }}
               >
                 Recently visited restaurants get lower priority, keeping your
                 choices fresh and exciting.
@@ -103,17 +103,17 @@ export default function Home() {
         <div
           className="text-center py-12 rounded-xl border"
           style={{
-            backgroundColor: "var(--color-surface)",
-            borderColor: "var(--color-border)",
+            backgroundColor: 'var(--color-surface)',
+            borderColor: 'var(--color-border)',
           }}
         >
           <h2
             className="text-2xl font-bold mb-4"
-            style={{ color: "var(--color-text)" }}
+            style={{ color: 'var(--color-text)' }}
           >
             Ready to stop the endless debate?
           </h2>
-          <p className="mb-6" style={{ color: "var(--color-text-light)" }}>
+          <p className="mb-6" style={{ color: 'var(--color-text-light)' }}>
             Join thousands of people who have already simplified their dining
             decisions.
           </p>

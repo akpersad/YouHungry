@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { ReactNode, useEffect } from "react";
-import { Button } from "./Button";
+import { ReactNode, useEffect } from 'react';
+import { Button } from './Button';
 
 interface ModalProps {
   isOpen: boolean;
@@ -17,26 +17,26 @@ export function Modal({
   onClose,
   title,
   children,
-  className = "",
+  className = '',
   showCloseButton = true,
 }: ModalProps) {
   // Handle escape key
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
+      if (e.key === 'Escape') {
         onClose();
       }
     };
 
     if (isOpen) {
-      document.addEventListener("keydown", handleEscape);
+      document.addEventListener('keydown', handleEscape);
       // Prevent body scroll when modal is open
-      document.body.style.overflow = "hidden";
+      document.body.style.overflow = 'hidden';
     }
 
     return () => {
-      document.removeEventListener("keydown", handleEscape);
-      document.body.style.overflow = "unset";
+      document.removeEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'unset';
     };
   }, [isOpen, onClose]);
 
@@ -48,27 +48,27 @@ export function Modal({
         className={`modal-content ${className}`}
         onClick={(e) => e.stopPropagation()}
         style={{
-          backgroundColor: "var(--color-surface)",
-          borderRadius: "var(--radius-xl)",
-          boxShadow: "var(--shadow-xl)",
-          maxWidth: "90vw",
-          maxHeight: "90vh",
-          overflow: "auto",
+          backgroundColor: 'var(--color-surface)',
+          borderRadius: 'var(--radius-xl)',
+          boxShadow: 'var(--shadow-xl)',
+          maxWidth: '90vw',
+          maxHeight: '90vh',
+          overflow: 'auto',
           zIndex: 1001,
-          padding: "1.5rem",
-          position: "relative",
+          padding: '1.5rem',
+          position: 'relative',
         }}
       >
         {/* Header */}
         {(title || showCloseButton) && (
           <div
             className="flex items-center justify-between mb-4"
-            style={{ borderBottom: "1px solid var(--color-border)" }}
+            style={{ borderBottom: '1px solid var(--color-border)' }}
           >
             {title && (
               <h2
                 className="text-xl font-semibold"
-                style={{ color: "var(--color-text)" }}
+                style={{ color: 'var(--color-text)' }}
               >
                 {title}
               </h2>
@@ -80,14 +80,14 @@ export function Modal({
                 onClick={onClose}
                 className="ml-auto"
                 style={{
-                  border: "1px solid var(--color-border)",
-                  borderRadius: "50%",
-                  width: "2rem",
-                  height: "2rem",
-                  padding: "0",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
+                  border: '1px solid var(--color-border)',
+                  borderRadius: '50%',
+                  width: '2rem',
+                  height: '2rem',
+                  padding: '0',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                 }}
               >
                 ×
@@ -97,7 +97,7 @@ export function Modal({
         )}
 
         {/* Content */}
-        <div style={{ color: "var(--color-text)" }}>{children}</div>
+        <div style={{ color: 'var(--color-text)' }}>{children}</div>
       </div>
     </div>
   );

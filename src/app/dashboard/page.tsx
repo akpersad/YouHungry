@@ -1,13 +1,13 @@
-import { MainLayout } from "@/components/layout/MainLayout";
-import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import { MainLayout } from '@/components/layout/MainLayout';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/Card";
-import { Button } from "@/components/ui/Button";
+} from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
 
 export default function DashboardPage() {
   return (

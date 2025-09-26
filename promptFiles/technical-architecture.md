@@ -105,7 +105,7 @@ interface Restaurant {
   };
   cuisine: string;
   rating: number;
-  priceRange?: "$" | "$$" | "$$$" | "$$$$";
+  priceRange?: '$' | '$$' | '$$$' | '$$$$';
   timeToPickUp?: number; // minutes
   photos?: string[];
   phoneNumber?: string;
@@ -125,7 +125,7 @@ interface Collection {
   _id: ObjectId;
   name: string;
   description?: string;
-  type: "personal" | "group";
+  type: 'personal' | 'group';
   ownerId: ObjectId; // User ID for personal, Group ID for group
   restaurantIds: ObjectId[];
   createdAt: Date;
@@ -153,12 +153,12 @@ interface Group {
 ```typescript
 interface Decision {
   _id: ObjectId;
-  type: "personal" | "group";
+  type: 'personal' | 'group';
   collectionId: ObjectId;
   groupId?: ObjectId;
   participants: ObjectId[]; // User IDs
-  method: "tiered" | "random";
-  status: "active" | "completed" | "expired";
+  method: 'tiered' | 'random';
+  status: 'active' | 'completed' | 'expired';
   deadline: Date;
   visitDate: Date;
   result?: {
@@ -183,7 +183,7 @@ interface Friendship {
   _id: ObjectId;
   requesterId: ObjectId;
   addresseeId: ObjectId;
-  status: "pending" | "accepted" | "declined";
+  status: 'pending' | 'accepted' | 'declined';
   createdAt: Date;
   updatedAt: Date;
 }

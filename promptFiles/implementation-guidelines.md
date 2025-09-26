@@ -146,7 +146,7 @@ export { Button };
 
 ```typescript
 // lib/db.ts
-import { MongoClient, Db } from "mongodb";
+import { MongoClient, Db } from 'mongodb';
 
 const client = new MongoClient(process.env.MONGODB_URI!);
 let db: Db;
@@ -184,15 +184,15 @@ export interface Restaurant {
 
 ```typescript
 // lib/restaurants.ts
-import { connectToDatabase } from "./db";
-import { Restaurant } from "@/types/database";
+import { connectToDatabase } from './db';
+import { Restaurant } from '@/types/database';
 
 export async function getRestaurantById(
   id: string
 ): Promise<Restaurant | null> {
   const db = await connectToDatabase();
   const restaurant = await db
-    .collection("restaurants")
+    .collection('restaurants')
     .findOne({ _id: new ObjectId(id) });
   return restaurant as Restaurant | null;
 }
@@ -203,11 +203,11 @@ export async function searchRestaurants(
 ): Promise<Restaurant[]> {
   const db = await connectToDatabase();
   const restaurants = await db
-    .collection("restaurants")
+    .collection('restaurants')
     .find({
       $or: [
-        { name: { $regex: query, $options: "i" } },
-        { cuisine: { $regex: query, $options: "i" } },
+        { name: { $regex: query, $options: 'i' } },
+        { cuisine: { $regex: query, $options: 'i' } },
       ],
     })
     .limit(20)
@@ -223,21 +223,21 @@ export async function searchRestaurants(
 
 ```typescript
 // app/api/restaurants/search/route.ts
-import { NextRequest, NextResponse } from "next/server";
-import { searchRestaurants } from "@/lib/restaurants";
-import { validateSearchParams } from "@/lib/validation";
+import { NextRequest, NextResponse } from 'next/server';
+import { searchRestaurants } from '@/lib/restaurants';
+import { validateSearchParams } from '@/lib/validation';
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const query = searchParams.get("q");
-    const location = searchParams.get("location");
+    const query = searchParams.get('q');
+    const location = searchParams.get('location');
 
     // Validate parameters
     const validation = validateSearchParams({ query, location });
     if (!validation.success) {
       return NextResponse.json(
-        { error: "Invalid parameters", details: validation.error },
+        { error: 'Invalid parameters', details: validation.error },
         { status: 400 }
       );
     }
@@ -247,9 +247,9 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ restaurants });
   } catch (error) {
-    console.error("Search error:", error);
+    console.error('Search error:', error);
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: 'Internal server error' },
       { status: 500 }
     );
   }
@@ -270,15 +270,15 @@ export async function GET(request: NextRequest) {
 
 ```typescript
 // hooks/useRestaurants.ts
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 
 // Restaurant search with TanStack Query
 export function useRestaurantSearch(filters: RestaurantFilters) {
   return useQuery({
-    queryKey: ["restaurants", "search", filters],
+    queryKey: ['restaurants', 'search', filters],
     queryFn: () => searchRestaurants(filters),
     staleTime: 5 * 60 * 1000, // 5 minutes
     cacheTime: 30 * 24 * 60 * 60 * 1000, // 30 days
@@ -293,13 +293,13 @@ export function useSubmitVote() {
     mutationFn: submitVote,
     onMutate: async (newVote) => {
       // Cancel outgoing refetches
-      await queryClient.cancelQueries({ queryKey: ["decisions"] });
+      await queryClient.cancelQueries({ queryKey: ['decisions'] });
 
       // Snapshot previous value
-      const previousDecisions = queryClient.getQueryData(["decisions"]);
+      const previousDecisions = queryClient.getQueryData(['decisions']);
 
       // Optimistically update
-      queryClient.setQueryData(["decisions"], (old: any) => ({
+      queryClient.setQueryData(['decisions'], (old: any) => ({
         ...old,
         votes: [...old.votes, newVote],
       }));
@@ -308,11 +308,11 @@ export function useSubmitVote() {
     },
     onError: (err, newVote, context) => {
       // Rollback on error
-      queryClient.setQueryData(["decisions"], context?.previousDecisions);
+      queryClient.setQueryData(['decisions'], context?.previousDecisions);
     },
     onSettled: () => {
       // Refetch after error or success
-      queryClient.invalidateQueries({ queryKey: ["decisions"] });
+      queryClient.invalidateQueries({ queryKey: ['decisions'] });
     },
   });
 }
@@ -322,19 +322,19 @@ export function useSubmitVote() {
 
 ```typescript
 // hooks/useGraphQL.ts
-import { useQuery, useMutation, useSubscription } from "@apollo/client";
-import { useQuery as useTanStackQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useSubscription } from '@apollo/client';
+import { useQuery as useTanStackQuery } from '@tanstack/react-query';
 import {
   GET_DASHBOARD_DATA,
   SEARCH_RESTAURANTS,
   SUBMIT_VOTE,
-} from "@/graphql/queries";
+} from '@/graphql/queries';
 
 // Dashboard data hook
 export function useDashboardData(userId: string) {
   const { data, loading, error } = useQuery(GET_DASHBOARD_DATA, {
     variables: { userId },
-    errorPolicy: "all",
+    errorPolicy: 'all',
     notifyOnNetworkStatusChange: true,
   });
 
@@ -350,7 +350,7 @@ export function useDashboardData(userId: string) {
 export function useRestaurantSearch(filters: RestaurantFilters) {
   const { data, loading, error, fetchMore } = useQuery(SEARCH_RESTAURANTS, {
     variables: { filters },
-    errorPolicy: "all",
+    errorPolicy: 'all',
   });
 
   return {
@@ -370,7 +370,7 @@ export function useRestaurantSearch(filters: RestaurantFilters) {
 export function useDecisionUpdates(decisionId: string) {
   const { data, loading, error } = useSubscription(DECISION_UPDATED, {
     variables: { decisionId },
-    errorPolicy: "all",
+    errorPolicy: 'all',
   });
 
   return {
@@ -383,7 +383,7 @@ export function useDecisionUpdates(decisionId: string) {
 // Vote submission hook
 export function useSubmitVote() {
   const [submitVote, { loading, error }] = useMutation(SUBMIT_VOTE, {
-    errorPolicy: "all",
+    errorPolicy: 'all',
   });
 
   const handleSubmitVote = async (decisionId: string, rankings: string[]) => {
@@ -394,7 +394,7 @@ export function useSubmitVote() {
           submitVote: {
             success: true,
             vote: {
-              user: { name: "You" },
+              user: { name: 'You' },
               rankings,
             },
           },
@@ -402,7 +402,7 @@ export function useSubmitVote() {
       });
       return result.data?.submitVote;
     } catch (err) {
-      console.error("Vote submission error:", err);
+      console.error('Vote submission error:', err);
       throw err;
     }
   };
@@ -427,17 +427,17 @@ export function useSubmitVote() {
 
 ```typescript
 // hooks/useRestaurantForm.ts
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { toast } from "sonner";
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { toast } from 'sonner';
 
 const restaurantFormSchema = z.object({
-  name: z.string().min(1, "Restaurant name is required"),
-  location: z.string().min(1, "Location is required"),
-  priceRange: z.enum(["$", "$$", "$$$", "$$$$"]).optional(),
+  name: z.string().min(1, 'Restaurant name is required'),
+  location: z.string().min(1, 'Location is required'),
+  priceRange: z.enum(['$', '$$', '$$$', '$$$$']).optional(),
   timeToPickUp: z.number().min(1).max(120).optional(),
-  collectionIds: z.array(z.string()).min(1, "Select at least one collection"),
+  collectionIds: z.array(z.string()).min(1, 'Select at least one collection'),
 });
 
 type RestaurantFormData = z.infer<typeof restaurantFormSchema>;
@@ -453,10 +453,10 @@ export function useRestaurantForm() {
   const onSubmit = async (data: RestaurantFormData) => {
     try {
       await addRestaurantToCollections(data);
-      toast.success("Restaurant added successfully!");
+      toast.success('Restaurant added successfully!');
       form.reset();
     } catch (error) {
-      toast.error("Failed to add restaurant. Please try again.");
+      toast.error('Failed to add restaurant. Please try again.');
     }
   };
 
@@ -470,29 +470,29 @@ export function useRestaurantForm() {
 
 // Collection creation form
 const collectionFormSchema = z.object({
-  name: z.string().min(1).max(50, "Name must be 50 characters or less"),
+  name: z.string().min(1).max(50, 'Name must be 50 characters or less'),
   description: z
     .string()
-    .max(500, "Description must be 500 characters or less")
+    .max(500, 'Description must be 500 characters or less')
     .optional(),
-  type: z.enum(["personal", "group"]),
+  type: z.enum(['personal', 'group']),
 });
 
 export function useCollectionForm() {
   const form = useForm<z.infer<typeof collectionFormSchema>>({
     resolver: zodResolver(collectionFormSchema),
     defaultValues: {
-      type: "personal",
+      type: 'personal',
     },
   });
 
   const onSubmit = async (data: z.infer<typeof collectionFormSchema>) => {
     try {
       await createCollection(data);
-      toast.success("Collection created successfully!");
+      toast.success('Collection created successfully!');
       form.reset();
     } catch (error) {
-      toast.error("Failed to create collection. Please try again.");
+      toast.error('Failed to create collection. Please try again.');
     }
   };
 
@@ -508,8 +508,8 @@ export function useCollectionForm() {
 
 ```typescript
 // hooks/useRestaurants.ts - DEPRECATED: Use TanStack Query hooks above
-import { useState, useEffect } from "react";
-import { Restaurant } from "@/types/database";
+import { useState, useEffect } from 'react';
+import { Restaurant } from '@/types/database';
 
 interface UseRestaurantsOptions {
   query?: string;
@@ -537,14 +537,14 @@ export function useRestaurants({
         const response = await fetch(
           `/api/restaurants/search?q=${encodeURIComponent(
             query
-          )}&location=${encodeURIComponent(location || "")}`
+          )}&location=${encodeURIComponent(location || '')}`
         );
-        if (!response.ok) throw new Error("Failed to fetch restaurants");
+        if (!response.ok) throw new Error('Failed to fetch restaurants');
 
         const data = await response.json();
         setRestaurants(data.restaurants);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "An error occurred");
+        setError(err instanceof Error ? err.message : 'An error occurred');
       } finally {
         setLoading(false);
       }
@@ -728,33 +728,33 @@ export function SkeletonCard() {
 
 ```typescript
 // lib/notifications.ts
-import { toast } from "sonner";
+import { toast } from 'sonner';
 
 export const notifications = {
   success: (message: string) => {
     toast.success(message, {
       duration: 4000,
-      position: "top-center",
+      position: 'top-center',
     });
   },
 
   error: (message: string) => {
     toast.error(message, {
       duration: 6000,
-      position: "top-center",
+      position: 'top-center',
     });
   },
 
   info: (message: string) => {
     toast.info(message, {
       duration: 4000,
-      position: "top-center",
+      position: 'top-center',
     });
   },
 
   loading: (message: string) => {
     return toast.loading(message, {
-      position: "top-center",
+      position: 'top-center',
     });
   },
 
@@ -766,7 +766,7 @@ export const notifications = {
 // Usage examples
 export function useDecisionNotifications() {
   const handleVoteSubmitted = () => {
-    notifications.success("Your vote has been submitted!");
+    notifications.success('Your vote has been submitted!');
   };
 
   const handleDecisionComplete = (restaurant: Restaurant) => {
@@ -801,17 +801,17 @@ export function useDecisionNotifications() {
 
 ```typescript
 // app/api/graphql/route.ts
-import { ApolloServer } from "@apollo/server";
-import { startServerAndCreateNextHandler } from "@as-integrations/next";
-import { typeDefs } from "@/graphql/schema";
-import { resolvers } from "@/graphql/resolvers";
-import { authContext } from "@/lib/auth-context";
+import { ApolloServer } from '@apollo/server';
+import { startServerAndCreateNextHandler } from '@as-integrations/next';
+import { typeDefs } from '@/graphql/schema';
+import { resolvers } from '@/graphql/resolvers';
+import { authContext } from '@/lib/auth-context';
 
 const server = new ApolloServer({
   typeDefs,
   resolvers,
   context: authContext,
-  introspection: process.env.NODE_ENV === "development",
+  introspection: process.env.NODE_ENV === 'development',
 });
 
 export const handler = startServerAndCreateNextHandler(server, {
@@ -825,11 +825,11 @@ export const handler = startServerAndCreateNextHandler(server, {
 
 ```typescript
 // lib/apollo-client.ts
-import { ApolloClient, InMemoryCache, createHttpLink } from "@apollo/client";
-import { setContext } from "@apollo/client/link/context";
+import { ApolloClient, InMemoryCache, createHttpLink } from '@apollo/client';
+import { setContext } from '@apollo/client/link/context';
 
 const httpLink = createHttpLink({
-  uri: "/api/graphql",
+  uri: '/api/graphql',
 });
 
 const authLink = setContext((_, { headers }) => {
@@ -837,7 +837,7 @@ const authLink = setContext((_, { headers }) => {
   return {
     headers: {
       ...headers,
-      authorization: token ? `Bearer ${token}` : "",
+      authorization: token ? `Bearer ${token}` : '',
     },
   };
 });
@@ -857,10 +857,10 @@ export const apolloClient = new ApolloClient({
   }),
   defaultOptions: {
     watchQuery: {
-      errorPolicy: "all",
+      errorPolicy: 'all',
     },
     query: {
-      errorPolicy: "all",
+      errorPolicy: 'all',
     },
   },
 });
@@ -882,12 +882,12 @@ export const apolloClient = new ApolloClient({
 ```typescript
 // Use design system classes
 const buttonClasses = cn(
-  "btn-base", // Base button styles from design system
-  "btn-primary", // Primary variant
-  "btn-md", // Medium size
-  "hover:btn-primary-hover", // Hover state
-  "focus:btn-primary-focus", // Focus state
-  "disabled:btn-primary-disabled" // Disabled state
+  'btn-base', // Base button styles from design system
+  'btn-primary', // Primary variant
+  'btn-md', // Medium size
+  'hover:btn-primary-hover', // Hover state
+  'focus:btn-primary-focus', // Focus state
+  'disabled:btn-primary-disabled' // Disabled state
 );
 ```
 
@@ -927,10 +927,10 @@ const buttonClasses = cn(
 ```typescript
 // Mobile-first responsive classes
 const containerClasses = cn(
-  "w-full", // Mobile: full width
-  "md:w-1/2", // Tablet: half width
-  "lg:w-1/3", // Desktop: third width
-  "xl:w-1/4" // Large desktop: quarter width
+  'w-full', // Mobile: full width
+  'md:w-1/2', // Tablet: half width
+  'lg:w-1/3', // Desktop: third width
+  'xl:w-1/4' // Large desktop: quarter width
 );
 ```
 
@@ -1052,9 +1052,13 @@ function RestaurantErrorFallback({
 ```typescript
 // lib/api-error-handler.ts
 export class APIError extends Error {
-  constructor(message: string, public status: number, public code?: string) {
+  constructor(
+    message: string,
+    public status: number,
+    public code?: string
+  ) {
     super(message);
-    this.name = "APIError";
+    this.name = 'APIError';
   }
 }
 
@@ -1062,28 +1066,28 @@ export function handleAPIError(error: unknown) {
   if (error instanceof APIError) {
     switch (error.status) {
       case 400:
-        toast.error("Invalid request. Please check your input.");
+        toast.error('Invalid request. Please check your input.');
         break;
       case 401:
-        toast.error("Please sign in to continue.");
+        toast.error('Please sign in to continue.');
         break;
       case 403:
         toast.error("You don't have permission to perform this action.");
         break;
       case 404:
-        toast.error("The requested resource was not found.");
+        toast.error('The requested resource was not found.');
         break;
       case 429:
-        toast.error("Too many requests. Please try again later.");
+        toast.error('Too many requests. Please try again later.');
         break;
       case 500:
-        toast.error("Server error. Please try again later.");
+        toast.error('Server error. Please try again later.');
         break;
       default:
-        toast.error("An unexpected error occurred.");
+        toast.error('An unexpected error occurred.');
     }
   } else {
-    toast.error("Network error. Please check your connection.");
+    toast.error('Network error. Please check your connection.');
   }
 }
 
@@ -1146,13 +1150,13 @@ describe("Button", () => {
 
 ```typescript
 // app/api/__tests__/restaurants/search.test.ts
-import { GET } from "../search/route";
-import { NextRequest } from "next/server";
+import { GET } from '../search/route';
+import { NextRequest } from 'next/server';
 
-describe("/api/restaurants/search", () => {
-  it("returns restaurants for valid query", async () => {
+describe('/api/restaurants/search', () => {
+  it('returns restaurants for valid query', async () => {
     const request = new NextRequest(
-      "http://localhost:3000/api/restaurants/search?q=pizza"
+      'http://localhost:3000/api/restaurants/search?q=pizza'
     );
     const response = await GET(request);
     const data = await response.json();
@@ -1162,9 +1166,9 @@ describe("/api/restaurants/search", () => {
     expect(Array.isArray(data.restaurants)).toBe(true);
   });
 
-  it("returns error for missing query", async () => {
+  it('returns error for missing query', async () => {
     const request = new NextRequest(
-      "http://localhost:3000/api/restaurants/search"
+      'http://localhost:3000/api/restaurants/search'
     );
     const response = await GET(request);
     const data = await response.json();
@@ -1181,21 +1185,21 @@ describe("/api/restaurants/search", () => {
 
 ```typescript
 // public/sw.js
-const CACHE_NAME = "you-hungry-v1";
+const CACHE_NAME = 'you-hungry-v1';
 const urlsToCache = [
-  "/",
-  "/static/js/bundle.js",
-  "/static/css/main.css",
-  "/manifest.json",
+  '/',
+  '/static/js/bundle.js',
+  '/static/css/main.css',
+  '/manifest.json',
 ];
 
-self.addEventListener("install", (event) => {
+self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => cache.addAll(urlsToCache))
   );
 });
 
-self.addEventListener("fetch", (event) => {
+self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(event.request).then((response) => {
       if (response) {
@@ -1239,7 +1243,7 @@ self.addEventListener("fetch", (event) => {
 
 ```typescript
 // lib/validation.ts
-import { z } from "zod";
+import { z } from 'zod';
 
 export const searchParamsSchema = z.object({
   query: z.string().min(1).max(100),
@@ -1260,15 +1264,15 @@ export function validateSearchParams(data: unknown) {
 
 ```typescript
 // middleware.ts
-import { authMiddleware } from "@clerk/nextjs";
+import { authMiddleware } from '@clerk/nextjs';
 
 export default authMiddleware({
-  publicRoutes: ["/", "/api/restaurants/search"],
-  ignoredRoutes: ["/api/webhooks/clerk"],
+  publicRoutes: ['/', '/api/restaurants/search'],
+  ignoredRoutes: ['/api/webhooks/clerk'],
 });
 
 export const config = {
-  matcher: ["/((?!.+\\.[\\w]+$|_next).*)", "/", "/(api|trpc)(.*)"],
+  matcher: ['/((?!.+\\.[\\w]+$|_next).*)', '/', '/(api|trpc)(.*)'],
 };
 ```
 
@@ -1295,16 +1299,16 @@ function App() {
 
 ```typescript
 // lib/cache.ts
-import { unstable_cache } from "next/cache";
+import { unstable_cache } from 'next/cache';
 
 export const getCachedRestaurants = unstable_cache(
   async (query: string) => {
     // Expensive database query
     return await searchRestaurants(query);
   },
-  ["restaurants"],
+  ['restaurants'],
   {
-    tags: ["restaurants"],
+    tags: ['restaurants'],
     revalidate: 3600, // 1 hour
   }
 );
@@ -1325,13 +1329,13 @@ export const getCachedRestaurants = unstable_cache(
  */
 interface ButtonProps {
   variant?:
-    | "primary"
-    | "secondary"
-    | "accent"
-    | "warm"
-    | "outline"
-    | "outline-accent";
-  size?: "sm" | "md" | "lg";
+    | 'primary'
+    | 'secondary'
+    | 'accent'
+    | 'warm'
+    | 'outline'
+    | 'outline-accent';
+  size?: 'sm' | 'md' | 'lg';
   isLoading?: boolean;
   children: React.ReactNode;
 }
@@ -1380,14 +1384,14 @@ TWILIO_PHONE_NUMBER=+1...
 
 ```typescript
 // next.config.ts
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   experimental: {
     appDir: true,
   },
   images: {
-    domains: ["maps.googleapis.com"],
+    domains: ['maps.googleapis.com'],
   },
   env: {
     CUSTOM_KEY: process.env.CUSTOM_KEY,

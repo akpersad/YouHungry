@@ -1,20 +1,20 @@
-"use client";
+'use client';
 
-import { SignOutButton as ClerkSignOutButton } from "@clerk/nextjs";
-import { Button } from "@/components/ui/Button";
+import { SignOutButton as ClerkSignOutButton } from '@clerk/nextjs';
+import { Button } from '@/components/ui/Button';
 
 interface SignOutButtonProps {
   children?: React.ReactNode;
   className?: string;
-  variant?: "primary" | "secondary" | "outline";
-  size?: "sm" | "md" | "lg";
+  variant?: 'primary' | 'secondary' | 'outline';
+  size?: 'sm' | 'md' | 'lg';
 }
 
 export function SignOutButton({
-  children = "Sign Out",
+  children = 'Sign Out',
   className,
-  variant = "outline",
-  size = "md",
+  variant = 'outline',
+  size = 'md',
 }: SignOutButtonProps) {
   return (
     <ClerkSignOutButton>

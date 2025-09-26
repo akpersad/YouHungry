@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { Modal } from "@/components/ui/Modal";
+import { useState } from 'react';
+import { Modal } from '@/components/ui/Modal';
 
 export default function DesignSystemPOC() {
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -11,76 +11,76 @@ export default function DesignSystemPOC() {
 
   const sampleRestaurants = [
     {
-      id: "1",
-      name: "The Artisan Table",
-      photo: "/api/placeholder/300/200",
-      price: "$$",
-      rating: "4.8",
-      distance: "0.3 mi",
-      tags: ["Italian", "Romantic", "Outdoor Seating"],
+      id: '1',
+      name: 'The Artisan Table',
+      photo: '/api/placeholder/300/200',
+      price: '$$',
+      rating: '4.8',
+      distance: '0.3 mi',
+      tags: ['Italian', 'Romantic', 'Outdoor Seating'],
     },
     {
-      id: "2",
-      name: "Sushi Zen",
-      photo: "/api/placeholder/300/200",
-      price: "$$$",
-      rating: "4.9",
-      distance: "0.7 mi",
-      tags: ["Japanese", "Fresh", "Omakase"],
+      id: '2',
+      name: 'Sushi Zen',
+      photo: '/api/placeholder/300/200',
+      price: '$$$',
+      rating: '4.9',
+      distance: '0.7 mi',
+      tags: ['Japanese', 'Fresh', 'Omakase'],
     },
     {
-      id: "3",
-      name: "Burger & Brews",
-      photo: "/api/placeholder/300/200",
-      price: "$",
-      rating: "4.5",
-      distance: "0.2 mi",
-      tags: ["American", "Casual", "Craft Beer"],
+      id: '3',
+      name: 'Burger & Brews',
+      photo: '/api/placeholder/300/200',
+      price: '$',
+      rating: '4.5',
+      distance: '0.2 mi',
+      tags: ['American', 'Casual', 'Craft Beer'],
     },
     {
-      id: "4",
-      name: "Mediterranean Breeze",
-      photo: "/api/placeholder/300/200",
-      price: "$$",
-      rating: "4.7",
-      distance: "0.5 mi",
-      tags: ["Mediterranean", "Healthy", "Vegetarian"],
+      id: '4',
+      name: 'Mediterranean Breeze',
+      photo: '/api/placeholder/300/200',
+      price: '$$',
+      rating: '4.7',
+      distance: '0.5 mi',
+      tags: ['Mediterranean', 'Healthy', 'Vegetarian'],
     },
   ];
 
   // Refined color system: Sophisticated monochrome with infrared accent
   const colors = {
     // Strategic accent colors - Infrared
-    accentPrimary: "#ff3366", // Vibrant infrared - primary actions
-    accentPrimaryLight: "#ff6699", // Light infrared - hover states
-    accentPrimaryDark: "#cc1144", // Dark infrared - pressed states
-    accentPrimaryMuted: "#ff4477", // Muted infrared - subtle highlights
+    accentPrimary: '#ff3366', // Vibrant infrared - primary actions
+    accentPrimaryLight: '#ff6699', // Light infrared - hover states
+    accentPrimaryDark: '#cc1144', // Dark infrared - pressed states
+    accentPrimaryMuted: '#ff4477', // Muted infrared - subtle highlights
 
     // Light mode - Shades of White & Gray
-    bgPrimary: "#fafafa", // Main background - off-white
-    bgSecondary: "#ffffff", // Card surfaces - pure white
-    bgTertiary: "#f5f5f5", // Secondary backgrounds - light gray
-    bgQuaternary: "#e5e5e5", // Borders, dividers - medium gray
-    bgQuinary: "#d1d1d1", // Stronger borders - dark gray
-    textPrimary: "#1a1a1a", // Primary text - high contrast
-    textSecondary: "#4a4a4a", // Secondary text - body text
-    textTertiary: "#8a8a8a", // Tertiary text - muted
-    textInverse: "#ffffff", // Text on dark backgrounds
+    bgPrimary: '#fafafa', // Main background - off-white
+    bgSecondary: '#ffffff', // Card surfaces - pure white
+    bgTertiary: '#f5f5f5', // Secondary backgrounds - light gray
+    bgQuaternary: '#e5e5e5', // Borders, dividers - medium gray
+    bgQuinary: '#d1d1d1', // Stronger borders - dark gray
+    textPrimary: '#1a1a1a', // Primary text - high contrast
+    textSecondary: '#4a4a4a', // Secondary text - body text
+    textTertiary: '#8a8a8a', // Tertiary text - muted
+    textInverse: '#ffffff', // Text on dark backgrounds
 
     // Dark mode - Shades of Black & Gray
-    bgPrimaryDark: "#000000", // Deepest background - pure black
-    bgSecondaryDark: "#1a1a1a", // Primary dark background - charcoal
-    bgTertiaryDark: "#2d2d2d", // Card surfaces - dark gray
-    bgQuaternaryDark: "#404040", // Secondary surfaces - medium dark gray
-    bgQuinaryDark: "#666666", // Borders, dividers - light dark gray
-    textPrimaryDark: "#ffffff", // Primary text - high contrast
-    textSecondaryDark: "#d1d1d1", // Secondary text - body text
-    textTertiaryDark: "#8a8a8a", // Tertiary text - muted
-    textInverseDark: "#1a1a1a", // Text on light backgrounds
+    bgPrimaryDark: '#000000', // Deepest background - pure black
+    bgSecondaryDark: '#1a1a1a', // Primary dark background - charcoal
+    bgTertiaryDark: '#2d2d2d', // Card surfaces - dark gray
+    bgQuaternaryDark: '#404040', // Secondary surfaces - medium dark gray
+    bgQuinaryDark: '#666666', // Borders, dividers - light dark gray
+    textPrimaryDark: '#ffffff', // Primary text - high contrast
+    textSecondaryDark: '#d1d1d1', // Secondary text - body text
+    textTertiaryDark: '#8a8a8a', // Tertiary text - muted
+    textInverseDark: '#1a1a1a', // Text on light backgrounds
   };
 
   const handleDragStart = (e: React.DragEvent, restaurantId: string) => {
-    e.dataTransfer.setData("text/plain", restaurantId);
+    e.dataTransfer.setData('text/plain', restaurantId);
   };
 
   const handleDragOver = (e: React.DragEvent, slotIndex: number) => {
@@ -94,7 +94,7 @@ export default function DesignSystemPOC() {
 
   const handleDrop = (e: React.DragEvent, slotIndex: number) => {
     e.preventDefault();
-    const restaurantId = e.dataTransfer.getData("text/plain");
+    const restaurantId = e.dataTransfer.getData('text/plain');
     const newSelected = [...selectedRestaurants];
     newSelected[slotIndex] = restaurantId;
     setSelectedRestaurants(newSelected);
@@ -103,7 +103,7 @@ export default function DesignSystemPOC() {
 
   const removeFromRanking = (slotIndex: number) => {
     const newSelected = [...selectedRestaurants];
-    newSelected[slotIndex] = "";
+    newSelected[slotIndex] = '';
     setSelectedRestaurants(newSelected);
   };
 
@@ -147,23 +147,23 @@ export default function DesignSystemPOC() {
               color: currentColors.textPrimary,
               border: `1px solid ${currentColors.bgQuaternary}`,
               boxShadow: isDarkMode
-                ? "0 2px 8px rgba(0,0,0,0.4)"
-                : "0 2px 8px rgba(0,0,0,0.08)",
+                ? '0 2px 8px rgba(0,0,0,0.4)'
+                : '0 2px 8px rgba(0,0,0,0.08)',
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.boxShadow = isDarkMode
-                ? "0 4px 16px rgba(0,0,0,0.5)"
-                : "0 4px 16px rgba(0,0,0,0.12)";
+                ? '0 4px 16px rgba(0,0,0,0.5)'
+                : '0 4px 16px rgba(0,0,0,0.12)';
               e.currentTarget.style.borderColor = currentColors.accentPrimary;
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.boxShadow = isDarkMode
-                ? "0 2px 8px rgba(0,0,0,0.4)"
-                : "0 2px 8px rgba(0,0,0,0.08)";
+                ? '0 2px 8px rgba(0,0,0,0.4)'
+                : '0 2px 8px rgba(0,0,0,0.08)';
               e.currentTarget.style.borderColor = currentColors.bgQuaternary;
             }}
           >
-            {isDarkMode ? "☀️ Light" : "🌙 Dark"}
+            {isDarkMode ? '☀️ Light' : '🌙 Dark'}
           </button>
         </div>
       </header>
@@ -184,8 +184,8 @@ export default function DesignSystemPOC() {
             style={{
               backgroundColor: currentColors.bgSecondary,
               boxShadow: isDarkMode
-                ? "0 4px 16px rgba(0,0,0,0.5)"
-                : "0 4px 16px rgba(0,0,0,0.12)",
+                ? '0 4px 16px rgba(0,0,0,0.5)'
+                : '0 4px 16px rgba(0,0,0,0.12)',
               borderTop: `1px solid ${currentColors.bgQuaternary}`,
             }}
           >
@@ -195,8 +195,8 @@ export default function DesignSystemPOC() {
                 style={{
                   backgroundColor: currentColors.accentPrimary,
                   boxShadow: isDarkMode
-                    ? "0 2px 8px rgba(0,0,0,0.4)"
-                    : "0 2px 8px rgba(0,0,0,0.08)",
+                    ? '0 2px 8px rgba(0,0,0,0.4)'
+                    : '0 2px 8px rgba(0,0,0,0.08)',
                 }}
               >
                 <span className="text-xl">🏠</span>
@@ -206,18 +206,18 @@ export default function DesignSystemPOC() {
                 className="flex flex-col items-center p-3 rounded-xl transition-all duration-200 hover:bg-gray-100 hover:shadow-sm"
                 style={{
                   color: currentColors.textSecondary,
-                  backgroundColor: "transparent",
+                  backgroundColor: 'transparent',
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.backgroundColor =
                     currentColors.bgTertiary;
                   e.currentTarget.style.boxShadow = isDarkMode
-                    ? "0 2px 8px rgba(0,0,0,0.4)"
-                    : "0 2px 8px rgba(0,0,0,0.08)";
+                    ? '0 2px 8px rgba(0,0,0,0.4)'
+                    : '0 2px 8px rgba(0,0,0,0.08)';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = "transparent";
-                  e.currentTarget.style.boxShadow = "none";
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.boxShadow = 'none';
                 }}
               >
                 <span className="text-xl">📚</span>
@@ -227,18 +227,18 @@ export default function DesignSystemPOC() {
                 className="flex flex-col items-center p-3 rounded-xl transition-all duration-200 hover:bg-gray-100 hover:shadow-sm"
                 style={{
                   color: currentColors.textSecondary,
-                  backgroundColor: "transparent",
+                  backgroundColor: 'transparent',
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.backgroundColor =
                     currentColors.bgTertiary;
                   e.currentTarget.style.boxShadow = isDarkMode
-                    ? "0 2px 8px rgba(0,0,0,0.4)"
-                    : "0 2px 8px rgba(0,0,0,0.08)";
+                    ? '0 2px 8px rgba(0,0,0,0.4)'
+                    : '0 2px 8px rgba(0,0,0,0.08)';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = "transparent";
-                  e.currentTarget.style.boxShadow = "none";
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.boxShadow = 'none';
                 }}
               >
                 <span className="text-xl">👤</span>
@@ -252,18 +252,18 @@ export default function DesignSystemPOC() {
               style={{
                 backgroundColor: currentColors.accentPrimary,
                 boxShadow: isDarkMode
-                  ? "0 4px 16px rgba(0,0,0,0.5)"
-                  : "0 4px 16px rgba(0,0,0,0.12)",
+                  ? '0 4px 16px rgba(0,0,0,0.5)'
+                  : '0 4px 16px rgba(0,0,0,0.12)',
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.boxShadow = isDarkMode
-                  ? "0 8px 32px rgba(0,0,0,0.6)"
-                  : "0 8px 32px rgba(0,0,0,0.16)";
+                  ? '0 8px 32px rgba(0,0,0,0.6)'
+                  : '0 8px 32px rgba(0,0,0,0.16)';
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.boxShadow = isDarkMode
-                  ? "0 4px 16px rgba(0,0,0,0.5)"
-                  : "0 4px 16px rgba(0,0,0,0.12)";
+                  ? '0 4px 16px rgba(0,0,0,0.5)'
+                  : '0 4px 16px rgba(0,0,0,0.12)';
               }}
             >
               <span className="text-white text-xl">+</span>
@@ -290,21 +290,21 @@ export default function DesignSystemPOC() {
                 style={{
                   backgroundColor: currentColors.bgSecondary,
                   boxShadow: isDarkMode
-                    ? "0 2px 8px rgba(0,0,0,0.4)"
-                    : "0 2px 8px rgba(0,0,0,0.08)",
+                    ? '0 2px 8px rgba(0,0,0,0.4)'
+                    : '0 2px 8px rgba(0,0,0,0.08)',
                   border: `1px solid ${currentColors.bgQuaternary}`,
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.boxShadow = isDarkMode
-                    ? "0 4px 16px rgba(0,0,0,0.5)"
-                    : "0 4px 16px rgba(0,0,0,0.12)";
+                    ? '0 4px 16px rgba(0,0,0,0.5)'
+                    : '0 4px 16px rgba(0,0,0,0.12)';
                   e.currentTarget.style.borderColor =
                     currentColors.accentPrimary;
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.boxShadow = isDarkMode
-                    ? "0 2px 8px rgba(0,0,0,0.4)"
-                    : "0 2px 8px rgba(0,0,0,0.08)";
+                    ? '0 2px 8px rgba(0,0,0,0.4)'
+                    : '0 2px 8px rgba(0,0,0,0.08)';
                   e.currentTarget.style.borderColor =
                     currentColors.bgQuaternary;
                 }}
@@ -397,22 +397,22 @@ export default function DesignSystemPOC() {
               style={{
                 backgroundColor: currentColors.accentPrimary,
                 boxShadow: isDarkMode
-                  ? "0 2px 8px rgba(0,0,0,0.4)"
-                  : "0 2px 8px rgba(0,0,0,0.08)",
+                  ? '0 2px 8px rgba(0,0,0,0.4)'
+                  : '0 2px 8px rgba(0,0,0,0.08)',
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.backgroundColor =
                   currentColors.accentPrimaryLight;
                 e.currentTarget.style.boxShadow = isDarkMode
-                  ? "0 4px 16px rgba(0,0,0,0.5)"
-                  : "0 4px 16px rgba(0,0,0,0.12)";
+                  ? '0 4px 16px rgba(0,0,0,0.5)'
+                  : '0 4px 16px rgba(0,0,0,0.12)';
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.backgroundColor =
                   currentColors.accentPrimary;
                 e.currentTarget.style.boxShadow = isDarkMode
-                  ? "0 2px 8px rgba(0,0,0,0.4)"
-                  : "0 2px 8px rgba(0,0,0,0.08)";
+                  ? '0 2px 8px rgba(0,0,0,0.4)'
+                  : '0 2px 8px rgba(0,0,0,0.08)';
               }}
             >
               Open Modal Demo
@@ -447,8 +447,8 @@ export default function DesignSystemPOC() {
                   style={{
                     backgroundColor: currentColors.accentPrimary,
                     boxShadow: isDarkMode
-                      ? "0 2px 8px rgba(0,0,0,0.4)"
-                      : "0 2px 8px rgba(0,0,0,0.08)",
+                      ? '0 2px 8px rgba(0,0,0,0.4)'
+                      : '0 2px 8px rgba(0,0,0,0.08)',
                   }}
                 >
                   Close Modal
@@ -461,8 +461,8 @@ export default function DesignSystemPOC() {
                     color: currentColors.textPrimary,
                     border: `1px solid ${currentColors.bgQuaternary}`,
                     boxShadow: isDarkMode
-                      ? "0 2px 8px rgba(0,0,0,0.4)"
-                      : "0 2px 8px rgba(0,0,0,0.08)",
+                      ? '0 2px 8px rgba(0,0,0,0.4)'
+                      : '0 2px 8px rgba(0,0,0,0.08)',
                   }}
                 >
                   Cancel
@@ -489,38 +489,38 @@ export default function DesignSystemPOC() {
                 style={{
                   backgroundColor: currentColors.accentPrimary,
                   boxShadow: isDarkMode
-                    ? "0 2px 8px rgba(0,0,0,0.4)"
-                    : "0 2px 8px rgba(0,0,0,0.08)",
+                    ? '0 2px 8px rgba(0,0,0,0.4)'
+                    : '0 2px 8px rgba(0,0,0,0.08)',
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.backgroundColor =
                     currentColors.accentPrimaryLight;
                   e.currentTarget.style.boxShadow = isDarkMode
-                    ? "0 4px 16px rgba(0,0,0,0.5)"
-                    : "0 4px 16px rgba(0,0,0,0.12)";
+                    ? '0 4px 16px rgba(0,0,0,0.5)'
+                    : '0 4px 16px rgba(0,0,0,0.12)';
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.backgroundColor =
                     currentColors.accentPrimary;
                   e.currentTarget.style.boxShadow = isDarkMode
-                    ? "0 2px 8px rgba(0,0,0,0.4)"
-                    : "0 2px 8px rgba(0,0,0,0.08)";
+                    ? '0 2px 8px rgba(0,0,0,0.4)'
+                    : '0 2px 8px rgba(0,0,0,0.08)';
                 }}
                 onMouseDown={(e) => {
                   e.currentTarget.style.backgroundColor =
                     currentColors.accentPrimaryDark;
-                  e.currentTarget.style.transform = "translateY(0)";
+                  e.currentTarget.style.transform = 'translateY(0)';
                   e.currentTarget.style.boxShadow = isDarkMode
-                    ? "inset 0 1px 2px rgba(0,0,0,0.2)"
-                    : "inset 0 1px 2px rgba(0,0,0,0.1)";
+                    ? 'inset 0 1px 2px rgba(0,0,0,0.2)'
+                    : 'inset 0 1px 2px rgba(0,0,0,0.1)';
                 }}
                 onMouseUp={(e) => {
                   e.currentTarget.style.backgroundColor =
                     currentColors.accentPrimaryLight;
-                  e.currentTarget.style.transform = "translateY(-1px)";
+                  e.currentTarget.style.transform = 'translateY(-1px)';
                   e.currentTarget.style.boxShadow = isDarkMode
-                    ? "0 4px 16px rgba(0,0,0,0.5)"
-                    : "0 4px 16px rgba(0,0,0,0.12)";
+                    ? '0 4px 16px rgba(0,0,0,0.5)'
+                    : '0 4px 16px rgba(0,0,0,0.12)';
                 }}
               >
                 Primary Button
@@ -532,8 +532,8 @@ export default function DesignSystemPOC() {
                   color: currentColors.textPrimary,
                   border: `1px solid ${currentColors.bgQuaternary}`,
                   boxShadow: isDarkMode
-                    ? "0 2px 8px rgba(0,0,0,0.4)"
-                    : "0 2px 8px rgba(0,0,0,0.08)",
+                    ? '0 2px 8px rgba(0,0,0,0.4)'
+                    : '0 2px 8px rgba(0,0,0,0.08)',
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.backgroundColor =
@@ -541,8 +541,8 @@ export default function DesignSystemPOC() {
                   e.currentTarget.style.borderColor =
                     currentColors.accentPrimary;
                   e.currentTarget.style.boxShadow = isDarkMode
-                    ? "0 4px 16px rgba(0,0,0,0.5)"
-                    : "0 4px 16px rgba(0,0,0,0.12)";
+                    ? '0 4px 16px rgba(0,0,0,0.5)'
+                    : '0 4px 16px rgba(0,0,0,0.12)';
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.backgroundColor =
@@ -550,8 +550,8 @@ export default function DesignSystemPOC() {
                   e.currentTarget.style.borderColor =
                     currentColors.bgQuaternary;
                   e.currentTarget.style.boxShadow = isDarkMode
-                    ? "0 2px 8px rgba(0,0,0,0.4)"
-                    : "0 2px 8px rgba(0,0,0,0.08)";
+                    ? '0 2px 8px rgba(0,0,0,0.4)'
+                    : '0 2px 8px rgba(0,0,0,0.08)';
                 }}
               >
                 Secondary Button
@@ -561,22 +561,22 @@ export default function DesignSystemPOC() {
                 style={{
                   backgroundColor: currentColors.accentPrimaryMuted,
                   boxShadow: isDarkMode
-                    ? "0 2px 8px rgba(0,0,0,0.4)"
-                    : "0 2px 8px rgba(0,0,0,0.08)",
+                    ? '0 2px 8px rgba(0,0,0,0.4)'
+                    : '0 2px 8px rgba(0,0,0,0.08)',
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.backgroundColor =
                     currentColors.accentPrimary;
                   e.currentTarget.style.boxShadow = isDarkMode
-                    ? "0 4px 16px rgba(0,0,0,0.5)"
-                    : "0 4px 16px rgba(0,0,0,0.12)";
+                    ? '0 4px 16px rgba(0,0,0,0.5)'
+                    : '0 4px 16px rgba(0,0,0,0.12)';
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.backgroundColor =
                     currentColors.accentPrimaryMuted;
                   e.currentTarget.style.boxShadow = isDarkMode
-                    ? "0 2px 8px rgba(0,0,0,0.4)"
-                    : "0 2px 8px rgba(0,0,0,0.08)";
+                    ? '0 2px 8px rgba(0,0,0,0.4)'
+                    : '0 2px 8px rgba(0,0,0,0.08)';
                 }}
               >
                 Muted Button
@@ -594,20 +594,20 @@ export default function DesignSystemPOC() {
                   color: currentColors.textPrimary,
                   border: `1px solid ${currentColors.bgQuaternary}`,
                   boxShadow: isDarkMode
-                    ? "0 2px 8px rgba(0,0,0,0.4)"
-                    : "0 2px 8px rgba(0,0,0,0.08)",
+                    ? '0 2px 8px rgba(0,0,0,0.4)'
+                    : '0 2px 8px rgba(0,0,0,0.08)',
                 }}
                 onFocus={(e) => {
                   e.target.style.borderColor = currentColors.accentPrimary;
                   e.target.style.boxShadow = isDarkMode
-                    ? "0 4px 16px rgba(0,0,0,0.5)"
-                    : "0 4px 16px rgba(0,0,0,0.12)";
+                    ? '0 4px 16px rgba(0,0,0,0.5)'
+                    : '0 4px 16px rgba(0,0,0,0.12)';
                 }}
                 onBlur={(e) => {
                   e.target.style.borderColor = currentColors.bgQuaternary;
                   e.target.style.boxShadow = isDarkMode
-                    ? "0 2px 8px rgba(0,0,0,0.4)"
-                    : "0 2px 8px rgba(0,0,0,0.08)";
+                    ? '0 2px 8px rgba(0,0,0,0.4)'
+                    : '0 2px 8px rgba(0,0,0,0.08)';
                 }}
                 onMouseEnter={(e) => {
                   if (document.activeElement !== e.target) {
@@ -632,20 +632,20 @@ export default function DesignSystemPOC() {
                     color: currentColors.textPrimary,
                     border: `1px solid ${currentColors.bgQuaternary}`,
                     boxShadow: isDarkMode
-                      ? "0 2px 8px rgba(0,0,0,0.4)"
-                      : "0 2px 8px rgba(0,0,0,0.08)",
+                      ? '0 2px 8px rgba(0,0,0,0.4)'
+                      : '0 2px 8px rgba(0,0,0,0.08)',
                   }}
                   onFocus={(e) => {
                     e.target.style.borderColor = currentColors.accentPrimary;
                     e.target.style.boxShadow = isDarkMode
-                      ? "0 4px 16px rgba(0,0,0,0.5)"
-                      : "0 4px 16px rgba(0,0,0,0.12)";
+                      ? '0 4px 16px rgba(0,0,0,0.5)'
+                      : '0 4px 16px rgba(0,0,0,0.12)';
                   }}
                   onBlur={(e) => {
                     e.target.style.borderColor = currentColors.bgQuaternary;
                     e.target.style.boxShadow = isDarkMode
-                      ? "0 2px 8px rgba(0,0,0,0.4)"
-                      : "0 2px 8px rgba(0,0,0,0.08)";
+                      ? '0 2px 8px rgba(0,0,0,0.4)'
+                      : '0 2px 8px rgba(0,0,0,0.08)';
                   }}
                 />
                 <input
@@ -657,20 +657,20 @@ export default function DesignSystemPOC() {
                     color: currentColors.textPrimary,
                     border: `1px solid ${currentColors.bgQuaternary}`,
                     boxShadow: isDarkMode
-                      ? "0 2px 8px rgba(0,0,0,0.4)"
-                      : "0 2px 8px rgba(0,0,0,0.08)",
+                      ? '0 2px 8px rgba(0,0,0,0.4)'
+                      : '0 2px 8px rgba(0,0,0,0.08)',
                   }}
                   onFocus={(e) => {
                     e.target.style.borderColor = currentColors.accentPrimary;
                     e.target.style.boxShadow = isDarkMode
-                      ? "0 4px 16px rgba(0,0,0,0.5)"
-                      : "0 4px 16px rgba(0,0,0,0.12)";
+                      ? '0 4px 16px rgba(0,0,0,0.5)'
+                      : '0 4px 16px rgba(0,0,0,0.12)';
                   }}
                   onBlur={(e) => {
                     e.target.style.borderColor = currentColors.bgQuaternary;
                     e.target.style.boxShadow = isDarkMode
-                      ? "0 2px 8px rgba(0,0,0,0.4)"
-                      : "0 2px 8px rgba(0,0,0,0.08)";
+                      ? '0 2px 8px rgba(0,0,0,0.4)'
+                      : '0 2px 8px rgba(0,0,0,0.08)';
                   }}
                 />
               </div>
@@ -682,8 +682,8 @@ export default function DesignSystemPOC() {
               style={{
                 backgroundColor: currentColors.bgSecondary,
                 boxShadow: isDarkMode
-                  ? "0 4px 16px rgba(0,0,0,0.5)"
-                  : "0 4px 16px rgba(0,0,0,0.12)",
+                  ? '0 4px 16px rgba(0,0,0,0.5)'
+                  : '0 4px 16px rgba(0,0,0,0.12)',
                 border: `1px solid ${currentColors.bgQuaternary}`,
               }}
             >
@@ -692,8 +692,8 @@ export default function DesignSystemPOC() {
                 style={{
                   backgroundColor: currentColors.accentPrimary,
                   boxShadow: isDarkMode
-                    ? "0 2px 8px rgba(0,0,0,0.4)"
-                    : "0 2px 8px rgba(0,0,0,0.08)",
+                    ? '0 2px 8px rgba(0,0,0,0.4)'
+                    : '0 2px 8px rgba(0,0,0,0.08)',
                 }}
               >
                 📋 List
@@ -702,14 +702,14 @@ export default function DesignSystemPOC() {
                 className="px-4 py-2 rounded-lg transition-all duration-200 hover:bg-gray-100"
                 style={{
                   color: currentColors.textSecondary,
-                  backgroundColor: "transparent",
+                  backgroundColor: 'transparent',
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.backgroundColor =
                     currentColors.bgTertiary;
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = "transparent";
+                  e.currentTarget.style.backgroundColor = 'transparent';
                 }}
               >
                 🗺️ Map
@@ -743,11 +743,11 @@ export default function DesignSystemPOC() {
                   boxShadow:
                     dragOverSlot === rank - 1
                       ? isDarkMode
-                        ? "0 4px 16px rgba(0,0,0,0.5)"
-                        : "0 4px 16px rgba(0,0,0,0.12)"
+                        ? '0 4px 16px rgba(0,0,0,0.5)'
+                        : '0 4px 16px rgba(0,0,0,0.12)'
                       : isDarkMode
-                      ? "0 2px 8px rgba(0,0,0,0.4)"
-                      : "0 2px 8px rgba(0,0,0,0.08)",
+                        ? '0 2px 8px rgba(0,0,0,0.4)'
+                        : '0 2px 8px rgba(0,0,0,0.08)',
                   borderTop: `1px solid ${
                     dragOverSlot === rank - 1
                       ? currentColors.accentPrimary
@@ -767,8 +767,8 @@ export default function DesignSystemPOC() {
                     rank === 1
                       ? `4px solid ${currentColors.accentPrimary}`
                       : rank === 2
-                      ? `4px solid ${currentColors.accentPrimaryLight}`
-                      : `4px solid ${currentColors.accentPrimaryMuted}`,
+                        ? `4px solid ${currentColors.accentPrimaryLight}`
+                        : `4px solid ${currentColors.accentPrimaryMuted}`,
                 }}
               >
                 <div
@@ -777,8 +777,8 @@ export default function DesignSystemPOC() {
                     backgroundColor: currentColors.bgTertiary,
                     color: currentColors.textPrimary,
                     boxShadow: isDarkMode
-                      ? "0 2px 8px rgba(0,0,0,0.4)"
-                      : "0 2px 8px rgba(0,0,0,0.08)",
+                      ? '0 2px 8px rgba(0,0,0,0.4)'
+                      : '0 2px 8px rgba(0,0,0,0.08)',
                     border: `1px solid ${currentColors.bgQuaternary}`,
                   }}
                 >
@@ -832,8 +832,8 @@ export default function DesignSystemPOC() {
             style={{
               backgroundColor: currentColors.bgSecondary,
               boxShadow: isDarkMode
-                ? "0 2px 8px rgba(0,0,0,0.4)"
-                : "0 2px 8px rgba(0,0,0,0.08)",
+                ? '0 2px 8px rgba(0,0,0,0.4)'
+                : '0 2px 8px rgba(0,0,0,0.08)',
               border: `1px solid ${currentColors.bgQuaternary}`,
             }}
           >
@@ -899,8 +899,8 @@ export default function DesignSystemPOC() {
                 style={{
                   backgroundColor: currentColors.accentPrimary,
                   boxShadow: isDarkMode
-                    ? "0 2px 8px rgba(0,0,0,0.4)"
-                    : "0 2px 8px rgba(0,0,0,0.08)",
+                    ? '0 2px 8px rgba(0,0,0,0.4)'
+                    : '0 2px 8px rgba(0,0,0,0.08)',
                 }}
               ></div>
               <p
@@ -924,8 +924,8 @@ export default function DesignSystemPOC() {
                 style={{
                   backgroundColor: currentColors.accentPrimaryMuted,
                   boxShadow: isDarkMode
-                    ? "0 2px 8px rgba(0,0,0,0.4)"
-                    : "0 2px 8px rgba(0,0,0,0.08)",
+                    ? '0 2px 8px rgba(0,0,0,0.4)'
+                    : '0 2px 8px rgba(0,0,0,0.08)',
                 }}
               ></div>
               <p
@@ -950,8 +950,8 @@ export default function DesignSystemPOC() {
                   backgroundColor: currentColors.bgPrimary,
                   border: `1px solid ${currentColors.bgQuaternary}`,
                   boxShadow: isDarkMode
-                    ? "0 2px 8px rgba(0,0,0,0.4)"
-                    : "0 2px 8px rgba(0,0,0,0.08)",
+                    ? '0 2px 8px rgba(0,0,0,0.4)'
+                    : '0 2px 8px rgba(0,0,0,0.08)',
                 }}
               ></div>
               <p
@@ -975,8 +975,8 @@ export default function DesignSystemPOC() {
                 style={{
                   backgroundColor: currentColors.bgPrimaryDark,
                   boxShadow: isDarkMode
-                    ? "0 2px 8px rgba(0,0,0,0.4)"
-                    : "0 2px 8px rgba(0,0,0,0.08)",
+                    ? '0 2px 8px rgba(0,0,0,0.4)'
+                    : '0 2px 8px rgba(0,0,0,0.08)',
                 }}
               ></div>
               <p
@@ -1000,8 +1000,8 @@ export default function DesignSystemPOC() {
             style={{
               backgroundColor: currentColors.bgSecondary,
               boxShadow: isDarkMode
-                ? "0 2px 8px rgba(0,0,0,0.4)"
-                : "0 2px 8px rgba(0,0,0,0.08)",
+                ? '0 2px 8px rgba(0,0,0,0.4)'
+                : '0 2px 8px rgba(0,0,0,0.08)',
               border: `1px solid ${currentColors.bgQuaternary}`,
             }}
           >

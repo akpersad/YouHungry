@@ -1,15 +1,15 @@
-import { ButtonHTMLAttributes, forwardRef } from "react";
-import { cn } from "@/lib/utils";
+import { ButtonHTMLAttributes, forwardRef } from 'react';
+import { cn } from '@/lib/utils';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?:
-    | "primary"
-    | "secondary"
-    | "accent"
-    | "warm"
-    | "outline"
-    | "outline-accent";
-  size?: "sm" | "md" | "lg";
+    | 'primary'
+    | 'secondary'
+    | 'accent'
+    | 'warm'
+    | 'outline'
+    | 'outline-accent';
+  size?: 'sm' | 'md' | 'lg';
   isLoading?: boolean;
 }
 
@@ -17,8 +17,8 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (
     {
       className,
-      variant = "primary",
-      size = "md",
+      variant = 'primary',
+      size = 'md',
       isLoading,
       children,
       ...props
@@ -28,18 +28,18 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <button
         className={cn(
-          "btn-base",
+          'btn-base',
           {
-            "btn-primary": variant === "primary",
-            "btn-secondary": variant === "secondary",
-            "btn-accent": variant === "accent",
-            "btn-warm": variant === "warm",
-            "btn-outline": variant === "outline",
-            "btn-outline-accent": variant === "outline-accent",
-            "btn-sm": size === "sm",
-            "btn-md": size === "md",
-            "btn-lg": size === "lg",
-            "opacity-50 cursor-not-allowed": isLoading,
+            'btn-primary': variant === 'primary',
+            'btn-secondary': variant === 'secondary',
+            'btn-accent': variant === 'accent',
+            'btn-warm': variant === 'warm',
+            'btn-outline': variant === 'outline',
+            'btn-outline-accent': variant === 'outline-accent',
+            'btn-sm': size === 'sm',
+            'btn-md': size === 'md',
+            'btn-lg': size === 'lg',
+            'opacity-50 cursor-not-allowed': isLoading,
           },
           className
         )}
@@ -75,6 +75,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   }
 );
 
-Button.displayName = "Button";
+Button.displayName = 'Button';
 
 export { Button };
+// Test comment

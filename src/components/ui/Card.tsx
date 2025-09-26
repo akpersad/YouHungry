@@ -1,25 +1,25 @@
-import { HTMLAttributes, forwardRef } from "react";
-import { cn } from "@/lib/utils";
+import { HTMLAttributes, forwardRef } from 'react';
+import { cn } from '@/lib/utils';
 
 interface CardProps extends HTMLAttributes<HTMLDivElement> {
-  variant?: "default" | "elevated";
-  padding?: "sm" | "md" | "lg";
+  variant?: 'default' | 'elevated';
+  padding?: 'sm' | 'md' | 'lg';
 }
 
 const Card = forwardRef<HTMLDivElement, CardProps>(
   (
-    { className, variant = "default", padding = "md", children, ...props },
+    { className, variant = 'default', padding = 'md', children, ...props },
     ref
   ) => {
     return (
       <div
         className={cn(
-          "card-base",
+          'card-base',
           {
-            "card-elevated": variant === "elevated",
-            "p-3": padding === "sm",
-            "p-4": padding === "md",
-            "p-6": padding === "lg",
+            'card-elevated': variant === 'elevated',
+            'p-3': padding === 'sm',
+            'p-4': padding === 'md',
+            'p-6': padding === 'lg',
           },
           className
         )}
@@ -32,7 +32,7 @@ const Card = forwardRef<HTMLDivElement, CardProps>(
   }
 );
 
-Card.displayName = "Card";
+Card.displayName = 'Card';
 
 type CardHeaderProps = HTMLAttributes<HTMLDivElement>;
 
@@ -40,7 +40,7 @@ const CardHeader = forwardRef<HTMLDivElement, CardHeaderProps>(
   ({ className, ...props }, ref) => {
     return (
       <div
-        className={cn("flex flex-col space-y-1.5 pb-4", className)}
+        className={cn('flex flex-col space-y-1.5 pb-4', className)}
         ref={ref}
         {...props}
       />
@@ -48,7 +48,7 @@ const CardHeader = forwardRef<HTMLDivElement, CardHeaderProps>(
   }
 );
 
-CardHeader.displayName = "CardHeader";
+CardHeader.displayName = 'CardHeader';
 
 type CardTitleProps = HTMLAttributes<HTMLHeadingElement>;
 
@@ -57,10 +57,10 @@ const CardTitle = forwardRef<HTMLParagraphElement, CardTitleProps>(
     return (
       <h3
         className={cn(
-          "text-lg font-semibold leading-none tracking-tight",
+          'text-lg font-semibold leading-none tracking-tight',
           className
         )}
-        style={{ color: "var(--color-text)" }}
+        style={{ color: 'var(--color-text)' }}
         ref={ref}
         {...props}
       />
@@ -68,7 +68,7 @@ const CardTitle = forwardRef<HTMLParagraphElement, CardTitleProps>(
   }
 );
 
-CardTitle.displayName = "CardTitle";
+CardTitle.displayName = 'CardTitle';
 
 type CardDescriptionProps = HTMLAttributes<HTMLParagraphElement>;
 
@@ -76,8 +76,8 @@ const CardDescription = forwardRef<HTMLParagraphElement, CardDescriptionProps>(
   ({ className, ...props }, ref) => {
     return (
       <p
-        className={cn("text-sm", className)}
-        style={{ color: "var(--color-text-muted)" }}
+        className={cn('text-sm', className)}
+        style={{ color: 'var(--color-text-muted)' }}
         ref={ref}
         {...props}
       />
@@ -85,17 +85,17 @@ const CardDescription = forwardRef<HTMLParagraphElement, CardDescriptionProps>(
   }
 );
 
-CardDescription.displayName = "CardDescription";
+CardDescription.displayName = 'CardDescription';
 
 type CardContentProps = HTMLAttributes<HTMLDivElement>;
 
 const CardContent = forwardRef<HTMLDivElement, CardContentProps>(
   ({ className, ...props }, ref) => {
-    return <div className={cn("pt-0", className)} ref={ref} {...props} />;
+    return <div className={cn('pt-0', className)} ref={ref} {...props} />;
   }
 );
 
-CardContent.displayName = "CardContent";
+CardContent.displayName = 'CardContent';
 
 type CardFooterProps = HTMLAttributes<HTMLDivElement>;
 
@@ -103,7 +103,7 @@ const CardFooter = forwardRef<HTMLDivElement, CardFooterProps>(
   ({ className, ...props }, ref) => {
     return (
       <div
-        className={cn("flex items-center pt-4", className)}
+        className={cn('flex items-center pt-4', className)}
         ref={ref}
         {...props}
       />
@@ -111,7 +111,7 @@ const CardFooter = forwardRef<HTMLDivElement, CardFooterProps>(
   }
 );
 
-CardFooter.displayName = "CardFooter";
+CardFooter.displayName = 'CardFooter';
 
 export {
   Card,

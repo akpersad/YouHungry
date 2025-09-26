@@ -152,9 +152,9 @@ Ensure your API routes have proper CORS configuration:
 ```typescript
 // Example for API routes
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "https://your-app.vercel.app",
-  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization",
+  'Access-Control-Allow-Origin': 'https://your-app.vercel.app',
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 };
 ```
 
