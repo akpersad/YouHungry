@@ -561,7 +561,7 @@ The following environment variables are configured and ready for use:
 
 #### External API Configuration
 
-- **NEXT_PUBLIC_GOOGLE_PLACES_API_KEY**: Google Places API key for restaurant search
+- **GOOGLE_PLACES_API_KEY**: Google Places API key for restaurant search
 - **GOOGLE_ADDRESS_VALIDATION_API_KEY**: Google Address Validation API key
 - **TWILIO_ACCOUNT_SID**: Twilio account SID for SMS notifications
 - **TWILIO_AUTH_TOKEN**: Twilio authentication token

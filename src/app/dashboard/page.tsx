@@ -9,6 +9,7 @@ import {
   CardTitle,
 } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import Link from 'next/link';
 
 export default function DashboardPage() {
   return (
@@ -33,7 +34,9 @@ export default function DashboardPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <Button className="w-full">Search Restaurants</Button>
+                <Link href="/restaurants">
+                  <Button className="w-full">Search Restaurants</Button>
+                </Link>
               </CardContent>
             </Card>
 

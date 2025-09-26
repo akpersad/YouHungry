@@ -22,7 +22,9 @@ This document tracks all items currently being worked on, organized by priority 
 - [x] **Collection UI Components** - CollectionList and CreateCollectionForm components ✅ COMPLETED
 - [x] **API Endpoints** - GET, POST, PUT, DELETE endpoints for collections ✅ COMPLETED
 - [x] **Dashboard Integration** - Integrated collection management into main dashboard ✅ COMPLETED
-- [ ] **Restaurant Search** - Google Places API integration for restaurant search
+- [x] **Restaurant Search** - Google Places API integration for restaurant search ✅ COMPLETED
+- [x] **Restaurant Search UI** - RestaurantSearchForm, RestaurantCard, RestaurantSearchResults components ✅ COMPLETED
+- [x] **GraphQL Integration** - GraphQL schema and resolvers for restaurant queries ✅ COMPLETED
 - [ ] **Restaurant Management** - Add/remove restaurants from collections
 - [ ] **Decision Making** - Basic random selection algorithm
 
@@ -30,9 +32,10 @@ This document tracks all items currently being worked on, organized by priority 
 
 ### Epic 2: Personal Collections Management (Continued)
 
-- [ ] **Restaurant Search Integration** - Google Places API setup and integration
-- [ ] **Restaurant Data Models** - Restaurant schema and data management
-- [ ] **Search UI Components** - Restaurant search interface and results display
+- [x] **Restaurant Search Integration** - Google Places API setup and integration ✅ COMPLETED
+- [x] **Restaurant Data Models** - Restaurant schema and data management ✅ COMPLETED
+- [x] **Search UI Components** - Restaurant search interface and results display ✅ COMPLETED
+- [x] **GraphQL Schema & Resolvers** - GraphQL integration for complex restaurant queries ✅ COMPLETED
 - [ ] **Restaurant Management** - Add/remove restaurants from collections functionality
 
 ### Documentation & Planning
@@ -82,7 +85,7 @@ This document tracks all items currently being worked on, organized by priority 
 
 ### This Sprint Goals
 
-1. **Complete Epic 2 Story 2** - Restaurant Search & Discovery
+1. **Complete Epic 2 Story 2** - Restaurant Search & Discovery ✅ COMPLETED
 2. **Complete Epic 2 Story 4** - Restaurant Management
 3. **Complete Epic 2 Story 5** - Personal Decision Making
 

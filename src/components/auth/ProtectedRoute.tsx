@@ -30,7 +30,7 @@ export function ProtectedRoute({ children, fallback }: ProtectedRouteProps) {
   if (!isSignedIn) {
     return (
       fallback || (
-        <div className="max-w-md mx-auto mt-8">
+        <div className="mx-auto mt-8">
           <Card>
             <CardHeader>
               <CardTitle>Sign In Required</CardTitle>

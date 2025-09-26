@@ -9,7 +9,9 @@ const customJestConfig = {
   testEnvironment: 'jest-environment-jsdom',
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
+    '^mongodb$': '<rootDir>/node_modules/mongodb/lib/index.js',
   },
+  transformIgnorePatterns: ['node_modules/(?!(bson|mongodb)/)'],
   testMatch: [
     '<rootDir>/src/**/__tests__/**/*.{js,jsx,ts,tsx}',
     '<rootDir>/src/**/*.{test,spec}.{js,jsx,ts,tsx}',
