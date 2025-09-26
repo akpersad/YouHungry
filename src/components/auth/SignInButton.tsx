@@ -1,7 +1,6 @@
 'use client';
 
 import { SignInButton as ClerkSignInButton } from '@clerk/nextjs';
-import { Button } from '@/components/ui/Button';
 
 interface SignInButtonProps {
   children?: React.ReactNode;
@@ -18,9 +17,11 @@ export function SignInButton({
 }: SignInButtonProps) {
   return (
     <ClerkSignInButton mode="modal">
-      <Button variant={variant} size={size} className={className}>
+      <button
+        className={`btn-base btn-${variant} btn-${size} ${className || ''}`}
+      >
         {children}
-      </Button>
+      </button>
     </ClerkSignInButton>
   );
 }

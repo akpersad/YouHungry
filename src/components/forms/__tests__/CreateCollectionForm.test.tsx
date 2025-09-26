@@ -1,4 +1,10 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  act,
+} from '@testing-library/react';
 import { CreateCollectionForm } from '../CreateCollectionForm';
 
 // Mock the useUser hook
@@ -65,20 +71,26 @@ describe('CreateCollectionForm', () => {
       json: async () => ({ success: true, collection: mockCollection }),
     });
 
-    render(
-      <CreateCollectionForm onSuccess={mockOnSuccess} onCancel={mockOnCancel} />
-    );
+    await act(async () => {
+      render(
+        <CreateCollectionForm
+          onSuccess={mockOnSuccess}
+          onCancel={mockOnCancel}
+        />
+      );
+    });
 
     const nameInput = screen.getByLabelText('Collection Name');
     const descriptionInput = screen.getByLabelText('Description (Optional)');
     const submitButton = screen.getByText('Create Collection');
 
-    fireEvent.change(nameInput, { target: { value: 'Test Collection' } });
-    fireEvent.change(descriptionInput, {
-      target: { value: 'Test Description' },
+    await act(async () => {
+      fireEvent.change(nameInput, { target: { value: 'Test Collection' } });
+      fireEvent.change(descriptionInput, {
+        target: { value: 'Test Description' },
+      });
+      fireEvent.click(submitButton);
     });
-
-    fireEvent.click(submitButton);
 
     await waitFor(() => {
       expect(fetch).toHaveBeenCalledWith('/api/collections', {
@@ -106,15 +118,22 @@ describe('CreateCollectionForm', () => {
       }),
     });
 
-    render(
-      <CreateCollectionForm onSuccess={mockOnSuccess} onCancel={mockOnCancel} />
-    );
+    await act(async () => {
+      render(
+        <CreateCollectionForm
+          onSuccess={mockOnSuccess}
+          onCancel={mockOnCancel}
+        />
+      );
+    });
 
     const nameInput = screen.getByLabelText('Collection Name');
     const submitButton = screen.getByText('Create Collection');
 
-    fireEvent.change(nameInput, { target: { value: 'Test Collection' } });
-    fireEvent.click(submitButton);
+    await act(async () => {
+      fireEvent.change(nameInput, { target: { value: 'Test Collection' } });
+      fireEvent.click(submitButton);
+    });
 
     await waitFor(() => {
       expect(
@@ -126,17 +145,29 @@ describe('CreateCollectionForm', () => {
   });
 
   it('handles network error', async () => {
+    // Suppress expected console.error for this test
+    const consoleSpy = jest
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
+
     (fetch as jest.Mock).mockRejectedValueOnce(new Error('Network error'));
 
-    render(
-      <CreateCollectionForm onSuccess={mockOnSuccess} onCancel={mockOnCancel} />
-    );
+    await act(async () => {
+      render(
+        <CreateCollectionForm
+          onSuccess={mockOnSuccess}
+          onCancel={mockOnCancel}
+        />
+      );
+    });
 
     const nameInput = screen.getByLabelText('Collection Name');
     const submitButton = screen.getByText('Create Collection');
 
-    fireEvent.change(nameInput, { target: { value: 'Test Collection' } });
-    fireEvent.click(submitButton);
+    await act(async () => {
+      fireEvent.change(nameInput, { target: { value: 'Test Collection' } });
+      fireEvent.click(submitButton);
+    });
 
     await waitFor(() => {
       expect(
@@ -145,6 +176,8 @@ describe('CreateCollectionForm', () => {
     });
 
     expect(mockOnSuccess).not.toHaveBeenCalled();
+
+    consoleSpy.mockRestore();
   });
 
   it('calls onCancel when cancel button is clicked', () => {
@@ -162,20 +195,26 @@ describe('CreateCollectionForm', () => {
       json: async () => ({ success: true, collection: mockCollection }),
     });
 
-    render(
-      <CreateCollectionForm onSuccess={mockOnSuccess} onCancel={mockOnCancel} />
-    );
+    await act(async () => {
+      render(
+        <CreateCollectionForm
+          onSuccess={mockOnSuccess}
+          onCancel={mockOnCancel}
+        />
+      );
+    });
 
     const nameInput = screen.getByLabelText('Collection Name');
     const descriptionInput = screen.getByLabelText('Description (Optional)');
     const submitButton = screen.getByText('Create Collection');
 
-    fireEvent.change(nameInput, { target: { value: '  Test Collection  ' } });
-    fireEvent.change(descriptionInput, {
-      target: { value: '  Test Description  ' },
+    await act(async () => {
+      fireEvent.change(nameInput, { target: { value: '  Test Collection  ' } });
+      fireEvent.change(descriptionInput, {
+        target: { value: '  Test Description  ' },
+      });
+      fireEvent.click(submitButton);
     });
-
-    fireEvent.click(submitButton);
 
     await waitFor(() => {
       expect(fetch).toHaveBeenCalledWith('/api/collections', {

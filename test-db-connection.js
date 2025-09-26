@@ -118,7 +118,7 @@ try {
       '⚠️  No .env.local file found, using system environment variables'
     );
   }
-} catch (error) {
+} catch {
   console.log(
     '⚠️  Could not load .env.local, using system environment variables'
   );

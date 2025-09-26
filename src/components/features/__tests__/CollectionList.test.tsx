@@ -1,4 +1,10 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  act,
+} from '@testing-library/react';
 import { CollectionList } from '../CollectionList';
 
 // Mock the useUser hook
@@ -42,13 +48,15 @@ describe('CollectionList', () => {
   });
 
   it('renders loading state initially', () => {
-    (fetch as jest.Mock).mockResolvedValueOnce({
-      json: async () => ({ success: true, collections: [] }),
-    });
+    // Don't mock fetch immediately to test loading state
+    (fetch as jest.Mock).mockImplementation(() => new Promise(() => {})); // Never resolves
 
     render(<CollectionList />);
 
     expect(screen.getByRole('status')).toBeInTheDocument();
+
+    // Clean up the mock
+    (fetch as jest.Mock).mockRestore();
   });
 
   it('renders empty state when no collections exist', async () => {
@@ -56,7 +64,9 @@ describe('CollectionList', () => {
       json: async () => ({ success: true, collections: [] }),
     });
 
-    render(<CollectionList />);
+    await act(async () => {
+      render(<CollectionList />);
+    });
 
     await waitFor(() => {
       expect(
@@ -74,7 +84,9 @@ describe('CollectionList', () => {
       json: async () => ({ success: true, collections: mockCollections }),
     });
 
-    render(<CollectionList />);
+    await act(async () => {
+      render(<CollectionList />);
+    });
 
     await waitFor(() => {
       expect(screen.getByText('Favorite Pizza Places')).toBeInTheDocument();
@@ -90,7 +102,9 @@ describe('CollectionList', () => {
       json: async () => ({ success: true, collections: [] }),
     });
 
-    render(<CollectionList />);
+    await act(async () => {
+      render(<CollectionList />);
+    });
 
     await waitFor(() => {
       expect(
@@ -98,7 +112,9 @@ describe('CollectionList', () => {
       ).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByText('Create Your First Collection'));
+    await act(async () => {
+      fireEvent.click(screen.getByText('Create Your First Collection'));
+    });
 
     await waitFor(() => {
       expect(screen.getByText('Create New Collection')).toBeInTheDocument();
@@ -118,14 +134,19 @@ describe('CollectionList', () => {
     // Mock window.confirm
     window.confirm = jest.fn(() => true);
 
-    render(<CollectionList />);
+    await act(async () => {
+      render(<CollectionList />);
+    });
 
     await waitFor(() => {
       expect(screen.getByText('Favorite Pizza Places')).toBeInTheDocument();
     });
 
     const deleteButtons = screen.getAllByText('Delete');
-    fireEvent.click(deleteButtons[0]);
+
+    await act(async () => {
+      fireEvent.click(deleteButtons[0]);
+    });
 
     expect(window.confirm).toHaveBeenCalledWith(
       'Are you sure you want to delete this collection? This action cannot be undone.'
@@ -139,9 +160,16 @@ describe('CollectionList', () => {
   });
 
   it('handles fetch error', async () => {
+    // Suppress expected console.error for this test
+    const consoleSpy = jest
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
+
     (fetch as jest.Mock).mockRejectedValueOnce(new Error('Network error'));
 
-    render(<CollectionList />);
+    await act(async () => {
+      render(<CollectionList />);
+    });
 
     await waitFor(() => {
       expect(
@@ -150,5 +178,7 @@ describe('CollectionList', () => {
     });
 
     expect(screen.getByText('Try Again')).toBeInTheDocument();
+
+    consoleSpy.mockRestore();
   });
 });

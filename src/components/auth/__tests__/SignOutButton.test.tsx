@@ -4,7 +4,7 @@ import { SignOutButton } from '../SignOutButton';
 // Mock the Clerk SignOutButton
 jest.mock('@clerk/nextjs', () => ({
   SignOutButton: ({ children }: { children: React.ReactNode }) => (
-    <button data-testid="clerk-signout-button">{children}</button>
+    <div data-testid="clerk-signout-button">{children}</div>
   ),
 }));
 

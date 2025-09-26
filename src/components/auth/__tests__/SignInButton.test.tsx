@@ -10,9 +10,9 @@ jest.mock('@clerk/nextjs', () => ({
     children: React.ReactNode;
     mode: string;
   }) => (
-    <button data-testid="clerk-signin-button" data-mode={mode}>
+    <div data-testid="clerk-signin-button" data-mode={mode}>
       {children}
-    </button>
+    </div>
   ),
 }));
 

@@ -1,7 +1,6 @@
 'use client';
 
 import { SignOutButton as ClerkSignOutButton } from '@clerk/nextjs';
-import { Button } from '@/components/ui/Button';
 
 interface SignOutButtonProps {
   children?: React.ReactNode;
@@ -18,9 +17,11 @@ export function SignOutButton({
 }: SignOutButtonProps) {
   return (
     <ClerkSignOutButton>
-      <Button variant={variant} size={size} className={className}>
+      <button
+        className={`btn-base btn-${variant} btn-${size} ${className || ''}`}
+      >
         {children}
-      </Button>
+      </button>
     </ClerkSignOutButton>
   );
 }
