@@ -10,16 +10,22 @@ const server = new ApolloServer({
   plugins: [
     // Add logging plugin for development
     {
-      requestDidStart() {
+      async requestDidStart() {
         return {
-          willSendResponse(requestContext) {
+          async willSendResponse(requestContext: unknown) {
             if (process.env.NODE_ENV === 'development') {
+              const context = requestContext as {
+                request: { operationName?: string; variables?: unknown };
+                response: {
+                  body: { kind: string; singleResult: { errors?: unknown } };
+                };
+              };
               console.log('GraphQL Response:', {
-                operationName: requestContext.request.operationName,
-                variables: requestContext.request.variables,
+                operationName: context.request.operationName,
+                variables: context.request.variables,
                 errors:
-                  requestContext.response.body.kind === 'single'
-                    ? requestContext.response.body.singleResult.errors
+                  context.response.body.kind === 'single'
+                    ? context.response.body.singleResult.errors
                     : null,
               });
             }

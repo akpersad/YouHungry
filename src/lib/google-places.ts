@@ -345,6 +345,7 @@ export async function searchRestaurantsByLocationConsistent(
       return b.rating - a.rating;
     });
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     return sortedRestaurants.map(({ distance, ...restaurant }) => restaurant);
   }
 
@@ -389,6 +390,7 @@ export async function searchRestaurantsByLocationConsistent(
     return b.rating - a.rating;
   });
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   return sortedRestaurants.map(({ distance, ...restaurant }) => restaurant);
 }
 

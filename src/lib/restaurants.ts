@@ -4,7 +4,6 @@ import { ObjectId } from 'mongodb';
 import {
   searchRestaurantsWithGooglePlaces,
   getPlaceDetails,
-  searchRestaurantsByLocation,
   searchRestaurantsByLocationConsistent,
 } from './google-places';
 

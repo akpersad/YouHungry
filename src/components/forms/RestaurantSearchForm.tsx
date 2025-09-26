@@ -7,7 +7,7 @@ import { Card } from '@/components/ui/Card';
 import { AddressInput } from '@/components/ui/AddressInput';
 
 interface RestaurantSearchFormProps {
-  onSearch: (query?: string, location: string, filters?: SearchFilters) => void;
+  onSearch: (location: string, query?: string, filters?: SearchFilters) => void;
   isLoading?: boolean;
 }
 
@@ -34,7 +34,7 @@ export function RestaurantSearchForm({
     e.preventDefault();
     if (!location.trim() || !isAddressValid) return;
 
-    onSearch(query.trim() || undefined, location.trim(), filters);
+    onSearch(location.trim(), query.trim() || undefined, filters);
   };
 
   const handleCurrentLocation = async () => {

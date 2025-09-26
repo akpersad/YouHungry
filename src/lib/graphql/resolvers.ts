@@ -18,11 +18,10 @@ export const resolvers = {
       {
         query,
         location,
-        filters,
       }: { query: string; location?: string; filters?: Record<string, unknown> }
     ) => {
       try {
-        const restaurants = await searchRestaurants(query, location, filters);
+        const restaurants = await searchRestaurants(query, location);
         return {
           restaurants,
           count: restaurants.length,
@@ -62,6 +61,7 @@ export const resolvers = {
           filteredRestaurants = restaurants.filter((restaurant) => {
             if (
               filters.cuisine &&
+              typeof filters.cuisine === 'string' &&
               !restaurant.cuisine
                 .toLowerCase()
                 .includes(filters.cuisine.toLowerCase())
@@ -69,7 +69,11 @@ export const resolvers = {
               return false;
             }
 
-            if (filters.minRating && restaurant.rating < filters.minRating) {
+            if (
+              filters.minRating &&
+              typeof filters.minRating === 'number' &&
+              restaurant.rating < filters.minRating
+            ) {
               return false;
             }
 
@@ -84,11 +88,19 @@ export const resolvers = {
                       : 4
                 : 0;
 
-              if (filters.minPrice && priceLevel < filters.minPrice) {
+              if (
+                filters.minPrice &&
+                typeof filters.minPrice === 'number' &&
+                priceLevel < filters.minPrice
+              ) {
                 return false;
               }
 
-              if (filters.maxPrice && priceLevel > filters.maxPrice) {
+              if (
+                filters.maxPrice &&
+                typeof filters.maxPrice === 'number' &&
+                priceLevel > filters.maxPrice
+              ) {
                 return false;
               }
             }
@@ -183,7 +195,16 @@ export const resolvers = {
       }: { id: string; priceRange?: string; timeToPickUp?: number }
     ) => {
       try {
-        return await updateRestaurant(id, { priceRange, timeToPickUp });
+        const validPriceRange = priceRange as
+          | '$'
+          | '$$'
+          | '$$$'
+          | '$$$$'
+          | undefined;
+        return await updateRestaurant(id, {
+          priceRange: validPriceRange,
+          timeToPickUp,
+        });
       } catch (error) {
         console.error('GraphQL updateRestaurant error:', error);
         throw new Error('Failed to update restaurant');

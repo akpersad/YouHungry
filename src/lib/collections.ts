@@ -1,5 +1,5 @@
 import { connectToDatabase } from './db';
-import { Collection } from '@/types/database';
+import { Collection, Restaurant } from '@/types/database';
 import { ObjectId } from 'mongodb';
 
 export async function getCollectionsByUserId(
@@ -110,4 +110,26 @@ export async function deleteCollection(id: string): Promise<boolean> {
     .deleteOne({ _id: new ObjectId(id) });
 
   return result.deletedCount > 0;
+}
+
+export async function getRestaurantsByCollection(
+  collectionId: string
+): Promise<Restaurant[]> {
+  const db = await connectToDatabase();
+  const collection = await db
+    .collection('collections')
+    .findOne({ _id: new ObjectId(collectionId) });
+
+  if (!collection) {
+    return [];
+  }
+
+  const restaurants = await db
+    .collection('restaurants')
+    .find({
+      _id: { $in: collection.restaurantIds },
+    })
+    .toArray();
+
+  return restaurants as Restaurant[];
 }

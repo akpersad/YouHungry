@@ -34,8 +34,8 @@ export function RestaurantSearchPage({
     useState(false);
 
   const searchRestaurants = async (
-    query?: string,
     location: string,
+    query?: string,
     filters?: SearchFilters
   ) => {
     setIsLoading(true);
