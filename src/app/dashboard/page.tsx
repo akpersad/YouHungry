@@ -1,5 +1,6 @@
 import { MainLayout } from '@/components/layout/MainLayout';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import { CollectionList } from '@/components/features/CollectionList';
 import {
   Card,
   CardContent,
@@ -21,19 +22,9 @@ export default function DashboardPage() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>My Collections</CardTitle>
-                <CardDescription>
-                  Manage your personal restaurant collections
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button className="w-full">View Collections</Button>
-              </CardContent>
-            </Card>
+          <CollectionList />
 
+          <div className="mt-8 grid md:grid-cols-2 gap-6">
             <Card>
               <CardHeader>
                 <CardTitle>Find Restaurants</CardTitle>
