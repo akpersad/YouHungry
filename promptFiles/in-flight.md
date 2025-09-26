@@ -27,6 +27,9 @@ This document tracks all items currently being worked on, organized by priority 
 - [x] **GraphQL Integration** - GraphQL schema and resolvers for restaurant queries ✅ COMPLETED
 - [x] **Address Validation & Autocomplete** - Google Address Validation API integration with dropdown suggestions ✅ COMPLETED
 - [x] **Enhanced Search Form** - Updated restaurant search form with address validation ✅ COMPLETED
+- [x] **Address Dropdown Fix** - Fixed address input dropdown to disappear when user clicks suggested address ✅ COMPLETED
+- [x] **Restaurant Image Loading** - Fixed restaurant image loading issues with Google Places photo URLs ✅ COMPLETED
+- [x] **Geocoding Integration** - Added geocoding functionality to convert addresses to coordinates for accurate search ✅ COMPLETED
 - [ ] **Restaurant Management** - Add/remove restaurants from collections
 - [ ] **Decision Making** - Basic random selection algorithm
 
@@ -38,6 +41,8 @@ This document tracks all items currently being worked on, organized by priority 
 - [x] **Restaurant Data Models** - Restaurant schema and data management ✅ COMPLETED
 - [x] **Search UI Components** - Restaurant search interface and results display ✅ COMPLETED
 - [x] **GraphQL Schema & Resolvers** - GraphQL integration for complex restaurant queries ✅ COMPLETED
+- [x] **Search Accuracy Improvements** - Fixed search to use geocoded coordinates instead of text-based location ✅ COMPLETED
+- [x] **Image Loading Fixes** - Resolved restaurant image loading issues with proper Next.js Image configuration ✅ COMPLETED
 - [ ] **Restaurant Management** - Add/remove restaurants from collections functionality
 
 ### Documentation & Planning
@@ -65,15 +70,15 @@ This document tracks all items currently being worked on, organized by priority 
 
 ### Current Sprint Status
 
-- **Items Started**: 16 items
-- **Items Completed**: 16 items (Epic 1 + Epic 2 Story 1)
-- **Items Blocked**: 1 item (Google Places API key)
-- **Sprint Progress**: 100% (Epic 1 completed, Epic 2 Story 1 completed)
+- **Items Started**: 19 items
+- **Items Completed**: 19 items (Epic 1 + Epic 2 Story 1 + Recent fixes)
+- **Items Blocked**: 0 items (All API keys configured)
+- **Sprint Progress**: 100% (Epic 1 completed, Epic 2 Story 1 completed with enhancements)
 
 ### Epic Progress
 
 - **Epic 1**: 100% complete ✅
-- **Epic 2**: 60% complete (Stories 1 & 2 completed, Story 2 enhanced with address validation)
+- **Epic 2**: 70% complete (Stories 1 & 2 completed, Story 2 enhanced with address validation and search improvements)
 - **Epic 3**: 0% complete (not started)
 - **Epic 4**: 0% complete (not started)
 
