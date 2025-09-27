@@ -15,6 +15,9 @@ describe('Address Validation API', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     process.env.GOOGLE_PLACES_API_KEY = 'test-api-key';
+
+    // Reset fetch mock to allow individual tests to override
+    (global.fetch as jest.Mock).mockReset();
   });
 
   describe('validateAddress', () => {
@@ -33,7 +36,7 @@ describe('Address Validation API', () => {
             {
               longText: '123 Main St',
               shortText: '123 Main St',
-              types: ['street_number', 'route'],
+              types: ['street_number'],
               languageCode: 'en',
             },
           ],
@@ -66,17 +69,14 @@ describe('Address Validation API', () => {
 
       expect(result).toEqual(mockResponse.result);
       expect(mockFetch).toHaveBeenCalledWith(
-        expect.stringContaining('addressvalidation.googleapis.com'),
+        '/api/address/validate',
         expect.objectContaining({
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            address: {
-              addressLines: ['123 Main St, New York, NY'],
-            },
-            enableUspsCass: true,
+            address: '123 Main St, New York, NY',
           }),
         })
       );
@@ -104,25 +104,43 @@ describe('Address Validation API', () => {
 
   describe('getAddressSuggestions', () => {
     it('should return address suggestions successfully', async () => {
-      const mockResponse = {
-        status: 'OK',
-        predictions: [
-          {
-            description: '123 Main St, New York, NY, USA',
-            place_id: 'ChIJN1t_tDeuEmsRUsoyG83frY4',
-            terms: [
-              { value: '123 Main St', types: ['street_number', 'route'] },
-              { value: 'New York', types: ['locality'] },
-              { value: 'NY', types: ['administrative_area_level_1'] },
-              { value: 'USA', types: ['country'] },
-            ],
-          },
-        ],
-      };
+      const mockSuggestions = [
+        {
+          formattedAddress: '123 Main St, New York, NY, USA',
+          placeId: 'ChIJN1t_tDeuEmsRUsoyG83frY4',
+          addressComponents: [
+            {
+              longText: '123 Main St',
+              shortText: '123 Main St',
+              types: ['street_number'],
+              languageCode: 'en',
+            },
+            {
+              longText: 'New York',
+              shortText: 'New York',
+              types: ['locality'],
+              languageCode: 'en',
+            },
+            {
+              longText: 'NY',
+              shortText: 'NY',
+              types: ['administrative_area_level_1'],
+              languageCode: 'en',
+            },
+            {
+              longText: 'USA',
+              shortText: 'USA',
+              types: ['country'],
+              languageCode: 'en',
+            },
+          ],
+          confidence: 0.8,
+        },
+      ];
 
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: async () => mockResponse,
+        json: async () => mockSuggestions,
       } as Response);
 
       const result = await getAddressSuggestions('123 Main St');
@@ -162,14 +180,9 @@ describe('Address Validation API', () => {
     });
 
     it('should return empty array when no suggestions found', async () => {
-      const mockResponse = {
-        status: 'ZERO_RESULTS',
-        predictions: [],
-      };
-
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: async () => mockResponse,
+        json: async () => [],
       } as Response);
 
       const result = await getAddressSuggestions('nonexistent address');
@@ -180,39 +193,63 @@ describe('Address Validation API', () => {
 
   describe('getAddressDetails', () => {
     it('should return address details successfully', async () => {
-      const mockResponse = {
-        status: 'OK',
-        result: {
-          formatted_address: '123 Main St, New York, NY 10001, USA',
-          place_id: 'ChIJN1t_tDeuEmsRUsoyG83frY4',
-          address_components: [
-            {
-              long_name: '123 Main St',
-              short_name: '123 Main St',
-              types: ['street_number', 'route'],
-            },
-            {
-              long_name: 'New York',
-              short_name: 'New York',
-              types: ['locality'],
-            },
-            {
-              long_name: 'New York',
-              short_name: 'NY',
-              types: ['administrative_area_level_1'],
-            },
-            {
-              long_name: '10001',
-              short_name: '10001',
-              types: ['postal_code'],
-            },
-          ],
+      const mockAddressDetails = {
+        formattedAddress: '123 Main St, New York, NY 10001, USA',
+        postalAddress: {
+          addressLines: ['123 Main St, New York, NY 10001, USA'],
+          locality: 'New York',
+          administrativeArea: 'New York',
+          postalCode: '10001',
+          regionCode: '',
+        },
+        addressComponents: [
+          {
+            longText: '123 Main St',
+            shortText: '123 Main St',
+            types: ['street_number'],
+            languageCode: 'en',
+          },
+          {
+            longText: 'New York',
+            shortText: 'New York',
+            types: ['locality'],
+            languageCode: 'en',
+          },
+          {
+            longText: 'New York',
+            shortText: 'NY',
+            types: ['administrative_area_level_1'],
+            languageCode: 'en',
+          },
+          {
+            longText: '10001',
+            shortText: '10001',
+            types: ['postal_code'],
+            languageCode: 'en',
+          },
+        ],
+        missingComponentTypes: [],
+        unconfirmedComponentTypes: [],
+        unresolvedTokens: [],
+        metadata: {
+          business: false,
+          poBox: false,
+          residential: false,
+        },
+        verdict: {
+          inputGranularity: 'PREMISE',
+          validationGranularity: 'PREMISE',
+          geocodeGranularity: 'PREMISE',
+          addressComplete: true,
+          hasUnconfirmedComponents: false,
+          hasInferredComponents: false,
+          hasReplacedComponents: false,
         },
       };
 
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: async () => mockResponse,
+        json: async () => mockAddressDetails,
       } as Response);
 
       const result = await getAddressDetails('ChIJN1t_tDeuEmsRUsoyG83frY4');

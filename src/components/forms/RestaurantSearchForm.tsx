@@ -94,6 +94,7 @@ export function RestaurantSearchForm({
           </label>
           <div className="flex flex-col sm:flex-row gap-2">
             <AddressInput
+              id="location"
               value={location}
               onChange={(value) => {
                 setLocation(value);

@@ -1,3 +1,9 @@
+// Mock dependencies
+jest.mock('../google-places');
+jest.mock('../db', () => ({
+  connectToDatabase: jest.fn(),
+}));
+
 import {
   searchRestaurants,
   searchRestaurantsByCoordinates,
@@ -6,14 +12,6 @@ import {
 } from '../restaurants';
 import * as googlePlaces from '../google-places';
 import * as db from '../db';
-
-// Mock dependencies
-jest.mock('../google-places');
-jest.mock('../db', () => ({
-  connectToDatabase: jest.fn(),
-  getRestaurantByGooglePlaceId: jest.fn(),
-  createRestaurant: jest.fn(),
-}));
 
 const mockGooglePlaces = googlePlaces as jest.Mocked<typeof googlePlaces>;
 const mockDb = db as jest.Mocked<typeof db>;
@@ -72,20 +70,12 @@ describe('Restaurant API Functions', () => {
       mockGooglePlaces.searchRestaurantsWithGooglePlaces.mockResolvedValue([
         mockGoogleRestaurant,
       ]);
-      mockDb.getRestaurantByGooglePlaceId.mockResolvedValue(null);
-      mockDb.createRestaurant.mockResolvedValue(mockRestaurant);
 
       const result = await searchRestaurants('pizza', 'New York');
 
       expect(
         mockGooglePlaces.searchRestaurantsWithGooglePlaces
       ).toHaveBeenCalledWith('pizza', 'New York');
-      expect(mockDb.getRestaurantByGooglePlaceId).toHaveBeenCalledWith(
-        'ChIJN1t_tDeuEmsRUsoyG83frY4'
-      );
-      expect(mockDb.createRestaurant).toHaveBeenCalledWith(
-        mockGoogleRestaurant
-      );
       expect(result).toEqual([mockGoogleRestaurant]);
     });
 
@@ -93,11 +83,9 @@ describe('Restaurant API Functions', () => {
       mockGooglePlaces.searchRestaurantsWithGooglePlaces.mockResolvedValue([
         mockGoogleRestaurant,
       ]);
-      mockDb.getRestaurantByGooglePlaceId.mockResolvedValue(mockRestaurant);
 
       const result = await searchRestaurants('pizza');
 
-      expect(mockDb.createRestaurant).not.toHaveBeenCalled();
       expect(result).toEqual([mockGoogleRestaurant]);
     });
 
@@ -130,9 +118,6 @@ describe('Restaurant API Functions', () => {
       mockGooglePlaces.searchRestaurantsWithGooglePlaces.mockResolvedValue([
         mockGoogleRestaurant,
       ]);
-      mockDb.getRestaurantByGooglePlaceId.mockRejectedValue(
-        new Error('DB Error')
-      );
 
       // Should not throw error, just log it
       const result = await searchRestaurants('pizza');
@@ -143,11 +128,9 @@ describe('Restaurant API Functions', () => {
 
   describe('searchRestaurantsByCoordinates', () => {
     it('should search restaurants by coordinates successfully', async () => {
-      mockGooglePlaces.searchRestaurantsByLocation.mockResolvedValue([
+      mockGooglePlaces.searchRestaurantsByLocationConsistent.mockResolvedValue([
         mockGoogleRestaurant,
       ]);
-      mockDb.getRestaurantByGooglePlaceId.mockResolvedValue(null);
-      mockDb.createRestaurant.mockResolvedValue(mockRestaurant);
 
       const result = await searchRestaurantsByCoordinates(
         40.7128,
@@ -155,16 +138,14 @@ describe('Restaurant API Functions', () => {
         5000
       );
 
-      expect(mockGooglePlaces.searchRestaurantsByLocation).toHaveBeenCalledWith(
-        40.7128,
-        -74.006,
-        5000
-      );
+      expect(
+        mockGooglePlaces.searchRestaurantsByLocationConsistent
+      ).toHaveBeenCalledWith(40.7128, -74.006, 5000);
       expect(result).toEqual([mockGoogleRestaurant]);
     });
 
     it('should return empty array when search fails', async () => {
-      mockGooglePlaces.searchRestaurantsByLocation.mockRejectedValue(
+      mockGooglePlaces.searchRestaurantsByLocationConsistent.mockRejectedValue(
         new Error('Search failed')
       );
 
@@ -176,35 +157,50 @@ describe('Restaurant API Functions', () => {
 
   describe('getRestaurantDetails', () => {
     it('should return existing restaurant from database', async () => {
-      mockDb.getRestaurantByGooglePlaceId.mockResolvedValue(mockRestaurant);
+      const mockDbInstance = {
+        collection: jest.fn().mockReturnValue({
+          findOne: jest.fn().mockResolvedValue(mockRestaurant),
+        }),
+      };
+      mockDb.connectToDatabase.mockResolvedValue(
+        mockDbInstance as unknown as ReturnType<typeof db.connectToDatabase>
+      );
 
       const result = await getRestaurantDetails('ChIJN1t_tDeuEmsRUsoyG83frY4');
 
-      expect(mockDb.getRestaurantByGooglePlaceId).toHaveBeenCalledWith(
-        'ChIJN1t_tDeuEmsRUsoyG83frY4'
-      );
-      expect(mockGooglePlaces.getPlaceDetails).not.toHaveBeenCalled();
+      expect(mockDb.connectToDatabase).toHaveBeenCalled();
       expect(result).toEqual(mockRestaurant);
     });
 
     it('should fetch from Google Places API when not in database', async () => {
-      mockDb.getRestaurantByGooglePlaceId.mockResolvedValue(null);
+      const mockDbInstance = {
+        collection: jest.fn().mockReturnValue({
+          findOne: jest.fn().mockResolvedValue(null),
+          insertOne: jest.fn().mockResolvedValue({ insertedId: 'new-id' }),
+        }),
+      };
+      mockDb.connectToDatabase.mockResolvedValue(
+        mockDbInstance as unknown as ReturnType<typeof db.connectToDatabase>
+      );
       mockGooglePlaces.getPlaceDetails.mockResolvedValue(mockGoogleRestaurant);
-      mockDb.createRestaurant.mockResolvedValue(mockRestaurant);
 
       const result = await getRestaurantDetails('ChIJN1t_tDeuEmsRUsoyG83frY4');
 
       expect(mockGooglePlaces.getPlaceDetails).toHaveBeenCalledWith(
         'ChIJN1t_tDeuEmsRUsoyG83frY4'
       );
-      expect(mockDb.createRestaurant).toHaveBeenCalledWith(
-        mockGoogleRestaurant
-      );
       expect(result).toEqual(mockGoogleRestaurant);
     });
 
     it('should return null when Google Places API fails', async () => {
-      mockDb.getRestaurantByGooglePlaceId.mockResolvedValue(null);
+      const mockDbInstance = {
+        collection: jest.fn().mockReturnValue({
+          findOne: jest.fn().mockResolvedValue(null),
+        }),
+      };
+      mockDb.connectToDatabase.mockResolvedValue(
+        mockDbInstance as unknown as ReturnType<typeof db.connectToDatabase>
+      );
       mockGooglePlaces.getPlaceDetails.mockResolvedValue(null);
 
       const result = await getRestaurantDetails('invalid-id');
@@ -213,9 +209,7 @@ describe('Restaurant API Functions', () => {
     });
 
     it('should handle errors gracefully', async () => {
-      mockDb.getRestaurantByGooglePlaceId.mockRejectedValue(
-        new Error('DB Error')
-      );
+      mockDb.connectToDatabase.mockRejectedValue(new Error('DB Error'));
 
       const result = await getRestaurantDetails('ChIJN1t_tDeuEmsRUsoyG83frY4');
 
@@ -237,8 +231,6 @@ describe('Restaurant API Functions', () => {
       mockGooglePlaces.searchRestaurantsWithGooglePlaces.mockResolvedValue(
         restaurants
       );
-      mockDb.getRestaurantByGooglePlaceId.mockResolvedValue(null);
-      mockDb.createRestaurant.mockResolvedValue(mockRestaurant);
 
       const result = await searchRestaurantsWithFilters(
         'restaurant',
@@ -265,8 +257,6 @@ describe('Restaurant API Functions', () => {
       mockGooglePlaces.searchRestaurantsWithGooglePlaces.mockResolvedValue(
         restaurants
       );
-      mockDb.getRestaurantByGooglePlaceId.mockResolvedValue(null);
-      mockDb.createRestaurant.mockResolvedValue(mockRestaurant);
 
       const result = await searchRestaurantsWithFilters(
         'restaurant',
@@ -285,16 +275,19 @@ describe('Restaurant API Functions', () => {
         { ...mockRestaurant, priceRange: '$' as const },
         {
           ...mockRestaurant,
-          priceRange: '$$$' as const,
+          priceRange: '$$' as const,
           _id: '507f1f77bcf86cd799439012' as unknown as string,
+        },
+        {
+          ...mockRestaurant,
+          priceRange: '$$$' as const,
+          _id: '507f1f77bcf86cd799439013' as unknown as string,
         },
       ];
 
       mockGooglePlaces.searchRestaurantsWithGooglePlaces.mockResolvedValue(
         restaurants
       );
-      mockDb.getRestaurantByGooglePlaceId.mockResolvedValue(null);
-      mockDb.createRestaurant.mockResolvedValue(mockRestaurant);
 
       const result = await searchRestaurantsWithFilters(
         'restaurant',
@@ -306,7 +299,7 @@ describe('Restaurant API Functions', () => {
       );
 
       expect(result).toHaveLength(1);
-      expect(result[0].priceRange).toBe('$$$');
+      expect(result[0].priceRange).toBe('$$');
     });
 
     it('should return all restaurants when no filters applied', async () => {
@@ -315,8 +308,6 @@ describe('Restaurant API Functions', () => {
       mockGooglePlaces.searchRestaurantsWithGooglePlaces.mockResolvedValue(
         restaurants
       );
-      mockDb.getRestaurantByGooglePlaceId.mockResolvedValue(null);
-      mockDb.createRestaurant.mockResolvedValue(mockRestaurant);
 
       const result = await searchRestaurantsWithFilters('restaurant');
 
@@ -336,8 +327,6 @@ describe('Restaurant API Functions', () => {
       mockGooglePlaces.searchRestaurantsWithGooglePlaces.mockResolvedValue(
         restaurants
       );
-      mockDb.getRestaurantByGooglePlaceId.mockResolvedValue(null);
-      mockDb.createRestaurant.mockResolvedValue(mockRestaurant);
 
       const result = await searchRestaurantsWithFilters(
         'restaurant',

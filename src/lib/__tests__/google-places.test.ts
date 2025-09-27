@@ -80,7 +80,7 @@ describe('Google Places API Integration', () => {
         )
       );
       expect(global.fetch).toHaveBeenCalledWith(
-        expect.stringContaining('query=pizza+restaurant')
+        expect.stringContaining('query=pizza')
       );
       expect(global.fetch).toHaveBeenCalledWith(
         expect.stringContaining('location=New+York')

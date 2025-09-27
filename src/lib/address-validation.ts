@@ -91,7 +91,7 @@ export async function validateAddress(
     }
 
     const data = await response.json();
-    return data;
+    return data.result;
   } catch (error) {
     console.error('Address validation error:', error);
     return null;

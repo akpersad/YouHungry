@@ -66,6 +66,8 @@ function convertGooglePlaceToRestaurant(
     cuisine = 'Takeaway';
   } else if (place.types.includes('meal_delivery')) {
     cuisine = 'Delivery';
+  } else if (place.types.includes('italian_restaurant')) {
+    cuisine = 'Italian';
   } else {
     // For restaurants without specific types, we'll need to use Place Details
     // to get more specific cuisine information. For now, keep as 'Restaurant'
@@ -301,7 +303,7 @@ export async function searchRestaurantsByLocation(
     return restaurants as Restaurant[];
   } catch (error) {
     console.error('Google Places API nearby search error:', error);
-    throw error;
+    return [];
   }
 }
 

@@ -1,5 +1,12 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { RestaurantSearchForm } from '../RestaurantSearchForm';
+import * as addressValidation from '@/lib/address-validation';
+
+// Mock the address validation module
+jest.mock('@/lib/address-validation');
+const mockAddressValidation = addressValidation as jest.Mocked<
+  typeof addressValidation
+>;
 
 // Mock geolocation API
 const mockGeolocation = {
@@ -16,6 +23,37 @@ describe('RestaurantSearchForm', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // Mock address validation to return valid by default
+    mockAddressValidation.getAddressSuggestions.mockResolvedValue([]);
+    mockAddressValidation.validateAddress.mockResolvedValue({
+      formattedAddress: 'New York, NY, USA',
+      postalAddress: {
+        addressLines: ['New York'],
+        locality: 'New York',
+        administrativeArea: 'NY',
+        postalCode: '10001',
+        regionCode: 'US',
+      },
+      addressComponents: [],
+      missingComponentTypes: [],
+      unconfirmedComponentTypes: [],
+      unresolvedTokens: [],
+      metadata: {
+        business: false,
+        poBox: false,
+        residential: true,
+      },
+      verdict: {
+        inputGranularity: 'LOCALITY' as const,
+        validationGranularity: 'LOCALITY' as const,
+        geocodeGranularity: 'LOCALITY' as const,
+        addressComplete: true,
+        hasUnconfirmedComponents: false,
+        hasInferredComponents: false,
+        hasReplacedComponents: false,
+      },
+    });
+    mockAddressValidation.isAddressValidForSearch.mockReturnValue(true);
   });
 
   it('renders search form correctly', () => {
@@ -41,10 +79,19 @@ describe('RestaurantSearchForm', () => {
 
     fireEvent.change(queryInput, { target: { value: 'pizza' } });
     fireEvent.change(locationInput, { target: { value: 'New York' } });
+
+    // Wait for address validation to complete
+    await waitFor(
+      () => {
+        expect(submitButton).not.toBeDisabled();
+      },
+      { timeout: 3000 }
+    );
+
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(mockOnSearch).toHaveBeenCalledWith('pizza', 'New York', {});
+      expect(mockOnSearch).toHaveBeenCalledWith('New York', 'pizza', {});
     });
   });
 
@@ -83,10 +130,19 @@ describe('RestaurantSearchForm', () => {
 
     fireEvent.change(queryInput, { target: { value: '  pizza  ' } });
     fireEvent.change(locationInput, { target: { value: 'New York' } });
+
+    // Wait for address validation to complete
+    await waitFor(
+      () => {
+        expect(submitButton).not.toBeDisabled();
+      },
+      { timeout: 3000 }
+    );
+
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(mockOnSearch).toHaveBeenCalledWith('pizza', 'New York', {});
+      expect(mockOnSearch).toHaveBeenCalledWith('New York', 'pizza', {});
     });
   });
 
@@ -123,10 +179,19 @@ describe('RestaurantSearchForm', () => {
     fireEvent.change(locationInput, { target: { value: 'New York' } });
     fireEvent.change(cuisineInput, { target: { value: 'Italian' } });
     fireEvent.change(minRatingInput, { target: { value: '4.0' } });
+
+    // Wait for address validation to complete
+    await waitFor(
+      () => {
+        expect(submitButton).not.toBeDisabled();
+      },
+      { timeout: 3000 }
+    );
+
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(mockOnSearch).toHaveBeenCalledWith('restaurant', 'New York', {
+      expect(mockOnSearch).toHaveBeenCalledWith('New York', 'restaurant', {
         cuisine: 'Italian',
         minRating: 4.0,
       });
@@ -256,10 +321,19 @@ describe('RestaurantSearchForm', () => {
     fireEvent.change(locationInput, { target: { value: 'New York' } });
     fireEvent.change(cuisineInput, { target: { value: 'Italian' } });
     fireEvent.change(cuisineInput, { target: { value: '' } }); // Clear cuisine
+
+    // Wait for address validation to complete
+    await waitFor(
+      () => {
+        expect(submitButton).not.toBeDisabled();
+      },
+      { timeout: 3000 }
+    );
+
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(mockOnSearch).toHaveBeenCalledWith('restaurant', 'New York', {
+      expect(mockOnSearch).toHaveBeenCalledWith('New York', 'restaurant', {
         cuisine: undefined,
       });
     });

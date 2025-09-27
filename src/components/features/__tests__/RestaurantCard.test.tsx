@@ -70,7 +70,7 @@ describe('RestaurantCard', () => {
     // Next.js Image component transforms the src URL, so we check for the pattern
     expect(photo).toHaveAttribute(
       'src',
-      expect.stringContaining('https%3A%2F%2Fexample.com%2Fphoto1.jpg')
+      expect.stringContaining('https://example.com/photo1.jpg')
     );
   });
 

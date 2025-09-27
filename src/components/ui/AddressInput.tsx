@@ -29,6 +29,7 @@ interface AddressInputProps {
   className?: string;
   required?: boolean;
   disabled?: boolean;
+  id?: string;
 }
 
 export function AddressInput({
@@ -40,6 +41,7 @@ export function AddressInput({
   className = '',
   required = false,
   disabled = false,
+  id,
 }: AddressInputProps) {
   const [suggestions, setSuggestions] = useState<AddressSuggestion[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -53,6 +55,7 @@ export function AddressInput({
   const inputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<NodeJS.Timeout | undefined>(undefined);
+  const validationDebounceRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
   // Debounced search for suggestions
   const searchSuggestions = useCallback(
@@ -116,9 +119,12 @@ export function AddressInput({
     onChange(newValue);
     setShowSuggestions(true);
 
-    // Clear previous debounce
+    // Clear previous debounces
     if (debounceRef.current) {
       clearTimeout(debounceRef.current);
+    }
+    if (validationDebounceRef.current) {
+      clearTimeout(validationDebounceRef.current);
     }
 
     // Debounce suggestions search
@@ -127,7 +133,7 @@ export function AddressInput({
     }, 300);
 
     // Debounce validation (longer delay)
-    debounceRef.current = setTimeout(() => {
+    validationDebounceRef.current = setTimeout(() => {
       validateCurrentAddress(newValue);
     }, 1000);
   };
@@ -187,9 +193,13 @@ export function AddressInput({
         break;
       case 'ArrowUp':
         e.preventDefault();
-        const prevIndex =
-          currentIndex > 0 ? currentIndex - 1 : suggestionElements.length - 1;
-        (suggestionElements[prevIndex] as HTMLElement)?.focus();
+        if (currentIndex === 0) {
+          // If we're at the first suggestion, return focus to input
+          inputRef.current?.focus();
+        } else {
+          const prevIndex = currentIndex - 1;
+          (suggestionElements[prevIndex] as HTMLElement)?.focus();
+        }
         break;
       case 'Enter':
         e.preventDefault();
@@ -211,11 +221,14 @@ export function AddressInput({
     }
   }, [value, searchSuggestions]);
 
-  // Cleanup debounce on unmount
+  // Cleanup debounces on unmount
   useEffect(() => {
     return () => {
       if (debounceRef.current) {
         clearTimeout(debounceRef.current);
+      }
+      if (validationDebounceRef.current) {
+        clearTimeout(validationDebounceRef.current);
       }
     };
   }, []);
@@ -224,6 +237,7 @@ export function AddressInput({
     <div className={`relative ${className}`}>
       <Input
         ref={inputRef}
+        id={id}
         type="text"
         value={value}
         onChange={handleInputChange}
