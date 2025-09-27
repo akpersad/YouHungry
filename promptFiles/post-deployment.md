@@ -1,48 +1,39 @@
 # Post-Deployment Setup Guide - You Hungry? App
 
-This document outlines all the steps required to complete the production setup after deploying the You Hungry? app to Vercel.
+This document outlines the steps required to complete the production setup **after** deploying the You Hungry? app to Vercel.
+
+> **Note**: Make sure you've completed the [Pre-Deployment Checklist](./pre-deployment.md) before following this guide.
 
 ## 🚀 Prerequisites
 
 - [ ] App deployed to Vercel
-- [ ] Production domain configured
-- [ ] All environment variables set in Vercel dashboard
+- [ ] Production domain configured and accessible
+- [ ] Pre-deployment environment variables already set
+- [ ] Live URL available (e.g., `https://your-app.vercel.app`)
 
-## 🔧 Environment Variables Setup
+## 🔧 Post-Deployment Environment Variables
 
-### Required Environment Variables in Vercel
+These variables require the live URL and must be set after deployment:
+
+### URL-Dependent Environment Variables
 
 Set these in your Vercel project dashboard under Settings > Environment Variables:
 
 ```bash
-# Database
-MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/you-hungry?retryWrites=true&w=majority
-MONGODB_DATABASE=you-hungry
+# App Configuration (requires live URL)
+NEXT_PUBLIC_APP_URL=https://your-app.vercel.app
 
-# Authentication (Clerk)
+# Clerk Production Keys (requires live URL for webhook)
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_live_...
 CLERK_SECRET_KEY=sk_live_...
 CLERK_WEBHOOK_SECRET=whsec_...
-
-# Google APIs
-GOOGLE_PLACES_API_KEY=AIza...
-GOOGLE_ADDRESS_VALIDATION_API_KEY=AIza...
-
-# Twilio (SMS)
-TWILIO_ACCOUNT_SID=AC...
-TWILIO_AUTH_TOKEN=...
-TWILIO_PHONE_NUMBER=+1...
-
-# App Configuration
-NEXT_PUBLIC_APP_URL=https://your-app.vercel.app
 ```
 
 ### Environment Variable Notes
 
 - **Clerk Keys**: Switch from `pk_test_` and `sk_test_` to `pk_live_` and `sk_live_` for production
-- **MongoDB**: Ensure your cluster allows connections from Vercel's IP ranges
-- **Google APIs**: Update API key restrictions to allow your production domain
-- **Twilio**: Use production credentials (not test credentials)
+- **App URL**: Must be set to your actual Vercel domain or custom domain
+- **Webhook Secret**: Generated after setting up Clerk webhook with live URL
 
 ## 🔗 Clerk Webhook Setup
 
@@ -80,51 +71,49 @@ NEXT_PUBLIC_APP_URL=https://your-app.vercel.app
 2. Check the Vercel function logs to ensure webhook is working
 3. Verify user is created in your MongoDB database
 
-## 🗄️ MongoDB Atlas Configuration
+## 🗄️ MongoDB Atlas Post-Deployment Verification
 
-### Step 1: Network Access
+### Database Connection Testing
 
-1. Go to [https://cloud.mongodb.com](https://cloud.mongodb.com)
-2. Navigate to **Network Access**
-3. Add **"0.0.0.0/0"** to allow connections from anywhere (or restrict to Vercel IPs)
-4. Click **"Add Entry"**
+1. **Test production connection**
+   - Verify MongoDB connection works from Vercel
+   - Check connection logs in Vercel dashboard
+   - Test database operations through your deployed app
 
-### Step 2: Database User
+2. **Database Collections Verification**
 
-1. Go to **Database Access**
-2. Ensure you have a user with read/write permissions
-3. Update the `MONGODB_URI` with the correct username/password
+   Verify these collections exist and are accessible:
+   - `users`
+   - `restaurants`
+   - `collections`
+   - `groups`
+   - `decisions`
+   - `friendships`
 
-### Step 3: Database Collections
+3. **Performance Monitoring**
+   - Monitor database connection counts
+   - Check for slow queries
+   - Set up alerts for connection issues
 
-Verify these collections exist in your `you-hungry` database:
+## 🔍 Google APIs Post-Deployment Configuration
 
-- `users`
-- `restaurants`
-- `collections`
-- `groups`
-- `decisions`
-- `friendships`
+### Update API Key Restrictions
 
-## 🔍 Google APIs Configuration
+Now that you have a live URL, update your Google API key restrictions:
 
-### Google Places API
+1. **Google Places API**
+   - Go to [Google Cloud Console](https://console.cloud.google.com)
+   - Navigate to **APIs & Services > Credentials**
+   - Select your API key
+   - **Update Application restrictions** to include your live domain:
+     - Add `https://your-app.vercel.app` to HTTP referrers (if needed)
+     - Or keep as "None" for server-side use
+   - Ensure **Places API** is enabled
 
-1. Go to [Google Cloud Console](https://console.cloud.google.com)
-2. Navigate to **APIs & Services > Credentials**
-3. Select your API key
-4. **CRITICAL**: Under **Application restrictions**, set to **"None"** for server-side use
-   - ❌ **DO NOT** use "HTTP referrers" restriction for server-side API calls
-   - ✅ **MUST** use "None" to allow server-side requests from Vercel
-5. Under **API restrictions**, ensure **Places API** is enabled
-6. **Important**: This API key will be used server-side, so referer restrictions will block requests
-
-### Google Address Validation API
-
-1. In the same Google Cloud Console
-2. Enable **Address Validation API**
-3. **CRITICAL**: Set **Application restrictions** to **"None"** for server-side use
-4. Ensure the API key has access to this service
+2. **Google Address Validation API**
+   - Update restrictions for your live domain
+   - Test API calls from your deployed app
+   - Monitor API usage and quotas
 
 ### ⚠️ Common Google Places API Issues
 
@@ -157,98 +146,100 @@ Verify these collections exist in your `you-hungry` database:
 4. Check API usage in Google Cloud Console
 5. Review server logs for error messages
 
-## 📱 Twilio Configuration
+## 📱 Twilio Post-Deployment Testing
 
-### Step 1: Phone Number Setup
+### SMS Integration Testing
 
-1. Go to [Twilio Console](https://console.twilio.com)
-2. Navigate to **Phone Numbers > Manage > Active numbers**
-3. Purchase a phone number if you haven't already
-4. Note the phone number (format: +1234567890)
+1. **Test SMS functionality**
+   - Send test SMS from your deployed app
+   - Verify SMS delivery to test numbers
+   - Check Twilio logs for any delivery issues
+   - Test SMS formatting and content
 
-### Step 2: Account Credentials
+2. **Monitor Twilio usage**
+   - Check SMS delivery rates
+   - Monitor costs and usage
+   - Set up billing alerts
+   - Review delivery logs for any issues
 
-1. Go to **Account > API keys & tokens**
-2. Copy your **Account SID** and **Auth Token**
-3. Add these to your Vercel environment variables
+## 🔒 Security Post-Deployment Verification
 
-### Step 3: Test SMS
+### CORS Testing
 
-1. Send a test SMS to verify the integration works
-2. Check Twilio logs for any delivery issues
+1. **Test CORS configuration**
+   - Verify API endpoints work from your live domain
+   - Test cross-origin requests
+   - Check for CORS errors in browser console
+   - Ensure preflight requests work correctly
 
-## 🔒 Security Configuration
+2. **Security headers verification**
+   - Check security headers are properly set
+   - Verify HTTPS is enforced
+   - Test authentication flow security
 
-### CORS Settings
+### Rate Limiting Testing
 
-Ensure your API routes have proper CORS configuration:
+1. **Test rate limits**
+   - Verify rate limiting is working on API endpoints
+   - Test with multiple requests
+   - Check rate limit responses
+   - Monitor for abuse patterns
 
-```typescript
-// Example for API routes
-const corsHeaders = {
-  'Access-Control-Allow-Origin': 'https://your-app.vercel.app',
-  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-};
-```
+## 📊 Monitoring & Analytics Activation
 
-### Rate Limiting
+### Enable Production Monitoring
 
-Consider implementing rate limiting for API endpoints:
+1. **Vercel Analytics**
+   - Enable Vercel Analytics in your project dashboard
+   - Verify analytics tracking is working
+   - Set up performance monitoring
+   - Configure error tracking
 
-- Restaurant search: 100 requests per minute per user
-- Collection operations: 50 requests per minute per user
-- Decision making: 10 requests per minute per user
+2. **Error Tracking**
+   - Activate error tracking service (Sentry, etc.)
+   - Verify error reporting is working
+   - Set up alert notifications
+   - Test error reporting functionality
 
-## 📊 Monitoring & Analytics
+3. **Database Monitoring**
+   - Verify MongoDB Atlas monitoring is active
+   - Set up performance alerts
+   - Monitor connection counts and query performance
+   - Configure alerts for high memory usage or slow queries
 
-### Vercel Analytics
+## 🧪 Post-Deployment Testing Checklist
 
-1. Enable Vercel Analytics in your project dashboard
-2. Monitor performance metrics and errors
-3. Set up alerts for critical issues
+### Production Authentication Flow
 
-### Error Tracking
-
-1. Consider integrating Sentry or similar error tracking
-2. Monitor database connection issues
-3. Track API failures and timeouts
-
-### Database Monitoring
-
-1. Set up MongoDB Atlas monitoring
-2. Monitor connection counts and query performance
-3. Set up alerts for high memory usage or slow queries
-
-## 🧪 Testing Checklist
-
-### Authentication Flow
-
-- [ ] User can sign up with email
+- [ ] User can sign up with email on live site
 - [ ] User can sign in with existing account
-- [ ] User profile is created in database
-- [ ] User can sign out
+- [ ] User profile is created in production database
+- [ ] User can sign out successfully
 - [ ] Protected routes redirect to sign-in
+- [ ] Clerk webhook creates users automatically
 
-### Database Operations
+### Production Database Operations
 
-- [ ] User data is properly stored
+- [ ] User data is properly stored in production DB
 - [ ] Collections can be created and retrieved
-- [ ] Restaurant data is searchable
-- [ ] Webhook creates users automatically
+- [ ] Restaurant data is searchable from live site
+- [ ] Database connections are stable
+- [ ] No connection timeout issues
 
-### API Endpoints
+### Production API Endpoints
 
-- [ ] Restaurant search returns results
+- [ ] Restaurant search returns results from live site
 - [ ] Collection CRUD operations work
-- [ ] Error handling works properly
-- [ ] Rate limiting is in place
+- [ ] Error handling works properly in production
+- [ ] Rate limiting is functioning
+- [ ] API responses are fast and reliable
 
-### External Integrations
+### Production External Integrations
 
-- [ ] Google Places API returns restaurant data
-- [ ] Twilio can send SMS (if implemented)
-- [ ] Address validation works (if implemented)
+- [ ] Google Places API returns restaurant data from live site
+- [ ] Twilio can send SMS from production (if implemented)
+- [ ] Address validation works from live site (if implemented)
+- [ ] All API keys work with production domain
 
 ## 🚨 Troubleshooting
 
@@ -347,26 +338,30 @@ Consider implementing rate limiting for API endpoints:
 - **MongoDB**: [docs.mongodb.com](https://docs.mongodb.com)
 - **Vercel**: [vercel.com/docs](https://vercel.com/docs)
 
-## ✅ Deployment Checklist
+## ✅ Post-Deployment Completion Checklist
 
-- [ ] App deployed to Vercel
+- [ ] Live URL accessible and working
 - [ ] Custom domain configured (if applicable)
-- [ ] All environment variables set
+- [ ] URL-dependent environment variables set
 - [ ] Clerk webhook configured and tested
-- [ ] MongoDB Atlas configured
-- [ ] Google APIs configured
-- [ ] Twilio configured (if using SMS)
-- [ ] Security settings reviewed
-- [ ] Monitoring set up
-- [ ] All tests passing
-- [ ] Documentation updated
-- [ ] Team notified of deployment
+- [ ] Clerk production keys activated
+- [ ] Google API restrictions updated for live domain
+- [ ] Twilio SMS tested in production (if using SMS)
+- [ ] Security settings verified
+- [ ] Monitoring activated and working
+- [ ] All production tests passing
+- [ ] Performance monitoring active
+- [ ] Error tracking configured
+- [ ] Database monitoring active
+- [ ] Team notified of successful deployment
 
 ---
 
 ## 📝 Notes
 
-- Keep this document updated as you add new services or configurations
+- This document focuses on post-deployment tasks that require a live URL
+- Pre-deployment tasks are covered in [pre-deployment.md](./pre-deployment.md)
 - Test all integrations thoroughly before marking as complete
-- Consider setting up staging environment for testing changes
+- Keep this document updated as you add new services or configurations
 - Document any custom configurations or workarounds
+- Consider setting up staging environment for testing changes
