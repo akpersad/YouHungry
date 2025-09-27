@@ -91,6 +91,14 @@ export function AddressInput({
         return;
       }
 
+      // Skip validation for "Current Location" - it's handled separately
+      if (address.trim() === 'Current Location') {
+        setIsValid(true);
+        setValidationError(null);
+        onValidationChange?.(true);
+        return;
+      }
+
       try {
         const validationResult = await validateAddress(address);
         if (validationResult) {

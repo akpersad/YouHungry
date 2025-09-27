@@ -21,16 +21,52 @@ export const userProfileSchema = z.object({
 
 // Collection validation schemas
 export const collectionSchema = z.object({
-  name: z.string().min(1).max(100),
+  name: z.string().min(1, 'Collection name is required').max(100),
   description: z.string().max(500).optional(),
   type: z.enum(['personal', 'group']),
 });
 
+// Simple validation functions for forms
+export const validateCollectionName = (name: string): string | null => {
+  if (!name.trim()) {
+    return 'Collection name is required';
+  }
+  if (name.length > 100) {
+    return 'Collection name must be 100 characters or less';
+  }
+  return null;
+};
+
+export const validateCollectionDescription = (
+  description: string
+): string | null => {
+  if (description.length > 500) {
+    return 'Description must be 500 characters or less';
+  }
+  return null;
+};
+
 // Restaurant validation schemas
 export const restaurantSearchSchema = z.object({
   query: z.string().max(100).optional(),
-  location: z.string().min(1).max(200),
+  location: z.string().min(1, 'Location is required').max(200),
+  distance: z.number().min(1).max(50).default(10),
+  cuisine: z.string().max(100).optional(),
+  minRating: z.number().min(0).max(5).optional(),
+  minPrice: z.number().min(1).max(4).optional(),
+  maxPrice: z.number().min(1).max(4).optional(),
 });
+
+// Simple validation functions for restaurant search
+export const validateLocation = (location: string): string | null => {
+  if (!location.trim()) {
+    return 'Location is required';
+  }
+  if (location.length > 200) {
+    return 'Location must be 200 characters or less';
+  }
+  return null;
+};
 
 export const restaurantUpdateSchema = z.object({
   priceRange: z.enum(['$', '$$', '$$$', '$$$$']).optional(),

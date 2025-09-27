@@ -2,9 +2,9 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
 import { Card } from '@/components/ui/Card';
 import { AddressInput } from '@/components/ui/AddressInput';
+import { Input } from '@/components/ui/Input';
 
 interface RestaurantSearchFormProps {
   onSearch: (location: string, query?: string, filters?: SearchFilters) => void;
@@ -23,18 +23,52 @@ export function RestaurantSearchForm({
   onSearch,
   isLoading = false,
 }: RestaurantSearchFormProps) {
-  const [query, setQuery] = useState('');
   const [location, setLocation] = useState('');
+  const [query, setQuery] = useState('');
+  const [distance, setDistance] = useState(10);
+  const [cuisine, setCuisine] = useState('');
+  const [minRating, setMinRating] = useState(0);
+  const [minPrice, setMinPrice] = useState(0);
+  const [maxPrice, setMaxPrice] = useState(0);
   const [useCurrentLocation, setUseCurrentLocation] = useState(false);
-  const [filters, setFilters] = useState<SearchFilters>({});
+  const [currentLocationCoords, setCurrentLocationCoords] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
   const [showFilters, setShowFilters] = useState(false);
   const [isAddressValid, setIsAddressValid] = useState(false);
+  const [error, setError] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!location.trim() || !isAddressValid) return;
 
-    onSearch(location.trim(), query.trim() || undefined, filters);
+    if (!isAddressValid) {
+      setError('Please enter a valid address');
+      return;
+    }
+
+    if (!location.trim()) {
+      setError('Location is required');
+      return;
+    }
+
+    setError('');
+
+    const filters: SearchFilters = {
+      distance,
+      cuisine: cuisine || undefined,
+      minRating: minRating || undefined,
+      minPrice: minPrice || undefined,
+      maxPrice: maxPrice || undefined,
+    };
+
+    // If using current location, pass the coordinates directly
+    let searchLocation = location.trim();
+    if (useCurrentLocation && currentLocationCoords) {
+      searchLocation = `${currentLocationCoords.lat},${currentLocationCoords.lng}`;
+    }
+
+    onSearch(searchLocation, query.trim() || undefined, filters);
   };
 
   const handleCurrentLocation = async () => {
@@ -42,10 +76,14 @@ export function RestaurantSearchForm({
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
           (position) => {
-            setLocation(
-              `${position.coords.latitude},${position.coords.longitude}`
-            );
+            const coords = {
+              lat: position.coords.latitude,
+              lng: position.coords.longitude,
+            };
+            setCurrentLocationCoords(coords);
             setUseCurrentLocation(true);
+            setLocation('Current Location');
+            setIsAddressValid(true);
           },
           (error) => {
             console.error('Error getting location:', error);
@@ -62,28 +100,30 @@ export function RestaurantSearchForm({
     }
   };
 
-  const handleFilterChange = (
-    key: keyof SearchFilters,
-    value: string | number
-  ) => {
-    setFilters((prev) => ({
-      ...prev,
-      [key]: value === '' ? undefined : value,
-    }));
-  };
-
   const handleAddressSelect = (address: string) => {
     setLocation(address);
     setUseCurrentLocation(false);
+    setCurrentLocationCoords(null);
   };
 
   const handleAddressValidationChange = (isValid: boolean) => {
-    setIsAddressValid(isValid);
+    // Only update validation if not using current location
+    if (!useCurrentLocation) {
+      setIsAddressValid(isValid);
+    }
   };
 
   return (
     <Card className="p-6">
       <form onSubmit={handleSubmit} className="space-y-4">
+        {error && (
+          <div className="p-3 bg-error/10 border border-error/20 rounded-lg">
+            <p className="text-error text-sm" role="alert">
+              {error}
+            </p>
+          </div>
+        )}
+
         {/* Location */}
         <div>
           <label
@@ -96,10 +136,7 @@ export function RestaurantSearchForm({
             <AddressInput
               id="location"
               value={location}
-              onChange={(value) => {
-                setLocation(value);
-                setUseCurrentLocation(false);
-              }}
+              onChange={setLocation}
               onAddressSelect={handleAddressSelect}
               onValidationChange={handleAddressValidationChange}
               placeholder="Enter address or city..."
@@ -122,34 +159,28 @@ export function RestaurantSearchForm({
               ✓ Using current location
             </p>
           )}
-          {location && !isAddressValid && !useCurrentLocation && (
-            <p className="text-sm text-amber-600 mt-1">
-              ⚠ Address validation in progress...
-            </p>
-          )}
         </div>
 
         {/* Distance */}
         <div>
           <label
             htmlFor="distance"
-            className="block text-sm font-medium text-gray-700 mb-2"
+            className="block text-sm font-medium text-gray-700 mb-1"
           >
             Search Radius
           </label>
           <select
             id="distance"
-            value={filters.distance || 10}
-            onChange={(e) =>
-              handleFilterChange('distance', parseInt(e.target.value))
-            }
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={distance}
+            onChange={(e) => setDistance(Number(e.target.value))}
+            className="input-base"
+            disabled={isLoading}
           >
-            <option value="1">1 mile</option>
-            <option value="5">5 miles</option>
-            <option value="10">10 miles</option>
-            <option value="25">25 miles</option>
-            <option value="50">50 miles</option>
+            <option value={1}>1 mile</option>
+            <option value={5}>5 miles</option>
+            <option value={10}>10 miles</option>
+            <option value={25}>25 miles</option>
+            <option value={50}>50 miles</option>
           </select>
         </div>
 
@@ -157,17 +188,17 @@ export function RestaurantSearchForm({
         <div>
           <label
             htmlFor="query"
-            className="block text-sm font-medium text-gray-700 mb-2"
+            className="block text-sm font-medium text-gray-700 mb-1"
           >
             Restaurant name or cuisine (optional)
           </label>
           <Input
             id="query"
             type="text"
-            placeholder="e.g., Italian, pizza, sushi..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="w-full"
+            placeholder="e.g., Italian, pizza, sushi..."
+            disabled={isLoading}
           />
         </div>
 
@@ -178,6 +209,7 @@ export function RestaurantSearchForm({
             variant="outline"
             onClick={() => setShowFilters(!showFilters)}
             className="w-full"
+            disabled={isLoading}
           >
             {showFilters ? 'Hide' : 'Show'} Filters
           </Button>
@@ -196,9 +228,10 @@ export function RestaurantSearchForm({
               <Input
                 id="cuisine"
                 type="text"
+                value={cuisine}
+                onChange={(e) => setCuisine(e.target.value)}
                 placeholder="e.g., Italian, Chinese..."
-                value={filters.cuisine || ''}
-                onChange={(e) => handleFilterChange('cuisine', e.target.value)}
+                disabled={isLoading}
               />
             </div>
 
@@ -212,14 +245,13 @@ export function RestaurantSearchForm({
               <Input
                 id="minRating"
                 type="number"
+                value={minRating}
+                onChange={(e) => setMinRating(Number(e.target.value))}
                 min="0"
                 max="5"
                 step="0.1"
                 placeholder="e.g., 4.0"
-                value={filters.minRating || ''}
-                onChange={(e) =>
-                  handleFilterChange('minRating', parseFloat(e.target.value))
-                }
+                disabled={isLoading}
               />
             </div>
 
@@ -232,17 +264,16 @@ export function RestaurantSearchForm({
               </label>
               <select
                 id="minPrice"
-                value={filters.minPrice || ''}
-                onChange={(e) =>
-                  handleFilterChange('minPrice', parseInt(e.target.value))
-                }
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={minPrice}
+                onChange={(e) => setMinPrice(Number(e.target.value))}
+                className="input-base"
+                disabled={isLoading}
               >
-                <option value="">Any</option>
-                <option value="1">$ (Budget)</option>
-                <option value="2">$$ (Moderate)</option>
-                <option value="3">$$$ (Expensive)</option>
-                <option value="4">$$$$ (Very Expensive)</option>
+                <option value={0}>Any</option>
+                <option value={1}>$ (Budget)</option>
+                <option value={2}>$$ (Moderate)</option>
+                <option value={3}>$$$ (Expensive)</option>
+                <option value={4}>$$$$ (Very Expensive)</option>
               </select>
             </div>
 
@@ -255,17 +286,16 @@ export function RestaurantSearchForm({
               </label>
               <select
                 id="maxPrice"
-                value={filters.maxPrice || ''}
-                onChange={(e) =>
-                  handleFilterChange('maxPrice', parseInt(e.target.value))
-                }
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={maxPrice}
+                onChange={(e) => setMaxPrice(Number(e.target.value))}
+                className="input-base"
+                disabled={isLoading}
               >
-                <option value="">Any</option>
-                <option value="1">$ (Budget)</option>
-                <option value="2">$$ (Moderate)</option>
-                <option value="3">$$$ (Expensive)</option>
-                <option value="4">$$$$ (Very Expensive)</option>
+                <option value={0}>Any</option>
+                <option value={1}>$ (Budget)</option>
+                <option value={2}>$$ (Moderate)</option>
+                <option value={3}>$$$ (Expensive)</option>
+                <option value={4}>$$$$ (Very Expensive)</option>
               </select>
             </div>
           </div>
@@ -274,17 +304,11 @@ export function RestaurantSearchForm({
         {/* Submit Button */}
         <Button
           type="submit"
-          disabled={!location.trim() || !isAddressValid || isLoading}
+          disabled={!isAddressValid || isLoading}
           className="w-full"
-          isLoading={isLoading}
         >
           {isLoading ? 'Searching...' : 'Search Restaurants'}
         </Button>
-        {location && !isAddressValid && !useCurrentLocation && (
-          <p className="text-sm text-red-600 text-center mt-2">
-            Please enter a valid address to search for restaurants
-          </p>
-        )}
       </form>
     </Card>
   );

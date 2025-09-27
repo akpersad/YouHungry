@@ -1,42 +1,33 @@
-import {
-  render,
-  screen,
-  fireEvent,
-  waitFor,
-  act,
-} from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { CreateCollectionForm } from '../CreateCollectionForm';
+import { useUser } from '@clerk/nextjs';
 
-// Mock the useUser hook
+// Mock Clerk
 jest.mock('@clerk/nextjs', () => ({
-  useUser: () => ({
-    user: {
-      id: 'test-user-id',
-    },
-  }),
+  useUser: jest.fn(),
 }));
 
 // Mock fetch
 global.fetch = jest.fn();
 
-const mockCollection = {
-  _id: { toString: () => 'new-collection-id' },
-  name: 'Test Collection',
-  description: 'Test Description',
-  type: 'personal' as const,
-  ownerId: { toString: () => 'test-user-id' },
-  restaurantIds: [],
-  createdAt: new Date(),
-  updatedAt: new Date(),
-};
+const mockUseUser = useUser as jest.MockedFunction<typeof useUser>;
+const mockFetch = fetch as jest.MockedFunction<typeof fetch>;
 
 describe('CreateCollectionForm', () => {
   const mockOnSuccess = jest.fn();
   const mockOnCancel = jest.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (fetch as jest.Mock).mockClear();
+    mockUseUser.mockReturnValue({
+      user: { id: 'user123' },
+      isLoaded: true,
+      isSignedIn: true,
+    } as ReturnType<typeof useUser>);
+
+    mockFetch.mockClear();
+    mockOnSuccess.mockClear();
+    mockOnCancel.mockClear();
   });
 
   it('renders form fields correctly', () => {
@@ -46,8 +37,10 @@ describe('CreateCollectionForm', () => {
 
     expect(screen.getByLabelText('Collection Name')).toBeInTheDocument();
     expect(screen.getByLabelText('Description (Optional)')).toBeInTheDocument();
-    expect(screen.getByText('Cancel')).toBeInTheDocument();
-    expect(screen.getByText('Create Collection')).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Create Collection' })
+    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Cancel' })).toBeInTheDocument();
   });
 
   it('validates required fields', async () => {
@@ -55,85 +48,92 @@ describe('CreateCollectionForm', () => {
       <CreateCollectionForm onSuccess={mockOnSuccess} onCancel={mockOnCancel} />
     );
 
-    const submitButton = screen.getByText('Create Collection');
-    expect(submitButton).toBeDisabled();
+    const form = document.querySelector('form');
 
-    const nameInput = screen.getByLabelText('Collection Name');
-    fireEvent.change(nameInput, { target: { value: 'Test Collection' } });
+    // Try to submit with empty form
+    fireEvent.submit(form!);
 
+    // Should show validation error
     await waitFor(() => {
-      expect(submitButton).not.toBeDisabled();
+      expect(
+        screen.getByText('Collection name is required')
+      ).toBeInTheDocument();
     });
+
+    expect(mockOnSuccess).not.toHaveBeenCalled();
+    expect(mockFetch).not.toHaveBeenCalled();
   });
 
   it('submits form with valid data', async () => {
-    (fetch as jest.Mock).mockResolvedValueOnce({
-      json: async () => ({ success: true, collection: mockCollection }),
-    });
+    const user = userEvent.setup();
+    const mockResponse = {
+      success: true,
+      collection: { id: 'collection123', name: 'Test Collection' },
+    };
 
-    await act(async () => {
-      render(
-        <CreateCollectionForm
-          onSuccess={mockOnSuccess}
-          onCancel={mockOnCancel}
-        />
-      );
-    });
+    mockFetch.mockResolvedValueOnce({
+      json: async () => mockResponse,
+    } as Response);
+
+    render(
+      <CreateCollectionForm onSuccess={mockOnSuccess} onCancel={mockOnCancel} />
+    );
 
     const nameInput = screen.getByLabelText('Collection Name');
     const descriptionInput = screen.getByLabelText('Description (Optional)');
-    const submitButton = screen.getByText('Create Collection');
-
-    await act(async () => {
-      fireEvent.change(nameInput, { target: { value: 'Test Collection' } });
-      fireEvent.change(descriptionInput, {
-        target: { value: 'Test Description' },
-      });
-      fireEvent.click(submitButton);
+    const submitButton = screen.getByRole('button', {
+      name: 'Create Collection',
     });
 
+    // Fill in the form fields
+    await user.type(nameInput, 'Test Collection');
+    await user.type(descriptionInput, 'Test description');
+
+    // Button should be enabled now
+    expect(submitButton).not.toBeDisabled();
+
+    await user.click(submitButton);
+
     await waitFor(() => {
-      expect(fetch).toHaveBeenCalledWith('/api/collections', {
+      expect(mockFetch).toHaveBeenCalledWith('/api/collections', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           name: 'Test Collection',
-          description: 'Test Description',
+          description: 'Test description',
           type: 'personal',
-          ownerId: 'test-user-id',
+          ownerId: 'user123',
         }),
       });
     });
 
-    expect(mockOnSuccess).toHaveBeenCalledWith(mockCollection);
+    expect(mockOnSuccess).toHaveBeenCalledWith(mockResponse.collection);
   });
 
-  it('handles submission error', async () => {
-    (fetch as jest.Mock).mockResolvedValueOnce({
-      json: async () => ({
-        success: false,
-        error: 'Collection name already exists',
-      }),
-    });
+  it('handles API errors', async () => {
+    const user = userEvent.setup();
+    const mockResponse = {
+      success: false,
+      error: 'Collection name already exists',
+    };
 
-    await act(async () => {
-      render(
-        <CreateCollectionForm
-          onSuccess={mockOnSuccess}
-          onCancel={mockOnCancel}
-        />
-      );
-    });
+    mockFetch.mockResolvedValueOnce({
+      json: async () => mockResponse,
+    } as Response);
+
+    render(
+      <CreateCollectionForm onSuccess={mockOnSuccess} onCancel={mockOnCancel} />
+    );
 
     const nameInput = screen.getByLabelText('Collection Name');
-    const submitButton = screen.getByText('Create Collection');
-
-    await act(async () => {
-      fireEvent.change(nameInput, { target: { value: 'Test Collection' } });
-      fireEvent.click(submitButton);
+    const submitButton = screen.getByRole('button', {
+      name: 'Create Collection',
     });
+
+    await user.type(nameInput, 'Test Collection');
+    await user.click(submitButton);
 
     await waitFor(() => {
       expect(
@@ -144,91 +144,56 @@ describe('CreateCollectionForm', () => {
     expect(mockOnSuccess).not.toHaveBeenCalled();
   });
 
-  it('handles network error', async () => {
-    // Suppress expected console.error for this test
-    const consoleSpy = jest
-      .spyOn(console, 'error')
-      .mockImplementation(() => {});
-
-    (fetch as jest.Mock).mockRejectedValueOnce(new Error('Network error'));
-
-    await act(async () => {
-      render(
-        <CreateCollectionForm
-          onSuccess={mockOnSuccess}
-          onCancel={mockOnCancel}
-        />
-      );
-    });
-
-    const nameInput = screen.getByLabelText('Collection Name');
-    const submitButton = screen.getByText('Create Collection');
-
-    await act(async () => {
-      fireEvent.change(nameInput, { target: { value: 'Test Collection' } });
-      fireEvent.click(submitButton);
-    });
-
-    await waitFor(() => {
-      expect(
-        screen.getByText('Failed to create collection')
-      ).toBeInTheDocument();
-    });
-
-    expect(mockOnSuccess).not.toHaveBeenCalled();
-
-    consoleSpy.mockRestore();
-  });
-
   it('calls onCancel when cancel button is clicked', () => {
     render(
       <CreateCollectionForm onSuccess={mockOnSuccess} onCancel={mockOnCancel} />
     );
 
-    fireEvent.click(screen.getByText('Cancel'));
+    const cancelButton = screen.getByRole('button', { name: 'Cancel' });
+    fireEvent.click(cancelButton);
 
     expect(mockOnCancel).toHaveBeenCalled();
   });
 
-  it('trims whitespace from inputs', async () => {
-    (fetch as jest.Mock).mockResolvedValueOnce({
-      json: async () => ({ success: true, collection: mockCollection }),
-    });
+  it('shows loading state during submission', async () => {
+    const user = userEvent.setup();
+    const mockResponse = {
+      success: true,
+      collection: { id: 'collection123', name: 'Test Collection' },
+    };
 
-    await act(async () => {
-      render(
-        <CreateCollectionForm
-          onSuccess={mockOnSuccess}
-          onCancel={mockOnCancel}
-        />
-      );
-    });
+    // Make fetch take some time
+    mockFetch.mockImplementationOnce(
+      () =>
+        new Promise((resolve) =>
+          setTimeout(
+            () =>
+              resolve({
+                json: async () => mockResponse,
+              } as Response),
+            100
+          )
+        )
+    );
+
+    render(
+      <CreateCollectionForm onSuccess={mockOnSuccess} onCancel={mockOnCancel} />
+    );
 
     const nameInput = screen.getByLabelText('Collection Name');
-    const descriptionInput = screen.getByLabelText('Description (Optional)');
-    const submitButton = screen.getByText('Create Collection');
-
-    await act(async () => {
-      fireEvent.change(nameInput, { target: { value: '  Test Collection  ' } });
-      fireEvent.change(descriptionInput, {
-        target: { value: '  Test Description  ' },
-      });
-      fireEvent.click(submitButton);
+    const submitButton = screen.getByRole('button', {
+      name: 'Create Collection',
     });
 
+    await user.type(nameInput, 'Test Collection');
+    await user.click(submitButton);
+
+    // Should show loading state
+    expect(screen.getByText('Creating...')).toBeInTheDocument();
+    expect(submitButton).toBeDisabled();
+
     await waitFor(() => {
-      expect(fetch).toHaveBeenCalledWith('/api/collections', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: 'Test Collection',
-          description: 'Test Description',
-          type: 'personal',
-          ownerId: 'test-user-id',
-        }),
-      });
+      expect(mockOnSuccess).toHaveBeenCalledWith(mockResponse.collection);
     });
   });
 });

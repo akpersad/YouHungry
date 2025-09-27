@@ -19,7 +19,7 @@ This document provides detailed implementation guidelines, coding standards, and
 
 ### Future Technologies (Phase 3+)
 
-- TanStack Query, React Hook Form, Framer Motion, @dnd-kit, GraphQL
+- TanStack Query, Simplified Form Management, Framer Motion, @dnd-kit, GraphQL
 - See technical-architecture.md for detailed future technology roadmap
 
 ## 🎯 Core Principles
@@ -426,86 +426,155 @@ export function useSubmitVote() {
 - **Cache Management**: Leverage Apollo Client's normalized cache
 - **Network Status**: Use `notifyOnNetworkStatusChange` for better loading states
 
-### Form Management with React Hook Form + Zod (Future Implementation)
+### ✅ Simplified Form Management Implementation (COMPLETED)
+
+**Approach**: React useState with custom validation functions instead of complex form libraries
+
+#### **Implementation Pattern**
 
 ```typescript
-// hooks/useRestaurantForm.ts
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { toast } from 'sonner';
+// Example: CreateCollectionForm.tsx
+import { useState } from 'react';
+import { validateCollectionName, validateCollectionDescription } from '@/lib/validation';
 
-const restaurantFormSchema = z.object({
-  name: z.string().min(1, 'Restaurant name is required'),
-  location: z.string().min(1, 'Location is required'),
-  priceRange: z.enum(['$', '$$', '$$$', '$$$$']).optional(),
-  timeToPickUp: z.number().min(1).max(120).optional(),
-  collectionIds: z.array(z.string()).min(1, 'Select at least one collection'),
-});
+export function CreateCollectionForm() {
+  const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
 
-type RestaurantFormData = z.infer<typeof restaurantFormSchema>;
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-export function useRestaurantForm() {
-  const form = useForm<RestaurantFormData>({
-    resolver: zodResolver(restaurantFormSchema),
-    defaultValues: {
-      collectionIds: [],
-    },
-  });
+    // Validate using simple validation functions
+    const nameError = validateCollectionName(name);
+    if (nameError) {
+      setError(nameError);
+      return;
+    }
 
-  const onSubmit = async (data: RestaurantFormData) => {
+    const descriptionError = validateCollectionDescription(description);
+    if (descriptionError) {
+      setError(descriptionError);
+      return;
+    }
+
+    setIsSubmitting(true);
+    setError('');
+
     try {
-      await addRestaurantToCollections(data);
-      toast.success('Restaurant added successfully!');
-      form.reset();
-    } catch (error) {
-      toast.error('Failed to add restaurant. Please try again.');
+      // Submit to API
+      const response = await fetch('/api/collections', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: name.trim(),
+          description: description.trim() || undefined,
+          type: 'personal',
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        // Handle success
+        setName('');
+        setDescription('');
+      } else {
+        setError(result.error || 'Failed to create collection');
+      }
+    } catch {
+      setError('Failed to create collection');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  return {
-    form,
-    onSubmit: form.handleSubmit(onSubmit),
-    isSubmitting: form.formState.isSubmitting,
-    errors: form.formState.errors,
-  };
-}
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      {error && (
+        <div className="p-3 bg-error/10 border border-error/20 rounded-lg">
+          <p className="text-error text-sm" role="alert">{error}</p>
+        </div>
+      )}
 
-// Collection creation form
-const collectionFormSchema = z.object({
-  name: z.string().min(1).max(50, 'Name must be 50 characters or less'),
-  description: z
-    .string()
-    .max(500, 'Description must be 500 characters or less')
-    .optional(),
-  type: z.enum(['personal', 'group']),
-});
+      <div className="w-full">
+        <label htmlFor="name" className="block text-sm font-medium text-text mb-1">
+          Collection Name
+        </label>
+        <Input
+          id="name"
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="e.g., Favorite Pizza Places"
+          required
+        />
+      </div>
 
-export function useCollectionForm() {
-  const form = useForm<z.infer<typeof collectionFormSchema>>({
-    resolver: zodResolver(collectionFormSchema),
-    defaultValues: {
-      type: 'personal',
-    },
-  });
+      <div className="w-full">
+        <label htmlFor="description" className="block text-sm font-medium text-text mb-1">
+          Description (Optional)
+        </label>
+        <textarea
+          id="description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          placeholder="Describe your collection..."
+          className="input-base min-h-[80px] resize-none"
+        />
+      </div>
 
-  const onSubmit = async (data: z.infer<typeof collectionFormSchema>) => {
-    try {
-      await createCollection(data);
-      toast.success('Collection created successfully!');
-      form.reset();
-    } catch (error) {
-      toast.error('Failed to create collection. Please try again.');
-    }
-  };
-
-  return {
-    form,
-    onSubmit: form.handleSubmit(onSubmit),
-    isSubmitting: form.formState.isSubmitting,
-  };
+      <Button type="submit" disabled={isSubmitting || !name.trim()}>
+        {isSubmitting ? 'Creating...' : 'Create Collection'}
+      </Button>
+    </form>
+  );
 }
 ```
+
+#### **Validation Functions**
+
+```typescript
+// lib/validation.ts
+export const validateCollectionName = (name: string): string | null => {
+  if (!name.trim()) {
+    return 'Collection name is required';
+  }
+  if (name.length > 100) {
+    return 'Collection name must be 100 characters or less';
+  }
+  return null;
+};
+
+export const validateCollectionDescription = (
+  description: string
+): string | null => {
+  if (description.length > 500) {
+    return 'Description must be 500 characters or less';
+  }
+  return null;
+};
+
+export const validateLocation = (location: string): string | null => {
+  if (!location.trim()) {
+    return 'Location is required';
+  }
+  if (location.length > 200) {
+    return 'Location must be 200 characters or less';
+  }
+  return null;
+};
+```
+
+#### **Benefits of Simplified Approach**
+
+- ✅ **Reliable**: No complex form state management issues
+- ✅ **Performant**: No unnecessary re-renders or validation overhead
+- ✅ **Maintainable**: Easy to understand and modify
+- ✅ **Testable**: Simple, straightforward testing
+- ✅ **Debuggable**: Clear error messages and state flow
+- ✅ **Lightweight**: No additional dependencies or bundle size
 
 ### Data Fetching Hook (Legacy - Use TanStack Query Instead)
 

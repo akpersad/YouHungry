@@ -12,7 +12,9 @@ const customJestConfig = {
     '^mongodb$': '<rootDir>/src/__mocks__/mongodb.js',
     '^bson$': '<rootDir>/src/__mocks__/bson.js',
   },
-  transformIgnorePatterns: ['node_modules/(?!(bson|mongodb|@mongodb-js)/)'],
+  transformIgnorePatterns: [
+    'node_modules/(?!(bson|mongodb|@mongodb-js|@clerk)/)',
+  ],
   testMatch: [
     '<rootDir>/src/**/__tests__/**/*.{js,jsx,ts,tsx}',
     '<rootDir>/src/**/*.{test,spec}.{js,jsx,ts,tsx}',
