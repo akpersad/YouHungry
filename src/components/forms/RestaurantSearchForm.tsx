@@ -31,6 +31,10 @@ export function RestaurantSearchForm({
   const [minPrice, setMinPrice] = useState(0);
   const [maxPrice, setMaxPrice] = useState(0);
   const [useCurrentLocation, setUseCurrentLocation] = useState(false);
+  const [currentLocationCoords, setCurrentLocationCoords] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
   const [showFilters, setShowFilters] = useState(false);
   const [isAddressValid, setIsAddressValid] = useState(false);
   const [error, setError] = useState('');
@@ -58,7 +62,13 @@ export function RestaurantSearchForm({
       maxPrice: maxPrice || undefined,
     };
 
-    onSearch(location.trim(), query.trim() || undefined, filters);
+    // If using current location, pass the coordinates directly
+    let searchLocation = location.trim();
+    if (useCurrentLocation && currentLocationCoords) {
+      searchLocation = `${currentLocationCoords.lat},${currentLocationCoords.lng}`;
+    }
+
+    onSearch(searchLocation, query.trim() || undefined, filters);
   };
 
   const handleCurrentLocation = async () => {
@@ -66,6 +76,11 @@ export function RestaurantSearchForm({
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
           (position) => {
+            const coords = {
+              lat: position.coords.latitude,
+              lng: position.coords.longitude,
+            };
+            setCurrentLocationCoords(coords);
             setUseCurrentLocation(true);
             setLocation('Current Location');
             setIsAddressValid(true);
@@ -88,10 +103,14 @@ export function RestaurantSearchForm({
   const handleAddressSelect = (address: string) => {
     setLocation(address);
     setUseCurrentLocation(false);
+    setCurrentLocationCoords(null);
   };
 
   const handleAddressValidationChange = (isValid: boolean) => {
-    setIsAddressValid(isValid);
+    // Only update validation if not using current location
+    if (!useCurrentLocation) {
+      setIsAddressValid(isValid);
+    }
   };
 
   return (
