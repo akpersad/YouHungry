@@ -21,15 +21,27 @@ export const userProfileSchema = z.object({
 
 // Collection validation schemas
 export const collectionSchema = z.object({
-  name: z.string().min(1).max(100),
+  name: z.string().min(1, 'Collection name is required').max(100),
   description: z.string().max(500).optional(),
   type: z.enum(['personal', 'group']),
+});
+
+// Schema for form initialization (allows empty strings)
+export const collectionFormSchema = z.object({
+  name: z.string().max(100).default(''),
+  description: z.string().max(500).optional().default(''),
+  type: z.enum(['personal', 'group']).default('personal'),
 });
 
 // Restaurant validation schemas
 export const restaurantSearchSchema = z.object({
   query: z.string().max(100).optional(),
-  location: z.string().min(1).max(200),
+  location: z.string().min(1, 'Location is required').max(200),
+  distance: z.number().min(1).max(50).default(10),
+  cuisine: z.string().max(100).optional(),
+  minRating: z.number().min(0).max(5).optional(),
+  minPrice: z.number().min(1).max(4).optional(),
+  maxPrice: z.number().min(1).max(4).optional(),
 });
 
 export const restaurantUpdateSchema = z.object({

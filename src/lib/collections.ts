@@ -6,10 +6,20 @@ export async function getCollectionsByUserId(
   userId: string
 ): Promise<Collection[]> {
   const db = await connectToDatabase();
+
+  // Handle both ObjectId and string userId formats
+  let ownerId;
+  try {
+    ownerId = new ObjectId(userId);
+  } catch (error) {
+    // If userId is not a valid ObjectId, treat it as a string
+    ownerId = userId;
+  }
+
   const collections = await db
     .collection('collections')
     .find({
-      ownerId: new ObjectId(userId),
+      ownerId: ownerId,
       type: 'personal',
     })
     .sort({ createdAt: -1 })
@@ -34,8 +44,19 @@ export async function createCollection(
   const db = await connectToDatabase();
   const now = new Date();
 
+  // Handle both ObjectId and string ownerId formats
+  let ownerId = collectionData.ownerId;
+  if (typeof ownerId === 'string') {
+    try {
+      ownerId = new ObjectId(ownerId);
+    } catch (error) {
+      // Keep as string if not a valid ObjectId
+    }
+  }
+
   const collection: Omit<Collection, '_id'> = {
     ...collectionData,
+    ownerId,
     restaurantIds: [],
     createdAt: now,
     updatedAt: now,

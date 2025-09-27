@@ -180,6 +180,22 @@ These technologies will be implemented when they solve specific problems in each
    - Create mobile-specific navigation patterns
    - Test across different screen sizes
 
+1b. **Design System Migration & Legacy UI Updates**
+
+- Audit existing UI components against updated design system specifications
+- Update legacy components to match new neumorphic design patterns
+- Migrate color system to new monochrome + infrared accent palette
+- Update shadow system to soft neumorphic (iOS-inspired) styling
+- Refactor navigation to bottom navigation with floating action button
+- Update restaurant cards to new visual hierarchy (Photo → Name → Price/Rating → Distance → Tags)
+- Implement new typography scale and font weights
+- Update form inputs to neumorphic styling with proper focus states
+- Migrate button components to new interaction patterns
+- Update layout containers and spacing to new system
+- Ensure all components support system preference detection (dark/light mode)
+- Test design system consistency across all existing screens
+- Document component migration checklist and completion status
+
 1a. **Enhanced Animations & Interactions (Future)**
 
 - Install and configure Framer Motion for animations

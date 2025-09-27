@@ -16,12 +16,10 @@ function CreateCollectionForm({
   onCancel,
 }: CreateCollectionFormProps) {
   const { user } = useUser();
+  const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-  });
+  const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,13 +29,13 @@ function CreateCollectionForm({
       return;
     }
 
-    if (!formData.name.trim()) {
+    if (!name.trim()) {
       setError('Collection name is required');
       return;
     }
 
     setIsSubmitting(true);
-    setError(null);
+    setError('');
 
     try {
       const response = await fetch('/api/collections', {
@@ -46,51 +44,56 @@ function CreateCollectionForm({
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          name: formData.name.trim(),
-          description: formData.description.trim() || undefined,
+          name: name.trim(),
+          description: description.trim() || undefined,
           type: 'personal',
           ownerId: user.id,
         }),
       });
 
-      const data = await response.json();
+      const result = await response.json();
 
-      if (data.success) {
-        onSuccess(data.collection);
+      if (result.success) {
+        onSuccess(result.collection);
       } else {
-        setError(data.error || 'Failed to create collection');
+        setError(result.error || 'Failed to create collection');
       }
-    } catch (err) {
+    } catch {
       setError('Failed to create collection');
-      console.error('Error creating collection:', err);
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  const handleInputChange = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-    if (error) setError(null);
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {error && (
         <div className="p-3 bg-error/10 border border-error/20 rounded-lg">
-          <p className="text-error text-sm">{error}</p>
+          <p className="text-error text-sm" role="alert">
+            {error}
+          </p>
         </div>
       )}
 
-      <Input
-        label="Collection Name"
-        value={formData.name}
-        onChange={(e) => handleInputChange('name', e.target.value)}
-        placeholder="e.g., Favorite Pizza Places"
-        required
-        maxLength={100}
-      />
+      <div className="w-full">
+        <label
+          htmlFor="name"
+          className="block text-sm font-medium text-text mb-1"
+        >
+          Collection Name
+        </label>
+        <Input
+          id="name"
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="e.g., Favorite Pizza Places"
+          maxLength={100}
+          required
+        />
+      </div>
 
-      <div>
+      <div className="w-full">
         <label
           htmlFor="description"
           className="block text-sm font-medium text-text mb-1"
@@ -99,29 +102,20 @@ function CreateCollectionForm({
         </label>
         <textarea
           id="description"
-          value={formData.description}
-          onChange={(e) => handleInputChange('description', e.target.value)}
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
           placeholder="Describe your collection..."
-          className="input-base min-h-[80px] resize-none"
           maxLength={500}
+          className="input-base min-h-[80px] resize-none"
         />
       </div>
 
       <div className="flex justify-end space-x-3 pt-4">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={onCancel}
-          disabled={isSubmitting}
-        >
+        <Button type="button" variant="outline" onClick={onCancel}>
           Cancel
         </Button>
-        <Button
-          type="submit"
-          isLoading={isSubmitting}
-          disabled={!formData.name.trim()}
-        >
-          Create Collection
+        <Button type="submit" disabled={isSubmitting || !name.trim()}>
+          {isSubmitting ? 'Creating...' : 'Create Collection'}
         </Button>
       </div>
     </form>
