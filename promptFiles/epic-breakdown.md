@@ -79,7 +79,7 @@ These technologies will be implemented when they solve specific problems in each
    - **Set up GraphQL schema for complex restaurant queries**
    - **Implement GraphQL resolvers for restaurant search with filters**
 
-3. **Enhanced Form Management** ✅ **COMPLETED**
+3. **Enhanced Form Management**
    - ✅ Implemented simplified form state management using useState
    - ✅ Created reliable form validation with clear error messages
    - ✅ Updated CreateCollectionForm and RestaurantSearchForm with simplified approach
@@ -223,13 +223,25 @@ These technologies will be implemented when they solve specific problems in each
 
 ### Stories:
 
-1. **SMS Integration**
+1. **Custom Registration Page with Phone & SMS Opt-in**
+   - Replace Clerk's default registration modal with custom registration page
+   - Create multi-step registration flow explaining app benefits
+   - Implement phone number sign-up option using Clerk's phone authentication
+   - Add SMS opt-in toggle during registration (default: off)
+   - Explain SMS benefits: group decision notifications, friend requests, group invites
+   - Store SMS preferences in user profile for group-specific settings
+   - Implement phone number verification flow for users who sign up with phone
+   - Handle reverification for adding phone numbers to existing email accounts
+   - **Unit test custom registration components and phone verification flow**
+   - **Update user database schema to include SMS preferences and phone numbers**
+
+2. **SMS Integration**
    - Integrate Twilio for SMS notifications
    - Create SMS opt-in/opt-out system
    - Implement group-specific notification preferences
    - Handle SMS delivery and error cases
 
-2. **In-App Notifications**
+3. **In-App Notifications**
    - Create notification system for group decisions
    - Implement real-time updates for group activities
    - Add notification preferences and settings
@@ -237,7 +249,7 @@ These technologies will be implemented when they solve specific problems in each
    - **Implement GraphQL subscriptions for real-time notifications**
    - **Add GraphQL queries for notification history and preferences**
 
-2a. **Toast Notification System (Future)**
+3a. **Toast Notification System (Future)**
 
 - Install and configure React Hot Toast (Sonner)
 - Implement user feedback notifications
@@ -245,11 +257,23 @@ These technologies will be implemented when they solve specific problems in each
 - Create notification positioning and styling
 - Handle notification queuing and dismissal
 
-3. **Email Notifications**
+4. **Email Notifications**
    - Set up email notification system
    - Create email templates for different events
    - Implement email preferences and unsubscribing
    - Handle email delivery and tracking
+
+5. **User Profile Management**
+   - Create comprehensive user profile page with editable fields
+   - Implement profile picture upload and management using Vercel Blob
+   - Add phone number management (add/remove/verify) with Clerk integration
+   - Build SMS opt-in/opt-out toggle with clear explanation
+   - Create per-group notification preferences interface
+   - Implement location settings and default location management
+   - Add profile validation and error handling
+   - Create profile update API endpoints with proper validation
+   - **Unit test profile management components and API endpoints**
+   - **Update user database schema to support profile picture URLs and enhanced preferences**
 
 ## 📊 Epic 7: Analytics & History
 
