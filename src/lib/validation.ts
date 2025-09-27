@@ -26,12 +26,25 @@ export const collectionSchema = z.object({
   type: z.enum(['personal', 'group']),
 });
 
-// Schema for form initialization (allows empty strings)
-export const collectionFormSchema = z.object({
-  name: z.string().max(100).default(''),
-  description: z.string().max(500).optional().default(''),
-  type: z.enum(['personal', 'group']).default('personal'),
-});
+// Simple validation functions for forms
+export const validateCollectionName = (name: string): string | null => {
+  if (!name.trim()) {
+    return 'Collection name is required';
+  }
+  if (name.length > 100) {
+    return 'Collection name must be 100 characters or less';
+  }
+  return null;
+};
+
+export const validateCollectionDescription = (
+  description: string
+): string | null => {
+  if (description.length > 500) {
+    return 'Description must be 500 characters or less';
+  }
+  return null;
+};
 
 // Restaurant validation schemas
 export const restaurantSearchSchema = z.object({
@@ -43,6 +56,17 @@ export const restaurantSearchSchema = z.object({
   minPrice: z.number().min(1).max(4).optional(),
   maxPrice: z.number().min(1).max(4).optional(),
 });
+
+// Simple validation functions for restaurant search
+export const validateLocation = (location: string): string | null => {
+  if (!location.trim()) {
+    return 'Location is required';
+  }
+  if (location.length > 200) {
+    return 'Location must be 200 characters or less';
+  }
+  return null;
+};
 
 export const restaurantUpdateSchema = z.object({
   priceRange: z.enum(['$', '$$', '$$$', '$$$$']).optional(),

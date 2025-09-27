@@ -4,16 +4,18 @@ import { RestaurantSearchForm } from '../RestaurantSearchForm';
 // Mock AddressInput component
 jest.mock('@/components/ui/AddressInput', () => ({
   AddressInput: ({
-    onAddressSelect,
     onValidationChange,
+    onChange,
+    value,
     ...props
   }: Record<string, unknown>) => (
     <input
       {...props}
       data-testid="address-input"
+      value={value}
       onChange={(e) => {
-        if (props.onChange) props.onChange(e);
-        onValidationChange(true); // Mock validation success
+        if (onChange) onChange(e.target.value);
+        if (onValidationChange) onValidationChange(true); // Mock validation success
       }}
     />
   ),
@@ -66,10 +68,15 @@ describe('RestaurantSearchForm', () => {
       name: 'Search Restaurants',
     });
 
+    // Set address and trigger validation
     fireEvent.change(addressInput, {
       target: { value: '123 Main St, City, State' },
     });
+
+    // Set query value
     fireEvent.change(queryInput, { target: { value: 'Italian' } });
+
+    // Click submit
     fireEvent.click(submitButton);
 
     await waitFor(() => {

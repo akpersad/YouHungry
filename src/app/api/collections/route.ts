@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCollectionsByUserId, createCollection } from '@/lib/collections';
-import { validateData, collectionFormSchema } from '@/lib/validation';
-import { ObjectId } from 'mongodb';
+import {
+  validateCollectionName,
+  validateCollectionDescription,
+} from '@/lib/validation';
 
 export async function GET(request: NextRequest) {
   try {
@@ -39,27 +41,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { name, description, type, ownerId } = body;
 
-    // Validate input (only validate the fields that are in the schema)
-    const validation = validateData(collectionFormSchema, {
-      name: name || '',
-      description: description || undefined,
-      type: type || 'personal',
-    });
-    if (!validation.success || !validation.data) {
-      return NextResponse.json(
-        { success: false, error: 'Invalid input', details: validation.error },
-        { status: 400 }
-      );
-    }
-
-    // Additional validation for required fields
-    if (!validation.data.name || validation.data.name.trim() === '') {
-      return NextResponse.json(
-        { success: false, error: 'Collection name is required' },
-        { status: 400 }
-      );
-    }
-
+    // Validate required fields
     if (!ownerId) {
       return NextResponse.json(
         { success: false, error: 'Owner ID is required' },
@@ -67,11 +49,31 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Validate collection name
+    const nameError = validateCollectionName(name || '');
+    if (nameError) {
+      return NextResponse.json(
+        { success: false, error: nameError },
+        { status: 400 }
+      );
+    }
+
+    // Validate description if provided
+    if (description) {
+      const descriptionError = validateCollectionDescription(description);
+      if (descriptionError) {
+        return NextResponse.json(
+          { success: false, error: descriptionError },
+          { status: 400 }
+        );
+      }
+    }
+
     // Create collection
     const collection = await createCollection({
-      name: validation.data.name,
-      description: validation.data.description,
-      type: validation.data.type,
+      name: (name || '').trim(),
+      description: description?.trim() || undefined,
+      type: type || 'personal',
       ownerId: ownerId, // Pass as string, let createCollection handle conversion
       restaurantIds: [],
     });

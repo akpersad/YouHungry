@@ -11,7 +11,7 @@ export async function getCollectionsByUserId(
   let ownerId;
   try {
     ownerId = new ObjectId(userId);
-  } catch (error) {
+  } catch {
     // If userId is not a valid ObjectId, treat it as a string
     ownerId = userId;
   }
@@ -49,7 +49,7 @@ export async function createCollection(
   if (typeof ownerId === 'string') {
     try {
       ownerId = new ObjectId(ownerId);
-    } catch (error) {
+    } catch {
       // Keep as string if not a valid ObjectId
     }
   }

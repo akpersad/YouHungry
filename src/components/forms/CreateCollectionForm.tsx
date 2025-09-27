@@ -55,6 +55,8 @@ function CreateCollectionForm({
 
       if (result.success) {
         onSuccess(result.collection);
+        setName('');
+        setDescription('');
       } else {
         setError(result.error || 'Failed to create collection');
       }
