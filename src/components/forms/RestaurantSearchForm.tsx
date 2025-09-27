@@ -117,7 +117,7 @@ export function RestaurantSearchForm({
             <AddressInput
               id="location"
               value={location}
-              onChange={(e) => setLocation(e.target.value)}
+              onChange={setLocation}
               onAddressSelect={handleAddressSelect}
               onValidationChange={handleAddressValidationChange}
               placeholder="Enter address or city..."
