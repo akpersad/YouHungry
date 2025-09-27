@@ -28,8 +28,8 @@ export const collectionSchema = z.object({
 
 // Restaurant validation schemas
 export const restaurantSearchSchema = z.object({
-  query: z.string().min(1).max(100),
-  location: z.string().max(200).optional(),
+  query: z.string().max(100).optional(),
+  location: z.string().min(1).max(200),
 });
 
 export const restaurantUpdateSchema = z.object({

@@ -256,6 +256,11 @@ type Decision {
 - **Caching Strategy**: 30-day cache for restaurant details
 - **Rate Limiting**: Batch requests, implement exponential backoff
 - **Cost Optimization**: Stale-while-revalidate pattern
+- **Search Implementation**:
+  - **Text Search API**: Used when specific restaurant name/cuisine query is provided
+  - **Nearby Search API**: Used for location-only searches (no query parameter)
+  - **Geocoding Integration**: Address validation and coordinate conversion for accurate location-based search
+  - **Query Processing**: Removes automatic "restaurant" suffix to allow precise searches like "McDonald's"
 
 #### Google Address Validation API
 
@@ -317,6 +322,10 @@ type Decision {
 ##### Restaurants Routes (Basic Operations)
 
 - `GET /api/restaurants/search` - Search restaurants
+  - **Query Parameters**: `q` (restaurant name/cuisine), `location` (address), `lat`/`lng` (coordinates), `radius`, `cuisine`, `minRating`, `maxPrice`, `minPrice`
+  - **Search Logic**: Uses Google Places Text Search API when query provided, Nearby Search API for location-only searches
+  - **Geocoding**: Automatically converts addresses to coordinates for accurate location-based search
+  - **Filtering**: Applies additional filters for cuisine, rating, and price level
 - `POST /api/restaurants` - Add restaurant to collection
 - `PUT /api/restaurants/[id]` - Update restaurant details
 - `DELETE /api/restaurants/[id]` - Remove restaurant from collection
@@ -561,7 +570,7 @@ The following environment variables are configured and ready for use:
 
 #### External API Configuration
 
-- **NEXT_PUBLIC_GOOGLE_PLACES_API_KEY**: Google Places API key for restaurant search
+- **GOOGLE_PLACES_API_KEY**: Google Places API key for restaurant search
 - **GOOGLE_ADDRESS_VALIDATION_API_KEY**: Google Address Validation API key
 - **TWILIO_ACCOUNT_SID**: Twilio account SID for SMS notifications
 - **TWILIO_AUTH_TOKEN**: Twilio authentication token
@@ -716,14 +725,17 @@ The following environment variables are configured and ready for use:
 - [x] **Basic REST APIs**: Collections, restaurants, users
 - [x] **Component Library**: UI components with Tailwind
 - [x] **Environment Configuration**: All required environment variables configured in `.env.local`
+- [x] **Restaurant Search System**: Google Places API integration with address validation and geocoding
+- [x] **GraphQL Integration**: Schema and resolvers for complex restaurant queries
 
 ### 🚧 In Progress (Phase 2)
 
 **Core features development**
 
-- [ ] **Restaurant Search**: Google Places API integration
-- [ ] **Collection Management**: CRUD operations
-- [ ] **User Dashboard**: Personal collections view
+- [x] **Restaurant Search**: Google Places API integration with Text Search and Nearby Search APIs ✅ COMPLETED
+- [x] **Collection Management**: CRUD operations ✅ COMPLETED
+- [x] **User Dashboard**: Personal collections view ✅ COMPLETED
+- [ ] **Restaurant Management**: Add/remove restaurants from collections
 - [ ] **Basic Decision Making**: Personal restaurant selection
 
 ## 🔮 Future Implementation Roadmap

@@ -24,16 +24,25 @@ This document tracks all planned items that are not yet started, organized by ca
 
 - [x] Build collection CRUD operations ✅ COMPLETED
 - [x] Create user dashboard with personal collections ✅ COMPLETED
-- [ ] Implement restaurant search with Google Places API
+- [x] Implement restaurant search with Google Places API ✅ COMPLETED
+- [x] Create restaurant search UI components ✅ COMPLETED
+- [x] Set up GraphQL schema and resolvers for restaurant queries ✅ COMPLETED
+- [x] Fix address dropdown and image loading issues ✅ COMPLETED
+- [x] Add geocoding integration for accurate search ✅ COMPLETED
+- [x] Complete Epic 2 Story 2 - Restaurant Search & Discovery ✅ COMPLETED
+- [x] Enhance address input UX with improved keyboard navigation ✅ COMPLETED
+- [x] Fix address validation API response handling ✅ COMPLETED
+- [x] Improve Google Places API error handling ✅ COMPLETED
+- [x] Add comprehensive testing infrastructure with fetch mocking ✅ COMPLETED
 - [ ] Add restaurant management functionality
 - [ ] Implement basic decision making algorithm
 
 ### Advanced Features (Future)
 
 - [ ] Implement drag-and-drop restaurant ranking system with @dnd-kit
-- [ ] Set up GraphQL server with Apollo Server
-- [ ] Implement GraphQL schema for restaurants and collections
-- [ ] Create GraphQL resolvers for complex queries
+- [x] Set up GraphQL server with Apollo Server ✅ COMPLETED
+- [x] Implement GraphQL schema for restaurants and collections ✅ COMPLETED
+- [x] Create GraphQL resolvers for complex queries ✅ COMPLETED
 - [ ] Add GraphQL client with Apollo Client
 - [ ] Implement React Hook Form with Zod integration
 - [ ] Set up TanStack Query for API state management

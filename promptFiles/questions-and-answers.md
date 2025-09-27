@@ -322,3 +322,14 @@ This document captures all questions asked during development and the decisions 
 - All new technologies are industry standards with excellent documentation
 - Perfect integration with existing TypeScript and Next.js setup
 - Future-proof architecture ready for iOS conversion
+
+## Q: How does the restaurant search handle specific restaurant name queries vs general location searches?
+
+**A:** The restaurant search system uses a smart API selection strategy:
+
+1. **Text Search API**: When a user provides a specific query (like "McDonald's"), the system uses Google Places Text Search API to find only restaurants matching that name/cuisine
+2. **Nearby Search API**: When no query is provided, it uses Google Places Nearby Search API to find all restaurants in the specified location
+3. **Geocoding Integration**: Addresses are automatically converted to coordinates for accurate location-based search
+4. **Query Processing**: The system removes automatic "restaurant" suffixes to allow precise searches like "McDonald's" without interference
+
+This ensures that searching for "McDonald's" + address returns only McDonald's locations, while searching with just an address returns all nearby restaurants.

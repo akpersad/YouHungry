@@ -72,6 +72,9 @@ These technologies will be implemented when they solve specific problems in each
    - Implement location-based restaurant discovery
    - Add restaurant details and metadata storage
    - Create restaurant search UI components
+   - **Implement address validation and autocomplete with Google Address Validation API**
+   - **Create address input dropdown with suggestions as user types**
+   - **Validate addresses before searching to improve user experience**
    - **Unit test restaurant search functionality and API integration**
    - **Set up GraphQL schema for complex restaurant queries**
    - **Implement GraphQL resolvers for restaurant search with filters**

@@ -25,7 +25,7 @@ CLERK_SECRET_KEY=sk_live_...
 CLERK_WEBHOOK_SECRET=whsec_...
 
 # Google APIs
-NEXT_PUBLIC_GOOGLE_PLACES_API_KEY=AIza...
+GOOGLE_PLACES_API_KEY=AIza...
 GOOGLE_ADDRESS_VALIDATION_API_KEY=AIza...
 
 # Twilio (SMS)
@@ -113,15 +113,49 @@ Verify these collections exist in your `you-hungry` database:
 1. Go to [Google Cloud Console](https://console.cloud.google.com)
 2. Navigate to **APIs & Services > Credentials**
 3. Select your API key
-4. Under **Application restrictions**, add your production domain
+4. **CRITICAL**: Under **Application restrictions**, set to **"None"** for server-side use
+   - ❌ **DO NOT** use "HTTP referrers" restriction for server-side API calls
+   - ✅ **MUST** use "None" to allow server-side requests from Vercel
 5. Under **API restrictions**, ensure **Places API** is enabled
+6. **Important**: This API key will be used server-side, so referer restrictions will block requests
 
 ### Google Address Validation API
 
 1. In the same Google Cloud Console
 2. Enable **Address Validation API**
-3. Add the same domain restrictions
+3. **CRITICAL**: Set **Application restrictions** to **"None"** for server-side use
 4. Ensure the API key has access to this service
+
+### ⚠️ Common Google Places API Issues
+
+#### Issue: "API keys with referer restrictions cannot be used with this API"
+
+**Cause**: The API key has HTTP referer restrictions but is being used server-side.
+
+**Solution**:
+
+1. Go to Google Cloud Console > APIs & Services > Credentials
+2. Click on your API key
+3. Under "Application restrictions", change from "HTTP referrers" to "None"
+4. Save the changes
+5. Wait 5-10 minutes for changes to propagate
+
+#### Issue: Empty search results
+
+**Possible Causes**:
+
+- API key restrictions blocking requests
+- Invalid location format
+- API quota exceeded
+- Places API not enabled
+
+**Debug Steps**:
+
+1. Check API key restrictions (must be "None" for server-side use)
+2. Verify Places API is enabled in Google Cloud Console
+3. Test with a simple location like "Times Square New York NY"
+4. Check API usage in Google Cloud Console
+5. Review server logs for error messages
 
 ## 📱 Twilio Configuration
 
@@ -237,9 +271,10 @@ Consider implementing rate limiting for API endpoints:
 #### API Key Issues
 
 - Verify API keys are correct
-- Check API key restrictions
+- Check API key restrictions (must be "None" for server-side use)
 - Ensure APIs are enabled in Google Cloud Console
 - Check rate limits and quotas
+- **Google Places API**: Must have "None" application restrictions for server-side use
 
 #### CORS Errors
 
