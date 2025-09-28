@@ -91,6 +91,9 @@ These technologies will be implemented when they solve specific problems in each
    - Manage restaurant custom fields (Price Range, Time to Pick Up)
    - Remove restaurants from collections
    - View restaurant details and history
+   - **Collection View Page** - Detailed view of restaurants within a collection
+   - **Collection Restaurant Management** - Add, edit, and remove restaurants from collection view
+   - **Collection Decision Making** - Random selection from collection restaurants
 
 5. **Personal Decision Making**
    - Implement random selection algorithm

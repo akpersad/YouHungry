@@ -67,6 +67,15 @@ describe('Restaurant API Functions', () => {
 
   describe('searchRestaurants', () => {
     it('should search restaurants using Google Places API successfully', async () => {
+      const mockDbInstance = {
+        collection: jest.fn().mockReturnValue({
+          findOne: jest.fn().mockResolvedValue(null),
+          insertOne: jest.fn().mockResolvedValue({ insertedId: 'new-id' }),
+        }),
+      };
+      mockDb.connectToDatabase.mockResolvedValue(
+        mockDbInstance as unknown as ReturnType<typeof db.connectToDatabase>
+      );
       mockGooglePlaces.searchRestaurantsWithGooglePlaces.mockResolvedValue([
         mockGoogleRestaurant,
       ]);
@@ -76,17 +85,32 @@ describe('Restaurant API Functions', () => {
       expect(
         mockGooglePlaces.searchRestaurantsWithGooglePlaces
       ).toHaveBeenCalledWith('pizza', 'New York');
-      expect(result).toEqual([mockGoogleRestaurant]);
+      expect(result).toEqual([
+        {
+          ...mockGoogleRestaurant,
+          _id: 'new-id',
+          cachedAt: expect.any(Date),
+          lastUpdated: expect.any(Date),
+        },
+      ]);
     });
 
     it('should not create restaurant if it already exists in database', async () => {
+      const mockDbInstance = {
+        collection: jest.fn().mockReturnValue({
+          findOne: jest.fn().mockResolvedValue(mockRestaurant),
+        }),
+      };
+      mockDb.connectToDatabase.mockResolvedValue(
+        mockDbInstance as unknown as ReturnType<typeof db.connectToDatabase>
+      );
       mockGooglePlaces.searchRestaurantsWithGooglePlaces.mockResolvedValue([
         mockGoogleRestaurant,
       ]);
 
       const result = await searchRestaurants('pizza');
 
-      expect(result).toEqual([mockGoogleRestaurant]);
+      expect(result).toEqual([mockRestaurant]);
     });
 
     it('should fallback to local search when Google Places API fails', async () => {
@@ -115,6 +139,15 @@ describe('Restaurant API Functions', () => {
     });
 
     it('should handle errors when storing restaurants', async () => {
+      const mockDbInstance = {
+        collection: jest.fn().mockReturnValue({
+          findOne: jest.fn().mockResolvedValue(null),
+          insertOne: jest.fn().mockRejectedValue(new Error('DB Error')),
+        }),
+      };
+      mockDb.connectToDatabase.mockResolvedValue(
+        mockDbInstance as unknown as ReturnType<typeof db.connectToDatabase>
+      );
       mockGooglePlaces.searchRestaurantsWithGooglePlaces.mockResolvedValue([
         mockGoogleRestaurant,
       ]);
@@ -228,6 +261,15 @@ describe('Restaurant API Functions', () => {
         },
       ];
 
+      const mockDbInstance = {
+        collection: jest.fn().mockReturnValue({
+          findOne: jest.fn().mockResolvedValue(null),
+          insertOne: jest.fn().mockResolvedValue({ insertedId: 'new-id' }),
+        }),
+      };
+      mockDb.connectToDatabase.mockResolvedValue(
+        mockDbInstance as unknown as ReturnType<typeof db.connectToDatabase>
+      );
       mockGooglePlaces.searchRestaurantsWithGooglePlaces.mockResolvedValue(
         restaurants
       );
@@ -254,6 +296,15 @@ describe('Restaurant API Functions', () => {
         },
       ];
 
+      const mockDbInstance = {
+        collection: jest.fn().mockReturnValue({
+          findOne: jest.fn().mockResolvedValue(null),
+          insertOne: jest.fn().mockResolvedValue({ insertedId: 'new-id' }),
+        }),
+      };
+      mockDb.connectToDatabase.mockResolvedValue(
+        mockDbInstance as unknown as ReturnType<typeof db.connectToDatabase>
+      );
       mockGooglePlaces.searchRestaurantsWithGooglePlaces.mockResolvedValue(
         restaurants
       );
@@ -285,6 +336,15 @@ describe('Restaurant API Functions', () => {
         },
       ];
 
+      const mockDbInstance = {
+        collection: jest.fn().mockReturnValue({
+          findOne: jest.fn().mockResolvedValue(null),
+          insertOne: jest.fn().mockResolvedValue({ insertedId: 'new-id' }),
+        }),
+      };
+      mockDb.connectToDatabase.mockResolvedValue(
+        mockDbInstance as unknown as ReturnType<typeof db.connectToDatabase>
+      );
       mockGooglePlaces.searchRestaurantsWithGooglePlaces.mockResolvedValue(
         restaurants
       );
@@ -303,15 +363,30 @@ describe('Restaurant API Functions', () => {
     });
 
     it('should return all restaurants when no filters applied', async () => {
-      const restaurants = [mockRestaurant];
-
+      const restaurants = [mockGoogleRestaurant];
+      const mockDbInstance = {
+        collection: jest.fn().mockReturnValue({
+          findOne: jest.fn().mockResolvedValue(null),
+          insertOne: jest.fn().mockResolvedValue({ insertedId: 'new-id' }),
+        }),
+      };
+      mockDb.connectToDatabase.mockResolvedValue(
+        mockDbInstance as unknown as ReturnType<typeof db.connectToDatabase>
+      );
       mockGooglePlaces.searchRestaurantsWithGooglePlaces.mockResolvedValue(
         restaurants
       );
 
       const result = await searchRestaurantsWithFilters('restaurant');
 
-      expect(result).toEqual(restaurants);
+      expect(result).toEqual([
+        {
+          ...mockGoogleRestaurant,
+          _id: 'new-id',
+          cachedAt: expect.any(Date),
+          lastUpdated: expect.any(Date),
+        },
+      ]);
     });
 
     it('should handle restaurants without price range', async () => {
@@ -324,6 +399,15 @@ describe('Restaurant API Functions', () => {
         },
       ];
 
+      const mockDbInstance = {
+        collection: jest.fn().mockReturnValue({
+          findOne: jest.fn().mockResolvedValue(null),
+          insertOne: jest.fn().mockResolvedValue({ insertedId: 'new-id' }),
+        }),
+      };
+      mockDb.connectToDatabase.mockResolvedValue(
+        mockDbInstance as unknown as ReturnType<typeof db.connectToDatabase>
+      );
       mockGooglePlaces.searchRestaurantsWithGooglePlaces.mockResolvedValue(
         restaurants
       );

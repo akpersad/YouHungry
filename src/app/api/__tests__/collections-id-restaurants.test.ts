@@ -7,7 +7,11 @@ import {
 } from '@/lib/collections';
 
 // Mock dependencies
-jest.mock('@/lib/collections');
+jest.mock('@/lib/collections', () => ({
+  getRestaurantsByCollection: jest.fn(),
+  addRestaurantToCollection: jest.fn(),
+  removeRestaurantFromCollection: jest.fn(),
+}));
 
 const mockGetRestaurantsByCollection =
   getRestaurantsByCollection as jest.MockedFunction<

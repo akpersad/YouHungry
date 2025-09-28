@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useUser } from '@clerk/nextjs';
+import { useRouter } from 'next/navigation';
 import {
   Card,
   CardContent,
@@ -20,6 +21,7 @@ interface CollectionListProps {
 
 function CollectionList({ onCollectionSelect }: CollectionListProps) {
   const { user } = useUser();
+  const router = useRouter();
   const [collections, setCollections] = useState<Collection[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -160,7 +162,13 @@ function CollectionList({ onCollectionSelect }: CollectionListProps) {
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => onCollectionSelect?.(collection)}
+                      onClick={() => {
+                        if (onCollectionSelect) {
+                          onCollectionSelect(collection);
+                        } else {
+                          router.push(`/collections/${collection._id}`);
+                        }
+                      }}
                       className="flex-1"
                     >
                       View

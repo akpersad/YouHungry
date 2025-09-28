@@ -94,6 +94,7 @@ describe('Address Validation API', () => {
       mockFetch.mockResolvedValueOnce({
         ok: false,
         status: 400,
+        json: async () => ({ error: 'Invalid address' }),
       } as Response);
 
       const result = await validateAddress('invalid address');

@@ -3,17 +3,23 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Restaurant, Collection } from '@/types/database';
 import { RestaurantCard } from './RestaurantCard';
+import { RestaurantCardCompact } from './RestaurantCardCompact';
 import { RestaurantManagementModal } from './RestaurantManagementModal';
+import { ViewToggle, ViewType } from '@/components/ui/ViewToggle';
 import { Button } from '@/components/ui/Button';
 
 interface CollectionRestaurantsListProps {
   collection: Collection;
   onRestaurantUpdate?: () => void;
+  onViewDetails?: (restaurant: Restaurant) => void;
+  onManageRestaurant?: (restaurant: Restaurant) => void;
 }
 
 export function CollectionRestaurantsList({
   collection,
   onRestaurantUpdate,
+  onViewDetails,
+  onManageRestaurant,
 }: CollectionRestaurantsListProps) {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -21,6 +27,7 @@ export function CollectionRestaurantsList({
   const [selectedRestaurant, setSelectedRestaurant] =
     useState<Restaurant | null>(null);
   const [isManagementModalOpen, setIsManagementModalOpen] = useState(false);
+  const [viewType, setViewType] = useState<ViewType>('list');
 
   const fetchRestaurants = useCallback(async () => {
     setIsLoading(true);
@@ -131,9 +138,15 @@ export function CollectionRestaurantsList({
   if (isLoading) {
     return (
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-          Restaurants in {collection.name}
-        </h3>
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            Restaurants in {collection.name}
+          </h3>
+          {/* View Toggle - Hidden on mobile during loading for now */}
+          <div className="hidden sm:block">
+            <ViewToggle currentView={viewType} onViewChange={setViewType} />
+          </div>
+        </div>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {[...Array(3)].map((_, index) => (
             <div
@@ -171,13 +184,19 @@ export function CollectionRestaurantsList({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-          Restaurants in {collection.name}
-        </h3>
-        <span className="text-sm text-gray-500 dark:text-gray-400">
-          {restaurants.length} restaurant{restaurants.length !== 1 ? 's' : ''}
-        </span>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            Restaurants in {collection.name}
+          </h3>
+          <span className="text-sm text-gray-500 dark:text-gray-400">
+            {restaurants.length} restaurant{restaurants.length !== 1 ? 's' : ''}
+          </span>
+        </div>
+        {/* View Toggle - Show on mobile and desktop */}
+        <div className="flex justify-end">
+          <ViewToggle currentView={viewType} onViewChange={setViewType} />
+        </div>
       </div>
 
       {restaurants.length === 0 ? (
@@ -191,27 +210,64 @@ export function CollectionRestaurantsList({
           </p>
         </div>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {restaurants.map((restaurant) => (
-            <div key={restaurant._id.toString()} className="relative group">
-              <RestaurantCard
-                restaurant={restaurant}
-                onViewDetails={() => handleManageRestaurant(restaurant)}
-                showAddButton={false}
-              />
-              <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                <Button
-                  onClick={() => handleManageRestaurant(restaurant)}
-                  size="sm"
-                  variant="outline"
-                  className="bg-white dark:bg-gray-800 shadow-sm"
-                >
-                  Manage
-                </Button>
-              </div>
+        <>
+          {/* List View */}
+          {viewType === 'list' && (
+            <div className="space-y-4 md:grid md:grid-cols-2 md:gap-4 md:space-y-0">
+              {restaurants.map((restaurant) => (
+                <div key={restaurant._id.toString()} className="relative group">
+                  <RestaurantCard
+                    restaurant={restaurant}
+                    onViewDetails={() =>
+                      onViewDetails?.(restaurant) ||
+                      handleManageRestaurant(restaurant)
+                    }
+                    showAddButton={false}
+                  />
+                  <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                    {onViewDetails && (
+                      <Button
+                        onClick={() => onViewDetails(restaurant)}
+                        size="sm"
+                        variant="outline"
+                        className="bg-white dark:bg-gray-800 shadow-sm"
+                      >
+                        View
+                      </Button>
+                    )}
+                    <Button
+                      onClick={() =>
+                        onManageRestaurant?.(restaurant) ||
+                        handleManageRestaurant(restaurant)
+                      }
+                      size="sm"
+                      variant="outline"
+                      className="bg-white dark:bg-gray-800 shadow-sm"
+                    >
+                      Manage
+                    </Button>
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          )}
+
+          {/* Grid View */}
+          {viewType === 'grid' && (
+            <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
+              {restaurants.map((restaurant) => (
+                <RestaurantCardCompact
+                  key={restaurant._id.toString()}
+                  restaurant={restaurant}
+                  onViewDetails={onViewDetails}
+                  onManageRestaurant={
+                    onManageRestaurant || handleManageRestaurant
+                  }
+                />
+              ))}
+            </div>
+          )}
+        </>
       )}
 
       <RestaurantManagementModal

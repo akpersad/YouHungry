@@ -43,6 +43,9 @@ This document tracks all items currently being worked on, organized by priority 
 - [x] **Clean Architecture** - Removed complex Zod/React Hook Form dependencies in favor of simple, maintainable code ✅ COMPLETED
 - [x] **Epic 2 Story 3 Finalization** - Completed all remaining items in Epic 2 Story 3: Enhanced Form Management ✅ COMPLETED
 - [x] **Restaurant Management** - Add/remove restaurants from collections ✅ COMPLETED
+- [x] **Collection View Page** - Detailed view of restaurants within a collection ✅ COMPLETED
+- [x] **Collection Restaurant Management** - Add, edit, and remove restaurants from collection view ✅ COMPLETED
+- [x] **Collection Decision Making** - Random selection from collection restaurants ✅ COMPLETED
 - [ ] **Decision Making** - Basic random selection algorithm
 
 ## ⏳ In Progress
@@ -57,7 +60,7 @@ This document tracks all items currently being worked on, organized by priority 
 - [x] **Image Loading Fixes** - Resolved restaurant image loading issues with proper Next.js Image configuration ✅ COMPLETED
 - [x] **Restaurant Search Query Fix** - Fixed restaurant search to properly use Text Search API when query is provided ✅ COMPLETED
 - [x] **Epic 2 Story 2 Completion** - Completed Restaurant Search & Discovery functionality with all enhancements ✅ COMPLETED
-- [ ] **Restaurant Management** - Add/remove restaurants from collections functionality
+- [x] **Restaurant Management** - Add/remove restaurants from collections functionality ✅ COMPLETED
 
 ### Documentation & Planning
 
