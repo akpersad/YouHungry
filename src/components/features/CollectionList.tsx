@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import {
@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
 import { CreateCollectionForm } from '../forms/CreateCollectionForm';
 import { Collection } from '@/types/database';
+import { useCollections, useDeleteCollection } from '@/hooks/api';
 
 interface CollectionListProps {
   onCollectionSelect?: (collection: Collection) => void;
@@ -22,40 +23,21 @@ interface CollectionListProps {
 function CollectionList({ onCollectionSelect }: CollectionListProps) {
   const { user } = useUser();
   const router = useRouter();
-  const [collections, setCollections] = useState<Collection[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
-  const fetchCollections = useCallback(async () => {
-    if (!user?.id) return;
+  // Use TanStack Query hooks
+  const {
+    data: collections = [],
+    isLoading,
+    error,
+    refetch,
+  } = useCollections(user?.id);
 
-    try {
-      setIsLoading(true);
-      const response = await fetch(`/api/collections?userId=${user.id}`);
-      const data = await response.json();
+  const deleteCollectionMutation = useDeleteCollection();
 
-      if (data.success) {
-        setCollections(data.collections);
-        setError(null);
-      } else {
-        setError(data.error || 'Failed to fetch collections');
-      }
-    } catch (err) {
-      setError('Failed to fetch collections');
-      console.error('Error fetching collections:', err);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [user?.id]);
-
-  useEffect(() => {
-    fetchCollections();
-  }, [user?.id, fetchCollections]);
-
-  const handleCollectionCreated = (newCollection: Collection) => {
-    setCollections((prev) => [newCollection, ...prev]);
+  const handleCollectionCreated = () => {
     setIsCreateModalOpen(false);
+    // The mutation will automatically invalidate and refetch the collections
   };
 
   const handleDeleteCollection = async (collectionId: string) => {
@@ -68,21 +50,10 @@ function CollectionList({ onCollectionSelect }: CollectionListProps) {
     }
 
     try {
-      const response = await fetch(`/api/collections/${collectionId}`, {
-        method: 'DELETE',
-      });
-
-      if (response.ok) {
-        setCollections((prev) =>
-          prev.filter((c) => c._id.toString() !== collectionId)
-        );
-      } else {
-        const data = await response.json();
-        setError(data.error || 'Failed to delete collection');
-      }
-    } catch (err) {
-      setError('Failed to delete collection');
-      console.error('Error deleting collection:', err);
+      await deleteCollectionMutation.mutateAsync(collectionId);
+    } catch (error) {
+      // Error is handled by the mutation's onError callback
+      console.error('Failed to delete collection:', error);
     }
   };
 
@@ -103,8 +74,12 @@ function CollectionList({ onCollectionSelect }: CollectionListProps) {
       <Card>
         <CardContent className="p-6">
           <div className="text-center">
-            <p className="text-error mb-4">{error}</p>
-            <Button onClick={fetchCollections} variant="outline">
+            <p className="text-error mb-4">
+              {error instanceof Error
+                ? error.message
+                : 'Failed to fetch collections'}
+            </p>
+            <Button onClick={() => refetch()} variant="outline">
               Try Again
             </Button>
           </div>
@@ -179,9 +154,12 @@ function CollectionList({ onCollectionSelect }: CollectionListProps) {
                       onClick={() =>
                         handleDeleteCollection(collection._id.toString())
                       }
-                      className="text-error hover:text-error"
+                      disabled={deleteCollectionMutation.isPending}
+                      className="text-error hover:text-error disabled:opacity-50"
                     >
-                      Delete
+                      {deleteCollectionMutation.isPending
+                        ? 'Deleting...'
+                        : 'Delete'}
                     </Button>
                   </div>
                 </div>

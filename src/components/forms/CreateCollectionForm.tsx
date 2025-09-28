@@ -5,6 +5,7 @@ import { useUser } from '@clerk/nextjs';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Collection } from '@/types/database';
+import { useCreateCollection } from '@/hooks/api';
 
 interface CreateCollectionFormProps {
   onSuccess: (collection: Collection) => void;
@@ -18,8 +19,9 @@ function CreateCollectionForm({
   const { user } = useUser();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
+
+  const createCollectionMutation = useCreateCollection();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,36 +36,22 @@ function CreateCollectionForm({
       return;
     }
 
-    setIsSubmitting(true);
     setError('');
 
     try {
-      const response = await fetch('/api/collections', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: name.trim(),
-          description: description.trim() || undefined,
-          type: 'personal',
-          ownerId: user.id,
-        }),
+      const newCollection = await createCollectionMutation.mutateAsync({
+        name: name.trim(),
+        description: description.trim() || undefined,
+        userId: user.id,
       });
 
-      const result = await response.json();
-
-      if (result.success) {
-        onSuccess(result.collection);
-        setName('');
-        setDescription('');
-      } else {
-        setError(result.error || 'Failed to create collection');
-      }
-    } catch {
-      setError('Failed to create collection');
-    } finally {
-      setIsSubmitting(false);
+      onSuccess(newCollection);
+      setName('');
+      setDescription('');
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : 'Failed to create collection'
+      );
     }
   };
 
@@ -116,8 +104,13 @@ function CreateCollectionForm({
         <Button type="button" variant="outline" onClick={onCancel}>
           Cancel
         </Button>
-        <Button type="submit" disabled={isSubmitting || !name.trim()}>
-          {isSubmitting ? 'Creating...' : 'Create Collection'}
+        <Button
+          type="submit"
+          disabled={createCollectionMutation.isPending || !name.trim()}
+        >
+          {createCollectionMutation.isPending
+            ? 'Creating...'
+            : 'Create Collection'}
         </Button>
       </div>
     </form>

@@ -2,17 +2,24 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { CreateCollectionForm } from '../CreateCollectionForm';
 import { useUser } from '@clerk/nextjs';
+import { TestQueryProvider } from '@/test-utils/testQueryClient';
 
 // Mock Clerk
 jest.mock('@clerk/nextjs', () => ({
   useUser: jest.fn(),
 }));
 
-// Mock fetch
-global.fetch = jest.fn();
+// Mock TanStack Query hooks
+jest.mock('@/hooks/api', () => ({
+  useCreateCollection: jest.fn(),
+}));
+
+import { useCreateCollection } from '@/hooks/api';
 
 const mockUseUser = useUser as jest.MockedFunction<typeof useUser>;
-const mockFetch = fetch as jest.MockedFunction<typeof fetch>;
+const mockUseCreateCollection = useCreateCollection as jest.MockedFunction<
+  typeof useCreateCollection
+>;
 
 describe('CreateCollectionForm', () => {
   const mockOnSuccess = jest.fn();
@@ -25,14 +32,25 @@ describe('CreateCollectionForm', () => {
       isSignedIn: true,
     } as ReturnType<typeof useUser>);
 
-    mockFetch.mockClear();
+    // Setup default mock for TanStack Query hook
+    mockUseCreateCollection.mockReturnValue({
+      mutateAsync: jest.fn(),
+      isPending: false,
+      error: null,
+    });
+
     mockOnSuccess.mockClear();
     mockOnCancel.mockClear();
   });
 
   it('renders form fields correctly', () => {
     render(
-      <CreateCollectionForm onSuccess={mockOnSuccess} onCancel={mockOnCancel} />
+      <TestQueryProvider>
+        <CreateCollectionForm
+          onSuccess={mockOnSuccess}
+          onCancel={mockOnCancel}
+        />
+      </TestQueryProvider>
     );
 
     expect(screen.getByLabelText('Collection Name')).toBeInTheDocument();
@@ -45,7 +63,12 @@ describe('CreateCollectionForm', () => {
 
   it('validates required fields', async () => {
     render(
-      <CreateCollectionForm onSuccess={mockOnSuccess} onCancel={mockOnCancel} />
+      <TestQueryProvider>
+        <CreateCollectionForm
+          onSuccess={mockOnSuccess}
+          onCancel={mockOnCancel}
+        />
+      </TestQueryProvider>
     );
 
     const form = document.querySelector('form');
@@ -61,22 +84,26 @@ describe('CreateCollectionForm', () => {
     });
 
     expect(mockOnSuccess).not.toHaveBeenCalled();
-    expect(mockFetch).not.toHaveBeenCalled();
   });
 
   it('submits form with valid data', async () => {
     const user = userEvent.setup();
-    const mockResponse = {
-      success: true,
-      collection: { id: 'collection123', name: 'Test Collection' },
-    };
+    const mockCollection = { id: 'collection123', name: 'Test Collection' };
+    const mockMutateAsync = jest.fn().mockResolvedValue(mockCollection);
 
-    mockFetch.mockResolvedValueOnce({
-      json: async () => mockResponse,
-    } as Response);
+    mockUseCreateCollection.mockReturnValue({
+      mutateAsync: mockMutateAsync,
+      isPending: false,
+      error: null,
+    });
 
     render(
-      <CreateCollectionForm onSuccess={mockOnSuccess} onCancel={mockOnCancel} />
+      <TestQueryProvider>
+        <CreateCollectionForm
+          onSuccess={mockOnSuccess}
+          onCancel={mockOnCancel}
+        />
+      </TestQueryProvider>
     );
 
     const nameInput = screen.getByLabelText('Collection Name');
@@ -95,36 +122,33 @@ describe('CreateCollectionForm', () => {
     await user.click(submitButton);
 
     await waitFor(() => {
-      expect(mockFetch).toHaveBeenCalledWith('/api/collections', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: 'Test Collection',
-          description: 'Test description',
-          type: 'personal',
-          ownerId: 'user123',
-        }),
+      expect(mockMutateAsync).toHaveBeenCalledWith({
+        name: 'Test Collection',
+        description: 'Test description',
+        userId: 'user123',
       });
     });
 
-    expect(mockOnSuccess).toHaveBeenCalledWith(mockResponse.collection);
+    expect(mockOnSuccess).toHaveBeenCalledWith(mockCollection);
   });
 
   it('handles API errors', async () => {
     const user = userEvent.setup();
-    const mockResponse = {
-      success: false,
-      error: 'Collection name already exists',
-    };
+    const mockError = new Error('Collection name already exists');
 
-    mockFetch.mockResolvedValueOnce({
-      json: async () => mockResponse,
-    } as Response);
+    mockUseCreateCollection.mockReturnValue({
+      mutateAsync: jest.fn().mockRejectedValue(mockError),
+      isPending: false,
+      error: mockError,
+    });
 
     render(
-      <CreateCollectionForm onSuccess={mockOnSuccess} onCancel={mockOnCancel} />
+      <TestQueryProvider>
+        <CreateCollectionForm
+          onSuccess={mockOnSuccess}
+          onCancel={mockOnCancel}
+        />
+      </TestQueryProvider>
     );
 
     const nameInput = screen.getByLabelText('Collection Name');
@@ -146,7 +170,12 @@ describe('CreateCollectionForm', () => {
 
   it('calls onCancel when cancel button is clicked', () => {
     render(
-      <CreateCollectionForm onSuccess={mockOnSuccess} onCancel={mockOnCancel} />
+      <TestQueryProvider>
+        <CreateCollectionForm
+          onSuccess={mockOnSuccess}
+          onCancel={mockOnCancel}
+        />
+      </TestQueryProvider>
     );
 
     const cancelButton = screen.getByRole('button', { name: 'Cancel' });
@@ -157,43 +186,29 @@ describe('CreateCollectionForm', () => {
 
   it('shows loading state during submission', async () => {
     const user = userEvent.setup();
-    const mockResponse = {
-      success: true,
-      collection: { id: 'collection123', name: 'Test Collection' },
-    };
+    const mockCollection = { id: 'collection123', name: 'Test Collection' };
 
-    // Make fetch take some time
-    mockFetch.mockImplementationOnce(
-      () =>
-        new Promise((resolve) =>
-          setTimeout(
-            () =>
-              resolve({
-                json: async () => mockResponse,
-              } as Response),
-            100
-          )
-        )
-    );
+    mockUseCreateCollection.mockReturnValue({
+      mutateAsync: jest.fn().mockResolvedValue(mockCollection),
+      isPending: true,
+      error: null,
+    });
 
     render(
-      <CreateCollectionForm onSuccess={mockOnSuccess} onCancel={mockOnCancel} />
+      <TestQueryProvider>
+        <CreateCollectionForm
+          onSuccess={mockOnSuccess}
+          onCancel={mockOnCancel}
+        />
+      </TestQueryProvider>
     );
 
     const nameInput = screen.getByLabelText('Collection Name');
-    const submitButton = screen.getByRole('button', {
-      name: 'Create Collection',
-    });
 
     await user.type(nameInput, 'Test Collection');
-    await user.click(submitButton);
 
-    // Should show loading state
+    // Should show loading state immediately due to isPending: true
     expect(screen.getByText('Creating...')).toBeInTheDocument();
-    expect(submitButton).toBeDisabled();
-
-    await waitFor(() => {
-      expect(mockOnSuccess).toHaveBeenCalledWith(mockResponse.collection);
-    });
+    expect(screen.getByRole('button', { name: 'Creating...' })).toBeDisabled();
   });
 });

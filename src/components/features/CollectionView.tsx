@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Collection, Restaurant } from '@/types/database';
+import { Restaurant } from '@/types/database';
+import { useCollection, useRandomDecision } from '@/hooks/api';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
@@ -19,9 +20,6 @@ interface CollectionViewProps {
 
 export function CollectionView({ collectionId }: CollectionViewProps) {
   const router = useRouter();
-  const [collection, setCollection] = useState<Collection | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [showAddRestaurant, setShowAddRestaurant] = useState(false);
   const [selectedRestaurant, setSelectedRestaurant] =
     useState<Restaurant | null>(null);
@@ -34,45 +32,26 @@ export function CollectionView({ collectionId }: CollectionViewProps) {
     reasoning: string;
     visitDate: Date;
   } | null>(null);
-  const [isMakingDecision, setIsMakingDecision] = useState(false);
   const [decisionError, setDecisionError] = useState<string | null>(null);
 
-  const fetchCollection = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
+  // Use TanStack Query hooks
+  const {
+    data: collection,
+    isLoading,
+    error,
+    refetch,
+  } = useCollection(collectionId);
 
-      const response = await fetch(`/api/collections/${collectionId}`);
-      const data = await response.json();
-
-      if (data.success) {
-        setCollection(data.collection);
-      } else {
-        setError(data.error || 'Failed to fetch collection');
-      }
-    } catch (err) {
-      setError('Failed to fetch collection');
-      console.error('Error fetching collection:', err);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [collectionId]);
-
-  useEffect(() => {
-    if (collectionId) {
-      fetchCollection();
-    }
-  }, [collectionId, fetchCollection]);
+  const randomDecisionMutation = useRandomDecision();
 
   const handleRestaurantAdded = () => {
-    // Refresh the collection data
-    fetchCollection();
+    // TanStack Query will automatically refetch the collection data
     setShowAddRestaurant(false);
   };
 
   const handleRestaurantUpdate = () => {
-    // Refresh the collection data
-    fetchCollection();
+    // TanStack Query will automatically refetch the collection data
+    // No manual refetch needed
   };
 
   const handleViewDetails = (restaurant: Restaurant) => {
@@ -111,7 +90,7 @@ export function CollectionView({ collectionId }: CollectionViewProps) {
       }
 
       // Refresh collection data
-      await fetchCollection();
+      // TanStack Query will automatically refetch
     } catch (error) {
       console.error('Error updating restaurant:', error);
       throw error;
@@ -136,7 +115,7 @@ export function CollectionView({ collectionId }: CollectionViewProps) {
       }
 
       // Refresh collection data
-      await fetchCollection();
+      // TanStack Query will automatically refetch
     } catch (error) {
       console.error('Error removing restaurant from collection:', error);
       throw error;
@@ -149,35 +128,22 @@ export function CollectionView({ collectionId }: CollectionViewProps) {
       return;
     }
 
+    setDecisionError(null);
+
+    // Set visit date to tomorrow at 7 PM
+    const visitDate = new Date();
+    visitDate.setDate(visitDate.getDate() + 1);
+    visitDate.setHours(19, 0, 0, 0);
+
     try {
-      setIsMakingDecision(true);
-      setDecisionError(null);
-
-      // Set visit date to tomorrow at 7 PM
-      const visitDate = new Date();
-      visitDate.setDate(visitDate.getDate() + 1);
-      visitDate.setHours(19, 0, 0, 0);
-
-      const response = await fetch('/api/decisions/random-select', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          collectionId: collectionId,
-          visitDate: visitDate.toISOString(),
-        }),
+      const result = await randomDecisionMutation.mutateAsync({
+        collectionId: collectionId,
+        visitDate: visitDate.toISOString(),
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to make decision');
-      }
-
-      // Fetch the selected restaurant details
+      // Fetch the selected restaurant details using the hook
       const restaurantResponse = await fetch(
-        `/api/restaurants/${data.result.restaurantId}`
+        `/api/restaurants/${result.result.restaurantId}`
       );
       const restaurantData = await restaurantResponse.json();
 
@@ -187,7 +153,7 @@ export function CollectionView({ collectionId }: CollectionViewProps) {
 
       setDecisionResult({
         restaurant: restaurantData.restaurant,
-        reasoning: data.result.reasoning,
+        reasoning: result.result.reasoning,
         visitDate: visitDate,
       });
       setIsDecisionResultOpen(true);
@@ -196,8 +162,6 @@ export function CollectionView({ collectionId }: CollectionViewProps) {
       setDecisionError(
         `Failed to make decision: ${error instanceof Error ? error.message : 'Unknown error'}`
       );
-    } finally {
-      setIsMakingDecision(false);
     }
   };
 
@@ -234,9 +198,13 @@ export function CollectionView({ collectionId }: CollectionViewProps) {
         <Card>
           <CardContent className="p-6">
             <div className="text-center">
-              <p className="text-error mb-4">{error}</p>
+              <p className="text-error mb-4">
+                {error instanceof Error
+                  ? error.message
+                  : 'Failed to fetch collection'}
+              </p>
               <div className="space-x-2">
-                <Button onClick={fetchCollection} variant="outline">
+                <Button onClick={() => refetch()} variant="outline">
                   Try Again
                 </Button>
                 <Button onClick={() => router.back()} variant="outline">
@@ -306,9 +274,11 @@ export function CollectionView({ collectionId }: CollectionViewProps) {
             <Button
               onClick={handleRandomDecision}
               variant="outline"
-              disabled={isMakingDecision}
+              disabled={randomDecisionMutation.isPending}
             >
-              {isMakingDecision ? 'Making Decision...' : 'Decide for Me'}
+              {randomDecisionMutation.isPending
+                ? 'Making Decision...'
+                : 'Decide for Me'}
             </Button>
             <Button onClick={() => setIsStatisticsOpen(true)} variant="outline">
               View Statistics
@@ -410,7 +380,7 @@ export function CollectionView({ collectionId }: CollectionViewProps) {
         visitDate={decisionResult?.visitDate || new Date()}
         onConfirmVisit={handleConfirmVisit}
         onTryAgain={handleTryAgain}
-        isLoading={isMakingDecision}
+        isLoading={randomDecisionMutation.isPending}
       />
 
       {/* Decision Statistics Modal */}

@@ -2,6 +2,22 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { CollectionView } from '../CollectionView';
 import { Collection, Restaurant } from '@/types/database';
 import { ObjectId } from 'mongodb';
+import { TestQueryProvider } from '@/test-utils/testQueryClient';
+
+// Mock TanStack Query hooks
+jest.mock('@/hooks/api', () => ({
+  useCollection: jest.fn(),
+  useRandomDecision: jest.fn(),
+}));
+
+import { useCollection, useRandomDecision } from '@/hooks/api';
+
+const mockUseCollection = useCollection as jest.MockedFunction<
+  typeof useCollection
+>;
+const mockUseRandomDecision = useRandomDecision as jest.MockedFunction<
+  typeof useRandomDecision
+>;
 
 // Mock Next.js router
 const mockPush = jest.fn();
@@ -239,12 +255,28 @@ describe('CollectionView', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (fetch as jest.Mock).mockClear();
+
+    // Setup default mocks for TanStack Query hooks
+    mockUseCollection.mockReturnValue({
+      data: undefined,
+      isLoading: true,
+      error: null,
+      refetch: jest.fn(),
+    });
+
+    mockUseRandomDecision.mockReturnValue({
+      mutateAsync: jest.fn(),
+      isPending: false,
+      error: null,
+    });
   });
 
   it('renders loading state initially', () => {
-    (fetch as jest.Mock).mockImplementation(() => new Promise(() => {})); // Never resolves
-
-    render(<CollectionView collectionId="507f1f77bcf86cd799439011" />);
+    render(
+      <TestQueryProvider>
+        <CollectionView collectionId="507f1f77bcf86cd799439011" />
+      </TestQueryProvider>
+    );
 
     expect(
       screen.getByRole('status', { name: 'Loading collection' })
