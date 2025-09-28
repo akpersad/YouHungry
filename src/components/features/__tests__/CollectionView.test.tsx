@@ -2,6 +2,22 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { CollectionView } from '../CollectionView';
 import { Collection, Restaurant } from '@/types/database';
 import { ObjectId } from 'mongodb';
+import { TestQueryProvider } from '@/test-utils/testQueryClient';
+
+// Mock TanStack Query hooks
+jest.mock('@/hooks/api', () => ({
+  useCollection: jest.fn(),
+  useRandomDecision: jest.fn(),
+}));
+
+import { useCollection, useRandomDecision } from '@/hooks/api';
+
+const mockUseCollection = useCollection as jest.MockedFunction<
+  typeof useCollection
+>;
+const mockUseRandomDecision = useRandomDecision as jest.MockedFunction<
+  typeof useRandomDecision
+>;
 
 // Mock Next.js router
 const mockPush = jest.fn();
@@ -239,12 +255,28 @@ describe('CollectionView', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (fetch as jest.Mock).mockClear();
+
+    // Setup default mocks for TanStack Query hooks
+    mockUseCollection.mockReturnValue({
+      data: undefined,
+      isLoading: true,
+      error: null,
+      refetch: jest.fn(),
+    });
+
+    mockUseRandomDecision.mockReturnValue({
+      mutateAsync: jest.fn(),
+      isPending: false,
+      error: null,
+    });
   });
 
   it('renders loading state initially', () => {
-    (fetch as jest.Mock).mockImplementation(() => new Promise(() => {})); // Never resolves
-
-    render(<CollectionView collectionId="507f1f77bcf86cd799439011" />);
+    render(
+      <TestQueryProvider>
+        <CollectionView collectionId="507f1f77bcf86cd799439011" />
+      </TestQueryProvider>
+    );
 
     expect(
       screen.getByRole('status', { name: 'Loading collection' })
@@ -252,15 +284,18 @@ describe('CollectionView', () => {
   });
 
   it('renders collection successfully', async () => {
-    (fetch as jest.Mock).mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({
-        success: true,
-        collection: mockCollection,
-      }),
+    mockUseCollection.mockReturnValue({
+      data: mockCollection,
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
     });
 
-    render(<CollectionView collectionId="507f1f77bcf86cd799439011" />);
+    render(
+      <TestQueryProvider>
+        <CollectionView collectionId="507f1f77bcf86cd799439011" />
+      </TestQueryProvider>
+    );
 
     await waitFor(() => {
       expect(screen.getByText('My Test Collection')).toBeInTheDocument();
@@ -273,9 +308,18 @@ describe('CollectionView', () => {
 
   it('displays error message when fetch fails', async () => {
     const errorMessage = 'Failed to fetch collection';
-    (fetch as jest.Mock).mockRejectedValueOnce(new Error(errorMessage));
+    mockUseCollection.mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      error: new Error(errorMessage),
+      refetch: jest.fn(),
+    });
 
-    render(<CollectionView collectionId="507f1f77bcf86cd799439011" />);
+    render(
+      <TestQueryProvider>
+        <CollectionView collectionId="507f1f77bcf86cd799439011" />
+      </TestQueryProvider>
+    );
 
     await waitFor(() => {
       expect(screen.getByText(errorMessage)).toBeInTheDocument();
@@ -287,15 +331,18 @@ describe('CollectionView', () => {
 
   it('displays error message when API returns error', async () => {
     const errorMessage = 'Collection not found';
-    (fetch as jest.Mock).mockResolvedValueOnce({
-      ok: false,
-      json: async () => ({
-        success: false,
-        error: errorMessage,
-      }),
+    mockUseCollection.mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      error: new Error(errorMessage),
+      refetch: jest.fn(),
     });
 
-    render(<CollectionView collectionId="507f1f77bcf86cd799439011" />);
+    render(
+      <TestQueryProvider>
+        <CollectionView collectionId="507f1f77bcf86cd799439011" />
+      </TestQueryProvider>
+    );
 
     await waitFor(() => {
       expect(screen.getByText(errorMessage)).toBeInTheDocument();
@@ -303,15 +350,18 @@ describe('CollectionView', () => {
   });
 
   it('shows collection not found when collection is null', async () => {
-    (fetch as jest.Mock).mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({
-        success: true,
-        collection: null,
-      }),
+    mockUseCollection.mockReturnValue({
+      data: null,
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
     });
 
-    render(<CollectionView collectionId="507f1f77bcf86cd799439011" />);
+    render(
+      <TestQueryProvider>
+        <CollectionView collectionId="507f1f77bcf86cd799439011" />
+      </TestQueryProvider>
+    );
 
     await waitFor(() => {
       expect(screen.getByText('Collection not found')).toBeInTheDocument();
@@ -319,15 +369,18 @@ describe('CollectionView', () => {
   });
 
   it('opens add restaurant modal when add restaurant button is clicked', async () => {
-    (fetch as jest.Mock).mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({
-        success: true,
-        collection: mockCollection,
-      }),
+    mockUseCollection.mockReturnValue({
+      data: mockCollection,
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
     });
 
-    render(<CollectionView collectionId="507f1f77bcf86cd799439011" />);
+    render(
+      <TestQueryProvider>
+        <CollectionView collectionId="507f1f77bcf86cd799439011" />
+      </TestQueryProvider>
+    );
 
     await waitFor(() => {
       expect(screen.getByText('My Test Collection')).toBeInTheDocument();
@@ -344,15 +397,18 @@ describe('CollectionView', () => {
   });
 
   it('shows decide for me button when collection has restaurants', async () => {
-    (fetch as jest.Mock).mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({
-        success: true,
-        collection: mockCollection,
-      }),
+    mockUseCollection.mockReturnValue({
+      data: mockCollection,
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
     });
 
-    render(<CollectionView collectionId="507f1f77bcf86cd799439011" />);
+    render(
+      <TestQueryProvider>
+        <CollectionView collectionId="507f1f77bcf86cd799439011" />
+      </TestQueryProvider>
+    );
 
     await waitFor(() => {
       expect(screen.getByText('My Test Collection')).toBeInTheDocument();
@@ -363,15 +419,18 @@ describe('CollectionView', () => {
 
   it('does not show decide for me button when collection has no restaurants', async () => {
     const emptyCollection = { ...mockCollection, restaurantIds: [] };
-    (fetch as jest.Mock).mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({
-        success: true,
-        collection: emptyCollection,
-      }),
+    mockUseCollection.mockReturnValue({
+      data: emptyCollection,
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
     });
 
-    render(<CollectionView collectionId="507f1f77bcf86cd799439011" />);
+    render(
+      <TestQueryProvider>
+        <CollectionView collectionId="507f1f77bcf86cd799439011" />
+      </TestQueryProvider>
+    );
 
     await waitFor(() => {
       expect(screen.getByText('My Test Collection')).toBeInTheDocument();
@@ -381,34 +440,44 @@ describe('CollectionView', () => {
   });
 
   it('handles random decision when decide for me is clicked', async () => {
-    // Mock successful API responses
-    (fetch as jest.Mock)
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          success: true,
-          collection: mockCollection,
-        }),
-      })
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          success: true,
-          result: {
-            restaurantId: mockCollection.restaurantIds[0],
-            reasoning: 'Selected using weighted random algorithm',
-          },
-        }),
-      })
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          success: true,
-          restaurant: mockRestaurants[0],
-        }),
-      });
+    mockUseCollection.mockReturnValue({
+      data: mockCollection,
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
+    });
 
-    render(<CollectionView collectionId="507f1f77bcf86cd799439011" />);
+    // Mock the restaurant fetch that happens after decision
+    (fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        success: true,
+        restaurant: mockRestaurants[0],
+      }),
+    });
+
+    mockUseRandomDecision.mockReturnValue({
+      mutateAsync: jest.fn().mockResolvedValue({
+        result: {
+          restaurantId: mockCollection.restaurantIds[0],
+          reasoning: 'Selected using weighted random algorithm',
+          weight: 1,
+        },
+        statistics: {
+          totalDecisions: 1,
+          averageWeight: 1,
+          mostChosenRestaurant: mockCollection.restaurantIds[0],
+        },
+      }),
+      isPending: false,
+      error: null,
+    });
+
+    render(
+      <TestQueryProvider>
+        <CollectionView collectionId="507f1f77bcf86cd799439011" />
+      </TestQueryProvider>
+    );
 
     await waitFor(() => {
       expect(screen.getByText('My Test Collection')).toBeInTheDocument();
@@ -427,15 +496,18 @@ describe('CollectionView', () => {
 
   it('shows error when decide for me is clicked on empty collection', async () => {
     const emptyCollection = { ...mockCollection, restaurantIds: [] };
-    (fetch as jest.Mock).mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({
-        success: true,
-        collection: emptyCollection,
-      }),
+    mockUseCollection.mockReturnValue({
+      data: emptyCollection,
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
     });
 
-    render(<CollectionView collectionId="507f1f77bcf86cd799439011" />);
+    render(
+      <TestQueryProvider>
+        <CollectionView collectionId="507f1f77bcf86cd799439011" />
+      </TestQueryProvider>
+    );
 
     await waitFor(() => {
       expect(screen.getByText('My Test Collection')).toBeInTheDocument();
@@ -446,15 +518,18 @@ describe('CollectionView', () => {
   });
 
   it('navigates back when back button is clicked', async () => {
-    (fetch as jest.Mock).mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({
-        success: true,
-        collection: mockCollection,
-      }),
+    mockUseCollection.mockReturnValue({
+      data: mockCollection,
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
     });
 
-    render(<CollectionView collectionId="507f1f77bcf86cd799439011" />);
+    render(
+      <TestQueryProvider>
+        <CollectionView collectionId="507f1f77bcf86cd799439011" />
+      </TestQueryProvider>
+    );
 
     await waitFor(() => {
       expect(screen.getByText('My Test Collection')).toBeInTheDocument();
@@ -467,15 +542,18 @@ describe('CollectionView', () => {
   });
 
   it('handles view restaurant details', async () => {
-    (fetch as jest.Mock).mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({
-        success: true,
-        collection: mockCollection,
-      }),
+    mockUseCollection.mockReturnValue({
+      data: mockCollection,
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
     });
 
-    render(<CollectionView collectionId="507f1f77bcf86cd799439011" />);
+    render(
+      <TestQueryProvider>
+        <CollectionView collectionId="507f1f77bcf86cd799439011" />
+      </TestQueryProvider>
+    );
 
     await waitFor(() => {
       expect(screen.getByText('My Test Collection')).toBeInTheDocument();
@@ -491,15 +569,18 @@ describe('CollectionView', () => {
   });
 
   it('handles manage restaurant', async () => {
-    (fetch as jest.Mock).mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({
-        success: true,
-        collection: mockCollection,
-      }),
+    mockUseCollection.mockReturnValue({
+      data: mockCollection,
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
     });
 
-    render(<CollectionView collectionId="507f1f77bcf86cd799439011" />);
+    render(
+      <TestQueryProvider>
+        <CollectionView collectionId="507f1f77bcf86cd799439011" />
+      </TestQueryProvider>
+    );
 
     await waitFor(() => {
       expect(screen.getByText('My Test Collection')).toBeInTheDocument();
@@ -515,26 +596,18 @@ describe('CollectionView', () => {
   });
 
   it('handles restaurant added callback', async () => {
-    (fetch as jest.Mock)
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          success: true,
-          collection: mockCollection,
-        }),
-      })
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          success: true,
-          collection: {
-            ...mockCollection,
-            restaurantIds: [...mockCollection.restaurantIds, new ObjectId()],
-          },
-        }),
-      });
+    mockUseCollection.mockReturnValue({
+      data: mockCollection,
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
+    });
 
-    render(<CollectionView collectionId="507f1f77bcf86cd799439011" />);
+    render(
+      <TestQueryProvider>
+        <CollectionView collectionId="507f1f77bcf86cd799439011" />
+      </TestQueryProvider>
+    );
 
     await waitFor(() => {
       expect(screen.getByText('My Test Collection')).toBeInTheDocument();

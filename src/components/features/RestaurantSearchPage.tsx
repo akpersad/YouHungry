@@ -1,12 +1,17 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { Restaurant, Collection } from '@/types/database';
 import { RestaurantSearchForm } from '../forms/RestaurantSearchForm';
 import { RestaurantSearchResults } from './RestaurantSearchResults';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
+import {
+  useCollections,
+  useRestaurantSearch,
+  useAddRestaurantToCollection,
+} from '@/hooks/api';
 
 interface RestaurantSearchPageProps {
   onAddToCollection?: (restaurant: Restaurant) => void;
@@ -26,24 +31,41 @@ export function RestaurantSearchPage({
   collections: propCollections = [],
 }: RestaurantSearchPageProps) {
   const { user, isLoaded } = useUser();
-  const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRestaurant, setSelectedRestaurant] =
     useState<Restaurant | null>(null);
   const [showAddToCollectionModal, setShowAddToCollectionModal] =
     useState(false);
-  const [collections, setCollections] = useState<Collection[]>([]);
-  const [isLoadingCollections, setIsLoadingCollections] = useState(false);
   const [selectedCollectionId, setSelectedCollectionId] = useState<string>('');
   const [restaurantInCollections, setRestaurantInCollections] = useState<
     Set<string>
   >(new Set());
   const [selectedRestaurantCollections, setSelectedRestaurantCollections] =
     useState<Set<string>>(new Set());
+  const [searchFilters, setSearchFilters] = useState<{
+    location: string;
+    q?: string;
+    cuisine?: string;
+    minRating?: number;
+    maxPrice?: number;
+    minPrice?: number;
+    distance?: number;
+  } | null>(null);
 
-  const collectionsFetched = useRef(false);
+  // Use TanStack Query hooks
+  const { data: collections = [], isLoading: isLoadingCollections } =
+    useCollections(user?.id);
+
+  const {
+    data: restaurants = [],
+    isLoading,
+    error,
+  } = useRestaurantSearch(
+    searchFilters || { location: '' },
+    !!searchFilters?.location
+  );
+
+  const addRestaurantMutation = useAddRestaurantToCollection();
 
   const checkRestaurantsInCollections = useCallback(
     async (collections: Collection[]) => {
@@ -103,97 +125,46 @@ export function RestaurantSearchPage({
   );
 
   // Fetch collections if not provided as props
-  useEffect(() => {
-    if (propCollections.length > 0) {
-      // Convert propCollections to Collection format
-      const convertedCollections: Collection[] = propCollections.map(
-        (prop) => ({
-          _id: prop._id as unknown as Collection['_id'], // Convert string to ObjectId-like structure for client
+  // Use propCollections if provided, otherwise use TanStack Query data
+  const effectiveCollections =
+    propCollections.length > 0
+      ? propCollections.map((prop) => ({
+          _id: prop._id as unknown as Collection['_id'],
           name: prop.name,
           description: '',
           type: 'personal' as const,
-          ownerId: 'temp' as unknown as Collection['ownerId'], // This will be overridden when fetched from API
+          ownerId: 'temp' as unknown as Collection['ownerId'],
           restaurantIds: [],
           createdAt: new Date(),
           updatedAt: new Date(),
-        })
-      );
-      setCollections(convertedCollections);
-    } else if (isLoaded && user?.id && !collectionsFetched.current) {
-      // Inline the fetch logic to avoid circular dependencies
-      const fetchCollectionsInline = async () => {
-        collectionsFetched.current = true;
-        setIsLoadingCollections(true);
-        try {
-          const response = await fetch(`/api/collections?userId=${user.id}`);
-          const data = await response.json();
-
-          if (data.success) {
-            console.log('Fetched collections:', data.collections);
-            setCollections(data.collections || []);
-          } else {
-            console.error('Failed to fetch collections:', data.error);
-          }
-        } catch (error) {
-          console.error('Error fetching collections:', error);
-        } finally {
-          setIsLoadingCollections(false);
-        }
-      };
-
-      fetchCollectionsInline();
-    }
-  }, [propCollections, isLoaded, user?.id]);
+        }))
+      : collections;
 
   // Check restaurants in collections when restaurants or collections change
   useEffect(() => {
-    if (restaurants.length > 0 && collections.length > 0) {
-      checkRestaurantsInCollections(collections);
+    if (restaurants.length > 0 && effectiveCollections.length > 0) {
+      checkRestaurantsInCollections(effectiveCollections);
     }
-  }, [restaurants, collections, checkRestaurantsInCollections]);
+  }, [restaurants, effectiveCollections, checkRestaurantsInCollections]);
 
-  const searchRestaurants = async (
+  const searchRestaurants = (
     location: string,
     query?: string,
     filters?: SearchFilters
   ) => {
-    setIsLoading(true);
-    setError(null);
     setSearchQuery(query || '');
 
-    try {
-      const params = new URLSearchParams({
-        location,
-        ...(query && { q: query }),
-        ...(filters?.cuisine && { cuisine: filters.cuisine }),
-        ...(filters?.minRating && { minRating: filters.minRating.toString() }),
-        ...(filters?.maxPrice && { maxPrice: filters.maxPrice.toString() }),
-        ...(filters?.minPrice && { minPrice: filters.minPrice.toString() }),
-        ...(filters?.distance && { distance: filters.distance.toString() }),
-      });
+    const searchParams = {
+      location,
+      ...(query && { q: query }),
+      ...(filters?.cuisine && { cuisine: filters.cuisine }),
+      ...(filters?.minRating && { minRating: filters.minRating }),
+      ...(filters?.maxPrice && { maxPrice: filters.maxPrice }),
+      ...(filters?.minPrice && { minPrice: filters.minPrice }),
+      ...(filters?.distance && { distance: filters.distance }),
+    };
 
-      const response = await fetch(`/api/restaurants/search?${params}`);
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to search restaurants');
-      }
-
-      setRestaurants(data.restaurants || []);
-
-      // Check which restaurants are already in collections
-      if (collections.length > 0) {
-        checkRestaurantsInCollections(collections);
-      }
-    } catch (err) {
-      console.error('Search error:', err);
-      setError(
-        err instanceof Error ? err.message : 'Failed to search restaurants'
-      );
-      setRestaurants([]);
-    } finally {
-      setIsLoading(false);
-    }
+    setSearchFilters(searchParams);
   };
 
   const checkRestaurantInSpecificCollections = (
@@ -208,7 +179,7 @@ export function RestaurantSearchPage({
     console.log('Checking restaurant:', restaurantId.toString());
     console.log(
       'Available collections:',
-      collections.map((c) => ({
+      effectiveCollections.map((c) => ({
         id: c._id.toString(),
         name: c.name,
         restaurantIds: c.restaurantIds,
@@ -280,7 +251,7 @@ export function RestaurantSearchPage({
       // Check which collections already contain this restaurant
       const restaurantCollections = checkRestaurantInSpecificCollections(
         restaurant,
-        collections
+        effectiveCollections
       );
       console.log(
         'Restaurant collections result:',
@@ -298,32 +269,11 @@ export function RestaurantSearchPage({
   const handleCollectionSelect = async (collectionId: string) => {
     if (!selectedRestaurant) return;
 
-    setIsLoading(true);
-    setError(null);
-
     try {
-      const response = await fetch('/api/restaurants', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          restaurantData: selectedRestaurant,
-          collectionId,
-        }),
+      await addRestaurantMutation.mutateAsync({
+        restaurantId: selectedRestaurant._id.toString(),
+        collectionId,
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        // Handle duplicate restaurant error specifically
-        if (data.alreadyExists) {
-          throw new Error(
-            'This restaurant is already in the selected collection'
-          );
-        }
-        throw new Error(data.error || 'Failed to add restaurant to collection');
-      }
 
       setShowAddToCollectionModal(false);
       setSelectedRestaurant(null);
@@ -335,13 +285,7 @@ export function RestaurantSearchPage({
       }
     } catch (err) {
       console.error('Error adding restaurant to collection:', err);
-      setError(
-        err instanceof Error
-          ? err.message
-          : 'Failed to add restaurant to collection'
-      );
-    } finally {
-      setIsLoading(false);
+      // Error is handled by the mutation's onError callback
     }
   };
 
@@ -369,7 +313,9 @@ export function RestaurantSearchPage({
             </div>
             <div className="ml-3">
               <h3 className="text-sm font-medium text-red-800">Search Error</h3>
-              <div className="mt-2 text-sm text-red-700">{error}</div>
+              <div className="mt-2 text-sm text-red-700">
+                {error instanceof Error ? error.message : 'An error occurred'}
+              </div>
             </div>
           </div>
         </div>
@@ -425,11 +371,11 @@ export function RestaurantSearchPage({
                     Loading collections...
                   </span>
                 </div>
-              ) : collections.length > 0 ? (
-                collections.length <= 3 ? (
+              ) : effectiveCollections.length > 0 ? (
+                effectiveCollections.length <= 3 ? (
                   // Show as buttons when 3 or fewer collections
                   <div className="space-y-2">
-                    {collections.map((collection) => {
+                    {effectiveCollections.map((collection) => {
                       const isAlreadyInCollection =
                         selectedRestaurantCollections.has(
                           collection._id.toString()
@@ -477,7 +423,7 @@ export function RestaurantSearchPage({
                       className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     >
                       <option value="">Select a collection...</option>
-                      {collections
+                      {effectiveCollections
                         .filter(
                           (collection) =>
                             !selectedRestaurantCollections.has(
@@ -493,7 +439,7 @@ export function RestaurantSearchPage({
                           </option>
                         ))}
                     </select>
-                    {collections.some((collection) =>
+                    {effectiveCollections.some((collection) =>
                       selectedRestaurantCollections.has(
                         collection._id.toString()
                       )
@@ -526,10 +472,14 @@ export function RestaurantSearchPage({
                         selectedCollectionId &&
                         handleCollectionSelect(selectedCollectionId)
                       }
-                      disabled={!selectedCollectionId}
+                      disabled={
+                        !selectedCollectionId || addRestaurantMutation.isPending
+                      }
                       className="w-full"
                     >
-                      Add to Collection
+                      {addRestaurantMutation.isPending
+                        ? 'Adding...'
+                        : 'Add to Collection'}
                     </Button>
                   </div>
                 )

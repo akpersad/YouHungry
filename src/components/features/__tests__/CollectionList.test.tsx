@@ -1,11 +1,6 @@
-import {
-  render,
-  screen,
-  fireEvent,
-  waitFor,
-  act,
-} from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { CollectionList } from '../CollectionList';
+import { TestQueryProvider } from '@/test-utils/testQueryClient';
 
 // Mock the useUser hook
 jest.mock('@clerk/nextjs', () => ({
@@ -30,6 +25,29 @@ jest.mock('next/navigation', () => ({
 
 // Mock fetch
 global.fetch = jest.fn();
+
+// Mock TanStack Query hooks
+jest.mock('@/hooks/api', () => ({
+  useCollections: jest.fn(),
+  useDeleteCollection: jest.fn(),
+  useCreateCollection: jest.fn(),
+}));
+
+import {
+  useCollections,
+  useDeleteCollection,
+  useCreateCollection,
+} from '@/hooks/api';
+
+const mockUseCollections = useCollections as jest.MockedFunction<
+  typeof useCollections
+>;
+const mockUseDeleteCollection = useDeleteCollection as jest.MockedFunction<
+  typeof useDeleteCollection
+>;
+const mockUseCreateCollection = useCreateCollection as jest.MockedFunction<
+  typeof useCreateCollection
+>;
 
 const mockCollections = [
   {
@@ -57,140 +75,165 @@ const mockCollections = [
 describe('CollectionList', () => {
   beforeEach(() => {
     (fetch as jest.Mock).mockClear();
+
+    // Setup default mocks for TanStack Query hooks
+    mockUseCollections.mockReturnValue({
+      data: [],
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
+    });
+
+    mockUseDeleteCollection.mockReturnValue({
+      mutateAsync: jest.fn(),
+      isPending: false,
+    });
+
+    mockUseCreateCollection.mockReturnValue({
+      mutateAsync: jest.fn(),
+      isPending: false,
+    });
   });
 
   it('renders loading state initially', () => {
-    // Don't mock fetch immediately to test loading state
-    (fetch as jest.Mock).mockImplementation(() => new Promise(() => {})); // Never resolves
+    mockUseCollections.mockReturnValue({
+      data: [],
+      isLoading: true,
+      error: null,
+      refetch: jest.fn(),
+    });
 
-    render(<CollectionList />);
+    render(
+      <TestQueryProvider>
+        <CollectionList />
+      </TestQueryProvider>
+    );
 
     expect(screen.getByRole('status')).toBeInTheDocument();
-
-    // Clean up the mock
-    (fetch as jest.Mock).mockRestore();
   });
 
-  it('renders empty state when no collections exist', async () => {
-    (fetch as jest.Mock).mockResolvedValueOnce({
-      json: async () => ({ success: true, collections: [] }),
+  it('renders empty state when no collections exist', () => {
+    mockUseCollections.mockReturnValue({
+      data: [],
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
     });
 
-    await act(async () => {
-      render(<CollectionList />);
-    });
+    render(
+      <TestQueryProvider>
+        <CollectionList />
+      </TestQueryProvider>
+    );
 
-    await waitFor(() => {
-      expect(
-        screen.getByText("You don't have any collections yet.")
-      ).toBeInTheDocument();
-    });
-
+    expect(
+      screen.getByText("You don't have any collections yet.")
+    ).toBeInTheDocument();
     expect(
       screen.getByText('Create Your First Collection')
     ).toBeInTheDocument();
   });
 
-  it('renders collections when they exist', async () => {
-    (fetch as jest.Mock).mockResolvedValueOnce({
-      json: async () => ({ success: true, collections: mockCollections }),
+  it('renders collections when they exist', () => {
+    mockUseCollections.mockReturnValue({
+      data: mockCollections,
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
     });
 
-    await act(async () => {
-      render(<CollectionList />);
-    });
+    render(
+      <TestQueryProvider>
+        <CollectionList />
+      </TestQueryProvider>
+    );
 
-    await waitFor(() => {
-      expect(screen.getByText('Favorite Pizza Places')).toBeInTheDocument();
-    });
-
+    expect(screen.getByText('Favorite Pizza Places')).toBeInTheDocument();
     expect(screen.getByText('Coffee Shops')).toBeInTheDocument();
     expect(screen.getByText('My go-to pizza spots')).toBeInTheDocument();
     expect(screen.getByText('Best coffee in town')).toBeInTheDocument();
   });
 
-  it('opens create modal when create button is clicked', async () => {
-    (fetch as jest.Mock).mockResolvedValueOnce({
-      json: async () => ({ success: true, collections: [] }),
+  it('opens create modal when create button is clicked', () => {
+    mockUseCollections.mockReturnValue({
+      data: [],
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
     });
 
-    await act(async () => {
-      render(<CollectionList />);
-    });
+    render(
+      <TestQueryProvider>
+        <CollectionList />
+      </TestQueryProvider>
+    );
 
-    await waitFor(() => {
-      expect(
-        screen.getByText('Create Your First Collection')
-      ).toBeInTheDocument();
-    });
+    expect(
+      screen.getByText('Create Your First Collection')
+    ).toBeInTheDocument();
 
-    await act(async () => {
-      fireEvent.click(screen.getByText('Create Your First Collection'));
-    });
+    fireEvent.click(screen.getByText('Create Your First Collection'));
 
-    await waitFor(() => {
-      expect(screen.getByText('Create New Collection')).toBeInTheDocument();
-    });
+    expect(screen.getByText('Create New Collection')).toBeInTheDocument();
   });
 
   it('handles delete collection', async () => {
-    (fetch as jest.Mock)
-      .mockResolvedValueOnce({
-        json: async () => ({ success: true, collections: mockCollections }),
-      })
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ success: true }),
-      });
+    const mockMutateAsync = jest.fn().mockResolvedValue(undefined);
+
+    mockUseCollections.mockReturnValue({
+      data: mockCollections,
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
+    });
+
+    mockUseDeleteCollection.mockReturnValue({
+      mutateAsync: mockMutateAsync,
+      isPending: false,
+    });
 
     // Mock window.confirm
     window.confirm = jest.fn(() => true);
 
-    await act(async () => {
-      render(<CollectionList />);
-    });
+    render(
+      <TestQueryProvider>
+        <CollectionList />
+      </TestQueryProvider>
+    );
 
-    await waitFor(() => {
-      expect(screen.getByText('Favorite Pizza Places')).toBeInTheDocument();
-    });
+    expect(screen.getByText('Favorite Pizza Places')).toBeInTheDocument();
 
     const deleteButtons = screen.getAllByText('Delete');
 
-    await act(async () => {
-      fireEvent.click(deleteButtons[0]);
-    });
+    fireEvent.click(deleteButtons[0]);
 
     expect(window.confirm).toHaveBeenCalledWith(
       'Are you sure you want to delete this collection? This action cannot be undone.'
     );
 
-    await waitFor(() => {
-      expect(fetch).toHaveBeenCalledWith('/api/collections/collection-1', {
-        method: 'DELETE',
-      });
-    });
+    expect(mockMutateAsync).toHaveBeenCalledWith('collection-1');
   });
 
-  it('handles fetch error', async () => {
-    // Suppress expected console.error for this test
-    const consoleSpy = jest
-      .spyOn(console, 'error')
-      .mockImplementation(() => {});
+  it('handles fetch error', () => {
+    const mockRefetch = jest.fn();
 
-    (fetch as jest.Mock).mockRejectedValueOnce(new Error('Network error'));
-
-    await act(async () => {
-      render(<CollectionList />);
+    mockUseCollections.mockReturnValue({
+      data: [],
+      isLoading: false,
+      error: new Error('Network error'),
+      refetch: mockRefetch,
     });
 
-    await waitFor(() => {
-      expect(
-        screen.getByText('Failed to fetch collections')
-      ).toBeInTheDocument();
-    });
+    render(
+      <TestQueryProvider>
+        <CollectionList />
+      </TestQueryProvider>
+    );
 
+    expect(screen.getByText('Network error')).toBeInTheDocument();
     expect(screen.getByText('Try Again')).toBeInTheDocument();
 
-    consoleSpy.mockRestore();
+    fireEvent.click(screen.getByText('Try Again'));
+    expect(mockRefetch).toHaveBeenCalled();
   });
 });
