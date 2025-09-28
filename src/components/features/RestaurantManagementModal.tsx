@@ -1,0 +1,205 @@
+'use client';
+
+import { useState } from 'react';
+import { Restaurant, Collection } from '@/types/database';
+import { Modal } from '@/components/ui/Modal';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { RestaurantImage } from '@/components/ui/RestaurantImage';
+
+interface RestaurantManagementModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  restaurant: Restaurant | null;
+  collection: Collection | null;
+  onUpdateRestaurant: (
+    restaurantId: string,
+    updates: { priceRange?: string; timeToPickUp?: number }
+  ) => Promise<void>;
+  onRemoveFromCollection: (restaurantId: string) => Promise<void>;
+}
+
+export function RestaurantManagementModal({
+  isOpen,
+  onClose,
+  restaurant,
+  collection,
+  onUpdateRestaurant,
+  onRemoveFromCollection,
+}: RestaurantManagementModalProps) {
+  const [priceRange, setPriceRange] = useState(restaurant?.priceRange || '');
+  const [timeToPickUp, setTimeToPickUp] = useState(
+    restaurant?.timeToPickUp?.toString() || ''
+  );
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSave = async () => {
+    if (!restaurant) return;
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const updates: { priceRange?: string; timeToPickUp?: number } = {};
+
+      if (priceRange !== restaurant.priceRange) {
+        updates.priceRange = priceRange || undefined;
+      }
+
+      if (timeToPickUp !== restaurant.timeToPickUp?.toString()) {
+        updates.timeToPickUp = timeToPickUp
+          ? parseInt(timeToPickUp, 10)
+          : undefined;
+      }
+
+      if (Object.keys(updates).length > 0) {
+        await onUpdateRestaurant(restaurant._id.toString(), updates);
+      }
+
+      onClose();
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : 'Failed to update restaurant'
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleRemove = async () => {
+    if (
+      !restaurant ||
+      !confirm(
+        'Are you sure you want to remove this restaurant from the collection?'
+      )
+    ) {
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      await onRemoveFromCollection(restaurant._id.toString());
+      onClose();
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : 'Failed to remove restaurant'
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const priceRangeOptions = [
+    { value: '', label: 'Not set' },
+    { value: '$', label: '$ - Inexpensive' },
+    { value: '$$', label: '$$ - Moderate' },
+    { value: '$$$', label: '$$$ - Expensive' },
+    { value: '$$$$', label: '$$$$ - Very Expensive' },
+  ];
+
+  if (!restaurant || !collection) {
+    return null;
+  }
+
+  return (
+    <Modal isOpen={isOpen} onClose={onClose} title="Manage Restaurant">
+      <div className="space-y-6">
+        {/* Restaurant Info */}
+        <div className="flex gap-4">
+          <div className="flex-shrink-0">
+            <RestaurantImage
+              src={restaurant.photos?.[0]}
+              alt={restaurant.name}
+              cuisine={restaurant.cuisine}
+              className="w-20 h-20 rounded-lg object-cover"
+            />
+          </div>
+          <div className="flex-1">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              {restaurant.name}
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              {restaurant.cuisine} • {restaurant.rating}⭐
+            </p>
+            <p className="text-sm text-gray-500 dark:text-gray-500">
+              {restaurant.address}
+            </p>
+          </div>
+        </div>
+
+        {/* Collection Info */}
+        <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            <span className="font-medium">Collection:</span> {collection.name}
+          </p>
+        </div>
+
+        {/* Custom Fields */}
+        <div className="space-y-4">
+          <div>
+            <label
+              htmlFor="priceRange"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            >
+              Price Range
+            </label>
+            <select
+              id="priceRange"
+              value={priceRange}
+              onChange={(e) => setPriceRange(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+            >
+              {priceRangeOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label
+              htmlFor="timeToPickUp"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            >
+              Time to Pick Up (minutes)
+            </label>
+            <Input
+              id="timeToPickUp"
+              type="number"
+              value={timeToPickUp}
+              onChange={(e) => setTimeToPickUp(e.target.value)}
+              placeholder="e.g., 15"
+              min="0"
+            />
+          </div>
+        </div>
+
+        {/* Error Message */}
+        {error && (
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md p-3">
+            <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+          </div>
+        )}
+
+        {/* Action Buttons */}
+        <div className="flex gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+          <Button onClick={handleSave} disabled={isLoading} className="flex-1">
+            {isLoading ? 'Saving...' : 'Save Changes'}
+          </Button>
+          <Button
+            onClick={handleRemove}
+            variant="outline"
+            disabled={isLoading}
+            className="text-red-600 border-red-300 hover:bg-red-50 dark:text-red-400 dark:border-red-600 dark:hover:bg-red-900/20"
+          >
+            Remove from Collection
+          </Button>
+        </div>
+      </div>
+    </Modal>
+  );
+}

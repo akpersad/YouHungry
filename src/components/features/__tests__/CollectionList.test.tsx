@@ -16,6 +16,18 @@ jest.mock('@clerk/nextjs', () => ({
   }),
 }));
 
+// Mock Next.js router
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: jest.fn(),
+    replace: jest.fn(),
+    back: jest.fn(),
+    forward: jest.fn(),
+    refresh: jest.fn(),
+    prefetch: jest.fn(),
+  }),
+}));
+
 // Mock fetch
 global.fetch = jest.fn();
 

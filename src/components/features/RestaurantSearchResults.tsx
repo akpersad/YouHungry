@@ -12,6 +12,7 @@ interface RestaurantSearchResultsProps {
   onLoadMore?: () => void;
   hasMore?: boolean;
   searchQuery?: string;
+  restaurantInCollections?: Set<string>;
 }
 
 export function RestaurantSearchResults({
@@ -22,6 +23,7 @@ export function RestaurantSearchResults({
   onLoadMore,
   hasMore = false,
   searchQuery,
+  restaurantInCollections = new Set(),
 }: RestaurantSearchResultsProps) {
   if (isLoading) {
     return (
@@ -71,6 +73,9 @@ export function RestaurantSearchResults({
             restaurant={restaurant}
             onAddToCollection={onAddToCollection}
             onViewDetails={onViewDetails}
+            isInCollection={restaurantInCollections.has(
+              (restaurant._id || restaurant.googlePlaceId).toString()
+            )}
           />
         ))}
       </div>

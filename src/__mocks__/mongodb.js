@@ -16,5 +16,16 @@ module.exports = {
     }),
     close: jest.fn(),
   })),
-  ObjectId: jest.fn().mockImplementation((id) => id || 'mock-object-id'),
+  ObjectId: Object.assign(
+    jest.fn().mockImplementation((id) => ({
+      toString: () => id || 'mock-object-id',
+      valueOf: () => id || 'mock-object-id',
+    })),
+    {
+      isValid: jest.fn().mockImplementation((id) => {
+        // Mock ObjectId.isValid to return true for valid ObjectId format
+        return typeof id === 'string' && /^[0-9a-fA-F]{24}$/.test(id);
+      }),
+    }
+  ),
 };

@@ -11,6 +11,7 @@ interface RestaurantCardProps {
   onViewDetails?: (restaurant: Restaurant) => void;
   showAddButton?: boolean;
   showDetailsButton?: boolean;
+  isInCollection?: boolean;
 }
 
 export function RestaurantCard({
@@ -19,6 +20,7 @@ export function RestaurantCard({
   onViewDetails,
   showAddButton = true,
   showDetailsButton = true,
+  isInCollection = false,
 }: RestaurantCardProps) {
   const formatPriceRange = (priceRange?: string) => {
     if (!priceRange) return 'Price not available';
@@ -112,12 +114,12 @@ export function RestaurantCard({
         <div className="flex space-x-2 pt-2">
           {showAddButton && onAddToCollection && (
             <Button
-              variant="primary"
+              variant={isInCollection ? 'outline' : 'primary'}
               size="sm"
               onClick={() => onAddToCollection(restaurant)}
-              className="flex-1"
+              className={`flex-1 ${isInCollection ? 'text-green-600 border-green-300 hover:bg-green-50' : ''}`}
             >
-              Add to Collection
+              {isInCollection ? '✓ In Collection' : 'Add to Collection'}
             </Button>
           )}
           {showDetailsButton && onViewDetails && (
