@@ -114,16 +114,21 @@ export function RestaurantSearchPage({
                   'toString' in restaurantData
                 ) {
                   return restaurantData.toString() === restaurantId;
-                } else {
+                } else if (
+                  restaurantData &&
+                  typeof restaurantData === 'object'
+                ) {
                   // New format: object with _id and/or googlePlaceId
                   return (
                     ('_id' in restaurantData &&
                       restaurantData._id &&
                       restaurantData._id.toString() === restaurantId) ||
-                    (restaurantData.googlePlaceId &&
+                    ('googlePlaceId' in restaurantData &&
+                      restaurantData.googlePlaceId &&
                       restaurantData.googlePlaceId === restaurantId)
                   );
                 }
+                return false;
               })
             ) {
               inCollections.add(restaurantId);
@@ -225,13 +230,14 @@ export function RestaurantSearchPage({
             idStr === restaurantIdStr
           );
           return idStr === restaurantIdStr;
-        } else {
+        } else if (restaurantData && typeof restaurantData === 'object') {
           // New format: object with _id and/or googlePlaceId
           const matchesId =
             '_id' in restaurantData &&
             restaurantData._id &&
             restaurantData._id.toString() === restaurantId.toString();
           const matchesGooglePlaceId =
+            'googlePlaceId' in restaurantData &&
             restaurantData.googlePlaceId &&
             restaurantData.googlePlaceId === restaurantId.toString();
           console.log(
@@ -240,6 +246,7 @@ export function RestaurantSearchPage({
           );
           return matchesId || matchesGooglePlaceId;
         }
+        return false;
       });
       console.log(
         `Collection ${collection.name} has restaurant:`,
