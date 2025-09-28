@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useUser } from '@clerk/nextjs';
-import { ObjectId } from 'mongodb';
 import { Restaurant, Collection } from '@/types/database';
 import { RestaurantSearchForm } from '../forms/RestaurantSearchForm';
 import { RestaurantSearchResults } from './RestaurantSearchResults';
@@ -50,11 +49,11 @@ export function RestaurantSearchPage({
       // Convert propCollections to Collection format
       const convertedCollections: Collection[] = propCollections.map(
         (prop) => ({
-          _id: new ObjectId(prop._id),
+          _id: prop._id as unknown as Collection['_id'], // Convert string to ObjectId-like structure for client
           name: prop.name,
           description: '',
           type: 'personal' as const,
-          ownerId: new ObjectId(), // This will be overridden when fetched from API
+          ownerId: 'temp' as unknown as Collection['ownerId'], // This will be overridden when fetched from API
           restaurantIds: [],
           createdAt: new Date(),
           updatedAt: new Date(),
@@ -109,7 +108,11 @@ export function RestaurantSearchPage({
                 // Handle both old format (string IDs) and new format (objects with _id and googlePlaceId)
                 if (typeof restaurantData === 'string') {
                   return restaurantData === restaurantId;
-                } else if (restaurantData instanceof ObjectId) {
+                } else if (
+                  restaurantData &&
+                  typeof restaurantData === 'object' &&
+                  'toString' in restaurantData
+                ) {
                   return restaurantData.toString() === restaurantId;
                 } else {
                   // New format: object with _id and/or googlePlaceId
@@ -210,7 +213,11 @@ export function RestaurantSearchPage({
             idStr === restaurantIdStr
           );
           return idStr === restaurantIdStr;
-        } else if (restaurantData instanceof ObjectId) {
+        } else if (
+          restaurantData &&
+          typeof restaurantData === 'object' &&
+          'toString' in restaurantData
+        ) {
           const idStr = restaurantData.toString();
           const restaurantIdStr = restaurantId.toString();
           console.log(
