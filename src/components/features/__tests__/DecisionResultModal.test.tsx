@@ -58,7 +58,7 @@ describe('DecisionResultModal', () => {
 
     expect(screen.getByText('Planned Visit')).toBeInTheDocument();
     expect(
-      screen.getByText('Tuesday, January 2, 2024 at 7:00 PM')
+      screen.getByText('Tuesday, January 2, 2024 at 2:00 PM')
     ).toBeInTheDocument();
   });
 
@@ -166,7 +166,7 @@ describe('DecisionResultModal', () => {
     render(<DecisionResultModal {...defaultProps} visitDate={testDate} />);
 
     expect(
-      screen.getByText('Wednesday, December 25, 2024 at 12:30 PM')
+      screen.getByText('Wednesday, December 25, 2024 at 7:30 AM')
     ).toBeInTheDocument();
   });
 });

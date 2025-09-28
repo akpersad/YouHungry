@@ -11,14 +11,16 @@ const mockStatistics = {
       restaurantId: 'restaurant123',
       name: 'Restaurant 1',
       selectionCount: 3,
-      lastSelected: '2024-01-01T18:30:00Z',
+      lastSelected: new Date(Date.now() - 25 * 60 * 60 * 1000).toISOString(), // 25 hours ago (yesterday)
       currentWeight: 0.85,
     },
     {
       restaurantId: 'restaurant456',
       name: 'Restaurant 2',
       selectionCount: 2,
-      lastSelected: '2023-12-15T12:00:00Z',
+      lastSelected: new Date(
+        Date.now() - 14 * 24 * 60 * 60 * 1000
+      ).toISOString(), // 14 days ago (2 weeks)
       currentWeight: 0.95,
     },
     {
@@ -94,10 +96,9 @@ describe('DecisionStatistics', () => {
     expect(screen.getByText('Last: 2 weeks ago')).toBeInTheDocument();
     expect(screen.getByText('Last: Never')).toBeInTheDocument();
 
-    // Check weight labels
-    expect(screen.getByText('High Priority')).toBeInTheDocument();
-    expect(screen.getByText('High Priority')).toBeInTheDocument();
-    expect(screen.getByText('High Priority')).toBeInTheDocument();
+    // Check weight labels - use getAllByText since there are multiple "High Priority" elements
+    const highPriorityElements = screen.getAllByText('High Priority');
+    expect(highPriorityElements).toHaveLength(3);
   });
 
   it('displays weight values correctly', async () => {
