@@ -114,7 +114,9 @@ const removeRestaurantFromCollection = async ({
 // React Query hooks
 export function useRestaurantSearch(filters: SearchFilters, enabled = true) {
   return useQuery({
-    queryKey: restaurantKeys.searchQuery(filters),
+    queryKey: restaurantKeys.searchQuery(
+      filters as unknown as Record<string, unknown>
+    ),
     queryFn: () => searchRestaurants(filters),
     enabled: enabled && !!filters.location,
     staleTime: 10 * 60 * 1000, // 10 minutes for search results
@@ -215,7 +217,7 @@ export function useRemoveRestaurantFromCollection() {
               ? {
                   ...old,
                   restaurantIds: old.restaurantIds.filter(
-                    (id: string) => id !== variables.restaurantId
+                    (id) => id.toString() !== variables.restaurantId
                   ),
                 }
               : undefined

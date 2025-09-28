@@ -131,11 +131,11 @@ export function useCreateCollection() {
 
       // Optimistically add the new collection
       const optimisticCollection: Collection = {
-        _id: `temp-${Date.now()}` as Collection['_id'],
+        _id: `temp-${Date.now()}` as unknown as Collection['_id'],
         name: variables.name,
         description: variables.description || '',
         type: 'personal' as const,
-        ownerId: variables.userId as Collection['ownerId'],
+        ownerId: variables.userId as unknown as Collection['ownerId'],
         restaurantIds: [],
         createdAt: new Date(),
         updatedAt: new Date(),
