@@ -63,6 +63,54 @@ export const typeDefs = gql`
     lng: Float!
   }
 
+  type Decision {
+    _id: ID!
+    type: String!
+    collectionId: ID!
+    groupId: ID
+    participants: [ID!]!
+    method: String!
+    status: String!
+    deadline: Date!
+    visitDate: Date!
+    result: DecisionResult
+    votes: [Vote!]
+    createdAt: Date!
+    updatedAt: Date!
+  }
+
+  type DecisionResult {
+    restaurantId: ID!
+    selectedAt: Date!
+    reasoning: String!
+  }
+
+  type Vote {
+    userId: ID!
+    rankings: [ID!]!
+    submittedAt: Date!
+  }
+
+  type DecisionStatistics {
+    totalDecisions: Int!
+    restaurantStats: [RestaurantStat!]!
+  }
+
+  type RestaurantStat {
+    restaurantId: ID!
+    name: String!
+    selectionCount: Int!
+    lastSelected: Date
+    currentWeight: Float!
+  }
+
+  type DecisionResultWithWeights {
+    restaurantId: ID!
+    selectedAt: Date!
+    reasoning: String!
+    weights: String! # JSON string of weights
+  }
+
   type Query {
     # Search restaurants with text query
     searchRestaurants(
@@ -87,6 +135,23 @@ export const typeDefs = gql`
 
     # Get restaurants by collection ID
     getRestaurantsByCollection(collectionId: ID!): [Restaurant!]!
+
+    # Get decision history for a collection
+    getDecisionHistory(collectionId: ID!, limit: Int): [Decision!]!
+
+    # Get decision statistics for a collection
+    getDecisionStatistics(collectionId: ID!): DecisionStatistics!
+  }
+
+  input CreateDecisionInput {
+    collectionId: ID!
+    method: String!
+    visitDate: Date!
+  }
+
+  input RandomSelectInput {
+    collectionId: ID!
+    visitDate: Date!
   }
 
   type Mutation {
@@ -101,6 +166,14 @@ export const typeDefs = gql`
 
     # Update restaurant custom fields
     updateRestaurant(id: ID!, priceRange: String, timeToPickUp: Int): Restaurant
+
+    # Create a new personal decision
+    createPersonalDecision(input: CreateDecisionInput!): Decision!
+
+    # Perform random selection with weighted algorithm
+    performRandomSelection(
+      input: RandomSelectInput!
+    ): DecisionResultWithWeights!
   }
 `;
 

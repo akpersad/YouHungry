@@ -6,6 +6,7 @@ jest.mock('@/components/ui/AddressInput', () => ({
   AddressInput: ({
     onValidationChange,
     onChange,
+    onAddressSelect,
     value,
     ...props
   }: Record<string, unknown>) => (
@@ -16,6 +17,7 @@ jest.mock('@/components/ui/AddressInput', () => ({
       onChange={(e) => {
         if (onChange) onChange(e.target.value);
         if (onValidationChange) onValidationChange(true); // Mock validation success
+        if (onAddressSelect) onAddressSelect(e.target.value); // Mock address select
       }}
     />
   ),

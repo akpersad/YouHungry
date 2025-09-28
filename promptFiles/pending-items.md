@@ -40,8 +40,14 @@ This document tracks all planned items that are not yet started, organized by ca
   - [x] Updated CreateCollectionForm and RestaurantSearchForm with simplified approach
   - [x] Removed complex Zod dependencies for better maintainability
   - [x] Added comprehensive form testing and validation
-- [ ] Add restaurant management functionality
-- [ ] Implement basic decision making algorithm
+- [x] Add restaurant management functionality ✅ COMPLETED
+- [x] Implement comprehensive decision making system ✅ COMPLETED
+  - [x] Weighted random selection algorithm with 30-day rolling weights
+  - [x] Decision history tracking and statistics
+  - [x] DecisionResultModal and DecisionStatistics UI components
+  - [x] REST API endpoints for decision creation and random selection
+  - [x] GraphQL integration for decision queries and statistics
+  - [x] Comprehensive test coverage for all decision functionality
 
 ### Advanced Features (Future)
 

@@ -223,6 +223,18 @@ const mockRestaurant: Restaurant = {
   lastUpdated: new Date(),
 };
 
+const mockRestaurants: Restaurant[] = [
+  {
+    ...mockRestaurant,
+    name: 'Test Restaurant 1',
+  },
+  {
+    ...mockRestaurant,
+    _id: new ObjectId('507f1f77bcf86cd799439014'),
+    name: 'Test Restaurant 2',
+  },
+];
+
 describe('CollectionView', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -369,16 +381,32 @@ describe('CollectionView', () => {
   });
 
   it('handles random decision when decide for me is clicked', async () => {
-    // Mock window.alert
-    window.alert = jest.fn();
-
-    (fetch as jest.Mock).mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({
-        success: true,
-        collection: mockCollection,
-      }),
-    });
+    // Mock successful API responses
+    (fetch as jest.Mock)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          success: true,
+          collection: mockCollection,
+        }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          success: true,
+          result: {
+            restaurantId: mockCollection.restaurantIds[0],
+            reasoning: 'Selected using weighted random algorithm',
+          },
+        }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          success: true,
+          restaurant: mockRestaurants[0],
+        }),
+      });
 
     render(<CollectionView collectionId="507f1f77bcf86cd799439011" />);
 
@@ -389,15 +417,15 @@ describe('CollectionView', () => {
     const decideButton = screen.getByText('Decide for Me');
     fireEvent.click(decideButton);
 
-    expect(window.alert).toHaveBeenCalledWith(
-      expect.stringContaining('Random selection: Restaurant at index')
-    );
+    // Wait for the decision result modal to appear
+    await waitFor(() => {
+      expect(screen.getByText('Decision Made!')).toBeInTheDocument();
+    });
+
+    expect(screen.getByText('Test Restaurant 1')).toBeInTheDocument();
   });
 
-  it('shows alert when decide for me is clicked on empty collection', async () => {
-    // Mock window.alert
-    window.alert = jest.fn();
-
+  it('shows error when decide for me is clicked on empty collection', async () => {
     const emptyCollection = { ...mockCollection, restaurantIds: [] };
     (fetch as jest.Mock).mockResolvedValueOnce({
       ok: true,
@@ -413,14 +441,8 @@ describe('CollectionView', () => {
       expect(screen.getByText('My Test Collection')).toBeInTheDocument();
     });
 
-    // Manually trigger the decide function since the button won't be visible
-    const decideButton = screen.queryByText('Decide for Me');
-    if (decideButton) {
-      fireEvent.click(decideButton);
-    }
-
-    // The component should handle empty collections gracefully
-    expect(window.alert).not.toHaveBeenCalled();
+    // The decide button should not be visible for empty collections
+    expect(screen.queryByText('Decide for Me')).not.toBeInTheDocument();
   });
 
   it('navigates back when back button is clicked', async () => {

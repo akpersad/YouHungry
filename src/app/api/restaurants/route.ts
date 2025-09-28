@@ -29,7 +29,6 @@ export async function POST(request: NextRequest) {
     if (
       !name ||
       !googlePlaceId ||
-      !address ||
       !coordinates ||
       !cuisine ||
       rating === undefined
@@ -49,7 +48,7 @@ export async function POST(request: NextRequest) {
         restaurant = await createRestaurant({
           googlePlaceId,
           name,
-          address,
+          address: address || 'Address not available',
           coordinates,
           cuisine,
           rating,

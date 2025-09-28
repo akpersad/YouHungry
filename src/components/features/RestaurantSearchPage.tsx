@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { Restaurant, Collection } from '@/types/database';
 import { RestaurantSearchForm } from '../forms/RestaurantSearchForm';
@@ -43,50 +43,7 @@ export function RestaurantSearchPage({
   const [selectedRestaurantCollections, setSelectedRestaurantCollections] =
     useState<Set<string>>(new Set());
 
-  // Fetch collections if not provided as props
-  useEffect(() => {
-    if (propCollections.length > 0) {
-      // Convert propCollections to Collection format
-      const convertedCollections: Collection[] = propCollections.map(
-        (prop) => ({
-          _id: prop._id as unknown as Collection['_id'], // Convert string to ObjectId-like structure for client
-          name: prop.name,
-          description: '',
-          type: 'personal' as const,
-          ownerId: 'temp' as unknown as Collection['ownerId'], // This will be overridden when fetched from API
-          restaurantIds: [],
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        })
-      );
-      setCollections(convertedCollections);
-    } else if (isLoaded && user) {
-      fetchCollections();
-    }
-  }, [propCollections, isLoaded, user]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const fetchCollections = useCallback(async () => {
-    if (!user?.id) return;
-
-    setIsLoadingCollections(true);
-    try {
-      const response = await fetch(`/api/collections?userId=${user.id}`);
-      const data = await response.json();
-
-      if (data.success) {
-        console.log('Fetched collections:', data.collections);
-        setCollections(data.collections || []);
-        // Check which restaurants are already in collections
-        checkRestaurantsInCollections(data.collections || []);
-      } else {
-        console.error('Failed to fetch collections:', data.error);
-      }
-    } catch (error) {
-      console.error('Error fetching collections:', error);
-    } finally {
-      setIsLoadingCollections(false);
-    }
-  }, [user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  const collectionsFetched = useRef(false);
 
   const checkRestaurantsInCollections = useCallback(
     async (collections: Collection[]) => {
@@ -144,6 +101,56 @@ export function RestaurantSearchPage({
     },
     [restaurants]
   );
+
+  // Fetch collections if not provided as props
+  useEffect(() => {
+    if (propCollections.length > 0) {
+      // Convert propCollections to Collection format
+      const convertedCollections: Collection[] = propCollections.map(
+        (prop) => ({
+          _id: prop._id as unknown as Collection['_id'], // Convert string to ObjectId-like structure for client
+          name: prop.name,
+          description: '',
+          type: 'personal' as const,
+          ownerId: 'temp' as unknown as Collection['ownerId'], // This will be overridden when fetched from API
+          restaurantIds: [],
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        })
+      );
+      setCollections(convertedCollections);
+    } else if (isLoaded && user?.id && !collectionsFetched.current) {
+      // Inline the fetch logic to avoid circular dependencies
+      const fetchCollectionsInline = async () => {
+        collectionsFetched.current = true;
+        setIsLoadingCollections(true);
+        try {
+          const response = await fetch(`/api/collections?userId=${user.id}`);
+          const data = await response.json();
+
+          if (data.success) {
+            console.log('Fetched collections:', data.collections);
+            setCollections(data.collections || []);
+          } else {
+            console.error('Failed to fetch collections:', data.error);
+          }
+        } catch (error) {
+          console.error('Error fetching collections:', error);
+        } finally {
+          setIsLoadingCollections(false);
+        }
+      };
+
+      fetchCollectionsInline();
+    }
+  }, [propCollections, isLoaded, user?.id]);
+
+  // Check restaurants in collections when restaurants or collections change
+  useEffect(() => {
+    if (restaurants.length > 0 && collections.length > 0) {
+      checkRestaurantsInCollections(collections);
+    }
+  }, [restaurants, collections, checkRestaurantsInCollections]);
 
   const searchRestaurants = async (
     location: string,
