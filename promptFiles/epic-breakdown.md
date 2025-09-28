@@ -152,7 +152,7 @@ These technologies will be implemented when they solve specific problems in each
    - **Implement GraphQL queries for group collections and members**
    - **Add GraphQL mutations for group collection management**
 
-**🔄 Parallel Work Note**: Stories 2 and 3 can be worked on in parallel as group creation and group collections are independent features that can be developed simultaneously.
+**🔄 Parallel Work Note**: Stories 2 and 3 SHOULD be worked on in parallel - Group Creation provides the foundation that Group Collections depends on, but the core group management logic can be developed alongside the collection management logic.
 
 ## 🤝 Epic 4: Group Decision Making
 
@@ -168,6 +168,14 @@ These technologies will be implemented when they solve specific problems in each
    - **Set up GraphQL subscriptions for real-time voting updates**
    - **Implement GraphQL mutations for vote submission and tracking**
 
+1a. **Drag & Drop Ranking Interface (Future)**
+
+- Install and configure @dnd-kit for drag-and-drop functionality
+- Create restaurant ranking interface with drag-and-drop
+- Implement sortable restaurant lists
+- Add visual feedback and animations for ranking
+- Handle touch-friendly interactions for mobile
+
 2. **Random Selection for Groups**
    - Extend random selection to group collections
    - Implement group-specific weighting
@@ -182,15 +190,7 @@ These technologies will be implemented when they solve specific problems in each
    - **Implement GraphQL subscriptions for decision status updates**
    - **Add real-time decision progress tracking with GraphQL**
 
-**🔄 Parallel Work Note**: Stories 1, 2, and 3 can be worked on in parallel as they are independent decision-making features that can be developed simultaneously.
-
-3a. **Drag & Drop Ranking Interface (Future)**
-
-- Install and configure @dnd-kit for drag-and-drop functionality
-- Create restaurant ranking interface with drag-and-drop
-- Implement sortable restaurant lists
-- Add visual feedback and animations for ranking
-- Handle touch-friendly interactions for mobile
+**🔄 Parallel Work Note**: Stories 1, 2, and 3 SHOULD be worked on in parallel - they are all core decision-making features that need to work together, and developing them simultaneously ensures proper integration and consistent UX patterns.
 
 ## 📱 Epic 5: Mobile-First Experience
 
@@ -274,7 +274,7 @@ These technologies will be implemented when they solve specific problems in each
    - **Implement GraphQL subscriptions for real-time notifications**
    - **Add GraphQL queries for notification history and preferences**
 
-**🔄 Parallel Work Note**: Stories 2, 3, and 4 can be worked on in parallel as they are independent notification systems that can be developed simultaneously.
+**🔄 Parallel Work Note**: Stories 2, 3, and 4 SHOULD be worked on in parallel - they are all notification systems that need to work together seamlessly, and developing them simultaneously ensures consistent notification patterns and proper integration.
 
 3a. **Toast Notification System (Future)**
 
@@ -327,6 +327,8 @@ These technologies will be implemented when they solve specific problems in each
    - Create data export capabilities
    - **Implement GraphQL queries for complex analytics data**
    - **Add GraphQL subscriptions for real-time analytics updates**
+
+**🔄 Parallel Work Note**: Stories 1, 2, and 3 SHOULD be worked on in parallel - they are all analytics features that need to work together, and developing them simultaneously ensures consistent data models and proper integration between history, weighting, and dashboard features.
 
 ## 🎨 Epic 8: Polish & Optimization
 
