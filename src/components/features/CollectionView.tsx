@@ -3,14 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Collection, Restaurant } from '@/types/database';
-import { ObjectId } from 'mongodb';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/Card';
+import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
 import { RestaurantSearchPage } from './RestaurantSearchPage';
@@ -149,7 +142,7 @@ export function CollectionView({ collectionId }: CollectionViewProps) {
     const randomIndex = Math.floor(
       Math.random() * collection.restaurantIds.length
     );
-    const randomRestaurantId = collection.restaurantIds[randomIndex];
+    // const randomRestaurantId = collection.restaurantIds[randomIndex];
 
     // Find the restaurant in the current collection data
     // For now, we'll just show an alert - in a real implementation,
