@@ -119,13 +119,14 @@ export function RestaurantSearchPage({
                   typeof restaurantData === 'object'
                 ) {
                   // New format: object with _id and/or googlePlaceId
+                  const obj = restaurantData as Record<string, unknown>;
                   return (
-                    ('_id' in restaurantData &&
-                      restaurantData._id &&
-                      restaurantData._id.toString() === restaurantId) ||
-                    ('googlePlaceId' in restaurantData &&
-                      restaurantData.googlePlaceId &&
-                      restaurantData.googlePlaceId === restaurantId)
+                    ('_id' in obj &&
+                      obj._id &&
+                      obj._id.toString() === restaurantId) ||
+                    ('googlePlaceId' in obj &&
+                      obj.googlePlaceId &&
+                      obj.googlePlaceId === restaurantId)
                   );
                 }
                 return false;
@@ -232,14 +233,15 @@ export function RestaurantSearchPage({
           return idStr === restaurantIdStr;
         } else if (restaurantData && typeof restaurantData === 'object') {
           // New format: object with _id and/or googlePlaceId
+          const obj = restaurantData as Record<string, unknown>;
           const matchesId =
-            '_id' in restaurantData &&
-            restaurantData._id &&
-            restaurantData._id.toString() === restaurantId.toString();
+            '_id' in obj &&
+            obj._id &&
+            obj._id.toString() === restaurantId.toString();
           const matchesGooglePlaceId =
-            'googlePlaceId' in restaurantData &&
-            restaurantData.googlePlaceId &&
-            restaurantData.googlePlaceId === restaurantId.toString();
+            'googlePlaceId' in obj &&
+            obj.googlePlaceId &&
+            obj.googlePlaceId === restaurantId.toString();
           console.log(
             `Comparing new format ${JSON.stringify(restaurantData)} with ${restaurantId}:`,
             `_id match: ${matchesId}, googlePlaceId match: ${matchesGooglePlaceId}`
