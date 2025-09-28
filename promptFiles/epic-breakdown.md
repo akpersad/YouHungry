@@ -249,8 +249,10 @@ These technologies will be implemented when they solve specific problems in each
    - Store SMS preferences in user profile for group-specific settings
    - Implement phone number verification flow for users who sign up with phone
    - Handle reverification for adding phone numbers to existing email accounts
+   - **Add optional city/state capture during registration for location-based features**
+   - **Implement city/state validation and formatting for consistent data storage**
+   - **Update user database schema to include location preferences and SMS settings**
    - **Unit test custom registration components and phone verification flow**
-   - **Update user database schema to include SMS preferences and phone numbers**
 
 2. **SMS Integration**
    - Integrate Twilio for SMS notifications

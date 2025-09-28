@@ -111,6 +111,63 @@ export const typeDefs = gql`
     weights: String! # JSON string of weights
   }
 
+  # Friend Management Types
+  type User {
+    _id: ID!
+    clerkId: String!
+    email: String!
+    name: String!
+    city: String
+    profilePicture: String
+    smsOptIn: Boolean!
+    smsPhoneNumber: String
+    createdAt: Date!
+    updatedAt: Date!
+  }
+
+  type FriendSearchResult {
+    _id: ID!
+    clerkId: String!
+    email: String!
+    name: String!
+    profilePicture: String
+    city: String
+  }
+
+  type Friend {
+    _id: ID!
+    clerkId: String!
+    email: String!
+    name: String!
+    profilePicture: String
+    city: String
+    friendshipId: ID!
+    addedAt: Date!
+  }
+
+  type FriendRequest {
+    _id: ID!
+    requester: User!
+    addressee: User!
+    status: String!
+    createdAt: Date!
+    updatedAt: Date!
+  }
+
+  type FriendRequests {
+    sent: [FriendRequest!]!
+    received: [FriendRequest!]!
+  }
+
+  type Friendship {
+    _id: ID!
+    requesterId: ID!
+    addresseeId: ID!
+    status: String!
+    createdAt: Date!
+    updatedAt: Date!
+  }
+
   type Query {
     # Search restaurants with text query
     searchRestaurants(
@@ -141,6 +198,22 @@ export const typeDefs = gql`
 
     # Get decision statistics for a collection
     getDecisionStatistics(collectionId: ID!): DecisionStatistics!
+
+    # Friend Management Queries
+    # Search for users by email or name
+    searchUsers(query: String!, userId: ID!): [FriendSearchResult!]!
+
+    # Get all friends for a user
+    getFriends(userId: ID!): [Friend!]!
+
+    # Get friend requests for a user
+    getFriendRequests(userId: ID!): FriendRequests!
+
+    # Check if two users are friends
+    areFriends(userId1: ID!, userId2: ID!): Boolean!
+
+    # Get friendship between two users
+    getFriendship(userId1: ID!, userId2: ID!): Friendship
   }
 
   input CreateDecisionInput {
@@ -174,6 +247,19 @@ export const typeDefs = gql`
     performRandomSelection(
       input: RandomSelectInput!
     ): DecisionResultWithWeights!
+
+    # Friend Management Mutations
+    # Send a friend request
+    sendFriendRequest(requesterId: ID!, addresseeId: ID!): Friendship!
+
+    # Accept a friend request
+    acceptFriendRequest(friendshipId: ID!, userId: ID!): Friendship!
+
+    # Decline a friend request
+    declineFriendRequest(friendshipId: ID!, userId: ID!): Friendship!
+
+    # Remove a friend
+    removeFriend(friendshipId: ID!, userId: ID!): Boolean!
   }
 `;
 

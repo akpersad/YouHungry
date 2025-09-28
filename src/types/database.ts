@@ -5,6 +5,7 @@ export interface User {
   clerkId: string;
   email: string;
   name: string;
+  username?: string;
   city?: string;
   profilePicture?: string;
   smsOptIn: boolean;
