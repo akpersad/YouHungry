@@ -2,6 +2,18 @@
 
 This document outlines the major epics and user stories for the You Hungry? app development journey. Each epic represents a major functional area that must be completed sequentially.
 
+## ⚠️ IMPORTANT: Status Tracking
+
+**DO NOT UPDATE THIS FILE WITH COMPLETION STATUS CHANGES**
+
+This file should remain a static reference for the planned epics and stories. Status updates should be tracked in:
+
+- `completed-items.md` - For completed work
+- `in-flight.md` - For work currently in progress
+- `pending-items.md` - For planned work not yet started
+
+This file is for planning and reference only, not for tracking progress.
+
 ## 🚀 Future Technology Integration
 
 **Future technologies** (marked with "Future" in story titles) are strategically placed within epics where they provide the most value:
@@ -54,7 +66,7 @@ These technologies will be implemented when they solve specific problems in each
    - Set up Next.js Bundle Analyzer for performance monitoring
    - Configure Web Vitals monitoring for performance tracking
 
-## 🏠 Epic 2: Personal Collections Management ✅ **COMPLETED**
+## 🏠 Epic 2: Personal Collections Management
 
 **Goal**: Enable users to create and manage their personal food collections
 
@@ -80,11 +92,11 @@ These technologies will be implemented when they solve specific problems in each
    - **Implement GraphQL resolvers for restaurant search with filters**
 
 3. **Enhanced Form Management**
-   - ✅ Implemented simplified form state management using useState
-   - ✅ Created reliable form validation with clear error messages
-   - ✅ Updated CreateCollectionForm and RestaurantSearchForm with simplified approach
-   - ✅ Added comprehensive form testing and validation
-   - ✅ Removed complex Zod dependencies for better maintainability
+   - Implement simplified form state management using useState
+   - Create reliable form validation with clear error messages
+   - Update CreateCollectionForm and RestaurantSearchForm with simplified approach
+   - Add comprehensive form testing and validation
+   - Remove complex Zod dependencies for better maintainability
 
 4. **Restaurant Management**
    - Add restaurants to collections
@@ -95,19 +107,16 @@ These technologies will be implemented when they solve specific problems in each
    - **Collection Restaurant Management** - Add, edit, and remove restaurants from collection view
    - **Collection Decision Making** - Random selection from collection restaurants
 
-5. **Personal Decision Making** ✅ **COMPLETED**
-   - ✅ Implement random selection algorithm with weighted system
-   - ✅ Add 30-day rolling weight system ensuring variety while allowing favorites
-   - ✅ Create decision history tracking with database storage
-   - ✅ Build decision result UI with DecisionResultModal and DecisionStatistics components
-   - ✅ Unit test decision algorithms and weight calculations (100+ test cases)
-   - ✅ Implement GraphQL queries for decision data with weights
-   - ✅ Add REST API endpoints for decision creation and random selection
-   - ✅ Integrate decision making into CollectionView with error handling
-   - ✅ Update database schema to support decision tracking with weights
-   - ✅ Enhanced decision API routes with improved error handling and response formatting
-   - ✅ Refined DecisionResultModal and DecisionStatistics components with better UX
-   - ✅ Added comprehensive test coverage for all decision system components
+5. **Personal Decision Making**
+   - Implement random selection algorithm with weighted system
+   - Add 30-day rolling weight system ensuring variety while allowing favorites
+   - Create decision history tracking with database storage
+   - Build decision result UI with DecisionResultModal and DecisionStatistics components
+   - Unit test decision algorithms and weight calculations
+   - Implement GraphQL queries for decision data with weights
+   - Add REST API endpoints for decision creation and random selection
+   - Integrate decision making into CollectionView with error handling
+   - Update database schema to support decision tracking with weights
 
 6. **Advanced API State Management (Future)**
    - Install and configure TanStack Query for API state management
