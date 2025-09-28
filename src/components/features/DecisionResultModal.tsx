@@ -57,7 +57,9 @@ export function DecisionResultModal({
             <div className="flex flex-col md:flex-row gap-4">
               <div className="flex-shrink-0">
                 <RestaurantImage
-                  restaurant={selectedRestaurant}
+                  src={selectedRestaurant.photos?.[0]}
+                  alt={selectedRestaurant.name}
+                  cuisine={selectedRestaurant.cuisine}
                   className="w-full md:w-32 h-32 object-cover rounded-lg"
                 />
               </div>

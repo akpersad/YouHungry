@@ -255,7 +255,9 @@ async function getRestaurantsByCollection(
         return null;
       }
     )
-    .filter((id): id is ObjectId | string => id !== null);
+    .filter(
+      (id: ObjectId | string | null): id is ObjectId | string => id !== null
+    );
 
   if (restaurantIds.length === 0) {
     return [];
@@ -266,10 +268,18 @@ async function getRestaurantsByCollection(
     .collection('restaurants')
     .find({
       $or: [
-        { _id: { $in: restaurantIds.filter((id) => id instanceof ObjectId) } },
+        {
+          _id: {
+            $in: restaurantIds.filter(
+              (id: ObjectId | string): id is ObjectId => id instanceof ObjectId
+            ),
+          },
+        },
         {
           googlePlaceId: {
-            $in: restaurantIds.filter((id) => typeof id === 'string'),
+            $in: restaurantIds.filter(
+              (id: ObjectId | string): id is string => typeof id === 'string'
+            ),
           },
         },
       ],

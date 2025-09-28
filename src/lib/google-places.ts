@@ -7,6 +7,7 @@ interface GooglePlaceResult {
   place_id: string;
   name: string;
   formatted_address: string;
+  vicinity?: string;
   geometry: {
     location: {
       lat: number;
