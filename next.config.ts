@@ -46,25 +46,6 @@ const nextConfig: NextConfig = {
     }
     return config;
   },
-  experimental: {
-    turbo: {
-      rules: {
-        '*.js': {
-          loaders: ['babel-loader'],
-          as: '*.js',
-        },
-      },
-      resolveAlias: {
-        fs: 'false',
-        net: 'false',
-        tls: 'false',
-        dns: 'false',
-        child_process: 'false',
-        'fs/promises': 'false',
-        'timers/promises': 'false',
-      },
-    },
-  },
 };
 
 export default bundleAnalyzer(nextConfig);
