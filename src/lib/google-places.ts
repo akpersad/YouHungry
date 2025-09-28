@@ -104,7 +104,8 @@ function convertGooglePlaceToRestaurant(
   return {
     googlePlaceId: place.place_id,
     name: place.name,
-    address: place.formatted_address,
+    address:
+      place.formatted_address || place.vicinity || 'Address not available',
     coordinates: {
       lat: place.geometry.location.lat,
       lng: place.geometry.location.lng,

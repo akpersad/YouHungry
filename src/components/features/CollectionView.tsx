@@ -10,6 +10,8 @@ import { RestaurantSearchPage } from './RestaurantSearchPage';
 import { CollectionRestaurantsList } from './CollectionRestaurantsList';
 import { RestaurantManagementModal } from './RestaurantManagementModal';
 import { RestaurantDetailsView } from './RestaurantDetailsView';
+import { DecisionResultModal } from './DecisionResultModal';
+import { DecisionStatistics } from './DecisionStatistics';
 
 interface CollectionViewProps {
   collectionId: string;
@@ -25,6 +27,15 @@ export function CollectionView({ collectionId }: CollectionViewProps) {
     useState<Restaurant | null>(null);
   const [isManagementModalOpen, setIsManagementModalOpen] = useState(false);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [isDecisionResultOpen, setIsDecisionResultOpen] = useState(false);
+  const [isStatisticsOpen, setIsStatisticsOpen] = useState(false);
+  const [decisionResult, setDecisionResult] = useState<{
+    restaurant: Restaurant;
+    reasoning: string;
+    visitDate: Date;
+  } | null>(null);
+  const [isMakingDecision, setIsMakingDecision] = useState(false);
+  const [decisionError, setDecisionError] = useState<string | null>(null);
 
   const fetchCollection = useCallback(async () => {
     try {
@@ -132,24 +143,75 @@ export function CollectionView({ collectionId }: CollectionViewProps) {
     }
   };
 
-  const handleRandomDecision = () => {
+  const handleRandomDecision = async () => {
     if (!collection || collection.restaurantIds.length === 0) {
-      alert('No restaurants in this collection to choose from!');
+      setDecisionError('No restaurants in this collection to choose from!');
       return;
     }
 
-    // Simple random selection for now
-    const randomIndex = Math.floor(
-      Math.random() * collection.restaurantIds.length
-    );
-    // const randomRestaurantId = collection.restaurantIds[randomIndex];
+    try {
+      setIsMakingDecision(true);
+      setDecisionError(null);
 
-    // Find the restaurant in the current collection data
-    // For now, we'll just show an alert - in a real implementation,
-    // we'd fetch the restaurant details and show a proper result modal
-    alert(
-      `Random selection: Restaurant at index ${randomIndex + 1} of ${collection.restaurantIds.length} restaurants`
-    );
+      // Set visit date to tomorrow at 7 PM
+      const visitDate = new Date();
+      visitDate.setDate(visitDate.getDate() + 1);
+      visitDate.setHours(19, 0, 0, 0);
+
+      const response = await fetch('/api/decisions/random-select', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          collectionId: collectionId,
+          visitDate: visitDate.toISOString(),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to make decision');
+      }
+
+      // Fetch the selected restaurant details
+      const restaurantResponse = await fetch(
+        `/api/restaurants/${data.result.restaurantId}`
+      );
+      const restaurantData = await restaurantResponse.json();
+
+      if (!restaurantResponse.ok) {
+        throw new Error('Failed to fetch restaurant details');
+      }
+
+      setDecisionResult({
+        restaurant: restaurantData.restaurant,
+        reasoning: data.result.reasoning,
+        visitDate: visitDate,
+      });
+      setIsDecisionResultOpen(true);
+    } catch (error) {
+      console.error('Error making decision:', error);
+      setDecisionError(
+        `Failed to make decision: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
+    } finally {
+      setIsMakingDecision(false);
+    }
+  };
+
+  const handleConfirmVisit = async () => {
+    // Here you could add logic to confirm the visit, send notifications, etc.
+    // For now, just close the modal - success feedback could be shown in a toast or banner
+    setIsDecisionResultOpen(false);
+    setDecisionResult(null);
+  };
+
+  const handleTryAgain = () => {
+    setIsDecisionResultOpen(false);
+    setDecisionResult(null);
+    handleRandomDecision();
   };
 
   if (isLoading) {
@@ -240,11 +302,46 @@ export function CollectionView({ collectionId }: CollectionViewProps) {
           Add Restaurant
         </Button>
         {collection.restaurantIds.length > 0 && (
-          <Button onClick={handleRandomDecision} variant="outline">
-            Decide for Me
-          </Button>
+          <>
+            <Button
+              onClick={handleRandomDecision}
+              variant="outline"
+              disabled={isMakingDecision}
+            >
+              {isMakingDecision ? 'Making Decision...' : 'Decide for Me'}
+            </Button>
+            <Button onClick={() => setIsStatisticsOpen(true)} variant="outline">
+              View Statistics
+            </Button>
+          </>
         )}
       </div>
+
+      {/* Decision Error Display */}
+      {decisionError && (
+        <div className="mb-6">
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="text-red-600">⚠️</div>
+                  <div>
+                    <p className="font-medium text-red-900">Decision Error</p>
+                    <p className="text-red-700 text-sm">{decisionError}</p>
+                  </div>
+                </div>
+                <Button
+                  onClick={() => setDecisionError(null)}
+                  variant="outline"
+                  size="sm"
+                >
+                  Dismiss
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* Restaurants List */}
       <CollectionRestaurantsList
@@ -302,6 +399,30 @@ export function CollectionView({ collectionId }: CollectionViewProps) {
             onClose={handleCloseModals}
           />
         )}
+      </Modal>
+
+      {/* Decision Result Modal */}
+      <DecisionResultModal
+        isOpen={isDecisionResultOpen}
+        onClose={() => setIsDecisionResultOpen(false)}
+        selectedRestaurant={decisionResult?.restaurant || null}
+        reasoning={decisionResult?.reasoning || ''}
+        visitDate={decisionResult?.visitDate || new Date()}
+        onConfirmVisit={handleConfirmVisit}
+        onTryAgain={handleTryAgain}
+        isLoading={isMakingDecision}
+      />
+
+      {/* Decision Statistics Modal */}
+      <Modal
+        isOpen={isStatisticsOpen}
+        onClose={() => setIsStatisticsOpen(false)}
+        title="Decision Statistics"
+      >
+        <DecisionStatistics
+          collectionId={collectionId}
+          onClose={() => setIsStatisticsOpen(false)}
+        />
       </Modal>
     </div>
   );

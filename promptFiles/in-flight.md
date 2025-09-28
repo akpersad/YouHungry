@@ -14,9 +14,9 @@ This document tracks all items currently being worked on, organized by priority 
 - [x] **Testing Infrastructure** - Set up Jest with React Testing Library, implemented comprehensive tests for all UI and auth components, configured test environment
 - [x] **Quality Assurance Setup** - Implemented Husky pre-commit hooks with lint-staged, set up pre-push validation pipeline
 
-## 🚀 Currently Active
+## ✅ Epic 2 Completed: Personal Collections Management
 
-### Epic 2: Personal Collections Management (In Progress)
+### Completed Stories
 
 - [x] **Collection Management** - CRUD operations for personal collections ✅ COMPLETED
 - [x] **Collection UI Components** - CollectionList and CreateCollectionForm components ✅ COMPLETED
@@ -46,21 +46,41 @@ This document tracks all items currently being worked on, organized by priority 
 - [x] **Collection View Page** - Detailed view of restaurants within a collection ✅ COMPLETED
 - [x] **Collection Restaurant Management** - Add, edit, and remove restaurants from collection view ✅ COMPLETED
 - [x] **Collection Decision Making** - Random selection from collection restaurants ✅ COMPLETED
-- [ ] **Decision Making** - Basic random selection algorithm
+- [x] **Personal Decision Making System** - Comprehensive decision making with 30-day rolling weight system ✅ COMPLETED
+- [x] **Random Selection Algorithm** - Weighted random selection algorithm that ensures variety while allowing favorites ✅ COMPLETED
+- [x] **Decision History Tracking** - Decision history tracking with database storage and retrieval ✅ COMPLETED
+- [x] **Decision Result UI** - DecisionResultModal with restaurant details, visit date, and reasoning display ✅ COMPLETED
+- [x] **Decision Statistics UI** - DecisionStatistics component showing selection history and weight distribution ✅ COMPLETED
+- [x] **Decision API Endpoints** - REST API endpoints for decision creation and random selection ✅ COMPLETED
+- [x] **GraphQL Decision Integration** - GraphQL queries and mutations for decision data with weights ✅ COMPLETED
+- [x] **Decision Testing Suite** - Comprehensive unit tests for decision algorithms, API endpoints, and UI components ✅ COMPLETED
+- [x] **Decision System Finalization** - Complete decision making system with weighted algorithm, UI components, and API integration ✅ COMPLETED
+- [x] **Decision Database Integration** - Updated database schema and types to support decision tracking with weights ✅ COMPLETED
+- [x] **Decision GraphQL Support** - Extended GraphQL schema and resolvers for decision queries and statistics ✅ COMPLETED
+- [x] **Epic 2 Final Completion** - All 5 stories of Epic 2: Personal Collections Management completed with full functionality ✅ COMPLETED
 
-## ⏳ In Progress
+## 🎯 Latest Session Work Completed
 
-### Epic 2: Personal Collections Management (Continued)
+### Decision Making System Implementation (Latest Session)
 
-- [x] **Restaurant Search Integration** - Google Places API setup and integration ✅ COMPLETED
-- [x] **Restaurant Data Models** - Restaurant schema and data management ✅ COMPLETED
-- [x] **Search UI Components** - Restaurant search interface and results display ✅ COMPLETED
-- [x] **GraphQL Schema & Resolvers** - GraphQL integration for complex restaurant queries ✅ COMPLETED
-- [x] **Search Accuracy Improvements** - Fixed search to use geocoded coordinates instead of text-based location ✅ COMPLETED
-- [x] **Image Loading Fixes** - Resolved restaurant image loading issues with proper Next.js Image configuration ✅ COMPLETED
-- [x] **Restaurant Search Query Fix** - Fixed restaurant search to properly use Text Search API when query is provided ✅ COMPLETED
-- [x] **Epic 2 Story 2 Completion** - Completed Restaurant Search & Discovery functionality with all enhancements ✅ COMPLETED
-- [x] **Restaurant Management** - Add/remove restaurants from collections functionality ✅ COMPLETED
+- [x] **Core Decision Library** - Created comprehensive decision making library (`src/lib/decisions.ts`) with weighted random selection algorithm
+- [x] **30-Day Rolling Weight System** - Implemented sophisticated weight calculation that reduces likelihood of recently selected restaurants
+- [x] **Decision API Routes** - Built REST API endpoints for decision creation and random selection with proper validation
+- [x] **Decision UI Components** - Created DecisionResultModal and DecisionStatistics components with full functionality
+- [x] **CollectionView Integration** - Integrated decision making into collection view with error handling and loading states
+- [x] **Database Schema Updates** - Updated Decision type to use string user IDs and added weights to decision results
+- [x] **GraphQL Extensions** - Extended GraphQL schema and resolvers to support decision queries and statistics
+- [x] **Comprehensive Testing** - Added 100+ test cases covering decision algorithms, API endpoints, and UI components
+- [x] **Decision Statistics** - Implemented decision statistics tracking showing selection history and weight distribution
+- [x] **Error Handling** - Added robust error handling throughout the decision making flow
+
+## 🚀 Currently Active
+
+### Epic 3: Social Features & Group Management (Ready to Start)
+
+- [ ] **Friend Management** - Add friends by email/username search, send and accept friend requests
+- [ ] **Group Creation & Management** - Create groups with custom names and descriptions, invite friends to join groups
+- [ ] **Group Collections** - Create group-specific collections, add restaurants to group collections
 
 ### Documentation & Planning
 
@@ -87,15 +107,15 @@ This document tracks all items currently being worked on, organized by priority 
 
 ### Current Sprint Status
 
-- **Items Started**: 20 items
-- **Items Completed**: 31 items (Epic 1 + Epic 2 Stories 1 & 2 + Recent enhancements and fixes)
+- **Items Started**: 25 items
+- **Items Completed**: 41 items (Epic 1 + Epic 2 complete with comprehensive decision making system)
 - **Items Blocked**: 0 items (All API keys configured)
-- **Sprint Progress**: 100% (Epic 1 completed, Epic 2 Stories 1 & 2 completed with comprehensive enhancements)
+- **Sprint Progress**: 100% (Epic 1 completed, Epic 2 fully completed with advanced decision making)
 
 ### Epic Progress
 
 - **Epic 1**: 100% complete ✅
-- **Epic 2**: 95% complete (Stories 1, 2, 3 & 4 completed with all enhancements, Story 5 pending)
+- **Epic 2**: 100% complete ✅ (All 5 stories completed with full functionality)
 - **Epic 3**: 0% complete (not started)
 - **Epic 4**: 0% complete (not started)
 
@@ -103,16 +123,17 @@ This document tracks all items currently being worked on, organized by priority 
 
 ### Immediate Focus
 
-1. **Restaurant Management** - Add/remove restaurants from collections functionality
-2. **Decision Making Algorithm** - Basic random selection for personal collections
-3. **Enhanced User Experience** - Polish remaining UI components and interactions
+1. **Friend Management** - Add friends by email/username search, send and accept friend requests
+2. **Group Creation & Management** - Create groups with custom names and descriptions, invite friends to join groups
+3. **Group Collections** - Create group-specific collections, add restaurants to group collections
 
 ### This Sprint Goals
 
-1. **Complete Epic 2 Story 2** - Restaurant Search & Discovery ✅ COMPLETED (Enhanced with address validation, geocoding, and search improvements)
-2. **Complete Epic 2 Story 3** - Enhanced Form Management ✅ COMPLETED (React Hook Form + Zod integration with comprehensive form components)
-3. **Complete Epic 2 Story 4** - Restaurant Management
-4. **Complete Epic 2 Story 5** - Personal Decision Making
+1. **Complete Epic 2** - Personal Collections Management ✅ COMPLETED (All 5 stories completed with full functionality including advanced decision making)
+2. **Document Recent Work** - Update all documentation to reflect completed decision making system ✅ COMPLETED
+3. **Start Epic 3 Story 1** - Friend Management
+4. **Start Epic 3 Story 2** - Group Creation & Management
+5. **Start Epic 3 Story 3** - Group Collections
 
 ## 📝 Notes
 

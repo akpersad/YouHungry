@@ -76,7 +76,7 @@ export interface Decision {
   type: 'personal' | 'group';
   collectionId: ObjectId;
   groupId?: ObjectId;
-  participants: ObjectId[]; // User IDs
+  participants: string[]; // User IDs (Clerk user IDs as strings)
   method: 'tiered' | 'random';
   status: 'active' | 'completed' | 'expired';
   deadline: Date;
@@ -85,9 +85,10 @@ export interface Decision {
     restaurantId: ObjectId;
     selectedAt: Date;
     reasoning: string;
+    weights?: { [restaurantId: string]: number };
   };
   votes?: {
-    userId: ObjectId;
+    userId: string; // Clerk user ID as string
     rankings: ObjectId[]; // Restaurant IDs in order
     submittedAt: Date;
   }[];

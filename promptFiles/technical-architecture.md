@@ -736,8 +736,8 @@ The following environment variables are configured and ready for use:
 - [x] **Collection Management**: CRUD operations ✅ COMPLETED
 - [x] **User Dashboard**: Personal collections view ✅ COMPLETED
 - [x] **Enhanced Form Management**: Simplified form state management with custom validation ✅ COMPLETED
-- [ ] **Restaurant Management**: Add/remove restaurants from collections
-- [ ] **Basic Decision Making**: Personal restaurant selection
+- [x] **Restaurant Management**: Add/remove restaurants from collections ✅ COMPLETED
+- [x] **Basic Decision Making**: Personal restaurant selection with weighted algorithm ✅ COMPLETED
 
 ## 📝 Form Management Implementation
 

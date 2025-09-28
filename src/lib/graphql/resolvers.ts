@@ -10,6 +10,12 @@ import {
   addRestaurantToCollection,
   removeRestaurantFromCollection,
 } from '../collections';
+import {
+  createPersonalDecision,
+  performRandomSelection,
+  getDecisionHistory,
+  getDecisionStatistics,
+} from '../decisions';
 
 export const resolvers = {
   Query: {
@@ -153,6 +159,30 @@ export const resolvers = {
         throw new Error('Failed to get restaurants by collection');
       }
     },
+
+    getDecisionHistory: async (
+      _: unknown,
+      { collectionId, limit = 50 }: { collectionId: string; limit?: number }
+    ) => {
+      try {
+        return await getDecisionHistory(collectionId, limit);
+      } catch (error) {
+        console.error('GraphQL getDecisionHistory error:', error);
+        throw new Error('Failed to get decision history');
+      }
+    },
+
+    getDecisionStatistics: async (
+      _: unknown,
+      { collectionId }: { collectionId: string }
+    ) => {
+      try {
+        return await getDecisionStatistics(collectionId);
+      } catch (error) {
+        console.error('GraphQL getDecisionStatistics error:', error);
+        throw new Error('Failed to get decision statistics');
+      }
+    },
   },
 
   Mutation: {
@@ -208,6 +238,54 @@ export const resolvers = {
       } catch (error) {
         console.error('GraphQL updateRestaurant error:', error);
         throw new Error('Failed to update restaurant');
+      }
+    },
+
+    createPersonalDecision: async (
+      _: unknown,
+      {
+        input,
+      }: { input: { collectionId: string; method: string; visitDate: Date } }
+    ) => {
+      try {
+        // For GraphQL, we need to get the current user ID
+        // This would typically come from the context
+        const userId = 'current-user-id'; // This should be injected from context
+        return await createPersonalDecision(
+          input.collectionId,
+          userId,
+          input.method as 'random' | 'tiered',
+          input.visitDate
+        );
+      } catch (error) {
+        console.error('GraphQL createPersonalDecision error:', error);
+        throw new Error('Failed to create personal decision');
+      }
+    },
+
+    performRandomSelection: async (
+      _: unknown,
+      { input }: { input: { collectionId: string; visitDate: Date } }
+    ) => {
+      try {
+        // For GraphQL, we need to get the current user ID
+        // This would typically come from the context
+        const userId = 'current-user-id'; // This should be injected from context
+        const result = await performRandomSelection(
+          input.collectionId,
+          userId,
+          input.visitDate
+        );
+
+        return {
+          restaurantId: result.restaurantId.toString(),
+          selectedAt: result.selectedAt,
+          reasoning: result.reasoning,
+          weights: JSON.stringify(result.weights),
+        };
+      } catch (error) {
+        console.error('GraphQL performRandomSelection error:', error);
+        throw new Error('Failed to perform random selection');
       }
     },
   },
