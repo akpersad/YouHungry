@@ -147,6 +147,22 @@ This document tracks all planned items that are not yet started, organized by ca
 - [ ] Add advanced search capabilities
 - [ ] Implement real-time collaboration features
 
+## 🎨 UI/UX Design Considerations (Future)
+
+### Collection Selection UI (Epic 3+)
+
+- **Current Implementation**: Collections show as buttons when ≤3, dropdown when >3
+- **Future Challenge**: When groups are introduced, we'll need to distinguish between:
+  - Personal collections (user's own)
+  - Group collections (shared with friends)
+  - Group collections by specific groups
+- **Proposed Solution**: Consider implementing:
+  - Grouped sections in dropdown (Personal Collections, Group Collections)
+  - Visual indicators (icons, colors) to distinguish collection types
+  - Search/filter functionality within collection selection
+  - Recent collections or favorites at the top
+- **Note**: This is a future consideration for Epic 3+ when group features are implemented
+
 ## 📝 Notes
 
 - Items are organized by priority and estimated effort

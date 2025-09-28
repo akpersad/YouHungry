@@ -38,23 +38,26 @@ export async function searchRestaurants(
       location
     );
 
-    // Store new restaurants in database for future local searches
-    await Promise.all(
+    // Store new restaurants in database and get the stored versions
+    const storedRestaurants = await Promise.all(
       googleResults.map(async (restaurant) => {
         try {
           const existing = await getRestaurantByGooglePlaceId(
             restaurant.googlePlaceId
           );
-          if (!existing) {
-            await createRestaurant(restaurant);
+          if (existing) {
+            return existing;
+          } else {
+            return await createRestaurant(restaurant);
           }
         } catch (error) {
           console.error('Error storing restaurant:', error);
+          return restaurant; // Return original if storage fails
         }
       })
     );
 
-    return googleResults;
+    return storedRestaurants;
   } catch (error) {
     console.error(
       'Google Places search failed, falling back to local search:',
@@ -149,42 +152,53 @@ export async function searchRestaurantsByCoordinates(
       radius
     );
 
-    // Store new restaurants in database
-    await Promise.all(
+    // Store new restaurants in database and get the stored versions
+    const storedRestaurants = await Promise.all(
       googleResults.map(async (restaurant) => {
         try {
           const existing = await getRestaurantByGooglePlaceId(
             restaurant.googlePlaceId
           );
-          if (!existing) {
-            await createRestaurant(restaurant);
+          if (existing) {
+            return existing;
+          } else {
+            return await createRestaurant(restaurant);
           }
         } catch (error) {
           console.error('Error storing restaurant:', error);
+          return restaurant; // Return original if storage fails
         }
       })
     );
 
-    return googleResults;
+    return storedRestaurants;
   } catch (error) {
     console.error('Location-based search failed:', error);
     return [];
   }
 }
 
-// Get restaurant details from Google Places API
+// Get restaurant details by ID (ObjectId or Google Place ID)
 export async function getRestaurantDetails(
-  googlePlaceId: string
+  id: string
 ): Promise<Restaurant | null> {
   try {
-    // First check if we have it in our database
-    const existing = await getRestaurantByGooglePlaceId(googlePlaceId);
+    // First try to get by ObjectId (internal database ID)
+    if (ObjectId.isValid(id)) {
+      const restaurant = await getRestaurantById(id);
+      if (restaurant) {
+        return restaurant;
+      }
+    }
+
+    // If not found by ObjectId, try by Google Place ID
+    const existing = await getRestaurantByGooglePlaceId(id);
     if (existing) {
       return existing;
     }
 
-    // If not, fetch from Google Places API
-    const details = await getPlaceDetails(googlePlaceId);
+    // If not in database, fetch from Google Places API
+    const details = await getPlaceDetails(id);
     if (details) {
       // Store in database for future use
       await createRestaurant(details);

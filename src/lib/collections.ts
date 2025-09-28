@@ -86,22 +86,103 @@ export async function updateCollection(
   return result as unknown as Collection | null;
 }
 
+export async function isRestaurantInCollection(
+  collectionId: string,
+  restaurantId: string
+): Promise<boolean> {
+  const db = await connectToDatabase();
+
+  // Check if restaurant exists in collection by either _id or googlePlaceId
+  const collection = await db.collection('collections').findOne({
+    _id: new ObjectId(collectionId),
+    $or: [
+      { 'restaurantIds._id': restaurantId },
+      { 'restaurantIds.googlePlaceId': restaurantId },
+      { restaurantIds: restaurantId }, // For backward compatibility with old format
+    ],
+  });
+
+  return !!collection;
+}
+
 export async function addRestaurantToCollection(
   collectionId: string,
   restaurantId: string
-): Promise<Collection | null> {
+): Promise<{ collection: Collection | null; wasAdded: boolean }> {
   const db = await connectToDatabase();
+
+  // Check if restaurant already exists in collection
+  const alreadyExists = await isRestaurantInCollection(
+    collectionId,
+    restaurantId
+  );
+
+  if (alreadyExists) {
+    // Return the collection without adding the restaurant
+    const collection = await getCollectionById(collectionId);
+    return { collection, wasAdded: false };
+  }
+
+  // Add restaurant to collection
+  // Store both database ID and Google Place ID for flexible matching
+  let restaurantDataToStore;
+
+  if (restaurantId.startsWith('ChIJ')) {
+    // This is a Google Place ID, we need to find the database restaurant
+    const restaurant = await db.collection('restaurants').findOne({
+      googlePlaceId: restaurantId,
+    });
+
+    if (restaurant) {
+      restaurantDataToStore = {
+        _id: restaurant._id,
+        googlePlaceId: restaurant.googlePlaceId,
+      };
+    } else {
+      // If restaurant not found in database, store just the Google Place ID
+      restaurantDataToStore = {
+        googlePlaceId: restaurantId,
+      };
+    }
+  } else {
+    // This is a database ID, we need to find the Google Place ID
+    try {
+      const restaurant = await db.collection('restaurants').findOne({
+        _id: new ObjectId(restaurantId),
+      });
+
+      if (restaurant) {
+        restaurantDataToStore = {
+          _id: restaurant._id,
+          googlePlaceId: restaurant.googlePlaceId,
+        };
+      } else {
+        // If restaurant not found, store just the database ID
+        restaurantDataToStore = {
+          _id: new ObjectId(restaurantId),
+        };
+      }
+    } catch {
+      // If it's not a valid ObjectId, store as is
+      restaurantDataToStore = {
+        _id: restaurantId,
+      };
+    }
+  }
 
   const result = await db.collection('collections').findOneAndUpdate(
     { _id: new ObjectId(collectionId) },
     {
-      $addToSet: { restaurantIds: new ObjectId(restaurantId) },
+      $addToSet: { restaurantIds: restaurantDataToStore },
       $set: { updatedAt: new Date() },
     },
     { returnDocument: 'after' }
   );
 
-  return result as unknown as Collection | null;
+  return {
+    collection: result as unknown as Collection | null,
+    wasAdded: true,
+  };
 }
 
 export async function removeRestaurantFromCollection(
@@ -145,10 +226,28 @@ export async function getRestaurantsByCollection(
     return [];
   }
 
+  // Extract restaurant IDs from the mixed format
+  const restaurantIds = collection.restaurantIds
+    .map((item) => {
+      if (typeof item === 'string' || item instanceof ObjectId) {
+        // Legacy format or direct ObjectId
+        return item;
+      } else if (item && typeof item === 'object' && '_id' in item) {
+        // New format with both _id and googlePlaceId
+        return item._id;
+      }
+      return null;
+    })
+    .filter((id) => id !== null);
+
+  if (restaurantIds.length === 0) {
+    return [];
+  }
+
   const restaurants = await db
     .collection('restaurants')
     .find({
-      _id: { $in: collection.restaurantIds },
+      _id: { $in: restaurantIds },
     })
     .toArray();
 

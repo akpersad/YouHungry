@@ -41,7 +41,7 @@ This document tracks all items currently being worked on, organized by priority 
 - [x] **Form Integration** - Updated CreateCollectionForm and RestaurantSearchForm to use simplified approach ✅ COMPLETED
 - [x] **Clean Architecture** - Removed complex Zod/React Hook Form dependencies in favor of simple, maintainable code ✅ COMPLETED
 - [x] **Epic 2 Story 3 Finalization** - Completed all remaining items in Epic 2 Story 3: Enhanced Form Management ✅ COMPLETED
-- [ ] **Restaurant Management** - Add/remove restaurants from collections
+- [x] **Restaurant Management** - Add/remove restaurants from collections ✅ COMPLETED
 - [ ] **Decision Making** - Basic random selection algorithm
 
 ## ⏳ In Progress
@@ -91,7 +91,7 @@ This document tracks all items currently being worked on, organized by priority 
 ### Epic Progress
 
 - **Epic 1**: 100% complete ✅
-- **Epic 2**: 95% complete (Stories 1, 2 & 3 completed with all enhancements, Story 4 & 5 pending)
+- **Epic 2**: 95% complete (Stories 1, 2, 3 & 4 completed with all enhancements, Story 5 pending)
 - **Epic 3**: 0% complete (not started)
 - **Epic 4**: 0% complete (not started)
 

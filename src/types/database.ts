@@ -51,7 +51,11 @@ export interface Collection {
   description?: string;
   type: 'personal' | 'group';
   ownerId: ObjectId; // User ID for personal, Group ID for group
-  restaurantIds: ObjectId[];
+  restaurantIds: (
+    | ObjectId
+    | { _id: ObjectId; googlePlaceId: string }
+    | { googlePlaceId: string }
+  )[];
   createdAt: Date;
   updatedAt: Date;
 }
