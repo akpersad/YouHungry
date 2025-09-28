@@ -90,6 +90,7 @@ jest.mock('@/components/ui/RestaurantImage', () => ({
     alt: string;
     className?: string;
   }) => (
+    // eslint-disable-next-line @next/next/no-img-element
     <img
       src={src || '/placeholder.jpg'}
       alt={alt}

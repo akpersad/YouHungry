@@ -228,17 +228,35 @@ export async function getRestaurantsByCollection(
 
   // Extract restaurant IDs from the mixed format
   const restaurantIds = collection.restaurantIds
-    .map((item) => {
-      if (typeof item === 'string' || item instanceof ObjectId) {
-        // Legacy format or direct ObjectId
-        return item;
-      } else if (item && typeof item === 'object' && '_id' in item) {
-        // New format with both _id and googlePlaceId
-        return item._id;
+    .map(
+      (
+        item:
+          | ObjectId
+          | { _id: ObjectId; googlePlaceId: string }
+          | { googlePlaceId: string }
+          | string
+      ) => {
+        if (typeof item === 'string' || item instanceof ObjectId) {
+          // Legacy format or direct ObjectId
+          return item;
+        } else if (item && typeof item === 'object' && '_id' in item) {
+          // New format with both _id and googlePlaceId
+          return item._id;
+        } else if (
+          item &&
+          typeof item === 'object' &&
+          'toString' in item &&
+          'valueOf' in item
+        ) {
+          // Serialized ObjectId (from mock data)
+          return new ObjectId(item.toString());
+        }
+        return null;
       }
-      return null;
-    })
-    .filter((id) => id !== null);
+    )
+    .filter(
+      (id: ObjectId | string | null): id is ObjectId | string => id !== null
+    );
 
   if (restaurantIds.length === 0) {
     return [];

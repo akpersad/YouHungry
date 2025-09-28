@@ -23,8 +23,8 @@ module.exports = {
     })),
     {
       isValid: jest.fn().mockImplementation((id) => {
-        // Mock ObjectId.isValid to return true for valid-looking IDs
-        return typeof id === 'string' && id.length > 0;
+        // Mock ObjectId.isValid to return true for valid ObjectId format
+        return typeof id === 'string' && /^[0-9a-fA-F]{24}$/.test(id);
       }),
     }
   ),

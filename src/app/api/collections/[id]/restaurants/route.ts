@@ -70,9 +70,9 @@ export async function POST(
       );
     }
 
-    const updatedCollection = await addRestaurantToCollection(id, restaurantId);
+    const result = await addRestaurantToCollection(id, restaurantId);
 
-    if (!updatedCollection) {
+    if (!result.collection) {
       return NextResponse.json(
         { success: false, error: 'Collection not found' },
         { status: 404 }
@@ -81,7 +81,7 @@ export async function POST(
 
     return NextResponse.json({
       success: true,
-      collection: updatedCollection,
+      collection: result.collection,
       message: 'Restaurant added to collection successfully',
     });
   } catch (error) {

@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useUser } from '@clerk/nextjs';
+import { ObjectId } from 'mongodb';
 import { Restaurant, Collection } from '@/types/database';
 import { RestaurantSearchForm } from '../forms/RestaurantSearchForm';
 import { RestaurantSearchResults } from './RestaurantSearchResults';
@@ -34,7 +35,7 @@ export function RestaurantSearchPage({
     useState<Restaurant | null>(null);
   const [showAddToCollectionModal, setShowAddToCollectionModal] =
     useState(false);
-  const [collections, setCollections] = useState<Collection[]>(propCollections);
+  const [collections, setCollections] = useState<Collection[]>([]);
   const [isLoadingCollections, setIsLoadingCollections] = useState(false);
   const [selectedCollectionId, setSelectedCollectionId] = useState<string>('');
   const [restaurantInCollections, setRestaurantInCollections] = useState<
@@ -45,12 +46,27 @@ export function RestaurantSearchPage({
 
   // Fetch collections if not provided as props
   useEffect(() => {
-    if (propCollections.length === 0 && isLoaded && user) {
+    if (propCollections.length > 0) {
+      // Convert propCollections to Collection format
+      const convertedCollections: Collection[] = propCollections.map(
+        (prop) => ({
+          _id: new ObjectId(prop._id),
+          name: prop.name,
+          description: '',
+          type: 'personal' as const,
+          ownerId: new ObjectId(), // This will be overridden when fetched from API
+          restaurantIds: [],
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        })
+      );
+      setCollections(convertedCollections);
+    } else if (isLoaded && user) {
       fetchCollections();
     }
-  }, [propCollections.length, isLoaded, user]);
+  }, [propCollections, isLoaded, user]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const fetchCollections = async () => {
+  const fetchCollections = useCallback(async () => {
     if (!user?.id) return;
 
     setIsLoadingCollections(true);
@@ -71,48 +87,54 @@ export function RestaurantSearchPage({
     } finally {
       setIsLoadingCollections(false);
     }
-  };
+  }, [user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const checkRestaurantsInCollections = async (collections: Collection[]) => {
-    if (restaurants.length === 0 || collections.length === 0) return;
+  const checkRestaurantsInCollections = useCallback(
+    async (collections: Collection[]) => {
+      if (restaurants.length === 0 || collections.length === 0) return;
 
-    try {
-      // Get all restaurant IDs from search results (use googlePlaceId if _id not available)
-      const restaurantIds = restaurants
-        .filter((r) => r._id || r.googlePlaceId)
-        .map((r) => (r._id || r.googlePlaceId).toString());
+      try {
+        // Get all restaurant IDs from search results (use googlePlaceId if _id not available)
+        const restaurantIds = restaurants
+          .filter((r) => r._id || r.googlePlaceId)
+          .map((r) => (r._id || r.googlePlaceId).toString());
 
-      // Check each collection for these restaurants
-      const inCollections = new Set<string>();
+        // Check each collection for these restaurants
+        const inCollections = new Set<string>();
 
-      for (const collection of collections) {
-        for (const restaurantId of restaurantIds) {
-          if (
-            collection.restaurantIds.some((restaurantData) => {
-              // Handle both old format (string IDs) and new format (objects with _id and googlePlaceId)
-              if (typeof restaurantData === 'string') {
-                return restaurantData === restaurantId;
-              } else {
-                // New format: object with _id and/or googlePlaceId
-                return (
-                  (restaurantData._id &&
-                    restaurantData._id.toString() === restaurantId) ||
-                  (restaurantData.googlePlaceId &&
-                    restaurantData.googlePlaceId === restaurantId)
-                );
-              }
-            })
-          ) {
-            inCollections.add(restaurantId);
+        for (const collection of collections) {
+          for (const restaurantId of restaurantIds) {
+            if (
+              collection.restaurantIds.some((restaurantData) => {
+                // Handle both old format (string IDs) and new format (objects with _id and googlePlaceId)
+                if (typeof restaurantData === 'string') {
+                  return restaurantData === restaurantId;
+                } else if (restaurantData instanceof ObjectId) {
+                  return restaurantData.toString() === restaurantId;
+                } else {
+                  // New format: object with _id and/or googlePlaceId
+                  return (
+                    ('_id' in restaurantData &&
+                      restaurantData._id &&
+                      restaurantData._id.toString() === restaurantId) ||
+                    (restaurantData.googlePlaceId &&
+                      restaurantData.googlePlaceId === restaurantId)
+                  );
+                }
+              })
+            ) {
+              inCollections.add(restaurantId);
+            }
           }
         }
-      }
 
-      setRestaurantInCollections(inCollections);
-    } catch (error) {
-      console.error('Error checking restaurants in collections:', error);
-    }
-  };
+        setRestaurantInCollections(inCollections);
+      } catch (error) {
+        console.error('Error checking restaurants in collections:', error);
+      }
+    },
+    [restaurants]
+  );
 
   const searchRestaurants = async (
     location: string,
@@ -188,9 +210,18 @@ export function RestaurantSearchPage({
             idStr === restaurantIdStr
           );
           return idStr === restaurantIdStr;
+        } else if (restaurantData instanceof ObjectId) {
+          const idStr = restaurantData.toString();
+          const restaurantIdStr = restaurantId.toString();
+          console.log(
+            `Comparing ObjectId format ${idStr} with ${restaurantIdStr}:`,
+            idStr === restaurantIdStr
+          );
+          return idStr === restaurantIdStr;
         } else {
           // New format: object with _id and/or googlePlaceId
           const matchesId =
+            '_id' in restaurantData &&
             restaurantData._id &&
             restaurantData._id.toString() === restaurantId.toString();
           const matchesGooglePlaceId =
@@ -390,10 +421,10 @@ export function RestaurantSearchPage({
                       );
                       return (
                         <button
-                          key={collection._id}
+                          key={collection._id.toString()}
                           onClick={() =>
                             !isAlreadyInCollection &&
-                            handleCollectionSelect(collection._id)
+                            handleCollectionSelect(collection._id.toString())
                           }
                           disabled={isAlreadyInCollection}
                           className={`w-full text-left p-3 border rounded-lg transition-colors ${
@@ -431,7 +462,10 @@ export function RestaurantSearchPage({
                             )
                         )
                         .map((collection) => (
-                          <option key={collection._id} value={collection._id}>
+                          <option
+                            key={collection._id.toString()}
+                            value={collection._id.toString()}
+                          >
                             {collection.name}
                           </option>
                         ))}
@@ -454,7 +488,7 @@ export function RestaurantSearchPage({
                             )
                             .map((collection) => (
                               <div
-                                key={collection._id}
+                                key={collection._id.toString()}
                                 className="flex items-center"
                               >
                                 <span className="text-green-600 mr-2">✓</span>
