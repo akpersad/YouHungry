@@ -15,7 +15,7 @@ const customJestConfig = {
     '^@clerk/backend$': '<rootDir>/src/__mocks__/@clerk/backend.js',
   },
   transformIgnorePatterns: [
-    'node_modules/(?!(bson|mongodb|@mongodb-js|@clerk|@clerk/backend|@clerk/nextjs|@clerk/backend)/)',
+    'node_modules/(?!(bson|mongodb|@mongodb-js|@clerk|@clerk/backend|@clerk/nextjs)/)',
   ],
   extensionsToTreatAsEsm: ['.ts', '.tsx'],
   globals: {

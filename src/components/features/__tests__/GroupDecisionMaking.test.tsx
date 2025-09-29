@@ -85,8 +85,8 @@ const mockRestaurants = [
     coordinates: { lat: 40.7128, lng: -74.006 },
     cuisine: 'Italian',
     rating: 4.5,
-    priceLevel: '$$',
-    phone: '+1-555-0123',
+    priceRange: '$$',
+    phoneNumber: '+1-555-0123',
     photos: ['photo1.jpg'],
     website: 'https://testrestaurant1.com',
     hours: {
