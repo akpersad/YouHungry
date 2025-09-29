@@ -63,10 +63,19 @@ This document tracks all planned items that are not yet started, organized by ca
 
 ### Social Features
 
-- [ ] Implement friend management system
+- [x] Implement friend management system ✅ COMPLETED
 - [ ] Create group creation and management
 - [ ] Build group collections functionality
 - [ ] Add group member role management
+
+### User Experience & Registration
+
+- [ ] Implement custom registration flow with city/state capture
+  - [ ] Create custom registration form with optional city/state fields
+  - [ ] Update webhook handler to capture custom registration data
+  - [ ] Replace temporary user sync process with proper registration flow
+  - [ ] Add city/state validation and formatting
+  - [ ] Update user interface to include location preferences
 
 ### Decision Making
 

@@ -18,13 +18,15 @@ This file is for planning and reference only, not for tracking progress.
 
 **Future technologies** (marked with "Future" in story titles) are strategically placed within epics where they provide the most value:
 
-- **Epic 1**: Enhanced development tools (Husky, lint-staged, Bundle Analyzer)
-- **Epic 2**: Form management (React Hook Form + Zod), API state management (TanStack Query)
+- **Epic 1**: Enhanced development tools (Husky, lint-staged, Bundle Analyzer) ✅ **COMPLETED**
+- **Epic 2**: Form management (React Hook Form + Zod), API state management (TanStack Query) ✅ **COMPLETED**
 - **Epic 4**: Drag & drop ranking (@dnd-kit)
 - **Epic 5**: Animations and interactions (Framer Motion)
 - **Epic 6**: Toast notifications (Sonner)
-- **Epic 8**: Error boundaries and graceful error handling
-- **Epic 9**: GraphQL integration (Apollo Server + Client) + Performance benchmarking
+- **Epic 8**: Error boundaries and graceful error handling + Performance benchmarking
+- **Epic 9**: GraphQL integration (Apollo Server + Client)
+
+**📊 Performance Benchmarking Note**: Performance benchmarking has been moved to Epic 8 (Polish & Optimization) to establish baselines before implementing advanced technologies like GraphQL. This ensures we have proper metrics to measure the effectiveness of optimizations.
 
 These technologies will be implemented when they solve specific problems in each epic, ensuring they add real value rather than being added prematurely.
 
@@ -150,6 +152,8 @@ These technologies will be implemented when they solve specific problems in each
    - **Implement GraphQL queries for group collections and members**
    - **Add GraphQL mutations for group collection management**
 
+**🔄 Parallel Work Note**: Stories 2 and 3 SHOULD be worked on in parallel - Group Creation provides the foundation that Group Collections depends on, but the core group management logic can be developed alongside the collection management logic.
+
 ## 🤝 Epic 4: Group Decision Making
 
 **Goal**: Enable collaborative decision making within groups
@@ -186,6 +190,8 @@ These technologies will be implemented when they solve specific problems in each
    - **Implement GraphQL subscriptions for decision status updates**
    - **Add real-time decision progress tracking with GraphQL**
 
+**🔄 Parallel Work Note**: Stories 1, 2, and 3 SHOULD be worked on in parallel - they are all core decision-making features that need to work together, and developing them simultaneously ensures proper integration and consistent UX patterns.
+
 ## 📱 Epic 5: Mobile-First Experience
 
 **Goal**: Optimize the app for mobile devices and create PWA capabilities
@@ -198,7 +204,7 @@ These technologies will be implemented when they solve specific problems in each
    - Create mobile-specific navigation patterns
    - Test across different screen sizes
 
-1b. **Design System Migration & Legacy UI Updates**
+1a. **Design System Migration & Legacy UI Updates**
 
 - Audit existing UI components against updated design system specifications
 - Update legacy components to match new neumorphic design patterns
@@ -214,7 +220,7 @@ These technologies will be implemented when they solve specific problems in each
 - Test design system consistency across all existing screens
 - Document component migration checklist and completion status
 
-1a. **Enhanced Animations & Interactions (Future)**
+1b. **Enhanced Animations & Interactions (Future)**
 
 - Install and configure Framer Motion for animations
 - Implement smooth transitions and micro-interactions
@@ -249,8 +255,10 @@ These technologies will be implemented when they solve specific problems in each
    - Store SMS preferences in user profile for group-specific settings
    - Implement phone number verification flow for users who sign up with phone
    - Handle reverification for adding phone numbers to existing email accounts
+   - **Add optional city/state capture during registration for location-based features**
+   - **Implement city/state validation and formatting for consistent data storage**
+   - **Update user database schema to include location preferences and SMS settings**
    - **Unit test custom registration components and phone verification flow**
-   - **Update user database schema to include SMS preferences and phone numbers**
 
 2. **SMS Integration**
    - Integrate Twilio for SMS notifications
@@ -265,6 +273,8 @@ These technologies will be implemented when they solve specific problems in each
    - Create notification history and management
    - **Implement GraphQL subscriptions for real-time notifications**
    - **Add GraphQL queries for notification history and preferences**
+
+**🔄 Parallel Work Note**: Stories 2, 3, and 4 SHOULD be worked on in parallel - they are all notification systems that need to work together seamlessly, and developing them simultaneously ensures consistent notification patterns and proper integration.
 
 3a. **Toast Notification System (Future)**
 
@@ -318,6 +328,8 @@ These technologies will be implemented when they solve specific problems in each
    - **Implement GraphQL queries for complex analytics data**
    - **Add GraphQL subscriptions for real-time analytics updates**
 
+**🔄 Parallel Work Note**: Stories 1, 2, and 3 SHOULD be worked on in parallel - they are all analytics features that need to work together, and developing them simultaneously ensures consistent data models and proper integration between history, weighting, and dashboard features.
+
 ## 🎨 Epic 8: Polish & Optimization
 
 **Goal**: Refine the user experience and optimize performance
@@ -351,6 +363,15 @@ These technologies will be implemented when they solve specific problems in each
    - Add performance testing and monitoring
    - Optimize test coverage and remove redundant tests
 
+4. **Performance Benchmarking & Monitoring**
+   - Establish baseline performance metrics for current REST API
+   - Measure API response times for complex queries (dashboard data, restaurant search)
+   - Record bundle size and loading performance metrics
+   - Document current caching effectiveness and hit rates
+   - Create performance monitoring dashboard for tracking
+   - Set up automated performance testing in CI/CD pipeline
+   - **Note**: This should be completed before implementing GraphQL or other advanced optimizations to establish proper baselines
+
 ## 🚀 Epic 9: Deployment & Launch
 
 **Goal**: Deploy the app and prepare for production use
@@ -363,16 +384,7 @@ These technologies will be implemented when they solve specific problems in each
    - Implement CI/CD workflows
    - Set up monitoring and logging
 
-1a. **Pre-GraphQL Performance Benchmarking (Future)**
-
-- Establish baseline performance metrics for current REST API
-- Measure API response times for complex queries (dashboard data, restaurant search)
-- Record bundle size and loading performance metrics
-- Document current caching effectiveness and hit rates
-- Create performance monitoring dashboard for tracking
-- Set up automated performance testing in CI/CD pipeline
-
-1b. **GraphQL Integration (Future)**
+1a. **GraphQL Integration (Future)**
 
 - Install and configure Apollo Server for GraphQL API
 - Set up Apollo Client for frontend GraphQL queries
@@ -381,7 +393,7 @@ These technologies will be implemented when they solve specific problems in each
 - Migrate complex REST endpoints to GraphQL
 - Set up GraphQL playground and documentation
 
-1c. **Post-GraphQL Performance Analysis (Future)**
+1b. **Post-GraphQL Performance Analysis (Future)**
 
 - Measure API response times after GraphQL implementation
 - Compare bundle size and loading performance vs baseline

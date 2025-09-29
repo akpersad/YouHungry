@@ -16,6 +16,17 @@ import {
   getDecisionHistory,
   getDecisionStatistics,
 } from '../decisions';
+import {
+  searchUsers,
+  getFriends,
+  getFriendRequests,
+  areFriends,
+  getFriendship,
+  sendFriendRequest,
+  acceptFriendRequest,
+  declineFriendRequest,
+  removeFriend,
+} from '../friends';
 
 export const resolvers = {
   Query: {
@@ -183,6 +194,61 @@ export const resolvers = {
         throw new Error('Failed to get decision statistics');
       }
     },
+
+    // Friend Management Queries
+    searchUsers: async (
+      _: unknown,
+      { query, userId }: { query: string; userId: string }
+    ) => {
+      try {
+        return await searchUsers(query, userId);
+      } catch (error) {
+        console.error('GraphQL searchUsers error:', error);
+        throw new Error('Failed to search users');
+      }
+    },
+
+    getFriends: async (_: unknown, { userId }: { userId: string }) => {
+      try {
+        return await getFriends(userId);
+      } catch (error) {
+        console.error('GraphQL getFriends error:', error);
+        throw new Error('Failed to get friends');
+      }
+    },
+
+    getFriendRequests: async (_: unknown, { userId }: { userId: string }) => {
+      try {
+        return await getFriendRequests(userId);
+      } catch (error) {
+        console.error('GraphQL getFriendRequests error:', error);
+        throw new Error('Failed to get friend requests');
+      }
+    },
+
+    areFriends: async (
+      _: unknown,
+      { userId1, userId2 }: { userId1: string; userId2: string }
+    ) => {
+      try {
+        return await areFriends(userId1, userId2);
+      } catch (error) {
+        console.error('GraphQL areFriends error:', error);
+        throw new Error('Failed to check friendship status');
+      }
+    },
+
+    getFriendship: async (
+      _: unknown,
+      { userId1, userId2 }: { userId1: string; userId2: string }
+    ) => {
+      try {
+        return await getFriendship(userId1, userId2);
+      } catch (error) {
+        console.error('GraphQL getFriendship error:', error);
+        throw new Error('Failed to get friendship');
+      }
+    },
   },
 
   Mutation: {
@@ -286,6 +352,55 @@ export const resolvers = {
       } catch (error) {
         console.error('GraphQL performRandomSelection error:', error);
         throw new Error('Failed to perform random selection');
+      }
+    },
+
+    // Friend Management Mutations
+    sendFriendRequest: async (
+      _: unknown,
+      { requesterId, addresseeId }: { requesterId: string; addresseeId: string }
+    ) => {
+      try {
+        return await sendFriendRequest(requesterId, addresseeId);
+      } catch (error) {
+        console.error('GraphQL sendFriendRequest error:', error);
+        throw new Error('Failed to send friend request');
+      }
+    },
+
+    acceptFriendRequest: async (
+      _: unknown,
+      { friendshipId, userId }: { friendshipId: string; userId: string }
+    ) => {
+      try {
+        return await acceptFriendRequest(friendshipId, userId);
+      } catch (error) {
+        console.error('GraphQL acceptFriendRequest error:', error);
+        throw new Error('Failed to accept friend request');
+      }
+    },
+
+    declineFriendRequest: async (
+      _: unknown,
+      { friendshipId, userId }: { friendshipId: string; userId: string }
+    ) => {
+      try {
+        return await declineFriendRequest(friendshipId, userId);
+      } catch (error) {
+        console.error('GraphQL declineFriendRequest error:', error);
+        throw new Error('Failed to decline friend request');
+      }
+    },
+
+    removeFriend: async (
+      _: unknown,
+      { friendshipId, userId }: { friendshipId: string; userId: string }
+    ) => {
+      try {
+        return await removeFriend(friendshipId, userId);
+      } catch (error) {
+        console.error('GraphQL removeFriend error:', error);
+        throw new Error('Failed to remove friend');
       }
     },
   },
