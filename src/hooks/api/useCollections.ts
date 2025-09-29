@@ -12,8 +12,15 @@ export const collectionKeys = {
 
 // API functions
 const fetchCollections = async (userId: string): Promise<Collection[]> => {
-  const response = await fetch(`/api/collections?userId=${userId}`);
+  console.log('fetchCollections called with userId:', userId);
+  const url = `/api/collections?userId=${userId}&type=personal`;
+  console.log('Fetching from URL:', url);
+
+  const response = await fetch(url);
   const data = await response.json();
+
+  console.log('API response status:', response.status);
+  console.log('API response data:', data);
 
   if (!response.ok) {
     throw new Error(data.error || 'Failed to fetch collections');

@@ -88,43 +88,94 @@ Notes: Love it
 
 ## 4. Group Decision Making
 
-### 4.1 Tiered Choice Decision
+### 4.1 Tiered Choice Decision (IMPLEMENTED ✅)
 
 1. **Group Collection** → Admin clicks "Start Decision" button
 2. **Decision Setup** → Admin sets:
-   - Decision deadline (default: 24 hours, max: 2 weeks)
-   - Restaurant visit date/time (when group will actually go)
-3. **Member Notification** → All members notified (SMS if opted-in)
-4. **Ranking Phase** → Each member ranks their top 3 choices
-5. **Voting Results** → System calculates majority winner
-6. **Tie Resolution** → If tie, members choose between tied options
-7. **Final Decision** → Winner announced with visit context, logged in group and individual histories
+   - Visit date/time (when group will actually go to restaurant)
+   - Decision method (Tiered Choice selected)
+   - Deadline (1-336 hours, default: 24 hours)
+3. **Real-time Notification** → All group members see decision appear instantly
+4. **Voting Interface** → Each member:
+   - Clicks "Vote" button to open ranking interface
+   - Drags and drops restaurants to rank their top 3 choices
+   - Submits vote with visual confirmation ("✓ You've Voted")
+   - Can re-vote until decision is closed
+5. **Live Updates** → All members see real-time vote counts and status
+6. **Decision Completion** → Admin clicks "Complete" when ready:
+   - System calculates weighted scores based on vote positions
+   - Selects restaurant with highest weighted score
+   - Shows selected restaurant with detailed info (address, phone, rating, price)
+   - Displays reasoning for selection
+7. **Result Display** → Completed decision shows for 24 hours after visit date
+8. **History Logging** → Decision logged in group and individual histories
 
-Notes: Love it. Though I realized on the make a decision flow, a user should also indicate when the restaurant choice will be. (There'll be two date/times - one when a decision will be made and when that group will be going to the restaurant)
+**Key Features Implemented**:
 
-### 4.2 Random Selection Decision
+- Real-time WebSocket updates for live collaboration
+- Drag-and-drop ranking interface with visual feedback
+- Weighted scoring algorithm (1st place = 3 points, 2nd = 2 points, 3rd = 1 point)
+- Vote status indicators and re-voting capability
+- Detailed restaurant information display
+- 24-hour visibility window for completed decisions
 
-1. **Group Collection** → Any admin clicks "Random Pick" button
-2. **Selection Options** → Admin chooses:
-   - All group collections
-   - Specific collection
-   - All personal collections
-3. **Decision Setup** → Admin sets:
-   - Restaurant visit date/time (when group will actually go)
-4. **Weighted Selection** → System applies 30-day rolling weights
-5. **Decision Result** → Selected restaurant shown to all members with visit context
-6. **History Update** → Decision logged in group and individual histories
+### 4.2 Random Selection Decision (IMPLEMENTED ✅)
 
-Notes: Love it. Admin can refer to any one in that group that is an admin, not just the one that started the decision.
+1. **Group Collection** → Admin clicks "Start Decision" button
+2. **Decision Setup** → Admin sets:
+   - Visit date/time (when group will actually go to restaurant)
+   - Decision method (Random Selection selected)
+   - Deadline (1-336 hours, default: 24 hours)
+3. **Immediate Selection** → System:
+   - Applies 30-day rolling weights to avoid recent selections
+   - Randomly selects restaurant based on weighted probabilities
+   - Shows selected restaurant with detailed information
+4. **Result Display** → All members see selected restaurant instantly
+5. **History Logging** → Decision logged in group and individual histories
 
-### 4.3 Decision Timeout Handling
+**Key Features Implemented**:
+
+- Weighted random selection with 30-day rolling system
+- Immediate decision result display
+- Restaurant details with address, phone, rating, price
+- Reasoning explanation for selection
+
+### 4.3 Decision Management (IMPLEMENTED ✅)
+
+1. **Admin Controls** → Group admins can:
+   - Start new decisions (tiered or random)
+   - Complete tiered decisions when votes are in
+   - Close decisions without completion
+   - View all decision statuses and vote counts
+2. **Member Participation** → All group members can:
+   - Vote on tiered decisions
+   - View decision results and restaurant details
+   - See vote status and participant counts
+3. **Real-time Updates** → All participants see:
+   - Live vote counts and participant status
+   - Real-time decision status changes
+   - Automatic UI updates when votes are submitted
+4. **Decision Visibility** → System shows:
+   - Active decisions with voting interface
+   - Recently completed decisions (24 hours after visit date)
+   - Closed decisions are hidden from main display
+
+**Key Features Implemented**:
+
+- Real-time WebSocket subscriptions for live updates
+- Fallback query system for connection reliability
+- Admin-only controls for decision management
+- Automatic participant deduplication
+- Connection error handling with graceful fallbacks
+
+### 4.4 Decision Timeout Handling (PLANNED)
 
 1. **Time Expires** → System checks if anyone has voted
 2. **No Votes** → Random selection from available restaurants
 3. **Partial Votes** → Continue with tiered choice logic using available votes
 4. **Notification** → All members notified of final decision
 
-Notes: Love it
+Notes: This feature is planned for future implementation
 
 ## 5. Restaurant Search & Discovery
 

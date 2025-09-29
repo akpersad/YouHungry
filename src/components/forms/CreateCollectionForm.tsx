@@ -6,22 +6,56 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Collection } from '@/types/database';
 import { useCreateCollection } from '@/hooks/api';
+import { useMutation } from '@tanstack/react-query';
 
 interface CreateCollectionFormProps {
   onSuccess: (collection: Collection) => void;
   onCancel: () => void;
+  groupId?: string; // Optional group ID for group collections
 }
 
 function CreateCollectionForm({
   onSuccess,
   onCancel,
+  groupId,
 }: CreateCollectionFormProps) {
   const { user } = useUser();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [error, setError] = useState('');
 
+  // Only use the hook for personal collections (when groupId is not provided)
   const createCollectionMutation = useCreateCollection();
+
+  // Custom mutation for group collections
+  const createGroupCollectionMutation = useMutation({
+    mutationFn: async (data: {
+      name: string;
+      description?: string;
+      groupId: string;
+    }) => {
+      const response = await fetch('/api/collections', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: data.name,
+          description: data.description,
+          type: 'group',
+          groupId: data.groupId,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create group collection');
+      }
+
+      const result = await response.json();
+      return result.collection;
+    },
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,11 +73,23 @@ function CreateCollectionForm({
     setError('');
 
     try {
-      const newCollection = await createCollectionMutation.mutateAsync({
-        name: name.trim(),
-        description: description.trim() || undefined,
-        userId: user.id,
-      });
+      let newCollection: Collection;
+
+      if (groupId) {
+        // Create group collection using the custom mutation
+        newCollection = await createGroupCollectionMutation.mutateAsync({
+          name: name.trim(),
+          description: description.trim() || undefined,
+          groupId: groupId,
+        });
+      } else {
+        // Create personal collection using the hook
+        newCollection = await createCollectionMutation.mutateAsync({
+          name: name.trim(),
+          description: description.trim() || undefined,
+          userId: user.id,
+        });
+      }
 
       onSuccess(newCollection);
       setName('');
@@ -106,9 +152,14 @@ function CreateCollectionForm({
         </Button>
         <Button
           type="submit"
-          disabled={createCollectionMutation.isPending || !name.trim()}
+          disabled={
+            createCollectionMutation.isPending ||
+            createGroupCollectionMutation.isPending ||
+            !name.trim()
+          }
         >
-          {createCollectionMutation.isPending
+          {createCollectionMutation.isPending ||
+          createGroupCollectionMutation.isPending
             ? 'Creating...'
             : 'Create Collection'}
         </Button>

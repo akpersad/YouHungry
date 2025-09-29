@@ -8,9 +8,10 @@ import { TestQueryProvider } from '@/test-utils/testQueryClient';
 jest.mock('@/hooks/api', () => ({
   useCollection: jest.fn(),
   useRandomDecision: jest.fn(),
+  useGroup: jest.fn(),
 }));
 
-import { useCollection, useRandomDecision } from '@/hooks/api';
+import { useCollection, useRandomDecision, useGroup } from '@/hooks/api';
 
 const mockUseCollection = useCollection as jest.MockedFunction<
   typeof useCollection
@@ -18,6 +19,7 @@ const mockUseCollection = useCollection as jest.MockedFunction<
 const mockUseRandomDecision = useRandomDecision as jest.MockedFunction<
   typeof useRandomDecision
 >;
+const mockUseGroup = useGroup as jest.MockedFunction<typeof useGroup>;
 
 // Mock Next.js router
 const mockPush = jest.fn();
@@ -269,6 +271,12 @@ describe('CollectionView', () => {
       isPending: false,
       error: null,
     });
+
+    mockUseGroup.mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      error: null,
+    });
   });
 
   it('renders loading state initially', () => {
@@ -447,15 +455,6 @@ describe('CollectionView', () => {
       refetch: jest.fn(),
     });
 
-    // Mock the restaurant fetch that happens after decision
-    (fetch as jest.Mock).mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({
-        success: true,
-        restaurant: mockRestaurants[0],
-      }),
-    });
-
     mockUseRandomDecision.mockReturnValue({
       mutateAsync: jest.fn().mockResolvedValue({
         result: {
@@ -482,6 +481,16 @@ describe('CollectionView', () => {
     await waitFor(() => {
       expect(screen.getByText('My Test Collection')).toBeInTheDocument();
     });
+
+    // Set up fetch mock right before clicking the button
+    (fetch as jest.Mock).mockImplementationOnce(() =>
+      Promise.resolve({
+        ok: true,
+        json: async () => ({
+          restaurant: mockRestaurants[0],
+        }),
+      })
+    );
 
     const decideButton = screen.getByText('Decide for Me');
     fireEvent.click(decideButton);

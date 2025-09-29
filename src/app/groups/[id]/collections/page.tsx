@@ -10,7 +10,7 @@ import { Collection } from '@/types/database';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { useGroup } from '@/hooks/api/useGroups';
-import { useCollections } from '@/hooks/api/useCollections';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
@@ -24,6 +24,7 @@ export default function GroupCollectionsPage({
 }: GroupCollectionsPageProps) {
   const { userId } = useAuth();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { id: groupId } = use(params);
   const [showCreateForm, setShowCreateForm] = useState(false);
 
@@ -32,21 +33,28 @@ export default function GroupCollectionsPage({
     isLoading: groupLoading,
     error: groupError,
   } = useGroup(groupId);
+  // Fetch group collections specifically
   const {
-    data: collectionsData,
+    data: groupCollections,
     isLoading: collectionsLoading,
     error: collectionsError,
-  } = useCollections(userId || '');
-
-  // Filter collections for this specific group
-  const groupCollections =
-    collectionsData?.filter(
-      (collection: Collection) => collection.ownerId.toString() === groupId
-    ) || [];
-
-  // const isCurrentUserAdmin = groupData?.adminIds.some(
-  //   (adminId) => adminId.toString() === userId
-  // );
+  } = useQuery({
+    queryKey: ['groupCollections', groupId],
+    queryFn: async (): Promise<Collection[]> => {
+      const response = await fetch(
+        `/api/collections?type=group&userId=${userId}`
+      );
+      if (!response.ok) {
+        throw new Error('Failed to fetch group collections');
+      }
+      const data = await response.json();
+      // Filter collections for this specific group
+      return data.collections.filter(
+        (collection: Collection) => collection.ownerId.toString() === groupId
+      );
+    },
+    enabled: !!userId && !!groupId,
+  });
 
   if (groupLoading) {
     return (
@@ -138,21 +146,29 @@ export default function GroupCollectionsPage({
               </div>
             </Card>
           ) : (
-            <CollectionList
-              collections={groupCollections}
-              isLoading={collectionsLoading}
-              onCreateCollection={() => setShowCreateForm(true)}
-              showType={false} // Don't show type since all are group collections
-            />
+            <div className="space-y-6">
+              <CollectionList
+                collections={groupCollections}
+                isLoading={collectionsLoading}
+                onCreateCollection={() => setShowCreateForm(true)}
+                showType={false} // Don't show type since all are group collections
+                // Remove onCollectionSelect so View button navigates to collection detail page
+              />
+
+              {/* Group Decision Making can be accessed from individual collection pages */}
+            </div>
           )}
 
           {showCreateForm && (
             <CreateCollectionForm
+              groupId={groupId}
               onSuccess={() => {
                 toast.success('Collection created successfully!');
                 setShowCreateForm(false);
-                // Refresh collections
-                window.location.reload();
+                // Invalidate the group collections cache to refresh the data
+                queryClient.invalidateQueries({
+                  queryKey: ['groupCollections', groupId],
+                });
               }}
               onCancel={() => setShowCreateForm(false)}
             />

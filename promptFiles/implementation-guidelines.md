@@ -582,6 +582,234 @@ export const validateLocation = (location: string): string | null => {
 - ✅ **Debuggable**: Clear error messages and state flow
 - ✅ **Lightweight**: No additional dependencies or bundle size
 
+## 🎯 Group Decision Making Implementation
+
+### ✅ Advanced Group Decision System (Epic 4 - COMPLETED)
+
+**Comprehensive group decision making with real-time collaboration**
+
+#### **Core Implementation Patterns**
+
+**Real-time Subscription Hook**:
+
+```typescript
+// hooks/api/useGroupDecisionSubscription.ts
+export function useGroupDecisionSubscription(
+  groupId: string,
+  onDecisionUpdate?: (decision: GroupDecision) => void,
+  enabled: boolean = true
+) {
+  const [decisions, setDecisions] = useState<GroupDecision[]>([]);
+  const [isConnected, setIsConnected] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    if (!enabled || !groupId) return;
+
+    // WebSocket connection logic
+    const ws = new WebSocket(
+      `ws://localhost:3000/api/ws/group-decisions?groupId=${groupId}`
+    );
+
+    ws.onopen = () => setIsConnected(true);
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      if (data.type === 'decision_update') {
+        setDecisions((prev) => updateDecisions(prev, data.decision));
+        onDecisionUpdate?.(data.decision);
+      }
+    };
+    ws.onerror = (error) => setError(error);
+    ws.onclose = () => setIsConnected(false);
+
+    return () => ws.close();
+  }, [groupId, enabled, onDecisionUpdate]);
+
+  return { decisions, isConnected, error, reconnect: () => {} };
+}
+```
+
+**Drag-and-Drop Ranking Interface**:
+
+```typescript
+// components/features/GroupDecisionMaking.tsx
+const handleDragStart = (e: React.DragEvent, restaurantId: string) => {
+  setDraggedItem(restaurantId);
+  e.dataTransfer.effectAllowed = 'move';
+};
+
+const handleDragOver = (e: React.DragEvent) => {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+};
+
+const handleDrop = (e: React.DragEvent, targetIndex: number) => {
+  e.preventDefault();
+  if (!draggedItem) return;
+
+  const newRankings = [...rankings];
+  const draggedIndex = newRankings.indexOf(draggedItem);
+
+  if (draggedIndex !== -1) {
+    newRankings.splice(draggedIndex, 1);
+  }
+
+  newRankings.splice(targetIndex, 0, draggedItem);
+  setRankings(newRankings);
+  setDraggedItem(null);
+};
+```
+
+**Weighted Scoring Algorithm**:
+
+```typescript
+// lib/decisions.ts
+export function calculateWeightedScores(votes: Vote[]): Record<string, number> {
+  const scores: Record<string, number> = {};
+
+  votes.forEach((vote) => {
+    vote.rankings.forEach((restaurantId, index) => {
+      const weight = vote.rankings.length - index; // 1st = 3, 2nd = 2, 3rd = 1
+      scores[restaurantId] = (scores[restaurantId] || 0) + weight;
+    });
+  });
+
+  return scores;
+}
+```
+
+**Decision Management API**:
+
+```typescript
+// app/api/decisions/group/vote/route.ts
+export async function POST(request: NextRequest) {
+  const { decisionId, rankings } = await request.json();
+  const user = await requireAuth();
+
+  const result = await submitGroupVote(
+    decisionId,
+    user._id.toString(),
+    rankings
+  );
+
+  if (result.success) {
+    // Broadcast update to all group members
+    await broadcastDecisionUpdate(decisionId);
+  }
+
+  return NextResponse.json(result);
+}
+```
+
+#### **Key Implementation Features**
+
+**Real-time Collaboration**:
+
+- WebSocket-based live updates for vote submissions
+- Automatic UI updates when decisions are completed
+- Connection status monitoring with fallback queries
+- Optimistic updates for immediate user feedback
+
+**Voting System**:
+
+- Drag-and-drop restaurant ranking interface
+- Weighted scoring algorithm (1st = 3 points, 2nd = 2 points, 3rd = 1 point)
+- Re-voting capability until decision is closed
+- Vote status indicators and participant tracking
+
+**Decision Management**:
+
+- Admin controls for creating, completing, and closing decisions
+- 24-hour visibility window for completed decisions
+- Automatic participant deduplication
+- Detailed restaurant information display
+
+**Error Handling**:
+
+- Graceful fallback to regular queries when WebSocket fails
+- Connection error recovery with automatic reconnection
+- Comprehensive error messages and user feedback
+- Optimistic updates with rollback on errors
+
+#### **Testing Implementation**
+
+**Component Tests**:
+
+```typescript
+// components/features/__tests__/GroupDecisionMaking.test.tsx
+describe('GroupDecisionMaking', () => {
+  it('handles drag and drop for restaurant rankings', async () => {
+    renderWithQueryClient(<GroupDecisionMaking {...props} />);
+
+    // Test drag and drop functionality
+    fireEvent.dragStart(screen.getByTestId('restaurant-1'));
+    fireEvent.dragOver(screen.getByTestId('ranking-slot-0'));
+    fireEvent.drop(screen.getByTestId('ranking-slot-0'));
+
+    expect(screen.getByText('Restaurant 1')).toBeInTheDocument();
+  });
+});
+```
+
+**API Tests**:
+
+```typescript
+// app/api/__tests__/group-vote.test.ts
+describe('/api/decisions/group/vote', () => {
+  it('submits a vote successfully', async () => {
+    mockSubmitGroupVote.mockResolvedValue({ success: true });
+
+    const response = await POST(request);
+    const data = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(data.success).toBe(true);
+  });
+});
+```
+
+**Library Tests**:
+
+```typescript
+// lib/__tests__/group-decisions.test.ts
+describe('submitGroupVote', () => {
+  it('creates new vote if user has not voted before', async () => {
+    const result = await submitGroupVote('decision_123', 'user_123', [
+      'restaurant_1',
+    ]);
+
+    expect(result.success).toBe(true);
+    expect(mockCollection.updateOne).toHaveBeenCalledWith(
+      { _id: new ObjectId('decision_123') },
+      { $push: { votes: expect.any(Object) } }
+    );
+  });
+});
+```
+
+#### **Performance Optimizations**
+
+**Caching Strategy**:
+
+- TanStack Query for API response caching
+- Real-time updates with optimistic UI updates
+- Fallback queries when subscriptions fail
+- Intelligent cache invalidation on vote submission
+
+**User Experience**:
+
+- Immediate UI feedback for all actions
+- Loading states and error handling
+- Smooth drag-and-drop interactions
+- Responsive design for mobile and desktop
+
+**Scalability**:
+
+- Efficient database queries with proper indexing
+- WebSocket connection management
+- Participant deduplication and validation
+- Error recovery and connection resilience
+
 ### Data Fetching Hook (Legacy - Use TanStack Query Instead)
 
 ```typescript

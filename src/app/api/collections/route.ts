@@ -17,21 +17,28 @@ export async function GET(request: NextRequest) {
     const user = await requireAuth();
     const { searchParams } = new URL(request.url);
     const type = searchParams.get('type'); // 'personal', 'group', or 'all'
+    const userId = searchParams.get('userId'); // Optional: for frontend calls
 
     let collections;
     let count;
 
     if (type === 'personal') {
-      collections = await getCollectionsByUserId(user._id.toString());
+      // Use the provided userId (Clerk ID) if available, otherwise use the authenticated user's ID
+      const targetUserId = userId || user._id.toString();
+      console.log('Fetching personal collections for user:', targetUserId);
+      collections = await getCollectionsByUserId(targetUserId);
+      console.log('Found personal collections:', collections);
       count = collections.length;
     } else if (type === 'group') {
       collections = await getGroupCollectionsByUserId(user._id.toString());
       count = collections.length;
     } else {
       // Default to 'all' - return both personal and group collections
-      const allCollections = await getAllCollectionsByUserId(
-        user._id.toString()
-      );
+      // Use the same userId logic as personal collections
+      const targetUserId = userId || user._id.toString();
+      console.log('Fetching all collections for user:', targetUserId);
+      const allCollections = await getAllCollectionsByUserId(targetUserId);
+      console.log('Found all collections:', allCollections);
       collections = {
         personal: allCollections.personal,
         group: allCollections.group,

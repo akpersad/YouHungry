@@ -1,30 +1,73 @@
 import { connectToDatabase } from './db';
 import { Collection, Restaurant } from '@/types/database';
 import { ObjectId } from 'mongodb';
+import { getUserByClerkId } from './users';
 
 export async function getCollectionsByUserId(
   userId: string
 ): Promise<Collection[]> {
   const db = await connectToDatabase();
 
-  // Handle both ObjectId and string userId formats
+  console.log('getCollectionsByUserId called with userId:', userId);
+
   let ownerId;
-  try {
-    ownerId = new ObjectId(userId);
-  } catch {
-    // If userId is not a valid ObjectId, treat it as a string
-    ownerId = userId;
+
+  // First, try to find the user by Clerk ID
+  console.log('Looking up user by Clerk ID:', userId);
+  const user = await getUserByClerkId(userId);
+  if (user) {
+    // Found user by Clerk ID, use their database ID
+    ownerId = user._id;
+    console.log('✅ Found user by Clerk ID, using database ID:', ownerId);
+  } else {
+    console.log('❌ User not found by Clerk ID, trying as database ID');
+    // Try to use userId as database ID directly
+    try {
+      ownerId = new ObjectId(userId);
+      console.log('Using userId as ObjectId:', ownerId);
+    } catch {
+      // If userId is not a valid ObjectId, treat it as a string
+      ownerId = userId;
+      console.log('Using userId as string:', ownerId);
+    }
   }
 
-  const collections = await db
+  // First try with database ID
+  let query = {
+    ownerId: ownerId,
+    type: 'personal',
+  };
+  console.log('Querying collections with database ID:', query);
+
+  let collections = await db
     .collection('collections')
-    .find({
-      ownerId: ownerId,
-      type: 'personal',
-    })
+    .find(query)
     .sort({ createdAt: -1 })
     .toArray();
 
+  console.log('Found collections with database ID:', collections);
+
+  // If no collections found and we have a user, also try with Clerk ID
+  if (collections.length === 0 && user) {
+    query = {
+      ownerId: userId, // Use the original Clerk ID
+      type: 'personal',
+    };
+    console.log(
+      'No collections found with database ID, trying with Clerk ID:',
+      query
+    );
+
+    collections = await db
+      .collection('collections')
+      .find(query)
+      .sort({ createdAt: -1 })
+      .toArray();
+
+    console.log('Found collections with Clerk ID:', collections);
+  }
+
+  console.log('Final collections result:', collections);
   return collections as Collection[];
 }
 
@@ -33,24 +76,47 @@ export async function getGroupCollectionsByUserId(
 ): Promise<Collection[]> {
   const db = await connectToDatabase();
 
-  // Handle both ObjectId and string userId formats
+  console.log('getGroupCollectionsByUserId called with userId:', userId);
+
   let userIdObj;
-  try {
-    userIdObj = new ObjectId(userId);
-  } catch {
-    // If userId is not a valid ObjectId, treat it as a string
-    userIdObj = userId;
+
+  // First, try to find the user by Clerk ID
+  console.log('Looking up user by Clerk ID for group collections:', userId);
+  const user = await getUserByClerkId(userId);
+  if (user) {
+    // Found user by Clerk ID, use their database ID
+    userIdObj = user._id;
+    console.log(
+      '✅ Found user by Clerk ID for group collections, using database ID:',
+      userIdObj
+    );
+  } else {
+    console.log(
+      '❌ User not found by Clerk ID for group collections, trying as database ID'
+    );
+    // Try to use userId as database ID directly
+    try {
+      userIdObj = new ObjectId(userId);
+      console.log('Using userId as ObjectId for group collections:', userIdObj);
+    } catch {
+      // If userId is not a valid ObjectId, treat it as a string
+      userIdObj = userId;
+      console.log('Using userId as string for group collections:', userIdObj);
+    }
   }
 
   // Find all groups where the user is a member
-  const groups = await db
-    .collection('groups')
-    .find({
-      $or: [{ adminIds: userIdObj }, { memberIds: userIdObj }],
-    })
-    .toArray();
+  const groupQuery = {
+    $or: [{ adminIds: userIdObj }, { memberIds: userIdObj }],
+  };
+  console.log('Querying groups with:', groupQuery);
+
+  const groups = await db.collection('groups').find(groupQuery).toArray();
+
+  console.log('Found groups:', groups);
 
   if (groups.length === 0) {
+    console.log('No groups found, returning empty array');
     return [];
   }
 

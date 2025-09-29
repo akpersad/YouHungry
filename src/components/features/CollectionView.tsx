@@ -2,8 +2,10 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useUser } from '@clerk/nextjs';
 import { Restaurant } from '@/types/database';
-import { useCollection, useRandomDecision } from '@/hooks/api';
+import { useCollection, useRandomDecision, useGroup } from '@/hooks/api';
+import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
@@ -13,6 +15,7 @@ import { RestaurantManagementModal } from './RestaurantManagementModal';
 import { RestaurantDetailsView } from './RestaurantDetailsView';
 import { DecisionResultModal } from './DecisionResultModal';
 import { DecisionStatistics } from './DecisionStatistics';
+import { GroupDecisionMaking } from './GroupDecisionMaking';
 
 interface CollectionViewProps {
   collectionId: string;
@@ -20,6 +23,7 @@ interface CollectionViewProps {
 
 export function CollectionView({ collectionId }: CollectionViewProps) {
   const router = useRouter();
+  const { user } = useUser();
   const [showAddRestaurant, setShowAddRestaurant] = useState(false);
   const [selectedRestaurant, setSelectedRestaurant] =
     useState<Restaurant | null>(null);
@@ -42,7 +46,42 @@ export function CollectionView({ collectionId }: CollectionViewProps) {
     refetch,
   } = useCollection(collectionId);
 
+  // Get group data if this is a group collection
+  const { data: groupData, isLoading: groupLoading } = useGroup(
+    collection?.type === 'group' ? collection.ownerId.toString() : ''
+  );
+
   const randomDecisionMutation = useRandomDecision();
+
+  // Get current user's database ID for admin check
+  const { data: currentUserData } = useQuery({
+    queryKey: ['currentUser', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      const response = await fetch(`/api/user/current`);
+      if (!response.ok) return null;
+      const data = await response.json();
+      return data.user;
+    },
+    enabled: !!user?.id,
+  });
+
+  // Check if current user is admin of the group
+  const isCurrentUserAdmin =
+    groupData?.adminIds?.some(
+      (adminId) => adminId.toString() === currentUserData?._id?.toString()
+    ) || false;
+
+  // Debug logging
+  console.log('Collection type:', collection?.type);
+  console.log('Group data:', groupData);
+  console.log('Current user ID (Clerk):', user?.id);
+  console.log('Current user data (DB):', currentUserData);
+  console.log(
+    'Admin IDs:',
+    groupData?.adminIds?.map((id) => id.toString())
+  );
+  console.log('Is current user admin:', isCurrentUserAdmin);
 
   const handleRestaurantAdded = () => {
     // TanStack Query will automatically refetch the collection data
@@ -280,6 +319,31 @@ export function CollectionView({ collectionId }: CollectionViewProps) {
                 ? 'Making Decision...'
                 : 'Decide for Me'}
             </Button>
+            {collection.type === 'group' && isCurrentUserAdmin && (
+              <Button
+                onClick={() => {
+                  // Scroll to group decision section and trigger start decision
+                  const groupDecisionSection = document.getElementById(
+                    'group-decision-section'
+                  );
+                  if (groupDecisionSection) {
+                    groupDecisionSection.scrollIntoView({ behavior: 'smooth' });
+                    // Trigger the start decision modal
+                    setTimeout(() => {
+                      const startButton = groupDecisionSection.querySelector(
+                        '[data-start-decision]'
+                      ) as HTMLButtonElement;
+                      if (startButton) {
+                        startButton.click();
+                      }
+                    }, 500);
+                  }
+                }}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                Start Group Decision
+              </Button>
+            )}
             <Button onClick={() => setIsStatisticsOpen(true)} variant="outline">
               View Statistics
             </Button>
@@ -320,6 +384,17 @@ export function CollectionView({ collectionId }: CollectionViewProps) {
         onViewDetails={handleViewDetails}
         onManageRestaurant={handleManageRestaurant}
       />
+
+      {/* Group Decision Making - Only show for group collections */}
+      {collection.type === 'group' && !groupLoading && (
+        <div id="group-decision-section" className="mt-8">
+          <GroupDecisionMaking
+            groupId={collection.ownerId.toString()}
+            collectionId={collectionId}
+            isAdmin={isCurrentUserAdmin}
+          />
+        </div>
+      )}
 
       {/* Add Restaurant Modal */}
       <Modal

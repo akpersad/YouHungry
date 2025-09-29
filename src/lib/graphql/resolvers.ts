@@ -16,6 +16,12 @@ import {
   performRandomSelection,
   getDecisionHistory,
   getDecisionStatistics,
+  createGroupDecision,
+  submitGroupVote,
+  completeTieredGroupDecision,
+  performGroupRandomSelection,
+  getGroupDecision,
+  getActiveGroupDecisions,
 } from '../decisions';
 import {
   searchUsers,
@@ -312,6 +318,28 @@ export const resolvers = {
         throw new Error('Failed to get group members');
       }
     },
+
+    // Group Decision Queries
+    getGroupDecisions: async (_: unknown, { groupId }: { groupId: string }) => {
+      try {
+        return await getActiveGroupDecisions(groupId);
+      } catch (error) {
+        console.error('GraphQL getGroupDecisions error:', error);
+        throw new Error('Failed to get group decisions');
+      }
+    },
+
+    getGroupDecision: async (
+      _: unknown,
+      { decisionId }: { decisionId: string }
+    ) => {
+      try {
+        return await getGroupDecision(decisionId);
+      } catch (error) {
+        console.error('GraphQL getGroupDecision error:', error);
+        throw new Error('Failed to get group decision');
+      }
+    },
   },
 
   Mutation: {
@@ -415,6 +443,97 @@ export const resolvers = {
       } catch (error) {
         console.error('GraphQL performRandomSelection error:', error);
         throw new Error('Failed to perform random selection');
+      }
+    },
+
+    // Group Decision Mutations
+    createGroupDecision: async (
+      _: unknown,
+      {
+        input,
+      }: {
+        input: {
+          collectionId: string;
+          groupId: string;
+          method: string;
+          visitDate: Date;
+          deadlineHours?: number;
+        };
+      }
+    ) => {
+      try {
+        // For GraphQL, we need to get the current user ID
+        // This would typically come from the context
+        const userId = 'current-user-id'; // This should be injected from context
+        return await createGroupDecision(
+          input.collectionId,
+          input.groupId,
+          [userId], // TODO: Get actual group members
+          input.method as 'random' | 'tiered',
+          input.visitDate,
+          input.deadlineHours || 24
+        );
+      } catch (error) {
+        console.error('GraphQL createGroupDecision error:', error);
+        throw new Error('Failed to create group decision');
+      }
+    },
+
+    submitGroupVote: async (
+      _: unknown,
+      { decisionId, rankings }: { decisionId: string; rankings: string[] }
+    ) => {
+      try {
+        const userId = 'current-user-id'; // This should be injected from context
+        const result = await submitGroupVote(decisionId, userId, rankings);
+        return result.success;
+      } catch (error) {
+        console.error('GraphQL submitGroupVote error:', error);
+        throw new Error('Failed to submit vote');
+      }
+    },
+
+    completeTieredGroupDecision: async (
+      _: unknown,
+      { decisionId }: { decisionId: string }
+    ) => {
+      try {
+        const result = await completeTieredGroupDecision(decisionId);
+        return {
+          restaurantId: result.restaurantId.toString(),
+          selectedAt: result.selectedAt,
+          reasoning: result.reasoning,
+          weights: JSON.stringify(result.weights),
+        };
+      } catch (error) {
+        console.error('GraphQL completeTieredGroupDecision error:', error);
+        throw new Error('Failed to complete decision');
+      }
+    },
+
+    performGroupRandomSelection: async (
+      _: unknown,
+      {
+        input,
+      }: { input: { collectionId: string; groupId: string; visitDate: Date } }
+    ) => {
+      try {
+        const userId = 'current-user-id'; // This should be injected from context
+        const result = await performGroupRandomSelection(
+          input.collectionId,
+          input.groupId,
+          [userId], // TODO: Get actual group members
+          input.visitDate
+        );
+        return {
+          restaurantId: result.restaurantId.toString(),
+          selectedAt: result.selectedAt,
+          reasoning: result.reasoning,
+          weights: JSON.stringify(result.weights),
+        };
+      } catch (error) {
+        console.error('GraphQL performGroupRandomSelection error:', error);
+        throw new Error('Failed to perform group random selection');
       }
     },
 

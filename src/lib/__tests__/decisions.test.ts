@@ -362,7 +362,7 @@ describe('Decision System', () => {
       });
 
       expect(Object.keys(result.weights)).toHaveLength(2);
-      expect(mockDecisionsCollection.updateOne).toHaveBeenCalled();
+      expect(mockDecisionsCollection.insertOne).toHaveBeenCalled();
     });
 
     it('should throw error if collection not found', async () => {
