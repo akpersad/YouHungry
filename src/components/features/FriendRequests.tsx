@@ -6,7 +6,7 @@ import {
 } from '@/hooks/api/useFriends';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
-import UserAvatar from '@/components/ui/UserAvatar';
+import { UserAvatar } from '@/components/ui/UserAvatar';
 
 interface FriendRequestsProps {
   userId: string;

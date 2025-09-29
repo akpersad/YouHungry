@@ -168,6 +168,29 @@ export const typeDefs = gql`
     updatedAt: Date!
   }
 
+  # Group Management Types
+  type Group {
+    _id: ID!
+    name: String!
+    description: String
+    adminIds: [ID!]!
+    memberIds: [ID!]!
+    collectionIds: [ID!]!
+    members: [User!]!
+    createdAt: Date!
+    updatedAt: Date!
+  }
+
+  type GroupMember {
+    _id: ID!
+    clerkId: String!
+    email: String!
+    name: String!
+    profilePicture: String
+    city: String
+    isAdmin: Boolean!
+  }
+
   type Query {
     # Search restaurants with text query
     searchRestaurants(
@@ -214,6 +237,16 @@ export const typeDefs = gql`
 
     # Get friendship between two users
     getFriendship(userId1: ID!, userId2: ID!): Friendship
+
+    # Group Management Queries
+    # Get all groups for a user
+    getGroups(userId: ID!): [Group!]!
+
+    # Get group by ID with members
+    getGroup(groupId: ID!): Group
+
+    # Get group members
+    getGroupMembers(groupId: ID!): [GroupMember!]!
   }
 
   input CreateDecisionInput {
@@ -225,6 +258,21 @@ export const typeDefs = gql`
   input RandomSelectInput {
     collectionId: ID!
     visitDate: Date!
+  }
+
+  input CreateGroupInput {
+    name: String!
+    description: String
+  }
+
+  input UpdateGroupInput {
+    name: String
+    description: String
+  }
+
+  input GroupInviteInput {
+    groupId: ID!
+    email: String!
   }
 
   type Mutation {
@@ -260,6 +308,28 @@ export const typeDefs = gql`
 
     # Remove a friend
     removeFriend(friendshipId: ID!, userId: ID!): Boolean!
+
+    # Group Management Mutations
+    # Create a new group
+    createGroup(input: CreateGroupInput!, userId: ID!): Group!
+
+    # Update a group
+    updateGroup(groupId: ID!, input: UpdateGroupInput!, userId: ID!): Group!
+
+    # Delete a group
+    deleteGroup(groupId: ID!, userId: ID!): Boolean!
+
+    # Invite user to group
+    inviteUserToGroup(input: GroupInviteInput!, userId: ID!): Boolean!
+
+    # Remove user from group
+    removeUserFromGroup(groupId: ID!, email: String!, userId: ID!): Boolean!
+
+    # Promote user to admin
+    promoteToAdmin(groupId: ID!, email: String!, userId: ID!): Boolean!
+
+    # Leave group
+    leaveGroup(groupId: ID!, userId: ID!): Boolean!
   }
 `;
 

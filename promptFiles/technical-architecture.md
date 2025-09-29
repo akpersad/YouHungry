@@ -314,8 +314,8 @@ type Decision {
 
 ##### Collections Routes (CRUD Operations)
 
-- `GET /api/collections` - Get user's collections
-- `POST /api/collections` - Create new collection
+- `GET /api/collections` - Get user's collections (supports ?type=personal|group|all)
+- `POST /api/collections` - Create new collection (supports personal and group collections)
 - `PUT /api/collections/[id]` - Update collection
 - `DELETE /api/collections/[id]` - Delete collection
 
@@ -334,10 +334,13 @@ type Decision {
 
 - `GET /api/groups` - Get user's groups
 - `POST /api/groups` - Create group
-- `PUT /api/groups/[id]` - Update group
-- `DELETE /api/groups/[id]` - Delete group
-- `POST /api/groups/[id]/invite` - Invite user to group
-- `POST /api/groups/[id]/join` - Join group
+- `GET /api/groups/[id]` - Get group details with members
+- `PUT /api/groups/[id]` - Update group (admin only)
+- `DELETE /api/groups/[id]` - Delete group (admin only)
+- `POST /api/groups/[id]/invite` - Invite user to group (admin only)
+- `POST /api/groups/[id]/remove` - Remove user from group (admin only)
+- `POST /api/groups/[id]/promote` - Promote user to admin (admin only)
+- `POST /api/groups/[id]/leave` - Leave group
 
 ##### Decisions Routes (Simple Operations)
 
@@ -736,6 +739,23 @@ The following environment variables are configured and ready for use:
 - **API Organization**: RESTful API design
 - **Database Organization**: Normalized schema design
 - **File Organization**: Clear file structure
+
+### User ID Handling & Authentication
+
+**Issue Resolved**: The app initially had a mismatch between Clerk user IDs (strings) and MongoDB ObjectIds, causing admin checks and user comparisons to fail.
+
+**Solution Implemented**:
+
+- Created `/api/user/current` endpoint that returns the current user's MongoDB ObjectId
+- Updated group pages to fetch the current user's MongoDB ID using `useEffect` and state
+- Modified `GroupView` component to receive MongoDB ObjectId instead of Clerk ID
+- This ensures proper admin checks and member comparisons throughout the app
+
+**Key Files**:
+
+- `src/app/api/user/current/route.ts` - Returns current user's MongoDB ID
+- `src/app/groups/[id]/page.tsx` - Fetches and passes MongoDB ID to GroupView
+- `src/components/features/GroupView.tsx` - Uses MongoDB ID for admin/member checks
 
 ### Future Considerations
 

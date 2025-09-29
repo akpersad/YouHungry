@@ -28,6 +28,60 @@ export async function getCollectionsByUserId(
   return collections as Collection[];
 }
 
+export async function getGroupCollectionsByUserId(
+  userId: string
+): Promise<Collection[]> {
+  const db = await connectToDatabase();
+
+  // Handle both ObjectId and string userId formats
+  let userIdObj;
+  try {
+    userIdObj = new ObjectId(userId);
+  } catch {
+    // If userId is not a valid ObjectId, treat it as a string
+    userIdObj = userId;
+  }
+
+  // Find all groups where the user is a member
+  const groups = await db
+    .collection('groups')
+    .find({
+      $or: [{ adminIds: userIdObj }, { memberIds: userIdObj }],
+    })
+    .toArray();
+
+  if (groups.length === 0) {
+    return [];
+  }
+
+  // Get all group collections
+  const groupIds = groups.map((group) => group._id);
+  const collections = await db
+    .collection('collections')
+    .find({
+      ownerId: { $in: groupIds },
+      type: 'group',
+    })
+    .sort({ createdAt: -1 })
+    .toArray();
+
+  return collections as Collection[];
+}
+
+export async function getAllCollectionsByUserId(
+  userId: string
+): Promise<{ personal: Collection[]; group: Collection[] }> {
+  const [personalCollections, groupCollections] = await Promise.all([
+    getCollectionsByUserId(userId),
+    getGroupCollectionsByUserId(userId),
+  ]);
+
+  return {
+    personal: personalCollections,
+    group: groupCollections,
+  };
+}
+
 export async function getCollectionById(
   id: string
 ): Promise<Collection | null> {
@@ -63,7 +117,116 @@ export async function createCollection(
   };
 
   const result = await db.collection('collections').insertOne(collection);
+
+  // If this is a group collection, update the group's collectionIds
+  if (collectionData.type === 'group') {
+    await db.collection('groups').updateOne(
+      { _id: ownerId },
+      {
+        $addToSet: { collectionIds: result.insertedId },
+        $set: { updatedAt: now },
+      }
+    );
+  }
+
   return { ...collection, _id: result.insertedId } as Collection;
+}
+
+export async function createGroupCollection(
+  groupId: string,
+  name: string,
+  description: string | undefined,
+  userId: string
+): Promise<Collection> {
+  const db = await connectToDatabase();
+
+  // Verify user is a member of the group
+  const group = await db.collection('groups').findOne({
+    _id: new ObjectId(groupId),
+    $or: [
+      { adminIds: new ObjectId(userId) },
+      { memberIds: new ObjectId(userId) },
+    ],
+  });
+
+  if (!group) {
+    throw new Error('Group not found or user is not a member');
+  }
+
+  return createCollection({
+    name: name.trim(),
+    description: description?.trim() || undefined,
+    type: 'group',
+    ownerId: new ObjectId(groupId),
+    restaurantIds: [],
+  });
+}
+
+export async function canUserAccessCollection(
+  collectionId: string,
+  userId: string
+): Promise<boolean> {
+  const db = await connectToDatabase();
+
+  const collection = await db.collection('collections').findOne({
+    _id: new ObjectId(collectionId),
+  });
+
+  if (!collection) {
+    return false;
+  }
+
+  // Personal collections - user must be the owner
+  if (collection.type === 'personal') {
+    return collection.ownerId.toString() === userId;
+  }
+
+  // Group collections - user must be a member of the group
+  if (collection.type === 'group') {
+    const group = await db.collection('groups').findOne({
+      _id: collection.ownerId,
+      $or: [
+        { adminIds: new ObjectId(userId) },
+        { memberIds: new ObjectId(userId) },
+      ],
+    });
+
+    return !!group;
+  }
+
+  return false;
+}
+
+export async function canUserModifyCollection(
+  collectionId: string,
+  userId: string
+): Promise<boolean> {
+  const db = await connectToDatabase();
+
+  const collection = await db.collection('collections').findOne({
+    _id: new ObjectId(collectionId),
+  });
+
+  if (!collection) {
+    return false;
+  }
+
+  // Personal collections - user must be the owner
+  if (collection.type === 'personal') {
+    return collection.ownerId.toString() === userId;
+  }
+
+  // Group collections - user must be an admin of the group
+  if (collection.type === 'group') {
+    const group = await db.collection('groups').findOne({
+      _id: collection.ownerId,
+      adminIds: new ObjectId(userId),
+    });
+
+    return !!group;
+  }
+
+  return false;
 }
 
 export async function updateCollection(

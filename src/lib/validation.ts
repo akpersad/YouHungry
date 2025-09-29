@@ -83,6 +83,26 @@ export const groupInviteSchema = z.object({
   email: z.string().email(),
 });
 
+// Simple validation functions for groups
+export const validateGroupName = (name: string): string | null => {
+  if (!name.trim()) {
+    return 'Group name is required';
+  }
+  if (name.length > 100) {
+    return 'Group name must be 100 characters or less';
+  }
+  return null;
+};
+
+export const validateGroupDescription = (
+  description: string
+): string | null => {
+  if (description.length > 500) {
+    return 'Description must be 500 characters or less';
+  }
+  return null;
+};
+
 // Decision validation schemas
 export const decisionSchema = z.object({
   collectionId: z.string().min(1),

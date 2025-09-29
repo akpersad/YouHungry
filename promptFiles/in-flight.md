@@ -28,6 +28,9 @@ This document tracks all items currently being worked on, organized by priority 
 - [x] **Address Validation & Autocomplete** - Google Address Validation API integration with dropdown suggestions ✅ COMPLETED
 - [x] **Enhanced Search Form** - Updated restaurant search form with address validation ✅ COMPLETED
 - [x] **Address Dropdown Fix** - Fixed address input dropdown to disappear when user clicks suggested address ✅ COMPLETED
+- [x] **User ID Handling Fix** - Fixed Clerk ID vs MongoDB ObjectId mismatch by creating /api/user/current endpoint ✅ COMPLETED
+- [x] **Group Admin Controls** - Fixed remove/promote member functionality and last admin leave restriction ✅ COMPLETED
+- [x] **GroupView Tests** - Updated GroupView tests to work with QueryClientProvider and fixed UI changes ✅ COMPLETED
 - [x] **Code Quality Resolution** - Fixed all lint errors, TypeScript errors, and added comprehensive test coverage ✅ COMPLETED
 - [x] **Restaurant Image Loading** - Fixed restaurant image loading issues with Google Places photo URLs ✅ COMPLETED
 - [x] **Geocoding Integration** - Added geocoding functionality to convert addresses to coordinates for accurate search ✅ COMPLETED
@@ -129,13 +132,47 @@ This document tracks all items currently being worked on, organized by priority 
   - [x] **Clerk User Sync** - Implemented temporary user sync process for existing Clerk users ✅ COMPLETED
   - [x] **Documentation Updates** - Updated all relevant documentation to reflect completed work ✅ COMPLETED
 
+## ✅ Epic 3 Completed: Social Features & Group Management
+
+### Completed Stories
+
+- [x] **Epic 3 Story 1: Friend Management** - Complete friend management functionality with search, requests, and management ✅ COMPLETED
+  - [x] **Database Schema & Types** - Implemented Friendship collection with proper relationships and validation ✅ COMPLETED
+  - [x] **REST API Endpoints** - Created comprehensive API for friend search, requests, and management operations ✅ COMPLETED
+  - [x] **Friend Search Functionality** - Email/username search with debounced input and user filtering ✅ COMPLETED
+  - [x] **Friend Request System** - Send, accept, decline, and remove friend requests with proper validation ✅ COMPLETED
+  - [x] **UI Components** - FriendSearch, FriendList, FriendRequests, and FriendsManagement components ✅ COMPLETED
+  - [x] **TanStack Query Hooks** - Comprehensive hooks with optimistic updates and error handling ✅ COMPLETED
+  - [x] **GraphQL Integration** - Extended schema and resolvers for friend management operations ✅ COMPLETED
+  - [x] **Comprehensive Testing** - 100+ test cases covering all friend management functionality ✅ COMPLETED
+  - [x] **Friends Management Page** - Complete friends interface at /friends route ✅ COMPLETED
+
+- [x] **Epic 3 Story 2: Group Creation & Management** - Complete group management functionality with creation, editing, member management, and admin privileges ✅ COMPLETED
+  - [x] **Database Schema & Types** - Implemented Group collection with proper relationships and validation ✅ COMPLETED
+  - [x] **REST API Endpoints** - Created comprehensive API for group CRUD operations (GET, POST, PUT, DELETE, invite, promote, remove, leave) ✅ COMPLETED
+  - [x] **Group Management Functions** - Core group operations with proper permission checks and validation ✅ COMPLETED
+  - [x] **UI Components** - GroupList, CreateGroupForm, GroupView, and GroupInvite components ✅ COMPLETED
+  - [x] **TanStack Query Hooks** - Comprehensive hooks with optimistic updates and error handling ✅ COMPLETED
+  - [x] **GraphQL Integration** - Extended schema and resolvers for group management operations ✅ COMPLETED
+  - [x] **Comprehensive Testing** - 100+ test cases covering all group management functionality ✅ COMPLETED
+  - [x] **Groups Management Pages** - Complete groups interface at /groups route with individual group management ✅ COMPLETED
+
+- [x] **Epic 3 Story 3: Group Collections** - Complete group collection functionality with permissions and member access ✅ COMPLETED
+  - [x] **Collection Type Support** - Extended collections to support both 'personal' and 'group' types ✅ COMPLETED
+  - [x] **Group Collection API** - Extended collections API to support group-specific collections ✅ COMPLETED
+  - [x] **Permission System** - Implemented access control for group collections (members can view, admins can modify) ✅ COMPLETED
+  - [x] **Group Collection UI** - Updated collection UI to distinguish between personal and group collections ✅ COMPLETED
+  - [x] **Group Collections Page** - Complete group collections interface at /groups/[id]/collections route ✅ COMPLETED
+  - [x] **Collection Management** - Full CRUD operations for group collections with proper validation ✅ COMPLETED
+  - [x] **Member Access Control** - Group members can access collections, admins can manage them ✅ COMPLETED
+
 ## 🚀 Currently Active
 
-### Epic 3: Social Features & Group Management (In Progress)
+### Epic 4: Group Decision Making (Next Priority)
 
-- [x] **Friend Management** - Add friends by email/username search, send and accept friend requests ✅ COMPLETED
-- [ ] **Group Creation & Management** - Create groups with custom names and descriptions, invite friends to join groups
-- [ ] **Group Collections** - Create group-specific collections, add restaurants to group collections
+- [ ] **Tiered Choice System** - Implement ranking system for group members with voting interface and consensus calculation
+- [ ] **Random Selection for Groups** - Extend random selection to group collections with group-specific weighting
+- [ ] **Decision Management** - Set decision deadlines, send notifications, and track decision status and progress
 
 ### Temporary User Sync (Current State)
 
@@ -171,32 +208,34 @@ This document tracks all items currently being worked on, organized by priority 
 ### Current Sprint Status
 
 - **Items Started**: 26 items
-- **Items Completed**: 58 items (Epic 1 + Epic 2 + Epic 3 Story 1 complete with comprehensive friend management)
+- **Items Completed**: 70+ items (Epic 1 + Epic 2 + Epic 3 complete with comprehensive friend management, group creation, and group collections)
 - **Items Blocked**: 0 items (All API keys configured)
-- **Sprint Progress**: 100% (Epic 1 completed, Epic 2 fully completed, Epic 3 Story 1 completed)
+- **Sprint Progress**: 100% (Epic 1 completed, Epic 2 fully completed, Epic 3 fully completed)
 
 ### Epic Progress
 
 - **Epic 1**: 100% complete ✅
 - **Epic 2**: 100% complete ✅ (All 5 stories completed with full functionality)
-- **Epic 3**: 33% complete (Story 1: Friend Management completed)
-- **Epic 4**: 0% complete (not started)
+- **Epic 3**: 100% complete ✅ (All 3 stories completed: Friend Management, Group Creation & Management, Group Collections)
+- **Epic 4**: 0% complete (ready to start)
 
 ## 🎯 Focus Areas
 
 ### Immediate Focus
 
-1. **Group Creation & Management** - Create groups with custom names and descriptions, invite friends to join groups
-2. **Group Collections** - Create group-specific collections, add restaurants to group collections
-3. **Group Decision Making** - Implement collaborative decision making within groups
+1. **Epic 4: Group Decision Making** - Implement collaborative decision making within groups
+2. **Epic 5: Mobile-First Experience** - Optimize UI for mobile devices and create PWA capabilities
+3. **Epic 6: Notifications & Communication** - Enable real-time communication and notifications
 
 ### This Sprint Goals
 
 1. **Complete Epic 2** - Personal Collections Management ✅ COMPLETED (All 5 stories completed with full functionality including advanced decision making)
 2. **Document Recent Work** - Update all documentation to reflect completed decision making system ✅ COMPLETED
 3. **Complete Epic 3 Story 1** - Friend Management ✅ COMPLETED (Complete friend management system with search, requests, and management)
-4. **Start Epic 3 Story 2** - Group Creation & Management
-5. **Start Epic 3 Story 3** - Group Collections
+4. **Complete Epic 3 Story 2** - Group Creation & Management ✅ COMPLETED (Complete group management system with creation, editing, member management, and admin privileges)
+5. **Complete Epic 3 Story 3** - Group Collections ✅ COMPLETED (Complete group collection functionality with permissions and member access)
+6. **Complete Epic 3** - Social Features & Group Management ✅ COMPLETED (All 3 stories completed with full functionality)
+7. **Start Epic 4** - Group Decision Making (Collaborative decision making within groups)
 
 ## 📝 Notes
 

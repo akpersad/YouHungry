@@ -320,6 +320,56 @@ body {
   z-index: 1000 !important;
 }
 
+/* Text Color Utilities */
+.text-error {
+  color: var(--color-error);
+}
+
+.text-success {
+  color: var(--color-success);
+}
+
+.text-warning {
+  color: var(--color-warning);
+}
+
+.text-info {
+  color: var(--color-info);
+}
+
+.text-text {
+  color: var(--color-text);
+}
+
+.text-text-light {
+  color: var(--color-text-light);
+}
+
+.text-text-muted {
+  color: var(--color-text-muted);
+}
+
+.text-text-white {
+  color: var(--color-text-white);
+}
+
+/* Border Color Utilities */
+.border-error {
+  border-color: var(--color-error);
+}
+
+.border-success {
+  border-color: var(--color-success);
+}
+
+.border-warning {
+  border-color: var(--color-warning);
+}
+
+.border-info {
+  border-color: var(--color-info);
+}
+
 /* Mobile-first responsive utilities */
 @media (max-width: 640px) {
   .container {

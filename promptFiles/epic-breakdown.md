@@ -140,9 +140,14 @@ These technologies will be implemented when they solve specific problems in each
 
 2. **Group Creation & Management**
    - Create groups with custom names and descriptions
-   - Invite friends to join groups
+   - **Searchable, paginated friend list for group invitations**
+   - **Friend-based invitation system with user info and "invite to group" button**
+   - **Group management page with tab system for pending invitations**
+   - **Accept/decline group invitations functionality**
    - Manage group membership and roles
    - Handle group admin privileges
+   - **Fallback email-based invitation system for non-friends**
+   - **Fixed user ID handling: Created /api/user/current endpoint to resolve Clerk ID vs MongoDB ObjectId mismatch**
 
 3. **Group Collections**
    - Create group-specific collections

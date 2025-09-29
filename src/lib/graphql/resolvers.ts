@@ -5,6 +5,7 @@ import {
   getRestaurantById,
   updateRestaurant,
 } from '../restaurants';
+import { User } from '../../types/database';
 import {
   getRestaurantsByCollection,
   addRestaurantToCollection,
@@ -27,6 +28,18 @@ import {
   declineFriendRequest,
   removeFriend,
 } from '../friends';
+import {
+  getGroupsByUserId,
+  getGroupById,
+  createGroup,
+  updateGroup,
+  deleteGroup,
+  inviteUserToGroup,
+  removeUserFromGroup,
+  promoteToAdmin,
+  leaveGroup,
+  getGroupMembers,
+} from '../groups';
 
 export const resolvers = {
   Query: {
@@ -249,6 +262,56 @@ export const resolvers = {
         throw new Error('Failed to get friendship');
       }
     },
+
+    // Group Management Queries
+    getGroups: async (_: unknown, { userId }: { userId: string }) => {
+      try {
+        const groups = await getGroupsByUserId(userId);
+        return groups.map((group) => ({
+          ...group,
+          members: [], // Will be populated by the Group type resolver
+        }));
+      } catch (error) {
+        console.error('GraphQL getGroups error:', error);
+        throw new Error('Failed to get groups');
+      }
+    },
+
+    getGroup: async (_: unknown, { groupId }: { groupId: string }) => {
+      try {
+        const group = await getGroupById(groupId);
+        if (!group) {
+          throw new Error('Group not found');
+        }
+        return {
+          ...group,
+          members: [], // Will be populated by the Group type resolver
+        };
+      } catch (error) {
+        console.error('GraphQL getGroup error:', error);
+        throw new Error('Failed to get group');
+      }
+    },
+
+    getGroupMembers: async (_: unknown, { groupId }: { groupId: string }) => {
+      try {
+        const members = await getGroupMembers(groupId);
+        const group = await getGroupById(groupId);
+        if (!group) {
+          throw new Error('Group not found');
+        }
+
+        return members.map((member) => ({
+          ...member,
+          isAdmin: group.adminIds.some(
+            (adminId) => adminId.toString() === member._id.toString()
+          ),
+        }));
+      } catch (error) {
+        console.error('GraphQL getGroupMembers error:', error);
+        throw new Error('Failed to get group members');
+      }
+    },
   },
 
   Mutation: {
@@ -401,6 +464,169 @@ export const resolvers = {
       } catch (error) {
         console.error('GraphQL removeFriend error:', error);
         throw new Error('Failed to remove friend');
+      }
+    },
+
+    // Group Management Mutations
+    createGroup: async (
+      _: unknown,
+      {
+        input,
+        userId,
+      }: { input: { name: string; description?: string }; userId: string }
+    ) => {
+      try {
+        return await createGroup(input.name, input.description, userId);
+      } catch (error) {
+        console.error('GraphQL createGroup error:', error);
+        throw new Error('Failed to create group');
+      }
+    },
+
+    updateGroup: async (
+      _: unknown,
+      {
+        groupId,
+        input,
+        userId,
+      }: {
+        groupId: string;
+        input: { name?: string; description?: string };
+        userId: string;
+      }
+    ) => {
+      try {
+        const group = await updateGroup(groupId, input, userId);
+        if (!group) {
+          throw new Error('Group not found or user is not an admin');
+        }
+        return group;
+      } catch (error) {
+        console.error('GraphQL updateGroup error:', error);
+        throw new Error('Failed to update group');
+      }
+    },
+
+    deleteGroup: async (
+      _: unknown,
+      { groupId, userId }: { groupId: string; userId: string }
+    ) => {
+      try {
+        return await deleteGroup(groupId, userId);
+      } catch (error) {
+        console.error('GraphQL deleteGroup error:', error);
+        throw new Error('Failed to delete group');
+      }
+    },
+
+    inviteUserToGroup: async (
+      _: unknown,
+      {
+        input,
+        userId,
+      }: { input: { groupId: string; email: string }; userId: string }
+    ) => {
+      try {
+        // Find user by email first
+        const { connectToDatabase } = await import('../db');
+        const db = await connectToDatabase();
+        const usersCollection = db.collection<User>('users');
+        const targetUser = await usersCollection.findOne({
+          email: input.email,
+        });
+
+        if (!targetUser) {
+          throw new Error('User not found');
+        }
+
+        return await inviteUserToGroup(
+          input.groupId,
+          targetUser._id.toString(),
+          userId
+        );
+      } catch (error) {
+        console.error('GraphQL inviteUserToGroup error:', error);
+        throw new Error('Failed to invite user to group');
+      }
+    },
+
+    removeUserFromGroup: async (
+      _: unknown,
+      {
+        groupId,
+        email,
+        userId,
+      }: { groupId: string; email: string; userId: string }
+    ) => {
+      try {
+        // Find user by email first
+        const { connectToDatabase } = await import('../db');
+        const db = await connectToDatabase();
+        const usersCollection = db.collection<User>('users');
+        const targetUser = await usersCollection.findOne({ email });
+
+        if (!targetUser) {
+          throw new Error('User not found');
+        }
+
+        return await removeUserFromGroup(
+          groupId,
+          targetUser._id.toString(),
+          userId
+        );
+      } catch (error) {
+        console.error('GraphQL removeUserFromGroup error:', error);
+        throw new Error('Failed to remove user from group');
+      }
+    },
+
+    promoteToAdmin: async (
+      _: unknown,
+      {
+        groupId,
+        email,
+        userId,
+      }: { groupId: string; email: string; userId: string }
+    ) => {
+      try {
+        // Find user by email first
+        const { connectToDatabase } = await import('../db');
+        const db = await connectToDatabase();
+        const usersCollection = db.collection<User>('users');
+        const targetUser = await usersCollection.findOne({ email });
+
+        if (!targetUser) {
+          throw new Error('User not found');
+        }
+
+        return await promoteToAdmin(groupId, targetUser._id.toString(), userId);
+      } catch (error) {
+        console.error('GraphQL promoteToAdmin error:', error);
+        throw new Error('Failed to promote user to admin');
+      }
+    },
+
+    leaveGroup: async (
+      _: unknown,
+      { groupId, userId }: { groupId: string; userId: string }
+    ) => {
+      try {
+        return await leaveGroup(groupId, userId);
+      } catch (error) {
+        console.error('GraphQL leaveGroup error:', error);
+        throw new Error('Failed to leave group');
+      }
+    },
+  },
+
+  // Type resolvers
+  Group: {
+    members: async (parent: { _id: string; memberIds: string[] }) => {
+      try {
+        return await getGroupMembers(parent._id.toString());
+      } catch (error) {
+        console.error('GraphQL Group.members resolver error:', error);
+        return [];
       }
     },
   },

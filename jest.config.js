@@ -11,6 +11,7 @@ const customJestConfig = {
     '^@/(.*)$': '<rootDir>/src/$1',
     '^mongodb$': '<rootDir>/src/__mocks__/mongodb.js',
     '^bson$': '<rootDir>/src/__mocks__/bson.js',
+    '^@clerk/nextjs$': '<rootDir>/src/__mocks__/@clerk/nextjs.js',
   },
   transformIgnorePatterns: [
     'node_modules/(?!(bson|mongodb|@mongodb-js|@clerk)/)',

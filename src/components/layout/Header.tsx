@@ -48,6 +48,13 @@ export function Header({ children }: HeaderProps) {
                 >
                   Search Restaurants
                 </Link>
+                <Link
+                  href="/groups"
+                  className="text-sm font-medium hover:opacity-80 transition-opacity"
+                  style={{ color: 'var(--color-text)' }}
+                >
+                  Groups
+                </Link>
               </nav>
             )}
           </div>
