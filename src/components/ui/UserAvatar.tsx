@@ -14,7 +14,7 @@ const sizeClasses = {
   lg: 'w-12 h-12 text-base',
 };
 
-export default function UserAvatar({
+export function UserAvatar({
   name,
   profilePicture,
   size = 'md',
@@ -25,6 +25,9 @@ export default function UserAvatar({
 
   // Generate initials from name
   const getInitials = (name: string) => {
+    if (!name || typeof name !== 'string') {
+      return '?';
+    }
     return name
       .split(' ')
       .map((word) => word.charAt(0))
@@ -45,6 +48,10 @@ export default function UserAvatar({
       'bg-red-500',
       'bg-teal-500',
     ];
+
+    if (!name || typeof name !== 'string') {
+      return colors[0]; // Default to first color
+    }
 
     let hash = 0;
     for (let i = 0; i < name.length; i++) {

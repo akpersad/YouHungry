@@ -5,7 +5,7 @@ import { useUserSearch, useSendFriendRequest } from '@/hooks/api/useFriends';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card } from '@/components/ui/Card';
-import UserAvatar from '@/components/ui/UserAvatar';
+import { UserAvatar } from '@/components/ui/UserAvatar';
 
 interface FriendSearchProps {
   userId: string;

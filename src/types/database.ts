@@ -105,3 +105,13 @@ export interface Friendship {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export interface GroupInvitation {
+  _id: ObjectId;
+  groupId: ObjectId;
+  inviterId: ObjectId;
+  inviteeId: ObjectId;
+  status: 'pending' | 'accepted' | 'declined';
+  createdAt: Date;
+  updatedAt: Date;
+}

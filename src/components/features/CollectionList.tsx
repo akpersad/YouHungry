@@ -18,20 +18,36 @@ import { useCollections, useDeleteCollection } from '@/hooks/api';
 
 interface CollectionListProps {
   onCollectionSelect?: (collection: Collection) => void;
+  collections?: Collection[];
+  isLoading?: boolean;
+  onCreateCollection?: () => void;
+  showType?: boolean;
 }
 
-function CollectionList({ onCollectionSelect }: CollectionListProps) {
+function CollectionList({
+  onCollectionSelect,
+  collections: propCollections,
+  isLoading: propIsLoading,
+  onCreateCollection: propOnCreateCollection,
+  showType = true, // eslint-disable-line @typescript-eslint/no-unused-vars
+}: CollectionListProps) {
   const { user } = useUser();
   const router = useRouter();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   // Use TanStack Query hooks
   const {
-    data: collections = [],
-    isLoading,
+    data: hookCollections = [],
+    isLoading: hookIsLoading,
     error,
     refetch,
   } = useCollections(user?.id);
+
+  // Use props if provided, otherwise use hook data
+  const collections = propCollections ?? hookCollections;
+  const isLoading = propIsLoading ?? hookIsLoading;
+  const onCreateCollection =
+    propOnCreateCollection ?? (() => setIsCreateModalOpen(true));
 
   const deleteCollectionMutation = useDeleteCollection();
 
@@ -97,9 +113,7 @@ function CollectionList({ onCollectionSelect }: CollectionListProps) {
             Manage your personal restaurant collections
           </p>
         </div>
-        <Button onClick={() => setIsCreateModalOpen(true)}>
-          Create Collection
-        </Button>
+        <Button onClick={onCreateCollection}>Create Collection</Button>
       </div>
 
       {collections.length === 0 ? (
