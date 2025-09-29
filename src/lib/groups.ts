@@ -55,7 +55,7 @@ export async function createGroup(
     updatedAt: now,
   };
 
-  const result = await groupsCollection.insertOne(group);
+  const result = await groupsCollection.insertOne(group as Group);
 
   return {
     _id: result.insertedId,
@@ -181,7 +181,9 @@ export async function inviteUserToGroup(
     updatedAt: new Date(),
   };
 
-  const result = await invitationsCollection.insertOne(invitation);
+  const result = await invitationsCollection.insertOne(
+    invitation as GroupInvitation
+  );
 
   return result.insertedId !== null;
 }

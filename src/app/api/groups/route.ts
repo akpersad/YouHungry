@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: validation.error }, { status: 400 });
     }
 
-    const { name, description } = validation.data;
+    const { name, description } = validation.data!;
 
     // Create the group
     const group = await createGroup(name, description, user._id.toString());

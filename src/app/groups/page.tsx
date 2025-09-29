@@ -2,9 +2,21 @@
 
 import React, { useState } from 'react';
 import { useAuth } from '@clerk/nextjs';
-import { useRouter } from 'next/navigation';
+// import { useRouter } from 'next/navigation';
 import { GroupList } from '@/components/features/GroupList';
 import { GroupInvitations } from '@/components/features/GroupInvitations';
+// import { GroupInvitation } from '@/types/database';
+
+// Define the GroupInvitation type that matches what the API returns
+interface GroupInvitation {
+  _id: string;
+  groupId: string;
+  groupName: string;
+  groupDescription?: string;
+  inviterName: string;
+  inviterEmail: string;
+  createdAt: string;
+}
 import { CreateGroupForm } from '@/components/forms/CreateGroupForm';
 import { Button } from '@/components/ui/Button';
 import {
@@ -31,7 +43,7 @@ export default function GroupsPage() {
 
   // Real group invitations data from API
   const { data: groupInvitations = [], isLoading: invitationsLoading } =
-    useGroupInvitations(userId);
+    useGroupInvitations(userId || '');
   const acceptInvitationMutation = useAcceptGroupInvitation();
   const declineInvitationMutation = useDeclineGroupInvitation();
 
@@ -49,7 +61,7 @@ export default function GroupsPage() {
       // If there are member emails, invite them to the group
       if (data.memberEmails && data.memberEmails.length > 0) {
         const invitePromises = data.memberEmails.map((email) =>
-          fetch(`/api/groups/${groupData.group._id}/invite`, {
+          fetch(`/api/groups/${groupData._id}/invite`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -169,7 +181,7 @@ export default function GroupsPage() {
             />
           ) : (
             <GroupInvitations
-              invitations={groupInvitations}
+              invitations={groupInvitations as GroupInvitation[]}
               onAcceptInvitation={handleAcceptInvitation}
               onDeclineInvitation={handleDeclineInvitation}
               isLoading={invitationsLoading}

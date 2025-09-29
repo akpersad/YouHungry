@@ -158,6 +158,7 @@ export async function createGroupCollection(
     description: description?.trim() || undefined,
     type: 'group',
     ownerId: new ObjectId(groupId),
+    restaurantIds: [],
   });
 }
 

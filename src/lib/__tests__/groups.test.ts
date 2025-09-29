@@ -1,4 +1,10 @@
 import { ObjectId } from 'mongodb';
+import { connectToDatabase } from '../db';
+
+// Mock the database module
+jest.mock('../db', () => ({
+  connectToDatabase: jest.fn(),
+}));
 
 // Custom matcher for ObjectId
 const expectObjectId = expect.objectContaining({
@@ -70,9 +76,7 @@ beforeEach(() => {
     return mockCollection;
   });
 
-  jest
-    .spyOn(jest.requireActual('../db'), 'connectToDatabase')
-    .mockResolvedValue(mockDb);
+  (connectToDatabase as jest.Mock).mockResolvedValue(mockDb);
 });
 
 describe('Groups Library', () => {

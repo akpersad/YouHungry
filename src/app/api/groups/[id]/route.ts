@@ -54,7 +54,7 @@ export async function PUT(
       return NextResponse.json({ error: validation.error }, { status: 400 });
     }
 
-    const { name, description } = validation.data;
+    const { name, description } = validation.data!;
 
     const group = await updateGroup(
       groupId,

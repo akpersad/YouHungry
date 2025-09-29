@@ -53,10 +53,9 @@ export function GroupView({
   const isCurrentUserAdmin = group.adminIds.some(
     (adminId) => adminId.toString() === currentUserId
   );
-  const currentUserMember = group.members.find(
-    // eslint-disable-line @typescript-eslint/no-unused-vars
-    (member) => member._id.toString() === currentUserId
-  );
+  // const currentUserMember = group.members.find(
+  //   (member) => member._id.toString() === currentUserId
+  // );
 
   // Check if current user is the last admin
   const isLastAdmin = isCurrentUserAdmin && group.adminIds.length === 1;
@@ -296,7 +295,7 @@ export function GroupView({
 
           {isCurrentUserAdmin && (
             <Button
-              variant="danger"
+              variant="outline"
               onClick={() => setShowDeleteModal(true)}
               isLoading={actionLoading === 'delete'}
             >
@@ -341,7 +340,11 @@ export function GroupView({
                 className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
               >
                 <div className="flex items-center space-x-3">
-                  <UserAvatar userId={member._id.toString()} size="md" />
+                  <UserAvatar
+                    name={member.name}
+                    profilePicture={member.profilePicture}
+                    size="md"
+                  />
                   <div>
                     <div className="flex items-center space-x-2">
                       <span className="font-medium text-gray-900">
@@ -370,7 +373,7 @@ export function GroupView({
                       </Button>
                     )}
                     <Button
-                      variant="danger"
+                      variant="outline"
                       size="sm"
                       onClick={() => handleRemoveUser(member.email)}
                       isLoading={actionLoading === `remove-${member.email}`}
@@ -449,7 +452,7 @@ export function GroupView({
               Cancel
             </Button>
             <Button
-              variant="danger"
+              variant="outline"
               onClick={handleDeleteGroup}
               isLoading={actionLoading === 'delete'}
             >

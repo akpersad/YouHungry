@@ -5,6 +5,7 @@ import {
   getRestaurantById,
   updateRestaurant,
 } from '../restaurants';
+import { User } from '../../types/database';
 import {
   getRestaurantsByCollection,
   addRestaurantToCollection,
@@ -528,7 +529,6 @@ export const resolvers = {
       try {
         // Find user by email first
         const { connectToDatabase } = await import('../db');
-        // const { User } = await import('../../types/database');
         const db = await connectToDatabase();
         const usersCollection = db.collection<User>('users');
         const targetUser = await usersCollection.findOne({
@@ -561,7 +561,6 @@ export const resolvers = {
       try {
         // Find user by email first
         const { connectToDatabase } = await import('../db');
-        // const { User } = await import('../../types/database');
         const db = await connectToDatabase();
         const usersCollection = db.collection<User>('users');
         const targetUser = await usersCollection.findOne({ email });
@@ -592,7 +591,6 @@ export const resolvers = {
       try {
         // Find user by email first
         const { connectToDatabase } = await import('../db');
-        // const { User } = await import('../../types/database');
         const db = await connectToDatabase();
         const usersCollection = db.collection<User>('users');
         const targetUser = await usersCollection.findOne({ email });
@@ -623,7 +621,7 @@ export const resolvers = {
 
   // Type resolvers
   Group: {
-    members: async (parent: { memberIds: string[] }) => {
+    members: async (parent: { _id: string; memberIds: string[] }) => {
       try {
         return await getGroupMembers(parent._id.toString());
       } catch (error) {

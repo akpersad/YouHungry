@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 // import Link from 'next/link';
 import { CollectionList } from '@/components/features/CollectionList';
 import { CreateCollectionForm } from '@/components/forms/CreateCollectionForm';
+import { Collection } from '@/types/database';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { useGroup } from '@/hooks/api/useGroups';
@@ -35,17 +36,17 @@ export default function GroupCollectionsPage({
     data: collectionsData,
     isLoading: collectionsLoading,
     error: collectionsError,
-  } = useCollections(userId || '', 'group');
+  } = useCollections(userId || '');
 
   // Filter collections for this specific group
   const groupCollections =
-    collectionsData?.group?.filter(
-      (collection) => collection.ownerId.toString() === groupId
+    collectionsData?.filter(
+      (collection: Collection) => collection.ownerId.toString() === groupId
     ) || [];
 
-  const isCurrentUserAdmin = groupData?.adminIds.some(
-    (adminId) => adminId.toString() === userId
-  );
+  // const isCurrentUserAdmin = groupData?.adminIds.some(
+  //   (adminId) => adminId.toString() === userId
+  // );
 
   if (groupLoading) {
     return (
@@ -145,39 +146,17 @@ export default function GroupCollectionsPage({
             />
           )}
 
-          <CreateCollectionForm
-            isOpen={showCreateForm}
-            onClose={() => setShowCreateForm(false)}
-            onSubmit={async (data) => {
-              try {
-                const response = await fetch('/api/collections', {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                  },
-                  body: JSON.stringify({
-                    ...data,
-                    type: 'group',
-                    groupId: groupId,
-                  }),
-                });
-
-                if (!response.ok) {
-                  const error = await response.json();
-                  throw new Error(error.error || 'Failed to create collection');
-                }
-
+          {showCreateForm && (
+            <CreateCollectionForm
+              onSuccess={() => {
                 toast.success('Collection created successfully!');
                 setShowCreateForm(false);
                 // Refresh collections
                 window.location.reload();
-              } catch (error) {
-                console.error('Error creating collection:', error);
-                toast.error('Failed to create collection. Please try again.');
-              }
-            }}
-            isLoading={false}
-          />
+              }}
+              onCancel={() => setShowCreateForm(false)}
+            />
+          )}
         </div>
       </ProtectedRoute>
     </MainLayout>

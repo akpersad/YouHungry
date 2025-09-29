@@ -48,7 +48,7 @@ interface RemoveUserRequest {
 }
 
 // Fetch groups for a user
-async function fetchGroups(_userId: string): Promise<Group[]> {
+async function fetchGroups(): Promise<Group[]> {
   const response = await fetch('/api/groups');
   if (!response.ok) {
     throw new Error('Failed to fetch groups');
@@ -195,7 +195,7 @@ async function leaveGroup(groupId: string): Promise<void> {
 export function useGroups(userId: string) {
   return useQuery({
     queryKey: groupKeys.list(userId),
-    queryFn: () => fetchGroups(userId),
+    queryFn: () => fetchGroups(),
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 }
@@ -334,7 +334,17 @@ export function useLeaveGroup() {
 }
 
 // Group Invitations
-async function getGroupInvitations(): Promise<unknown[]> {
+interface GroupInvitationResponse {
+  _id: string;
+  groupId: string;
+  groupName: string;
+  groupDescription?: string;
+  inviterName: string;
+  inviterEmail: string;
+  createdAt: string;
+}
+
+async function getGroupInvitations(): Promise<GroupInvitationResponse[]> {
   const response = await fetch('/api/groups/invitations');
   if (!response.ok) {
     throw new Error('Failed to fetch group invitations');

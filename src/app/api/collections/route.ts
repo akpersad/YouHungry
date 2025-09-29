@@ -98,7 +98,7 @@ export async function POST(request: NextRequest) {
         name: (name || '').trim(),
         description: description?.trim() || undefined,
         type: 'personal',
-        ownerId: user._id.toString(),
+        ownerId: user._id,
         restaurantIds: [],
       });
     }
