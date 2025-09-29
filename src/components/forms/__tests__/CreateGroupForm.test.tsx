@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { CreateGroupForm } from '../CreateGroupForm';
 
@@ -57,8 +57,6 @@ describe('CreateGroupForm', () => {
   });
 
   it('should validate required group name', async () => {
-    const user = userEvent.setup();
-
     render(
       <CreateGroupForm
         isOpen={true}
@@ -68,10 +66,12 @@ describe('CreateGroupForm', () => {
       />
     );
 
-    const submitButton = screen.getByRole('button', { name: 'Create Group' });
-    await user.click(submitButton);
+    const form = screen.getByRole('form');
+    fireEvent.submit(form);
 
-    expect(screen.getByText('Group name is required')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('Group name is required')).toBeInTheDocument();
+    });
     expect(mockOnSubmit).not.toHaveBeenCalled();
   });
 
@@ -235,6 +235,13 @@ describe('CreateGroupForm', () => {
   it('should disable form when submitting', async () => {
     const user = userEvent.setup();
 
+    // Create a promise that doesn't resolve immediately
+    let resolvePromise: () => void;
+    const submissionPromise = new Promise<void>((resolve) => {
+      resolvePromise = resolve;
+    });
+    mockOnSubmit.mockReturnValue(submissionPromise);
+
     render(
       <CreateGroupForm
         isOpen={true}
@@ -252,7 +259,11 @@ describe('CreateGroupForm', () => {
 
     // Form should be disabled during submission
     expect(submitButton).toBeDisabled();
-    expect(screen.getByText('Creating...')).toBeInTheDocument();
+    expect(submitButton.querySelector('svg')).toBeInTheDocument(); // Check for spinner
+
+    // Resolve the promise to complete the test
+    resolvePromise!();
+    await submissionPromise;
   });
 
   it('should disable form when isLoading is true', () => {
@@ -285,10 +296,12 @@ describe('CreateGroupForm', () => {
     );
 
     // Submit empty form to trigger error
-    const submitButton = screen.getByRole('button', { name: 'Create Group' });
-    await user.click(submitButton);
+    const form = screen.getByRole('form');
+    fireEvent.submit(form);
 
-    expect(screen.getByText('Group name is required')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('Group name is required')).toBeInTheDocument();
+    });
 
     // Start typing in name field
     const nameInput = screen.getByLabelText('Group Name *');

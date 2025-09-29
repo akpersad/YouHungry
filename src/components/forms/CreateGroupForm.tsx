@@ -21,7 +21,7 @@ export function CreateGroupForm({
   isOpen,
   onClose,
   onSubmit,
-  isLoading = false, // eslint-disable-line @typescript-eslint/no-unused-vars
+  isLoading = false,
 }: CreateGroupFormProps) {
   const [formData, setFormData] = useState({
     name: '',
@@ -142,7 +142,7 @@ export function CreateGroupForm({
 
   return (
     <Modal isOpen={isOpen} onClose={handleClose} title="Create New Group">
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4" role="form">
         <div>
           <label
             htmlFor="group-name"
@@ -157,7 +157,7 @@ export function CreateGroupForm({
             onChange={(e) => handleInputChange('name', e.target.value)}
             placeholder="Enter group name"
             error={errors.name}
-            disabled={isSubmitting}
+            disabled={isSubmitting || isLoading}
             required
           />
         </div>
@@ -180,7 +180,7 @@ export function CreateGroupForm({
                 ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
                 : 'border-gray-300'
             } ${isSubmitting ? 'bg-gray-50 cursor-not-allowed' : ''}`}
-            disabled={isSubmitting}
+            disabled={isSubmitting || isLoading}
           />
           {errors.description && (
             <p className="mt-1 text-sm text-red-600">{errors.description}</p>
@@ -203,11 +203,17 @@ export function CreateGroupForm({
             <Input
               type="email"
               value={currentEmail}
-              onChange={(e) => setCurrentEmail(e.target.value)}
+              onChange={(e) => {
+                setCurrentEmail(e.target.value);
+                // Clear email error when user starts typing
+                if (errors.email) {
+                  setErrors((prev) => ({ ...prev, email: undefined }));
+                }
+              }}
               onKeyPress={handleKeyPress}
               placeholder="Enter email address"
               error={errors.email}
-              disabled={isSubmitting}
+              disabled={isSubmitting || isLoading}
               className="flex-1"
             />
             <Button
@@ -235,7 +241,7 @@ export function CreateGroupForm({
                     <button
                       type="button"
                       onClick={() => handleRemoveEmail(email)}
-                      disabled={isSubmitting}
+                      disabled={isSubmitting || isLoading}
                       className="text-red-500 hover:text-red-700 text-sm font-medium"
                     >
                       Remove
@@ -252,11 +258,15 @@ export function CreateGroupForm({
             type="button"
             variant="secondary"
             onClick={handleClose}
-            disabled={isSubmitting}
+            disabled={isSubmitting || isLoading}
           >
             Cancel
           </Button>
-          <Button type="submit" variant="primary" isLoading={isSubmitting}>
+          <Button
+            type="submit"
+            variant="primary"
+            isLoading={isSubmitting || isLoading}
+          >
             Create Group
           </Button>
         </div>

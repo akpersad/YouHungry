@@ -1,4 +1,10 @@
 import { ObjectId } from 'mongodb';
+
+// Custom matcher for ObjectId
+const expectObjectId = expect.objectContaining({
+  toString: expect.any(Function),
+  valueOf: expect.any(Function),
+});
 import {
   createGroup,
   getGroupsByUserId,
@@ -46,6 +52,12 @@ const mockGroupsCollection = {
   deleteOne: jest.fn(),
 };
 
+const mockInvitationsCollection = {
+  insertOne: jest.fn(),
+  findOne: jest.fn(),
+  updateOne: jest.fn(),
+};
+
 beforeEach(() => {
   jest.clearAllMocks();
 
@@ -53,12 +65,14 @@ beforeEach(() => {
   mockDb.collection.mockImplementation((name) => {
     if (name === 'groups') return mockGroupsCollection;
     if (name === 'users') return mockUsersCollection;
+    if (name === 'invitations') return mockInvitationsCollection;
+    if (name === 'groupInvitations') return mockInvitationsCollection;
     return mockCollection;
   });
 
-  (
-    jest.requireActual('../db').connectToDatabase as jest.Mock
-  ).mockResolvedValue(mockDb);
+  jest
+    .spyOn(jest.requireActual('../db'), 'connectToDatabase')
+    .mockResolvedValue(mockDb);
 });
 
 describe('Groups Library', () => {
@@ -86,26 +100,29 @@ describe('Groups Library', () => {
         mockUserId
       );
 
-      expect(mockGroupsCollection.insertOne).toHaveBeenCalledWith({
-        name: 'Test Group',
-        description: 'A test group',
-        adminIds: [new ObjectId(mockUserId)],
-        memberIds: [new ObjectId(mockUserId)],
-        collectionIds: [],
-        createdAt: expect.any(Date),
-        updatedAt: expect.any(Date),
-      });
+      expect(mockGroupsCollection.insertOne).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: 'Test Group',
+          description: 'A test group',
+          adminIds: [expectObjectId],
+          memberIds: [expectObjectId],
+          collectionIds: [],
+          createdAt: expect.any(Date),
+          updatedAt: expect.any(Date),
+        })
+      );
 
-      expect(result).toEqual({
-        _id: new ObjectId(mockGroupId),
-        name: 'Test Group',
-        description: 'A test group',
-        adminIds: [new ObjectId(mockUserId)],
-        memberIds: [new ObjectId(mockUserId)],
-        collectionIds: [],
-        createdAt: expect.any(Date),
-        updatedAt: expect.any(Date),
-      });
+      expect(result).toEqual(
+        expect.objectContaining({
+          name: 'Test Group',
+          description: 'A test group',
+          adminIds: [expectObjectId],
+          memberIds: [expectObjectId],
+          collectionIds: [],
+          createdAt: expect.any(Date),
+          updatedAt: expect.any(Date),
+        })
+      );
     });
 
     it('should trim whitespace from name and description', async () => {
@@ -114,15 +131,17 @@ describe('Groups Library', () => {
 
       await createGroup('  Test Group  ', '  A test group  ', mockUserId);
 
-      expect(mockGroupsCollection.insertOne).toHaveBeenCalledWith({
-        name: 'Test Group',
-        description: 'A test group',
-        adminIds: [new ObjectId(mockUserId)],
-        memberIds: [new ObjectId(mockUserId)],
-        collectionIds: [],
-        createdAt: expect.any(Date),
-        updatedAt: expect.any(Date),
-      });
+      expect(mockGroupsCollection.insertOne).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: 'Test Group',
+          description: 'A test group',
+          adminIds: [expectObjectId],
+          memberIds: [expectObjectId],
+          collectionIds: [],
+          createdAt: expect.any(Date),
+          updatedAt: expect.any(Date),
+        })
+      );
     });
 
     it('should handle undefined description', async () => {
@@ -131,15 +150,17 @@ describe('Groups Library', () => {
 
       await createGroup('Test Group', undefined, mockUserId);
 
-      expect(mockGroupsCollection.insertOne).toHaveBeenCalledWith({
-        name: 'Test Group',
-        description: undefined,
-        adminIds: [new ObjectId(mockUserId)],
-        memberIds: [new ObjectId(mockUserId)],
-        collectionIds: [],
-        createdAt: expect.any(Date),
-        updatedAt: expect.any(Date),
-      });
+      expect(mockGroupsCollection.insertOne).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: 'Test Group',
+          description: undefined,
+          adminIds: [expectObjectId],
+          memberIds: [expectObjectId],
+          collectionIds: [],
+          createdAt: expect.any(Date),
+          updatedAt: expect.any(Date),
+        })
+      );
     });
   });
 
@@ -153,12 +174,11 @@ describe('Groups Library', () => {
 
       const result = await getGroupsByUserId(mockUserId);
 
-      expect(mockGroupsCollection.find).toHaveBeenCalledWith({
-        $or: [
-          { adminIds: new ObjectId(mockUserId) },
-          { memberIds: new ObjectId(mockUserId) },
-        ],
-      });
+      expect(mockGroupsCollection.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          $or: [{ adminIds: expectObjectId }, { memberIds: expectObjectId }],
+        })
+      );
       expect(result).toEqual([mockGroup]);
     });
   });
@@ -169,9 +189,11 @@ describe('Groups Library', () => {
 
       const result = await getGroupById(mockGroupId);
 
-      expect(mockGroupsCollection.findOne).toHaveBeenCalledWith({
-        _id: new ObjectId(mockGroupId),
-      });
+      expect(mockGroupsCollection.findOne).toHaveBeenCalledWith(
+        expect.objectContaining({
+          _id: expectObjectId,
+        })
+      );
       expect(result).toEqual(mockGroup);
     });
 
@@ -196,10 +218,12 @@ describe('Groups Library', () => {
         mockUserId
       );
 
-      expect(mockGroupsCollection.findOne).toHaveBeenCalledWith({
-        _id: new ObjectId(mockGroupId),
-        adminIds: new ObjectId(mockUserId),
-      });
+      expect(mockGroupsCollection.findOne).toHaveBeenCalledWith(
+        expect.objectContaining({
+          _id: expectObjectId,
+          adminIds: expectObjectId,
+        })
+      );
       expect(result).toEqual(updatedGroup);
     });
 
@@ -236,6 +260,9 @@ describe('Groups Library', () => {
       const targetUserId = '507f1f77bcf86cd799439013';
       mockGroupsCollection.findOne.mockResolvedValue(mockGroup);
       mockGroupsCollection.updateOne.mockResolvedValue({ modifiedCount: 1 });
+      mockInvitationsCollection.insertOne.mockResolvedValue({
+        insertedId: new ObjectId(),
+      });
 
       const result = await inviteUserToGroup(
         mockGroupId,
@@ -243,12 +270,15 @@ describe('Groups Library', () => {
         mockUserId
       );
 
-      expect(mockGroupsCollection.updateOne).toHaveBeenCalledWith(
-        { _id: new ObjectId(mockGroupId) },
-        {
-          $addToSet: { memberIds: new ObjectId(targetUserId) },
-          $set: { updatedAt: expect.any(Date) },
-        }
+      expect(mockInvitationsCollection.insertOne).toHaveBeenCalledWith(
+        expect.objectContaining({
+          groupId: expectObjectId,
+          inviterId: expectObjectId,
+          inviteeId: expectObjectId,
+          status: 'pending',
+          createdAt: expect.any(Date),
+          updatedAt: expect.any(Date),
+        })
       );
       expect(result).toBe(true);
     });

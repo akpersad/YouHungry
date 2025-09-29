@@ -2,7 +2,13 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { useAuth } from '@clerk/nextjs';
 import GroupsPage from '../page';
-import { useGroups, useCreateGroup } from '@/hooks/api/useGroups';
+import {
+  useGroups,
+  useCreateGroup,
+  useGroupInvitations,
+  useAcceptGroupInvitation,
+  useDeclineGroupInvitation,
+} from '@/hooks/api/useGroups';
 import { toast } from 'react-hot-toast';
 
 // Mock dependencies
@@ -28,6 +34,17 @@ const mockUseGroups = useGroups as jest.MockedFunction<typeof useGroups>;
 const mockUseCreateGroup = useCreateGroup as jest.MockedFunction<
   typeof useCreateGroup
 >;
+const mockUseGroupInvitations = useGroupInvitations as jest.MockedFunction<
+  typeof useGroupInvitations
+>;
+const mockUseAcceptGroupInvitation =
+  useAcceptGroupInvitation as jest.MockedFunction<
+    typeof useAcceptGroupInvitation
+  >;
+const mockUseDeclineGroupInvitation =
+  useDeclineGroupInvitation as jest.MockedFunction<
+    typeof useDeclineGroupInvitation
+  >;
 const mockToast = toast as jest.Mocked<typeof toast>;
 
 const mockGroups = [
@@ -37,6 +54,7 @@ const mockGroups = [
     description: 'A test group',
     memberIds: ['user1'],
     adminIds: ['user1'],
+    collectionIds: [],
     members: [
       {
         _id: 'user1',
@@ -54,6 +72,7 @@ const mockGroups = [
     description: 'Food enthusiasts group',
     memberIds: ['user1', 'user2'],
     adminIds: ['user1'],
+    collectionIds: [],
     members: [
       {
         _id: 'user1',
@@ -108,12 +127,28 @@ describe('GroupsPage', () => {
       mutateAsync: jest.fn(),
       isPending: false,
     });
+
+    mockUseGroupInvitations.mockReturnValue({
+      data: [],
+      isLoading: false,
+      error: null,
+    });
+
+    mockUseAcceptGroupInvitation.mockReturnValue({
+      mutateAsync: jest.fn(),
+      isPending: false,
+    });
+
+    mockUseDeclineGroupInvitation.mockReturnValue({
+      mutateAsync: jest.fn(),
+      isPending: false,
+    });
   });
 
   it('renders groups page with correct title', () => {
     render(<GroupsPage />);
 
-    expect(screen.getByText('Groups')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Groups' })).toBeInTheDocument();
     expect(
       screen.getByText('Collaborate with friends on restaurant decisions')
     ).toBeInTheDocument();
@@ -198,8 +233,9 @@ describe('GroupsPage', () => {
     fireEvent.click(addButton);
 
     // Submit form
-    const submitButton = screen.getByText('Create Group');
-    fireEvent.click(submitButton);
+    const form = screen.getByRole('form');
+    const submitButton = form.querySelector('button[type="submit"]');
+    fireEvent.click(submitButton!);
 
     await waitFor(() => {
       expect(mockMutateAsync).toHaveBeenCalledWith({
@@ -219,7 +255,7 @@ describe('GroupsPage', () => {
     render(<GroupsPage />);
 
     // Should still show the page structure
-    expect(screen.getByText('Groups')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Groups' })).toBeInTheDocument();
     expect(screen.getByText('Create Group')).toBeInTheDocument();
   });
 
@@ -314,7 +350,7 @@ describe('GroupsPage', () => {
 
     render(<GroupsPage />);
 
-    expect(screen.getByText('Create Group')).toBeInTheDocument();
+    expect(screen.getAllByText('Create Group')).toHaveLength(2); // Header button and empty state button
   });
 
   it('handles group creation error', async () => {
@@ -336,8 +372,9 @@ describe('GroupsPage', () => {
     const nameInput = screen.getByLabelText('Group Name *');
     fireEvent.change(nameInput, { target: { value: 'New Group' } });
 
-    const submitButton = screen.getByText('Create Group');
-    fireEvent.click(submitButton);
+    const form = screen.getByRole('form');
+    const submitButton = form.querySelector('button[type="submit"]');
+    fireEvent.click(submitButton!);
 
     await waitFor(() => {
       expect(mockToast.error).toHaveBeenCalledWith(
@@ -365,8 +402,9 @@ describe('GroupsPage', () => {
     const nameInput = screen.getByLabelText('Group Name *');
     fireEvent.change(nameInput, { target: { value: 'New Group' } });
 
-    const submitButton = screen.getByText('Create Group');
-    fireEvent.click(submitButton);
+    const form = screen.getByRole('form');
+    const submitButton = form.querySelector('button[type="submit"]');
+    fireEvent.click(submitButton!);
 
     await waitFor(() => {
       expect(mockToast.success).toHaveBeenCalledWith(
@@ -406,8 +444,9 @@ describe('GroupsPage', () => {
     const addButton = screen.getByText('Add');
     fireEvent.click(addButton);
 
-    const submitButton = screen.getByText('Create Group');
-    fireEvent.click(submitButton);
+    const form = screen.getByRole('form');
+    const submitButton = form.querySelector('button[type="submit"]');
+    fireEvent.click(submitButton!);
 
     await waitFor(() => {
       expect(mockToast.success).toHaveBeenCalledWith(

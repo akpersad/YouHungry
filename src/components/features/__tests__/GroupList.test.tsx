@@ -120,7 +120,6 @@ describe('GroupList', () => {
     );
 
     // Check that creation dates are displayed (format may vary by locale/timezone)
-    expect(screen.getByText(/Created/)).toBeInTheDocument();
     expect(screen.getAllByText(/Created/)).toHaveLength(2);
   });
 

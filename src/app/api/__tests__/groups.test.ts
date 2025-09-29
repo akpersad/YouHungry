@@ -54,8 +54,8 @@ const mockGroup = {
   adminIds: ['507f1f77bcf86cd799439011'],
   memberIds: ['507f1f77bcf86cd799439011'],
   collectionIds: [],
-  createdAt: new Date(),
-  updatedAt: new Date(),
+  createdAt: new Date('2025-09-29T03:58:07.936Z'),
+  updatedAt: new Date('2025-09-29T03:58:07.936Z'),
 };
 
 const mockMembers = [
@@ -82,7 +82,13 @@ describe('Groups API Routes', () => {
       const data = await response.json();
 
       expect(response.status).toBe(200);
-      expect(data.groups).toEqual([mockGroup]);
+      expect(data.groups).toEqual([
+        {
+          ...mockGroup,
+          createdAt: mockGroup.createdAt.toISOString(),
+          updatedAt: mockGroup.updatedAt.toISOString(),
+        },
+      ]);
       expect(getGroupsByUserId).toHaveBeenCalledWith(mockUser._id);
     });
 
@@ -123,7 +129,11 @@ describe('Groups API Routes', () => {
       const data = await response.json();
 
       expect(response.status).toBe(201);
-      expect(data.group).toEqual(mockGroup);
+      expect(data.group).toEqual({
+        ...mockGroup,
+        createdAt: mockGroup.createdAt.toISOString(),
+        updatedAt: mockGroup.updatedAt.toISOString(),
+      });
       expect(createGroup).toHaveBeenCalledWith(
         'Test Group',
         'A test group',
@@ -201,6 +211,8 @@ describe('Groups API Routes', () => {
       expect(data.group).toEqual({
         ...mockGroup,
         members: mockMembers,
+        createdAt: mockGroup.createdAt.toISOString(),
+        updatedAt: mockGroup.updatedAt.toISOString(),
       });
     });
 
