@@ -1,4 +1,5 @@
 import React from 'react';
+import Image from 'next/image';
 
 interface UserAvatarProps {
   name: string;
@@ -72,10 +73,11 @@ export default function UserAvatar({
       `}
     >
       {shouldShowImage && (
-        <img
+        <Image
           src={profilePicture}
           alt={`${name}'s profile`}
-          className="w-full h-full object-cover"
+          fill
+          className="object-cover"
           onLoad={() => setImageLoaded(true)}
           onError={() => setImageError(true)}
         />
