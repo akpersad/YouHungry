@@ -1,137 +1,164 @@
 @import 'tailwindcss';
 
+/* Neumorphic Design System - Sophisticated Monochrome with Strategic Accents */
+
+/* Default to system preference */
 :root {
-  /* Design System Colors - Infrared Accent System */
-  /* Primary Colors (for backgrounds/headings) */
-  --color-primary: #ff3366; /* Vibrant Infrared */
-  --color-primary-light: #ff6699;
-  --color-primary-dark: #cc1144;
-  --color-secondary: #ff4477; /* Muted Infrared */
-  --color-secondary-light: #ff6699;
-  --color-secondary-dark: #cc1144;
-  --color-accent: #ff3366; /* Primary Infrared Accent */
-  --color-accent-light: #ff6699;
-  --color-accent-dark: #cc1144;
-
-  /* Secondary Colors (for accents/buttons) */
-  --color-warm-yellow: #ffd23f;
-  --color-creamy-off-white: #fff8e1;
-
-  /* Text Colors */
-  --color-text: #222222; /* Dark Gray/Black */
-  --color-text-light: #4a4a4a;
-  --color-text-muted: #6b6b6b;
-  --color-text-white: #ffffff; /* Pure White for dark backgrounds */
-
-  /* Background Colors - Monochrome System */
-  --color-background: #fafafa; /* Off-white */
-  --color-background-light: #ffffff;
-  --color-background-dark: #f5f5f5;
-  --color-surface: #ffffff;
-  --color-surface-light: #fafafa;
-  --color-surface-dark: #f5f5f5;
-
-  /* Border Colors */
-  --color-border: #e0e0e0;
-  --color-border-light: #f0f0f0;
-  --color-border-dark: #d0d0d0;
-
-  /* Status Colors */
-  --color-success: #22c55e;
-  --color-warning: #f59e0b;
-  --color-error: #ef4444;
-  --color-info: #3b82f6;
-
-  /* Spacing Scale */
-  --spacing-xs: 0.25rem;
-  --spacing-sm: 0.5rem;
-  --spacing-md: 1rem;
-  --spacing-lg: 1.5rem;
-  --spacing-xl: 2rem;
-  --spacing-2xl: 3rem;
-  --spacing-3xl: 4rem;
-
-  /* Typography Scale */
-  --text-xs: 0.75rem;
-  --text-sm: 0.875rem;
-  --text-base: 1rem;
-  --text-lg: 1.125rem;
-  --text-xl: 1.25rem;
-  --text-2xl: 1.5rem;
-  --text-3xl: 1.875rem;
-  --text-4xl: 2.25rem;
-
-  /* Border Radius */
-  --radius-sm: 0.25rem;
-  --radius-md: 0.375rem;
-  --radius-lg: 0.5rem;
-  --radius-xl: 0.75rem;
-  --radius-2xl: 1rem;
-  --radius-full: 9999px;
-
-  /* Shadows */
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --shadow-lg:
-    0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-  --shadow-xl:
-    0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  color-scheme: light dark;
 }
 
-@theme inline {
-  /* Color System */
-  --color-primary: var(--color-primary);
-  --color-primary-light: var(--color-primary-light);
-  --color-primary-dark: var(--color-primary-dark);
-  --color-secondary: var(--color-secondary);
-  --color-secondary-light: var(--color-secondary-light);
-  --color-secondary-dark: var(--color-secondary-dark);
-  --color-accent: var(--color-accent);
-  --color-accent-light: var(--color-accent-light);
-  --color-accent-dark: var(--color-accent-dark);
-  --color-text: var(--color-text);
-  --color-text-light: var(--color-text-light);
-  --color-text-muted: var(--color-text-muted);
-  --color-background: var(--color-background);
-  --color-background-light: var(--color-background-light);
-  --color-background-dark: var(--color-background-dark);
-  --color-surface: var(--color-surface);
-  --color-surface-light: var(--color-surface-light);
-  --color-surface-dark: var(--color-surface-dark);
-  --color-border: var(--color-border);
-  --color-border-light: var(--color-border-light);
-  --color-border-dark: var(--color-border-dark);
-  --color-success: var(--color-success);
-  --color-warning: var(--color-warning);
-  --color-error: var(--color-error);
-  --color-info: var(--color-info);
+/* Light Mode Variables - Shades of White & Gray */
+@media (prefers-color-scheme: light) {
+  :root {
+    /* Base Colors (Monochrome Foundation) */
+    --bg-primary: #fafafa; /* Main background - off-white */
+    --bg-secondary: #ffffff; /* Card surfaces - pure white */
+    --bg-tertiary: #f5f5f5; /* Secondary backgrounds - light gray */
+    --bg-quaternary: #e5e5e5; /* Borders, dividers - medium gray */
+    --bg-quinary: #d1d1d1; /* Stronger borders - dark gray */
 
-  /* Typography */
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+    /* Strategic Accent Colors - Infrared */
+    --accent-primary: #ff3366; /* Vibrant infrared - primary actions */
+    --accent-primary-light: #ff6699; /* Light infrared - hover states */
+    --accent-primary-dark: #cc1144; /* Dark infrared - pressed states */
+    --accent-primary-muted: #ff4477; /* Muted infrared - subtle highlights */
 
-  /* Spacing */
-  --spacing-xs: var(--spacing-xs);
-  --spacing-sm: var(--spacing-sm);
-  --spacing-md: var(--spacing-md);
-  --spacing-lg: var(--spacing-lg);
-  --spacing-xl: var(--spacing-xl);
-  --spacing-2xl: var(--spacing-2xl);
-  --spacing-3xl: var(--spacing-3xl);
+    /* Text Colors */
+    --text-primary: #1a1a1a; /* Primary text - high contrast */
+    --text-secondary: #4a4a4a; /* Secondary text - body text */
+    --text-tertiary: #8a8a8a; /* Tertiary text - muted */
+    --text-inverse: #ffffff; /* Text on dark backgrounds */
 
-  /* Border Radius */
-  --radius-sm: var(--radius-sm);
-  --radius-md: var(--radius-md);
-  --radius-lg: var(--radius-lg);
-  --radius-xl: var(--radius-xl);
-  --radius-2xl: var(--radius-2xl);
-  --radius-full: var(--radius-full);
+    /* Enhanced Shadow & Depth System */
+    --shadow-subtle: 0 2px 8px rgba(0, 0, 0, 0.08); /* Light elevation, subtle depth */
+    --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.12); /* Card elevation, natural depth */
+    --shadow-strong: 0 8px 32px rgba(0, 0, 0, 0.16); /* High elevation, dramatic depth */
+    --shadow-inset: inset 0 2px 4px rgba(0, 0, 0, 0.06); /* Pressed states, subtle indentation */
+    --shadow-layered:
+      0 2px 8px rgba(0, 0, 0, 0.08), 0 8px 32px rgba(0, 0, 0, 0.12); /* Complex depth */
+    --shadow-glow: 0 0 20px rgba(255, 51, 102, 0.15); /* Infrared accent glow */
 
-  /* Shadows */
-  --shadow-sm: var(--shadow-sm);
-  --shadow-md: var(--shadow-md);
-  --shadow-lg: var(--shadow-lg);
-  --shadow-xl: var(--shadow-xl);
+    /* Light Mode Neumorphic Shadows */
+    --shadow-neumorphic-light:
+      inset 2px 2px 4px rgba(255, 255, 255, 0.9),
+      inset -2px -2px 4px rgba(0, 0, 0, 0.08);
+    --shadow-neumorphic-elevated:
+      4px 4px 12px rgba(0, 0, 0, 0.08), -4px -4px 12px rgba(255, 255, 255, 0.9);
+    --shadow-neumorphic-pressed:
+      inset 4px 4px 8px rgba(0, 0, 0, 0.08),
+      inset -4px -4px 8px rgba(255, 255, 255, 0.9);
+
+    /* Status Colors */
+    --color-success: #22c55e;
+    --color-warning: #f59e0b;
+    --color-error: #ef4444;
+    --color-info: #3b82f6;
+
+    /* Spacing Scale */
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+    --spacing-2xl: 3rem;
+    --spacing-3xl: 4rem;
+
+    /* Typography Scale */
+    --text-xs: 0.75rem;
+    --text-sm: 0.875rem;
+    --text-base: 1rem;
+    --text-lg: 1.125rem;
+    --text-xl: 1.25rem;
+    --text-2xl: 1.5rem;
+    --text-3xl: 1.875rem;
+    --text-4xl: 2.25rem;
+
+    /* Border Radius */
+    --radius-sm: 0.25rem;
+    --radius-md: 0.375rem;
+    --radius-lg: 0.5rem;
+    --radius-xl: 0.75rem;
+    --radius-2xl: 1rem;
+    --radius-3xl: 1.5rem;
+    --radius-full: 9999px;
+  }
+}
+
+/* Dark Mode Variables - Shades of Black & Gray */
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Base Colors (Monochrome Foundation) */
+    --bg-primary: #000000; /* Deepest background - pure black */
+    --bg-secondary: #1a1a1a; /* Primary dark background - charcoal */
+    --bg-tertiary: #2d2d2d; /* Card surfaces - dark gray */
+    --bg-quaternary: #404040; /* Secondary surfaces - medium dark gray */
+    --bg-quinary: #666666; /* Borders, dividers - light dark gray */
+
+    /* Strategic Accent Colors - Infrared */
+    --accent-primary: #ff3366; /* Vibrant infrared - primary actions */
+    --accent-primary-light: #ff6699; /* Light infrared - hover states */
+    --accent-primary-dark: #cc1144; /* Dark infrared - pressed states */
+    --accent-primary-muted: #ff4477; /* Muted infrared - subtle highlights */
+
+    /* Text Colors */
+    --text-primary: #ffffff; /* Primary text - high contrast */
+    --text-secondary: #d1d1d1; /* Secondary text - body text */
+    --text-tertiary: #8a8a8a; /* Tertiary text - muted */
+    --text-inverse: #1a1a1a; /* Text on light backgrounds */
+
+    /* Enhanced Shadow & Depth System */
+    --shadow-subtle: 0 2px 8px rgba(0, 0, 0, 0.4); /* Light elevation, subtle depth */
+    --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.5); /* Card elevation, natural depth */
+    --shadow-strong: 0 8px 32px rgba(0, 0, 0, 0.6); /* High elevation, dramatic depth */
+    --shadow-inset: inset 0 2px 4px rgba(0, 0, 0, 0.3); /* Pressed states, subtle indentation */
+    --shadow-layered:
+      0 2px 8px rgba(0, 0, 0, 0.4), 0 8px 32px rgba(0, 0, 0, 0.5); /* Complex depth */
+    --shadow-glow: 0 0 20px rgba(255, 51, 102, 0.25); /* Infrared accent glow (stronger in dark mode) */
+
+    /* Dark Mode Neumorphic Shadows */
+    --shadow-neumorphic-dark:
+      inset 2px 2px 4px rgba(255, 255, 255, 0.05),
+      inset -2px -2px 4px rgba(0, 0, 0, 0.4);
+    --shadow-neumorphic-elevated:
+      4px 4px 12px rgba(0, 0, 0, 0.4), -4px -4px 12px rgba(255, 255, 255, 0.05);
+    --shadow-neumorphic-pressed:
+      inset 4px 4px 8px rgba(0, 0, 0, 0.4),
+      inset -4px -4px 8px rgba(255, 255, 255, 0.05);
+
+    /* Status Colors */
+    --color-success: #22c55e;
+    --color-warning: #f59e0b;
+    --color-error: #ef4444;
+    --color-info: #3b82f6;
+
+    /* Spacing Scale */
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+    --spacing-2xl: 3rem;
+    --spacing-3xl: 4rem;
+
+    /* Typography Scale */
+    --text-xs: 0.75rem;
+    --text-sm: 0.875rem;
+    --text-base: 1rem;
+    --text-lg: 1.125rem;
+    --text-xl: 1.25rem;
+    --text-2xl: 1.5rem;
+    --text-3xl: 1.875rem;
+    --text-4xl: 2.25rem;
+
+    /* Border Radius */
+    --radius-sm: 0.25rem;
+    --radius-md: 0.375rem;
+    --radius-lg: 0.5rem;
+    --radius-xl: 0.75rem;
+    --radius-2xl: 1rem;
+    --radius-3xl: 1.5rem;
+    --radius-full: 9999px;
+  }
 }
 
 /* Base Styles */
@@ -144,10 +171,10 @@ html {
 }
 
 body {
-  background: var(--color-background);
-  color: var(--color-text);
+  background: var(--bg-primary);
+  color: var(--text-primary);
   font-family:
-    var(--font-sans),
+    var(--font-geist-sans),
     system-ui,
     -apple-system,
     sans-serif;
@@ -156,135 +183,286 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Button Base Styles */
+/* Neumorphic Button System */
 .btn-base {
-  @apply inline-flex items-center justify-center rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
+  @apply inline-flex items-center justify-center rounded-xl font-medium transition-all duration-200;
+  @apply focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
+  border: none;
+  cursor: pointer;
 }
 
+/* Primary Button - Neumorphic */
 .btn-primary {
-  background-color: var(--color-primary);
-  color: var(--color-text-white);
+  background: var(--accent-primary);
+  color: var(--text-inverse);
+  box-shadow: var(--shadow-neumorphic-elevated);
+  border-radius: var(--radius-xl);
+  padding: 12px 24px;
+  font-weight: 600;
+  font-size: var(--text-sm);
 }
 
 .btn-primary:hover {
-  background-color: var(--color-primary-dark);
+  background: var(--accent-primary-light);
+  box-shadow: var(--shadow-neumorphic-elevated);
+  transform: translateY(-1px);
+}
+
+.btn-primary:active {
+  background: var(--accent-primary-dark);
+  box-shadow: var(--shadow-neumorphic-pressed);
+  transform: translateY(0);
 }
 
 .btn-primary:focus {
-  --tw-ring-color: var(--color-primary);
+  --tw-ring-color: var(--accent-primary);
+  --tw-ring-opacity: 0.3;
 }
 
+/* Secondary Button - Neumorphic */
 .btn-secondary {
-  background-color: var(--color-secondary);
-  color: var(--color-text-white);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-neumorphic-light);
+  border: 1px solid var(--bg-quaternary);
+  border-radius: var(--radius-xl);
+  padding: 12px 24px;
+  font-weight: 500;
+  font-size: var(--text-sm);
 }
 
 .btn-secondary:hover {
-  background-color: var(--color-secondary-dark);
+  background: var(--bg-tertiary);
+  box-shadow: var(--shadow-neumorphic-elevated);
+  border-color: var(--accent-primary);
+  transform: translateY(-1px);
+}
+
+.btn-secondary:active {
+  box-shadow: var(--shadow-neumorphic-pressed);
+  transform: translateY(0);
 }
 
 .btn-secondary:focus {
-  --tw-ring-color: var(--color-secondary);
+  --tw-ring-color: var(--accent-primary);
+  --tw-ring-opacity: 0.3;
 }
 
+/* Accent Button - Neumorphic */
 .btn-accent {
-  background-color: var(--color-accent);
-  color: var(--color-text-white);
+  background: var(--accent-primary);
+  color: var(--text-inverse);
+  box-shadow: var(--shadow-neumorphic-elevated);
+  border-radius: var(--radius-xl);
+  padding: 12px 24px;
+  font-weight: 600;
+  font-size: var(--text-sm);
 }
 
 .btn-accent:hover {
-  background-color: var(--color-accent-dark);
+  background: var(--accent-primary-light);
+  box-shadow: var(--shadow-neumorphic-elevated);
+  transform: translateY(-1px);
+}
+
+.btn-accent:active {
+  background: var(--accent-primary-dark);
+  box-shadow: var(--shadow-neumorphic-pressed);
+  transform: translateY(0);
 }
 
 .btn-accent:focus {
-  --tw-ring-color: var(--color-accent);
+  --tw-ring-color: var(--accent-primary);
+  --tw-ring-opacity: 0.3;
 }
 
+/* Warm Button - Neumorphic */
 .btn-warm {
-  background-color: var(--color-warm-yellow);
-  color: var(--color-text);
+  background: #ffd23f;
+  color: var(--text-primary);
+  box-shadow: var(--shadow-neumorphic-elevated);
+  border-radius: var(--radius-xl);
+  padding: 12px 24px;
+  font-weight: 600;
+  font-size: var(--text-sm);
 }
 
 .btn-warm:hover {
-  background-color: #f4c430;
+  background: #f4c430;
+  box-shadow: var(--shadow-neumorphic-elevated);
+  transform: translateY(-1px);
+}
+
+.btn-warm:active {
+  background: #e6b800;
+  box-shadow: var(--shadow-neumorphic-pressed);
+  transform: translateY(0);
 }
 
 .btn-warm:focus {
-  --tw-ring-color: var(--color-warm-yellow);
+  --tw-ring-color: #ffd23f;
+  --tw-ring-opacity: 0.3;
 }
 
+/* Outline Button - Neumorphic */
 .btn-outline {
-  border: 2px solid var(--color-primary);
-  color: var(--color-primary);
-  background-color: transparent;
+  background: transparent;
+  color: var(--accent-primary);
+  border: 2px solid var(--accent-primary);
+  box-shadow: var(--shadow-neumorphic-light);
+  border-radius: var(--radius-xl);
+  padding: 10px 22px;
+  font-weight: 600;
+  font-size: var(--text-sm);
 }
 
 .btn-outline:hover {
-  background-color: var(--color-primary);
-  color: var(--color-text-white);
+  background: var(--accent-primary);
+  color: var(--text-inverse);
+  box-shadow: var(--shadow-neumorphic-elevated);
+  transform: translateY(-1px);
+}
+
+.btn-outline:active {
+  box-shadow: var(--shadow-neumorphic-pressed);
+  transform: translateY(0);
 }
 
 .btn-outline:focus {
-  --tw-ring-color: var(--color-primary);
+  --tw-ring-color: var(--accent-primary);
+  --tw-ring-opacity: 0.3;
 }
 
+/* Outline Accent Button - Neumorphic */
 .btn-outline-accent {
-  border: 2px solid var(--color-accent);
-  color: var(--color-accent);
-  background-color: transparent;
+  background: transparent;
+  color: var(--accent-primary);
+  border: 2px solid var(--accent-primary);
+  box-shadow: var(--shadow-neumorphic-light);
+  border-radius: var(--radius-xl);
+  padding: 10px 22px;
+  font-weight: 600;
+  font-size: var(--text-sm);
 }
 
 .btn-outline-accent:hover {
-  background-color: var(--color-accent);
-  color: var(--color-text-white);
+  background: var(--accent-primary);
+  color: var(--text-inverse);
+  box-shadow: var(--shadow-neumorphic-elevated);
+  transform: translateY(-1px);
+}
+
+.btn-outline-accent:active {
+  box-shadow: var(--shadow-neumorphic-pressed);
+  transform: translateY(0);
 }
 
 .btn-outline-accent:focus {
-  --tw-ring-color: var(--color-accent);
+  --tw-ring-color: var(--accent-primary);
+  --tw-ring-opacity: 0.3;
 }
 
+/* Button Sizes */
 .btn-sm {
-  @apply px-3 py-1.5 text-sm;
+  padding: 8px 16px;
+  font-size: var(--text-xs);
+  border-radius: var(--radius-lg);
 }
 
 .btn-md {
-  @apply px-4 py-2 text-base;
+  padding: 12px 24px;
+  font-size: var(--text-sm);
+  border-radius: var(--radius-xl);
 }
 
 .btn-lg {
-  @apply px-6 py-3 text-lg;
+  padding: 16px 32px;
+  font-size: var(--text-base);
+  border-radius: var(--radius-2xl);
 }
 
-/* Input Base Styles */
+/* Neumorphic Input System */
 .input-base {
-  @apply w-full rounded-lg border px-3 py-2 focus:outline-none focus:ring-2;
-  background-color: var(--color-surface);
-  border-color: var(--color-border);
-  color: var(--color-text);
-}
-
-.input-base::placeholder {
-  color: var(--color-text-muted);
+  background: var(--bg-secondary);
+  border: 1px solid var(--bg-quaternary);
+  border-radius: var(--radius-xl);
+  padding: 12px 16px;
+  font-size: var(--text-base);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-neumorphic-light);
+  transition: all 0.2s ease;
+  width: 100%;
 }
 
 .input-base:focus {
-  border-color: var(--color-primary);
-  --tw-ring-color: var(--color-primary);
-  --tw-ring-opacity: 0.2;
+  outline: none;
+  box-shadow: var(--shadow-neumorphic-elevated);
+  border-color: var(--accent-primary);
+  background: var(--bg-secondary);
 }
 
-/* Card Base Styles */
+.input-base:hover {
+  border-color: var(--bg-quinary);
+  box-shadow: var(--shadow-neumorphic-light);
+}
+
+.input-base::placeholder {
+  color: var(--text-tertiary);
+  font-weight: 400;
+}
+
+.input-base:focus::placeholder {
+  color: var(--text-secondary);
+}
+
+/* Input Error States */
+.input-error {
+  border-color: var(--color-error);
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.input-error:focus {
+  --tw-ring-color: var(--color-error);
+  --tw-ring-opacity: 0.3;
+}
+
+/* Input Success States */
+.input-success {
+  border-color: var(--color-success);
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+}
+
+.input-success:focus {
+  --tw-ring-color: var(--color-success);
+  --tw-ring-opacity: 0.3;
+}
+
+/* Neumorphic Card System */
 .card-base {
-  @apply rounded-xl border shadow-sm;
-  background-color: var(--color-surface);
-  border-color: var(--color-border);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-subtle);
+  border: 1px solid var(--bg-quaternary);
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.card-base:hover {
+  box-shadow: var(--shadow-medium);
+  transform: translateY(-2px);
+  border-color: var(--accent-primary);
 }
 
 .card-elevated {
-  @apply shadow-md;
+  box-shadow: var(--shadow-medium);
 }
 
-/* Modal and Overlay Styles */
+.card-elevated:hover {
+  box-shadow: var(--shadow-strong);
+  transform: translateY(-4px);
+}
+
+/* Neumorphic Modal System */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -296,28 +474,32 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  backdrop-filter: blur(4px);
 }
 
 .modal-content {
-  background-color: var(--color-surface);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-xl);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-3xl);
+  box-shadow: var(--shadow-layered);
+  border: 1px solid var(--bg-quaternary);
   max-width: 90vw;
   max-height: 90vh;
   overflow: auto;
   z-index: 1001;
 }
 
-/* Clerk Modal Overrides */
+/* Clerk Modal Overrides - Neumorphic */
 .cl-modalContent {
-  background-color: var(--color-surface) !important;
-  border-radius: var(--radius-xl) !important;
-  box-shadow: var(--shadow-xl) !important;
+  background: var(--bg-secondary) !important;
+  border-radius: var(--radius-3xl) !important;
+  box-shadow: var(--shadow-layered) !important;
+  border: 1px solid var(--bg-quaternary) !important;
 }
 
 .cl-modalOverlay {
   background-color: rgba(0, 0, 0, 0.5) !important;
   z-index: 1000 !important;
+  backdrop-filter: blur(4px) !important;
 }
 
 /* Text Color Utilities */
@@ -337,20 +519,24 @@ body {
   color: var(--color-info);
 }
 
-.text-text {
-  color: var(--color-text);
+.text-primary {
+  color: var(--text-primary);
 }
 
-.text-text-light {
-  color: var(--color-text-light);
+.text-secondary {
+  color: var(--text-secondary);
 }
 
-.text-text-muted {
-  color: var(--color-text-muted);
+.text-tertiary {
+  color: var(--text-tertiary);
 }
 
-.text-text-white {
-  color: var(--color-text-white);
+.text-inverse {
+  color: var(--text-inverse);
+}
+
+.text-accent {
+  color: var(--accent-primary);
 }
 
 /* Border Color Utilities */
@@ -370,21 +556,266 @@ body {
   border-color: var(--color-info);
 }
 
-/* Mobile-first responsive utilities */
+.border-accent {
+  border-color: var(--accent-primary);
+}
+
+/* Background Color Utilities */
+.bg-primary {
+  background: var(--bg-primary);
+}
+
+.bg-secondary {
+  background: var(--bg-secondary);
+}
+
+.bg-tertiary {
+  background: var(--bg-tertiary);
+}
+
+.bg-accent {
+  background: var(--accent-primary);
+}
+
+/* Shadow Utilities */
+.shadow-neumorphic-light {
+  box-shadow: var(--shadow-neumorphic-light);
+}
+
+.shadow-neumorphic-elevated {
+  box-shadow: var(--shadow-neumorphic-elevated);
+}
+
+.shadow-neumorphic-pressed {
+  box-shadow: var(--shadow-neumorphic-pressed);
+}
+
+.shadow-subtle {
+  box-shadow: var(--shadow-subtle);
+}
+
+.shadow-medium {
+  box-shadow: var(--shadow-medium);
+}
+
+.shadow-strong {
+  box-shadow: var(--shadow-strong);
+}
+
+.shadow-glow {
+  box-shadow: var(--shadow-glow);
+}
+
+/* Typography Utilities */
+.text-xs {
+  font-size: var(--text-xs);
+}
+
+.text-sm {
+  font-size: var(--text-sm);
+}
+
+.text-base {
+  font-size: var(--text-base);
+}
+
+.text-lg {
+  font-size: var(--text-lg);
+}
+
+.text-xl {
+  font-size: var(--text-xl);
+}
+
+.text-2xl {
+  font-size: var(--text-2xl);
+}
+
+.text-3xl {
+  font-size: var(--text-3xl);
+}
+
+.text-4xl {
+  font-size: var(--text-4xl);
+}
+
+/* Font Weight Utilities */
+.font-light {
+  font-weight: 300;
+}
+
+.font-normal {
+  font-weight: 400;
+}
+
+.font-medium {
+  font-weight: 500;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+.font-bold {
+  font-weight: 700;
+}
+
+/* Spacing Utilities */
+.p-xs {
+  padding: var(--spacing-xs);
+}
+
+.p-sm {
+  padding: var(--spacing-sm);
+}
+
+.p-md {
+  padding: var(--spacing-md);
+}
+
+.p-lg {
+  padding: var(--spacing-lg);
+}
+
+.p-xl {
+  padding: var(--spacing-xl);
+}
+
+.p-2xl {
+  padding: var(--spacing-2xl);
+}
+
+.p-3xl {
+  padding: var(--spacing-3xl);
+}
+
+.m-xs {
+  margin: var(--spacing-xs);
+}
+
+.m-sm {
+  margin: var(--spacing-sm);
+}
+
+.m-md {
+  margin: var(--spacing-md);
+}
+
+.m-lg {
+  margin: var(--spacing-lg);
+}
+
+.m-xl {
+  margin: var(--spacing-xl);
+}
+
+.m-2xl {
+  margin: var(--spacing-2xl);
+}
+
+.m-3xl {
+  margin: var(--spacing-3xl);
+}
+
+/* Border Radius Utilities */
+.rounded-sm {
+  border-radius: var(--radius-sm);
+}
+
+.rounded-md {
+  border-radius: var(--radius-md);
+}
+
+.rounded-lg {
+  border-radius: var(--radius-lg);
+}
+
+.rounded-xl {
+  border-radius: var(--radius-xl);
+}
+
+.rounded-2xl {
+  border-radius: var(--radius-2xl);
+}
+
+.rounded-3xl {
+  border-radius: var(--radius-3xl);
+}
+
+.rounded-full {
+  border-radius: var(--radius-full);
+}
+
+/* Container System */
+.container {
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 0 var(--spacing-md);
+}
+
+.container-sm {
+  max-width: 640px;
+}
+
+.container-md {
+  max-width: 768px;
+}
+
+.container-lg {
+  max-width: 1024px;
+}
+
+.container-xl {
+  max-width: 1280px;
+}
+
+/* Responsive Breakpoints */
 @media (max-width: 640px) {
   .container {
-    @apply px-4;
+    padding: 0 var(--spacing-sm);
   }
 }
 
 @media (min-width: 641px) {
   .container {
-    @apply px-6;
+    padding: 0 var(--spacing-md);
   }
 }
 
 @media (min-width: 1024px) {
   .container {
-    @apply px-8;
+    padding: 0 var(--spacing-lg);
   }
+}
+
+@media (min-width: 1280px) {
+  .container {
+    padding: 0 var(--spacing-xl);
+  }
+}
+
+/* Focus States for Accessibility */
+.focus-visible {
+  @apply focus:outline-none focus:ring-2 focus:ring-offset-2;
+  --tw-ring-color: var(--accent-primary);
+  --tw-ring-opacity: 0.3;
+}
+
+/* Hover States */
+.hover-lift {
+  transition: all 0.2s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-neumorphic-elevated);
+}
+
+/* Active States */
+.active-press {
+  transition: all 0.1s ease;
+}
+
+.active-press:active {
+  transform: scale(0.98);
 }

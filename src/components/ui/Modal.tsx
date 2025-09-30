@@ -45,50 +45,24 @@ export function Modal({
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div
-        className={`modal-content ${className}`}
+        className={`modal-content p-lg ${className}`}
         onClick={(e) => e.stopPropagation()}
-        style={{
-          backgroundColor: 'var(--color-surface)',
-          borderRadius: 'var(--radius-xl)',
-          boxShadow: 'var(--shadow-xl)',
-          maxWidth: '90vw',
-          maxHeight: '90vh',
-          overflow: 'auto',
-          zIndex: 1001,
-          padding: '1.5rem',
-          position: 'relative',
-        }}
       >
         {/* Header */}
         {(title || showCloseButton) && (
           <div
-            className="flex items-center justify-between mb-4"
-            style={{ borderBottom: '1px solid var(--color-border)' }}
+            className="flex items-center justify-between mb-4 pb-4 border-b"
+            style={{ borderColor: 'var(--bg-quaternary)' }}
           >
             {title && (
-              <h2
-                className="text-xl font-semibold"
-                style={{ color: 'var(--color-text)' }}
-              >
-                {title}
-              </h2>
+              <h2 className="text-xl font-semibold text-primary">{title}</h2>
             )}
             {showCloseButton && (
               <Button
                 variant="outline"
                 size="sm"
                 onClick={onClose}
-                className="ml-auto"
-                style={{
-                  border: '1px solid var(--color-border)',
-                  borderRadius: '50%',
-                  width: '2rem',
-                  height: '2rem',
-                  padding: '0',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
+                className="ml-auto rounded-full w-8 h-8 p-0 flex items-center justify-center"
               >
                 ×
               </Button>
@@ -97,7 +71,7 @@ export function Modal({
         )}
 
         {/* Content */}
-        <div style={{ color: 'var(--color-text)' }}>{children}</div>
+        <div className="text-primary">{children}</div>
       </div>
     </div>
   );
