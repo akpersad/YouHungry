@@ -499,12 +499,12 @@ export function calculateTieredConsensus(
     winner = restaurants.find((r) => r._id.toString() === winnerId) || null;
     reasoning = `Clear winner with ${winnerScore} points (${votes.length} votes total)`;
   } else {
-    // Handle tie - for now, pick the first one alphabetically
-    const tiedRestaurantIds = tiedScores.map(([id]) => id).sort();
-    winner =
-      restaurants.find((r) => r._id.toString() === tiedRestaurantIds[0]) ||
-      null;
-    reasoning = `Tie between ${tiedScores.length} restaurants with ${winnerScore} points each. Selected ${winner?.name || 'unknown'} alphabetically.`;
+    // Handle tie - select randomly from tied restaurants
+    const tiedRestaurantIds = tiedScores.map(([id]) => id);
+    const randomIndex = Math.floor(Math.random() * tiedRestaurantIds.length);
+    const selectedId = tiedRestaurantIds[randomIndex];
+    winner = restaurants.find((r) => r._id.toString() === selectedId) || null;
+    reasoning = `Tie between ${tiedScores.length} restaurants with ${winnerScore} points each. Selected ${winner?.name || 'unknown'} randomly.`;
   }
 
   return { winner, reasoning, voteBreakdown };
