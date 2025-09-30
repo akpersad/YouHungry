@@ -31,7 +31,7 @@ export function BottomNavigation({ items, className }: BottomNavigationProps) {
         borderRadius: 'var(--radius-3xl) var(--radius-3xl) 0 0',
       }}
     >
-      <div className="flex justify-around items-center">
+      <div className="flex justify-around items-center h-full">
         {items.map((item) => (
           <button
             key={item.id}
@@ -39,18 +39,21 @@ export function BottomNavigation({ items, className }: BottomNavigationProps) {
             className={cn(
               'flex flex-col items-center justify-center',
               'min-w-0 flex-1 py-2 px-3 rounded-xl',
-              'transition-all duration-200',
+              'transition-all duration-200 touch-target',
               'focus:outline-none focus:ring-2 focus:ring-offset-2',
+              'active:scale-95',
               {
                 'bg-accent text-inverse shadow-neumorphic-pressed':
                   item.isActive,
-                'text-secondary hover:bg-tertiary hover:text-primary':
+                'text-secondary hover:bg-tertiary hover:text-primary hover:scale-105':
                   !item.isActive,
               }
             )}
             style={{
-              minHeight: '44px', // Touch target size
+              minHeight: '60px', // Larger touch target for mobile
+              minWidth: '60px',
             }}
+            aria-label={item.label}
           >
             <div className="flex items-center justify-center mb-1">
               {item.icon}

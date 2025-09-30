@@ -27,12 +27,12 @@ export function FloatingActionButton({
   const getPositionClasses = () => {
     switch (position) {
       case 'bottom-left':
-        return 'bottom-24 left-4';
+        return 'bottom-28 left-4'; // Above bottom navigation
       case 'bottom-center':
-        return 'bottom-24 left-1/2 transform -translate-x-1/2';
+        return 'bottom-28 left-1/2 transform -translate-x-1/2';
       case 'bottom-right':
       default:
-        return 'bottom-24 right-4';
+        return 'bottom-28 right-4'; // Above bottom navigation
     }
   };
 

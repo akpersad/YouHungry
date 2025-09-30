@@ -787,28 +787,190 @@ body {
   max-width: 1280px;
 }
 
-/* Responsive Breakpoints */
+/* Mobile-First Responsive Breakpoints */
+/* Mobile: 320px - 640px */
 @media (max-width: 640px) {
   .container {
     padding: 0 var(--spacing-sm);
   }
+
+  /* Mobile typography scaling */
+  .text-4xl {
+    font-size: 1.75rem; /* 28px instead of 36px */
+    line-height: 2rem;
+  }
+
+  .text-3xl {
+    font-size: 1.5rem; /* 24px instead of 30px */
+    line-height: 1.75rem;
+  }
+
+  .text-2xl {
+    font-size: 1.25rem; /* 20px instead of 24px */
+    line-height: 1.5rem;
+  }
+
+  /* Mobile button sizes */
+  .btn-lg {
+    padding: 14px 28px;
+    font-size: var(--text-sm);
+  }
+
+  .btn-md {
+    padding: 10px 20px;
+    font-size: var(--text-sm);
+  }
+
+  .btn-sm {
+    padding: 8px 14px;
+    font-size: var(--text-xs);
+  }
+
+  /* Mobile card padding */
+  .card-base {
+    margin: 4px 8px;
+  }
+
+  .p-lg {
+    padding: var(--spacing-md);
+  }
+
+  .p-xl {
+    padding: var(--spacing-lg);
+  }
+
+  /* Mobile input sizes */
+  .input-base {
+    padding: 10px 14px;
+    font-size: 16px; /* Prevent zoom on iOS */
+  }
+
+  /* Mobile spacing adjustments */
+  .space-lg {
+    margin: var(--spacing-md);
+  }
+
+  .space-xl {
+    margin: var(--spacing-lg);
+  }
+
+  /* Mobile navigation adjustments */
+  .nav-item {
+    min-height: 44px; /* iOS touch target */
+    padding: 8px 16px;
+  }
 }
 
+/* Tablet: 641px - 768px */
 @media (min-width: 641px) {
   .container {
     padding: 0 var(--spacing-md);
   }
-}
 
-@media (min-width: 1024px) {
-  .container {
-    padding: 0 var(--spacing-lg);
+  /* Tablet navigation */
+  .nav-item {
+    min-height: 48px;
+    padding: 10px 18px;
   }
 }
 
-@media (min-width: 1280px) {
+/* Desktop: 769px - 1024px */
+@media (min-width: 769px) {
+  .container {
+    padding: 0 var(--spacing-lg);
+  }
+
+  /* Desktop navigation */
+  .nav-item {
+    min-height: 48px;
+    padding: 12px 20px;
+  }
+}
+
+/* Large Desktop: 1025px+ */
+@media (min-width: 1025px) {
   .container {
     padding: 0 var(--spacing-xl);
+  }
+
+  /* Large desktop navigation */
+  .nav-item {
+    min-height: 52px;
+    padding: 14px 24px;
+  }
+}
+
+/* Extra Large: 1280px+ */
+@media (min-width: 1280px) {
+  .container {
+    padding: 0 var(--spacing-2xl);
+  }
+}
+
+/* Mobile-specific utilities */
+@media (max-width: 640px) {
+  .mobile-hidden {
+    display: none !important;
+  }
+
+  .mobile-full {
+    width: 100% !important;
+  }
+
+  .mobile-stack {
+    flex-direction: column !important;
+  }
+
+  .mobile-center {
+    text-align: center !important;
+  }
+
+  .mobile-p-0 {
+    padding: 0 !important;
+  }
+
+  .mobile-m-0 {
+    margin: 0 !important;
+  }
+}
+
+/* Touch target utilities */
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+.touch-target-lg {
+  min-height: 48px;
+  min-width: 48px;
+}
+
+/* Mobile-specific component adjustments */
+@media (max-width: 640px) {
+  /* Modal adjustments for mobile */
+  .modal-content {
+    max-width: 95vw;
+    max-height: 90vh;
+    margin: var(--spacing-sm);
+    border-radius: var(--radius-2xl);
+  }
+
+  /* Button adjustments for mobile */
+  .btn-base {
+    min-height: 44px;
+    border-radius: var(--radius-lg);
+  }
+
+  /* Input adjustments for mobile */
+  .input-base {
+    min-height: 44px;
+    border-radius: var(--radius-lg);
+  }
+
+  /* Card adjustments for mobile */
+  .card-base {
+    border-radius: var(--radius-xl);
+    margin: var(--spacing-xs) var(--spacing-sm);
   }
 }
 
