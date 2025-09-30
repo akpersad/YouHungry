@@ -7,11 +7,10 @@ import { RestaurantSearchForm } from '../forms/RestaurantSearchForm';
 import { RestaurantSearchResults } from './RestaurantSearchResults';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
-import {
-  useCollections,
-  useRestaurantSearch,
-  useAddRestaurantToCollection,
-} from '@/hooks/api';
+import { useRestaurantSearch, useAddRestaurantToCollection } from '@/hooks/api';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMemo } from 'react';
+import { toast } from 'react-hot-toast';
 
 interface RestaurantSearchPageProps {
   onAddToCollection?: (restaurant: Restaurant) => void;
@@ -31,6 +30,7 @@ export function RestaurantSearchPage({
   collections: propCollections = [],
 }: RestaurantSearchPageProps) {
   const { user, isLoaded } = useUser();
+  const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRestaurant, setSelectedRestaurant] =
     useState<Restaurant | null>(null);
@@ -52,9 +52,34 @@ export function RestaurantSearchPage({
     distance?: number;
   } | null>(null);
 
-  // Use TanStack Query hooks
-  const { data: collections = [], isLoading: isLoadingCollections } =
-    useCollections(user?.id);
+  // Use TanStack Query hooks - fetch all collections (personal + group)
+  const { data: collectionsData, isLoading: isLoadingCollections } = useQuery({
+    queryKey: ['allCollections', user?.id],
+    queryFn: async () => {
+      const response = await fetch(
+        `/api/collections?userId=${user?.id}&type=all`
+      );
+      if (!response.ok) {
+        throw new Error('Failed to fetch collections');
+      }
+      const data = await response.json();
+      console.log('All collections API response:', data);
+      console.log('Personal collections:', data.collections.personal);
+      console.log('Group collections:', data.collections.group);
+      // Combine personal and group collections into a single array
+      const combined = [
+        ...data.collections.personal,
+        ...data.collections.group,
+      ];
+      console.log('Combined collections:', combined);
+      return combined;
+    },
+    enabled: !!user?.id,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
+  // Handle the collections data structure
+  const collections = useMemo(() => collectionsData || [], [collectionsData]);
 
   const {
     data: restaurants = [],
@@ -126,8 +151,8 @@ export function RestaurantSearchPage({
 
   // Fetch collections if not provided as props
   // Use propCollections if provided, otherwise use TanStack Query data
-  const effectiveCollections =
-    propCollections.length > 0
+  const effectiveCollections = useMemo(() => {
+    return propCollections.length > 0
       ? propCollections.map((prop) => ({
           _id: prop._id as unknown as Collection['_id'],
           name: prop.name,
@@ -138,7 +163,10 @@ export function RestaurantSearchPage({
           createdAt: new Date(),
           updatedAt: new Date(),
         }))
-      : collections;
+      : Array.isArray(collections)
+        ? collections
+        : [];
+  }, [propCollections, collections]);
 
   // Check restaurants in collections when restaurants or collections change
   useEffect(() => {
@@ -175,11 +203,17 @@ export function RestaurantSearchPage({
     const restaurantId = restaurant._id || restaurant.googlePlaceId;
     if (!restaurantId) return new Set<string>();
 
+    // Safety check: ensure collections is an array
+    if (!Array.isArray(collections)) {
+      console.error('collections is not an array:', collections);
+      return new Set<string>();
+    }
+
     const inCollections = new Set<string>();
     console.log('Checking restaurant:', restaurantId.toString());
     console.log(
       'Available collections:',
-      effectiveCollections.map((c) => ({
+      collections.map((c) => ({
         id: c._id.toString(),
         name: c.name,
         restaurantIds: c.restaurantIds,
@@ -187,6 +221,10 @@ export function RestaurantSearchPage({
     );
 
     for (const collection of collections) {
+      console.log(
+        `Checking collection ${collection.name} with restaurantIds:`,
+        collection.restaurantIds
+      );
       const hasRestaurant = collection.restaurantIds.some((restaurantData) => {
         // Handle both old format (string IDs) and new format (objects with _id and googlePlaceId)
         if (typeof restaurantData === 'string') {
@@ -197,34 +235,37 @@ export function RestaurantSearchPage({
             idStr === restaurantIdStr
           );
           return idStr === restaurantIdStr;
-        } else if (
-          restaurantData &&
-          typeof restaurantData === 'object' &&
-          'toString' in restaurantData
-        ) {
-          const idStr = restaurantData.toString();
-          const restaurantIdStr = restaurantId.toString();
-          console.log(
-            `Comparing ObjectId format ${idStr} with ${restaurantIdStr}:`,
-            idStr === restaurantIdStr
-          );
-          return idStr === restaurantIdStr;
         } else if (restaurantData && typeof restaurantData === 'object') {
-          // New format: object with _id and/or googlePlaceId
           const obj = restaurantData as Record<string, unknown>;
-          const matchesId =
-            '_id' in obj &&
-            obj._id &&
-            obj._id.toString() === restaurantId.toString();
-          const matchesGooglePlaceId =
-            'googlePlaceId' in obj &&
-            obj.googlePlaceId &&
-            obj.googlePlaceId === restaurantId.toString();
-          console.log(
-            `Comparing new format ${JSON.stringify(restaurantData)} with ${restaurantId}:`,
-            `_id match: ${matchesId}, googlePlaceId match: ${matchesGooglePlaceId}`
-          );
-          return matchesId || matchesGooglePlaceId;
+          // Check if it's the new format with _id and googlePlaceId properties first
+          if ('_id' in obj || 'googlePlaceId' in obj) {
+            // New format: object with _id and/or googlePlaceId
+            const matchesId =
+              '_id' in obj &&
+              obj._id &&
+              String(obj._id) === String(restaurantId);
+            const matchesGooglePlaceId =
+              'googlePlaceId' in obj &&
+              obj.googlePlaceId &&
+              obj.googlePlaceId === restaurantId;
+            console.log(
+              `Comparing new format ${JSON.stringify(restaurantData)} with ${restaurantId}:`,
+              `_id match: ${matchesId}, googlePlaceId match: ${matchesGooglePlaceId}`
+            );
+            return matchesId || matchesGooglePlaceId;
+          } else if ('toString' in restaurantData) {
+            // ObjectId format
+            const idStr = restaurantData.toString();
+            const restaurantIdStr = restaurantId.toString();
+            console.log(
+              `Comparing ObjectId format ${idStr} with ${restaurantIdStr}:`,
+              idStr === restaurantIdStr
+            );
+            // Also try comparing the string representation
+            return (
+              idStr === restaurantIdStr || idStr === restaurantId.toString()
+            );
+          }
         }
         return false;
       });
@@ -247,7 +288,20 @@ export function RestaurantSearchPage({
     } else {
       console.log('Selected restaurant:', restaurant);
       console.log('Restaurant ID:', restaurant._id);
+      console.log('Restaurant ID type:', typeof restaurant._id);
+      console.log('Restaurant keys:', Object.keys(restaurant));
       setSelectedRestaurant(restaurant);
+
+      // Only proceed if we have valid collections data
+      if (!Array.isArray(effectiveCollections)) {
+        console.error(
+          'effectiveCollections is not an array:',
+          effectiveCollections
+        );
+        setShowAddToCollectionModal(true);
+        return;
+      }
+
       // Check which collections already contain this restaurant
       const restaurantCollections = checkRestaurantInSpecificCollections(
         restaurant,
@@ -269,11 +323,56 @@ export function RestaurantSearchPage({
   const handleCollectionSelect = async (collectionId: string) => {
     if (!selectedRestaurant) return;
 
+    console.log(
+      'Selected restaurant for adding to collection:',
+      selectedRestaurant
+    );
+    console.log('Restaurant _id:', selectedRestaurant._id);
+    console.log('Restaurant _id type:', typeof selectedRestaurant._id);
+
+    // Handle different possible ID formats
+    let restaurantId: string;
+    if (selectedRestaurant._id) {
+      restaurantId = selectedRestaurant._id.toString();
+    } else if (selectedRestaurant.googlePlaceId) {
+      restaurantId = selectedRestaurant.googlePlaceId;
+    } else {
+      console.error(
+        'No valid ID found in selectedRestaurant:',
+        selectedRestaurant
+      );
+      toast.error('Invalid restaurant data');
+      return;
+    }
+
     try {
       await addRestaurantMutation.mutateAsync({
-        restaurantId: selectedRestaurant._id.toString(),
+        restaurantId,
         collectionId,
       });
+
+      // Find the collection name for the success message
+      const collection = effectiveCollections.find(
+        (c) => c._id.toString() === collectionId
+      );
+      const collectionName = collection?.name || 'collection';
+
+      // Show success message
+      toast.success(`Added to ${collectionName}!`);
+
+      // Invalidate collections cache to refresh the data
+      queryClient.invalidateQueries({
+        queryKey: ['allCollections', user?.id],
+      });
+
+      // Re-check restaurant collections to update the "already in collection" status
+      if (selectedRestaurant) {
+        const restaurantCollections = checkRestaurantInSpecificCollections(
+          selectedRestaurant,
+          effectiveCollections
+        );
+        setSelectedRestaurantCollections(restaurantCollections);
+      }
 
       setShowAddToCollectionModal(false);
       setSelectedRestaurant(null);
@@ -285,7 +384,7 @@ export function RestaurantSearchPage({
       }
     } catch (err) {
       console.error('Error adding restaurant to collection:', err);
-      // Error is handled by the mutation's onError callback
+      toast.error('Failed to add restaurant to collection');
     }
   };
 

@@ -62,8 +62,12 @@ export async function POST(
       );
     }
 
-    // Validate ObjectId format
-    if (!ObjectId.isValid(restaurantId)) {
+    // Validate restaurant ID format (ObjectId or Google Place ID)
+    const isValidObjectId = ObjectId.isValid(restaurantId);
+    const isValidGooglePlaceId =
+      restaurantId.startsWith('ChIJ') && restaurantId.length > 20;
+
+    if (!isValidObjectId && !isValidGooglePlaceId) {
       return NextResponse.json(
         { success: false, error: 'Invalid restaurant ID format' },
         { status: 400 }
@@ -119,8 +123,12 @@ export async function DELETE(
       );
     }
 
-    // Validate ObjectId format
-    if (!ObjectId.isValid(restaurantId)) {
+    // Validate restaurant ID format (ObjectId or Google Place ID)
+    const isValidObjectId = ObjectId.isValid(restaurantId);
+    const isValidGooglePlaceId =
+      restaurantId.startsWith('ChIJ') && restaurantId.length > 20;
+
+    if (!isValidObjectId && !isValidGooglePlaceId) {
       return NextResponse.json(
         { success: false, error: 'Invalid restaurant ID format' },
         { status: 400 }

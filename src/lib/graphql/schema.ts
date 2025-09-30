@@ -247,11 +247,36 @@ export const typeDefs = gql`
 
     # Get group members
     getGroupMembers(groupId: ID!): [GroupMember!]!
+
+    # Group Decision Queries
+    getGroupDecisions(groupId: ID!): [Decision!]!
+    getGroupDecision(decisionId: ID!): Decision
+  }
+
+  type Subscription {
+    # Group Decision Subscriptions
+    groupDecisionUpdated(groupId: ID!): Decision!
+    voteSubmitted(decisionId: ID!): Vote!
+    decisionCompleted(decisionId: ID!): Decision!
   }
 
   input CreateDecisionInput {
     collectionId: ID!
     method: String!
+    visitDate: Date!
+  }
+
+  input CreateGroupDecisionInput {
+    collectionId: ID!
+    groupId: ID!
+    method: String!
+    visitDate: Date!
+    deadlineHours: Int
+  }
+
+  input GroupRandomSelectInput {
+    collectionId: ID!
+    groupId: ID!
     visitDate: Date!
   }
 
@@ -294,6 +319,14 @@ export const typeDefs = gql`
     # Perform random selection with weighted algorithm
     performRandomSelection(
       input: RandomSelectInput!
+    ): DecisionResultWithWeights!
+
+    # Group Decision Mutations
+    createGroupDecision(input: CreateGroupDecisionInput!): Decision!
+    submitGroupVote(decisionId: ID!, rankings: [ID!]!): Boolean!
+    completeTieredGroupDecision(decisionId: ID!): DecisionResultWithWeights!
+    performGroupRandomSelection(
+      input: GroupRandomSelectInput!
     ): DecisionResultWithWeights!
 
     # Friend Management Mutations

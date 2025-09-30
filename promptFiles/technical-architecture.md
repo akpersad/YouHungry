@@ -161,13 +161,14 @@ interface Decision {
   groupId?: ObjectId;
   participants: ObjectId[]; // User IDs
   method: 'tiered' | 'random';
-  status: 'active' | 'completed' | 'expired';
+  status: 'active' | 'completed' | 'expired' | 'closed';
   deadline: Date;
   visitDate: Date;
   result?: {
     restaurantId: ObjectId;
     selectedAt: Date;
     reasoning: string;
+    weights?: Record<string, number>; // Restaurant weights for tiered decisions
   };
   votes?: {
     userId: ObjectId;
@@ -348,6 +349,15 @@ type Decision {
 - `POST /api/decisions` - Start decision process
 - `POST /api/decisions/[id]/vote` - Submit vote
 - `GET /api/decisions/[id]` - Get decision details
+
+##### Group Decision Routes (Advanced Operations)
+
+- `GET /api/decisions/group?groupId={id}` - Get group decisions
+- `POST /api/decisions/group` - Create group decision
+- `POST /api/decisions/group/vote` - Submit group vote
+- `PUT /api/decisions/group/vote` - Complete tiered group decision
+- `DELETE /api/decisions/group/vote` - Close group decision
+- `POST /api/decisions/group/random-select` - Perform group random selection
 
 ## 🔮 Future GraphQL API (Advanced Operations)
 
@@ -779,7 +789,7 @@ The following environment variables are configured and ready for use:
 - [x] **Restaurant Search System**: Google Places API integration with address validation and geocoding
 - [x] **GraphQL Integration**: Schema and resolvers for complex restaurant queries
 
-### 🚧 In Progress (Phase 2)
+### ✅ Completed (Phase 2)
 
 **Core features development**
 
@@ -789,6 +799,10 @@ The following environment variables are configured and ready for use:
 - [x] **Enhanced Form Management**: Simplified form state management with custom validation ✅ COMPLETED
 - [x] **Restaurant Management**: Add/remove restaurants from collections ✅ COMPLETED
 - [x] **Basic Decision Making**: Personal restaurant selection with weighted algorithm ✅ COMPLETED
+- [x] **Group Management**: Complete group CRUD with admin/member roles ✅ COMPLETED
+- [x] **Group Decision Making**: Advanced tiered voting system with real-time updates ✅ COMPLETED
+- [x] **Real-time Subscriptions**: WebSocket-based group decision updates ✅ COMPLETED
+- [x] **Comprehensive Testing**: 100+ tests covering all major functionality ✅ COMPLETED
 
 ## 📝 Form Management Implementation
 
@@ -850,6 +864,144 @@ export const validateLocation = (location: string): string | null => {
 - Validation function testing
 - User interaction testing with React Testing Library
 - API integration testing with mocked endpoints
+
+## 🎯 Group Decision Making Implementation
+
+### ✅ Advanced Group Decision System (Epic 4 - COMPLETED)
+
+**Comprehensive group decision making with real-time collaboration**
+
+#### **Core Features Implemented**
+
+**Tiered Voting System**:
+
+- Drag-and-drop restaurant ranking interface
+- Weighted scoring algorithm based on vote positions
+- Real-time vote submission and updates
+- Vote status indicators and re-voting capability
+
+**Decision Management**:
+
+- Create group decisions with tiered or random methods
+- Set visit dates and deadlines (1-336 hours)
+- Complete decisions with automatic restaurant selection
+- Close decisions without completion (admin only)
+- 24-hour visibility window for completed decisions
+
+**Real-time Collaboration**:
+
+- WebSocket-based subscription system for live updates
+- Automatic UI updates when votes are submitted
+- Connection status monitoring with fallback queries
+- Optimistic updates for better user experience
+
+**Admin Controls**:
+
+- Group admins can create, complete, and close decisions
+- Member-only voting permissions
+- Participant management and validation
+- Decision status tracking and management
+
+#### **Technical Implementation**
+
+**Frontend Components**:
+
+- `GroupDecisionMaking`: Main decision interface with voting and management
+- `useGroupDecisionSubscription`: Real-time subscription hook
+- `useGroupDecisions`: Fallback query hook for reliability
+- Drag-and-drop ranking with `onDragStart`, `onDragOver`, `onDrop` handlers
+
+**API Endpoints**:
+
+- `POST /api/decisions/group`: Create group decisions
+- `GET /api/decisions/group`: Fetch group decisions
+- `POST /api/decisions/group/vote`: Submit votes
+- `PUT /api/decisions/group/vote`: Complete decisions
+- `DELETE /api/decisions/group/vote`: Close decisions
+
+**Database Operations**:
+
+- `createGroupDecision`: Create new group decisions with participant management
+- `submitGroupVote`: Handle vote submission with ranking validation
+- `completeTieredGroupDecision`: Calculate weighted results and select restaurant
+- `closeGroupDecision`: Close decisions without completion
+- `getActiveGroupDecisions`: Fetch all decisions (active, completed, closed)
+
+**Real-time Features**:
+
+- WebSocket subscriptions for live vote updates
+- Automatic participant deduplication
+- Vote status tracking and display
+- Connection error handling with graceful fallbacks
+
+#### **User Experience Features**
+
+**Voting Interface**:
+
+- Intuitive drag-and-drop ranking system
+- Visual feedback for vote status ("✓ You've Voted")
+- Re-voting capability until decision is closed
+- Restaurant details display with address, phone, rating, price
+
+**Decision Display**:
+
+- Active decisions with vote counts and deadlines
+- Completed decisions with selected restaurant details
+- 24-hour visibility window for recent completions
+- Closed decisions hidden from main display
+
+**Admin Interface**:
+
+- Start decision button for group admins
+- Complete decision when all votes are in
+- Close decision without completion option
+- Real-time participant and vote tracking
+
+#### **Testing Coverage**
+
+**Component Tests**:
+
+- `GroupDecisionMaking.test.tsx`: 15+ test cases covering all functionality
+- Vote submission and ranking interface testing
+- Admin controls and permission testing
+- Real-time subscription and fallback testing
+
+**API Tests**:
+
+- `group-decisions.test.ts`: Complete API endpoint testing
+- `group-vote.test.ts`: Vote submission and decision management testing
+- Error handling and validation testing
+- Authentication and authorization testing
+
+**Library Tests**:
+
+- `group-decisions.test.ts`: Database operation testing
+- Vote calculation and ranking algorithm testing
+- Decision completion and closing logic testing
+- Edge cases and error scenarios testing
+
+#### **Performance Optimizations**
+
+**Caching Strategy**:
+
+- TanStack Query for API response caching
+- Real-time updates with optimistic UI updates
+- Fallback queries when subscriptions fail
+- Intelligent cache invalidation on vote submission
+
+**User Experience**:
+
+- Immediate UI feedback for all actions
+- Loading states and error handling
+- Smooth drag-and-drop interactions
+- Responsive design for mobile and desktop
+
+**Scalability**:
+
+- Efficient database queries with proper indexing
+- WebSocket connection management
+- Participant deduplication and validation
+- Error recovery and connection resilience
 
 ## 🔮 Future Implementation Roadmap
 

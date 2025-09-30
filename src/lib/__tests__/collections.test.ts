@@ -74,12 +74,24 @@ describe('Collections API Functions', () => {
   describe('getCollectionsByUserId', () => {
     it('should get collections by user ID (ObjectId)', async () => {
       const mockDbInstance = {
-        collection: jest.fn().mockReturnValue({
-          find: jest.fn().mockReturnValue({
-            sort: jest.fn().mockReturnValue({
-              toArray: jest.fn().mockResolvedValue([mockCollection]),
+        collection: jest.fn().mockImplementation((collectionName) => {
+          if (collectionName === 'users') {
+            return {
+              findOne: jest.fn().mockResolvedValue({
+                _id: new ObjectId('507f1f77bcf86cd799439012'),
+                clerkId: '507f1f77bcf86cd799439012',
+                email: 'test@example.com',
+                name: 'Test User',
+              }),
+            };
+          }
+          return {
+            find: jest.fn().mockReturnValue({
+              sort: jest.fn().mockReturnValue({
+                toArray: jest.fn().mockResolvedValue([mockCollection]),
+              }),
             }),
-          }),
+          };
         }),
       };
       mockDb.connectToDatabase.mockResolvedValue(
@@ -94,12 +106,19 @@ describe('Collections API Functions', () => {
 
     it('should get collections by user ID (string)', async () => {
       const mockDbInstance = {
-        collection: jest.fn().mockReturnValue({
-          find: jest.fn().mockReturnValue({
-            sort: jest.fn().mockReturnValue({
-              toArray: jest.fn().mockResolvedValue([mockCollection]),
+        collection: jest.fn().mockImplementation((collectionName) => {
+          if (collectionName === 'users') {
+            return {
+              findOne: jest.fn().mockResolvedValue(null), // User not found by Clerk ID
+            };
+          }
+          return {
+            find: jest.fn().mockReturnValue({
+              sort: jest.fn().mockReturnValue({
+                toArray: jest.fn().mockResolvedValue([mockCollection]),
+              }),
             }),
-          }),
+          };
         }),
       };
       mockDb.connectToDatabase.mockResolvedValue(

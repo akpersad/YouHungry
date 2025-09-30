@@ -12,10 +12,17 @@ const customJestConfig = {
     '^mongodb$': '<rootDir>/src/__mocks__/mongodb.js',
     '^bson$': '<rootDir>/src/__mocks__/bson.js',
     '^@clerk/nextjs$': '<rootDir>/src/__mocks__/@clerk/nextjs.js',
+    '^@clerk/backend$': '<rootDir>/src/__mocks__/@clerk/backend.js',
   },
   transformIgnorePatterns: [
-    'node_modules/(?!(bson|mongodb|@mongodb-js|@clerk)/)',
+    'node_modules/(?!(bson|mongodb|@mongodb-js|@clerk|@clerk/backend|@clerk/nextjs)/)',
   ],
+  extensionsToTreatAsEsm: ['.ts', '.tsx'],
+  globals: {
+    'ts-jest': {
+      useESM: true,
+    },
+  },
   testMatch: [
     '<rootDir>/src/**/__tests__/**/*.{js,jsx,ts,tsx}',
     '<rootDir>/src/**/*.{test,spec}.{js,jsx,ts,tsx}',
