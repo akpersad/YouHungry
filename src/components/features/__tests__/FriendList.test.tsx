@@ -297,7 +297,7 @@ describe('FriendList', () => {
     const cancelButton = screen.getByText('Cancel');
     fireEvent.click(cancelButton);
 
-    expect(screen.queryByText('Remove Friend')).not.toBeInTheDocument();
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 
   it('shows loading state when removing friend', () => {

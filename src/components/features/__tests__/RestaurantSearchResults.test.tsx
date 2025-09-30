@@ -162,7 +162,7 @@ describe('RestaurantSearchResults', () => {
       />
     );
 
-    const detailsButtons = screen.getAllByText('View Details');
+    const detailsButtons = screen.getAllByText('Details');
     fireEvent.click(detailsButtons[0]);
 
     expect(mockOnViewDetails).toHaveBeenCalledWith(mockRestaurants[0]);

@@ -105,75 +105,144 @@ function CollectionList({
   }
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h2 className="text-2xl font-bold text-text">My Collections</h2>
-          <p className="text-text-light">
+    <div className="space-y-6">
+      {/* Header - Mobile optimized */}
+      <div className="space-y-4 md:space-y-0 md:flex md:items-center md:justify-between">
+        <div className="space-y-1">
+          <h2 className="text-xl md:text-2xl font-bold text-primary">
+            My Collections
+          </h2>
+          <p className="text-secondary text-sm md:text-base">
             Manage your personal restaurant collections
           </p>
         </div>
-        <Button onClick={onCreateCollection}>Create Collection</Button>
+        <Button
+          onClick={onCreateCollection}
+          className="w-full md:w-auto touch-target"
+        >
+          Create Collection
+        </Button>
       </div>
 
       {collections.length === 0 ? (
-        <Card>
-          <CardContent className="p-6">
-            <div className="text-center py-8">
-              <p className="text-text-muted mb-4">
-                You don&apos;t have any collections yet.
-              </p>
-              <Button onClick={() => setIsCreateModalOpen(true)}>
-                Create Your First Collection
-              </Button>
+        <Card className="p-6">
+          <div className="text-center py-8">
+            <div className="mb-4">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-tertiary flex items-center justify-center">
+                <svg
+                  className="w-8 h-8 text-secondary"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                  />
+                </svg>
+              </div>
             </div>
-          </CardContent>
+            <p className="text-tertiary mb-6 text-sm md:text-base">
+              You don&apos;t have any collections yet.
+            </p>
+            <Button
+              onClick={() => setIsCreateModalOpen(true)}
+              className="touch-target"
+            >
+              Create Your First Collection
+            </Button>
+          </div>
         </Card>
       ) : (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {collections.map((collection) => (
             <Card
               key={collection._id.toString()}
-              className="hover:shadow-md transition-shadow"
+              className="hover:shadow-medium transition-all duration-200 active:scale-98 touch-target"
+              onClick={() => {
+                if (onCollectionSelect) {
+                  onCollectionSelect(collection);
+                } else {
+                  router.push(`/collections/${collection._id}`);
+                }
+              }}
             >
-              <CardHeader>
-                <CardTitle className="text-lg">{collection.name}</CardTitle>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg text-primary truncate">
+                  {collection.name}
+                </CardTitle>
                 {collection.description && (
-                  <CardDescription>{collection.description}</CardDescription>
+                  <CardDescription className="text-secondary text-sm line-clamp-2">
+                    {collection.description}
+                  </CardDescription>
                 )}
               </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <p className="text-sm text-text-muted">
-                    {collection.restaurantIds.length} restaurants
-                  </p>
-                  <div className="flex space-x-2">
+              <CardContent className="pt-0">
+                <div className="space-y-4">
+                  {/* Restaurant count with icon */}
+                  <div className="flex items-center gap-2 text-sm text-secondary">
+                    <svg
+                      className="w-4 h-4 flex-shrink-0"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                      />
+                    </svg>
+                    <span>{collection.restaurantIds.length} restaurants</span>
+                  </div>
+
+                  {/* Action buttons - Mobile optimized */}
+                  <div className="flex gap-2">
                     <Button
                       size="sm"
-                      variant="outline"
-                      onClick={() => {
+                      variant="primary"
+                      onClick={(e) => {
+                        e.stopPropagation();
                         if (onCollectionSelect) {
                           onCollectionSelect(collection);
                         } else {
                           router.push(`/collections/${collection._id}`);
                         }
                       }}
-                      className="flex-1"
+                      className="flex-1 touch-target"
                     >
-                      View
+                      View Collection
                     </Button>
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() =>
-                        handleDeleteCollection(collection._id.toString())
-                      }
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteCollection(collection._id.toString());
+                      }}
                       disabled={deleteCollectionMutation.isPending}
-                      className="text-error hover:text-error disabled:opacity-50"
+                      className="text-error border-error hover:bg-error/10 disabled:opacity-50 touch-target px-3"
                     >
-                      {deleteCollectionMutation.isPending
-                        ? 'Deleting...'
-                        : 'Delete'}
+                      {deleteCollectionMutation.isPending ? (
+                        <div className="w-4 h-4 border-2 border-error border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                          />
+                        </svg>
+                      )}
                     </Button>
                   </div>
                 </div>

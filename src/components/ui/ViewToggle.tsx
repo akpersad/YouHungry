@@ -1,76 +1,343 @@
 'use client';
 
-import { Button } from './Button';
+// import { ReactNode } from 'react'; // Will be used in future variants
+import { cn } from '@/lib/utils';
 
-export type ViewType = 'list' | 'grid';
+export type ViewType = 'list' | 'map' | 'grid';
 
 interface ViewToggleProps {
   currentView: ViewType;
-  onViewChange: (view: ViewType) => void;
+  onToggle: (view: ViewType) => void;
   className?: string;
+  size?: 'sm' | 'md' | 'lg';
+  position?: 'top-right' | 'top-left' | 'inline';
 }
 
 export function ViewToggle({
   currentView,
-  onViewChange,
-  className = '',
+  onToggle,
+  className,
+  size = 'md',
+  position = 'top-right',
 }: ViewToggleProps) {
+  const getSizeClasses = () => {
+    switch (size) {
+      case 'sm':
+        return 'w-8 h-8 text-sm';
+      case 'lg':
+        return 'w-12 h-12 text-lg';
+      case 'md':
+      default:
+        return 'w-10 h-10 text-base';
+    }
+  };
+
+  const getPositionClasses = () => {
+    switch (position) {
+      case 'top-left':
+        return 'fixed top-20 left-4 z-40';
+      case 'top-right':
+        return 'fixed top-20 right-4 z-40';
+      case 'inline':
+      default:
+        return 'relative';
+    }
+  };
+
+  const getIconSize = () => {
+    switch (size) {
+      case 'sm':
+        return 'w-4 h-4';
+      case 'lg':
+        return 'w-6 h-6';
+      case 'md':
+      default:
+        return 'w-5 h-5';
+    }
+  };
+
+  // List icon
+  const ListIcon = () => (
+    <svg
+      className={getIconSize()}
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <line x1="8" y1="6" x2="21" y2="6" />
+      <line x1="8" y1="12" x2="21" y2="12" />
+      <line x1="8" y1="18" x2="21" y2="18" />
+      <line x1="3" y1="6" x2="3.01" y2="6" />
+      <line x1="3" y1="12" x2="3.01" y2="12" />
+      <line x1="3" y1="18" x2="3.01" y2="18" />
+    </svg>
+  );
+
+  // Map icon
+  const MapIcon = () => (
+    <svg
+      className={getIconSize()}
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z" />
+      <line x1="8" y1="2" x2="8" y2="18" />
+      <line x1="16" y1="6" x2="16" y2="22" />
+    </svg>
+  );
+
+  // Grid icon
+  const GridIcon = () => (
+    <svg
+      className={getIconSize()}
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <rect x="3" y="3" width="7" height="7" />
+      <rect x="14" y="3" width="7" height="7" />
+      <rect x="14" y="14" width="7" height="7" />
+      <rect x="3" y="14" width="7" height="7" />
+    </svg>
+  );
+
   return (
     <div
-      className={`flex items-center bg-gray-100 rounded-lg p-1 ${className}`}
+      className={cn(
+        'bg-secondary rounded-xl shadow-neumorphic-elevated',
+        'border border-quaternary p-1 flex gap-1',
+        getPositionClasses(),
+        className
+      )}
+      style={{
+        borderColor: 'var(--bg-quaternary)',
+      }}
     >
-      <Button
-        variant={currentView === 'list' ? 'primary' : 'outline'}
-        size="sm"
-        onClick={() => onViewChange('list')}
-        className={`px-2 sm:px-3 py-1.5 text-xs font-medium transition-all duration-200 ${
-          currentView === 'list'
-            ? 'text-white shadow-sm'
-            : 'text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
-        }`}
+      {/* List View Button */}
+      <button
+        onClick={() => onToggle('list')}
+        className={cn(
+          'flex items-center justify-center rounded-lg',
+          'transition-all duration-200 touch-target',
+          'focus:outline-none focus:ring-2 focus:ring-offset-2',
+          'active:scale-95',
+          {
+            'bg-accent text-inverse shadow-neumorphic-pressed':
+              currentView === 'list',
+            'text-secondary hover:bg-tertiary hover:text-primary hover:scale-105':
+              currentView !== 'list',
+          },
+          getSizeClasses()
+        )}
+        style={
+          {
+            '--tw-ring-color': 'var(--accent-primary)',
+            '--tw-ring-opacity': '0.3',
+          } as React.CSSProperties
+        }
+        aria-label="Switch to list view"
+      >
+        <ListIcon />
+      </button>
+
+      {/* Map View Button */}
+      <button
+        onClick={() => onToggle('map')}
+        className={cn(
+          'flex items-center justify-center rounded-lg',
+          'transition-all duration-200 touch-target',
+          'focus:outline-none focus:ring-2 focus:ring-offset-2',
+          'active:scale-95',
+          {
+            'bg-accent text-inverse shadow-neumorphic-pressed':
+              currentView === 'map',
+            'text-secondary hover:bg-tertiary hover:text-primary hover:scale-105':
+              currentView !== 'map',
+          },
+          getSizeClasses()
+        )}
+        style={
+          {
+            '--tw-ring-color': 'var(--accent-primary)',
+            '--tw-ring-opacity': '0.3',
+          } as React.CSSProperties
+        }
+        aria-label="Switch to map view"
+      >
+        <MapIcon />
+      </button>
+
+      {/* Grid View Button */}
+      <button
+        onClick={() => onToggle('grid')}
+        className={cn(
+          'flex items-center justify-center rounded-lg',
+          'transition-all duration-200 touch-target',
+          'focus:outline-none focus:ring-2 focus:ring-offset-2',
+          'active:scale-95',
+          {
+            'bg-accent text-inverse shadow-neumorphic-pressed':
+              currentView === 'grid',
+            'text-secondary hover:bg-tertiary hover:text-primary hover:scale-105':
+              currentView !== 'grid',
+          },
+          getSizeClasses()
+        )}
+        style={
+          {
+            '--tw-ring-color': 'var(--accent-primary)',
+            '--tw-ring-opacity': '0.3',
+          } as React.CSSProperties
+        }
+        aria-label="Switch to grid view"
+      >
+        <GridIcon />
+      </button>
+    </div>
+  );
+}
+
+// Enhanced view toggle with labels for larger screens
+interface ViewToggleWithLabelsProps extends ViewToggleProps {
+  showLabels?: boolean;
+}
+
+export function ViewToggleWithLabels({
+  currentView,
+  onToggle,
+  className,
+  size = 'md',
+  position = 'top-right',
+  showLabels = false,
+}: ViewToggleWithLabelsProps) {
+  if (!showLabels) {
+    return (
+      <ViewToggle
+        currentView={currentView}
+        onToggle={onToggle}
+        className={className}
+        size={size}
+        position={position}
+      />
+    );
+  }
+
+  const getSizeClasses = () => {
+    switch (size) {
+      case 'sm':
+        return 'px-3 py-2 text-sm';
+      case 'lg':
+        return 'px-6 py-3 text-lg';
+      case 'md':
+      default:
+        return 'px-4 py-2 text-base';
+    }
+  };
+
+  const getPositionClasses = () => {
+    switch (position) {
+      case 'top-left':
+        return 'fixed top-20 left-4 z-40';
+      case 'top-right':
+        return 'fixed top-20 right-4 z-40';
+      case 'inline':
+      default:
+        return 'relative';
+    }
+  };
+
+  return (
+    <div
+      className={cn(
+        'bg-secondary rounded-xl shadow-neumorphic-elevated',
+        'border border-quaternary flex gap-1',
+        getPositionClasses(),
+        className
+      )}
+      style={{
+        borderColor: 'var(--bg-quaternary)',
+      }}
+    >
+      {/* List View Button */}
+      <button
+        onClick={() => onToggle('list')}
+        className={cn(
+          'flex items-center gap-2 rounded-lg font-medium',
+          'transition-all duration-200 touch-target',
+          'focus:outline-none focus:ring-2 focus:ring-offset-2',
+          'active:scale-95',
+          {
+            'bg-accent text-inverse shadow-neumorphic-pressed':
+              currentView === 'list',
+            'text-secondary hover:bg-tertiary hover:text-primary hover:scale-105':
+              currentView !== 'list',
+          },
+          getSizeClasses()
+        )}
+        style={
+          {
+            '--tw-ring-color': 'var(--accent-primary)',
+            '--tw-ring-opacity': '0.3',
+          } as React.CSSProperties
+        }
+        aria-label="Switch to list view"
       >
         <svg
-          className="w-3 h-3 sm:w-4 sm:h-4 mr-1"
+          className="w-4 h-4"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
         >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M4 6h16M4 10h16M4 14h16M4 18h16"
-          />
+          <line x1="8" y1="6" x2="21" y2="6" />
+          <line x1="8" y1="12" x2="21" y2="12" />
+          <line x1="8" y1="18" x2="21" y2="18" />
+          <line x1="3" y1="6" x2="3.01" y2="6" />
+          <line x1="3" y1="12" x2="3.01" y2="12" />
+          <line x1="3" y1="18" x2="3.01" y2="18" />
         </svg>
-        <span className="hidden sm:inline">List</span>
-      </Button>
-      <Button
-        variant={currentView === 'grid' ? 'primary' : 'outline'}
-        size="sm"
-        onClick={() => onViewChange('grid')}
-        className={`px-2 sm:px-3 py-1.5 text-xs font-medium transition-all duration-200 ${
-          currentView === 'grid'
-            ? 'text-white shadow-sm'
-            : 'text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
-        }`}
+        <span>List</span>
+      </button>
+
+      {/* Map View Button */}
+      <button
+        onClick={() => onToggle('map')}
+        className={cn(
+          'flex items-center gap-2 rounded-lg font-medium',
+          'transition-all duration-200 touch-target',
+          'focus:outline-none focus:ring-2 focus:ring-offset-2',
+          'active:scale-95',
+          {
+            'bg-accent text-inverse shadow-neumorphic-pressed':
+              currentView === 'map',
+            'text-secondary hover:bg-tertiary hover:text-primary hover:scale-105':
+              currentView !== 'map',
+          },
+          getSizeClasses()
+        )}
+        style={
+          {
+            '--tw-ring-color': 'var(--accent-primary)',
+            '--tw-ring-opacity': '0.3',
+          } as React.CSSProperties
+        }
+        aria-label="Switch to map view"
       >
         <svg
-          className="w-3 h-3 sm:w-4 sm:h-4 mr-1"
+          className="w-4 h-4"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
         >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
-          />
+          <path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z" />
+          <line x1="8" y1="2" x2="8" y2="18" />
+          <line x1="16" y1="6" x2="16" y2="22" />
         </svg>
-        <span className="hidden sm:inline">Grid</span>
-      </Button>
+        <span>Map</span>
+      </button>
     </div>
   );
 }

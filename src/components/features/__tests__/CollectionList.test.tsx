@@ -203,7 +203,11 @@ describe('CollectionList', () => {
 
     expect(screen.getByText('Favorite Pizza Places')).toBeInTheDocument();
 
-    const deleteButtons = screen.getAllByText('Delete');
+    const deleteButtons = screen
+      .getAllByRole('button')
+      .filter(
+        (button) => button.textContent === '' && button.querySelector('svg')
+      );
 
     fireEvent.click(deleteButtons[0]);
 

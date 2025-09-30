@@ -16,7 +16,7 @@ describe('Input', () => {
   it('should apply error styling when error prop is provided', () => {
     render(<Input error="Test error message" />);
     const input = screen.getByRole('textbox');
-    expect(input).toHaveClass('border-error');
+    expect(input).toHaveClass('input-error');
   });
 
   it('should render label when label prop is provided', () => {

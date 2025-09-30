@@ -102,54 +102,69 @@ function CreateCollectionForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-6">
       {error && (
-        <div className="p-3 bg-error/10 border border-error/20 rounded-lg">
-          <p className="text-error text-sm" role="alert">
-            {error}
-          </p>
+        <div className="p-4 bg-error/10 border border-error/20 rounded-xl">
+          <div className="flex items-start gap-3">
+            <svg
+              className="w-5 h-5 text-error flex-shrink-0 mt-0.5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <p className="text-error text-sm" role="alert">
+              {error}
+            </p>
+          </div>
         </div>
       )}
 
-      <div className="w-full">
-        <label
-          htmlFor="name"
-          className="block text-sm font-medium text-text mb-1"
-        >
-          Collection Name
-        </label>
-        <Input
-          id="name"
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="e.g., Favorite Pizza Places"
-          maxLength={100}
-          required
-        />
+      <div className="space-y-6">
+        <div className="w-full">
+          <Input
+            id="name"
+            label="Collection Name"
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="e.g., Favorite Pizza Places"
+            maxLength={100}
+            required
+            helperText="Give your collection a memorable name"
+          />
+        </div>
+
+        <div className="w-full">
+          <label
+            htmlFor="description"
+            className="block text-sm font-medium text-primary mb-2"
+          >
+            Description <span className="text-tertiary">(Optional)</span>
+          </label>
+          <textarea
+            id="description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Describe your collection..."
+            maxLength={500}
+            className="input-base min-h-[100px] resize-none"
+            rows={4}
+          />
+          <p className="mt-1 text-xs text-tertiary">
+            {description.length}/500 characters
+          </p>
+        </div>
       </div>
 
-      <div className="w-full">
-        <label
-          htmlFor="description"
-          className="block text-sm font-medium text-text mb-1"
-        >
-          Description (Optional)
-        </label>
-        <textarea
-          id="description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          placeholder="Describe your collection..."
-          maxLength={500}
-          className="input-base min-h-[80px] resize-none"
-        />
-      </div>
-
-      <div className="flex justify-end space-x-3 pt-4">
-        <Button type="button" variant="outline" onClick={onCancel}>
-          Cancel
-        </Button>
+      {/* Mobile-optimized button layout */}
+      <div className="flex flex-col-reverse sm:flex-row gap-3 pt-4">
         <Button
           type="submit"
           disabled={
@@ -157,11 +172,40 @@ function CreateCollectionForm({
             createGroupCollectionMutation.isPending ||
             !name.trim()
           }
+          className="w-full sm:w-auto touch-target"
         >
           {createCollectionMutation.isPending ||
-          createGroupCollectionMutation.isPending
-            ? 'Creating...'
-            : 'Create Collection'}
+          createGroupCollectionMutation.isPending ? (
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+              Creating...
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                />
+              </svg>
+              Create Collection
+            </div>
+          )}
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onCancel}
+          className="w-full sm:w-auto touch-target"
+        >
+          Cancel
         </Button>
       </div>
     </form>

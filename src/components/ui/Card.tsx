@@ -17,9 +17,9 @@ const Card = forwardRef<HTMLDivElement, CardProps>(
           'card-base',
           {
             'card-elevated': variant === 'elevated',
-            'p-3': padding === 'sm',
-            'p-4': padding === 'md',
-            'p-6': padding === 'lg',
+            'p-sm': padding === 'sm',
+            'p-md': padding === 'md',
+            'p-lg': padding === 'lg',
           },
           className
         )}
@@ -57,10 +57,9 @@ const CardTitle = forwardRef<HTMLParagraphElement, CardTitleProps>(
     return (
       <h3
         className={cn(
-          'text-lg font-semibold leading-none tracking-tight',
+          'text-lg font-semibold leading-none tracking-tight text-primary',
           className
         )}
-        style={{ color: 'var(--color-text)' }}
         ref={ref}
         {...props}
       />
@@ -76,8 +75,7 @@ const CardDescription = forwardRef<HTMLParagraphElement, CardDescriptionProps>(
   ({ className, ...props }, ref) => {
     return (
       <p
-        className={cn('text-sm', className)}
-        style={{ color: 'var(--color-text-muted)' }}
+        className={cn('text-sm text-tertiary', className)}
         ref={ref}
         {...props}
       />
