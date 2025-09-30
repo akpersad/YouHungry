@@ -144,7 +144,7 @@ export function CollectionRestaurantsList({
           </h3>
           {/* View Toggle - Hidden on mobile during loading for now */}
           <div className="hidden sm:block">
-            <ViewToggle currentView={viewType} onViewChange={setViewType} />
+            <ViewToggle currentView={viewType} onToggle={setViewType} />
           </div>
         </div>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -195,7 +195,7 @@ export function CollectionRestaurantsList({
         </div>
         {/* View Toggle - Show on mobile and desktop */}
         <div className="flex justify-end">
-          <ViewToggle currentView={viewType} onViewChange={setViewType} />
+          <ViewToggle currentView={viewType} onToggle={setViewType} />
         </div>
       </div>
 

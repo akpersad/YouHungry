@@ -7,6 +7,13 @@ import { RestaurantCard } from './RestaurantCard';
 import { Restaurant } from '@/types/database';
 import { TouchGestures } from './MobileSearchInterface';
 import { cn } from '@/lib/utils';
+import { motion } from 'framer-motion';
+import {
+  swipeVariants,
+  progressVariants,
+  staggerContainer,
+  staggerItem,
+} from '@/lib/animations';
 
 interface MobileDecisionInterfaceProps {
   restaurants: Restaurant[];
@@ -144,21 +151,24 @@ export function MobileDecisionInterface({
 
         {/* Progress Bar */}
         <div className="w-full bg-tertiary rounded-full h-2">
-          <div
-            className="bg-accent h-2 rounded-full transition-all duration-300"
+          <motion.div
+            className="bg-accent h-2 rounded-full"
+            variants={progressVariants}
+            initial="initial"
+            animate="animate"
             style={{ width: `${progress}%` }}
           />
         </div>
       </div>
 
       {/* Restaurant Card with Swipe Gestures */}
-      <div
+      <motion.div
         ref={cardRef}
         {...swipeGestures}
-        className={cn('relative transition-transform duration-200 ease-out', {
-          'transform translate-x-8 opacity-50': swipeDirection === 'right',
-          'transform -translate-x-8 opacity-50': swipeDirection === 'left',
-        })}
+        variants={swipeVariants}
+        initial="rest"
+        animate={swipeDirection || 'rest'}
+        className="relative"
       >
         <RestaurantCard
           restaurant={currentRestaurant}
@@ -209,7 +219,7 @@ export function MobileDecisionInterface({
             </div>
           </div>
         )}
-      </div>
+      </motion.div>
 
       {/* Swipe Instructions */}
       {!hasVoted && (
@@ -269,96 +279,109 @@ export function MobileDecisionInterface({
       )}
 
       {/* Action Buttons */}
-      <div className="flex gap-3">
+      <motion.div
+        className="flex gap-3"
+        variants={staggerContainer}
+        initial="hidden"
+        animate="visible"
+      >
         {!hasVoted ? (
           <>
-            <Button
-              variant="outline"
-              onClick={() => onVote(currentRestaurant._id.toString(), 'no')}
-              className="flex-1 touch-target"
-              disabled={isDeciding}
-            >
-              <div className="flex items-center gap-2">
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-                No
-              </div>
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => onSkip(currentRestaurant._id.toString())}
-              className="flex-1 touch-target"
-              disabled={isDeciding}
-            >
-              <div className="flex items-center gap-2">
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M5 15l7-7 7 7"
-                  />
-                </svg>
-                Skip
-              </div>
-            </Button>
-            <Button
-              onClick={() => onVote(currentRestaurant._id.toString(), 'yes')}
-              className="flex-1 touch-target"
-              disabled={isDeciding}
-            >
-              <div className="flex items-center gap-2">
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M5 13l4 4L19 7"
-                  />
-                </svg>
-                Yes
-              </div>
-            </Button>
+            <motion.div variants={staggerItem}>
+              <Button
+                variant="outline"
+                onClick={() => onVote(currentRestaurant._id.toString(), 'no')}
+                className="flex-1 touch-target"
+                disabled={isDeciding}
+              >
+                <div className="flex items-center gap-2">
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                  No
+                </div>
+              </Button>
+            </motion.div>
+            <motion.div variants={staggerItem}>
+              <Button
+                variant="outline"
+                onClick={() => onSkip(currentRestaurant._id.toString())}
+                className="flex-1 touch-target"
+                disabled={isDeciding}
+              >
+                <div className="flex items-center gap-2">
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5 15l7-7 7 7"
+                    />
+                  </svg>
+                  Skip
+                </div>
+              </Button>
+            </motion.div>
+            <motion.div variants={staggerItem}>
+              <Button
+                onClick={() => onVote(currentRestaurant._id.toString(), 'yes')}
+                className="flex-1 touch-target"
+                disabled={isDeciding}
+              >
+                <div className="flex items-center gap-2">
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                  Yes
+                </div>
+              </Button>
+            </motion.div>
           </>
         ) : (
-          <Button
-            onClick={() => {
-              if (currentRestaurantIndex < restaurants.length - 1) {
-                // Move to next restaurant
-                window.location.reload(); // Simple way to trigger next restaurant
-              } else {
-                setShowResultsSheet(true);
-              }
-            }}
-            className="w-full touch-target"
-          >
-            {currentRestaurantIndex < restaurants.length - 1
-              ? 'Next Restaurant'
-              : 'View Results'}
-          </Button>
+          <motion.div variants={staggerItem} className="w-full">
+            <Button
+              onClick={() => {
+                if (currentRestaurantIndex < restaurants.length - 1) {
+                  // Move to next restaurant
+                  window.location.reload(); // Simple way to trigger next restaurant
+                } else {
+                  setShowResultsSheet(true);
+                }
+              }}
+              className="w-full touch-target"
+            >
+              {currentRestaurantIndex < restaurants.length - 1
+                ? 'Next Restaurant'
+                : 'View Results'}
+            </Button>
+          </motion.div>
         )}
-      </div>
+      </motion.div>
 
       {/* Quick Actions */}
       <div className="flex gap-2">

@@ -1,7 +1,12 @@
-import { ButtonHTMLAttributes, forwardRef } from 'react';
-import { cn } from '@/lib/utils';
+'use client';
 
-interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+import { forwardRef, ReactNode } from 'react';
+import { cn } from '@/lib/utils';
+import { motion, HTMLMotionProps } from 'framer-motion';
+import { buttonVariants } from '@/lib/animations';
+
+interface ButtonProps
+  extends Omit<HTMLMotionProps<'button'>, 'variant' | 'size' | 'children'> {
   variant?:
     | 'primary'
     | 'secondary'
@@ -11,6 +16,7 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
     | 'outline-accent';
   size?: 'sm' | 'md' | 'lg';
   isLoading?: boolean;
+  children: ReactNode;
 }
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
@@ -26,7 +32,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     ref
   ) => {
     return (
-      <button
+      <motion.button
         className={cn(
           'btn-base',
           {
@@ -45,6 +51,10 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         )}
         ref={ref}
         disabled={isLoading || props.disabled}
+        variants={buttonVariants}
+        initial="rest"
+        whileHover="hover"
+        whileTap="tap"
         {...props}
       >
         {isLoading && (
@@ -70,7 +80,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           </svg>
         )}
         {children}
-      </button>
+      </motion.button>
     );
   }
 );
@@ -78,4 +88,3 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 Button.displayName = 'Button';
 
 export { Button };
-// Test comment

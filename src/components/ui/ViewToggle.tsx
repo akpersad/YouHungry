@@ -3,9 +3,11 @@
 // import { ReactNode } from 'react'; // Will be used in future variants
 import { cn } from '@/lib/utils';
 
+export type ViewType = 'list' | 'map' | 'grid';
+
 interface ViewToggleProps {
-  currentView: 'list' | 'map';
-  onToggle: (view: 'list' | 'map') => void;
+  currentView: ViewType;
+  onToggle: (view: ViewType) => void;
   className?: string;
   size?: 'sm' | 'md' | 'lg';
   position?: 'top-right' | 'top-left' | 'inline';
@@ -87,6 +89,22 @@ export function ViewToggle({
     </svg>
   );
 
+  // Grid icon
+  const GridIcon = () => (
+    <svg
+      className={getIconSize()}
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <rect x="3" y="3" width="7" height="7" />
+      <rect x="14" y="3" width="7" height="7" />
+      <rect x="14" y="14" width="7" height="7" />
+      <rect x="3" y="14" width="7" height="7" />
+    </svg>
+  );
+
   return (
     <div
       className={cn(
@@ -151,6 +169,33 @@ export function ViewToggle({
         aria-label="Switch to map view"
       >
         <MapIcon />
+      </button>
+
+      {/* Grid View Button */}
+      <button
+        onClick={() => onToggle('grid')}
+        className={cn(
+          'flex items-center justify-center rounded-lg',
+          'transition-all duration-200 touch-target',
+          'focus:outline-none focus:ring-2 focus:ring-offset-2',
+          'active:scale-95',
+          {
+            'bg-accent text-inverse shadow-neumorphic-pressed':
+              currentView === 'grid',
+            'text-secondary hover:bg-tertiary hover:text-primary hover:scale-105':
+              currentView !== 'grid',
+          },
+          getSizeClasses()
+        )}
+        style={
+          {
+            '--tw-ring-color': 'var(--accent-primary)',
+            '--tw-ring-opacity': '0.3',
+          } as React.CSSProperties
+        }
+        aria-label="Switch to grid view"
+      >
+        <GridIcon />
       </button>
     </div>
   );

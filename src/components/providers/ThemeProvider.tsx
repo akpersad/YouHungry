@@ -6,6 +6,7 @@ import {
   useEffect,
   useState,
   ReactNode,
+  useCallback,
 } from 'react';
 
 type Theme = 'light' | 'dark' | 'system';
@@ -42,12 +43,12 @@ export function ThemeProvider({
   };
 
   // Resolve theme based on current setting
-  const resolveTheme = (currentTheme: Theme): 'light' | 'dark' => {
+  const resolveTheme = useCallback((currentTheme: Theme): 'light' | 'dark' => {
     if (currentTheme === 'system') {
       return getSystemTheme();
     }
     return currentTheme;
-  };
+  }, []);
 
   // Set theme and update DOM
   const setTheme = (newTheme: Theme) => {
@@ -207,13 +208,13 @@ export function ThemeProvider({
     return () => {
       mediaQuery.removeEventListener('change', handleSystemThemeChange);
     };
-  }, [storageKey, defaultTheme]);
+  }, [storageKey, defaultTheme, resolveTheme, theme]);
 
   // Update resolved theme when theme changes
   useEffect(() => {
     const resolved = resolveTheme(theme);
     setResolvedTheme(resolved);
-  }, [theme]);
+  }, [theme, resolveTheme]);
 
   const value: ThemeContextType = {
     theme,

@@ -2,6 +2,8 @@
 
 import { ReactNode, useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
+import { motion, AnimatePresence } from 'framer-motion';
+import { bottomSheetVariants } from '@/lib/animations';
 
 interface BottomSheetProps {
   isOpen: boolean;
@@ -126,59 +128,69 @@ export function BottomSheet({
     document.addEventListener('mouseup', handleMouseUp);
   };
 
-  if (!isOpen) return null;
-
   return (
-    <>
-      {/* Backdrop */}
-      <div
-        className="fixed inset-0 bg-black/50 z-40 backdrop-blur-sm"
-        onClick={onClose}
-      />
+    <AnimatePresence>
+      {isOpen && (
+        <>
+          {/* Backdrop */}
+          <motion.div
+            className="fixed inset-0 bg-black/50 z-40 backdrop-blur-sm"
+            onClick={onClose}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+          />
 
-      {/* Bottom Sheet */}
-      <div
-        ref={sheetRef}
-        className={cn(
-          'fixed bottom-0 left-0 right-0 z-50',
-          'bg-secondary border-t border-quaternary',
-          'rounded-t-3xl shadow-neumorphic-elevated',
-          'transition-transform duration-300 ease-out',
-          className
-        )}
-        style={{
-          borderColor: 'var(--bg-quaternary)',
-          borderRadius: 'var(--radius-3xl) var(--radius-3xl) 0 0',
-          maxHeight: '90vh',
-          transform: 'translateY(0)',
-        }}
-      >
-        {/* Handle */}
-        {showHandle && (
-          <div
-            className="flex justify-center py-3 cursor-grab active:cursor-grabbing"
-            onTouchStart={handleTouchStart}
-            onTouchMove={handleTouchMove}
-            onTouchEnd={handleTouchEnd}
-            onMouseDown={handleMouseDownWithListeners}
+          {/* Bottom Sheet */}
+          <motion.div
+            ref={sheetRef}
+            className={cn(
+              'fixed bottom-0 left-0 right-0 z-50',
+              'bg-secondary border-t border-quaternary',
+              'rounded-t-3xl shadow-neumorphic-elevated',
+              className
+            )}
+            style={{
+              borderColor: 'var(--bg-quaternary)',
+              borderRadius: 'var(--radius-3xl) var(--radius-3xl) 0 0',
+              maxHeight: '90vh',
+            }}
+            variants={bottomSheetVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
           >
-            <div className="w-12 h-1 bg-quaternary rounded-full" />
-          </div>
-        )}
+            {/* Handle */}
+            {showHandle && (
+              <div
+                className="flex justify-center py-3 cursor-grab active:cursor-grabbing"
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
+                onMouseDown={handleMouseDownWithListeners}
+              >
+                <div className="w-12 h-1 bg-quaternary rounded-full" />
+              </div>
+            )}
 
-        {/* Header */}
-        {title && (
-          <div className="px-4 py-3 border-b border-quaternary">
-            <h3 className="text-lg font-semibold text-primary text-center">
-              {title}
-            </h3>
-          </div>
-        )}
+            {/* Header */}
+            {title && (
+              <div className="px-4 py-3 border-b border-quaternary">
+                <h3 className="text-lg font-semibold text-primary text-center">
+                  {title}
+                </h3>
+              </div>
+            )}
 
-        {/* Content */}
-        <div className="px-4 py-4 max-h-80vh overflow-y-auto">{children}</div>
-      </div>
-    </>
+            {/* Content */}
+            <div className="px-4 py-4 max-h-80vh overflow-y-auto">
+              {children}
+            </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
   );
 }
 

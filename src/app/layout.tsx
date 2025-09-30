@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import { ClerkProvider } from '@clerk/nextjs';
 import { QueryProvider } from '@/components/providers/QueryProvider';
 import { ThemeProvider } from '@/components/providers/ThemeProvider';
+import { PageTransition } from '@/components/ui/PageTransition';
+import Script from 'next/script';
 import './globals.css';
 
 const geistSans = Geist({
@@ -16,11 +18,66 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'You Hungry? - Smart Restaurant Decision Making',
-  description:
-    "Stop the endless 'where should we eat?' debate. Let our smart decision engine help you and your friends choose the perfect restaurant every time.",
-  keywords: ['restaurant', 'decision', 'group', 'food', 'dining', 'choice'],
+  title: 'You Hungry? - Restaurant Discovery',
+  description: 'Discover and decide on restaurants with friends',
+  keywords: ['restaurants', 'food', 'discovery', 'decision making', 'groups'],
   authors: [{ name: 'You Hungry Team' }],
+  creator: 'You Hungry Team',
+  publisher: 'You Hungry Team',
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  metadataBase: new URL('https://you-hungry.app'),
+  alternates: {
+    canonical: '/',
+  },
+  openGraph: {
+    title: 'You Hungry? - Restaurant Discovery',
+    description: 'Discover and decide on restaurants with friends',
+    url: 'https://you-hungry.app',
+    siteName: 'You Hungry?',
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'You Hungry? - Restaurant Discovery App',
+      },
+    ],
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'You Hungry? - Restaurant Discovery',
+    description: 'Discover and decide on restaurants with friends',
+    images: ['/og-image.png'],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'You Hungry?',
+  },
+  other: {
+    'mobile-web-app-capable': 'yes',
+    'apple-mobile-web-app-capable': 'yes',
+    'apple-mobile-web-app-status-bar-style': 'default',
+    'theme-color': '#ff6b6b',
+  },
 };
 
 export const viewport = {
@@ -37,12 +94,41 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en">
+        <head>
+          <link rel="manifest" href="/manifest.json" />
+          <link rel="icon" href="/favicon.ico" />
+          <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
+          <meta name="theme-color" content="#ff6b6b" />
+        </head>
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
           <ThemeProvider>
-            <QueryProvider>{children}</QueryProvider>
+            <QueryProvider>
+              <PageTransition>{children}</PageTransition>
+            </QueryProvider>
           </ThemeProvider>
+
+          {/* Service Worker Registration */}
+          <Script
+            id="sw-register"
+            strategy="afterInteractive"
+            dangerouslySetInnerHTML={{
+              __html: `
+                if ('serviceWorker' in navigator) {
+                  window.addEventListener('load', function() {
+                    navigator.serviceWorker.register('/sw.js')
+                      .then(function(registration) {
+                        console.log('ServiceWorker registration successful');
+                      })
+                      .catch(function(err) {
+                        console.log('ServiceWorker registration failed: ', err);
+                      });
+                  });
+                }
+              `,
+            }}
+          />
         </body>
       </html>
     </ClerkProvider>

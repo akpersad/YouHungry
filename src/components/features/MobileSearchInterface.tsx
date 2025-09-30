@@ -4,15 +4,15 @@ import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { BottomSheet, QuickActionSheet } from '@/components/ui/BottomSheet';
-import { ViewToggle } from '@/components/ui/ViewToggle';
+import { ViewToggle, ViewType } from '@/components/ui/ViewToggle';
 import { cn } from '@/lib/utils';
 
 interface MobileSearchInterfaceProps {
   searchQuery: string;
   onSearchChange: (query: string) => void;
   onSearchSubmit: () => void;
-  currentView: 'list' | 'map';
-  onViewToggle: (view: 'list' | 'map') => void;
+  currentView: ViewType;
+  onViewToggle: (view: ViewType) => void;
   filters?: {
     cuisine?: string[];
     priceRange?: string[];
@@ -475,7 +475,7 @@ export const TouchGestures = {
     const [pullDistance, setPullDistance] = useState(0);
     const [isRefreshing, setIsRefreshing] = useState(false);
 
-    const handleTouchStart = (_e: React.TouchEvent) => {
+    const handleTouchStart = () => {
       if (window.scrollY === 0) {
         setPullDistance(0);
       }
