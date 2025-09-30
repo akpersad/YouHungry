@@ -401,9 +401,7 @@ describe('GroupView', () => {
     fireEvent.click(closeButton);
 
     // Modal should be closed
-    expect(
-      screen.queryByText('Invite Friends to Group')
-    ).not.toBeInTheDocument();
+    expect(screen.queryByText('Invite User to Group')).not.toBeInTheDocument();
   });
 
   it('resets form state when modals are closed', () => {

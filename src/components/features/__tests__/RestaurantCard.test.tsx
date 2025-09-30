@@ -15,6 +15,7 @@ const mockRestaurant: Restaurant = {
   rating: 4.5,
   priceRange: '$$',
   timeToPickUp: 25,
+  distance: 1.2,
   photos: ['https://example.com/photo1.jpg'],
   phoneNumber: '+1-555-0123',
   website: 'https://testrestaurant.com',
@@ -47,13 +48,13 @@ describe('RestaurantCard', () => {
     expect(screen.getByText('Test Restaurant')).toBeInTheDocument();
     expect(screen.getByText('Italian')).toBeInTheDocument();
     expect(
-      screen.getByText(/123 Test Street, Test City, TC 12345/)
+      screen.getByText(/📍 123 Test Street, Test City, TC 12345/)
     ).toBeInTheDocument();
     expect(screen.getByText(/4\.5/)).toBeInTheDocument();
     expect(screen.getByText(/\$\$/)).toBeInTheDocument();
     expect(screen.getByText(/25.*min/)).toBeInTheDocument();
-    expect(screen.getByText(/\+1-555-0123/)).toBeInTheDocument();
-    expect(screen.getByText(/Visit Website/)).toBeInTheDocument();
+    expect(screen.getByText(/📞 Available/)).toBeInTheDocument();
+    expect(screen.getByText(/🌐 Website/)).toBeInTheDocument();
   });
 
   it('renders restaurant photo when available', () => {
@@ -80,6 +81,7 @@ describe('RestaurantCard', () => {
         restaurant={mockRestaurant}
         onAddToCollection={mockOnAddToCollection}
         onViewDetails={mockOnViewDetails}
+        variant="default"
       />
     );
 
@@ -112,7 +114,7 @@ describe('RestaurantCard', () => {
     );
 
     expect(screen.getByText(/No rating/)).toBeInTheDocument();
-    expect(screen.getByText(/Price not available/)).toBeInTheDocument();
+    expect(screen.getByText(/Price N\/A/)).toBeInTheDocument();
     expect(screen.queryByText('Visit Website')).not.toBeInTheDocument();
     expect(screen.queryByText('Hours:')).not.toBeInTheDocument();
   });
@@ -141,7 +143,7 @@ describe('RestaurantCard', () => {
       />
     );
 
-    const detailsButton = screen.getByText('View Details');
+    const detailsButton = screen.getByText('Details');
     fireEvent.click(detailsButton);
 
     expect(mockOnViewDetails).toHaveBeenCalledWith(mockRestaurant);
@@ -158,7 +160,7 @@ describe('RestaurantCard', () => {
     );
 
     expect(screen.queryByText('Add to Collection')).not.toBeInTheDocument();
-    expect(screen.getByText('View Details')).toBeInTheDocument();
+    expect(screen.getByText('Details')).toBeInTheDocument();
   });
 
   it('hides buttons when showDetailsButton is false', () => {
@@ -194,6 +196,7 @@ describe('RestaurantCard', () => {
         restaurant={restaurantWithManyHours}
         onAddToCollection={mockOnAddToCollection}
         onViewDetails={mockOnViewDetails}
+        variant="default"
       />
     );
 

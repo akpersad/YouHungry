@@ -2,62 +2,72 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { ViewToggle } from '../ViewToggle';
 
 describe('ViewToggle', () => {
-  const mockOnViewChange = jest.fn();
+  const mockOnToggle = jest.fn();
 
   beforeEach(() => {
-    mockOnViewChange.mockClear();
+    mockOnToggle.mockClear();
   });
 
-  it('renders both list and grid buttons', () => {
-    render(<ViewToggle currentView="list" onViewChange={mockOnViewChange} />);
+  it('renders list, map, and grid buttons', () => {
+    render(<ViewToggle currentView="list" onToggle={mockOnToggle} />);
 
-    expect(screen.getByText('List')).toBeInTheDocument();
-    expect(screen.getByText('Grid')).toBeInTheDocument();
+    expect(screen.getByLabelText('Switch to list view')).toBeInTheDocument();
+    expect(screen.getByLabelText('Switch to map view')).toBeInTheDocument();
+    expect(screen.getByLabelText('Switch to grid view')).toBeInTheDocument();
   });
 
   it('shows list button as active when currentView is list', () => {
-    render(<ViewToggle currentView="list" onViewChange={mockOnViewChange} />);
+    render(<ViewToggle currentView="list" onToggle={mockOnToggle} />);
 
-    const listButton = screen.getByText('List').closest('button');
-    const gridButton = screen.getByText('Grid').closest('button');
+    const listButton = screen.getByLabelText('Switch to list view');
+    const gridButton = screen.getByLabelText('Switch to grid view');
 
-    expect(listButton).toHaveClass('btn-primary');
-    expect(gridButton).toHaveClass('btn-outline');
+    expect(listButton).toHaveClass('bg-accent');
+    expect(gridButton).toHaveClass('text-secondary');
   });
 
   it('shows grid button as active when currentView is grid', () => {
-    render(<ViewToggle currentView="grid" onViewChange={mockOnViewChange} />);
+    render(<ViewToggle currentView="grid" onToggle={mockOnToggle} />);
 
-    const listButton = screen.getByText('List').closest('button');
-    const gridButton = screen.getByText('Grid').closest('button');
+    const listButton = screen.getByLabelText('Switch to list view');
+    const gridButton = screen.getByLabelText('Switch to grid view');
 
-    expect(gridButton).toHaveClass('btn-primary');
-    expect(listButton).toHaveClass('btn-outline');
+    expect(gridButton).toHaveClass('bg-accent');
+    expect(listButton).toHaveClass('text-secondary');
   });
 
-  it('calls onViewChange with "list" when list button is clicked', () => {
-    render(<ViewToggle currentView="grid" onViewChange={mockOnViewChange} />);
+  it('calls onToggle with "list" when list button is clicked', () => {
+    render(<ViewToggle currentView="grid" onToggle={mockOnToggle} />);
 
-    const listButton = screen.getByText('List');
+    const listButton = screen.getByLabelText('Switch to list view');
     fireEvent.click(listButton);
 
-    expect(mockOnViewChange).toHaveBeenCalledWith('list');
+    expect(mockOnToggle).toHaveBeenCalledWith('list');
   });
 
-  it('calls onViewChange with "grid" when grid button is clicked', () => {
-    render(<ViewToggle currentView="list" onViewChange={mockOnViewChange} />);
+  it('calls onToggle with "grid" when grid button is clicked', () => {
+    render(<ViewToggle currentView="list" onToggle={mockOnToggle} />);
 
-    const gridButton = screen.getByText('Grid');
+    const gridButton = screen.getByLabelText('Switch to grid view');
     fireEvent.click(gridButton);
 
-    expect(mockOnViewChange).toHaveBeenCalledWith('grid');
+    expect(mockOnToggle).toHaveBeenCalledWith('grid');
+  });
+
+  it('calls onToggle with "map" when map button is clicked', () => {
+    render(<ViewToggle currentView="list" onToggle={mockOnToggle} />);
+
+    const mapButton = screen.getByLabelText('Switch to map view');
+    fireEvent.click(mapButton);
+
+    expect(mockOnToggle).toHaveBeenCalledWith('map');
   });
 
   it('applies custom className', () => {
     const { container } = render(
       <ViewToggle
         currentView="list"
-        onViewChange={mockOnViewChange}
+        onToggle={mockOnToggle}
         className="custom-class"
       />
     );

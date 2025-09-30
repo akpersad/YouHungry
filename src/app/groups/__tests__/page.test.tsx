@@ -10,11 +10,35 @@ import {
   useDeclineGroupInvitation,
 } from '@/hooks/api/useGroups';
 import { toast } from 'react-hot-toast';
+import { ThemeProvider } from '@/components/providers/ThemeProvider';
+import { TestQueryProvider } from '@/test-utils/testQueryClient';
 
 // Mock dependencies
 jest.mock('@clerk/nextjs');
 jest.mock('@/hooks/api/useGroups');
 jest.mock('react-hot-toast');
+
+// Mock window.matchMedia
+Object.defineProperty(window, 'matchMedia', {
+  writable: true,
+  value: jest.fn().mockImplementation((query) => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: jest.fn(), // deprecated
+    removeListener: jest.fn(), // deprecated
+    addEventListener: jest.fn(),
+    removeEventListener: jest.fn(),
+    dispatchEvent: jest.fn(),
+  })),
+});
+
+// Test wrapper with providers
+const TestWrapper = ({ children }: { children: React.ReactNode }) => (
+  <TestQueryProvider>
+    <ThemeProvider>{children}</ThemeProvider>
+  </TestQueryProvider>
+);
 jest.mock('next/navigation', () => ({
   useRouter: () => ({
     push: jest.fn(),
@@ -146,7 +170,7 @@ describe('GroupsPage', () => {
   });
 
   it('renders groups page with correct title', () => {
-    render(<GroupsPage />);
+    render(<GroupsPage />, { wrapper: TestWrapper });
 
     expect(screen.getByRole('heading', { name: 'Groups' })).toBeInTheDocument();
     expect(
@@ -155,21 +179,21 @@ describe('GroupsPage', () => {
   });
 
   it('renders groups list', () => {
-    render(<GroupsPage />);
+    render(<GroupsPage />, { wrapper: TestWrapper });
 
     expect(screen.getByText('Test Group 1')).toBeInTheDocument();
     expect(screen.getByText('Food Lovers')).toBeInTheDocument();
   });
 
   it('shows tab navigation', () => {
-    render(<GroupsPage />);
+    render(<GroupsPage />, { wrapper: TestWrapper });
 
     expect(screen.getByText('My Groups (2)')).toBeInTheDocument();
     expect(screen.getByText('Invitations (0)')).toBeInTheDocument();
   });
 
   it('switches between tabs', () => {
-    render(<GroupsPage />);
+    render(<GroupsPage />, { wrapper: TestWrapper });
 
     // Initially on groups tab
     expect(screen.getByText('Test Group 1')).toBeInTheDocument();
@@ -192,7 +216,7 @@ describe('GroupsPage', () => {
   });
 
   it('opens create group form when Create Group button is clicked', () => {
-    render(<GroupsPage />);
+    render(<GroupsPage />, { wrapper: TestWrapper });
 
     const createButton = screen.getByText('Create Group');
     fireEvent.click(createButton);
@@ -215,7 +239,7 @@ describe('GroupsPage', () => {
       json: () => Promise.resolve({ success: true }),
     });
 
-    render(<GroupsPage />);
+    render(<GroupsPage />, { wrapper: TestWrapper });
 
     // Open create group form
     const createButton = screen.getByText('Create Group');
@@ -252,7 +276,7 @@ describe('GroupsPage', () => {
       error: null,
     });
 
-    render(<GroupsPage />);
+    render(<GroupsPage />, { wrapper: TestWrapper });
 
     // Should still show the page structure
     expect(screen.getByRole('heading', { name: 'Groups' })).toBeInTheDocument();
@@ -266,7 +290,7 @@ describe('GroupsPage', () => {
       error: new Error('Failed to load groups'),
     });
 
-    render(<GroupsPage />);
+    render(<GroupsPage />, { wrapper: TestWrapper });
 
     expect(
       screen.getByText('Failed to load groups. Please try again later.')
@@ -274,7 +298,7 @@ describe('GroupsPage', () => {
   });
 
   it('handles invitation acceptance', async () => {
-    render(<GroupsPage />);
+    render(<GroupsPage />, { wrapper: TestWrapper });
 
     // Switch to invitations tab
     const invitationsTab = screen.getByText('Invitations (0)');
@@ -290,7 +314,7 @@ describe('GroupsPage', () => {
   });
 
   it('handles invitation decline', async () => {
-    render(<GroupsPage />);
+    render(<GroupsPage />, { wrapper: TestWrapper });
 
     // Switch to invitations tab
     const invitationsTab = screen.getByText('Invitations (0)');
@@ -306,14 +330,14 @@ describe('GroupsPage', () => {
   });
 
   it('shows correct tab counts', () => {
-    render(<GroupsPage />);
+    render(<GroupsPage />, { wrapper: TestWrapper });
 
     expect(screen.getByText('My Groups (2)')).toBeInTheDocument();
     expect(screen.getByText('Invitations (0)')).toBeInTheDocument();
   });
 
   it('updates tab counts when data changes', () => {
-    const { rerender } = render(<GroupsPage />);
+    const { rerender } = render(<GroupsPage />, { wrapper: TestWrapper });
 
     expect(screen.getByText('My Groups (2)')).toBeInTheDocument();
 
@@ -336,7 +360,7 @@ describe('GroupsPage', () => {
       error: null,
     });
 
-    render(<GroupsPage />);
+    render(<GroupsPage />, { wrapper: TestWrapper });
 
     expect(screen.getByText('My Groups (0)')).toBeInTheDocument();
   });
@@ -348,7 +372,7 @@ describe('GroupsPage', () => {
       error: null,
     });
 
-    render(<GroupsPage />);
+    render(<GroupsPage />, { wrapper: TestWrapper });
 
     expect(screen.getAllByText('Create Group')).toHaveLength(2); // Header button and empty state button
   });
@@ -362,7 +386,7 @@ describe('GroupsPage', () => {
       isPending: false,
     });
 
-    render(<GroupsPage />);
+    render(<GroupsPage />, { wrapper: TestWrapper });
 
     // Open create group form
     const createButton = screen.getByText('Create Group');
@@ -392,7 +416,7 @@ describe('GroupsPage', () => {
       isPending: false,
     });
 
-    render(<GroupsPage />);
+    render(<GroupsPage />, { wrapper: TestWrapper });
 
     // Open create group form
     const createButton = screen.getByText('Create Group');
@@ -428,7 +452,7 @@ describe('GroupsPage', () => {
       json: () => Promise.resolve({ success: true }),
     });
 
-    render(<GroupsPage />);
+    render(<GroupsPage />, { wrapper: TestWrapper });
 
     // Open create group form
     const createButton = screen.getByText('Create Group');

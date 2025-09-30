@@ -296,8 +296,10 @@ async function getOfflineVotes() {
   return [];
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function removeOfflineVote(_id) {
   // Implementation would use IndexedDB
+  // Parameter intentionally unused for future implementation
 }
 
 async function getOfflineCollectionUpdates() {
@@ -305,8 +307,10 @@ async function getOfflineCollectionUpdates() {
   return [];
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function removeOfflineCollectionUpdate(_id) {
   // Implementation would use IndexedDB
+  // Parameter intentionally unused for future implementation
 }
 
 // Push notification handling
