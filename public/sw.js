@@ -39,17 +39,8 @@ self.addEventListener('install', (event) => {
         console.log('Service Worker: Caching static assets');
         return cache.addAll(STATIC_ASSETS);
       }),
-      // Cache API endpoints
-      caches.open(API_CACHE_NAME).then((cache) => {
-        console.log('Service Worker: Caching API endpoints');
-        return Promise.all(
-          API_ENDPOINTS.map((endpoint) =>
-            cache
-              .add(endpoint)
-              .catch((err) => console.warn(`Failed to cache ${endpoint}:`, err))
-          )
-        );
-      }),
+      // Skip API endpoint caching to prevent conflicts
+      Promise.resolve(),
     ])
       .then(() => {
         console.log('Service Worker: All assets cached');
@@ -104,74 +95,22 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Handle API requests with network-first strategy
+  // Handle API requests - always fetch fresh (no caching to prevent conflicts)
   if (url.pathname.startsWith('/api/')) {
     event.respondWith(
-      fetch(request)
-        .then((response) => {
-          // Cache successful API responses
-          if (response.status === 200) {
-            const responseClone = response.clone();
-            const cacheName = API_ENDPOINTS.some((endpoint) =>
-              url.pathname.startsWith(endpoint)
-            )
-              ? API_CACHE_NAME
-              : DYNAMIC_CACHE_NAME;
-
-            caches.open(cacheName).then((cache) => {
-              cache.put(request, responseClone);
-            });
+      fetch(request).catch(() => {
+        // Return offline response for API requests
+        return new Response(
+          JSON.stringify({
+            error: 'Offline',
+            message: 'This request cannot be completed offline',
+          }),
+          {
+            status: 503,
+            headers: { 'Content-Type': 'application/json' },
           }
-          return response;
-        })
-        .catch(() => {
-          // Fallback to cache for API requests
-          return caches.match(request).then((response) => {
-            if (response) {
-              return response;
-            }
-
-            // Return appropriate offline response based on endpoint
-            const isReadOperation = request.method === 'GET';
-            const endpoint = url.pathname;
-
-            if (isReadOperation) {
-              // Return empty array for collection endpoints
-              if (
-                endpoint.includes('/collections') ||
-                endpoint.includes('/restaurants') ||
-                endpoint.includes('/groups')
-              ) {
-                return new Response(JSON.stringify([]), {
-                  status: 200,
-                  headers: { 'Content-Type': 'application/json' },
-                });
-              }
-
-              // Return empty object for single resource endpoints
-              if (endpoint.match(/\/api\/\w+\/[a-f0-9]+$/)) {
-                return new Response(JSON.stringify({}), {
-                  status: 200,
-                  headers: { 'Content-Type': 'application/json' },
-                });
-              }
-            }
-
-            // Return offline error for write operations
-            return new Response(
-              JSON.stringify({
-                error: 'Offline',
-                message:
-                  "You are currently offline. This action will be synced when you're back online.",
-                offline: true,
-              }),
-              {
-                status: 503,
-                headers: { 'Content-Type': 'application/json' },
-              }
-            );
-          });
-        })
+        );
+      })
     );
     return;
   }
@@ -206,6 +145,7 @@ self.addEventListener('fetch', (event) => {
                     <!DOCTYPE html>
                     <html>
                     <head>
+                      <meta charset="UTF-8">
                       <title>You Hungry? - Offline</title>
                       <meta name="viewport" content="width=device-width, initial-scale=1">
                       <style>
@@ -230,7 +170,7 @@ self.addEventListener('fetch', (event) => {
                     </head>
                     <body>
                       <div class="offline-container">
-                        <h1>🍽️ You're Offline</h1>
+                        <h1>🍕 You're Offline</h1>
                         <p>It looks like you're not connected to the internet. Check your connection and try again.</p>
                         <button onclick="window.location.reload()">Try Again</button>
                       </div>
@@ -239,7 +179,7 @@ self.addEventListener('fetch', (event) => {
                     `,
                 {
                   status: 200,
-                  headers: { 'Content-Type': 'text/html' },
+                  headers: { 'Content-Type': 'text/html; charset=utf-8' },
                 }
               );
             });
