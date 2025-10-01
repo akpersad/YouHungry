@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { performGroupRandomSelection } from '@/lib/decisions';
@@ -41,7 +42,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Group random selection error:', error);
+    logger.error('Group random selection error:', error);
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(

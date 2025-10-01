@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import {
   getRestaurantsByCollection,
@@ -28,7 +29,7 @@ export async function GET(
       count: restaurants.length,
     });
   } catch (error) {
-    console.error('Get collection restaurants error:', error);
+    logger.error('Get collection restaurants error:', error);
     return NextResponse.json(
       {
         success: false,
@@ -89,7 +90,7 @@ export async function POST(
       message: 'Restaurant added to collection successfully',
     });
   } catch (error) {
-    console.error('Add restaurant to collection error:', error);
+    logger.error('Add restaurant to collection error:', error);
     return NextResponse.json(
       {
         success: false,
@@ -153,7 +154,7 @@ export async function DELETE(
       message: 'Restaurant removed from collection successfully',
     });
   } catch (error) {
-    console.error('Remove restaurant from collection error:', error);
+    logger.error('Remove restaurant from collection error:', error);
     return NextResponse.json(
       {
         success: false,

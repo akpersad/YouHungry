@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth';
 import {
@@ -31,7 +32,7 @@ export async function GET(
       },
     });
   } catch (error) {
-    console.error('Error fetching group:', error);
+    logger.error('Error fetching group:', error);
     return NextResponse.json(
       { error: 'Failed to fetch group' },
       { status: 500 }
@@ -70,7 +71,7 @@ export async function PUT(
 
     return NextResponse.json({ group });
   } catch (error) {
-    console.error('Error updating group:', error);
+    logger.error('Error updating group:', error);
     if (error instanceof Error && error.message.includes('not an admin')) {
       return NextResponse.json({ error: error.message }, { status: 403 });
     }
@@ -99,7 +100,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error deleting group:', error);
+    logger.error('Error deleting group:', error);
     if (error instanceof Error && error.message.includes('not an admin')) {
       return NextResponse.json({ error: error.message }, { status: 403 });
     }

@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { acceptFriendRequest, declineFriendRequest } from '@/lib/friends';
 
@@ -39,7 +40,7 @@ export async function PUT(
       friendship,
     });
   } catch (error) {
-    console.error('Update friend request error:', error);
+    logger.error('Update friend request error:', error);
 
     if (error instanceof Error) {
       return NextResponse.json(

@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import {
   getCollectionById,
@@ -34,7 +35,7 @@ export async function GET(
       collection,
     });
   } catch (error) {
-    console.error('Get collection error:', error);
+    logger.error('Get collection error:', error);
     return NextResponse.json(
       {
         success: false,
@@ -91,7 +92,7 @@ export async function PUT(
       collection,
     });
   } catch (error) {
-    console.error('Update collection error:', error);
+    logger.error('Update collection error:', error);
     return NextResponse.json(
       {
         success: false,
@@ -130,7 +131,7 @@ export async function DELETE(
       message: 'Collection deleted successfully',
     });
   } catch (error) {
-    console.error('Delete collection error:', error);
+    logger.error('Delete collection error:', error);
     return NextResponse.json(
       {
         success: false,

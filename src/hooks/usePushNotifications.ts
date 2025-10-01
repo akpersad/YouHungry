@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import { useState, useEffect, useCallback } from 'react';
 import {
   pushNotifications,
@@ -52,7 +53,7 @@ export function usePushNotifications() {
         await checkStatus();
         return subscription;
       } catch (error) {
-        console.error('Failed to subscribe to push notifications:', error);
+        logger.error('Failed to subscribe to push notifications:', error);
         throw error;
       } finally {
         setLoading(false);
@@ -67,7 +68,7 @@ export function usePushNotifications() {
       await checkStatus();
       return success;
     } catch (error) {
-      console.error('Failed to unsubscribe from push notifications:', error);
+      logger.error('Failed to unsubscribe from push notifications:', error);
       return false;
     } finally {
       setLoading(false);
@@ -79,7 +80,7 @@ export function usePushNotifications() {
     try {
       await pushNotifications.sendTestNotification();
     } catch (error) {
-      console.error('Failed to send test notification:', error);
+      logger.error('Failed to send test notification:', error);
       throw error;
     }
   }, []);

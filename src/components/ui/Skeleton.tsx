@@ -24,7 +24,7 @@ export function Skeleton({ className, children }: SkeletonProps) {
 // Restaurant Card Skeleton
 export function RestaurantCardSkeleton() {
   return (
-    <div className="p-0 overflow-hidden">
+    <div className="p-0 overflow-hidden" data-testid="restaurant-card-skeleton">
       {/* Photo skeleton */}
       <Skeleton className="w-full h-48" />
 
@@ -63,7 +63,7 @@ export function RestaurantCardSkeleton() {
 // Collection Card Skeleton
 export function CollectionCardSkeleton() {
   return (
-    <div className="p-4">
+    <div className="p-4" data-testid="collection-card-skeleton">
       <div className="space-y-4">
         {/* Header skeleton */}
         <div className="space-y-2">
@@ -189,7 +189,7 @@ export function CollectionListSkeleton({ count = 3 }: { count?: number }) {
 // Decision Interface Skeleton
 export function DecisionInterfaceSkeleton() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="decision-interface-skeleton">
       {/* Progress header skeleton */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">

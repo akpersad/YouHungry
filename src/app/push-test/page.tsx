@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import React, { useState } from 'react';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { PushSubscriptionData } from '@/lib/push-notifications';
@@ -39,7 +40,7 @@ export default function PushTestPage() {
         setError('Notification permission denied');
       }
     } catch (err) {
-      console.error('Basic notification error:', err);
+      logger.error('Basic notification error:', err);
       const errorMessage = err instanceof Error ? err.message : String(err);
       setError(errorMessage);
     }
@@ -91,7 +92,7 @@ export default function PushTestPage() {
         setError('Failed to subscribe. Permission may have been denied.');
       }
     } catch (err) {
-      console.error('Subscribe error:', err);
+      logger.error('Subscribe error:', err);
       const errorMessage = err instanceof Error ? err.message : String(err);
       setError(errorMessage);
     }

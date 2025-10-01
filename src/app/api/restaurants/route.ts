@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { createRestaurant, getRestaurantDetails } from '@/lib/restaurants';
 import { addRestaurantToCollection } from '@/lib/collections';
@@ -60,7 +61,7 @@ export async function POST(request: NextRequest) {
           hours: restaurantData.hours,
         });
       } catch (createError) {
-        console.error('Error creating restaurant:', createError);
+        logger.error('Error creating restaurant:', createError);
         return NextResponse.json(
           { success: false, error: 'Failed to create restaurant' },
           { status: 500 }
@@ -113,7 +114,7 @@ export async function POST(request: NextRequest) {
       collection: updatedCollection,
     });
   } catch (error) {
-    console.error('Add restaurant to collection error:', error);
+    logger.error('Add restaurant to collection error:', error);
     return NextResponse.json(
       {
         success: false,

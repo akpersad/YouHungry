@@ -133,7 +133,7 @@ export default function RootLayout({
                           window.dispatchEvent(new CustomEvent('sw-registered', { detail: registration }));
                         })
                         .catch(function(err) {
-                          console.error('ServiceWorker registration failed:', err);
+                          logger.error('ServiceWorker registration failed:', err);
                           window.dispatchEvent(new CustomEvent('sw-error', { detail: err }));
                         });
                     });
@@ -151,7 +151,7 @@ export default function RootLayout({
                               window.dispatchEvent(new CustomEvent('sw-registered', { detail: registration }));
                             })
                             .catch(function(err) {
-                              console.error('ServiceWorker registration failed:', err);
+                              logger.error('ServiceWorker registration failed:', err);
                               window.dispatchEvent(new CustomEvent('sw-error', { detail: err }));
                             });
                         });

@@ -1,0 +1,73 @@
+{
+  "comparison": {
+    "date1": "2025-09-30",
+    "date2": "2025-10-01",
+    "generatedAt": "2025-10-01T13:38:29.391Z"
+  },
+  "summary": {
+    "totalComparisons": 2,
+    "improvements": 7,
+    "degradations": 1,
+    "neutral": 1
+  },
+  "details": {
+    "webVitals": {
+      "fcp": {
+        "old": 1764.5740090247562,
+        "new": 1764.5740090247562,
+        "change": 0,
+        "trend": "improvement"
+      },
+      "lcp": {
+        "old": 2113.481528259069,
+        "new": 2113.481528259069,
+        "change": 0,
+        "trend": "improvement"
+      },
+      "fid": {
+        "old": 53.467444954091924,
+        "new": 53.467444954091924,
+        "change": 0,
+        "trend": "improvement"
+      },
+      "cls": {
+        "old": 0.08521326662095877,
+        "new": 0.08521326662095877,
+        "change": 0,
+        "trend": "improvement"
+      },
+      "ttfb": {
+        "old": 247.08187535131603,
+        "new": 247.08187535131603,
+        "change": 0,
+        "trend": "improvement"
+      }
+    },
+    "api": {
+      "averageResponseTime": {
+        "old": 182.11609526985634,
+        "new": 182.11609526985634,
+        "change": 0,
+        "trend": "improvement"
+      },
+      "successRate": {
+        "old": 96.89324800375994,
+        "new": 96.89324800375994,
+        "change": 0,
+        "trend": "degradation"
+      },
+      "errorRate": {
+        "old": 1.8538987382504835,
+        "new": 1.8538987382504835,
+        "change": 0,
+        "trend": "improvement"
+      },
+      "totalRequests": {
+        "old": 1260,
+        "new": 1260,
+        "change": 0,
+        "trend": "decrease"
+      }
+    }
+  }
+}

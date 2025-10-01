@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/db';
 
@@ -22,7 +23,7 @@ export async function POST() {
       modifiedCount: result.modifiedCount,
     });
   } catch (error) {
-    console.error('Clear collections error:', error);
+    logger.error('Clear collections error:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to clear collections' },
       { status: 500 }

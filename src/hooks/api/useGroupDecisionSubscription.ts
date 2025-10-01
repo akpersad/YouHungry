@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { useEffect, useRef, useState } from 'react';
 
 interface GroupDecision {
@@ -91,13 +92,13 @@ export function useGroupDecisionSubscription(
             break;
         }
       } catch (err) {
-        console.error('Error parsing SSE message:', err);
+        logger.error('Error parsing SSE message:', err);
         setError('Failed to parse server message');
       }
     };
 
     eventSource.onerror = (event) => {
-      console.error('SSE connection error:', event);
+      logger.error('SSE connection error:', event);
       setIsConnected(false);
       setError('Connection lost. Attempting to reconnect...');
 

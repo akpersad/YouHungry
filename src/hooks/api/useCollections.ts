@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Collection } from '@/types/database';
 
@@ -12,15 +13,15 @@ export const collectionKeys = {
 
 // API functions
 const fetchCollections = async (userId: string): Promise<Collection[]> => {
-  console.log('fetchCollections called with userId:', userId);
+  logger.debug('fetchCollections called with userId:', userId);
   const url = `/api/collections?userId=${userId}&type=personal`;
-  console.log('Fetching from URL:', url);
+  logger.debug('Fetching from URL:', url);
 
   const response = await fetch(url);
   const data = await response.json();
 
-  console.log('API response status:', response.status);
-  console.log('API response data:', data);
+  logger.debug('API response status:', response.status);
+  logger.debug('API response data:', data);
 
   if (!response.ok) {
     throw new Error(data.error || 'Failed to fetch collections');
@@ -166,7 +167,7 @@ export function useCreateCollection() {
           context.previousCollections
         );
       }
-      console.error('Failed to create collection:', error);
+      logger.error('Failed to create collection:', error);
     },
     onSuccess: (newCollection, variables) => {
       // Replace optimistic collection with real data
@@ -213,7 +214,7 @@ export function useUpdateCollection() {
       });
     },
     onError: (error) => {
-      console.error('Failed to update collection:', error);
+      logger.error('Failed to update collection:', error);
     },
   });
 }
@@ -278,7 +279,7 @@ export function useDeleteCollection() {
         });
       }
 
-      console.error('Failed to delete collection:', error);
+      logger.error('Failed to delete collection:', error);
     },
     onSettled: () => {
       // Always refetch to ensure consistency

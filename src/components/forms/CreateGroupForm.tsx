@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -123,7 +124,7 @@ export function CreateGroupForm({
       setErrors({});
       onClose();
     } catch (error) {
-      console.error('Error creating group:', error);
+      logger.error('Error creating group:', error);
       // Error handling is done by the parent component
     } finally {
       setIsSubmitting(false);

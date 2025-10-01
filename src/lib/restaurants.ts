@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { connectToDatabase } from './db';
 import { Restaurant } from '@/types/database';
 import { ObjectId } from 'mongodb';
@@ -51,7 +52,7 @@ export async function searchRestaurants(
             return await createRestaurant(restaurant);
           }
         } catch (error) {
-          console.error('Error storing restaurant:', error);
+          logger.error('Error storing restaurant:', error);
           return restaurant; // Return original if storage fails
         }
       })
@@ -59,7 +60,7 @@ export async function searchRestaurants(
 
     return storedRestaurants;
   } catch (error) {
-    console.error(
+    logger.error(
       'Google Places search failed, falling back to local search:',
       error
     );
@@ -69,7 +70,7 @@ export async function searchRestaurants(
       error instanceof Error &&
       error.message.includes('API keys with referer restrictions')
     ) {
-      console.error(
+      logger.error(
         'Google Places API key has referer restrictions. Please configure the API key without referer restrictions for server-side use.'
       );
     }
@@ -165,7 +166,7 @@ export async function searchRestaurantsByCoordinates(
             return await createRestaurant(restaurant);
           }
         } catch (error) {
-          console.error('Error storing restaurant:', error);
+          logger.error('Error storing restaurant:', error);
           return restaurant; // Return original if storage fails
         }
       })
@@ -173,7 +174,7 @@ export async function searchRestaurantsByCoordinates(
 
     return storedRestaurants;
   } catch (error) {
-    console.error('Location-based search failed:', error);
+    logger.error('Location-based search failed:', error);
     return [];
   }
 }
@@ -207,7 +208,7 @@ export async function getRestaurantDetails(
 
     return null;
   } catch (error) {
-    console.error('Error getting restaurant details:', error);
+    logger.error('Error getting restaurant details:', error);
     return null;
   }
 }

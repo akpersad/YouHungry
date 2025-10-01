@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
@@ -15,7 +16,7 @@ export async function GET(request: NextRequest) {
     const apiKey = process.env.GOOGLE_PLACES_API_KEY;
 
     if (!apiKey) {
-      console.error('Google Places API key not configured');
+      logger.error('Google Places API key not configured');
       return NextResponse.json(
         { error: 'Google Places API key not configured' },
         { status: 500 }
@@ -109,7 +110,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(addressValidationResult);
   } catch (error) {
-    console.error('Address details error:', error);
+    logger.error('Address details error:', error);
     return NextResponse.json(
       { error: 'Address details failed' },
       { status: 500 }

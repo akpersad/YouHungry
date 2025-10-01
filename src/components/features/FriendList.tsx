@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import { useState } from 'react';
 import { useFriends, useRemoveFriend } from '@/hooks/api/useFriends';
 import { Button } from '@/components/ui/Button';
@@ -34,7 +35,7 @@ export function FriendList({ userId }: FriendListProps) {
       setShowRemoveModal(false);
       setFriendToRemove(null);
     } catch (error) {
-      console.error('Failed to remove friend:', error);
+      logger.error('Failed to remove friend:', error);
     }
   };
 

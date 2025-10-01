@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth';
 import { declineGroupInvitation } from '@/lib/groups';
@@ -27,7 +28,7 @@ export async function POST(
       message: 'Invitation declined',
     });
   } catch (error) {
-    console.error('Error declining group invitation:', error);
+    logger.error('Error declining group invitation:', error);
     if (error instanceof Error) {
       if (error.message.includes('Invitation not found')) {
         return NextResponse.json(

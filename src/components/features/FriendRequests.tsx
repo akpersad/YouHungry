@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import {
   useFriendRequests,
   useUpdateFriendRequest,
@@ -27,7 +28,7 @@ export function FriendRequests({ userId }: FriendRequestsProps) {
         userId,
       });
     } catch (error) {
-      console.error(`Failed to ${action} friend request:`, error);
+      logger.error(`Failed to ${action} friend request:`, error);
     }
   };
 

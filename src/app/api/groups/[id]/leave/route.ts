@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth';
 import { leaveGroup } from '@/lib/groups';
@@ -24,7 +25,7 @@ export async function POST(
       message: 'Successfully left the group',
     });
   } catch (error) {
-    console.error('Error leaving group:', error);
+    logger.error('Error leaving group:', error);
     if (error instanceof Error) {
       if (error.message.includes('not a member')) {
         return NextResponse.json(

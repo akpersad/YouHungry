@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { getActiveGroupDecisions, getGroupDecision } from '@/lib/decisions';
@@ -49,7 +50,7 @@ export async function GET(request: NextRequest) {
               }
             }
           } catch (error) {
-            console.error('Error sending initial data:', error);
+            logger.error('Error sending initial data:', error);
             sendData({ type: 'error', message: 'Failed to load data' });
           }
         };
@@ -79,7 +80,7 @@ export async function GET(request: NextRequest) {
               }
             }
           } catch (error) {
-            console.error('Error in periodic update:', error);
+            logger.error('Error in periodic update:', error);
           }
         }, 5000);
 
@@ -105,7 +106,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('SSE error:', error);
+    logger.error('SSE error:', error);
     return new Response('Internal Server Error', { status: 500 });
   }
 }

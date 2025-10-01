@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Input } from './Input';
 import {
@@ -72,7 +73,7 @@ export function AddressInput({
         setSuggestions(results);
         setShowSuggestions(true);
       } catch (error) {
-        console.error('Error fetching address suggestions:', error);
+        logger.error('Error fetching address suggestions:', error);
         setSuggestions([]);
       } finally {
         setIsLoading(false);
@@ -112,7 +113,7 @@ export function AddressInput({
           onValidationChange?.(false);
         }
       } catch (error) {
-        console.error('Address validation error:', error);
+        logger.error('Address validation error:', error);
         setIsValid(false);
         setValidationError('Address validation failed');
         onValidationChange?.(false);

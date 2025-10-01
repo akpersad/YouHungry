@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import React, { use } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
@@ -39,7 +40,7 @@ export default function GroupPage({ params }: GroupPageProps) {
           setCurrentUserMongoId(userData.user._id);
         }
       } catch (error) {
-        console.error('Error fetching current user:', error);
+        logger.error('Error fetching current user:', error);
       }
     };
 
@@ -64,7 +65,7 @@ export default function GroupPage({ params }: GroupPageProps) {
       await updateGroupMutation.mutateAsync({ groupId, data });
       toast.success('Group updated successfully!');
     } catch (error) {
-      console.error('Error updating group:', error);
+      logger.error('Error updating group:', error);
       toast.error('Failed to update group. Please try again.');
     }
   };
@@ -74,7 +75,7 @@ export default function GroupPage({ params }: GroupPageProps) {
       await inviteUserMutation.mutateAsync({ groupId, data: { email } });
       toast.success(`Invitation sent to ${email}!`);
     } catch (error) {
-      console.error('Error inviting user:', error);
+      logger.error('Error inviting user:', error);
       toast.error('Failed to send invitation. Please try again.');
     }
   };
@@ -92,7 +93,7 @@ export default function GroupPage({ params }: GroupPageProps) {
       await Promise.all(invitePromises);
       toast.success(`Invitations sent to ${friendEmails.length} friend(s)!`);
     } catch (error) {
-      console.error('Error inviting friends:', error);
+      logger.error('Error inviting friends:', error);
       toast.error('Failed to send invitations. Please try again.');
     }
   };
@@ -102,7 +103,7 @@ export default function GroupPage({ params }: GroupPageProps) {
       await removeUserMutation.mutateAsync({ groupId, data: { email } });
       toast.success(`User removed from group`);
     } catch (error) {
-      console.error('Error removing user:', error);
+      logger.error('Error removing user:', error);
       toast.error('Failed to remove user. Please try again.');
     }
   };
@@ -112,7 +113,7 @@ export default function GroupPage({ params }: GroupPageProps) {
       await promoteUserMutation.mutateAsync({ groupId, data: { email } });
       toast.success(`User promoted to admin`);
     } catch (error) {
-      console.error('Error promoting user:', error);
+      logger.error('Error promoting user:', error);
       toast.error('Failed to promote user. Please try again.');
     }
   };
@@ -123,7 +124,7 @@ export default function GroupPage({ params }: GroupPageProps) {
       toast.success('You have left the group');
       router.push('/groups');
     } catch (error) {
-      console.error('Error leaving group:', error);
+      logger.error('Error leaving group:', error);
       toast.error('Failed to leave group. Please try again.');
     }
   };
@@ -134,7 +135,7 @@ export default function GroupPage({ params }: GroupPageProps) {
       toast.success('Group deleted successfully');
       router.push('/groups');
     } catch (error) {
-      console.error('Error deleting group:', error);
+      logger.error('Error deleting group:', error);
       toast.error('Failed to delete group. Please try again.');
     }
   };

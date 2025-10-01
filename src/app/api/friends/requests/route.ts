@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { sendFriendRequest, getFriendRequests } from '@/lib/friends';
 
@@ -20,7 +21,7 @@ export async function GET(request: NextRequest) {
       requests,
     });
   } catch (error) {
-    console.error('Get friend requests error:', error);
+    logger.error('Get friend requests error:', error);
     return NextResponse.json(
       {
         success: false,
@@ -60,7 +61,7 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
-    console.error('Send friend request error:', error);
+    logger.error('Send friend request error:', error);
 
     if (error instanceof Error) {
       return NextResponse.json(

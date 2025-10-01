@@ -6,7 +6,7 @@ import {
   CollectionCardSkeleton,
   DecisionInterfaceSkeleton,
 } from '@/components/ui/Skeleton';
-import { Restaurant, Group } from '@/types/database';
+import { Restaurant, Group, Collection } from '@/types/database';
 
 // Define proper types for component props
 interface ComponentProps {
@@ -46,6 +46,69 @@ interface RestaurantSearchResultsProps {
   restaurants: Restaurant[];
   isLoading: boolean;
   [key: string]: unknown;
+}
+
+interface RestaurantDetailsViewProps {
+  restaurant: Restaurant;
+  onManage?: () => void;
+  onAddToCollection?: () => void;
+  showManageButton?: boolean;
+  showAddButton?: boolean;
+}
+
+interface GroupDecisionMakingProps {
+  groupId: string;
+  collectionId: string;
+  isAdmin: boolean;
+}
+
+interface DecisionResultModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  selectedRestaurant: Restaurant | null;
+  reasoning: string;
+  visitDate: Date;
+  onConfirmVisit: () => void;
+  onTryAgain: () => void;
+  isLoading?: boolean;
+}
+
+interface RestaurantManagementModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  restaurant: Restaurant | null;
+  collection: Collection | null;
+  onUpdateRestaurant: (
+    restaurantId: string,
+    updates: { priceRange?: string; timeToPickUp?: number }
+  ) => Promise<void>;
+  onRemoveFromCollection: (restaurantId: string) => Promise<void>;
+}
+
+interface FriendSearchProps {
+  userId: string;
+  onClose?: () => void;
+}
+
+interface GroupInvitation {
+  _id: string;
+  groupId: string;
+  groupName: string;
+  groupDescription?: string;
+  inviterName: string;
+  inviterEmail: string;
+  createdAt: string;
+}
+
+interface GroupInvitationsProps {
+  invitations: GroupInvitation[];
+  onAcceptInvitation: (invitationId: string) => Promise<void>;
+  onDeclineInvitation: (invitationId: string) => Promise<void>;
+}
+
+interface DecisionStatisticsProps {
+  collectionId: string;
+  onClose?: () => void;
 }
 
 interface CreateCollectionFormProps {
@@ -112,6 +175,49 @@ export const LazyCreateCollectionForm = lazy(() =>
 export const LazyCreateGroupForm = lazy(() =>
   import('@/components/forms/CreateGroupForm').then((module) => ({
     default: module.CreateGroupForm,
+  }))
+);
+
+// Additional lazy-loaded components for better performance
+export const LazyRestaurantDetailsView = lazy(() =>
+  import('@/components/features/RestaurantDetailsView').then((module) => ({
+    default: module.RestaurantDetailsView,
+  }))
+);
+
+export const LazyGroupDecisionMaking = lazy(() =>
+  import('@/components/features/GroupDecisionMaking').then((module) => ({
+    default: module.GroupDecisionMaking,
+  }))
+);
+
+export const LazyDecisionResultModal = lazy(() =>
+  import('@/components/features/DecisionResultModal').then((module) => ({
+    default: module.DecisionResultModal,
+  }))
+);
+
+export const LazyRestaurantManagementModal = lazy(() =>
+  import('@/components/features/RestaurantManagementModal').then((module) => ({
+    default: module.RestaurantManagementModal,
+  }))
+);
+
+export const LazyFriendSearch = lazy(() =>
+  import('@/components/features/FriendSearch').then((module) => ({
+    default: module.FriendSearch,
+  }))
+);
+
+export const LazyGroupInvitations = lazy(() =>
+  import('@/components/features/GroupInvitations').then((module) => ({
+    default: module.GroupInvitations,
+  }))
+);
+
+export const LazyDecisionStatistics = lazy(() =>
+  import('@/components/features/DecisionStatistics').then((module) => ({
+    default: module.DecisionStatistics,
   }))
 );
 
@@ -210,6 +316,128 @@ export function CreateGroupFormWithSkeleton(props: CreateGroupFormProps) {
       }
     >
       <LazyCreateGroupForm {...props} />
+    </Suspense>
+  );
+}
+
+// Additional wrapper components with loading states
+export function RestaurantDetailsViewWithSkeleton(
+  props: RestaurantDetailsViewProps
+) {
+  return (
+    <Suspense
+      fallback={
+        <div className="animate-pulse space-y-4">
+          <div className="h-64 bg-tertiary rounded-lg" />
+          <div className="h-8 bg-tertiary rounded-lg" />
+          <div className="h-4 bg-tertiary rounded-lg" />
+          <div className="h-4 bg-tertiary rounded-lg w-3/4" />
+        </div>
+      }
+    >
+      <LazyRestaurantDetailsView {...props} />
+    </Suspense>
+  );
+}
+
+export function GroupDecisionMakingWithSkeleton(
+  props: GroupDecisionMakingProps
+) {
+  return (
+    <Suspense fallback={<DecisionInterfaceSkeleton />}>
+      <LazyGroupDecisionMaking {...props} />
+    </Suspense>
+  );
+}
+
+export function DecisionResultModalWithSkeleton(
+  props: DecisionResultModalProps
+) {
+  return (
+    <Suspense
+      fallback={
+        <div className="animate-pulse space-y-4">
+          <div className="h-8 bg-tertiary rounded-lg" />
+          <div className="h-32 bg-tertiary rounded-lg" />
+          <div className="h-10 bg-tertiary rounded-lg" />
+        </div>
+      }
+    >
+      <LazyDecisionResultModal {...props} />
+    </Suspense>
+  );
+}
+
+export function RestaurantManagementModalWithSkeleton(
+  props: RestaurantManagementModalProps
+) {
+  return (
+    <Suspense
+      fallback={
+        <div className="animate-pulse space-y-4">
+          <div className="h-8 bg-tertiary rounded-lg" />
+          <div className="h-20 bg-tertiary rounded-lg" />
+          <div className="h-10 bg-tertiary rounded-lg" />
+        </div>
+      }
+    >
+      <LazyRestaurantManagementModal {...props} />
+    </Suspense>
+  );
+}
+
+export function FriendSearchWithSkeleton(props: FriendSearchProps) {
+  return (
+    <Suspense
+      fallback={
+        <div className="animate-pulse space-y-4">
+          <div className="h-10 bg-tertiary rounded-lg" />
+          <div className="space-y-2">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="h-16 bg-tertiary rounded-lg" />
+            ))}
+          </div>
+        </div>
+      }
+    >
+      <LazyFriendSearch {...props} />
+    </Suspense>
+  );
+}
+
+export function GroupInvitationsWithSkeleton(props: GroupInvitationsProps) {
+  return (
+    <Suspense
+      fallback={
+        <div className="animate-pulse space-y-4">
+          <div className="h-8 bg-tertiary rounded-lg" />
+          <div className="space-y-2">
+            {Array.from({ length: 2 }).map((_, i) => (
+              <div key={i} className="h-20 bg-tertiary rounded-lg" />
+            ))}
+          </div>
+        </div>
+      }
+    >
+      <LazyGroupInvitations {...props} />
+    </Suspense>
+  );
+}
+
+export function DecisionStatisticsWithSkeleton(props: DecisionStatisticsProps) {
+  return (
+    <Suspense
+      fallback={
+        <div className="animate-pulse space-y-4">
+          <div className="h-8 bg-tertiary rounded-lg" />
+          <div className="grid grid-cols-2 gap-4">
+            <div className="h-20 bg-tertiary rounded-lg" />
+            <div className="h-20 bg-tertiary rounded-lg" />
+          </div>
+        </div>
+      }
+    >
+      <LazyDecisionStatistics {...props} />
     </Suspense>
   );
 }

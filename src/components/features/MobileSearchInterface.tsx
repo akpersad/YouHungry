@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -359,11 +360,11 @@ export function MobileSearchInterface({
               navigator.geolocation?.getCurrentPosition(
                 (position) => {
                   // Handle successful location
-                  console.log('Location:', position.coords);
+                  logger.debug('Location:', position.coords);
                   setIsLocationSheetOpen(false);
                 },
                 (error) => {
-                  console.error('Location error:', error);
+                  logger.error('Location error:', error);
                 }
               );
             }}
@@ -399,7 +400,7 @@ export function MobileSearchInterface({
               const address = prompt('Enter your address:');
               if (address) {
                 // Handle custom address
-                console.log('Custom address:', address);
+                logger.debug('Custom address:', address);
                 setIsLocationSheetOpen(false);
               }
             }}

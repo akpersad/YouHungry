@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { Group, User } from '@/types/database';
@@ -72,7 +73,7 @@ export function GroupView({
       });
       setIsEditing(false);
     } catch (error) {
-      console.error('Error updating group:', error);
+      logger.error('Error updating group:', error);
     } finally {
       setActionLoading(null);
     }
@@ -88,7 +89,7 @@ export function GroupView({
       setInviteEmail('');
       setShowInviteModal(false);
     } catch (error) {
-      console.error('Error inviting user:', error);
+      logger.error('Error inviting user:', error);
     } finally {
       setActionLoading(null);
     }
@@ -100,7 +101,7 @@ export function GroupView({
       await onInviteFriends?.(friendEmails);
       setShowFriendSelectionModal(false);
     } catch (error) {
-      console.error('Error inviting friends:', error);
+      logger.error('Error inviting friends:', error);
       throw error; // Re-throw to let the modal handle the error display
     } finally {
       setActionLoading(null);
@@ -114,7 +115,7 @@ export function GroupView({
     try {
       await onRemoveUser(email);
     } catch (error) {
-      console.error('Error removing user:', error);
+      logger.error('Error removing user:', error);
     } finally {
       setActionLoading(null);
     }
@@ -127,7 +128,7 @@ export function GroupView({
     try {
       await onPromoteUser(email);
     } catch (error) {
-      console.error('Error promoting user:', error);
+      logger.error('Error promoting user:', error);
     } finally {
       setActionLoading(null);
     }
@@ -140,7 +141,7 @@ export function GroupView({
     try {
       await onLeaveGroup();
     } catch (error) {
-      console.error('Error leaving group:', error);
+      logger.error('Error leaving group:', error);
     } finally {
       setActionLoading(null);
     }
@@ -153,7 +154,7 @@ export function GroupView({
     try {
       await onDeleteGroup();
     } catch (error) {
-      console.error('Error deleting group:', error);
+      logger.error('Error deleting group:', error);
     } finally {
       setActionLoading(null);
     }

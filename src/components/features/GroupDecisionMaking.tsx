@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useUser } from '@clerk/nextjs';
@@ -281,7 +282,7 @@ export function GroupDecisionMaking({
     const decisionId = selectedDecision.id;
 
     if (!decisionId) {
-      console.error('Selected decision has no ID!');
+      logger.error('Selected decision has no ID!');
       alert('Error: Decision ID is missing. Please try again.');
       return;
     }

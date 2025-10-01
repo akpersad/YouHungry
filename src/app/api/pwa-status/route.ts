@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
@@ -14,7 +15,7 @@ export async function GET(request: NextRequest) {
       const swResponse = await fetch(swUrl);
       swExists = swResponse.ok;
     } catch (error) {
-      console.log('PWA Debug: Service worker not accessible:', error);
+      logger.debug('PWA Debug: Service worker not accessible:', error);
     }
 
     // Check if manifest file exists
@@ -24,7 +25,7 @@ export async function GET(request: NextRequest) {
       const manifestResponse = await fetch(manifestUrl);
       manifestExists = manifestResponse.ok;
     } catch (error) {
-      console.log('PWA Debug: Manifest not accessible:', error);
+      logger.debug('PWA Debug: Manifest not accessible:', error);
     }
 
     const pwaStatus = {
@@ -60,11 +61,11 @@ export async function GET(request: NextRequest) {
       },
     };
 
-    console.log('PWA Status Check:', JSON.stringify(pwaStatus, null, 2));
+    logger.debug('PWA Status Check:', JSON.stringify(pwaStatus, null, 2));
 
     return NextResponse.json(pwaStatus);
   } catch (error) {
-    console.error('PWA Status Check Error:', error);
+    logger.error('PWA Status Check Error:', error);
     return NextResponse.json(
       { error: 'Failed to check PWA status' },
       { status: 500 }

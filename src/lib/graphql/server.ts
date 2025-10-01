@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { ApolloServer } from '@apollo/server';
 import { startServerAndCreateNextHandler } from '@as-integrations/next';
 import { typeDefs } from './schema';
@@ -20,7 +21,7 @@ const server = new ApolloServer({
                   body: { kind: string; singleResult: { errors?: unknown } };
                 };
               };
-              console.log('GraphQL Response:', {
+              logger.debug('GraphQL Response:', {
                 operationName: context.request.operationName,
                 variables: context.request.variables,
                 errors:

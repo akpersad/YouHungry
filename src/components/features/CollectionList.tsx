@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import { useState } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
@@ -69,7 +70,7 @@ function CollectionList({
       await deleteCollectionMutation.mutateAsync(collectionId);
     } catch (error) {
       // Error is handled by the mutation's onError callback
-      console.error('Failed to delete collection:', error);
+      logger.error('Failed to delete collection:', error);
     }
   };
 
