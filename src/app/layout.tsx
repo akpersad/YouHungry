@@ -4,6 +4,10 @@ import { ClerkProvider } from '@clerk/nextjs';
 import { QueryProvider } from '@/components/providers/QueryProvider';
 import { ThemeProvider } from '@/components/providers/ThemeProvider';
 import { PageTransition } from '@/components/ui/PageTransition';
+import {
+  PWAInstallPrompt,
+  PWAOfflineBanner,
+} from '@/components/ui/PWAStatusIndicator';
 import Script from 'next/script';
 import './globals.css';
 
@@ -97,7 +101,7 @@ export default function RootLayout({
         <head>
           <link rel="manifest" href="/manifest.json" />
           <link rel="icon" href="/favicon.ico" />
-          <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
+          <link rel="apple-touch-icon" href="/icons/icon-192x192.svg" />
           <meta name="theme-color" content="#ff6b6b" />
         </head>
         <body
@@ -106,6 +110,8 @@ export default function RootLayout({
           <ThemeProvider>
             <QueryProvider>
               <PageTransition>{children}</PageTransition>
+              <PWAInstallPrompt />
+              <PWAOfflineBanner />
             </QueryProvider>
           </ThemeProvider>
 
