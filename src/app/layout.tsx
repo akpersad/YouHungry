@@ -4,6 +4,10 @@ import { ClerkProvider } from '@clerk/nextjs';
 import { QueryProvider } from '@/components/providers/QueryProvider';
 import { ThemeProvider } from '@/components/providers/ThemeProvider';
 import { PageTransition } from '@/components/ui/PageTransition';
+import {
+  PWAInstallPrompt,
+  PWAOfflineBanner,
+} from '@/components/ui/PWAStatusIndicator';
 import Script from 'next/script';
 import './globals.css';
 
@@ -97,7 +101,7 @@ export default function RootLayout({
         <head>
           <link rel="manifest" href="/manifest.json" />
           <link rel="icon" href="/favicon.ico" />
-          <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
+          <link rel="apple-touch-icon" href="/icons/icon-192x192.svg" />
           <meta name="theme-color" content="#ff6b6b" />
         </head>
         <body
@@ -106,6 +110,8 @@ export default function RootLayout({
           <ThemeProvider>
             <QueryProvider>
               <PageTransition>{children}</PageTransition>
+              <PWAInstallPrompt />
+              <PWAOfflineBanner />
             </QueryProvider>
           </ThemeProvider>
 
@@ -116,15 +122,41 @@ export default function RootLayout({
             dangerouslySetInnerHTML={{
               __html: `
                 if ('serviceWorker' in navigator) {
-                  window.addEventListener('load', function() {
+                  // Browser detection for iOS compatibility
+                  const isSafari = /Safari/.test(navigator.userAgent) && !(/Chrome/.test(navigator.userAgent) || /CriOS/.test(navigator.userAgent));
+                  
+                  if (isSafari) {
+                    // Safari needs registration on load event
+                    window.addEventListener('load', function() {
+                      navigator.serviceWorker.register('/sw.js', { scope: '/' })
+                        .then(function(registration) {
+                          window.dispatchEvent(new CustomEvent('sw-registered', { detail: registration }));
+                        })
+                        .catch(function(err) {
+                          console.error('ServiceWorker registration failed:', err);
+                          window.dispatchEvent(new CustomEvent('sw-error', { detail: err }));
+                        });
+                    });
+                  } else {
+                    // Standard registration for Chrome and other browsers
                     navigator.serviceWorker.register('/sw.js')
                       .then(function(registration) {
-                        console.log('ServiceWorker registration successful');
+                        window.dispatchEvent(new CustomEvent('sw-registered', { detail: registration }));
                       })
                       .catch(function(err) {
-                        console.log('ServiceWorker registration failed: ', err);
+                        // Fallback to load event if immediate registration fails
+                        window.addEventListener('load', function() {
+                          navigator.serviceWorker.register('/sw.js')
+                            .then(function(registration) {
+                              window.dispatchEvent(new CustomEvent('sw-registered', { detail: registration }));
+                            })
+                            .catch(function(err) {
+                              console.error('ServiceWorker registration failed:', err);
+                              window.dispatchEvent(new CustomEvent('sw-error', { detail: err }));
+                            });
+                        });
                       });
-                  });
+                  }
                 }
               `,
             }}

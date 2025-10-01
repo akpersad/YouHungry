@@ -119,6 +119,25 @@ export default function Home() {
           </p>
           <Button size="lg">Start Your First Collection</Button>
         </div>
+
+        {/* Developer Tools Section */}
+        <div className="mt-8 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+            🛠️ Developer Tools
+          </h3>
+          <div className="flex flex-wrap gap-2">
+            <a href="/pwa-explorer">
+              <Button variant="outline" size="sm">
+                📱 PWA Explorer
+              </Button>
+            </a>
+            <a href="/push-test">
+              <Button variant="outline" size="sm">
+                🔔 Push Notifications Test
+              </Button>
+            </a>
+          </div>
+        </div>
       </div>
     </MainLayout>
   );

@@ -80,7 +80,7 @@
 
 
 ┌─────────────────────────────────────────────────────────────────────────────────┐
-│                              FRIENDSHIP RELATIONSHIPS                          │
+│                          FRIENDSHIP & INVITATION RELATIONSHIPS                 │
 └─────────────────────────────────────────────────────────────────────────────────┘
 
 ┌─────────────────┐    1:N    ┌─────────────────┐    1:N    ┌─────────────────┐
@@ -100,6 +100,30 @@
 │                 │           │                 │           │                 │
 └─────────────────┘           └─────────────────┘           └─────────────────┘
     (Requester)                    (Friendship)                (Addressee)
+
+
+┌─────────────────┐    1:N    ┌──────────────────┐    1:N    ┌─────────────────┐
+│     GROUPS      │◄─────────►│ GROUP_INVITATIONS│◄─────────►│     USERS       │
+│                 │           │                  │           │                 │
+│ • _id (PK)      │           │ • _id (PK)       │           │ • _id (PK)      │
+│ • name          │           │ • groupId (FK)   │           │ • clerkId (UK)  │
+│ • description   │           │ • inviterId (FK) │           │ • email (UK)    │
+│ • adminIds      │           │ • inviteeId (FK) │           │ • name          │
+│ • memberIds     │           │ • status         │           │ • city          │
+│ • collectionIds │           │   - pending      │           │ • createdAt     │
+│ • createdAt     │           │   - accepted     │           │ • updatedAt     │
+│ • updatedAt     │           │   - declined     │           │                 │
+│                 │           │ • createdAt      │           │                 │
+└─────────────────┘           │ • updatedAt      │           └─────────────────┘
+     (Group)                  │                  │               (Invitee)
+                              └──────────────────┘
+                                      │
+                                      │ 1:N
+                                      ▼
+                              ┌─────────────────┐
+                              │     USERS       │
+                              │   (Inviter)     │
+                              └─────────────────┘
 
 
 ┌─────────────────────────────────────────────────────────────────────────────────┐
@@ -142,6 +166,14 @@
    - Friendships connect two users (requester and addressee)
    - Bidirectional relationship stored as single document
 
+10. GROUP_INVITATIONS ↔ GROUPS (N:1)
+   - Group invitations belong to specific groups
+   - Multiple invitations can be sent for one group
+
+11. GROUP_INVITATIONS ↔ USERS (N:1 for inviter, N:1 for invitee)
+   - Invitations connect inviter (group member) and invitee (user being invited)
+   - Tracks invitation status (pending, accepted, declined)
+
 
 ┌─────────────────────────────────────────────────────────────────────────────────┐
 │                                KEY INDEXES                                     │
@@ -164,6 +196,17 @@ DECISIONS:
 COLLECTIONS:
 - ownerId + type (compound)
 
+GROUP_INVITATIONS:
+- groupId + inviteeId (compound)
+- status (for filtering pending invitations)
+- inviteeId (for user's invitations lookup)
+
+OFFLINE_STORAGE (IndexedDB):
+- restaurants: lastUpdated
+- collections: lastUpdated
+- decisions: collectionId, status
+- offlineActions: createdAt, retryCount
+
 
 ┌─────────────────────────────────────────────────────────────────────────────────┐
 │                              DATA FLOW PATTERNS                                │
@@ -180,3 +223,86 @@ USER_A → FRIENDSHIP → USER_B
 
 Collection Management:
 USER/GROUP → COLLECTION → RESTAURANTS (from Google Places API)
+
+Offline Sync Flow:
+OFFLINE_ACTION → INDEXEDDB → ONLINE_DETECTION → BACKGROUND_SYNC → SERVER_API
+
+Group Invitation Flow:
+ADMIN → GROUP_INVITATION → USER → ACCEPT/DECLINE → GROUP_MEMBER
+
+Friend Request Flow:
+USER_A → FRIENDSHIP (pending) → USER_B → ACCEPT/DECLINE → FRIENDSHIP (accepted)
+
+
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                            OFFLINE STORAGE (IndexedDB)                         │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+Client-Side Offline Storage for PWA:
+
+┌──────────────────┐
+│ OFFLINE_STORAGE  │ (IndexedDB: YouHungryOfflineDB)
+│                  │
+│ Object Stores:   │
+│                  │
+│ 1. restaurants   │ • id (PK)
+│                  │ • name, address, cuisine
+│                  │ • rating, priceLevel, photos
+│                  │ • lastUpdated
+│                  │ Index: lastUpdated
+│                  │
+│ 2. collections   │ • id (PK)
+│                  │ • name, description, type
+│                  │ • ownerId, restaurantIds
+│                  │ • lastUpdated
+│                  │ Index: lastUpdated
+│                  │
+│ 3. decisions     │ • id (PK)
+│                  │ • collectionId, groupId
+│                  │ • status, result, votes
+│                  │ • createdAt
+│                  │ Index: collectionId, status
+│                  │
+│ 4. offlineActions│ • id (PK, autoIncrement)
+│                  │ • type (vote, collection, decision)
+│                  │ • url, method, headers, data
+│                  │ • createdAt, retryCount, maxRetries
+│                  │ Index: createdAt, retryCount
+│                  │
+└──────────────────┘
+
+Purpose:
+- Offline data caching for PWA functionality
+- Background sync queue for offline actions
+- Automatic cleanup of expired data (7 days default)
+- Sync status tracking and retry logic
+
+
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                          TECHNOLOGY STACK SUMMARY                              │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+Database Layer:
+- MongoDB Atlas (Primary Database)
+- IndexedDB (Client-side Offline Storage for PWA)
+
+Data Storage Types:
+- Server-side: MongoDB (persistent, authoritative)
+- Client-side: IndexedDB (offline cache, sync queue)
+- Cache: Service Worker Cache API (static assets, API responses)
+
+PWA Features:
+- Service Workers for offline functionality
+- Background sync for offline actions
+- IndexedDB for offline data persistence
+- Cache API for multi-tier caching strategy
+
+Collections Added:
+- GROUP_INVITATIONS (for group invitation management)
+- Offline storage: restaurants, collections, decisions, offlineActions (IndexedDB)
+
+Recent Schema Enhancements:
+- Added GROUP_INVITATIONS collection with status tracking
+- Implemented offline storage with IndexedDB for PWA support
+- Added background sync queue with retry logic
+- Enhanced caching with multi-tier strategy (static, dynamic, API)

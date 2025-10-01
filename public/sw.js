@@ -1,7 +1,8 @@
 // Service Worker for You Hungry? PWA
-const CACHE_NAME = 'you-hungry-v1';
-const STATIC_CACHE_NAME = 'you-hungry-static-v1';
-const DYNAMIC_CACHE_NAME = 'you-hungry-dynamic-v1';
+const CACHE_NAME = 'you-hungry-v2';
+const STATIC_CACHE_NAME = 'you-hungry-static-v2';
+const DYNAMIC_CACHE_NAME = 'you-hungry-dynamic-v2';
+const API_CACHE_NAME = 'you-hungry-api-v2';
 
 // Assets to cache immediately
 const STATIC_ASSETS = [
@@ -9,9 +10,22 @@ const STATIC_ASSETS = [
   '/dashboard',
   '/restaurants',
   '/groups',
+  '/friends',
+  '/collections',
   '/manifest.json',
-  '/icons/icon-192x192.png',
-  '/icons/icon-512x512.png',
+  '/icons/icon-192x192.svg',
+  '/icons/icon-512x512.svg',
+  '/_next/static/css/',
+  '/_next/static/js/',
+];
+
+// API endpoints to cache
+const API_ENDPOINTS = [
+  '/api/collections',
+  '/api/restaurants',
+  '/api/decisions',
+  '/api/groups',
+  '/api/friends',
 ];
 
 // Install event - cache static assets
@@ -19,18 +33,30 @@ self.addEventListener('install', (event) => {
   console.log('Service Worker: Installing...');
 
   event.waitUntil(
-    caches
-      .open(STATIC_CACHE_NAME)
-      .then((cache) => {
+    Promise.all([
+      // Cache static assets
+      caches.open(STATIC_CACHE_NAME).then((cache) => {
         console.log('Service Worker: Caching static assets');
         return cache.addAll(STATIC_ASSETS);
-      })
+      }),
+      // Cache API endpoints
+      caches.open(API_CACHE_NAME).then((cache) => {
+        console.log('Service Worker: Caching API endpoints');
+        return Promise.all(
+          API_ENDPOINTS.map((endpoint) =>
+            cache
+              .add(endpoint)
+              .catch((err) => console.warn(`Failed to cache ${endpoint}:`, err))
+          )
+        );
+      }),
+    ])
       .then(() => {
-        console.log('Service Worker: Static assets cached');
+        console.log('Service Worker: All assets cached');
         return self.skipWaiting();
       })
       .catch((error) => {
-        console.error('Service Worker: Failed to cache static assets', error);
+        console.error('Service Worker: Failed to cache assets', error);
       })
   );
 });
@@ -47,7 +73,8 @@ self.addEventListener('activate', (event) => {
           cacheNames.map((cacheName) => {
             if (
               cacheName !== STATIC_CACHE_NAME &&
-              cacheName !== DYNAMIC_CACHE_NAME
+              cacheName !== DYNAMIC_CACHE_NAME &&
+              cacheName !== API_CACHE_NAME
             ) {
               console.log('Service Worker: Deleting old cache', cacheName);
               return caches.delete(cacheName);
@@ -85,7 +112,13 @@ self.addEventListener('fetch', (event) => {
           // Cache successful API responses
           if (response.status === 200) {
             const responseClone = response.clone();
-            caches.open(DYNAMIC_CACHE_NAME).then((cache) => {
+            const cacheName = API_ENDPOINTS.some((endpoint) =>
+              url.pathname.startsWith(endpoint)
+            )
+              ? API_CACHE_NAME
+              : DYNAMIC_CACHE_NAME;
+
+            caches.open(cacheName).then((cache) => {
               cache.put(request, responseClone);
             });
           }
@@ -97,12 +130,40 @@ self.addEventListener('fetch', (event) => {
             if (response) {
               return response;
             }
-            // Return offline page for API requests
+
+            // Return appropriate offline response based on endpoint
+            const isReadOperation = request.method === 'GET';
+            const endpoint = url.pathname;
+
+            if (isReadOperation) {
+              // Return empty array for collection endpoints
+              if (
+                endpoint.includes('/collections') ||
+                endpoint.includes('/restaurants') ||
+                endpoint.includes('/groups')
+              ) {
+                return new Response(JSON.stringify([]), {
+                  status: 200,
+                  headers: { 'Content-Type': 'application/json' },
+                });
+              }
+
+              // Return empty object for single resource endpoints
+              if (endpoint.match(/\/api\/\w+\/[a-f0-9]+$/)) {
+                return new Response(JSON.stringify({}), {
+                  status: 200,
+                  headers: { 'Content-Type': 'application/json' },
+                });
+              }
+            }
+
+            // Return offline error for write operations
             return new Response(
               JSON.stringify({
                 error: 'Offline',
                 message:
-                  'You are currently offline. Please check your connection.',
+                  "You are currently offline. This action will be synced when you're back online.",
+                offline: true,
               }),
               {
                 status: 503,
@@ -231,86 +292,139 @@ self.addEventListener('fetch', (event) => {
 self.addEventListener('sync', (event) => {
   console.log('Service Worker: Background sync triggered', event.tag);
 
-  if (event.tag === 'restaurant-vote') {
-    event.waitUntil(syncRestaurantVotes());
-  }
-
-  if (event.tag === 'collection-update') {
-    event.waitUntil(syncCollectionUpdates());
+  if (event.tag === 'offline-actions') {
+    event.waitUntil(syncOfflineActions());
   }
 });
 
-// Sync restaurant votes when back online
-async function syncRestaurantVotes() {
+// Sync all offline actions when back online
+async function syncOfflineActions() {
   try {
-    // Get offline votes from IndexedDB
-    const offlineVotes = await getOfflineVotes();
+    // Get offline actions from IndexedDB
+    const offlineActions = await getOfflineActions();
 
-    for (const vote of offlineVotes) {
+    for (const action of offlineActions) {
       try {
-        await fetch('/api/decisions/vote', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(vote),
+        const response = await fetch(action.url, {
+          method: action.method,
+          headers: action.headers,
+          body: action.data ? JSON.stringify(action.data) : undefined,
         });
 
-        // Remove from offline storage after successful sync
-        await removeOfflineVote(vote.id);
+        if (response.ok) {
+          // Remove from offline storage after successful sync
+          await removeOfflineAction(action.id);
+          console.log(`Successfully synced action ${action.id}`);
+        } else {
+          // Increment retry count
+          await updateOfflineAction(action.id, {
+            retryCount: action.retryCount + 1,
+          });
+          console.warn(
+            `Failed to sync action ${action.id}, retry count: ${action.retryCount + 1}`
+          );
+        }
       } catch (error) {
-        console.error('Failed to sync vote:', error);
+        console.error(`Failed to sync action ${action.id}:`, error);
+        // Increment retry count
+        await updateOfflineAction(action.id, {
+          retryCount: action.retryCount + 1,
+        });
       }
     }
   } catch (error) {
-    console.error('Failed to sync restaurant votes:', error);
+    console.error('Failed to sync offline actions:', error);
   }
 }
 
-// Sync collection updates when back online
-async function syncCollectionUpdates() {
-  try {
-    // Get offline collection updates from IndexedDB
-    const offlineUpdates = await getOfflineCollectionUpdates();
+// IndexedDB helpers for offline actions
+async function getOfflineActions() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open('YouHungryOfflineDB', 1);
 
-    for (const update of offlineUpdates) {
-      try {
-        await fetch('/api/collections', {
-          method: update.method,
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(update.data),
-        });
+    request.onsuccess = () => {
+      const db = request.result;
+      const transaction = db.transaction(['offlineActions'], 'readonly');
+      const store = transaction.objectStore('offlineActions');
+      const getAllRequest = store.getAll();
 
-        // Remove from offline storage after successful sync
-        await removeOfflineCollectionUpdate(update.id);
-      } catch (error) {
-        console.error('Failed to sync collection update:', error);
-      }
-    }
-  } catch (error) {
-    console.error('Failed to sync collection updates:', error);
-  }
+      getAllRequest.onsuccess = () => {
+        resolve(getAllRequest.result || []);
+      };
+
+      getAllRequest.onerror = () => {
+        reject(getAllRequest.error);
+      };
+    };
+
+    request.onerror = () => {
+      reject(request.error);
+    };
+  });
 }
 
-// IndexedDB helpers (simplified)
-async function getOfflineVotes() {
-  // Implementation would use IndexedDB
-  return [];
+async function removeOfflineAction(id) {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open('YouHungryOfflineDB', 1);
+
+    request.onsuccess = () => {
+      const db = request.result;
+      const transaction = db.transaction(['offlineActions'], 'readwrite');
+      const store = transaction.objectStore('offlineActions');
+      const deleteRequest = store.delete(id);
+
+      deleteRequest.onsuccess = () => {
+        resolve();
+      };
+
+      deleteRequest.onerror = () => {
+        reject(deleteRequest.error);
+      };
+    };
+
+    request.onerror = () => {
+      reject(request.error);
+    };
+  });
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-async function removeOfflineVote(_id) {
-  // Implementation would use IndexedDB
-  // Parameter intentionally unused for future implementation
-}
+async function updateOfflineAction(id, updates) {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open('YouHungryOfflineDB', 1);
 
-async function getOfflineCollectionUpdates() {
-  // Implementation would use IndexedDB
-  return [];
-}
+    request.onsuccess = () => {
+      const db = request.result;
+      const transaction = db.transaction(['offlineActions'], 'readwrite');
+      const store = transaction.objectStore('offlineActions');
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-async function removeOfflineCollectionUpdate(_id) {
-  // Implementation would use IndexedDB
-  // Parameter intentionally unused for future implementation
+      const getRequest = store.get(id);
+      getRequest.onsuccess = () => {
+        const action = getRequest.result;
+        if (action) {
+          const updatedAction = { ...action, ...updates };
+          const putRequest = store.put(updatedAction);
+
+          putRequest.onsuccess = () => {
+            resolve();
+          };
+
+          putRequest.onerror = () => {
+            reject(putRequest.error);
+          };
+        } else {
+          reject(new Error('Action not found'));
+        }
+      };
+
+      getRequest.onerror = () => {
+        reject(getRequest.error);
+      };
+    };
+
+    request.onerror = () => {
+      reject(request.error);
+    };
+  });
 }
 
 // Push notification handling
@@ -319,8 +433,8 @@ self.addEventListener('push', (event) => {
 
   const options = {
     body: 'New restaurant recommendations available!',
-    icon: '/icons/icon-192x192.png',
-    badge: '/icons/icon-72x72.png',
+    icon: '/icons/icon-192x192.svg',
+    badge: '/icons/icon-72x72.svg',
     vibrate: [200, 100, 200],
     data: {
       dateOfArrival: Date.now(),
@@ -330,12 +444,12 @@ self.addEventListener('push', (event) => {
       {
         action: 'explore',
         title: 'Explore',
-        icon: '/icons/explore.png',
+        icon: '/icons/explore.svg',
       },
       {
         action: 'close',
         title: 'Close',
-        icon: '/icons/close.png',
+        icon: '/icons/close.svg',
       },
     ],
   };

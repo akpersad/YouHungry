@@ -301,19 +301,34 @@ These technologies will be implemented when they solve specific problems in each
 - Create notification positioning and styling
 - Handle notification queuing and dismissal
 
-4. **Email Notifications**
+4. **Push Notifications (PWA)**
+   - Implement push notification manager with permission handling
+   - Create push notification subscription system
+   - Add push notification preferences and opt-in/opt-out
+   - Implement test notification functionality
+   - Handle iOS-specific requirements (iOS 16.4+, Home Screen installation)
+   - Add push notification status monitoring and debugging
+   - Create notification permission prompts with clear explanations
+   - Implement graceful degradation for unsupported platforms
+   - **Integrate with service worker for background notifications**
+   - **Add notification action handlers and click-through navigation**
+   - **Create notification templates for different event types**
+   - **Unit test push notification manager and subscription flows**
+
+5. **Email Notifications**
    - Set up email notification system
    - Create email templates for different events
    - Implement email preferences and unsubscribing
    - Handle email delivery and tracking
 
-5. **User Profile Management**
+6. **User Profile Management**
    - Create comprehensive user profile page with editable fields
    - Implement profile picture upload and management using Vercel Blob
    - Add phone number management (add/remove/verify) with Clerk integration
    - Build SMS opt-in/opt-out toggle with clear explanation
    - Create per-group notification preferences interface
    - Implement location settings and default location management
+   - Add push notification preferences to profile settings
    - Add profile validation and error handling
    - Create profile update API endpoints with proper validation
    - **Unit test profile management components and API endpoints**
@@ -400,6 +415,7 @@ These technologies will be implemented when they solve specific problems in each
    - Configure production environment variables
    - Implement CI/CD workflows
    - Set up monitoring and logging
+   - **⚠️ CRITICAL: Test Push Notifications immediately after deployment** (see post-deployment.md for details)
 
 1a. **GraphQL Integration (Future)**
 
