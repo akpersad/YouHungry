@@ -12,7 +12,7 @@ interface LoggerConfig {
 }
 
 class Logger {
-  private config: LoggerConfig;
+  private config!: LoggerConfig;
 
   constructor() {
     this.updateConfig();
