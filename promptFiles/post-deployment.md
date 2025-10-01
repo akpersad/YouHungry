@@ -207,6 +207,225 @@ Now that you have a live URL, update your Google API key restrictions:
    - Monitor connection counts and query performance
    - Configure alerts for high memory usage or slow queries
 
+## 🔔 ⚠️ CRITICAL: Push Notifications Testing (PRIORITY #1)
+
+**⚠️ MUST BE TESTED IMMEDIATELY AFTER DEPLOYMENT**
+
+Push notifications are fully implemented but **cannot be tested locally** due to iOS security restrictions. This is the **FIRST** thing to verify after deployment.
+
+### Why This Is Critical
+
+**Local Development Issue**:
+
+- ❌ Service Workers require HTTPS or localhost
+- ❌ Testing on `http://192.168.x.x` does NOT work on iOS
+- ❌ Push API and PushManager unavailable over HTTP on network IPs
+- ✅ **Will work in production with HTTPS**
+
+**What We Learned**:
+
+- iOS 16.4+ supports Web Push in Safari (iOS 18.6 confirmed)
+- Chrome on iOS uses Safari's WebKit engine (same capabilities)
+- Service Worker and PushManager APIs require secure context
+- Standalone mode (Home Screen) is required for iOS
+- `localhost` is secure, but network IPs (`192.168.x.x`) are not
+
+### Testing Procedure
+
+#### Prerequisites
+
+- [ ] App deployed to Vercel with HTTPS
+- [ ] iOS device with iOS 16.4 or later (iOS 17+ recommended)
+- [ ] Safari browser on iOS
+- [ ] Production URL (e.g., `https://you-hungry.vercel.app`)
+
+#### Step 1: Install PWA on iOS
+
+1. Open **Safari** on your iOS device
+2. Navigate to production HTTPS URL
+3. Tap **Share** → **"Add to Home Screen"** → **"Add"**
+4. **Close Safari completely** (swipe up and close)
+
+#### Step 2: Open from Home Screen
+
+1. Locate "You Hungry?" icon on Home Screen
+2. **Tap the icon** (NOT Safari)
+3. Verify standalone mode (no browser UI visible)
+
+#### Step 3: Navigate to Push Test Page
+
+1. On home page, scroll to "🛠️ Developer Tools" section
+2. Tap **"🔔 Push Notifications Test"** button
+3. You'll be on `/push-test` page
+
+#### Step 4: Verify Service Worker APIs
+
+Check the Debug Info section should show:
+
+- [ ] ✅ SW in navigator: Yes
+- [ ] ✅ PushManager: Yes
+- [ ] ✅ Notification: Yes
+- [ ] ✅ Display Mode: Standalone
+- [ ] ✅ Supported: Yes
+- [ ] Subscribe button should be **BLUE** (not gray)
+
+**If any show "No", there's still an issue!**
+
+#### Step 5: Test Push Subscription
+
+1. Tap **"🔔 Subscribe to Push Notifications (Full)"** button (blue button)
+2. iOS should prompt for notification permission
+3. Tap **"Allow"**
+4. Should see success message
+5. Button should change to show unsubscribe option
+
+#### Step 6: Test Notification Delivery
+
+1. Tap **"📬 Send Test Notification"** button
+2. A notification should appear on your device
+3. Notification should show:
+   - Title: "You Hungry? Test"
+   - Body: "This is a test notification from your PWA!"
+   - App icon
+
+#### Step 7: Test on Additional Platforms
+
+**Android Chrome**:
+
+- [ ] Install PWA
+- [ ] Test push subscription
+- [ ] Verify notifications appear
+- [ ] Test automatic install prompt
+
+**Desktop Chrome/Edge**:
+
+- [ ] Test push subscription
+- [ ] Verify notifications
+- [ ] Test notification actions (if implemented)
+
+### Expected Results
+
+**iOS Safari (16.4+)**:
+
+```json
+{
+  "capabilities": {
+    "hasServiceWorker": true,    ✅
+    "hasPushManager": true,       ✅
+    "hasNotification": true       ✅
+  },
+  "displayMode": {
+    "isStandalone": true,         ✅
+    "displayMode": "standalone"   ✅
+  },
+  "status": {
+    "supported": true,            ✅
+    "permission": "granted"       ✅ (after allowing)
+  }
+}
+```
+
+### Troubleshooting Production
+
+**If Service Worker Still Shows "No" on HTTPS**:
+
+1. Clear Safari cache completely
+2. Delete PWA from Home Screen
+3. Close Safari
+4. Reinstall PWA
+5. Open from Home Screen
+6. Try again
+
+**If Permission is "Denied"**:
+
+1. Settings → Safari → Advanced → Website Data
+2. Find and remove production domain
+3. Settings → Notifications → Find app → Allow
+4. Reinstall PWA
+
+### What We Implemented
+
+✅ **Push Notification Manager** (`src/lib/push-notifications.ts`):
+
+- Permission handling
+- Subscription management
+- iOS version detection
+- Platform capability checks
+- Test notification sending
+
+✅ **React Hook** (`src/hooks/usePushNotifications.ts`):
+
+- Status monitoring
+- Subscribe/unsubscribe
+- Loading states
+- Error handling
+
+✅ **Test Page** (`/push-test`):
+
+- Comprehensive status display
+- iOS requirement detection
+- Platform-specific warnings
+- Basic notification fallback for testing
+- Debug information panel
+
+✅ **PWA Explorer** (`/pwa-explorer`):
+
+- Tests 15 PWA capabilities
+- Browser detection
+- API availability checks
+
+### Key Learnings Documented
+
+**iOS Push Notification Requirements** (from [WebKit blog](https://webkit.org/blog/12945/meet-web-push/) and [iOS 16.4 announcement](https://webkit.org/blog/13878/)):
+
+1. **iOS 16.4+** required (most users on iOS 17+)
+2. **Must be added to Home Screen** (standalone mode)
+3. **Must open from Home Screen icon** (not browser)
+4. **HTTPS required** (or localhost for development)
+5. **Safari browser** (Chrome on iOS uses same WebKit engine)
+
+**Platform Differences**:
+
+- **iOS**: Limited features, no action buttons, requires home screen install
+- **Android**: Full features, automatic prompts, rich notifications
+- **Desktop**: Full features, best for development/testing
+
+**Secure Context Requirements** (from [MDN Push API](https://developer.mozilla.org/en-US/docs/Web/API/Push_API)):
+
+- ✅ `https://` - Always secure
+- ✅ `localhost` - Considered secure even on HTTP
+- ❌ `http://192.168.x.x` - NOT secure on iOS
+- ❌ `http://` on network IPs - NOT secure on iOS
+
+**Browser Detection**:
+
+- Chrome on iOS: User agent contains `CriOS`
+- Safari on iOS: User agent contains `Safari` but not `CriOS` or `Chrome`
+- Both use WebKit engine on iOS (same capabilities)
+
+### Success Criteria
+
+- [ ] ✅ Service Workers register on HTTPS
+- [ ] ✅ PushManager API available in standalone mode
+- [ ] ✅ Notification permissions work
+- [ ] ✅ Test notifications deliver successfully
+- [ ] ✅ Works on iOS 17+
+- [ ] ✅ Works on Android
+- [ ] ✅ Works on Desktop
+- [ ] ✅ Graceful degradation for unsupported platforms
+
+### Next Steps After Verification
+
+Once push notifications are confirmed working:
+
+1. **Integrate with backend** - Server-side push sending
+2. **Create notification templates** - For group decisions, invites, etc.
+3. **Add user preferences** - Notification settings
+4. **Implement triggers** - Auto-send for app events
+5. **Add analytics** - Track notification engagement
+
+---
+
 ## 🧪 Post-Deployment Testing Checklist
 
 ### Production Authentication Flow
