@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import React, { useState } from 'react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -39,7 +40,7 @@ export function GroupInvitations({
       await onAcceptInvitation(invitationId);
       toast.success('Successfully joined the group!');
     } catch (error) {
-      console.error('Error accepting invitation:', error);
+      logger.error('Error accepting invitation:', error);
       toast.error('Failed to accept invitation. Please try again.');
     } finally {
       setProcessingInvitations((prev) => {
@@ -56,7 +57,7 @@ export function GroupInvitations({
       await onDeclineInvitation(invitationId);
       toast.success('Invitation declined');
     } catch (error) {
-      console.error('Error declining invitation:', error);
+      logger.error('Error declining invitation:', error);
       toast.error('Failed to decline invitation. Please try again.');
     } finally {
       setProcessingInvitations((prev) => {

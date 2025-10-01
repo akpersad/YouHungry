@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import React, { useState } from 'react';
 import { useAuth } from '@clerk/nextjs';
 // import { useRouter } from 'next/navigation';
@@ -78,7 +79,7 @@ export default function GroupsPage() {
         toast.success('Group created successfully!');
       }
     } catch (error) {
-      console.error('Error creating group:', error);
+      logger.error('Error creating group:', error);
       toast.error('Failed to create group. Please try again.');
     }
   };
@@ -88,7 +89,7 @@ export default function GroupsPage() {
       await acceptInvitationMutation.mutateAsync(invitationId);
       toast.success('Successfully joined the group!');
     } catch (error) {
-      console.error('Error accepting invitation:', error);
+      logger.error('Error accepting invitation:', error);
       toast.error('Failed to accept invitation. Please try again.');
     }
   };
@@ -98,7 +99,7 @@ export default function GroupsPage() {
       await declineInvitationMutation.mutateAsync(invitationId);
       toast.success('Invitation declined');
     } catch (error) {
-      console.error('Error declining invitation:', error);
+      logger.error('Error declining invitation:', error);
       toast.error('Failed to decline invitation. Please try again.');
     }
   };

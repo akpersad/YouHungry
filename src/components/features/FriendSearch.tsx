@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import { useState, useEffect } from 'react';
 import { useUserSearch, useSendFriendRequest } from '@/hooks/api/useFriends';
 import { Button } from '@/components/ui/Button';
@@ -45,7 +46,7 @@ export function FriendSearch({ userId, onClose }: FriendSearchProps) {
         onClose();
       }
     } catch (error) {
-      console.error('Failed to send friend request:', error);
+      logger.error('Failed to send friend request:', error);
       setErrorMessage(
         error instanceof Error
           ? error.message

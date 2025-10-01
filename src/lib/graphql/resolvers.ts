@@ -5,6 +5,7 @@ import {
   getRestaurantById,
   updateRestaurant,
 } from '../restaurants';
+import { logger } from '@/lib/logger';
 import { User } from '../../types/database';
 import {
   getRestaurantsByCollection,
@@ -65,7 +66,7 @@ export const resolvers = {
           nextPageToken: null,
         };
       } catch (error) {
-        console.error('GraphQL searchRestaurants error:', error);
+        logger.error('GraphQL searchRestaurants error:', error);
         throw new Error('Failed to search restaurants');
       }
     },
@@ -152,7 +153,7 @@ export const resolvers = {
           nextPageToken: null,
         };
       } catch (error) {
-        console.error('GraphQL searchRestaurantsByLocation error:', error);
+        logger.error('GraphQL searchRestaurantsByLocation error:', error);
         throw new Error('Failed to search restaurants by location');
       }
     },
@@ -164,7 +165,7 @@ export const resolvers = {
       try {
         return await getRestaurantDetails(googlePlaceId);
       } catch (error) {
-        console.error('GraphQL getRestaurantDetails error:', error);
+        logger.error('GraphQL getRestaurantDetails error:', error);
         throw new Error('Failed to get restaurant details');
       }
     },
@@ -173,7 +174,7 @@ export const resolvers = {
       try {
         return await getRestaurantById(id);
       } catch (error) {
-        console.error('GraphQL getRestaurant error:', error);
+        logger.error('GraphQL getRestaurant error:', error);
         throw new Error('Failed to get restaurant');
       }
     },
@@ -185,7 +186,7 @@ export const resolvers = {
       try {
         return await getRestaurantsByCollection(collectionId);
       } catch (error) {
-        console.error('GraphQL getRestaurantsByCollection error:', error);
+        logger.error('GraphQL getRestaurantsByCollection error:', error);
         throw new Error('Failed to get restaurants by collection');
       }
     },
@@ -197,7 +198,7 @@ export const resolvers = {
       try {
         return await getDecisionHistory(collectionId, limit);
       } catch (error) {
-        console.error('GraphQL getDecisionHistory error:', error);
+        logger.error('GraphQL getDecisionHistory error:', error);
         throw new Error('Failed to get decision history');
       }
     },
@@ -209,7 +210,7 @@ export const resolvers = {
       try {
         return await getDecisionStatistics(collectionId);
       } catch (error) {
-        console.error('GraphQL getDecisionStatistics error:', error);
+        logger.error('GraphQL getDecisionStatistics error:', error);
         throw new Error('Failed to get decision statistics');
       }
     },
@@ -222,7 +223,7 @@ export const resolvers = {
       try {
         return await searchUsers(query, userId);
       } catch (error) {
-        console.error('GraphQL searchUsers error:', error);
+        logger.error('GraphQL searchUsers error:', error);
         throw new Error('Failed to search users');
       }
     },
@@ -231,7 +232,7 @@ export const resolvers = {
       try {
         return await getFriends(userId);
       } catch (error) {
-        console.error('GraphQL getFriends error:', error);
+        logger.error('GraphQL getFriends error:', error);
         throw new Error('Failed to get friends');
       }
     },
@@ -240,7 +241,7 @@ export const resolvers = {
       try {
         return await getFriendRequests(userId);
       } catch (error) {
-        console.error('GraphQL getFriendRequests error:', error);
+        logger.error('GraphQL getFriendRequests error:', error);
         throw new Error('Failed to get friend requests');
       }
     },
@@ -252,7 +253,7 @@ export const resolvers = {
       try {
         return await areFriends(userId1, userId2);
       } catch (error) {
-        console.error('GraphQL areFriends error:', error);
+        logger.error('GraphQL areFriends error:', error);
         throw new Error('Failed to check friendship status');
       }
     },
@@ -264,7 +265,7 @@ export const resolvers = {
       try {
         return await getFriendship(userId1, userId2);
       } catch (error) {
-        console.error('GraphQL getFriendship error:', error);
+        logger.error('GraphQL getFriendship error:', error);
         throw new Error('Failed to get friendship');
       }
     },
@@ -278,7 +279,7 @@ export const resolvers = {
           members: [], // Will be populated by the Group type resolver
         }));
       } catch (error) {
-        console.error('GraphQL getGroups error:', error);
+        logger.error('GraphQL getGroups error:', error);
         throw new Error('Failed to get groups');
       }
     },
@@ -294,7 +295,7 @@ export const resolvers = {
           members: [], // Will be populated by the Group type resolver
         };
       } catch (error) {
-        console.error('GraphQL getGroup error:', error);
+        logger.error('GraphQL getGroup error:', error);
         throw new Error('Failed to get group');
       }
     },
@@ -314,7 +315,7 @@ export const resolvers = {
           ),
         }));
       } catch (error) {
-        console.error('GraphQL getGroupMembers error:', error);
+        logger.error('GraphQL getGroupMembers error:', error);
         throw new Error('Failed to get group members');
       }
     },
@@ -324,7 +325,7 @@ export const resolvers = {
       try {
         return await getActiveGroupDecisions(groupId);
       } catch (error) {
-        console.error('GraphQL getGroupDecisions error:', error);
+        logger.error('GraphQL getGroupDecisions error:', error);
         throw new Error('Failed to get group decisions');
       }
     },
@@ -336,7 +337,7 @@ export const resolvers = {
       try {
         return await getGroupDecision(decisionId);
       } catch (error) {
-        console.error('GraphQL getGroupDecision error:', error);
+        logger.error('GraphQL getGroupDecision error:', error);
         throw new Error('Failed to get group decision');
       }
     },
@@ -353,7 +354,7 @@ export const resolvers = {
       try {
         return await addRestaurantToCollection(restaurantId, collectionId);
       } catch (error) {
-        console.error('GraphQL addRestaurantToCollection error:', error);
+        logger.error('GraphQL addRestaurantToCollection error:', error);
         throw new Error('Failed to add restaurant to collection');
       }
     },
@@ -368,7 +369,7 @@ export const resolvers = {
       try {
         return await removeRestaurantFromCollection(restaurantId, collectionId);
       } catch (error) {
-        console.error('GraphQL removeRestaurantFromCollection error:', error);
+        logger.error('GraphQL removeRestaurantFromCollection error:', error);
         throw new Error('Failed to remove restaurant from collection');
       }
     },
@@ -393,7 +394,7 @@ export const resolvers = {
           timeToPickUp,
         });
       } catch (error) {
-        console.error('GraphQL updateRestaurant error:', error);
+        logger.error('GraphQL updateRestaurant error:', error);
         throw new Error('Failed to update restaurant');
       }
     },
@@ -415,7 +416,7 @@ export const resolvers = {
           input.visitDate
         );
       } catch (error) {
-        console.error('GraphQL createPersonalDecision error:', error);
+        logger.error('GraphQL createPersonalDecision error:', error);
         throw new Error('Failed to create personal decision');
       }
     },
@@ -441,7 +442,7 @@ export const resolvers = {
           weights: JSON.stringify(result.weights),
         };
       } catch (error) {
-        console.error('GraphQL performRandomSelection error:', error);
+        logger.error('GraphQL performRandomSelection error:', error);
         throw new Error('Failed to perform random selection');
       }
     },
@@ -474,7 +475,7 @@ export const resolvers = {
           input.deadlineHours || 24
         );
       } catch (error) {
-        console.error('GraphQL createGroupDecision error:', error);
+        logger.error('GraphQL createGroupDecision error:', error);
         throw new Error('Failed to create group decision');
       }
     },
@@ -488,7 +489,7 @@ export const resolvers = {
         const result = await submitGroupVote(decisionId, userId, rankings);
         return result.success;
       } catch (error) {
-        console.error('GraphQL submitGroupVote error:', error);
+        logger.error('GraphQL submitGroupVote error:', error);
         throw new Error('Failed to submit vote');
       }
     },
@@ -506,7 +507,7 @@ export const resolvers = {
           weights: JSON.stringify(result.weights),
         };
       } catch (error) {
-        console.error('GraphQL completeTieredGroupDecision error:', error);
+        logger.error('GraphQL completeTieredGroupDecision error:', error);
         throw new Error('Failed to complete decision');
       }
     },
@@ -532,7 +533,7 @@ export const resolvers = {
           weights: JSON.stringify(result.weights),
         };
       } catch (error) {
-        console.error('GraphQL performGroupRandomSelection error:', error);
+        logger.error('GraphQL performGroupRandomSelection error:', error);
         throw new Error('Failed to perform group random selection');
       }
     },
@@ -545,7 +546,7 @@ export const resolvers = {
       try {
         return await sendFriendRequest(requesterId, addresseeId);
       } catch (error) {
-        console.error('GraphQL sendFriendRequest error:', error);
+        logger.error('GraphQL sendFriendRequest error:', error);
         throw new Error('Failed to send friend request');
       }
     },
@@ -557,7 +558,7 @@ export const resolvers = {
       try {
         return await acceptFriendRequest(friendshipId, userId);
       } catch (error) {
-        console.error('GraphQL acceptFriendRequest error:', error);
+        logger.error('GraphQL acceptFriendRequest error:', error);
         throw new Error('Failed to accept friend request');
       }
     },
@@ -569,7 +570,7 @@ export const resolvers = {
       try {
         return await declineFriendRequest(friendshipId, userId);
       } catch (error) {
-        console.error('GraphQL declineFriendRequest error:', error);
+        logger.error('GraphQL declineFriendRequest error:', error);
         throw new Error('Failed to decline friend request');
       }
     },
@@ -581,7 +582,7 @@ export const resolvers = {
       try {
         return await removeFriend(friendshipId, userId);
       } catch (error) {
-        console.error('GraphQL removeFriend error:', error);
+        logger.error('GraphQL removeFriend error:', error);
         throw new Error('Failed to remove friend');
       }
     },
@@ -597,7 +598,7 @@ export const resolvers = {
       try {
         return await createGroup(input.name, input.description, userId);
       } catch (error) {
-        console.error('GraphQL createGroup error:', error);
+        logger.error('GraphQL createGroup error:', error);
         throw new Error('Failed to create group');
       }
     },
@@ -621,7 +622,7 @@ export const resolvers = {
         }
         return group;
       } catch (error) {
-        console.error('GraphQL updateGroup error:', error);
+        logger.error('GraphQL updateGroup error:', error);
         throw new Error('Failed to update group');
       }
     },
@@ -633,7 +634,7 @@ export const resolvers = {
       try {
         return await deleteGroup(groupId, userId);
       } catch (error) {
-        console.error('GraphQL deleteGroup error:', error);
+        logger.error('GraphQL deleteGroup error:', error);
         throw new Error('Failed to delete group');
       }
     },
@@ -664,7 +665,7 @@ export const resolvers = {
           userId
         );
       } catch (error) {
-        console.error('GraphQL inviteUserToGroup error:', error);
+        logger.error('GraphQL inviteUserToGroup error:', error);
         throw new Error('Failed to invite user to group');
       }
     },
@@ -694,7 +695,7 @@ export const resolvers = {
           userId
         );
       } catch (error) {
-        console.error('GraphQL removeUserFromGroup error:', error);
+        logger.error('GraphQL removeUserFromGroup error:', error);
         throw new Error('Failed to remove user from group');
       }
     },
@@ -720,7 +721,7 @@ export const resolvers = {
 
         return await promoteToAdmin(groupId, targetUser._id.toString(), userId);
       } catch (error) {
-        console.error('GraphQL promoteToAdmin error:', error);
+        logger.error('GraphQL promoteToAdmin error:', error);
         throw new Error('Failed to promote user to admin');
       }
     },
@@ -732,7 +733,7 @@ export const resolvers = {
       try {
         return await leaveGroup(groupId, userId);
       } catch (error) {
-        console.error('GraphQL leaveGroup error:', error);
+        logger.error('GraphQL leaveGroup error:', error);
         throw new Error('Failed to leave group');
       }
     },
@@ -744,7 +745,7 @@ export const resolvers = {
       try {
         return await getGroupMembers(parent._id.toString());
       } catch (error) {
-        console.error('GraphQL Group.members resolver error:', error);
+        logger.error('GraphQL Group.members resolver error:', error);
         return [];
       }
     },

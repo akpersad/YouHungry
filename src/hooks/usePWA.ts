@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 // PWA Hook for managing Progressive Web App features
 import { useState, useEffect, useCallback } from 'react';
 import { offlineStorage, OfflineAction } from '@/lib/offline-storage';
@@ -58,7 +59,7 @@ export function usePWA() {
         }));
       } catch (error) {
         // Service worker check failed - this is expected on some browsers/iOS
-        console.error('Failed to check service worker status:', error);
+        logger.error('Failed to check service worker status:', error);
       }
     }
   }, []);
@@ -73,7 +74,7 @@ export function usePWA() {
         lastSync: syncStatus.lastSync,
       }));
     } catch (error) {
-      console.error('Failed to check offline actions:', error);
+      logger.error('Failed to check offline actions:', error);
     }
   }, []);
 
@@ -104,7 +105,7 @@ export function usePWA() {
 
       return false;
     } catch (error) {
-      console.error('Failed to install app:', error);
+      logger.error('Failed to install app:', error);
       return false;
     }
   }, [installPrompt]);
@@ -134,7 +135,7 @@ export function usePWA() {
             });
           }
         } catch (error) {
-          console.error(`Failed to sync action ${action.id}:`, error);
+          logger.error(`Failed to sync action ${action.id}:`, error);
           allSuccessful = false;
           await offlineStorage.updateOfflineAction(action.id, {
             retryCount: action.retryCount + 1,
@@ -147,7 +148,7 @@ export function usePWA() {
 
       return allSuccessful;
     } catch (error) {
-      console.error('Failed to sync offline actions:', error);
+      logger.error('Failed to sync offline actions:', error);
       return false;
     }
   }, [checkOfflineActions]);
@@ -175,7 +176,7 @@ export function usePWA() {
 
         await checkOfflineActions();
       } catch (error) {
-        console.error('Failed to queue offline action:', error);
+        logger.error('Failed to queue offline action:', error);
       }
     },
     [checkOfflineActions]

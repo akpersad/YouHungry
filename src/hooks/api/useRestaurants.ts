@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Restaurant, Collection } from '@/types/database';
 
@@ -175,7 +176,7 @@ export function useAddRestaurantToCollection() {
           context.previousCollection
         );
       }
-      console.error('Failed to add restaurant to collection:', error);
+      logger.error('Failed to add restaurant to collection:', error);
     },
     onSettled: (_, __, variables) => {
       // Always refetch after error or success to ensure consistency
@@ -234,7 +235,7 @@ export function useRemoveRestaurantFromCollection() {
           context.previousCollection
         );
       }
-      console.error('Failed to remove restaurant from collection:', error);
+      logger.error('Failed to remove restaurant from collection:', error);
     },
     onSettled: (_, __, variables) => {
       // Always refetch after error or success to ensure consistency

@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { getFriends, removeFriend } from '@/lib/friends';
 
@@ -21,7 +22,7 @@ export async function GET(request: NextRequest) {
       count: friends.length,
     });
   } catch (error) {
-    console.error('Get friends error:', error);
+    logger.error('Get friends error:', error);
     return NextResponse.json(
       {
         success: false,
@@ -59,7 +60,7 @@ export async function DELETE(request: NextRequest) {
       message: 'Friend removed successfully',
     });
   } catch (error) {
-    console.error('Remove friend error:', error);
+    logger.error('Remove friend error:', error);
 
     if (error instanceof Error) {
       return NextResponse.json(

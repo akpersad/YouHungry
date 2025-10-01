@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { Button } from '@/components/ui/Button';
@@ -83,7 +84,7 @@ export function FriendSelectionModal({
       toast.success('Successfully invited friend to the group!');
       onClose();
     } catch (error) {
-      console.error('Error inviting friend:', error);
+      logger.error('Error inviting friend:', error);
       toast.error('Failed to send invitation. Please try again.');
     } finally {
       setInvitingFriend(null);

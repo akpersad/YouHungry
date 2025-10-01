@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth';
 import { getGroupInvitationsForUser } from '@/lib/groups';
@@ -40,7 +41,7 @@ export async function GET() {
       invitations: invitationsWithDetails,
     });
   } catch (error) {
-    console.error('Error fetching group invitations:', error);
+    logger.error('Error fetching group invitations:', error);
     return NextResponse.json(
       { error: 'Failed to fetch invitations' },
       { status: 500 }

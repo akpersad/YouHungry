@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { performRandomSelection, getDecisionStatistics } from '@/lib/decisions';
@@ -34,7 +35,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Random selection error:', error);
+    logger.error('Random selection error:', error);
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -87,7 +88,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Get decision statistics error:', error);
+    logger.error('Get decision statistics error:', error);
     return NextResponse.json(
       { error: 'Failed to get decision statistics' },
       { status: 500 }

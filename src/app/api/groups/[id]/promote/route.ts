@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth';
 import { promoteToAdmin } from '@/lib/groups';
@@ -47,7 +48,7 @@ export async function POST(
       message: `Successfully promoted ${targetUser.name} to admin`,
     });
   } catch (error) {
-    console.error('Error promoting user to admin:', error);
+    logger.error('Error promoting user to admin:', error);
     if (error instanceof Error) {
       if (error.message.includes('not an admin')) {
         return NextResponse.json(

@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Decision, Restaurant } from '@/types/database';
 
@@ -122,7 +123,7 @@ export function useRandomDecision() {
       });
     },
     onError: (error) => {
-      console.error('Failed to make random decision:', error);
+      logger.error('Failed to make random decision:', error);
     },
   });
 }

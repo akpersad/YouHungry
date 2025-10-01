@@ -1,3 +1,5 @@
+import { logger } from '@/lib/logger';
+
 // Google Address Validation API integration
 // https://developers.google.com/maps/documentation/address-validation
 
@@ -93,7 +95,7 @@ export async function validateAddress(
     const data = await response.json();
     return data.result;
   } catch (error) {
-    console.error('Address validation error:', error);
+    logger.error('Address validation error:', error);
     return null;
   }
 }
@@ -123,7 +125,7 @@ export async function getAddressSuggestions(
     const suggestions: AddressSuggestion[] = await response.json();
     return suggestions;
   } catch (error) {
-    console.error('Address suggestions error:', error);
+    logger.error('Address suggestions error:', error);
     return [];
   }
 }
@@ -150,7 +152,7 @@ export async function getAddressDetails(
       await response.json();
     return addressValidationResult;
   } catch (error) {
-    console.error('Address details error:', error);
+    logger.error('Address details error:', error);
     return null;
   }
 }

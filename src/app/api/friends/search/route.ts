@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { searchUsers } from '@/lib/friends';
 
@@ -29,7 +30,7 @@ export async function GET(request: NextRequest) {
       count: results.length,
     });
   } catch (error) {
-    console.error('Search users error:', error);
+    logger.error('Search users error:', error);
     return NextResponse.json(
       {
         success: false,

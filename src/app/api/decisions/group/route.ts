@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth';
 import { createGroupDecision, getActiveGroupDecisions } from '@/lib/decisions';
@@ -59,7 +60,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Create group decision error:', error);
+    logger.error('Create group decision error:', error);
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -120,7 +121,7 @@ export async function GET(request: NextRequest) {
       })),
     });
   } catch (error) {
-    console.error('Get group decisions error:', error);
+    logger.error('Get group decisions error:', error);
     return NextResponse.json(
       { error: 'Failed to get group decisions' },
       { status: 500 }

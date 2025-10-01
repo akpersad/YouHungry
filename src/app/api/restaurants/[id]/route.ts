@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import {
   getRestaurantDetails,
@@ -33,7 +34,7 @@ export async function GET(
       restaurant,
     });
   } catch (error) {
-    console.error('Restaurant details error:', error);
+    logger.error('Restaurant details error:', error);
     return NextResponse.json(
       {
         success: false,
@@ -102,7 +103,7 @@ export async function PUT(
       restaurant: updatedRestaurant,
     });
   } catch (error) {
-    console.error('Update restaurant error:', error);
+    logger.error('Update restaurant error:', error);
     return NextResponse.json(
       {
         success: false,
@@ -141,7 +142,7 @@ export async function DELETE(
       message: 'Restaurant deleted successfully',
     });
   } catch (error) {
-    console.error('Delete restaurant error:', error);
+    logger.error('Delete restaurant error:', error);
     return NextResponse.json(
       {
         success: false,

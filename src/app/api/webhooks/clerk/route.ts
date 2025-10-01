@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest } from 'next/server';
 import { Webhook } from 'svix';
 import { headers } from 'next/headers';
@@ -26,7 +27,7 @@ export async function POST(req: NextRequest) {
   const webhookSecret = process.env.CLERK_WEBHOOK_SECRET;
 
   if (!webhookSecret) {
-    console.log('CLERK_WEBHOOK_SECRET not set, skipping webhook verification');
+    logger.debug('CLERK_WEBHOOK_SECRET not set, skipping webhook verification');
     return new Response('Webhook secret not configured', { status: 400 });
   }
 
@@ -42,7 +43,7 @@ export async function POST(req: NextRequest) {
       'svix-signature': svix_signature,
     }) as WebhookEvent;
   } catch (err) {
-    console.error('Error verifying webhook:', err);
+    logger.error('Error verifying webhook:', err);
     return new Response('Error occured', {
       status: 400,
     });
@@ -70,9 +71,9 @@ export async function POST(req: NextRequest) {
         },
       });
 
-      console.log(`User created: ${id}`);
+      logger.debug(`User created: ${id}`);
     } catch (error) {
-      console.error('Error creating user:', error);
+      logger.error('Error creating user:', error);
       return new Response('Error creating user', { status: 500 });
     }
   }
@@ -89,10 +90,10 @@ export async function POST(req: NextRequest) {
           profilePicture: image_url || user.profilePicture,
         });
 
-        console.log(`User updated: ${id}`);
+        logger.debug(`User updated: ${id}`);
       }
     } catch (error) {
-      console.error('Error updating user:', error);
+      logger.error('Error updating user:', error);
       return new Response('Error updating user', { status: 500 });
     }
   }
@@ -101,7 +102,7 @@ export async function POST(req: NextRequest) {
     const { id } = evt.data;
 
     if (!id) {
-      console.error('No user ID in deletion event');
+      logger.error('No user ID in deletion event');
       return new Response('No user ID provided', { status: 400 });
     }
 
@@ -110,10 +111,10 @@ export async function POST(req: NextRequest) {
       if (user) {
         // Note: In a real app, you might want to soft delete or handle this differently
         // For now, we'll just log it
-        console.log(`User deleted: ${id}`);
+        logger.debug(`User deleted: ${id}`);
       }
     } catch (error) {
-      console.error('Error handling user deletion:', error);
+      logger.error('Error handling user deletion:', error);
       return new Response('Error handling user deletion', { status: 500 });
     }
   }

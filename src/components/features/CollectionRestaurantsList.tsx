@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import { useState, useEffect, useCallback } from 'react';
 import { Restaurant, Collection } from '@/types/database';
 import { RestaurantCard } from './RestaurantCard';
@@ -45,7 +46,7 @@ export function CollectionRestaurantsList({
 
       setRestaurants(data.restaurants || []);
     } catch (err) {
-      console.error('Error fetching restaurants:', err);
+      logger.error('Error fetching restaurants:', err);
       setError(
         err instanceof Error ? err.message : 'Failed to fetch restaurants'
       );
@@ -101,7 +102,7 @@ export function CollectionRestaurantsList({
 
       onRestaurantUpdate?.();
     } catch (error) {
-      console.error('Error updating restaurant:', error);
+      logger.error('Error updating restaurant:', error);
       throw error;
     }
   };
@@ -130,7 +131,7 @@ export function CollectionRestaurantsList({
 
       onRestaurantUpdate?.();
     } catch (error) {
-      console.error('Error removing restaurant from collection:', error);
+      logger.error('Error removing restaurant from collection:', error);
       throw error;
     }
   };

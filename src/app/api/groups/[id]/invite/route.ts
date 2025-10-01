@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth';
 import { inviteUserToGroup } from '@/lib/groups';
@@ -47,7 +48,7 @@ export async function POST(
       message: `Successfully invited ${targetUser.name} to the group`,
     });
   } catch (error) {
-    console.error('Error inviting user to group:', error);
+    logger.error('Error inviting user to group:', error);
     if (error instanceof Error) {
       if (error.message.includes('not an admin')) {
         return NextResponse.json(

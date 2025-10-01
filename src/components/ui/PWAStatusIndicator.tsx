@@ -4,6 +4,7 @@
 import React from 'react';
 import { usePWA } from '@/hooks/usePWA';
 import { Button } from './Button';
+import { logger } from '@/lib/logger';
 
 interface PWAStatusIndicatorProps {
   className?: string;
@@ -155,13 +156,13 @@ export function PWADebugPanel() {
   const { status, installApp, canInstall } = usePWA();
 
   const handleManualInstall = async () => {
-    console.log('Manual install attempt');
+    logger.debug('Manual install attempt');
     const success = await installApp();
-    console.log('Manual install result:', success);
+    logger.debug('Manual install result:', success);
   };
 
   const checkPWARequirements = () => {
-    console.log('Check Requirements button clicked!');
+    logger.debug('Check Requirements button clicked!');
 
     try {
       const requirements = {
@@ -183,7 +184,7 @@ export function PWADebugPanel() {
           location.hostname === '127.0.0.1',
       };
 
-      console.log('PWA Requirements Check:', requirements);
+      logger.debug('PWA Requirements Check:', requirements);
 
       // Also show an alert for mobile debugging
       alert(`PWA Requirements:
@@ -201,18 +202,18 @@ Check console for full details.`);
 
       return requirements;
     } catch (error) {
-      console.error('Error checking PWA requirements:', error);
+      logger.error('Error checking PWA requirements:', error);
       alert('Error checking requirements. Check console for details.');
     }
   };
 
   const checkPWAServerStatus = async () => {
     try {
-      console.log('Checking PWA status via server...');
+      logger.debug('Checking PWA status via server...');
       const response = await fetch('/api/pwa-status');
       const data = await response.json();
 
-      console.log('Server PWA Status:', data);
+      logger.debug('Server PWA Status:', data);
 
       alert(`Server PWA Status:
 Service Worker: ${data.requirements.hasServiceWorker ? '✅' : '❌'}
@@ -228,7 +229,7 @@ Check server logs for full details.`);
 
       return data;
     } catch (error) {
-      console.error('Error checking server PWA status:', error);
+      logger.error('Error checking server PWA status:', error);
       alert('Error checking server status. Check server logs.');
     }
   };

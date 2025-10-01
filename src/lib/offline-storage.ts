@@ -1,3 +1,5 @@
+import { logger } from '@/lib/logger';
+
 // Offline Storage Utilities for PWA
 // Handles IndexedDB operations for offline data persistence
 
@@ -89,13 +91,13 @@ class OfflineStorage {
       const request = indexedDB.open(DB_NAME, DB_VERSION);
 
       request.onerror = () => {
-        console.error('Failed to open IndexedDB:', request.error);
+        logger.error('Failed to open IndexedDB:', request.error);
         reject(request.error);
       };
 
       request.onsuccess = () => {
         this.db = request.result;
-        console.log('IndexedDB opened successfully');
+        logger.debug('IndexedDB opened successfully');
         resolve();
       };
 

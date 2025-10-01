@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { searchRestaurantsByCoordinates } from '@/lib/restaurants';
 import { validateData, restaurantSearchSchema } from '@/lib/validation';
@@ -111,7 +112,7 @@ export async function GET(request: NextRequest) {
           latitude = coordinates.lat;
           longitude = coordinates.lng;
         } catch (error) {
-          console.error('Geocoding error:', error);
+          logger.error('Geocoding error:', error);
 
           // Check if it's a REQUEST_DENIED error (API key issue)
           if (
@@ -247,7 +248,7 @@ export async function GET(request: NextRequest) {
       { status: 400 }
     );
   } catch (error) {
-    console.error('Search error:', error);
+    logger.error('Search error:', error);
     return NextResponse.json(
       {
         success: false,

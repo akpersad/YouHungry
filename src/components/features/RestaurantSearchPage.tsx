@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import { useState, useEffect, useCallback } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { Restaurant, Collection } from '@/types/database';
@@ -63,15 +64,15 @@ export function RestaurantSearchPage({
         throw new Error('Failed to fetch collections');
       }
       const data = await response.json();
-      console.log('All collections API response:', data);
-      console.log('Personal collections:', data.collections.personal);
-      console.log('Group collections:', data.collections.group);
+      logger.debug('All collections API response:', data);
+      logger.debug('Personal collections:', data.collections.personal);
+      logger.debug('Group collections:', data.collections.group);
       // Combine personal and group collections into a single array
       const combined = [
         ...data.collections.personal,
         ...data.collections.group,
       ];
-      console.log('Combined collections:', combined);
+      logger.debug('Combined collections:', combined);
       return combined;
     },
     enabled: !!user?.id,
@@ -143,7 +144,7 @@ export function RestaurantSearchPage({
 
         setRestaurantInCollections(inCollections);
       } catch (error) {
-        console.error('Error checking restaurants in collections:', error);
+        logger.error('Error checking restaurants in collections:', error);
       }
     },
     [restaurants]
@@ -205,13 +206,13 @@ export function RestaurantSearchPage({
 
     // Safety check: ensure collections is an array
     if (!Array.isArray(collections)) {
-      console.error('collections is not an array:', collections);
+      logger.error('collections is not an array:', collections);
       return new Set<string>();
     }
 
     const inCollections = new Set<string>();
-    console.log('Checking restaurant:', restaurantId.toString());
-    console.log(
+    logger.debug('Checking restaurant:', restaurantId.toString());
+    logger.debug(
       'Available collections:',
       collections.map((c) => ({
         id: c._id.toString(),
@@ -221,7 +222,7 @@ export function RestaurantSearchPage({
     );
 
     for (const collection of collections) {
-      console.log(
+      logger.debug(
         `Checking collection ${collection.name} with restaurantIds:`,
         collection.restaurantIds
       );
@@ -230,7 +231,7 @@ export function RestaurantSearchPage({
         if (typeof restaurantData === 'string') {
           const idStr = restaurantData;
           const restaurantIdStr = restaurantId.toString();
-          console.log(
+          logger.debug(
             `Comparing old format ${idStr} with ${restaurantIdStr}:`,
             idStr === restaurantIdStr
           );
@@ -248,7 +249,7 @@ export function RestaurantSearchPage({
               'googlePlaceId' in obj &&
               obj.googlePlaceId &&
               obj.googlePlaceId === restaurantId;
-            console.log(
+            logger.debug(
               `Comparing new format ${JSON.stringify(restaurantData)} with ${restaurantId}:`,
               `_id match: ${matchesId}, googlePlaceId match: ${matchesGooglePlaceId}`
             );
@@ -257,7 +258,7 @@ export function RestaurantSearchPage({
             // ObjectId format
             const idStr = restaurantData.toString();
             const restaurantIdStr = restaurantId.toString();
-            console.log(
+            logger.debug(
               `Comparing ObjectId format ${idStr} with ${restaurantIdStr}:`,
               idStr === restaurantIdStr
             );
@@ -269,7 +270,7 @@ export function RestaurantSearchPage({
         }
         return false;
       });
-      console.log(
+      logger.debug(
         `Collection ${collection.name} has restaurant:`,
         hasRestaurant
       );
@@ -278,7 +279,7 @@ export function RestaurantSearchPage({
       }
     }
 
-    console.log('Restaurant is in collections:', Array.from(inCollections));
+    logger.debug('Restaurant is in collections:', Array.from(inCollections));
     return inCollections;
   };
 
@@ -286,15 +287,15 @@ export function RestaurantSearchPage({
     if (onAddToCollection) {
       onAddToCollection(restaurant);
     } else {
-      console.log('Selected restaurant:', restaurant);
-      console.log('Restaurant ID:', restaurant._id);
-      console.log('Restaurant ID type:', typeof restaurant._id);
-      console.log('Restaurant keys:', Object.keys(restaurant));
+      logger.debug('Selected restaurant:', restaurant);
+      logger.debug('Restaurant ID:', restaurant._id);
+      logger.debug('Restaurant ID type:', typeof restaurant._id);
+      logger.debug('Restaurant keys:', Object.keys(restaurant));
       setSelectedRestaurant(restaurant);
 
       // Only proceed if we have valid collections data
       if (!Array.isArray(effectiveCollections)) {
-        console.error(
+        logger.error(
           'effectiveCollections is not an array:',
           effectiveCollections
         );
@@ -307,7 +308,7 @@ export function RestaurantSearchPage({
         restaurant,
         effectiveCollections
       );
-      console.log(
+      logger.debug(
         'Restaurant collections result:',
         Array.from(restaurantCollections)
       );
@@ -323,12 +324,12 @@ export function RestaurantSearchPage({
   const handleCollectionSelect = async (collectionId: string) => {
     if (!selectedRestaurant) return;
 
-    console.log(
+    logger.debug(
       'Selected restaurant for adding to collection:',
       selectedRestaurant
     );
-    console.log('Restaurant _id:', selectedRestaurant._id);
-    console.log('Restaurant _id type:', typeof selectedRestaurant._id);
+    logger.debug('Restaurant _id:', selectedRestaurant._id);
+    logger.debug('Restaurant _id type:', typeof selectedRestaurant._id);
 
     // Handle different possible ID formats
     let restaurantId: string;
@@ -337,7 +338,7 @@ export function RestaurantSearchPage({
     } else if (selectedRestaurant.googlePlaceId) {
       restaurantId = selectedRestaurant.googlePlaceId;
     } else {
-      console.error(
+      logger.error(
         'No valid ID found in selectedRestaurant:',
         selectedRestaurant
       );
@@ -383,7 +384,7 @@ export function RestaurantSearchPage({
         onAddToCollection(selectedRestaurant);
       }
     } catch (err) {
-      console.error('Error adding restaurant to collection:', err);
+      logger.error('Error adding restaurant to collection:', err);
       toast.error('Failed to add restaurant to collection');
     }
   };
@@ -479,11 +480,11 @@ export function RestaurantSearchPage({
                         selectedRestaurantCollections.has(
                           collection._id.toString()
                         );
-                      console.log(
+                      logger.debug(
                         `Collection ${collection.name} isAlreadyInCollection:`,
                         isAlreadyInCollection
                       );
-                      console.log(
+                      logger.debug(
                         'selectedRestaurantCollections:',
                         Array.from(selectedRestaurantCollections)
                       );

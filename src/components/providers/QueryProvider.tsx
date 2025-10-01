@@ -15,10 +15,10 @@ export function QueryProvider({ children }: QueryProviderProps) {
       new QueryClient({
         defaultOptions: {
           queries: {
-            // Time before data is considered stale (5 minutes for most data)
-            staleTime: 5 * 60 * 1000,
-            // Time before unused data is garbage collected (30 days)
-            gcTime: 30 * 24 * 60 * 60 * 1000,
+            // Time before data is considered stale (30 seconds for most data)
+            staleTime: 30 * 1000,
+            // Time before unused data is garbage collected (5 minutes)
+            gcTime: 5 * 60 * 1000,
             // Retry failed requests up to 3 times with exponential backoff
             retry: (failureCount, error) => {
               // Don't retry on 4xx errors (client errors)

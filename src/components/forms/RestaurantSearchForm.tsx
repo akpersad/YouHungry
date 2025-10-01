@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
@@ -86,7 +87,7 @@ export function RestaurantSearchForm({
             setIsAddressValid(true);
           },
           (error) => {
-            console.error('Error getting location:', error);
+            logger.error('Error getting location:', error);
             alert(
               'Unable to get your location. Please enter an address manually.'
             );
@@ -96,7 +97,7 @@ export function RestaurantSearchForm({
         alert('Geolocation is not supported by this browser.');
       }
     } catch (error) {
-      console.error('Error getting location:', error);
+      logger.error('Error getting location:', error);
     }
   };
 

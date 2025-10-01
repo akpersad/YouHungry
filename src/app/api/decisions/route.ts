@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { createPersonalDecision, getDecisionHistory } from '@/lib/decisions';
@@ -41,7 +42,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Create decision error:', error);
+    logger.error('Create decision error:', error);
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -99,7 +100,7 @@ export async function GET(request: NextRequest) {
       })),
     });
   } catch (error) {
-    console.error('Get decisions error:', error);
+    logger.error('Get decisions error:', error);
     return NextResponse.json(
       { error: 'Failed to get decisions' },
       { status: 500 }

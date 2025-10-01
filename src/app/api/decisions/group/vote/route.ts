@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth';
 import {
@@ -36,7 +37,7 @@ export async function POST(request: NextRequest) {
       message: result.message,
     });
   } catch (error) {
-    console.error('Submit vote error:', error);
+    logger.error('Submit vote error:', error);
 
     if (error instanceof Error) {
       return NextResponse.json({ error: error.message }, { status: 400 });
@@ -76,7 +77,7 @@ export async function PUT(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Complete decision error:', error);
+    logger.error('Complete decision error:', error);
 
     if (error instanceof Error) {
       return NextResponse.json({ error: error.message }, { status: 400 });
@@ -112,7 +113,7 @@ export async function DELETE(request: NextRequest) {
       message: result.message,
     });
   } catch (error) {
-    console.error('Close decision error:', error);
+    logger.error('Close decision error:', error);
 
     if (error instanceof Error) {
       return NextResponse.json({ error: error.message }, { status: 400 });

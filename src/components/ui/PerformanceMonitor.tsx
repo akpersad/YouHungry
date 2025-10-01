@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { logger } from '@/lib/logger';
 
 // Declare gtag for Google Analytics
 declare global {
@@ -63,7 +64,7 @@ export function PerformanceMonitor() {
       new PerformanceObserver((entryList) => {
         for (const entry of entryList.getEntries()) {
           if (entry.name === 'first-contentful-paint') {
-            console.log('FCP:', entry.startTime);
+            logger.debug('FCP:', entry.startTime);
             // Send to analytics
             sendMetric('fcp', entry.startTime);
           }
@@ -74,7 +75,7 @@ export function PerformanceMonitor() {
       new PerformanceObserver((entryList) => {
         const entries = entryList.getEntries();
         const lastEntry = entries[entries.length - 1];
-        console.log('LCP:', lastEntry.startTime);
+        logger.debug('LCP:', lastEntry.startTime);
         sendMetric('lcp', lastEntry.startTime);
       }).observe({ entryTypes: ['largest-contentful-paint'] });
 
@@ -82,7 +83,7 @@ export function PerformanceMonitor() {
       new PerformanceObserver((entryList) => {
         for (const entry of entryList.getEntries()) {
           const fidEntry = entry as FirstInputEntry;
-          console.log('FID:', fidEntry.processingStart - fidEntry.startTime);
+          logger.debug('FID:', fidEntry.processingStart - fidEntry.startTime);
           sendMetric('fid', fidEntry.processingStart - fidEntry.startTime);
         }
       }).observe({ entryTypes: ['first-input'] });
@@ -94,7 +95,7 @@ export function PerformanceMonitor() {
           const clsEntry = entry as LayoutShiftEntry;
           if (!clsEntry.hadRecentInput) {
             clsValue += clsEntry.value;
-            console.log('CLS:', clsValue);
+            logger.debug('CLS:', clsValue);
             sendMetric('cls', clsValue);
           }
         }
@@ -107,7 +108,7 @@ export function PerformanceMonitor() {
       if (navigationEntry) {
         const ttfb =
           navigationEntry.responseStart - navigationEntry.requestStart;
-        console.log('TTFB:', ttfb);
+        logger.debug('TTFB:', ttfb);
         sendMetric('ttfb', ttfb);
       }
     };
@@ -142,7 +143,7 @@ export function PerformanceMonitor() {
             userAgent: navigator.userAgent,
           }),
         }).catch((error) => {
-          console.error('Failed to send metric:', error);
+          logger.error('Failed to send metric:', error);
         });
       }
     };
@@ -161,11 +162,11 @@ export function PerformanceMonitor() {
         return total + transferSize;
       }, 0);
 
-      console.log('Total JS bundle size:', totalJSSize, 'bytes');
+      logger.debug('Total JS bundle size:', totalJSSize, 'bytes');
 
       // Alert if bundle size is too large (> 500KB)
       if (totalJSSize > 500000) {
-        console.warn('Large bundle size detected:', totalJSSize, 'bytes');
+        logger.warn('Large bundle size detected:', totalJSSize, 'bytes');
       }
 
       sendMetric('bundle_size', totalJSSize);
@@ -182,13 +183,13 @@ export function PerformanceMonitor() {
             limit: memory.jsHeapSizeLimit,
           };
 
-          console.log('Memory usage:', memoryInfo);
+          logger.debug('Memory usage:', memoryInfo);
           sendMetric('memory_used', memoryInfo.used);
           sendMetric('memory_total', memoryInfo.total);
 
           // Alert if memory usage is high (> 80% of limit)
           if (memoryInfo.used / memoryInfo.limit > 0.8) {
-            console.warn(
+            logger.warn(
               'High memory usage detected:',
               (memoryInfo.used / memoryInfo.limit) * 100,
               '%'
@@ -209,7 +210,7 @@ export function PerformanceMonitor() {
           saveData: connection.saveData,
         };
 
-        console.log('Network info:', networkInfo);
+        logger.debug('Network info:', networkInfo);
         sendMetric('network_effective_type', networkInfo.effectiveType);
         sendMetric('network_downlink', networkInfo.downlink);
         sendMetric('network_rtt', networkInfo.rtt);
@@ -221,7 +222,7 @@ export function PerformanceMonitor() {
       const observer = new PerformanceObserver((list) => {
         for (const entry of list.getEntries()) {
           if (entry.entryType === 'measure') {
-            console.log('Render time:', entry.name, entry.duration);
+            logger.debug('Render time:', entry.name, entry.duration);
             sendMetric(`render_${entry.name}`, entry.duration);
           }
         }
@@ -268,7 +269,7 @@ export function useRenderTime(componentName: string) {
         `${componentName}-render-end`
       );
 
-      console.log(`${componentName} render time:`, renderTime, 'ms');
+      logger.debug(`${componentName} render time:`, renderTime, 'ms');
     };
   }, [componentName]);
 }
@@ -286,7 +287,7 @@ export function useAPIPerformance() {
       const endTime = performance.now();
       const duration = endTime - startTime;
 
-      console.log(`API call ${endpoint} took:`, duration, 'ms');
+      logger.api(`API call ${endpoint} took:`, duration, 'ms');
 
       // Send to analytics
       if (typeof fetch !== 'undefined') {
@@ -302,7 +303,7 @@ export function useAPIPerformance() {
             timestamp: Date.now(),
           }),
         }).catch((error) => {
-          console.error('Failed to send API metric:', error);
+          logger.error('Failed to send API metric:', error);
         });
       }
 
@@ -311,7 +312,7 @@ export function useAPIPerformance() {
       const endTime = performance.now();
       const duration = endTime - startTime;
 
-      console.error(`API call ${endpoint} failed after:`, duration, 'ms');
+      logger.error(`API call ${endpoint} failed after:`, duration, 'ms');
 
       // Send error metric
       if (typeof fetch !== 'undefined') {
@@ -328,7 +329,7 @@ export function useAPIPerformance() {
             timestamp: Date.now(),
           }),
         }).catch((analyticsError) => {
-          console.error('Failed to send API error metric:', analyticsError);
+          logger.error('Failed to send API error metric:', analyticsError);
         });
       }
 
@@ -357,7 +358,7 @@ export function InteractionMonitor() {
         url: window.location.href,
       };
 
-      console.log('User interaction:', interactionData);
+      logger.debug('User interaction:', interactionData);
 
       // Send to analytics
       if (typeof fetch !== 'undefined') {
@@ -368,7 +369,7 @@ export function InteractionMonitor() {
           },
           body: JSON.stringify(interactionData),
         }).catch((error) => {
-          console.error('Failed to send interaction data:', error);
+          logger.error('Failed to send interaction data:', error);
         });
       }
     };

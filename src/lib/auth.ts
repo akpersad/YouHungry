@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { auth } from '@clerk/nextjs/server';
 import { getUserByClerkId, createUser } from './users';
 import { User } from '@/types/database';
@@ -33,7 +34,7 @@ export async function getCurrentUser(): Promise<User | null> {
 
     return user;
   } catch (error) {
-    console.error('Error getting current user:', error);
+    logger.error('Error getting current user:', error);
     return null;
   }
 }

@@ -1,3 +1,5 @@
+import { logger } from '@/lib/logger';
+
 // Push Notifications Manager
 // Handles push notification subscriptions and sending
 
@@ -88,7 +90,7 @@ export class PushNotificationManager {
       const permission = await this.requestPermission();
 
       if (permission !== 'granted') {
-        console.log('Push notification permission denied');
+        logger.debug('Push notification permission denied');
         return null;
       }
 
@@ -119,7 +121,7 @@ export class PushNotificationManager {
 
       return subscriptionData;
     } catch (error) {
-      console.error('Failed to subscribe to push notifications:', error);
+      logger.error('Failed to subscribe to push notifications:', error);
       throw error;
     }
   }
@@ -139,7 +141,7 @@ export class PushNotificationManager {
 
       return false;
     } catch (error) {
-      console.error('Failed to unsubscribe from push notifications:', error);
+      logger.error('Failed to unsubscribe from push notifications:', error);
       return false;
     }
   }

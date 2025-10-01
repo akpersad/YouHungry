@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth';
 import {
@@ -25,9 +26,9 @@ export async function GET(request: NextRequest) {
     if (type === 'personal') {
       // Use the provided userId (Clerk ID) if available, otherwise use the authenticated user's ID
       const targetUserId = userId || user._id.toString();
-      console.log('Fetching personal collections for user:', targetUserId);
+      logger.debug('Fetching personal collections for user:', targetUserId);
       collections = await getCollectionsByUserId(targetUserId);
-      console.log('Found personal collections:', collections);
+      logger.debug('Found personal collections:', collections);
       count = collections.length;
     } else if (type === 'group') {
       collections = await getGroupCollectionsByUserId(user._id.toString());
@@ -36,9 +37,9 @@ export async function GET(request: NextRequest) {
       // Default to 'all' - return both personal and group collections
       // Use the same userId logic as personal collections
       const targetUserId = userId || user._id.toString();
-      console.log('Fetching all collections for user:', targetUserId);
+      logger.debug('Fetching all collections for user:', targetUserId);
       const allCollections = await getAllCollectionsByUserId(targetUserId);
-      console.log('Found all collections:', allCollections);
+      logger.debug('Found all collections:', allCollections);
       collections = {
         personal: allCollections.personal,
         group: allCollections.group,
@@ -52,7 +53,7 @@ export async function GET(request: NextRequest) {
       count,
     });
   } catch (error) {
-    console.error('Get collections error:', error);
+    logger.error('Get collections error:', error);
     return NextResponse.json(
       {
         success: false,
@@ -118,7 +119,7 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
-    console.error('Create collection error:', error);
+    logger.error('Create collection error:', error);
     if (error instanceof Error) {
       if (error.message.includes('not a member')) {
         return NextResponse.json(

@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Friend, FriendRequest, FriendSearchResult } from '@/lib/friends';
 
@@ -177,7 +178,7 @@ export function useSendFriendRequest() {
       });
     },
     onError: (error) => {
-      console.error('Failed to send friend request:', error);
+      logger.error('Failed to send friend request:', error);
     },
   });
 }
@@ -197,7 +198,7 @@ export function useUpdateFriendRequest() {
       });
     },
     onError: (error) => {
-      console.error('Failed to update friend request:', error);
+      logger.error('Failed to update friend request:', error);
     },
   });
 }
@@ -237,7 +238,7 @@ export function useRemoveFriend() {
           context.previousFriends
         );
       }
-      console.error('Failed to remove friend:', error);
+      logger.error('Failed to remove friend:', error);
     },
     onSettled: (_, __, variables) => {
       // Always refetch to ensure consistency

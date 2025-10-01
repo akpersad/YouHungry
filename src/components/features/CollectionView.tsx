@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@clerk/nextjs';
@@ -73,15 +74,15 @@ export function CollectionView({ collectionId }: CollectionViewProps) {
     ) || false;
 
   // Debug logging
-  console.log('Collection type:', collection?.type);
-  console.log('Group data:', groupData);
-  console.log('Current user ID (Clerk):', user?.id);
-  console.log('Current user data (DB):', currentUserData);
-  console.log(
+  logger.debug('Collection type:', collection?.type);
+  logger.debug('Group data:', groupData);
+  logger.debug('Current user ID (Clerk):', user?.id);
+  logger.debug('Current user data (DB):', currentUserData);
+  logger.debug(
     'Admin IDs:',
     groupData?.adminIds?.map((id) => id.toString())
   );
-  console.log('Is current user admin:', isCurrentUserAdmin);
+  logger.debug('Is current user admin:', isCurrentUserAdmin);
 
   const handleRestaurantAdded = () => {
     // TanStack Query will automatically refetch the collection data
@@ -131,7 +132,7 @@ export function CollectionView({ collectionId }: CollectionViewProps) {
       // Refresh collection data
       // TanStack Query will automatically refetch
     } catch (error) {
-      console.error('Error updating restaurant:', error);
+      logger.error('Error updating restaurant:', error);
       throw error;
     }
   };
@@ -156,7 +157,7 @@ export function CollectionView({ collectionId }: CollectionViewProps) {
       // Refresh collection data
       // TanStack Query will automatically refetch
     } catch (error) {
-      console.error('Error removing restaurant from collection:', error);
+      logger.error('Error removing restaurant from collection:', error);
       throw error;
     }
   };
@@ -197,7 +198,7 @@ export function CollectionView({ collectionId }: CollectionViewProps) {
       });
       setIsDecisionResultOpen(true);
     } catch (error) {
-      console.error('Error making decision:', error);
+      logger.error('Error making decision:', error);
       setDecisionError(
         `Failed to make decision: ${error instanceof Error ? error.message : 'Unknown error'}`
       );

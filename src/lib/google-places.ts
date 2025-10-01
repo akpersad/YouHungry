@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { Restaurant } from '@/types/database';
 import { calculateDistance } from './utils';
 import { connectToDatabase } from './db';
@@ -120,7 +121,7 @@ function convertGooglePlaceToRestaurant(
     photos: place.photos?.map((photo) => {
       const photoUrl = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photo_reference=${photo.photo_reference}&key=${process.env.GOOGLE_PLACES_API_KEY}`;
       if (process.env.NODE_ENV === 'development') {
-        console.log('Generated photo URL:', {
+        logger.debug('Generated photo URL:', {
           photoUrl,
           photoReference: photo.photo_reference,
           hasApiKey: !!process.env.GOOGLE_PLACES_API_KEY,
@@ -181,7 +182,7 @@ export async function searchRestaurantsWithGooglePlaces(
 
     // Debug logging for photos
     if (process.env.NODE_ENV === 'development') {
-      console.log('Google Places search results:', {
+      logger.debug('Google Places search results:', {
         totalResults: data.results.length,
         restaurantsWithPhotos: restaurants.filter(
           (r) => r.photos && r.photos.length > 0
@@ -199,7 +200,7 @@ export async function searchRestaurantsWithGooglePlaces(
 
     return restaurants as Restaurant[];
   } catch (error) {
-    console.error('Google Places API search error:', error);
+    logger.error('Google Places API search error:', error);
     throw error;
   }
 }
@@ -238,7 +239,7 @@ export async function getPlaceDetails(
     const restaurant = convertGooglePlaceToRestaurant(data.result);
     return restaurant as Restaurant;
   } catch (error) {
-    console.error('Google Places API details error:', error);
+    logger.error('Google Places API details error:', error);
     throw error;
   }
 }
@@ -286,7 +287,7 @@ export async function searchRestaurantsByLocation(
 
     // Debug logging for photos
     if (process.env.NODE_ENV === 'development') {
-      console.log('Google Places nearby search results:', {
+      logger.debug('Google Places nearby search results:', {
         totalResults: data.results.length,
         restaurantsWithPhotos: restaurants.filter(
           (r) => r.photos && r.photos.length > 0
@@ -304,7 +305,7 @@ export async function searchRestaurantsByLocation(
 
     return restaurants as Restaurant[];
   } catch (error) {
-    console.error('Google Places API nearby search error:', error);
+    logger.error('Google Places API nearby search error:', error);
     return [];
   }
 }
@@ -422,11 +423,11 @@ async function cacheRestaurantsForLocation(
       .collection('location_cache')
       .replaceOne({ locationKey }, cacheData, { upsert: true });
 
-    console.log(
+    logger.debug(
       `Cached ${restaurants.length} restaurants for location ${locationKey}`
     );
   } catch (error) {
-    console.error('Error caching restaurants:', error);
+    logger.error('Error caching restaurants:', error);
   }
 }
 
@@ -445,13 +446,13 @@ async function getCachedRestaurantsForLocation(
     });
 
     if (cacheEntry && cacheEntry.restaurants) {
-      console.log(`Using cached results for location ${locationKey}`);
+      logger.debug(`Using cached results for location ${locationKey}`);
       return cacheEntry.restaurants;
     }
 
     return null;
   } catch (error) {
-    console.error('Error getting cached restaurants:', error);
+    logger.error('Error getting cached restaurants:', error);
     return null;
   }
 }
@@ -465,10 +466,10 @@ export async function cleanupExpiredCache(): Promise<void> {
     });
 
     if (result.deletedCount > 0) {
-      console.log(`Cleaned up ${result.deletedCount} expired cache entries`);
+      logger.debug(`Cleaned up ${result.deletedCount} expired cache entries`);
     }
   } catch (error) {
-    console.error('Error cleaning up cache:', error);
+    logger.error('Error cleaning up cache:', error);
   }
 }
 
@@ -499,7 +500,7 @@ export async function geocodeAddress(
 
     // Enhanced error logging for debugging
     if (process.env.NODE_ENV === 'development') {
-      console.log('Geocoding API response:', {
+      logger.debug('Geocoding API response:', {
         status: data.status,
         error_message: data.error_message,
         address,
@@ -524,7 +525,7 @@ export async function geocodeAddress(
 
     return null;
   } catch (error) {
-    console.error('Geocoding error:', error);
+    logger.error('Geocoding error:', error);
     throw error;
   }
 }
