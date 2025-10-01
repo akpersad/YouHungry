@@ -6,7 +6,7 @@ import {
   CollectionCardSkeleton,
   DecisionInterfaceSkeleton,
 } from '@/components/ui/Skeleton';
-import { Restaurant, Group } from '@/types/database';
+import { Restaurant, Group, Collection } from '@/types/database';
 
 // Define proper types for component props
 interface ComponentProps {
@@ -46,6 +46,69 @@ interface RestaurantSearchResultsProps {
   restaurants: Restaurant[];
   isLoading: boolean;
   [key: string]: unknown;
+}
+
+interface RestaurantDetailsViewProps {
+  restaurant: Restaurant;
+  onManage?: () => void;
+  onAddToCollection?: () => void;
+  showManageButton?: boolean;
+  showAddButton?: boolean;
+}
+
+interface GroupDecisionMakingProps {
+  groupId: string;
+  collectionId: string;
+  isAdmin: boolean;
+}
+
+interface DecisionResultModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  selectedRestaurant: Restaurant | null;
+  reasoning: string;
+  visitDate: Date;
+  onConfirmVisit: () => void;
+  onTryAgain: () => void;
+  isLoading?: boolean;
+}
+
+interface RestaurantManagementModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  restaurant: Restaurant | null;
+  collection: Collection | null;
+  onUpdateRestaurant: (
+    restaurantId: string,
+    updates: { priceRange?: string; timeToPickUp?: number }
+  ) => Promise<void>;
+  onRemoveFromCollection: (restaurantId: string) => Promise<void>;
+}
+
+interface FriendSearchProps {
+  userId: string;
+  onClose?: () => void;
+}
+
+interface GroupInvitation {
+  _id: string;
+  groupId: string;
+  groupName: string;
+  groupDescription?: string;
+  inviterName: string;
+  inviterEmail: string;
+  createdAt: string;
+}
+
+interface GroupInvitationsProps {
+  invitations: GroupInvitation[];
+  onAcceptInvitation: (invitationId: string) => Promise<void>;
+  onDeclineInvitation: (invitationId: string) => Promise<void>;
+}
+
+interface DecisionStatisticsProps {
+  collectionId: string;
+  onClose?: () => void;
 }
 
 interface CreateCollectionFormProps {
@@ -258,7 +321,9 @@ export function CreateGroupFormWithSkeleton(props: CreateGroupFormProps) {
 }
 
 // Additional wrapper components with loading states
-export function RestaurantDetailsViewWithSkeleton(props: ComponentProps) {
+export function RestaurantDetailsViewWithSkeleton(
+  props: RestaurantDetailsViewProps
+) {
   return (
     <Suspense
       fallback={
@@ -275,7 +340,9 @@ export function RestaurantDetailsViewWithSkeleton(props: ComponentProps) {
   );
 }
 
-export function GroupDecisionMakingWithSkeleton(props: ComponentProps) {
+export function GroupDecisionMakingWithSkeleton(
+  props: GroupDecisionMakingProps
+) {
   return (
     <Suspense fallback={<DecisionInterfaceSkeleton />}>
       <LazyGroupDecisionMaking {...props} />
@@ -283,7 +350,9 @@ export function GroupDecisionMakingWithSkeleton(props: ComponentProps) {
   );
 }
 
-export function DecisionResultModalWithSkeleton(props: ComponentProps) {
+export function DecisionResultModalWithSkeleton(
+  props: DecisionResultModalProps
+) {
   return (
     <Suspense
       fallback={
@@ -299,7 +368,9 @@ export function DecisionResultModalWithSkeleton(props: ComponentProps) {
   );
 }
 
-export function RestaurantManagementModalWithSkeleton(props: ComponentProps) {
+export function RestaurantManagementModalWithSkeleton(
+  props: RestaurantManagementModalProps
+) {
   return (
     <Suspense
       fallback={
@@ -315,7 +386,7 @@ export function RestaurantManagementModalWithSkeleton(props: ComponentProps) {
   );
 }
 
-export function FriendSearchWithSkeleton(props: ComponentProps) {
+export function FriendSearchWithSkeleton(props: FriendSearchProps) {
   return (
     <Suspense
       fallback={
@@ -334,7 +405,7 @@ export function FriendSearchWithSkeleton(props: ComponentProps) {
   );
 }
 
-export function GroupInvitationsWithSkeleton(props: ComponentProps) {
+export function GroupInvitationsWithSkeleton(props: GroupInvitationsProps) {
   return (
     <Suspense
       fallback={
@@ -353,7 +424,7 @@ export function GroupInvitationsWithSkeleton(props: ComponentProps) {
   );
 }
 
-export function DecisionStatisticsWithSkeleton(props: ComponentProps) {
+export function DecisionStatisticsWithSkeleton(props: DecisionStatisticsProps) {
   return (
     <Suspense
       fallback={

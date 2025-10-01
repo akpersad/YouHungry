@@ -31,7 +31,9 @@ export async function GET() {
         };
       })
       .filter((item) => item.date)
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+      .sort(
+        (a, b) => new Date(a.date!).getTime() - new Date(b.date!).getTime()
+      );
 
     // Load metrics data
     const metrics = files

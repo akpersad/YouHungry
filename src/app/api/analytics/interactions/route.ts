@@ -63,7 +63,7 @@ export async function GET(request: NextRequest) {
     const db = await connectToDatabase();
 
     // Build query
-    const query: { date?: string } = {};
+    const query: { date?: string; type?: string } = {};
     if (date) {
       query.date = date;
     }
@@ -99,11 +99,8 @@ export async function GET(request: NextRequest) {
 }
 
 async function calculateInteractionStats(
-  db: {
-    collection: (name: string) => {
-      find: (query: unknown) => { toArray: () => Promise<unknown[]> };
-    };
-  },
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  db: any,
   query: { date?: string; type?: string }
 ) {
   const pipeline = [
@@ -148,12 +145,14 @@ async function calculateInteractionStats(
     };
   }
 
-  const stats = result[0];
+  const stats = result[0] as Record<string, unknown>;
 
   // Sort interactions by count
-  stats.interactionsByType.sort(
-    (a: { count: number }, b: { count: number }) => b.count - a.count
-  );
+  if (stats.interactionsByType && Array.isArray(stats.interactionsByType)) {
+    (stats.interactionsByType as { count: number }[]).sort(
+      (a: { count: number }, b: { count: number }) => b.count - a.count
+    );
+  }
 
   return {
     totalInteractions: stats.totalInteractions,

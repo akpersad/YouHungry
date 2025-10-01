@@ -30,7 +30,7 @@ export function useThrottle<T extends (...args: unknown[]) => unknown>(
   callback: T,
   delay: number
 ): T {
-  const lastRun = useRef(Date.now());
+  const lastRun = useRef(0);
 
   return useCallback(
     ((...args) => {
@@ -48,23 +48,27 @@ export function useStableCallback<T extends (...args: unknown[]) => unknown>(
   callback: T,
   deps: React.DependencyList
 ): T {
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  return useCallback(callback, deps);
+  const ref = useRef<T | undefined>(undefined);
+  const depsRef = useRef<React.DependencyList | undefined>(undefined);
+
+  if (!ref.current || !depsRef.current || !areEqual(deps, depsRef.current)) {
+    ref.current = ((...args: unknown[]) => callback(...args)) as T;
+    depsRef.current = deps;
+  }
+
+  return ref.current;
 }
 
 // Memoized value hook with custom equality function
 export function useStableMemo<T>(
   factory: () => T,
-  deps: React.DependencyList,
-  isEqual?: (a: T, b: T) => boolean
+  deps: React.DependencyList
 ): T {
-  const ref = useRef<{ deps: React.DependencyList; value: T }>();
+  const ref = useRef<{ deps: React.DependencyList; value: T } | undefined>(
+    undefined
+  );
 
-  if (
-    !ref.current ||
-    !areEqual(deps, ref.current.deps) ||
-    (isEqual && !isEqual(ref.current.value, factory()))
-  ) {
+  if (!ref.current || !areEqual(deps, ref.current.deps)) {
     ref.current = { deps, value: factory() };
   }
 
@@ -157,8 +161,20 @@ export function usePerformanceMonitor(componentName: string) {
 
   useEffect(() => {
     renderCount.current += 1;
+
+    // Mark render start
+    performance.mark(`${componentName}-render-start`);
+
     const endTime = performance.now();
     const renderTime = endTime - startTime.current;
+
+    // Mark render end
+    performance.mark(`${componentName}-render-end`);
+    performance.measure(
+      `${componentName}-render`,
+      `${componentName}-render-start`,
+      `${componentName}-render-end`
+    );
 
     if (process.env.NODE_ENV === 'development') {
       logger.debug(
@@ -203,7 +219,7 @@ export function useBatchedAPI<T, R>(
 
   const addItems = useCallback(
     (items: T[]) => {
-      const newBatches = [];
+      const newBatches: T[][] = [];
       for (let i = 0; i < items.length; i += batchSize) {
         newBatches.push(items.slice(i, i + batchSize));
       }
@@ -265,9 +281,9 @@ export function useMemoryMonitor() {
           }
         ).memory;
         setMemoryInfo({
-          used: memory.usedJSHeapSize,
-          total: memory.totalJSHeapSize,
-          limit: memory.jsHeapSizeLimit,
+          used: memory?.usedJSHeapSize || 0,
+          total: memory?.totalJSHeapSize || 0,
+          limit: memory?.jsHeapSizeLimit || 0,
         });
       }
     };
@@ -317,17 +333,4 @@ function areEqual(a: React.DependencyList, b: React.DependencyList): boolean {
   return a.every((val, index) => Object.is(val, b[index]));
 }
 
-// Export all hooks and utilities
-export {
-  useDebounce,
-  useThrottle,
-  useStableCallback,
-  useStableMemo,
-  useIntersectionObserver,
-  useVirtualScroll,
-  usePerformanceMonitor,
-  preloadImage,
-  useBatchedAPI,
-  useMemoryMonitor,
-  useBundleSizeMonitor,
-};
+// All hooks and utilities are already exported above

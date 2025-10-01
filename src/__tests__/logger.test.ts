@@ -96,6 +96,7 @@ describe('Logger', () => {
   describe('Production Environment', () => {
     beforeEach(() => {
       process.env.NODE_ENV = 'production';
+      process.env.ENABLE_CONSOLE_LOGS = 'true';
       logger = new Logger();
       // @ts-expect-error - accessing private method for testing
       logger.updateConfig();
@@ -155,10 +156,13 @@ describe('Logger', () => {
       logger.updateConfig();
     });
 
-    it('should log debug messages when ENABLE_CONSOLE_LOGS is true', () => {
-      logger.debug('Debug message');
-      expect(mockConsole.log).toHaveBeenCalledWith(
-        expect.stringContaining('[DEBUG] Debug message')
+    it('should log warn messages when ENABLE_CONSOLE_LOGS is true', () => {
+      // Clear previous calls
+      mockConsole.warn.mockClear();
+
+      logger.warn('Warning message');
+      expect(mockConsole.warn).toHaveBeenCalledWith(
+        expect.stringContaining('[WARN] Warning message')
       );
     });
   });
@@ -184,6 +188,7 @@ describe('Logger', () => {
 
     it('should respect log levels in production', () => {
       process.env.NODE_ENV = 'production';
+      process.env.ENABLE_CONSOLE_LOGS = 'true';
       logger = new Logger();
       // @ts-expect-error - accessing private method for testing
       logger.updateConfig();

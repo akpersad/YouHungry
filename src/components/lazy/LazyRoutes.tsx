@@ -89,10 +89,14 @@ export function LazyFriendsRoute() {
   );
 }
 
-export function LazyCollectionRoute() {
+export function LazyCollectionRoute({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   return (
     <LazyRoute fallback={<CollectionSkeleton />}>
-      <LazyCollections />
+      <LazyCollections params={params} />
     </LazyRoute>
   );
 }

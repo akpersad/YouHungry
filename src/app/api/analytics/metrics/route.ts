@@ -106,11 +106,8 @@ export async function GET(request: NextRequest) {
 }
 
 async function calculateAverages(
-  db: {
-    collection: (name: string) => {
-      find: (query: unknown) => { toArray: () => Promise<unknown[]> };
-    };
-  },
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  db: any,
   query: { date?: string }
 ) {
   const pipeline = [
@@ -143,30 +140,32 @@ async function calculateAverages(
     return {};
   }
 
-  const averages = result[0];
+  const averages = result[0] as Record<string, unknown>;
   return {
-    fcp: averages.avgFcp ? Math.round(averages.avgFcp) : null,
-    lcp: averages.avgLcp ? Math.round(averages.avgLcp) : null,
-    fid: averages.avgFid ? Math.round(averages.avgFid) : null,
-    cls: averages.avgCls ? Math.round(averages.avgCls * 1000) / 1000 : null,
-    ttfb: averages.avgTtfb ? Math.round(averages.avgTtfb) : null,
+    fcp: averages.avgFcp ? Math.round(Number(averages.avgFcp)) : null,
+    lcp: averages.avgLcp ? Math.round(Number(averages.avgLcp)) : null,
+    fid: averages.avgFid ? Math.round(Number(averages.avgFid)) : null,
+    cls: averages.avgCls
+      ? Math.round(Number(averages.avgCls) * 1000) / 1000
+      : null,
+    ttfb: averages.avgTtfb ? Math.round(Number(averages.avgTtfb)) : null,
     bundleSize: averages.avgBundleSize
-      ? Math.round(averages.avgBundleSize)
+      ? Math.round(Number(averages.avgBundleSize))
       : null,
     memoryUsed: averages.avgMemoryUsed
-      ? Math.round(averages.avgMemoryUsed)
+      ? Math.round(Number(averages.avgMemoryUsed))
       : null,
     memoryTotal: averages.avgMemoryTotal
-      ? Math.round(averages.avgMemoryTotal)
+      ? Math.round(Number(averages.avgMemoryTotal))
       : null,
     memoryLimit: averages.avgMemoryLimit
-      ? Math.round(averages.avgMemoryLimit)
+      ? Math.round(Number(averages.avgMemoryLimit))
       : null,
     networkDownlink: averages.avgNetworkDownlink
-      ? Math.round(averages.avgNetworkDownlink * 100) / 100
+      ? Math.round(Number(averages.avgNetworkDownlink) * 100) / 100
       : null,
     networkRtt: averages.avgNetworkRtt
-      ? Math.round(averages.avgNetworkRtt)
+      ? Math.round(Number(averages.avgNetworkRtt))
       : null,
     count: averages.count,
   };

@@ -60,46 +60,62 @@ export function PerformanceMonitor() {
 
     // Core Web Vitals monitoring
     const observeWebVitals = () => {
-      // First Contentful Paint (FCP)
-      new PerformanceObserver((entryList) => {
-        for (const entry of entryList.getEntries()) {
-          if (entry.name === 'first-contentful-paint') {
-            logger.debug('FCP:', entry.startTime);
-            // Send to analytics
-            sendMetric('fcp', entry.startTime);
+      try {
+        // First Contentful Paint (FCP)
+        new PerformanceObserver((entryList) => {
+          for (const entry of entryList.getEntries()) {
+            if (entry.name === 'first-contentful-paint') {
+              logger.debug('FCP:', entry.startTime);
+              // Send to analytics
+              sendMetric('fcp', entry.startTime);
+            }
           }
-        }
-      }).observe({ entryTypes: ['paint'] });
+        }).observe({ entryTypes: ['paint'] });
+      } catch (error) {
+        logger.error('Error setting up FCP observer:', error);
+      }
 
-      // Largest Contentful Paint (LCP)
-      new PerformanceObserver((entryList) => {
-        const entries = entryList.getEntries();
-        const lastEntry = entries[entries.length - 1];
-        logger.debug('LCP:', lastEntry.startTime);
-        sendMetric('lcp', lastEntry.startTime);
-      }).observe({ entryTypes: ['largest-contentful-paint'] });
+      try {
+        // Largest Contentful Paint (LCP)
+        new PerformanceObserver((entryList) => {
+          const entries = entryList.getEntries();
+          const lastEntry = entries[entries.length - 1];
+          logger.debug('LCP:', lastEntry.startTime);
+          sendMetric('lcp', lastEntry.startTime);
+        }).observe({ entryTypes: ['largest-contentful-paint'] });
+      } catch (error) {
+        logger.error('Error setting up LCP observer:', error);
+      }
 
-      // First Input Delay (FID)
-      new PerformanceObserver((entryList) => {
-        for (const entry of entryList.getEntries()) {
-          const fidEntry = entry as FirstInputEntry;
-          logger.debug('FID:', fidEntry.processingStart - fidEntry.startTime);
-          sendMetric('fid', fidEntry.processingStart - fidEntry.startTime);
-        }
-      }).observe({ entryTypes: ['first-input'] });
-
-      // Cumulative Layout Shift (CLS)
-      let clsValue = 0;
-      new PerformanceObserver((entryList) => {
-        for (const entry of entryList.getEntries()) {
-          const clsEntry = entry as LayoutShiftEntry;
-          if (!clsEntry.hadRecentInput) {
-            clsValue += clsEntry.value;
-            logger.debug('CLS:', clsValue);
-            sendMetric('cls', clsValue);
+      try {
+        // First Input Delay (FID)
+        new PerformanceObserver((entryList) => {
+          for (const entry of entryList.getEntries()) {
+            const fidEntry = entry as FirstInputEntry;
+            logger.debug('FID:', fidEntry.processingStart - fidEntry.startTime);
+            sendMetric('fid', fidEntry.processingStart - fidEntry.startTime);
           }
-        }
-      }).observe({ entryTypes: ['layout-shift'] });
+        }).observe({ entryTypes: ['first-input'] });
+      } catch (error) {
+        logger.error('Error setting up FID observer:', error);
+      }
+
+      try {
+        // Cumulative Layout Shift (CLS)
+        let clsValue = 0;
+        new PerformanceObserver((entryList) => {
+          for (const entry of entryList.getEntries()) {
+            const clsEntry = entry as LayoutShiftEntry;
+            if (!clsEntry.hadRecentInput) {
+              clsValue += clsEntry.value;
+              logger.debug('CLS:', clsValue);
+              sendMetric('cls', clsValue);
+            }
+          }
+        }).observe({ entryTypes: ['layout-shift'] });
+      } catch (error) {
+        logger.error('Error setting up CLS observer:', error);
+      }
 
       // Time to First Byte (TTFB)
       const navigationEntry = performance.getEntriesByType(
@@ -219,16 +235,20 @@ export function PerformanceMonitor() {
 
     // Monitor component render performance
     const monitorRenderPerformance = () => {
-      const observer = new PerformanceObserver((list) => {
-        for (const entry of list.getEntries()) {
-          if (entry.entryType === 'measure') {
-            logger.debug('Render time:', entry.name, entry.duration);
-            sendMetric(`render_${entry.name}`, entry.duration);
+      try {
+        const observer = new PerformanceObserver((list) => {
+          for (const entry of list.getEntries()) {
+            if (entry.entryType === 'measure') {
+              logger.debug('Render time:', entry.name, entry.duration);
+              sendMetric(`render_${entry.name}`, entry.duration);
+            }
           }
-        }
-      });
+        });
 
-      observer.observe({ entryTypes: ['measure'] });
+        observer.observe({ entryTypes: ['measure'] });
+      } catch (error) {
+        logger.error('Error setting up render performance observer:', error);
+      }
     };
 
     // Initialize monitoring

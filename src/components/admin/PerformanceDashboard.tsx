@@ -400,21 +400,29 @@ export function PerformanceDashboard() {
                   </h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                     {Object.entries(metrics as Record<string, unknown>).map(
-                      ([metric, data]) => (
-                        <div
-                          key={metric}
-                          className="flex items-center justify-between p-2 bg-gray-50 rounded"
-                        >
-                          <span className="text-sm font-medium">{metric}</span>
-                          <div className="flex items-center gap-2">
-                            {getTrendIcon(data.trend)}
-                            <span className="text-sm">
-                              {data.change > 0 ? '+' : ''}
-                              {data.change.toFixed(1)}%
+                      ([metric, data]) => {
+                        const dataObj = data as {
+                          trend: string;
+                          change: number;
+                        };
+                        return (
+                          <div
+                            key={metric}
+                            className="flex items-center justify-between p-2 bg-gray-50 rounded"
+                          >
+                            <span className="text-sm font-medium">
+                              {metric}
                             </span>
+                            <div className="flex items-center gap-2">
+                              {getTrendIcon(dataObj.trend)}
+                              <span className="text-sm">
+                                {dataObj.change > 0 ? '+' : ''}
+                                {dataObj.change.toFixed(1)}%
+                              </span>
+                            </div>
                           </div>
-                        </div>
-                      )
+                        );
+                      }
                     )}
                   </div>
                 </div>

@@ -41,7 +41,9 @@ export async function GET(request: NextRequest) {
         };
       })
       .filter((item) => item.date)
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      .sort(
+        (a, b) => new Date(b.date!).getTime() - new Date(a.date!).getTime()
+      );
 
     if (files.length < 2) {
       return NextResponse.json(
@@ -60,10 +62,10 @@ export async function GET(request: NextRequest) {
     const compareDateStr = compareDate.toISOString().split('T')[0];
 
     // Find the most recent file (today or closest to today)
-    const file2 = files.find((f) => f.date <= today) || files[0];
+    const file2 = files.find((f) => f.date! <= today) || files[0];
 
     // Find the file for the comparison date or closest to it
-    const file1 = files.find((f) => f.date <= compareDateStr);
+    const file1 = files.find((f) => f.date! <= compareDateStr);
 
     if (!file1 || !file2) {
       return NextResponse.json(
@@ -96,7 +98,24 @@ export async function GET(request: NextRequest) {
     );
 
     // Perform comparison (simplified version)
-    const comparison = {
+    const comparison: {
+      comparison: {
+        date1: string | null;
+        date2: string | null;
+        generatedAt: string;
+      };
+      summary: {
+        totalComparisons: number;
+        improvements: number;
+        degradations: number;
+        neutral: number;
+      };
+      details: {
+        webVitals?: Record<string, unknown>;
+        bundle?: Record<string, unknown>;
+        api?: Record<string, unknown>;
+      };
+    } = {
       comparison: {
         date1: file1.date,
         date2: file2.date,
@@ -113,7 +132,7 @@ export async function GET(request: NextRequest) {
 
     // Compare web vitals
     if (metrics1.webVitals && metrics2.webVitals) {
-      const webVitalsComparison = {};
+      const webVitalsComparison: Record<string, unknown> = {};
       Object.keys(metrics2.webVitals).forEach((key) => {
         const oldValue = metrics1.webVitals[key];
         const newValue = metrics2.webVitals[key];
@@ -138,7 +157,7 @@ export async function GET(request: NextRequest) {
 
     // Compare bundle size
     if (metrics1.bundleSize && metrics2.bundleSize) {
-      const bundleComparison = {};
+      const bundleComparison: Record<string, unknown> = {};
       Object.keys(metrics2.bundleSize).forEach((key) => {
         const oldValue = metrics1.bundleSize[key];
         const newValue = metrics2.bundleSize[key];
@@ -163,7 +182,7 @@ export async function GET(request: NextRequest) {
 
     // Compare API performance
     if (metrics1.apiPerformance && metrics2.apiPerformance) {
-      const apiComparison = {};
+      const apiComparison: Record<string, unknown> = {};
       Object.keys(metrics2.apiPerformance).forEach((key) => {
         const oldValue = metrics1.apiPerformance[key];
         const newValue = metrics2.apiPerformance[key];
