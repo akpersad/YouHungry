@@ -50,11 +50,14 @@ export function usePWA() {
     if ('serviceWorker' in navigator) {
       try {
         const registration = await navigator.serviceWorker.getRegistration();
+        const isReady = Boolean(registration && registration.active);
+
         setStatus((prev) => ({
           ...prev,
-          isServiceWorkerReady: Boolean(registration && registration.active),
+          isServiceWorkerReady: isReady,
         }));
       } catch (error) {
+        // Service worker check failed - this is expected on some browsers/iOS
         console.error('Failed to check service worker status:', error);
       }
     }

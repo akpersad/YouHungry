@@ -122,15 +122,41 @@ export default function RootLayout({
             dangerouslySetInnerHTML={{
               __html: `
                 if ('serviceWorker' in navigator) {
-                  window.addEventListener('load', function() {
+                  // Browser detection for iOS compatibility
+                  const isSafari = /Safari/.test(navigator.userAgent) && !(/Chrome/.test(navigator.userAgent) || /CriOS/.test(navigator.userAgent));
+                  
+                  if (isSafari) {
+                    // Safari needs registration on load event
+                    window.addEventListener('load', function() {
+                      navigator.serviceWorker.register('/sw.js', { scope: '/' })
+                        .then(function(registration) {
+                          window.dispatchEvent(new CustomEvent('sw-registered', { detail: registration }));
+                        })
+                        .catch(function(err) {
+                          console.error('ServiceWorker registration failed:', err);
+                          window.dispatchEvent(new CustomEvent('sw-error', { detail: err }));
+                        });
+                    });
+                  } else {
+                    // Standard registration for Chrome and other browsers
                     navigator.serviceWorker.register('/sw.js')
                       .then(function(registration) {
-                        console.log('ServiceWorker registration successful');
+                        window.dispatchEvent(new CustomEvent('sw-registered', { detail: registration }));
                       })
                       .catch(function(err) {
-                        console.log('ServiceWorker registration failed: ', err);
+                        // Fallback to load event if immediate registration fails
+                        window.addEventListener('load', function() {
+                          navigator.serviceWorker.register('/sw.js')
+                            .then(function(registration) {
+                              window.dispatchEvent(new CustomEvent('sw-registered', { detail: registration }));
+                            })
+                            .catch(function(err) {
+                              console.error('ServiceWorker registration failed:', err);
+                              window.dispatchEvent(new CustomEvent('sw-error', { detail: err }));
+                            });
+                        });
                       });
-                  });
+                  }
                 }
               `,
             }}
