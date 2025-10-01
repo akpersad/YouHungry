@@ -1,7 +1,7 @@
 'use client';
 
 import { logger } from '@/lib/logger';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import {
   usePerformanceMonitor,
   useMemoryMonitor,
@@ -53,7 +53,7 @@ export function EnhancedPerformanceMonitor() {
   };
 
   // Collect performance metrics
-  const collectMetrics = async () => {
+  const collectMetrics = useCallback(async () => {
     if (isCollecting) return;
 
     setIsCollecting(true);
@@ -112,7 +112,8 @@ export function EnhancedPerformanceMonitor() {
     } finally {
       setIsCollecting(false);
     }
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isCollecting]);
 
   // Get a specific performance metric
   const getMetric = (metricName: string): Promise<number | null> => {

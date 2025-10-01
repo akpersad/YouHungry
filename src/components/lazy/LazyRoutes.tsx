@@ -1,7 +1,7 @@
 'use client';
 
 import { lazy, Suspense } from 'react';
-import { useRouter } from 'next/navigation';
+// import { useRouter } from 'next/navigation'; // Reserved for future route preloading
 
 // Lazy load page components
 const LazyDashboard = lazy(() => import('@/app/dashboard/page'));
@@ -99,7 +99,7 @@ export function LazyCollectionRoute() {
 
 // Hook for preloading routes
 export function useRoutePreloader() {
-  const router = useRouter();
+  // const router = useRouter(); // Reserved for future route preloading
 
   const preloadRoute = (route: string) => {
     // Preload the route component
@@ -159,7 +159,6 @@ interface DynamicCollectionLoaderProps {
 }
 
 export function DynamicCollectionLoader({
-  collectionId,
   children,
 }: DynamicCollectionLoaderProps) {
   return <LazyRoute fallback={<CollectionSkeleton />}>{children}</LazyRoute>;

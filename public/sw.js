@@ -19,14 +19,14 @@ const STATIC_ASSETS = [
   '/_next/static/js/',
 ];
 
-// API endpoints to cache
-const API_ENDPOINTS = [
-  '/api/collections',
-  '/api/restaurants',
-  '/api/decisions',
-  '/api/groups',
-  '/api/friends',
-];
+// API endpoints to cache (currently disabled to prevent caching conflicts)
+// const API_ENDPOINTS = [
+//   '/api/collections',
+//   '/api/restaurants',
+//   '/api/decisions',
+//   '/api/groups',
+//   '/api/friends',
+// ];
 
 // Install event - cache static assets
 self.addEventListener('install', (event) => {
