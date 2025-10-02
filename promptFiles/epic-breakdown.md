@@ -277,6 +277,18 @@ These technologies will be implemented when they solve specific problems in each
    - **Update user database schema to include location preferences and SMS settings**
    - **Unit test custom registration components and phone verification flow**
 
+1a. **Add Custom Login Page**
+
+- Create dedicated sign-in page at `/sign-in` route
+- Replace Clerk's default modal with custom page-based authentication
+- Implement custom sign-in UI matching app design system
+- Add custom sign-up page at `/sign-up` route for consistency
+- Configure Clerk appearance to match app branding and styling
+- Implement proper redirect handling after authentication
+- Add back navigation to home page from auth pages
+- Ensure mobile-responsive design for auth pages
+- **Unit test custom authentication pages and components**
+
 2. **SMS Integration**
    - Integrate Twilio for SMS notifications
    - Create SMS opt-in/opt-out system
