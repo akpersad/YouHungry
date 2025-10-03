@@ -6,6 +6,7 @@ import { Restaurant, Collection } from '@/types/database';
 import { RestaurantCard } from './RestaurantCard';
 import { RestaurantCardCompact } from './RestaurantCardCompact';
 import { RestaurantManagementModal } from './RestaurantManagementModal';
+import { MapView } from './MapView';
 import { ViewToggle, ViewType } from '@/components/ui/ViewToggle';
 import { Button } from '@/components/ui/Button';
 
@@ -29,6 +30,24 @@ export function CollectionRestaurantsList({
     useState<Restaurant | null>(null);
   const [isManagementModalOpen, setIsManagementModalOpen] = useState(false);
   const [viewType, setViewType] = useState<ViewType>('list');
+  const [mapSelectedRestaurant, setMapSelectedRestaurant] =
+    useState<Restaurant | null>(null);
+
+  // Load view type from localStorage on mount
+  useEffect(() => {
+    const savedViewType = localStorage.getItem(
+      'collection-view-type'
+    ) as ViewType;
+    if (savedViewType && ['list', 'grid', 'map'].includes(savedViewType)) {
+      setViewType(savedViewType);
+    }
+  }, []);
+
+  // Save view type to localStorage when it changes
+  const handleViewTypeChange = (newViewType: ViewType) => {
+    setViewType(newViewType);
+    localStorage.setItem('collection-view-type', newViewType);
+  };
 
   const fetchRestaurants = useCallback(async () => {
     setIsLoading(true);
@@ -136,6 +155,19 @@ export function CollectionRestaurantsList({
     }
   };
 
+  const handleMapRestaurantSelect = (restaurant: Restaurant) => {
+    setMapSelectedRestaurant(restaurant);
+    logger.debug('Restaurant selected on map:', restaurant.name);
+  };
+
+  const handleMapRestaurantDetails = (restaurant: Restaurant) => {
+    if (onViewDetails) {
+      onViewDetails(restaurant);
+    } else {
+      handleManageRestaurant(restaurant);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -145,7 +177,10 @@ export function CollectionRestaurantsList({
           </h3>
           {/* View Toggle - Hidden on mobile during loading for now */}
           <div className="hidden sm:block">
-            <ViewToggle currentView={viewType} onToggle={setViewType} />
+            <ViewToggle
+              currentView={viewType}
+              onToggle={handleViewTypeChange}
+            />
           </div>
         </div>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -196,7 +231,7 @@ export function CollectionRestaurantsList({
         </div>
         {/* View Toggle - Show on mobile and desktop */}
         <div className="flex justify-end">
-          <ViewToggle currentView={viewType} onToggle={setViewType} />
+          <ViewToggle currentView={viewType} onToggle={handleViewTypeChange} />
         </div>
       </div>
 
@@ -266,6 +301,54 @@ export function CollectionRestaurantsList({
                   }
                 />
               ))}
+            </div>
+          )}
+
+          {/* Map View */}
+          {viewType === 'map' && (
+            <div className="space-y-4">
+              <MapView
+                restaurants={restaurants}
+                onRestaurantSelect={handleMapRestaurantSelect}
+                onRestaurantDetails={handleMapRestaurantDetails}
+                selectedRestaurant={mapSelectedRestaurant}
+                height="500px"
+                className="rounded-lg overflow-hidden shadow-lg"
+              />
+              {mapSelectedRestaurant && (
+                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-semibold text-blue-900 dark:text-blue-100">
+                        {mapSelectedRestaurant.name}
+                      </h4>
+                      <p className="text-sm text-blue-700 dark:text-blue-300">
+                        {mapSelectedRestaurant.address}
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        onClick={() =>
+                          handleMapRestaurantDetails(mapSelectedRestaurant)
+                        }
+                        size="sm"
+                        variant="outline"
+                        className="border-blue-300 text-blue-700 hover:bg-blue-100 dark:border-blue-600 dark:text-blue-300 dark:hover:bg-blue-900/30"
+                      >
+                        View Details
+                      </Button>
+                      <Button
+                        onClick={() => setMapSelectedRestaurant(null)}
+                        size="sm"
+                        variant="outline"
+                        className="text-blue-600 hover:bg-blue-100 dark:text-blue-400 dark:hover:bg-blue-900/30"
+                      >
+                        Clear
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </>

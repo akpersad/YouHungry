@@ -115,6 +115,13 @@ export default function RootLayout({
             </QueryProvider>
           </ThemeProvider>
 
+          {/* Google Maps API */}
+          <Script
+            id="google-maps"
+            src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY}&libraries=places`}
+            strategy="beforeInteractive"
+          />
+
           {/* Service Worker Registration */}
           <Script
             id="sw-register"
