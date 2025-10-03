@@ -1,7 +1,6 @@
 'use client';
 
-import { Wrapper, Status } from '@googlemaps/react-wrapper';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Restaurant } from '@/types/database';
 import { logger } from '@/lib/logger';
 import { Button } from '@/components/ui/Button';
@@ -440,30 +439,43 @@ export function MapView({
   className = '',
   height = '500px',
 }: MapViewProps) {
+  const [isGoogleMapsLoaded, setIsGoogleMapsLoaded] = useState(false);
+  const [hasError, setHasError] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
 
-  const render = useCallback(
-    (status: Status) => {
-      switch (status) {
-        case Status.LOADING:
-          return <MapLoading />;
-        case Status.FAILURE:
-          return <MapError retry={() => setRetryCount((prev) => prev + 1)} />;
-        case Status.SUCCESS:
-          return (
-            <MapComponent
-              restaurants={restaurants}
-              onRestaurantSelect={onRestaurantSelect}
-              onRestaurantDetails={onRestaurantDetails}
-              selectedRestaurant={selectedRestaurant}
-            />
-          );
-        default:
-          return <MapLoading />;
+  // Check if Google Maps API is loaded
+  useEffect(() => {
+    const checkGoogleMaps = () => {
+      if (
+        typeof window !== 'undefined' &&
+        window.google &&
+        window.google.maps
+      ) {
+        setIsGoogleMapsLoaded(true);
+        setHasError(false);
+        logger.debug('Google Maps API loaded successfully');
+      } else {
+        // Retry after a short delay
+        setTimeout(checkGoogleMaps, 100);
       }
-    },
-    [restaurants, onRestaurantSelect, onRestaurantDetails, selectedRestaurant]
-  );
+    };
+
+    // Start checking after component mounts
+    const timeout = setTimeout(checkGoogleMaps, 100);
+
+    // Set a maximum timeout to show error if Google Maps doesn't load
+    const maxTimeout = setTimeout(() => {
+      if (!isGoogleMapsLoaded) {
+        setHasError(true);
+        logger.error('Google Maps API failed to load within timeout');
+      }
+    }, 10000); // 10 second timeout
+
+    return () => {
+      clearTimeout(timeout);
+      clearTimeout(maxTimeout);
+    };
+  }, [isGoogleMapsLoaded, retryCount]);
 
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY;
 
@@ -498,13 +510,21 @@ export function MapView({
     );
   }
 
+  if (hasError) {
+    return <MapError retry={() => setRetryCount((prev) => prev + 1)} />;
+  }
+
+  if (!isGoogleMapsLoaded) {
+    return <MapLoading />;
+  }
+
   return (
     <div className={`w-full ${className}`} style={{ height }}>
-      <Wrapper
-        apiKey={apiKey}
-        render={render}
-        libraries={['places']}
-        key={retryCount} // Force re-render on retry
+      <MapComponent
+        restaurants={restaurants}
+        onRestaurantSelect={onRestaurantSelect}
+        onRestaurantDetails={onRestaurantDetails}
+        selectedRestaurant={selectedRestaurant}
       />
     </div>
   );
