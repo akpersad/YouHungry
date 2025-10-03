@@ -65,7 +65,22 @@ export async function GET(request: NextRequest) {
     const file2 = files.find((f) => f.date! <= today) || files[0];
 
     // Find the file for the comparison date or closest to it
-    const file1 = files.find((f) => f.date! <= compareDateStr);
+    // If no exact match, find the closest previous day
+    let file1 = files.find((f) => f.date! <= compareDateStr);
+
+    // If no file found for the requested day, keep going back until we find one
+    if (!file1 && files.length > 1) {
+      // Sort files by date descending to find the closest previous day
+      const sortedFiles = files.sort(
+        (a, b) => new Date(b.date!).getTime() - new Date(a.date!).getTime()
+      );
+      // Find the first file that's before the comparison date
+      file1 = sortedFiles.find((f) => f.date! < compareDateStr);
+      // If still no file found, use the second most recent file (after file2)
+      if (!file1 && sortedFiles.length > 1) {
+        file1 = sortedFiles[1]; // Second most recent file
+      }
+    }
 
     if (!file1 || !file2) {
       return NextResponse.json(
@@ -73,9 +88,32 @@ export async function GET(request: NextRequest) {
           error: `No metrics files found for comparison`,
           lookingFor: compareDateStr,
           availableDates: files.map((f) => f.date),
+          totalFiles: files.length,
         },
         { status: 404 }
       );
+    }
+
+    // Ensure we're not comparing the same file
+    if (file1.date === file2.date) {
+      // If we're comparing the same date, find the previous unique date
+      const sortedFiles = files.sort(
+        (a, b) => new Date(b.date!).getTime() - new Date(a.date!).getTime()
+      );
+      const uniqueDates = [...new Set(sortedFiles.map((f) => f.date))];
+      const currentIndex = uniqueDates.indexOf(file2.date!);
+      if (currentIndex > 0) {
+        const previousDate = uniqueDates[currentIndex - 1];
+        file1 = files.find((f) => f.date === previousDate);
+      } else {
+        return NextResponse.json(
+          {
+            error: `Cannot compare: only one unique date available`,
+            availableDates: uniqueDates,
+          },
+          { status: 400 }
+        );
+      }
     }
 
     // Check if comparison already exists

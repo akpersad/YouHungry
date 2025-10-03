@@ -6,7 +6,7 @@ import { Restaurant, Collection } from '@/types/database';
 import { RestaurantCard } from './RestaurantCard';
 import { RestaurantCardCompact } from './RestaurantCardCompact';
 import { RestaurantManagementModal } from './RestaurantManagementModal';
-import { MapView } from './MapView';
+import { LazyMapView } from './LazyMapView';
 import { ViewToggle, ViewType } from '@/components/ui/ViewToggle';
 import { Button } from '@/components/ui/Button';
 
@@ -307,7 +307,7 @@ export function CollectionRestaurantsList({
           {/* Map View */}
           {viewType === 'map' && (
             <div className="space-y-4">
-              <MapView
+              <LazyMapView
                 restaurants={restaurants}
                 onRestaurantSelect={handleMapRestaurantSelect}
                 onRestaurantDetails={handleMapRestaurantDetails}
