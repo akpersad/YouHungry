@@ -85,19 +85,32 @@ export interface OfflineAction {
 
 class OfflineStorage {
   private db: IDBDatabase | null = null;
+  private initPromise: Promise<void> | null = null;
 
   async init(): Promise<void> {
-    return new Promise((resolve, reject) => {
+    // Return existing promise if already initializing
+    if (this.initPromise) {
+      return this.initPromise;
+    }
+
+    // Return resolved promise if already initialized
+    if (this.db) {
+      return Promise.resolve();
+    }
+
+    this.initPromise = new Promise((resolve, reject) => {
       const request = indexedDB.open(DB_NAME, DB_VERSION);
 
       request.onerror = () => {
         logger.error('Failed to open IndexedDB:', request.error);
+        this.initPromise = null;
         reject(request.error);
       };
 
       request.onsuccess = () => {
         this.db = request.result;
         logger.debug('IndexedDB opened successfully');
+        this.initPromise = null;
         resolve();
       };
 
@@ -358,7 +371,9 @@ class OfflineStorage {
 // Export singleton instance
 export const offlineStorage = new OfflineStorage();
 
-// Initialize on module load
-if (typeof window !== 'undefined' && 'indexedDB' in window) {
+// Initialize on module load only once
+let isInitialized = false;
+if (typeof window !== 'undefined' && 'indexedDB' in window && !isInitialized) {
+  isInitialized = true;
   offlineStorage.init().catch(console.error);
 }

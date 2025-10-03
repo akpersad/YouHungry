@@ -5,7 +5,7 @@ import { Restaurant } from '@/types/database';
 import { logger } from '@/lib/logger';
 import { Button } from '@/components/ui/Button';
 import { Skeleton } from '@/components/ui/Skeleton';
-import { MarkerClusterer } from '@googlemaps/markerclusterer';
+import { useGoogleMaps } from '@/hooks/useGoogleMaps';
 
 interface MapViewProps {
   restaurants: Restaurant[];
@@ -26,8 +26,8 @@ interface MapComponentProps {
 // Custom marker class for restaurant markers
 class RestaurantMarker {
   public restaurant: Restaurant;
-  public infoWindow: google.maps.InfoWindow;
-  public marker: google.maps.Marker;
+  public infoWindow: google.maps.InfoWindow | null = null;
+  public marker: google.maps.Marker | null = null;
 
   constructor(
     restaurant: Restaurant,
@@ -35,13 +35,18 @@ class RestaurantMarker {
     onSelect?: (restaurant: Restaurant) => void,
     onDetails?: (restaurant: Restaurant) => void
   ) {
+    // Check if Google Maps API is available
+    if (typeof window === 'undefined' || !window.google?.maps) {
+      throw new Error('Google Maps API not loaded');
+    }
+
     const position = {
       lat: restaurant.coordinates.lat,
       lng: restaurant.coordinates.lng,
     };
 
     this.restaurant = restaurant;
-    this.marker = new google.maps.Marker({
+    this.marker = new window.google.maps.Marker({
       position,
       map,
       title: restaurant.name,
@@ -55,19 +60,19 @@ class RestaurantMarker {
             <circle cx="16" cy="12" r="2" fill="#ef4444"/>
           </svg>
         `),
-        scaledSize: new google.maps.Size(32, 32),
-        anchor: new google.maps.Point(16, 32),
+        scaledSize: new window.google.maps.Size(32, 32),
+        anchor: new window.google.maps.Point(16, 32),
       },
     });
 
-    this.infoWindow = new google.maps.InfoWindow({
+    this.infoWindow = new window.google.maps.InfoWindow({
       content: this.createInfoWindowContent(),
     });
 
     // Add click listener to marker
     this.marker.addListener('click', () => {
       onSelect?.(restaurant);
-      this.infoWindow.open(map, this.marker);
+      this.infoWindow?.open(map, this.marker!);
     });
 
     // Add double-click listener for details
@@ -129,10 +134,13 @@ class RestaurantMarker {
   }
 
   public updateInfoWindow(): void {
-    this.infoWindow.setContent(this.createInfoWindowContent());
+    this.infoWindow?.setContent(this.createInfoWindowContent());
   }
 
   public setSelected(selected: boolean): void {
+    if (!this.marker || typeof window === 'undefined' || !window.google?.maps)
+      return;
+
     if (selected) {
       this.marker.setIcon({
         url:
@@ -144,8 +152,8 @@ class RestaurantMarker {
             <circle cx="20" cy="14" r="2.5" fill="#3b82f6"/>
           </svg>
         `),
-        scaledSize: new google.maps.Size(40, 40),
-        anchor: new google.maps.Point(20, 40),
+        scaledSize: new window.google.maps.Size(40, 40),
+        anchor: new window.google.maps.Point(20, 40),
       });
     } else {
       this.marker.setIcon({
@@ -158,30 +166,31 @@ class RestaurantMarker {
             <circle cx="16" cy="12" r="2" fill="#ef4444"/>
           </svg>
         `),
-        scaledSize: new google.maps.Size(32, 32),
-        anchor: new google.maps.Point(16, 32),
+        scaledSize: new window.google.maps.Size(32, 32),
+        anchor: new window.google.maps.Point(16, 32),
       });
     }
   }
 
   public getPosition(): google.maps.LatLng | null {
-    return this.marker.getPosition() || null;
+    return this.marker?.getPosition() || null;
   }
 
   public setMap(map: google.maps.Map | null): void {
-    this.marker.setMap(map);
+    this.marker?.setMap(map);
   }
 
   public getVisible(): boolean {
-    return this.marker.getVisible();
+    return this.marker?.getVisible() ?? false;
   }
 
   public setVisible(visible: boolean): void {
-    this.marker.setVisible(visible);
+    this.marker?.setVisible(visible);
   }
 
-  public getMap(): google.maps.Map | google.maps.StreetViewPanorama | null {
-    return this.marker.getMap();
+  public getMap(): google.maps.Map | null {
+    const map = this.marker?.getMap();
+    return map instanceof google.maps.Map ? map : null;
   }
 }
 
@@ -195,14 +204,20 @@ function MapComponent({
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<google.maps.Map | null>(null);
   const markersRef = useRef<RestaurantMarker[]>([]);
-  const clustererRef = useRef<MarkerClusterer | null>(null);
+  const clustererRef = useRef<unknown | null>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
 
   // Initialize map
   useEffect(() => {
-    if (!mapRef.current || mapInstanceRef.current) return;
+    if (
+      !mapRef.current ||
+      mapInstanceRef.current ||
+      typeof window === 'undefined' ||
+      !window.google?.maps
+    )
+      return;
 
-    const map = new google.maps.Map(mapRef.current, {
+    const map = new window.google.maps.Map(mapRef.current, {
       center: { lat: 37.7749, lng: -122.4194 }, // Default to San Francisco
       zoom: 12,
       mapTypeControl: true,
@@ -237,8 +252,12 @@ function MapComponent({
       // Cleanup markers and clusterer
       markersRef.current.forEach((marker) => marker.setMap(null));
       markersRef.current = [];
-      if (clustererRef.current) {
-        clustererRef.current.clearMarkers();
+      if (
+        clustererRef.current &&
+        typeof clustererRef.current === 'object' &&
+        'clearMarkers' in clustererRef.current
+      ) {
+        (clustererRef.current as { clearMarkers: () => void }).clearMarkers();
         clustererRef.current = null;
       }
     };
@@ -256,8 +275,12 @@ function MapComponent({
     // Clear existing markers and clusterer
     markersRef.current.forEach((marker) => marker.setMap(null));
     markersRef.current = [];
-    if (clustererRef.current) {
-      clustererRef.current.clearMarkers();
+    if (
+      clustererRef.current &&
+      typeof clustererRef.current === 'object' &&
+      'clearMarkers' in clustererRef.current
+    ) {
+      (clustererRef.current as { clearMarkers: () => void }).clearMarkers();
       clustererRef.current = null;
     }
 
@@ -270,26 +293,41 @@ function MapComponent({
           restaurant.coordinates?.lat && restaurant.coordinates?.lng
       )
       .map((restaurant) => {
-        const marker = new RestaurantMarker(
-          restaurant,
-          map,
-          onRestaurantSelect,
-          onRestaurantDetails
-        );
+        try {
+          const marker = new RestaurantMarker(
+            restaurant,
+            map,
+            onRestaurantSelect,
+            onRestaurantDetails
+          );
 
-        // Add a subtle drop animation only on initial load
-        if (isInitialLoadRef.current) {
-          setTimeout(() => {
-            marker.marker.setAnimation(google.maps.Animation.DROP);
-            // Stop animation after it completes
+          // Add a subtle drop animation only on initial load
+          if (
+            isInitialLoadRef.current &&
+            marker.marker &&
+            typeof window !== 'undefined' &&
+            window.google?.maps
+          ) {
             setTimeout(() => {
-              marker.marker.setAnimation(null);
-            }, 1000);
-          }, 100);
-        }
+              marker.marker?.setAnimation(window.google.maps.Animation.DROP);
+              // Stop animation after it completes
+              setTimeout(() => {
+                marker.marker?.setAnimation(null);
+              }, 1000);
+            }, 100);
+          }
 
-        return marker;
-      });
+          return marker;
+        } catch (error) {
+          logger.error(
+            'Failed to create marker for restaurant:',
+            restaurant.name,
+            error
+          );
+          return null;
+        }
+      })
+      .filter((marker): marker is RestaurantMarker => marker !== null);
 
     // Mark that initial load is complete
     isInitialLoadRef.current = false;
@@ -297,37 +335,48 @@ function MapComponent({
     markersRef.current = newMarkers;
 
     // Create marker clusterer
-    if (newMarkers.length > 0) {
-      clustererRef.current = new MarkerClusterer({
-        map,
-        markers: newMarkers.map((marker) => marker.marker),
-        renderer: {
-          render: ({ count, position }) => {
-            const color =
-              count > 10 ? '#ef4444' : count > 5 ? '#f59e0b' : '#10b981';
-            return new google.maps.Marker({
-              position,
-              icon: {
-                url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(`
-                  <svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="20" cy="20" r="18" fill="${color}" stroke="#ffffff" stroke-width="3"/>
-                    <text x="20" y="26" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">${count}</text>
-                  </svg>
-                `)}`,
-                scaledSize: new google.maps.Size(40, 40),
-                anchor: new google.maps.Point(20, 20),
+    if (
+      newMarkers.length > 0 &&
+      typeof window !== 'undefined' &&
+      window.google?.maps
+    ) {
+      // Dynamically import MarkerClusterer to avoid module evaluation issues
+      import('@googlemaps/markerclusterer')
+        .then(({ MarkerClusterer }) => {
+          clustererRef.current = new MarkerClusterer({
+            map,
+            markers: newMarkers.map((marker) => marker.marker!).filter(Boolean),
+            renderer: {
+              render: ({ count, position }) => {
+                const color =
+                  count > 10 ? '#ef4444' : count > 5 ? '#f59e0b' : '#10b981';
+                return new window.google.maps.Marker({
+                  position,
+                  icon: {
+                    url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(`
+                    <svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="20" cy="20" r="18" fill="${color}" stroke="#ffffff" stroke-width="3"/>
+                      <text x="20" y="26" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">${count}</text>
+                    </svg>
+                  `)}`,
+                    scaledSize: new window.google.maps.Size(40, 40),
+                    anchor: new window.google.maps.Point(20, 20),
+                  },
+                  label: {
+                    text: count.toString(),
+                    color: 'white',
+                    fontSize: '12px',
+                    fontWeight: 'bold',
+                  },
+                  zIndex: Number(window.google.maps.Marker.MAX_ZINDEX) + count,
+                });
               },
-              label: {
-                text: count.toString(),
-                color: 'white',
-                fontSize: '12px',
-                fontWeight: 'bold',
-              },
-              zIndex: Number(google.maps.Marker.MAX_ZINDEX) + count,
-            });
-          },
-        },
-      });
+            },
+          });
+        })
+        .catch((error) => {
+          logger.error('Failed to load MarkerClusterer:', error);
+        });
 
       // Set up global functions for info window buttons
       (
@@ -353,11 +402,16 @@ function MapComponent({
       };
 
       // Fit map to show all markers
-      const bounds = new google.maps.LatLngBounds();
-      newMarkers.forEach((marker) => {
-        bounds.extend(marker.getPosition()!);
-      });
-      map.fitBounds(bounds);
+      if (typeof window !== 'undefined' && window.google?.maps) {
+        const bounds = new window.google.maps.LatLngBounds();
+        newMarkers.forEach((marker) => {
+          const position = marker.getPosition();
+          if (position) {
+            bounds.extend(position);
+          }
+        });
+        map.fitBounds(bounds);
+      }
 
       // If only one marker, set a reasonable zoom level
       if (newMarkers.length === 1) {
@@ -439,43 +493,14 @@ export function MapView({
   className = '',
   height = '500px',
 }: MapViewProps) {
-  const [isGoogleMapsLoaded, setIsGoogleMapsLoaded] = useState(false);
-  const [hasError, setHasError] = useState(false);
-  const [retryCount, setRetryCount] = useState(0);
+  const { isLoaded, isLoading, error, loadGoogleMaps } = useGoogleMaps();
 
-  // Check if Google Maps API is loaded
+  // Load Google Maps when component mounts
   useEffect(() => {
-    const checkGoogleMaps = () => {
-      if (
-        typeof window !== 'undefined' &&
-        window.google &&
-        window.google.maps
-      ) {
-        setIsGoogleMapsLoaded(true);
-        setHasError(false);
-        logger.debug('Google Maps API loaded successfully');
-      } else {
-        // Retry after a short delay
-        setTimeout(checkGoogleMaps, 100);
-      }
-    };
-
-    // Start checking after component mounts
-    const timeout = setTimeout(checkGoogleMaps, 100);
-
-    // Set a maximum timeout to show error if Google Maps doesn't load
-    const maxTimeout = setTimeout(() => {
-      if (!isGoogleMapsLoaded) {
-        setHasError(true);
-        logger.error('Google Maps API failed to load within timeout');
-      }
-    }, 10000); // 10 second timeout
-
-    return () => {
-      clearTimeout(timeout);
-      clearTimeout(maxTimeout);
-    };
-  }, [isGoogleMapsLoaded, retryCount]);
+    if (!isLoaded && !isLoading && !error) {
+      loadGoogleMaps();
+    }
+  }, [isLoaded, isLoading, error, loadGoogleMaps]);
 
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY;
 
@@ -510,11 +535,11 @@ export function MapView({
     );
   }
 
-  if (hasError) {
-    return <MapError retry={() => setRetryCount((prev) => prev + 1)} />;
+  if (error) {
+    return <MapError retry={() => loadGoogleMaps()} />;
   }
 
-  if (!isGoogleMapsLoaded) {
+  if (!isLoaded || isLoading) {
     return <MapLoading />;
   }
 

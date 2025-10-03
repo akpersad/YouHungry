@@ -1,3 +1,5 @@
+'use client';
+
 import { AdminNav } from '@/components/admin/AdminNav';
 import { Sidebar } from '@/components/ui/Sidebar';
 
@@ -9,7 +11,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   return (
     <div className="flex h-screen bg-background">
       <Sidebar>
-        <AdminNav />
+        <AdminNav activeTab="analytics" onTabChange={() => {}} />
       </Sidebar>
 
       <main className="flex-1 overflow-auto">

@@ -62,8 +62,8 @@ function collectBundleSizeMetrics() {
   console.log('📦 Collecting bundle size metrics...');
 
   try {
-    // Run Next.js build with bundle analyzer
-    const buildOutput = execSync('npm run build', {
+    // Run Next.js build with bundle analyzer using webpack (not turbopack)
+    const buildOutput = execSync('npm run build:webpack', {
       encoding: 'utf8',
       cwd: process.cwd(),
       env: { ...process.env, ANALYZE: 'true' },
@@ -110,7 +110,7 @@ function collectBuildTimeMetrics() {
 
   try {
     const startTime = Date.now();
-    execSync('npm run build', {
+    execSync('npm run build:webpack', {
       encoding: 'utf8',
       cwd: process.cwd(),
       stdio: 'pipe',

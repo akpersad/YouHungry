@@ -240,7 +240,7 @@ These technologies will be implemented when they solve specific problems in each
    - Enable background sync capabilities
 
 3. **Performance Optimization**
-   - Implement aggressive caching strategies
+   - Implement `aggressive` caching strategies
    - Optimize bundle size and loading times
    - Add performance monitoring
    - Implement lazy loading and code splitting
@@ -257,7 +257,77 @@ These technologies will be implemented when they solve specific problems in each
    - Add map view loading states and error handling
    - **Unit test map view components and Google Maps integration**
 
-## 🔔 Epic 6: Notifications & Communication
+## 🛠️ Epic 6: Admin Panel & Monitoring
+
+**Goal**: Comprehensive admin dashboard for system monitoring and management
+
+### Stories:
+
+1. **Admin Panel Foundation**
+   - Create comprehensive admin panel at `/admin` with tabbed interface
+   - Implement AdminGate component with user ID allowlist for security
+   - Add tabs for Analytics, Cost Monitoring, Users, Database, Settings
+   - Ensure admin panel is protected behind authentication
+   - Add external tools section with legacy dashboard links
+   - **Unit test admin panel components and security gates**
+
+2. **Cost Monitoring Dashboard**
+   - Implement real-time cost monitoring with historical data
+   - Add cost breakdown by API service (Google Places, Maps, etc.)
+   - Display daily/monthly cost projections and savings
+   - Show cache performance metrics and hit rates
+   - Add cost recommendations and optimization suggestions
+   - Implement auto-refresh and manual refresh capabilities
+   - **Unit test cost monitoring components and data visualization**
+
+**🔄 Parallel Work Group A: Data Management Dashboards**
+_These stories should be worked on together as they share common data patterns, API endpoints, and UI components_
+
+3. **User Management Dashboard**
+   - Display user statistics and activity metrics
+   - Show user registration trends and engagement data
+   - Implement user search and filtering capabilities
+   - Add user profile management tools
+   - Display friend request and group invitation metrics
+   - **Unit test user management components and data tables**
+
+4. **Database Management Dashboard**
+   - Show database connection status and performance metrics
+   - Display collection and restaurant data statistics
+   - Add database query performance monitoring
+   - Implement data cleanup and maintenance tools
+   - Show storage usage and optimization recommendations
+   - **Unit test database management components and monitoring**
+
+5. **Usage Analytics Dashboard**
+   - Track API usage patterns and trends
+   - Display most popular features and endpoints
+   - Show user behavior analytics and engagement metrics
+   - Implement usage forecasting and capacity planning
+   - Add performance benchmarking and comparison tools
+   - **Unit test analytics components and data visualization**
+
+**🔄 Parallel Work Group B: Configuration & Monitoring**
+_These stories should be worked on together as they share configuration patterns, alert systems, and monitoring infrastructure_
+
+5. **System Settings Dashboard**
+   - Configure rate limiting settings and thresholds
+   - Manage API key configurations and restrictions
+   - Set up alert thresholds for costs and performance
+   - Configure notification settings for admin alerts
+   - Manage system maintenance and downtime windows
+   - **Unit test system settings components and configuration**
+
+6. **Admin Alert System Implementation**
+   - Set up Twilio SMS alerts for cost spikes and system issues
+   - Implement email notifications for admin events
+   - Add real-time monitoring for API failures and circuit breakers
+   - Configure threshold-based alerts for performance degradation
+   - Set up emergency contact system for critical issues
+   - Integrate with existing Twilio infrastructure from Epic 7
+   - **Unit test alert system components and notification delivery**
+
+## 🔔 Epic 7: Notifications & Communication
 
 **Goal**: Enable real-time communication and notifications
 
@@ -289,11 +359,15 @@ These technologies will be implemented when they solve specific problems in each
 - Ensure mobile-responsive design for auth pages
 - **Unit test custom authentication pages and components**
 
-2. **SMS Integration**
+2. **SMS Integration & Admin Alerts**
    - Integrate Twilio for SMS notifications
    - Create SMS opt-in/opt-out system
    - Implement group-specific notification preferences
    - Handle SMS delivery and error cases
+   - **Admin Alert System**: Set up Twilio SMS alerts for cost spikes and system issues
+   - **Admin Notifications**: Implement emergency SMS alerts for critical system failures
+   - **Cost Monitoring Alerts**: SMS notifications when daily costs exceed thresholds
+   - **System Health Alerts**: SMS alerts for circuit breaker activations and API failures
 
 3. **In-App Notifications**
    - Create notification system for group decisions

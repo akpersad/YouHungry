@@ -108,12 +108,21 @@ export function PerformanceDashboard() {
         `/api/admin/performance/compare?days=${days}`
       );
       if (!response.ok) {
-        throw new Error('Failed to load comparison data');
+        const errorData = await response.json().catch(() => ({}));
+        logger.error('Failed to load comparison data:', {
+          status: response.status,
+          error: errorData.error || 'Unknown error',
+          availableDates: errorData.availableDates || [],
+        });
+        // Don't throw error, just log it and continue without comparison data
+        setComparison(null);
+        return;
       }
       const data = await response.json();
       setComparison(data);
     } catch (err) {
       logger.error('Failed to load comparison:', err);
+      setComparison(null);
     }
   };
 
@@ -147,6 +156,38 @@ export function PerformanceDashboard() {
       default:
         return <Minus className="h-4 w-4 text-gray-600" />;
     }
+  };
+
+  const formatMetricName = (metric: string): string => {
+    const metricNames: Record<string, string> = {
+      // Web Vitals
+      fcp: 'First Contentful Paint',
+      lcp: 'Largest Contentful Paint',
+      fid: 'First Input Delay',
+      cls: 'Cumulative Layout Shift',
+      ttfb: 'Time to First Byte',
+
+      // Bundle metrics
+      firstLoadJS: 'First Load JS',
+      totalBundleSize: 'Total Bundle Size',
+      fileCount: 'File Count',
+
+      // API metrics
+      averageResponseTime: 'Average Response Time',
+      successRate: 'Success Rate',
+      errorRate: 'Error Rate',
+      totalRequests: 'Total Requests',
+
+      // Build metrics
+      buildTime: 'Build Time',
+    };
+
+    return (
+      metricNames[metric] ||
+      metric
+        .replace(/([A-Z])/g, ' $1')
+        .replace(/^./, (str) => str.toUpperCase())
+    );
   };
 
   const getStatusBadge = (
@@ -395,23 +436,38 @@ export function PerformanceDashboard() {
             <div className="space-y-4">
               {Object.entries(comparison.details).map(([category, metrics]) => (
                 <div key={category}>
-                  <h4 className="font-semibold text-lg mb-2 capitalize">
-                    {category}
+                  <h4 className="font-semibold text-lg mb-2">
+                    {category === 'webVitals'
+                      ? 'Web Vitals'
+                      : category === 'bundle'
+                        ? 'Bundle Size'
+                        : category === 'api'
+                          ? 'API Performance'
+                          : category.charAt(0).toUpperCase() +
+                            category.slice(1)}
                   </h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                     {Object.entries(metrics as Record<string, unknown>).map(
                       ([metric, data]) => {
+                        // Ensure data is an object with the expected structure
+                        if (typeof data !== 'object' || data === null) {
+                          return null;
+                        }
+
                         const dataObj = data as {
                           trend: string;
                           change: number;
+                          old?: number;
+                          new?: number;
                         };
+
                         return (
                           <div
                             key={metric}
                             className="flex items-center justify-between p-2 bg-gray-50 rounded"
                           >
                             <span className="text-sm font-medium">
-                              {metric}
+                              {formatMetricName(metric)}
                             </span>
                             <div className="flex items-center gap-2">
                               {getTrendIcon(dataObj.trend)}
