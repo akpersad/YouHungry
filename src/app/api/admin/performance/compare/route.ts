@@ -117,7 +117,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Check if comparison already exists
-    const comparisonFilename = `comparison-${file1.date}-vs-${file2.date}.json`;
+    const comparisonFilename = `comparison-${file1!.date}-vs-${file2.date}.json`;
     const comparisonPath = path.join(comparisonsDir, comparisonFilename);
 
     if (fs.existsSync(comparisonPath)) {
@@ -129,7 +129,7 @@ export async function GET(request: NextRequest) {
 
     // Load metrics for comparison
     const metrics1 = JSON.parse(
-      fs.readFileSync(path.join(metricsDir, file1.filename), 'utf8')
+      fs.readFileSync(path.join(metricsDir, file1!.filename), 'utf8')
     );
     const metrics2 = JSON.parse(
       fs.readFileSync(path.join(metricsDir, file2.filename), 'utf8')
@@ -155,7 +155,7 @@ export async function GET(request: NextRequest) {
       };
     } = {
       comparison: {
-        date1: file1.date,
+        date1: file1!.date,
         date2: file2.date,
         generatedAt: new Date().toISOString(),
       },

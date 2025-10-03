@@ -572,10 +572,12 @@ Once push notifications are confirmed working:
 - [ ] Performance monitoring active
 - [ ] Error tracking configured
 - [ ] Database monitoring active
-- [ ] **Admin gating for performance dashboard** (`/admin/performance`)
-  - [ ] Create allowlist of user IDs who can access admin panel
-  - [ ] Implement `AdminGate` component to check user permissions
-  - [ ] Test with production user ID once available
+- [ ] **Admin Panel Security Configuration** (`/admin`)
+  - [ ] **CRITICAL**: Add your production user ID to `ADMIN_USER_IDS` array in `src/components/admin/AdminGate.tsx`
+  - [ ] Test admin panel access with your production user account
+  - [ ] Verify all admin tabs are accessible and functional
+  - [ ] Ensure cost monitoring dashboard displays real data
+  - [ ] Test admin panel security - verify other users cannot access
   - [ ] Ensure standalone dashboard (`/performance-dashboard.html`) remains accessible
 - [ ] Team notified of successful deployment
 

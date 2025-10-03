@@ -3,9 +3,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { searchRestaurantsByCoordinates } from '@/lib/restaurants';
 import { validateData, restaurantSearchSchema } from '@/lib/validation';
 import {
-  geocodeAddress,
-  searchRestaurantsWithGooglePlaces,
-} from '@/lib/google-places';
+  geocodeAddressOptimized,
+  smartRestaurantSearch,
+} from '@/lib/optimized-google-places';
 import { calculateDistance } from '@/lib/utils';
 
 export async function GET(request: NextRequest) {
@@ -100,9 +100,9 @@ export async function GET(request: NextRequest) {
         latitude = parseFloat(coordinateMatch[1]);
         longitude = parseFloat(coordinateMatch[2]);
       } else {
-        // Geocode the address to get coordinates
+        // Use optimized geocoding with caching
         try {
-          const coordinates = await geocodeAddress(location);
+          const coordinates = await geocodeAddressOptimized(location);
           if (!coordinates) {
             return NextResponse.json(
               { error: 'Could not find coordinates for the provided address' },
@@ -162,11 +162,10 @@ export async function GET(request: NextRequest) {
 
       let restaurants;
       if (query) {
-        // If there's a query, use text search with location
-        const locationString = `${latitude},${longitude}`;
-        restaurants = await searchRestaurantsWithGooglePlaces(
+        // Use smart search that combines multiple strategies for better results
+        restaurants = await smartRestaurantSearch(
           query,
-          locationString,
+          location,
           searchRadius
         );
       } else {

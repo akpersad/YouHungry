@@ -189,7 +189,8 @@ class RestaurantMarker {
   }
 
   public getMap(): google.maps.Map | null {
-    return this.marker?.getMap() || null;
+    const map = this.marker?.getMap();
+    return map instanceof google.maps.Map ? map : null;
   }
 }
 
@@ -203,7 +204,7 @@ function MapComponent({
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<google.maps.Map | null>(null);
   const markersRef = useRef<RestaurantMarker[]>([]);
-  const clustererRef = useRef<google.maps.marker.Clusterer | null>(null);
+  const clustererRef = useRef<unknown | null>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
 
   // Initialize map
@@ -251,8 +252,12 @@ function MapComponent({
       // Cleanup markers and clusterer
       markersRef.current.forEach((marker) => marker.setMap(null));
       markersRef.current = [];
-      if (clustererRef.current) {
-        clustererRef.current.clearMarkers();
+      if (
+        clustererRef.current &&
+        typeof clustererRef.current === 'object' &&
+        'clearMarkers' in clustererRef.current
+      ) {
+        (clustererRef.current as { clearMarkers: () => void }).clearMarkers();
         clustererRef.current = null;
       }
     };
@@ -270,8 +275,12 @@ function MapComponent({
     // Clear existing markers and clusterer
     markersRef.current.forEach((marker) => marker.setMap(null));
     markersRef.current = [];
-    if (clustererRef.current) {
-      clustererRef.current.clearMarkers();
+    if (
+      clustererRef.current &&
+      typeof clustererRef.current === 'object' &&
+      'clearMarkers' in clustererRef.current
+    ) {
+      (clustererRef.current as { clearMarkers: () => void }).clearMarkers();
       clustererRef.current = null;
     }
 

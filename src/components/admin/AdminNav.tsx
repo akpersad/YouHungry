@@ -1,114 +1,97 @@
 'use client';
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import {
   BarChart3,
   Settings,
   Users,
   Database,
-  Activity,
+  DollarSign,
   ExternalLink,
 } from 'lucide-react';
 
+interface AdminNavProps {
+  activeTab: string;
+  onTabChange: (tab: string) => void;
+}
+
 const adminNavItems = [
   {
-    title: 'Performance',
-    href: '/admin/performance',
+    id: 'analytics',
+    title: 'Analytics',
     icon: BarChart3,
     description: 'Monitor app performance metrics',
   },
   {
-    title: 'Analytics',
-    href: '/admin/analytics',
-    icon: Activity,
-    description: 'View user analytics and insights',
+    id: 'costs',
+    title: 'Cost Monitoring',
+    icon: DollarSign,
+    description: 'Track API costs and usage',
   },
   {
+    id: 'users',
     title: 'Users',
-    href: '/admin/users',
     icon: Users,
     description: 'Manage user accounts',
   },
   {
+    id: 'database',
     title: 'Database',
-    href: '/admin/database',
     icon: Database,
     description: 'Database management tools',
   },
   {
+    id: 'settings',
     title: 'Settings',
-    href: '/admin/settings',
     icon: Settings,
     description: 'System configuration',
   },
 ];
 
-export function AdminNav() {
-  const pathname = usePathname();
-
+export function AdminNav({ activeTab, onTabChange }: AdminNavProps) {
   return (
-    <div className="space-y-4">
-      <div className="px-3 py-2">
-        <h2 className="mb-1 px-4 text-lg font-semibold tracking-tight">
-          Admin Panel
-        </h2>
-        <p className="px-4 text-sm text-muted-foreground">
-          System administration and monitoring
-        </p>
+    <div className="bg-white rounded-lg shadow-sm border">
+      <div className="border-b border-gray-200">
+        <nav className="flex space-x-8 px-6" aria-label="Tabs">
+          {adminNavItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = activeTab === item.id;
+
+            return (
+              <button
+                key={item.id}
+                onClick={() => onTabChange(item.id)}
+                className={cn(
+                  'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors flex items-center gap-2',
+                  isActive
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                )}
+              >
+                <Icon className="h-4 w-4" />
+                {item.title}
+              </button>
+            );
+          })}
+        </nav>
       </div>
 
-      <nav className="space-y-1 px-3">
-        {adminNavItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = pathname === item.href;
-
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                'flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent hover:text-accent-foreground',
-                isActive && 'bg-accent text-accent-foreground'
-              )}
-            >
-              <Icon className="h-4 w-4" />
-              <div className="flex-1">
-                <div className="font-medium">{item.title}</div>
-                <div className="text-xs text-muted-foreground">
-                  {item.description}
-                </div>
-              </div>
-            </Link>
-          );
-        })}
-
-        {/* External Links */}
-        <div className="border-t pt-4 mt-4">
-          <div className="px-3 py-2">
-            <h3 className="text-sm font-medium text-muted-foreground mb-2">
-              External Tools
-            </h3>
-          </div>
-
+      {/* External Links */}
+      <div className="px-6 py-4 border-t border-gray-200">
+        <div className="flex items-center gap-2 text-sm text-gray-600">
+          <span>External Tools:</span>
           <a
             href="/performance-dashboard.html"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent hover:text-accent-foreground"
+            className="flex items-center gap-1 text-primary hover:text-primary-dark transition-colors"
           >
-            <BarChart3 className="h-4 w-4" />
-            <div className="flex-1">
-              <div className="font-medium">Legacy Dashboard</div>
-              <div className="text-xs text-muted-foreground">
-                Standalone HTML dashboard
-              </div>
-            </div>
+            <BarChart3 className="h-3 w-3" />
+            Legacy Dashboard
             <ExternalLink className="h-3 w-3" />
           </a>
         </div>
-      </nav>
+      </div>
     </div>
   );
 }
