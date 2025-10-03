@@ -78,10 +78,10 @@ class RestaurantMarker {
 
   private createInfoWindowContent(): string {
     const { restaurant } = this;
-    const photoUrl = restaurant.photos?.[0]?.url || '/icons/icon-96x96.svg';
+    const photoUrl = restaurant.photos?.[0] || '/icons/icon-96x96.svg';
     const rating = restaurant.rating || 0;
-    const priceLevel = restaurant.priceLevel || 0;
-    const priceText = '$$$$'.slice(0, priceLevel) || 'N/A';
+    const priceRange = restaurant.priceRange || 'N/A';
+    const priceText = priceRange;
 
     return `
       <div class="p-3 max-w-xs">
@@ -300,7 +300,7 @@ function MapComponent({
     if (newMarkers.length > 0) {
       clustererRef.current = new MarkerClusterer({
         map,
-        markers: newMarkers,
+        markers: newMarkers.map((marker) => marker.marker),
         renderer: {
           render: ({ count, position }) => {
             const color =

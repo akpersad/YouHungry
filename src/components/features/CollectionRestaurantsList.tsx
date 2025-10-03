@@ -340,7 +340,7 @@ export function CollectionRestaurantsList({
                       <Button
                         onClick={() => setMapSelectedRestaurant(null)}
                         size="sm"
-                        variant="ghost"
+                        variant="outline"
                         className="text-blue-600 hover:bg-blue-100 dark:text-blue-400 dark:hover:bg-blue-900/30"
                       >
                         Clear
