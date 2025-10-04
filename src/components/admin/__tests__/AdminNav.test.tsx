@@ -17,11 +17,13 @@ describe('AdminNav', () => {
   it('should render all navigation tabs', () => {
     render(<AdminNav activeTab="analytics" onTabChange={mockOnTabChange} />);
 
+    expect(screen.getByText('Performance')).toBeInTheDocument();
     expect(screen.getByText('Analytics')).toBeInTheDocument();
     expect(screen.getByText('Cost Monitoring')).toBeInTheDocument();
     expect(screen.getByText('Users')).toBeInTheDocument();
     expect(screen.getByText('Database')).toBeInTheDocument();
     expect(screen.getByText('Settings')).toBeInTheDocument();
+    expect(screen.getByText('Alerts')).toBeInTheDocument();
   });
 
   it('should render all navigation icons', () => {
@@ -29,7 +31,7 @@ describe('AdminNav', () => {
 
     // Icons are rendered as SVG elements, we can check for their presence
     const buttons = screen.getAllByRole('button');
-    expect(buttons).toHaveLength(5); // 5 navigation tabs
+    expect(buttons).toHaveLength(7); // 7 navigation tabs (Performance, Analytics, Cost Monitoring, Users, Database, Settings, Alerts)
   });
 
   it('should highlight active tab', () => {
@@ -65,6 +67,9 @@ describe('AdminNav', () => {
     render(<AdminNav activeTab="analytics" onTabChange={mockOnTabChange} />);
 
     // Test each tab
+    fireEvent.click(screen.getByText('Performance'));
+    expect(mockOnTabChange).toHaveBeenCalledWith('performance');
+
     fireEvent.click(screen.getByText('Analytics'));
     expect(mockOnTabChange).toHaveBeenCalledWith('analytics');
 
@@ -79,6 +84,9 @@ describe('AdminNav', () => {
 
     fireEvent.click(screen.getByText('Settings'));
     expect(mockOnTabChange).toHaveBeenCalledWith('settings');
+
+    fireEvent.click(screen.getByText('Alerts'));
+    expect(mockOnTabChange).toHaveBeenCalledWith('alerts');
   });
 
   it('should render external tools section', () => {
