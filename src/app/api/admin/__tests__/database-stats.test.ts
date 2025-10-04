@@ -122,7 +122,7 @@ describe('/api/admin/database/stats', () => {
     const mockDb = {
       admin: jest.fn().mockReturnValue(mockAdminDb),
       collection: jest.fn().mockImplementation((name) => {
-        if (name === 'errorCollection') {
+        if (name === 'users') {
           throw new Error('Collection not found');
         }
         return {
@@ -153,7 +153,7 @@ describe('/api/admin/database/stats', () => {
 
     // Should have error collection with error message
     const errorCollection = data.data.collections.find(
-      (col: { name: string; error?: string }) => col.name === 'errorCollection'
+      (col: { name: string; error?: string }) => col.name === 'users'
     );
     expect(errorCollection).toBeDefined();
     expect(errorCollection.error).toBe('Collection not found');

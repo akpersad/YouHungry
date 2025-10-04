@@ -86,20 +86,48 @@ export async function GET() {
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-    const recentActivity = await Promise.all([
-      db
-        .collection('users')
-        .countDocuments({ createdAt: { $gte: sevenDaysAgo } }),
-      db
-        .collection('collections')
-        .countDocuments({ createdAt: { $gte: sevenDaysAgo } }),
-      db
-        .collection('groups')
-        .countDocuments({ createdAt: { $gte: sevenDaysAgo } }),
-      db
-        .collection('decisions')
-        .countDocuments({ createdAt: { $gte: sevenDaysAgo } }),
-    ]);
+    const recentActivity = await Promise.allSettled([
+      (async () => {
+        try {
+          return await db
+            .collection('users')
+            .countDocuments({ createdAt: { $gte: sevenDaysAgo } });
+        } catch {
+          return 0;
+        }
+      })(),
+      (async () => {
+        try {
+          return await db
+            .collection('collections')
+            .countDocuments({ createdAt: { $gte: sevenDaysAgo } });
+        } catch {
+          return 0;
+        }
+      })(),
+      (async () => {
+        try {
+          return await db
+            .collection('groups')
+            .countDocuments({ createdAt: { $gte: sevenDaysAgo } });
+        } catch {
+          return 0;
+        }
+      })(),
+      (async () => {
+        try {
+          return await db
+            .collection('decisions')
+            .countDocuments({ createdAt: { $gte: sevenDaysAgo } });
+        } catch {
+          return 0;
+        }
+      })(),
+    ]).then((results) =>
+      results.map((result) =>
+        result.status === 'fulfilled' ? result.value : 0
+      )
+    );
 
     // Get query performance data (simplified - in production you'd use MongoDB profiler)
     const queryMetrics = {

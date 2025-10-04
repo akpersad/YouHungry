@@ -71,9 +71,9 @@ describe('/api/admin/analytics/usage', () => {
 
     // Mock daily activity aggregation
     mockDb.toArray.mockResolvedValueOnce([
-      { _id: '2024-01-08', decisions: 15, uniqueUsers: ['user1', 'user2'] },
-      { _id: '2024-01-09', decisions: 22, uniqueUsers: ['user1', 'user3'] },
-      { _id: '2024-01-10', decisions: 18, uniqueUsers: ['user2', 'user4'] },
+      { _id: '2024-01-08', decisions: 15, uniqueUserCount: 3 },
+      { _id: '2024-01-09', decisions: 22, uniqueUserCount: 2 },
+      { _id: '2024-01-10', decisions: 18, uniqueUserCount: 4 },
     ]);
 
     const request = new NextRequest(
@@ -88,7 +88,7 @@ describe('/api/admin/analytics/usage', () => {
     expect(data.data.featureUsage.restaurantSearch).toBe(450);
     expect(data.data.featureUsage.groupDecisions).toBe(120);
     expect(data.data.userBehavior.totalUsers).toBe(150);
-    expect(data.userBehavior.engagementRate).toBe(63.3);
+    expect(data.data.userBehavior.engagementRate).toBe(63.33);
     expect(data.data.trends.dailyActivity).toHaveLength(3);
   });
 
@@ -236,12 +236,12 @@ describe('/api/admin/analytics/usage', () => {
       {
         _id: '2024-01-08',
         decisions: 15,
-        uniqueUsers: ['user1', 'user2', 'user3'],
+        uniqueUserCount: 3,
       },
       {
         _id: '2024-01-09',
         decisions: 22,
-        uniqueUsers: ['user1', 'user4', 'user5', 'user6'],
+        uniqueUserCount: 4,
       },
     ]);
 

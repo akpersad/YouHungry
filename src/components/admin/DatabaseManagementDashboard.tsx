@@ -115,7 +115,10 @@ export function DatabaseManagementDashboard() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <RefreshCw className="h-8 w-8 animate-spin text-primary" />
+        <RefreshCw
+          className="h-8 w-8 animate-spin text-primary"
+          role="status"
+        />
       </div>
     );
   }

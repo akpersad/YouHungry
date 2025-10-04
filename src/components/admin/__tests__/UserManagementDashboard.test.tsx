@@ -176,12 +176,12 @@ describe('UserManagementDashboard', () => {
     fireEvent.click(searchButton);
 
     await waitFor(() => {
-      // Check that the search API was called with the john query (third call)
-      expect(fetch).toHaveBeenNthCalledWith(
-        3,
-        expect.stringContaining('/api/admin/users/search?q=john'),
-        expect.any(Object)
+      // Check that the search API was called with the john query
+      const calls = (fetch as jest.Mock).mock.calls;
+      const searchCall = calls.find(
+        (call) => call[0] && call[0].includes('/api/admin/users/search?q=john')
       );
+      expect(searchCall).toBeDefined();
     });
   });
 

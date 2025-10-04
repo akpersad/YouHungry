@@ -415,7 +415,7 @@ export function UserManagementDashboard() {
       </Card>
 
       {/* Top Active Users */}
-      {stats && stats.topActiveUsers.length > 0 && (
+      {stats && stats.topActiveUsers && stats.topActiveUsers.length > 0 && (
         <Card className="p-6">
           <h3 className="text-lg font-semibold mb-4">Top Active Users</h3>
           <div className="space-y-3">
