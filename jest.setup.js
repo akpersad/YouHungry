@@ -117,6 +117,21 @@ mockFetch.mockImplementation(() =>
   })
 );
 
+// Set consistent environment variables for all tests
+process.env.NODE_ENV = 'test';
+process.env.GOOGLE_PLACES_API_KEY = 'test-api-key';
+process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY = 'test-api-key';
+process.env.GOOGLE_ADDRESS_VALIDATION_API_KEY = 'test-api-key';
+process.env.MONGODB_URI = 'mongodb://localhost:27017/you-hungry-test';
+process.env.MONGODB_DATABASE = 'test-db-name';
+process.env.TWILIO_ACCOUNT_SID = 'test-api-key';
+process.env.TWILIO_AUTH_TOKEN = 'test-api-key';
+process.env.TWILIO_PHONE_NUMBER = '+18002562938';
+process.env.NEXT_PUBLIC_APP_URL = 'http://localhost:3000';
+process.env.RESEND_API_KEY = 'test-api-key';
+process.env.NEXTAUTH_SECRET = 'test-secret';
+process.env.NEXTAUTH_URL = 'http://localhost:3000';
+
 // Reset fetch mock before each test, but preserve any specific mocks
 beforeEach(() => {
   // Don't clear mocks that are specifically set by individual tests

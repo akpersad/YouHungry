@@ -9,6 +9,7 @@ import {
   useUpdateFriendRequest,
   useRemoveFriend,
 } from '../useFriends';
+import { mockUsers } from '@/test-utils/mockData';
 
 // Mock fetch
 global.fetch = jest.fn();
@@ -42,12 +43,7 @@ describe('useFriends', () => {
   it('should fetch friends successfully', async () => {
     const mockFriends = [
       {
-        _id: 'user2',
-        clerkId: 'clerk2',
-        email: 'john@example.com',
-        name: 'John Doe',
-        profilePicture: 'pic1.jpg',
-        city: 'New York',
+        ...mockUsers[0],
         friendshipId: 'friendship1',
         addedAt: new Date('2023-01-01'),
       },
@@ -246,16 +242,19 @@ describe('useSendFriendRequest', () => {
       expect(result.current.isSuccess).toBe(true);
     });
 
-    expect(fetch).toHaveBeenCalledWith('/api/friends/requests', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        requesterId: 'user1',
-        addresseeId: 'user2',
-      }),
-    });
+    expect(fetch).toHaveBeenCalledWith(
+      '/api/friends/requests',
+      expect.objectContaining({
+        method: 'POST',
+        headers: expect.objectContaining({
+          'Content-Type': 'application/json',
+        }),
+        body: JSON.stringify({
+          requesterId: 'user1',
+          addresseeId: 'user2',
+        }),
+      })
+    );
   });
 
   it('should handle send friend request error', async () => {

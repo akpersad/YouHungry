@@ -12,52 +12,25 @@ import {
 } from '../restaurants';
 import * as googlePlaces from '../google-places';
 import * as db from '../db';
+import { mockRestaurant } from '@/test-utils/mockData';
 
 const mockGooglePlaces = googlePlaces as jest.Mocked<typeof googlePlaces>;
 const mockDb = db as jest.Mocked<typeof db>;
 
-// Mock restaurant data
-const mockRestaurant = {
-  _id: '507f1f77bcf86cd799439011' as unknown as string,
-  googlePlaceId: 'ChIJN1t_tDeuEmsRUsoyG83frY4',
-  name: 'Test Restaurant',
-  address: '123 Test Street, Test City, TC 12345',
-  coordinates: {
-    lat: 40.7128,
-    lng: -74.006,
-  },
-  cuisine: 'Italian',
-  rating: 4.5,
-  priceRange: '$$' as const,
-  timeToPickUp: 25,
-  photos: ['https://example.com/photo1.jpg'],
-  phoneNumber: '+1-555-0123',
-  website: 'https://testrestaurant.com',
-  hours: {
-    Monday: '9:00 AM – 10:00 PM',
-  },
-  cachedAt: new Date('2024-01-01'),
-  lastUpdated: new Date('2024-01-01'),
-};
-
+// Use centralized mock data
 const mockGoogleRestaurant = {
-  googlePlaceId: 'ChIJN1t_tDeuEmsRUsoyG83frY4',
-  name: 'Test Restaurant',
-  address: '123 Test Street, Test City, TC 12345',
-  coordinates: {
-    lat: 40.7128,
-    lng: -74.006,
-  },
-  cuisine: 'Italian',
-  rating: 4.5,
-  priceRange: '$$' as const,
-  timeToPickUp: 25,
-  photos: ['https://example.com/photo1.jpg'],
-  phoneNumber: '+1-555-0123',
-  website: 'https://testrestaurant.com',
-  hours: {
-    Monday: '9:00 AM – 10:00 PM',
-  },
+  googlePlaceId: mockRestaurant.googlePlaceId,
+  name: mockRestaurant.name,
+  address: mockRestaurant.address,
+  coordinates: mockRestaurant.coordinates,
+  cuisine: mockRestaurant.cuisine,
+  rating: mockRestaurant.rating,
+  priceRange: mockRestaurant.priceRange,
+  timeToPickUp: mockRestaurant.timeToPickUp,
+  photos: mockRestaurant.photos,
+  phoneNumber: mockRestaurant.phoneNumber,
+  website: mockRestaurant.website,
+  hours: mockRestaurant.hours,
 };
 
 describe('Restaurant API Functions', () => {

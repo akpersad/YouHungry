@@ -9,6 +9,7 @@ const customJestConfig = {
   testEnvironment: 'jest-environment-jsdom',
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
+    '^@/test-utils/(.*)$': '<rootDir>/src/test-utils/$1',
     '^mongodb$': '<rootDir>/src/__mocks__/mongodb.js',
     '^bson$': '<rootDir>/src/__mocks__/bson.js',
     '^@clerk/nextjs$': '<rootDir>/src/__mocks__/@clerk/nextjs.js',
