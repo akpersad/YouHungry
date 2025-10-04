@@ -311,7 +311,7 @@ _These stories should be worked on together as they share common data patterns, 
 _These stories should be worked on together as they share configuration patterns, alert systems, and monitoring infrastructure_
 
 5. **System Settings Dashboard**
-   - Configure rate limiting settings and thresholds
+   - Configure rate limiting settigstngs and thresholds
    - Manage API key configurations and restrictions
    - Set up alert thresholds for costs and performance
    - Configure notification settings for admin alerts
