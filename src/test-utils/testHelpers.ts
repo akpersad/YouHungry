@@ -7,6 +7,7 @@
 
 import { QueryClient } from '@tanstack/react-query';
 import React from 'react';
+import { expect, jest } from '@jest/globals';
 
 // ============================================================================
 // REACT QUERY TEST HELPERS
@@ -20,7 +21,7 @@ export const createTestQueryClient = () =>
     defaultOptions: {
       queries: {
         retry: false,
-        cacheTime: 0,
+        gcTime: 0,
       },
       mutations: {
         retry: false,
@@ -33,9 +34,7 @@ export const createTestQueryClient = () =>
  */
 export const createTestWrapper = () => {
   const TestWrapper = ({ children }: { children: React.ReactNode }) =>
-    React.createElement(
-      React.createElement('div', { 'data-testid': 'test-wrapper' }, children)
-    );
+    React.createElement('div', { 'data-testid': 'test-wrapper' }, children);
   TestWrapper.displayName = 'TestWrapper';
   return TestWrapper;
 };
@@ -204,12 +203,14 @@ export const createMockPerformance = () => ({
  * Sets up test environment variables
  */
 export const setupTestEnv = () => {
-  process.env.NODE_ENV = 'test';
-  process.env.GOOGLE_PLACES_API_KEY = 'test-api-key';
-  process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY = 'test-api-key';
-  process.env.MONGODB_URI = 'mongodb://localhost:27017/you-hungry-test';
-  process.env.NEXTAUTH_SECRET = 'test-secret';
-  process.env.NEXTAUTH_URL = 'http://localhost:3000';
+  Object.assign(process.env, {
+    NODE_ENV: 'test',
+    GOOGLE_PLACES_API_KEY: 'test-api-key',
+    NEXT_PUBLIC_GOOGLE_PLACES_API_KEY: 'test-api-key',
+    MONGODB_URI: 'mongodb://localhost:27017/you-hungry-test',
+    NEXTAUTH_SECRET: 'test-secret',
+    NEXTAUTH_URL: 'http://localhost:3000',
+  });
 };
 
 /**

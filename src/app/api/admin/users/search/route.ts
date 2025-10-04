@@ -32,9 +32,8 @@ export async function GET(request: NextRequest) {
       ];
     }
 
-    // Build sort object
-    const sort: Record<string, number> = {};
-    sort[sortBy] = sortOrder === 'desc' ? -1 : 1;
+    // Build sort object - MongoDB sort expects [field, direction] tuples
+    const sort: [string, 1 | -1] = [sortBy, sortOrder === 'desc' ? -1 : 1];
 
     // Get paginated users
     const skip = (page - 1) * limit;

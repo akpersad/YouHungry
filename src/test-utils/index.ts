@@ -10,5 +10,5 @@ export * from './mockData';
 // Test Helpers
 export * from './testHelpers';
 
-// Re-export existing test utilities
-export * from './testQueryClient';
+// Re-export existing test utilities (excluding createTestQueryClient to avoid conflict)
+export { createTestQueryClient as createTestQueryClientOriginal } from './testQueryClient';

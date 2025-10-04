@@ -6,13 +6,14 @@
  * database schema and API response formats.
  */
 
+import { ObjectId } from 'mongodb';
 import {
   Restaurant,
   Collection,
   User,
   Group,
   Decision,
-  FriendRequest,
+  Friendship,
 } from '@/types/database';
 
 // ============================================================================
@@ -20,7 +21,7 @@ import {
 // ============================================================================
 
 export const mockRestaurant: Restaurant = {
-  _id: '507f1f77bcf86cd799439011' as unknown as string,
+  _id: new ObjectId('507f1f77bcf86cd799439011'),
   googlePlaceId: 'ChIJN1t_tDeuEmsRUsoyG83frY4',
   name: 'Test Restaurant',
   address: '123 Test Street, Test City, TC 12345',
@@ -45,7 +46,7 @@ export const mockRestaurant: Restaurant = {
 };
 
 export const mockRestaurant2: Restaurant = {
-  _id: '507f1f77bcf86cd799439012' as unknown as string,
+  _id: new ObjectId('507f1f77bcf86cd799439012'),
   googlePlaceId: 'ChIJN1t_tDeuEmsRUsoyG83frY5',
   name: 'Test Restaurant 2',
   address: '456 Test Avenue, Test City, TC 12345',
@@ -75,23 +76,39 @@ export const mockRestaurants: Restaurant[] = [mockRestaurant, mockRestaurant2];
 // ============================================================================
 
 export const mockUser: User = {
-  _id: '507f1f77bcf86cd799439013' as unknown as string,
+  _id: new ObjectId('507f1f77bcf86cd799439013'),
   clerkId: 'user_123',
   email: 'test@example.com',
   name: 'Test User',
   profilePicture: 'https://example.com/avatar.jpg',
   city: 'Test City',
+  smsOptIn: false,
+  preferences: {
+    notificationSettings: {
+      groupDecisions: true,
+      friendRequests: true,
+      groupInvites: true,
+    },
+  },
   createdAt: new Date('2024-01-01T00:00:00.000Z'),
   updatedAt: new Date('2024-01-01T00:00:00.000Z'),
 };
 
 export const mockUser2: User = {
-  _id: '507f1f77bcf86cd799439014' as unknown as string,
+  _id: new ObjectId('507f1f77bcf86cd799439014'),
   clerkId: 'user_456',
   email: 'test2@example.com',
   name: 'Test User 2',
   profilePicture: 'https://example.com/avatar2.jpg',
   city: 'Test City 2',
+  smsOptIn: true,
+  preferences: {
+    notificationSettings: {
+      groupDecisions: false,
+      friendRequests: true,
+      groupInvites: false,
+    },
+  },
   createdAt: new Date('2024-01-01T00:00:00.000Z'),
   updatedAt: new Date('2024-01-01T00:00:00.000Z'),
 };
@@ -103,7 +120,7 @@ export const mockUsers: User[] = [mockUser, mockUser2];
 // ============================================================================
 
 export const mockCollection: Collection = {
-  _id: '507f1f77bcf86cd799439015' as unknown as string,
+  _id: new ObjectId('507f1f77bcf86cd799439015'),
   name: 'Test Collection',
   description: 'A test collection for restaurants',
   type: 'personal' as const,
@@ -114,7 +131,7 @@ export const mockCollection: Collection = {
 };
 
 export const mockCollection2: Collection = {
-  _id: '507f1f77bcf86cd799439016' as unknown as string,
+  _id: new ObjectId('507f1f77bcf86cd799439016'),
   name: 'Test Collection 2',
   description: 'Another test collection',
   type: 'personal' as const,
@@ -131,7 +148,7 @@ export const mockCollections: Collection[] = [mockCollection, mockCollection2];
 // ============================================================================
 
 export const mockGroup: Group = {
-  _id: '507f1f77bcf86cd799439017' as unknown as string,
+  _id: new ObjectId('507f1f77bcf86cd799439017'),
   name: 'Test Group',
   description: 'A test group for restaurant decisions',
   adminIds: [mockUser._id],
@@ -148,10 +165,10 @@ export const mockGroups: Group[] = [mockGroup];
 // ============================================================================
 
 export const mockDecision: Decision = {
-  _id: '507f1f77bcf86cd799439018' as unknown as string,
+  _id: new ObjectId('507f1f77bcf86cd799439018'),
   type: 'personal' as const,
   collectionId: mockCollection._id,
-  userId: mockUser._id,
+  participants: [mockUser.clerkId],
   method: 'random' as const,
   status: 'completed' as const,
   deadline: new Date('2024-01-02T00:00:00.000Z'),
@@ -171,8 +188,8 @@ export const mockDecisions: Decision[] = [mockDecision];
 // FRIEND REQUEST MOCK DATA
 // ============================================================================
 
-export const mockFriendRequest: FriendRequest = {
-  _id: '507f1f77bcf86cd799439019' as unknown as string,
+export const mockFriendRequest: Friendship = {
+  _id: new ObjectId('507f1f77bcf86cd799439019'),
   requesterId: mockUser._id,
   addresseeId: mockUser2._id,
   status: 'pending' as const,
@@ -180,7 +197,7 @@ export const mockFriendRequest: FriendRequest = {
   updatedAt: new Date('2024-01-01T00:00:00.000Z'),
 };
 
-export const mockFriendRequests: FriendRequest[] = [mockFriendRequest];
+export const mockFriendRequests: Friendship[] = [mockFriendRequest];
 
 // ============================================================================
 // GOOGLE PLACES API MOCK DATA
@@ -261,15 +278,15 @@ export const mockPerformanceMetrics = {
 // ============================================================================
 
 /**
- * Creates a mock ObjectId string
+ * Creates a mock ObjectId for testing
  */
-export const createMockObjectId = (): string => {
-  return (
+export const createMockObjectId = (): ObjectId => {
+  const hex =
     '507f1f77bcf86cd7994390' +
     Math.floor(Math.random() * 1000)
       .toString()
-      .padStart(3, '0')
-  );
+      .padStart(3, '0');
+  return new ObjectId(hex);
 };
 
 /**
@@ -287,7 +304,7 @@ export const createMockRestaurant = (
 ): Restaurant => {
   return {
     ...mockRestaurant,
-    _id: createMockObjectId() as unknown as string,
+    _id: createMockObjectId(),
     ...overrides,
   };
 };
@@ -298,7 +315,7 @@ export const createMockRestaurant = (
 export const createMockUser = (overrides: Partial<User> = {}): User => {
   return {
     ...mockUser,
-    _id: createMockObjectId() as unknown as string,
+    _id: createMockObjectId(),
     ...overrides,
   };
 };
@@ -311,7 +328,7 @@ export const createMockCollection = (
 ): Collection => {
   return {
     ...mockCollection,
-    _id: createMockObjectId() as unknown as string,
+    _id: createMockObjectId(),
     ...overrides,
   };
 };
