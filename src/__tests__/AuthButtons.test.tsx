@@ -1,0 +1,124 @@
+import { render, screen } from '@testing-library/react';
+import { AuthButtons } from '@/components/auth/AuthButtons';
+
+// Mock Next.js router
+jest.mock('next/navigation', () => ({
+  useRouter: jest.fn(),
+}));
+
+// Mock Clerk components
+jest.mock('@clerk/nextjs', () => ({
+  SignInButton: ({ children, mode }: any) => (
+    <div data-testid="clerk-signin" data-mode={mode}>
+      {children}
+    </div>
+  ),
+  SignUpButton: ({ children, mode }: any) => (
+    <div data-testid="clerk-signup" data-mode={mode}>
+      {children}
+    </div>
+  ),
+}));
+
+// Mock Button component
+jest.mock('@/components/ui/Button', () => ({
+  Button: ({ children, className, variant, size }: any) => (
+    <button
+      className={className}
+      data-testid={`button-${variant || 'default'}-${size || 'default'}`}
+    >
+      {children}
+    </button>
+  ),
+}));
+
+describe('AuthButtons', () => {
+  // Mock window.location for development detection
+  const mockLocation = {
+    hostname: 'localhost',
+  };
+
+  beforeEach(() => {
+    Object.defineProperty(window, 'location', {
+      value: mockLocation,
+      writable: true,
+    });
+  });
+
+  it('renders Clerk modals in development mode', () => {
+    render(<AuthButtons />);
+
+    expect(screen.getByTestId('clerk-signup')).toBeInTheDocument();
+    expect(screen.getByTestId('clerk-signin')).toBeInTheDocument();
+    expect(screen.getByTestId('clerk-signup')).toHaveAttribute(
+      'data-mode',
+      'modal'
+    );
+    expect(screen.getByTestId('clerk-signin')).toHaveAttribute(
+      'data-mode',
+      'modal'
+    );
+  });
+
+  it('renders default buttons in development mode', () => {
+    render(<AuthButtons />);
+
+    expect(screen.getByText('Get Started')).toBeInTheDocument();
+    expect(screen.getByText('Sign In')).toBeInTheDocument();
+    expect(screen.getByTestId('button-default-lg')).toBeInTheDocument();
+    expect(screen.getByTestId('button-outline-lg')).toBeInTheDocument();
+  });
+
+  it('wraps children in Clerk SignUpButton in development mode', () => {
+    render(
+      <AuthButtons>
+        <button>Custom Button</button>
+      </AuthButtons>
+    );
+
+    expect(screen.getByTestId('clerk-signup')).toBeInTheDocument();
+    expect(screen.getByText('Custom Button')).toBeInTheDocument();
+  });
+
+  it('applies custom className', () => {
+    render(<AuthButtons className="custom-class" />);
+
+    const container = screen.getByTestId('clerk-signup').parentElement;
+    expect(container).toHaveClass('custom-class');
+  });
+});
+
+describe('AuthButtons Production Mode', () => {
+  // Mock window.location for production detection
+  const mockLocation = {
+    hostname: 'you-hungry.vercel.app',
+  };
+
+  beforeEach(() => {
+    Object.defineProperty(window, 'location', {
+      value: mockLocation,
+      writable: true,
+    });
+  });
+
+  it('renders custom auth pages in production mode', () => {
+    render(<AuthButtons />);
+
+    const getStartedLink = screen.getByText('Get Started').closest('a');
+    const signInLink = screen.getByText('Sign In').closest('a');
+
+    expect(getStartedLink).toHaveAttribute('href', '/sign-up');
+    expect(signInLink).toHaveAttribute('href', '/sign-in');
+  });
+
+  it('wraps children in sign-up link in production mode', () => {
+    render(
+      <AuthButtons>
+        <button>Custom Button</button>
+      </AuthButtons>
+    );
+
+    const link = screen.getByText('Custom Button').closest('a');
+    expect(link).toHaveAttribute('href', '/sign-up');
+  });
+});
