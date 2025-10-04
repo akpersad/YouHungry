@@ -23,10 +23,19 @@ export async function getCurrentUser(): Promise<User | null> {
         name: 'User', // Placeholder for development
         smsOptIn: false,
         preferences: {
+          locationSettings: {
+            city: undefined,
+            state: undefined,
+            country: undefined,
+            timezone: undefined,
+          },
           notificationSettings: {
             groupDecisions: true,
             friendRequests: true,
             groupInvites: true,
+            smsEnabled: false,
+            emailEnabled: true,
+            pushEnabled: true,
           },
         },
       });

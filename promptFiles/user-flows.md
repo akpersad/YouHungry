@@ -4,23 +4,44 @@ This document outlines the major user journeys and flows for the You Hungry? app
 
 ## 1. Registration & Onboarding Flow
 
-### 1.1 New User Registration
+### 1.1 New User Registration (UPDATED ✅ IMPLEMENTED)
 
 1. **Landing Page** → User clicks "Sign Up"
-2. **Registration Page** → User enters email, password, name
-3. **SMS Opt-in Prompt** → User can toggle SMS notifications (default: off)
-4. **Location Permission** → User grants/denies location access
-5. **Redirect to Dashboard** → User sees empty state with "Create Your First Collection" CTA
+2. **Custom Registration Page** → User sees app benefits explanation and registration form
+3. **App Benefits Display** → Clear explanation of features and value proposition
+4. **SMS Benefits Info** → Highlighted SMS notification benefits with opt-in explanation
+5. **Clerk Registration** → User enters email, password, name, and phone number
+6. **SMS Opt-in Toggle** → User can toggle SMS notifications (default: off)
+7. **Location Preferences** → User can set city, state, and location settings
+8. **Redirect to Dashboard** → User sees empty state with "Create Your First Collection" CTA
 
-Notes: Love it
+**Key Features Implemented**:
 
-### 1.2 Returning User Login
+- Custom sign-up page at `/sign-up` route with app benefits explanation
+- SMS notification benefits highlighted with opt-in explanation
+- Mobile responsive design optimized for mobile devices
+- Seamless Clerk integration with custom appearance
+- Enhanced user schema with phone number and location preferences
+
+Notes: ✅ COMPLETED - Custom registration flow with phone support and SMS opt-in
+
+### 1.2 Returning User Login (UPDATED ✅ IMPLEMENTED)
 
 1. **Landing Page** → User clicks "Sign In"
-2. **Login Page** → User enters credentials
-3. **Redirect to Dashboard** → User sees their collections and recent activity
+2. **Custom Login Page** → User sees consistent branding and sign-in form
+3. **Clerk Sign-in** → User enters credentials with configured appearance
+4. **Back Navigation** → User can navigate back to home page
+5. **Redirect to Dashboard** → User sees their collections and recent activity
 
-Notes: Love it
+**Key Features Implemented**:
+
+- Custom sign-in page at `/sign-in` route with consistent branding
+- Updated SignInButton to redirect to custom pages instead of modal
+- Clerk appearance configured to match app design system
+- Back to home navigation from auth pages
+- Mobile responsive design
+
+Notes: ✅ COMPLETED - Custom login page replacing Clerk modal
 
 ## 2. Personal Collection Management
 

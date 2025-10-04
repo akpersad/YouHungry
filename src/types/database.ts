@@ -7,15 +7,26 @@ export interface User {
   name: string;
   username?: string;
   city?: string;
+  state?: string;
   profilePicture?: string;
   smsOptIn: boolean;
   smsPhoneNumber?: string;
+  phoneNumber?: string; // Clerk phone number
   preferences: {
     defaultLocation?: string;
+    locationSettings: {
+      city?: string;
+      state?: string;
+      country?: string;
+      timezone?: string;
+    };
     notificationSettings: {
       groupDecisions: boolean;
       friendRequests: boolean;
       groupInvites: boolean;
+      smsEnabled: boolean;
+      emailEnabled: boolean;
+      pushEnabled: boolean;
     };
   };
   createdAt: Date;

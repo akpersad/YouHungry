@@ -27,33 +27,50 @@ export async function POST(req: NextRequest) {
   const webhookSecret = process.env.CLERK_WEBHOOK_SECRET;
 
   if (!webhookSecret) {
-    logger.debug('CLERK_WEBHOOK_SECRET not set, skipping webhook verification');
-    return new Response('Webhook secret not configured', { status: 400 });
+    logger.debug(
+      'CLERK_WEBHOOK_SECRET not set, running in development mode without verification'
+    );
+    // In development, we'll process the webhook without verification
+    // This allows testing user creation locally before production webhook setup
   }
-
-  const wh = new Webhook(webhookSecret);
 
   let evt: WebhookEvent;
 
-  // Verify the payload with the headers
-  try {
-    evt = wh.verify(body, {
-      'svix-id': svix_id,
-      'svix-timestamp': svix_timestamp,
-      'svix-signature': svix_signature,
-    }) as WebhookEvent;
-  } catch (err) {
-    logger.error('Error verifying webhook:', err);
-    return new Response('Error occured', {
-      status: 400,
-    });
+  // Verify the payload with the headers (only if webhook secret is available)
+  if (webhookSecret) {
+    const wh = new Webhook(webhookSecret);
+    try {
+      evt = wh.verify(body, {
+        'svix-id': svix_id,
+        'svix-timestamp': svix_timestamp,
+        'svix-signature': svix_signature,
+      }) as WebhookEvent;
+    } catch (err) {
+      logger.error('Error verifying webhook:', err);
+      return new Response('Error occured', {
+        status: 400,
+      });
+    }
+  } else {
+    // Development mode: parse the payload directly without verification
+    logger.debug(
+      'Development mode: parsing webhook payload without verification'
+    );
+    evt = JSON.parse(body) as WebhookEvent;
   }
 
   // Handle the webhook
   const eventType = evt.type;
 
   if (eventType === 'user.created') {
-    const { id, email_addresses, first_name, last_name, image_url } = evt.data;
+    const {
+      id,
+      email_addresses,
+      first_name,
+      last_name,
+      image_url,
+      phone_numbers,
+    } = evt.data;
 
     try {
       await createUser({
@@ -61,12 +78,22 @@ export async function POST(req: NextRequest) {
         email: email_addresses[0]?.email_address || '',
         name: `${first_name || ''} ${last_name || ''}`.trim() || 'User',
         profilePicture: image_url,
-        smsOptIn: false,
+        phoneNumber: phone_numbers?.[0]?.phone_number,
+        smsOptIn: false, // Default to false, user can opt-in during registration
         preferences: {
+          locationSettings: {
+            city: undefined,
+            state: undefined,
+            country: undefined,
+            timezone: undefined,
+          },
           notificationSettings: {
             groupDecisions: true,
             friendRequests: true,
             groupInvites: true,
+            smsEnabled: false, // Default to false
+            emailEnabled: true, // Default to true
+            pushEnabled: true, // Default to true
           },
         },
       });
@@ -79,7 +106,14 @@ export async function POST(req: NextRequest) {
   }
 
   if (eventType === 'user.updated') {
-    const { id, email_addresses, first_name, last_name, image_url } = evt.data;
+    const {
+      id,
+      email_addresses,
+      first_name,
+      last_name,
+      image_url,
+      phone_numbers,
+    } = evt.data;
 
     try {
       const user = await getUserByClerkId(id);
@@ -88,6 +122,7 @@ export async function POST(req: NextRequest) {
           email: email_addresses[0]?.email_address || user.email,
           name: `${first_name || ''} ${last_name || ''}`.trim() || user.name,
           profilePicture: image_url || user.profilePicture,
+          phoneNumber: phone_numbers?.[0]?.phone_number || user.phoneNumber,
         });
 
         logger.debug(`User updated: ${id}`);

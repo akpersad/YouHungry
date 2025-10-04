@@ -69,7 +69,7 @@ This document outlines the technical architecture, technology stack, and impleme
 
 ### Collections Structure
 
-#### Users Collection
+#### Users Collection (UPDATED ✅ IMPLEMENTED)
 
 ```typescript
 interface User {
@@ -77,13 +77,24 @@ interface User {
   clerkId: string;
   email: string;
   name: string;
+  username?: string; // Added for friend search functionality
+  phoneNumber?: string; // Added for Clerk phone authentication
   city?: string;
+  state?: string; // Added for location preferences
   profilePicture?: string;
   smsOptIn: boolean;
   smsPhoneNumber?: string;
   preferences: {
     defaultLocation?: string;
+    locationSettings?: {
+      city?: string;
+      state?: string;
+      country?: string;
+    };
     notificationSettings: {
+      sms: boolean; // Enhanced SMS settings
+      email: boolean; // Added email notifications
+      push: boolean; // Added push notifications
       groupDecisions: boolean;
       friendRequests: boolean;
       groupInvites: boolean;
@@ -93,6 +104,14 @@ interface User {
   updatedAt: Date;
 }
 ```
+
+**Key Schema Updates Implemented**:
+
+- Added `phoneNumber` field for Clerk phone authentication
+- Added `username` field for friend search functionality
+- Enhanced location preferences with `state` field
+- Extended notification settings with SMS, email, and push options
+- Added structured location settings for better user preferences
 
 #### Restaurants Collection
 
@@ -279,12 +298,20 @@ type Decision {
 
 #### REST API Routes (Simple Operations)
 
-##### Authentication Routes
+##### Authentication Routes (UPDATED ✅ IMPLEMENTED)
 
-- `POST /api/auth/register` - User registration
-- `POST /api/auth/login` - User login
-- `GET /api/auth/profile` - Get user profile
-- `PUT /api/auth/profile` - Update user profile
+- `POST /api/webhooks/clerk` - Clerk webhook for user creation/updates with phone number handling
+- `GET /api/user/current` - Get current user's MongoDB ObjectId
+- `GET /api/user/profile` - Get user profile (via Clerk)
+- `PUT /api/user/profile` - Update user profile (via Clerk)
+
+**Key Authentication Updates Implemented**:
+
+- Enhanced Clerk webhook to capture phone numbers from registration
+- User creation with new fields and proper defaults
+- User update handling includes phone number changes
+- Comprehensive error handling for webhook operations
+- Middleware updates to handle new auth routes (`/sign-in`, `/sign-up`)
 
 ##### Collections Routes (CRUD Operations)
 
@@ -629,6 +656,9 @@ The following environment variables are configured and ready for use:
 - ✅ **All required environment variables are configured**
 - ✅ **Database connection tested and verified**
 - ✅ **API endpoints tested with configured variables**
+- ✅ **Custom authentication pages implemented and tested**
+- ✅ **Clerk webhook configured for user sync**
+- ✅ **Enhanced user schema deployed**
 - ✅ **Ready for development and testing**
 
 ## 🔒 Security Considerations
