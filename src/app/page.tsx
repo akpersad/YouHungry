@@ -7,6 +7,7 @@ import {
   CardTitle,
 } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { AuthButtons } from '@/components/auth/AuthButtons';
 
 export default function Home() {
   return (
@@ -28,16 +29,7 @@ export default function Home() {
             smart decision engine help you and your friends choose the perfect
             restaurant every time.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="/dashboard">
-              <Button size="lg" className="w-full sm:w-auto">
-                Get Started
-              </Button>
-            </a>
-            <Button variant="outline" size="lg" className="w-full sm:w-auto">
-              Learn More
-            </Button>
-          </div>
+          <AuthButtons />
         </div>
 
         {/* Features Section */}
@@ -117,7 +109,9 @@ export default function Home() {
             Join thousands of people who have already simplified their dining
             decisions.
           </p>
-          <Button size="lg">Start Your First Collection</Button>
+          <div className="text-center">
+            <AuthButtons />
+          </div>
         </div>
 
         {/* Developer Tools Section */}

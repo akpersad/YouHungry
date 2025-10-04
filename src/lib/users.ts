@@ -38,9 +38,11 @@ export async function updateUser(
       | 'email'
       | 'name'
       | 'city'
+      | 'state'
       | 'profilePicture'
       | 'smsOptIn'
       | 'smsPhoneNumber'
+      | 'phoneNumber'
       | 'preferences'
     >
   >

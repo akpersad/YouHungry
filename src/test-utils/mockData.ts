@@ -84,10 +84,19 @@ export const mockUser: User = {
   city: 'Test City',
   smsOptIn: false,
   preferences: {
+    locationSettings: {
+      city: 'Test City',
+      state: 'Test State',
+      country: 'US',
+      timezone: 'America/New_York',
+    },
     notificationSettings: {
       groupDecisions: true,
       friendRequests: true,
       groupInvites: true,
+      smsEnabled: false,
+      emailEnabled: true,
+      pushEnabled: true,
     },
   },
   createdAt: new Date('2024-01-01T00:00:00.000Z'),
@@ -103,10 +112,19 @@ export const mockUser2: User = {
   city: 'Test City 2',
   smsOptIn: true,
   preferences: {
+    locationSettings: {
+      city: 'Test City 2',
+      state: 'Test State 2',
+      country: 'US',
+      timezone: 'America/Los_Angeles',
+    },
     notificationSettings: {
       groupDecisions: false,
       friendRequests: true,
       groupInvites: false,
+      smsEnabled: true,
+      emailEnabled: true,
+      pushEnabled: false,
     },
   },
   createdAt: new Date('2024-01-01T00:00:00.000Z'),
