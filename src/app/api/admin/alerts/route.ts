@@ -1,25 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { logger } from '@/lib/logger';
 import { emailNotificationService, AlertData } from '@/lib/email-notifications';
-
-// Alert storage interface (in a real implementation, this would be a database)
-interface StoredAlert extends AlertData {
-  id: string;
-  acknowledged: boolean;
-  acknowledgedBy?: string;
-  acknowledgedAt?: Date;
-  resolved: boolean;
-  resolvedBy?: string;
-  resolvedAt?: Date;
-}
-
-// In-memory alert storage (in production, this would be a database)
-const alertStorage: Map<string, StoredAlert> = new Map();
-
-// Helper function to clear storage (for testing)
-export function clearAlertStorage() {
-  alertStorage.clear();
-}
+import { alertStorage, StoredAlert } from '@/lib/alert-storage';
 
 // GET /api/admin/alerts - Retrieve all alerts
 export async function GET(request: NextRequest) {

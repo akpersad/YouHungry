@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server';
-import { GET, POST, PUT, DELETE, clearAlertStorage } from '../alerts/route';
+import { GET, POST, PUT, DELETE } from '../alerts/route';
+import { clearAlertStorage } from '@/lib/alert-storage';
 
 // Mock logger
 jest.mock('@/lib/logger', () => ({
