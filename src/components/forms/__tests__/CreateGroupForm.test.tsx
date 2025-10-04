@@ -9,6 +9,8 @@ const mockOnClose = jest.fn();
 describe('CreateGroupForm', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    // Make mockOnSubmit return a resolved promise by default to avoid act() warnings
+    mockOnSubmit.mockResolvedValue(undefined);
   });
 
   it('should render form fields', () => {

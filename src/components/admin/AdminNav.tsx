@@ -8,6 +8,8 @@ import {
   Database,
   DollarSign,
   ExternalLink,
+  AlertTriangle,
+  Activity,
 } from 'lucide-react';
 
 interface AdminNavProps {
@@ -17,10 +19,16 @@ interface AdminNavProps {
 
 const adminNavItems = [
   {
+    id: 'performance',
+    title: 'Performance',
+    icon: Activity,
+    description: 'Monitor Core Web Vitals and system performance',
+  },
+  {
     id: 'analytics',
     title: 'Analytics',
     icon: BarChart3,
-    description: 'Monitor app performance metrics',
+    description: 'Monitor app usage analytics',
   },
   {
     id: 'costs',
@@ -45,6 +53,12 @@ const adminNavItems = [
     title: 'Settings',
     icon: Settings,
     description: 'System configuration',
+  },
+  {
+    id: 'alerts',
+    title: 'Alerts',
+    icon: AlertTriangle,
+    description: 'System alerts and notifications',
   },
 ];
 
