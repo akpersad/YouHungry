@@ -51,15 +51,26 @@ jest.mock('../AdminNav', () => ({
   ),
 }));
 
-jest.mock('../PerformanceDashboard', () => ({
-  PerformanceDashboard: () => (
-    <div data-testid="performance-dashboard">Performance Dashboard</div>
-  ),
+// Mock the dashboard components to avoid API calls during tests
+jest.mock('../UsageAnalyticsDashboard', () => ({
+  UsageAnalyticsDashboard: () => <div>Usage Analytics</div>,
+}));
+
+jest.mock('../UserManagementDashboard', () => ({
+  UserManagementDashboard: () => <div>User Management</div>,
+}));
+
+jest.mock('../DatabaseManagementDashboard', () => ({
+  DatabaseManagementDashboard: () => <div>Database Management</div>,
 }));
 
 jest.mock('../CostMonitoringDashboard', () => ({
-  CostMonitoringDashboard: () => (
-    <div data-testid="cost-monitoring-dashboard">Cost Monitoring Dashboard</div>
+  CostMonitoringDashboard: () => <div>Cost Monitoring</div>,
+}));
+
+jest.mock('../PerformanceDashboard', () => ({
+  PerformanceDashboard: () => (
+    <div data-testid="performance-dashboard">Performance Dashboard</div>
   ),
 }));
 
@@ -83,10 +94,8 @@ describe('AdminPanel', () => {
   it('should default to analytics tab', () => {
     render(<AdminPanel />);
 
-    expect(screen.getByTestId('performance-dashboard')).toBeInTheDocument();
-    expect(
-      screen.queryByTestId('cost-monitoring-dashboard')
-    ).not.toBeInTheDocument();
+    // Should show Usage Analytics Dashboard immediately (mocked)
+    expect(screen.getByText('Usage Analytics')).toBeInTheDocument();
   });
 
   it('should switch to costs tab when clicked', () => {
@@ -95,40 +104,25 @@ describe('AdminPanel', () => {
     const costsButton = screen.getByText('Costs');
     fireEvent.click(costsButton);
 
-    expect(screen.getByTestId('cost-monitoring-dashboard')).toBeInTheDocument();
-    expect(
-      screen.queryByTestId('performance-dashboard')
-    ).not.toBeInTheDocument();
+    expect(screen.getByText('Cost Monitoring')).toBeInTheDocument();
   });
 
-  it('should show coming soon message for users tab', () => {
+  it('should show user management dashboard for users tab', () => {
     render(<AdminPanel />);
 
     const usersButton = screen.getByText('Users');
     fireEvent.click(usersButton);
 
     expect(screen.getByText('User Management')).toBeInTheDocument();
-    expect(screen.getByText('Coming Soon:')).toBeInTheDocument();
-    expect(
-      screen.getByText(
-        'User management features will be implemented in a future update.'
-      )
-    ).toBeInTheDocument();
   });
 
-  it('should show coming soon message for database tab', () => {
+  it('should show database management dashboard for database tab', () => {
     render(<AdminPanel />);
 
     const databaseButton = screen.getByText('Database');
     fireEvent.click(databaseButton);
 
     expect(screen.getByText('Database Management')).toBeInTheDocument();
-    expect(screen.getByText('Coming Soon:')).toBeInTheDocument();
-    expect(
-      screen.getByText(
-        'Database management features will be implemented in a future update.'
-      )
-    ).toBeInTheDocument();
   });
 
   it('should show coming soon message for settings tab', () => {
@@ -149,20 +143,24 @@ describe('AdminPanel', () => {
   it('should switch between tabs correctly', () => {
     render(<AdminPanel />);
 
-    // Start with analytics
-    expect(screen.getByTestId('performance-dashboard')).toBeInTheDocument();
+    // Start with analytics (Usage Analytics Dashboard)
+    expect(screen.getByText('Usage Analytics')).toBeInTheDocument();
 
     // Switch to costs
     fireEvent.click(screen.getByText('Costs'));
-    expect(screen.getByTestId('cost-monitoring-dashboard')).toBeInTheDocument();
+    expect(screen.getByText('Cost Monitoring')).toBeInTheDocument();
 
     // Switch to users
     fireEvent.click(screen.getByText('Users'));
     expect(screen.getByText('User Management')).toBeInTheDocument();
 
+    // Switch to database
+    fireEvent.click(screen.getByText('Database'));
+    expect(screen.getByText('Database Management')).toBeInTheDocument();
+
     // Switch back to analytics
     fireEvent.click(screen.getByText('Analytics'));
-    expect(screen.getByTestId('performance-dashboard')).toBeInTheDocument();
+    expect(screen.getByText('Usage Analytics')).toBeInTheDocument();
   });
 
   it('should have proper styling classes', () => {

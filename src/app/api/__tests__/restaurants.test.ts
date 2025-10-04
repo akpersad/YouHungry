@@ -76,10 +76,12 @@ describe('/api/restaurants POST', () => {
     expect(mockGetRestaurantDetails).toHaveBeenCalledWith(
       mockRestaurantData.googlePlaceId
     );
+    expect(mockGetRestaurantDetails).toHaveBeenCalledTimes(1);
     expect(mockAddRestaurantToCollection).toHaveBeenCalledWith(
       '507f1f77bcf86cd799439011',
       mockRestaurant._id
     );
+    expect(mockAddRestaurantToCollection).toHaveBeenCalledTimes(1);
   });
 
   it('should create new restaurant and add to collection', async () => {

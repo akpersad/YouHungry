@@ -2,44 +2,33 @@
 
 import { useState } from 'react';
 import { AdminNav } from './AdminNav';
-import { PerformanceDashboard } from './PerformanceDashboard';
+// import { PerformanceDashboard } from './PerformanceDashboard';
 import { CostMonitoringDashboard } from './CostMonitoringDashboard';
+import { UserManagementDashboard } from './UserManagementDashboard';
+import { DatabaseManagementDashboard } from './DatabaseManagementDashboard';
+import { UsageAnalyticsDashboard } from './UsageAnalyticsDashboard';
 
 type AdminTab = 'analytics' | 'costs' | 'users' | 'database' | 'settings';
 
 export function AdminPanel() {
   const [activeTab, setActiveTab] = useState<AdminTab>('analytics');
+  // const [cacheBuster, setCacheBuster] = useState(Date.now());
+
+  // Add cache busting when component mounts or tab changes
+  // useEffect(() => {
+  //   setCacheBuster(Date.now());
+  // }, [activeTab]);
 
   const renderTabContent = () => {
     switch (activeTab) {
       case 'analytics':
-        return <PerformanceDashboard />;
+        return <UsageAnalyticsDashboard />;
       case 'costs':
         return <CostMonitoringDashboard />;
       case 'users':
-        return (
-          <div className="p-6">
-            <h2 className="text-2xl font-bold mb-4">User Management</h2>
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-              <p className="text-yellow-800">
-                <strong>Coming Soon:</strong> User management features will be
-                implemented in a future update.
-              </p>
-            </div>
-          </div>
-        );
+        return <UserManagementDashboard />;
       case 'database':
-        return (
-          <div className="p-6">
-            <h2 className="text-2xl font-bold mb-4">Database Management</h2>
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-              <p className="text-yellow-800">
-                <strong>Coming Soon:</strong> Database management features will
-                be implemented in a future update.
-              </p>
-            </div>
-          </div>
-        );
+        return <DatabaseManagementDashboard />;
       case 'settings':
         return (
           <div className="p-6">
@@ -53,7 +42,7 @@ export function AdminPanel() {
           </div>
         );
       default:
-        return <PerformanceDashboard />;
+        return <UsageAnalyticsDashboard />;
     }
   };
 

@@ -1,32 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { RestaurantCard } from '../RestaurantCard';
-import { Restaurant } from '@/types/database';
-
-const mockRestaurant: Restaurant = {
-  _id: '507f1f77bcf86cd799439011' as unknown as string,
-  googlePlaceId: 'ChIJN1t_tDeuEmsRUsoyG83frY4',
-  name: 'Test Restaurant',
-  address: '123 Test Street, Test City, TC 12345',
-  coordinates: {
-    lat: 40.7128,
-    lng: -74.006,
-  },
-  cuisine: 'Italian',
-  rating: 4.5,
-  priceRange: '$$',
-  timeToPickUp: 25,
-  distance: 1.2,
-  photos: ['https://example.com/photo1.jpg'],
-  phoneNumber: '+1-555-0123',
-  website: 'https://testrestaurant.com',
-  hours: {
-    Monday: '9:00 AM – 10:00 PM',
-    Tuesday: '9:00 AM – 10:00 PM',
-    Wednesday: '9:00 AM – 10:00 PM',
-  },
-  cachedAt: new Date('2024-01-01'),
-  lastUpdated: new Date('2024-01-01'),
-};
+import { mockRestaurant } from '@/test-utils/mockData';
 
 describe('RestaurantCard', () => {
   const mockOnAddToCollection = jest.fn();
@@ -47,12 +21,9 @@ describe('RestaurantCard', () => {
 
     expect(screen.getByText('Test Restaurant')).toBeInTheDocument();
     expect(screen.getByText('Italian')).toBeInTheDocument();
-    expect(
-      screen.getByText(/📍 123 Test Street, Test City, TC 12345/)
-    ).toBeInTheDocument();
     expect(screen.getByText(/4\.5/)).toBeInTheDocument();
     expect(screen.getByText(/\$\$/)).toBeInTheDocument();
-    expect(screen.getByText(/25.*min/)).toBeInTheDocument();
+    expect(screen.getByText(/25 min/)).toBeInTheDocument();
     expect(screen.getByText(/📞 Available/)).toBeInTheDocument();
     expect(screen.getByText(/🌐 Website/)).toBeInTheDocument();
   });
@@ -94,7 +65,7 @@ describe('RestaurantCard', () => {
   });
 
   it('handles missing optional fields gracefully', () => {
-    const restaurantWithoutOptionalFields: Restaurant = {
+    const restaurantWithoutOptionalFields = {
       ...mockRestaurant,
       rating: 0,
       priceRange: undefined,

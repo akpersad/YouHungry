@@ -319,8 +319,7 @@ _These stories should be worked on together as they share configuration patterns
    - **Unit test system settings components and configuration**
 
 6. **Admin Alert System Implementation**
-   - Set up Twilio SMS alerts for cost spikes and system issues
-   - Implement email notifications for admin events
+   - Implement email notifications for admin events (We've decided to use Resend as the service provider for emails)
    - Add real-time monitoring for API failures and circuit breakers
    - Configure threshold-based alerts for performance degradation
    - Set up emergency contact system for critical issues
