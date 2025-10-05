@@ -126,3 +126,36 @@ export interface GroupInvitation {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export interface InAppNotification {
+  _id: ObjectId;
+  userId: ObjectId; // Recipient user ID
+  type:
+    | 'group_decision'
+    | 'friend_request'
+    | 'group_invitation'
+    | 'decision_result'
+    | 'admin_alert';
+  title: string;
+  message: string;
+  data?: {
+    groupId?: ObjectId;
+    decisionId?: ObjectId;
+    requesterId?: ObjectId;
+    inviterId?: ObjectId;
+    restaurantId?: ObjectId;
+    [key: string]: unknown;
+  };
+  read: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface ShortUrl {
+  _id: ObjectId;
+  originalUrl: string;
+  shortCode: string;
+  createdAt: Date;
+  expiresAt?: Date;
+  clickCount: number;
+}
