@@ -13,6 +13,11 @@ const isUsingTurbopack =
 const nextConfig: NextConfig = {
   outputFileTracingRoot: __dirname,
 
+  // ESLint configuration - ignore errors during build for performance collection
+  eslint: {
+    ignoreDuringBuilds: process.env.ESLINT_NO_DEV_ERRORS === 'true',
+  },
+
   // Performance optimizations
   experimental: {
     optimizeCss: true,
