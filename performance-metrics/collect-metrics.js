@@ -63,10 +63,11 @@ function collectBundleSizeMetrics() {
 
   try {
     // Run Next.js build with bundle analyzer using webpack (not turbopack)
+    // Ignore ESLint errors for performance collection
     const buildOutput = execSync('npm run build:webpack', {
       encoding: 'utf8',
       cwd: process.cwd(),
-      env: { ...process.env, ANALYZE: 'true' },
+      env: { ...process.env, ANALYZE: 'true', ESLINT_NO_DEV_ERRORS: 'true' },
     });
 
     // Extract bundle size information from build output
@@ -114,6 +115,7 @@ function collectBuildTimeMetrics() {
       encoding: 'utf8',
       cwd: process.cwd(),
       stdio: 'pipe',
+      env: { ...process.env, ESLINT_NO_DEV_ERRORS: 'true' },
     });
     const endTime = Date.now();
 
