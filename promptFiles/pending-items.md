@@ -82,7 +82,7 @@ This document tracks all planned items that are not yet started, organized by ca
 - [ ] Implement tiered choice system for groups
 - [ ] Create random selection for groups
 - [ ] Build decision management and timeouts
-- [ ] Add group decision notifications
+- [x] Add group decision notifications ✅ COMPLETED
 - [ ] Set up GraphQL subscriptions for real-time decision updates
 - [ ] Implement GraphQL mutations for vote submission
 - [ ] Add real-time voting progress tracking
@@ -103,7 +103,7 @@ This document tracks all planned items that are not yet started, organized by ca
 
 ### Advanced Features
 
-- [ ] Implement SMS notifications with Twilio
+- [x] Implement SMS notifications with Twilio ✅ COMPLETED
 - [ ] Create comprehensive analytics dashboard
 - [ ] Add decision history and insights
 - [ ] Build recommendation system
@@ -118,7 +118,7 @@ This document tracks all planned items that are not yet started, organized by ca
 - [ ] Implement GraphQL error handling and retry logic
 - [ ] Add GraphQL query complexity analysis
 - [ ] Create GraphQL performance monitoring
-- [ ] Implement user feedback system with toast notifications
+- [x] Implement user feedback system with toast notifications ✅ COMPLETED
 
 ### Future Enhancements
 
@@ -140,7 +140,7 @@ This document tracks all planned items that are not yet started, organized by ca
 - [ ] Advanced analytics and insights
 - [ ] Restaurant rating and review system
 - [ ] Integration with calendar apps
-- [ ] Location-based push notifications
+- [x] Location-based push notifications ✅ COMPLETED
 
 ### Technical Improvements
 
