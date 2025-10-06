@@ -85,12 +85,82 @@ export function usePushNotifications() {
     }
   }, []);
 
+  // Send group decision notification
+  const sendGroupDecisionNotification = useCallback(
+    async (
+      groupName: string,
+      decisionType: 'tiered' | 'random',
+      deadline: Date
+    ): Promise<void> => {
+      try {
+        await pushNotifications.sendGroupDecisionNotification(
+          groupName,
+          decisionType,
+          deadline
+        );
+      } catch (error) {
+        logger.error('Failed to send group decision notification:', error);
+        throw error;
+      }
+    },
+    []
+  );
+
+  // Send friend request notification
+  const sendFriendRequestNotification = useCallback(
+    async (requesterName: string): Promise<void> => {
+      try {
+        await pushNotifications.sendFriendRequestNotification(requesterName);
+      } catch (error) {
+        logger.error('Failed to send friend request notification:', error);
+        throw error;
+      }
+    },
+    []
+  );
+
+  // Send group invitation notification
+  const sendGroupInvitationNotification = useCallback(
+    async (groupName: string, inviterName: string): Promise<void> => {
+      try {
+        await pushNotifications.sendGroupInvitationNotification(
+          groupName,
+          inviterName
+        );
+      } catch (error) {
+        logger.error('Failed to send group invitation notification:', error);
+        throw error;
+      }
+    },
+    []
+  );
+
+  // Send decision result notification
+  const sendDecisionResultNotification = useCallback(
+    async (groupName: string, restaurantName: string): Promise<void> => {
+      try {
+        await pushNotifications.sendDecisionResultNotification(
+          groupName,
+          restaurantName
+        );
+      } catch (error) {
+        logger.error('Failed to send decision result notification:', error);
+        throw error;
+      }
+    },
+    []
+  );
+
   return {
     status,
     loading,
     subscribe,
     unsubscribe,
     sendTestNotification,
+    sendGroupDecisionNotification,
+    sendFriendRequestNotification,
+    sendGroupInvitationNotification,
+    sendDecisionResultNotification,
     refresh: checkStatus,
   };
 }

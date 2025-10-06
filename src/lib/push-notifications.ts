@@ -204,6 +204,180 @@ export class PushNotificationManager {
   }
 
   /**
+   * Send group decision notification
+   */
+  async sendGroupDecisionNotification(
+    groupName: string,
+    decisionType: 'tiered' | 'random',
+    deadline: Date
+  ): Promise<void> {
+    if (!this.isSupported()) {
+      logger.warn('Push notifications not supported');
+      return;
+    }
+
+    const permission = this.getPermissionStatus();
+    if (permission !== 'granted') {
+      logger.warn('Push notification permission not granted');
+      return;
+    }
+
+    // const typeText = decisionType === 'tiered' ? 'voting' : 'random selection';
+    const message =
+      decisionType === 'tiered'
+        ? `🍽️ ${groupName} has started a group decision! Cast your vote by ${deadline.toLocaleDateString()} at ${deadline.toLocaleTimeString()}.`
+        : `🎲 ${groupName} has started a random selection! The decision will be made at ${deadline.toLocaleDateString()} at ${deadline.toLocaleTimeString()}.`;
+
+    const notification = new Notification(`${groupName} Decision Started`, {
+      body: message,
+      icon: '/icons/icon-192x192.svg',
+      badge: '/icons/icon-72x72.svg',
+      tag: `group-decision-${groupName}`,
+      requireInteraction: true,
+      data: {
+        type: 'group_decision',
+        groupName,
+        decisionType,
+        deadline: deadline.toISOString(),
+      },
+    });
+
+    notification.onclick = () => {
+      // Navigate to the group page
+      window.focus();
+      window.location.href = '/groups';
+      notification.close();
+    };
+
+    // Auto-close after 10 seconds if not interacted with
+    setTimeout(() => {
+      notification.close();
+    }, 10000);
+  }
+
+  /**
+   * Send friend request notification
+   */
+  async sendFriendRequestNotification(requesterName: string): Promise<void> {
+    if (!this.isSupported()) {
+      logger.warn('Push notifications not supported');
+      return;
+    }
+
+    const permission = this.getPermissionStatus();
+    if (permission !== 'granted') {
+      logger.warn('Push notification permission not granted');
+      return;
+    }
+
+    const notification = new Notification('New Friend Request', {
+      body: `${requesterName} sent you a friend request!`,
+      icon: '/icons/icon-192x192.svg',
+      badge: '/icons/icon-72x72.svg',
+      tag: `friend-request-${requesterName}`,
+      requireInteraction: true,
+      data: {
+        type: 'friend_request',
+        requesterName,
+      },
+    });
+
+    notification.onclick = () => {
+      window.focus();
+      window.location.href = '/friends';
+      notification.close();
+    };
+
+    setTimeout(() => {
+      notification.close();
+    }, 8000);
+  }
+
+  /**
+   * Send group invitation notification
+   */
+  async sendGroupInvitationNotification(
+    groupName: string,
+    inviterName: string
+  ): Promise<void> {
+    if (!this.isSupported()) {
+      logger.warn('Push notifications not supported');
+      return;
+    }
+
+    const permission = this.getPermissionStatus();
+    if (permission !== 'granted') {
+      logger.warn('Push notification permission not granted');
+      return;
+    }
+
+    const notification = new Notification('Group Invitation', {
+      body: `${inviterName} invited you to join "${groupName}"!`,
+      icon: '/icons/icon-192x192.svg',
+      badge: '/icons/icon-72x72.svg',
+      tag: `group-invitation-${groupName}`,
+      requireInteraction: true,
+      data: {
+        type: 'group_invitation',
+        groupName,
+        inviterName,
+      },
+    });
+
+    notification.onclick = () => {
+      window.focus();
+      window.location.href = '/groups';
+      notification.close();
+    };
+
+    setTimeout(() => {
+      notification.close();
+    }, 8000);
+  }
+
+  /**
+   * Send decision result notification
+   */
+  async sendDecisionResultNotification(
+    groupName: string,
+    restaurantName: string
+  ): Promise<void> {
+    if (!this.isSupported()) {
+      logger.warn('Push notifications not supported');
+      return;
+    }
+
+    const permission = this.getPermissionStatus();
+    if (permission !== 'granted') {
+      logger.warn('Push notification permission not granted');
+      return;
+    }
+
+    const notification = new Notification(`${groupName} Decision Complete`, {
+      body: `The group has decided on ${restaurantName}!`,
+      icon: '/icons/icon-192x192.svg',
+      badge: '/icons/icon-72x72.svg',
+      tag: `decision-result-${groupName}`,
+      requireInteraction: true,
+      data: {
+        type: 'decision_result',
+        groupName,
+        restaurantName,
+      },
+    });
+
+    notification.onclick = () => {
+      window.focus();
+      window.location.href = '/groups';
+      notification.close();
+    };
+
+    setTimeout(() => {
+      notification.close();
+    }, 8000);
+  }
+
+  /**
    * Get notification capabilities info
    */
   getCapabilities() {

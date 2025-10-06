@@ -8,6 +8,7 @@ import {
   PWAInstallPrompt,
   PWAOfflineBanner,
 } from '@/components/ui/PWAStatusIndicator';
+import { Toaster } from 'sonner';
 import Script from 'next/script';
 import './globals.css';
 
@@ -112,6 +113,13 @@ export default function RootLayout({
               <PageTransition>{children}</PageTransition>
               <PWAInstallPrompt />
               <PWAOfflineBanner />
+              <Toaster
+                position="top-center"
+                expand={false}
+                richColors
+                closeButton
+                duration={4000}
+              />
             </QueryProvider>
           </ThemeProvider>
 
