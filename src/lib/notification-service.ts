@@ -3,6 +3,7 @@ import { smsNotifications } from '@/lib/sms-notifications';
 import { inAppNotifications } from '@/lib/in-app-notifications';
 import { pushNotifications } from '@/lib/push-notifications';
 import { ToastNotificationService } from '@/lib/toast-notifications';
+import { userEmailNotificationService } from '@/lib/user-email-notifications';
 import { logger } from '@/lib/logger';
 import { User } from '@/types/database';
 
@@ -10,6 +11,7 @@ export interface NotificationOptions {
   userId: ObjectId | string;
   user?: User;
   smsEnabled?: boolean;
+  emailEnabled?: boolean;
   pushEnabled?: boolean;
   inAppEnabled?: boolean;
   toastEnabled?: boolean;
@@ -66,6 +68,7 @@ export class NotificationService {
       userId,
       user,
       smsEnabled,
+      emailEnabled,
       pushEnabled,
       inAppEnabled,
       toastEnabled,
@@ -75,6 +78,10 @@ export class NotificationService {
       // Determine which channels to use
       const shouldSendSMS =
         smsEnabled && user?.smsOptIn && user?.smsPhoneNumber;
+      const shouldSendEmail =
+        emailEnabled &&
+        user?.preferences?.notificationSettings?.emailEnabled &&
+        user?.email;
       const shouldSendPush = pushEnabled !== false; // Default to true
       const shouldSendInApp = inAppEnabled !== false; // Default to true
       const shouldSendToast = toastEnabled !== false; // Default to true
@@ -99,6 +106,29 @@ export class NotificationService {
               if (shouldSendToast && typeof window !== 'undefined') {
                 ToastNotificationService.smsNotificationFailed(error);
               }
+            })
+        );
+      }
+
+      // Send email notification
+      if (shouldSendEmail && user?.email) {
+        promises.push(
+          userEmailNotificationService
+            .sendUserNotification({
+              type: 'group_decision',
+              recipientEmail: user.email,
+              recipientName: user.name,
+              groupName: data.groupName,
+              groupId: data.groupId.toString(),
+              decisionId: data.decisionId.toString(),
+              decisionType: data.decisionType,
+              deadline: data.deadline,
+            })
+            .catch((error) => {
+              logger.error(
+                'Failed to send email group decision notification:',
+                error
+              );
             })
         );
       }
@@ -172,6 +202,7 @@ export class NotificationService {
       userId,
       user,
       smsEnabled,
+      emailEnabled,
       pushEnabled,
       inAppEnabled,
       toastEnabled,
@@ -180,6 +211,10 @@ export class NotificationService {
     try {
       const shouldSendSMS =
         smsEnabled && user?.smsOptIn && user?.smsPhoneNumber;
+      const shouldSendEmail =
+        emailEnabled &&
+        user?.preferences?.notificationSettings?.emailEnabled &&
+        user?.email;
       const shouldSendPush = pushEnabled !== false;
       const shouldSendInApp = inAppEnabled !== false;
       const shouldSendToast = toastEnabled !== false;
@@ -202,6 +237,26 @@ export class NotificationService {
               if (shouldSendToast && typeof window !== 'undefined') {
                 ToastNotificationService.smsNotificationFailed(error);
               }
+            })
+        );
+      }
+
+      // Send email notification
+      if (shouldSendEmail && user?.email) {
+        promises.push(
+          userEmailNotificationService
+            .sendUserNotification({
+              type: 'friend_request',
+              recipientEmail: user.email,
+              recipientName: user.name,
+              requesterName: data.requesterName,
+              requesterId: data.requesterId.toString(),
+            })
+            .catch((error) => {
+              logger.error(
+                'Failed to send email friend request notification:',
+                error
+              );
             })
         );
       }
@@ -265,6 +320,7 @@ export class NotificationService {
       userId,
       user,
       smsEnabled,
+      emailEnabled,
       pushEnabled,
       inAppEnabled,
       toastEnabled,
@@ -273,6 +329,10 @@ export class NotificationService {
     try {
       const shouldSendSMS =
         smsEnabled && user?.smsOptIn && user?.smsPhoneNumber;
+      const shouldSendEmail =
+        emailEnabled &&
+        user?.preferences?.notificationSettings?.emailEnabled &&
+        user?.email;
       const shouldSendPush = pushEnabled !== false;
       const shouldSendInApp = inAppEnabled !== false;
       const shouldSendToast = toastEnabled !== false;
@@ -296,6 +356,28 @@ export class NotificationService {
               if (shouldSendToast && typeof window !== 'undefined') {
                 ToastNotificationService.smsNotificationFailed(error);
               }
+            })
+        );
+      }
+
+      // Send email notification
+      if (shouldSendEmail && user?.email) {
+        promises.push(
+          userEmailNotificationService
+            .sendUserNotification({
+              type: 'group_invitation',
+              recipientEmail: user.email,
+              recipientName: user.name,
+              groupName: data.groupName,
+              groupId: data.groupId.toString(),
+              inviterName: data.inviterName,
+              inviterId: data.inviterId.toString(),
+            })
+            .catch((error) => {
+              logger.error(
+                'Failed to send email group invitation notification:',
+                error
+              );
             })
         );
       }
@@ -357,14 +439,48 @@ export class NotificationService {
     data: DecisionResultNotificationData,
     options: NotificationOptions
   ): Promise<void> {
-    const { userId, pushEnabled, inAppEnabled, toastEnabled } = options;
+    const {
+      userId,
+      user,
+      emailEnabled,
+      pushEnabled,
+      inAppEnabled,
+      toastEnabled,
+    } = options;
 
     try {
+      const shouldSendEmail =
+        emailEnabled &&
+        user?.preferences?.notificationSettings?.emailEnabled &&
+        user?.email;
       const shouldSendPush = pushEnabled !== false;
       const shouldSendInApp = inAppEnabled !== false;
       const shouldSendToast = toastEnabled !== false;
 
       const promises: Promise<unknown>[] = [];
+
+      // Send email notification
+      if (shouldSendEmail && user?.email) {
+        promises.push(
+          userEmailNotificationService
+            .sendUserNotification({
+              type: 'decision_result',
+              recipientEmail: user.email,
+              recipientName: user.name,
+              groupName: data.groupName,
+              groupId: data.groupId.toString(),
+              decisionId: data.decisionId.toString(),
+              restaurantName: data.restaurantName,
+              restaurantId: data.restaurantId.toString(),
+            })
+            .catch((error) => {
+              logger.error(
+                'Failed to send email decision result notification:',
+                error
+              );
+            })
+        );
+      }
 
       // Send in-app notification
       if (shouldSendInApp) {

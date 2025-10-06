@@ -45,6 +45,17 @@ Epic 7 Stories 2-4 have been **100% completed**, implementing a comprehensive no
 - **API Endpoints**: `/api/shorten` for shortening, `/s/[shortCode]` for resolution
 - **Character Savings**: Reduces SMS length by 50-70 characters per message
 
+### Story 5: Email Notifications ✅ COMPLETED
+
+- **Resend Email Integration**: Complete email notification service using Resend API ✅ COMPLETED
+- **Rich Email Templates**: Beautiful HTML email templates for all notification types ✅ COMPLETED
+- **Email Preferences**: User email preferences with opt-in/opt-out functionality ✅ COMPLETED
+- **Unsubscribe System**: Email unsubscribe functionality with user-friendly interface ✅ COMPLETED
+- **Delivery Tracking**: Email delivery status monitoring and error handling ✅ COMPLETED
+- **API Endpoints**: Complete email management API with testing capabilities ✅ COMPLETED
+- **React Hook Integration**: TanStack Query integration for email notifications ✅ COMPLETED
+- **Comprehensive Testing**: 51 passing tests covering all email functionality ✅ COMPLETED
+
 ## 🏗️ Architecture
 
 ### Notification Service Integration
@@ -110,9 +121,10 @@ interface User {
 - `src/lib/sms-notifications.ts` - Twilio SMS service with validation and formatting
 - `src/lib/in-app-notifications.ts` - Database-backed notification system
 - `src/lib/toast-notifications.ts` - React Hot Toast wrapper with predefined messages
-- `src/lib/notification-service.ts` - Unified notification orchestrator
+- `src/lib/notification-service.ts` - Unified notification orchestrator (updated with email)
 - `src/lib/push-notifications.ts` - Enhanced push notification manager (updated)
 - `src/lib/url-shortener.ts` - URL shortening service with TinyURL integration
+- `src/lib/user-email-notifications.ts` - User email notification service with templates
 
 ### API Endpoints
 
@@ -121,11 +133,14 @@ interface User {
 - `src/app/api/notifications/route.ts` - In-app notification management API
 - `src/app/api/shorten/route.ts` - URL shortening API endpoint
 - `src/app/s/[shortCode]/route.ts` - Short URL resolution endpoint
+- `src/app/api/email/route.ts` - Email notification management API
+- `src/app/api/email/unsubscribe/route.ts` - Email unsubscribe endpoint
 
 ### React Hooks
 
 - `src/hooks/useSMSNotifications.ts` - SMS notification hook with TanStack Query
 - `src/hooks/useInAppNotifications.ts` - In-app notification hook with real-time updates
+- `src/hooks/useEmailNotifications.ts` - Email notification hook with TanStack Query integration
 - `src/hooks/usePushNotifications.ts` - Enhanced push notification hook (updated)
 - `src/hooks/useURLShortener.ts` - URL shortening hook for client-side usage
 
@@ -149,6 +164,7 @@ interface User {
 
 - **SMS Notifications**: 13/13 tests passing
 - **Toast Notifications**: 18/18 tests passing
+- **Email Notifications**: 51/51 tests passing
 - **Integration Tests**: Comprehensive end-to-end testing
 - **Error Handling**: Graceful failure scenarios tested
 
@@ -156,6 +172,10 @@ interface User {
 
 - `src/__tests__/sms-notifications.test.ts` - SMS service unit tests
 - `src/__tests__/notification-integration.test.ts` - Toast notification integration tests
+- `src/__tests__/user-email-notifications.test.ts` - User email notification service tests
+- `src/__tests__/useEmailNotifications.test.ts` - Email notification hook tests
+- `src/app/api/__tests__/email.test.ts` - Email notification API endpoint tests
+- `src/app/api/__tests__/email-unsubscribe.test.ts` - Email unsubscribe API endpoint tests
 
 ## 🔧 Configuration
 
@@ -168,6 +188,10 @@ TWILIO_AUTH_TOKEN=...
 TWILIO_PHONE_NUMBER=+18663101886  # Development number
 TWILIO_MESSAGING_SERVICE_SID=MG...  # Optional: Messaging Service SID
 
+# Resend Configuration
+RESEND_API_KEY=re_...  # Required for email notifications
+FROM_EMAIL=noreply@yourdomain.com  # Your verified sender email
+
 # Application Configuration
 NEXT_PUBLIC_APP_URL=http://localhost:3000  # Required for URL shortening
 ```
@@ -178,6 +202,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000  # Required for URL shortening
 - **Push Testing**: Requires HTTPS in production (iOS limitation)
 - **In-App Testing**: Real-time updates with 30-second refresh
 - **Toast Testing**: Immediate feedback with auto-dismiss
+- **Email Testing**: Send test emails via `/notification-test` page with Resend API
 
 ## 🚀 Usage Examples
 
@@ -196,6 +221,7 @@ await notificationService.sendGroupDecisionNotification(
     userId: userId,
     user: user,
     smsEnabled: true,
+    emailEnabled: true, // Email notifications enabled
     pushEnabled: true,
     inAppEnabled: true,
     toastEnabled: true,
@@ -218,6 +244,21 @@ ToastNotificationService.groupDecisionStarted('My Group', 'tiered');
 ```typescript
 const { notifications, stats, markAsRead } = useInAppNotifications();
 // Real-time updates, mark as read, unread count
+```
+
+### Using Email Notifications
+
+```typescript
+const { testEmail, validateConfig } = useEmailNotifications();
+
+// Send test email
+await testEmail.mutateAsync({ email: 'user@example.com' });
+
+// Validate email configuration
+const config = await validateConfig.refetch();
+if (config.data?.valid) {
+  console.log('Email service is properly configured');
+}
 ```
 
 ## 🔍 Testing Instructions
@@ -249,7 +290,16 @@ const { notifications, stats, markAsRead } = useInAppNotifications();
 2. Verify predefined messages (collection created, restaurant added, etc.)
 3. Check auto-dismiss timing (4-6 seconds)
 
-### 5. URL Shortener
+### 5. Email Notifications
+
+1. Navigate to `/notification-test`
+2. Scroll to "Email Notification Tests" section
+3. Enter test email address and click "Send Test Email"
+4. Check email configuration status in the status card
+5. Test unsubscribe functionality via `/api/email/unsubscribe?email=test@example.com`
+6. Verify email notifications are sent for group decisions, friend requests, and invitations
+
+### 6. URL Shortener
 
 1. Navigate to `/notification-test`
 2. Scroll to "URL Shortener Tests" section
