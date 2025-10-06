@@ -29,7 +29,7 @@ describe('SMS Notifications', () => {
     jest.clearAllMocks();
     process.env = {
       ...originalEnv,
-      TWILIO_ACCOUNT_SID: 'AC1234567890abcdef1234567890abcdef',
+      TWILIO_ACCOUNT_SID: 'AC1234567890abcdef1234567890abcdef', // Fake Twilio SID
       TWILIO_AUTH_TOKEN: 'test_auth_token',
       TWILIO_PHONE_NUMBER: '+18663101886',
     };
