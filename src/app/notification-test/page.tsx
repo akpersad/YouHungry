@@ -7,6 +7,7 @@ import {
 } from '@/hooks/useSMSNotifications';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { useInAppNotifications } from '@/hooks/useInAppNotifications';
+import { useEmailNotifications } from '@/hooks/useEmailNotifications';
 import { useURLShortener } from '@/hooks/useURLShortener';
 import { ToastNotificationService } from '@/lib/toast-notifications';
 // Removed direct import of notificationService to avoid server-side dependencies in client bundle
@@ -49,6 +50,9 @@ export default function NotificationTestPage() {
     error: urlError,
     shortenUrl,
   } = useURLShortener();
+
+  // Email notifications
+  const { testEmail, validateConfig } = useEmailNotifications();
 
   const [smsStatus, setSmsStatus] = useState<SMSServiceStatus | null>(null);
   const [urlToShorten, setUrlToShorten] = useState('');
@@ -392,6 +396,32 @@ export default function NotificationTestPage() {
               )}
             </div>
           </Card>
+
+          <Card className="p-4">
+            <h3 className="font-semibold text-gray-900">Email Notifications</h3>
+            <div className="mt-2 space-y-2">
+              <div className="text-sm text-gray-600">
+                Status:{' '}
+                {validateConfig.isLoading
+                  ? 'Checking...'
+                  : validateConfig.isError
+                    ? 'Error'
+                    : validateConfig.data?.valid
+                      ? 'Configured'
+                      : 'Not Configured'}
+              </div>
+              {validateConfig.data?.error && (
+                <div className="text-xs text-red-500">
+                  {validateConfig.data.error}
+                </div>
+              )}
+              <div className="flex gap-2">
+                {validateConfig.data?.valid && (
+                  <Badge variant="secondary">Resend API</Badge>
+                )}
+              </div>
+            </div>
+          </Card>
         </div>
 
         {/* SMS Tests */}
@@ -481,6 +511,97 @@ export default function NotificationTestPage() {
                 </p>
               </div>
             )}
+          </div>
+        </Card>
+
+        {/* Email Notification Tests */}
+        <Card className="p-6">
+          <h2 className="mb-4 text-xl font-semibold text-gray-900">
+            Email Notification Tests
+          </h2>
+          <div className="space-y-4">
+            <div className="grid gap-3 md:grid-cols-2">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Test Email Address
+                </label>
+                <input
+                  type="email"
+                  placeholder="test@example.com"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  defaultValue="test@example.com"
+                />
+              </div>
+              <div className="flex items-end">
+                <Button
+                  onClick={() => {
+                    const emailInput = document.querySelector(
+                      'input[type="email"]'
+                    ) as HTMLInputElement;
+                    const email = emailInput?.value || 'test@example.com';
+                    testEmail.mutate({ email });
+                  }}
+                  disabled={testEmail.isLoading}
+                  className="w-full"
+                >
+                  {testEmail.isLoading ? 'Sending...' : 'Send Test Email'}
+                </Button>
+              </div>
+            </div>
+
+            {testEmail.isSuccess && (
+              <div className="p-3 bg-green-50 border border-green-200 rounded-md">
+                <p className="text-sm text-green-800">
+                  <strong>Success:</strong> {testEmail.data?.message}
+                </p>
+                {testEmail.data?.emailId && (
+                  <p className="text-xs text-green-600 mt-1">
+                    Email ID: {testEmail.data.emailId}
+                  </p>
+                )}
+              </div>
+            )}
+
+            {testEmail.isError && (
+              <div className="p-3 bg-red-50 border border-red-200 rounded-md">
+                <p className="text-sm text-red-800">
+                  <strong>Error:</strong> {testEmail.error?.message}
+                </p>
+              </div>
+            )}
+
+            <div className="border-t pt-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="font-medium text-gray-900">
+                    Email Configuration
+                  </h4>
+                  <p className="text-sm text-gray-600">
+                    Status:{' '}
+                    {validateConfig.isLoading
+                      ? 'Checking...'
+                      : validateConfig.isError
+                        ? 'Error'
+                        : validateConfig.data?.valid
+                          ? 'Valid'
+                          : 'Invalid'}
+                  </p>
+                  {validateConfig.data?.error && (
+                    <p className="text-xs text-red-600 mt-1">
+                      {validateConfig.data.error}
+                    </p>
+                  )}
+                </div>
+                <Button
+                  onClick={() => validateConfig.refetch()}
+                  variant="outline"
+                  size="sm"
+                  disabled={validateConfig.isLoading}
+                >
+                  Validate Config
+                </Button>
+              </div>
+            </div>
           </div>
         </Card>
 
