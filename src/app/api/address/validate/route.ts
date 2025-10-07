@@ -46,7 +46,15 @@ export async function POST(request: NextRequest) {
     }
 
     const data = await response.json();
-    return NextResponse.json(data.result);
+
+    // Log the response for debugging
+    logger.info('Address validation response:', {
+      address,
+      hasResult: !!data.result,
+      resultKeys: data.result ? Object.keys(data.result) : [],
+    });
+
+    return NextResponse.json({ result: data.result });
   } catch (error) {
     logger.error('Address validation error:', error);
     return NextResponse.json(

@@ -92,7 +92,7 @@ describe('AddressInput', () => {
 
     render(
       <AddressInput
-        value="123 Main St"
+        value=""
         onChange={mockOnChange}
         onAddressSelect={mockOnAddressSelect}
       />
@@ -100,17 +100,20 @@ describe('AddressInput', () => {
 
     const input = screen.getByRole('textbox');
 
-    // Trigger the search by changing the input value
+    // Trigger the search by changing the input value (need at least 3 characters)
     fireEvent.change(input, { target: { value: '123 Main St' } });
 
-    await waitFor(() => {
-      expect(
-        screen.getByText('123 Main St, New York, NY, USA')
-      ).toBeInTheDocument();
-      expect(
-        screen.getByText('123 Main St, Boston, MA, USA')
-      ).toBeInTheDocument();
-    });
+    await waitFor(
+      () => {
+        expect(
+          screen.getByText('123 Main St, New York, NY, USA')
+        ).toBeInTheDocument();
+        expect(
+          screen.getByText('123 Main St, Boston, MA, USA')
+        ).toBeInTheDocument();
+      },
+      { timeout: 2000 }
+    );
   });
 
   it('calls onAddressSelect when suggestion is clicked', async () => {
@@ -129,7 +132,7 @@ describe('AddressInput', () => {
 
     render(
       <AddressInput
-        value="123 Main St"
+        value=""
         onChange={mockOnChange}
         onAddressSelect={mockOnAddressSelect}
       />
@@ -140,10 +143,13 @@ describe('AddressInput', () => {
     // Trigger the search by changing the input value
     fireEvent.change(input, { target: { value: '123 Main St' } });
 
-    await waitFor(() => {
-      const suggestion = screen.getByText('123 Main St, New York, NY, USA');
-      fireEvent.click(suggestion);
-    });
+    await waitFor(
+      () => {
+        const suggestion = screen.getByText('123 Main St, New York, NY, USA');
+        fireEvent.click(suggestion);
+      },
+      { timeout: 2000 }
+    );
 
     expect(mockOnAddressSelect).toHaveBeenCalledWith(
       '123 Main St, New York, NY, USA',
@@ -174,7 +180,7 @@ describe('AddressInput', () => {
 
     render(
       <AddressInput
-        value="123 Main St"
+        value=""
         onChange={mockOnChange}
         onAddressSelect={mockOnAddressSelect}
       />
@@ -185,11 +191,14 @@ describe('AddressInput', () => {
     // Trigger the search by changing the input value
     fireEvent.change(input, { target: { value: '123 Main St' } });
 
-    await waitFor(() => {
-      expect(
-        screen.getByText('123 Main St, New York, NY, USA')
-      ).toBeInTheDocument();
-    });
+    await waitFor(
+      () => {
+        expect(
+          screen.getByText('123 Main St, New York, NY, USA')
+        ).toBeInTheDocument();
+      },
+      { timeout: 2000 }
+    );
 
     // Test arrow down navigation
     fireEvent.keyDown(input, { key: 'ArrowDown' });
@@ -261,7 +270,11 @@ describe('AddressInput', () => {
     const input = screen.getByRole('textbox');
 
     // Trigger validation by changing the input value
-    fireEvent.change(input, { target: { value: '123 Main St, New York, NY' } });
+    await act(async () => {
+      fireEvent.change(input, {
+        target: { value: '123 Main St, New York, NY' },
+      });
+    });
 
     // Update the component with the new value
     rerender(
@@ -309,7 +322,9 @@ describe('AddressInput', () => {
     const input = screen.getByRole('textbox');
 
     // Trigger validation by changing the input value
-    fireEvent.change(input, { target: { value: 'invalid address' } });
+    await act(async () => {
+      fireEvent.change(input, { target: { value: 'invalid address' } });
+    });
 
     // Update the component with the new value
     rerender(

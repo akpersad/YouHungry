@@ -77,6 +77,8 @@ export async function validateAddress(
   address: string
 ): Promise<AddressValidationResult | null> {
   try {
+    logger.info('Validating address:', { address });
+
     const response = await fetch('/api/address/validate', {
       method: 'POST',
       headers: {
@@ -87,12 +89,22 @@ export async function validateAddress(
 
     if (!response.ok) {
       const errorData = await response.json();
+      logger.error('Address validation API error:', {
+        status: response.status,
+        error: errorData,
+      });
       throw new Error(
         errorData.error || `Address Validation API error: ${response.status}`
       );
     }
 
     const data = await response.json();
+    logger.info('Address validation API response:', {
+      hasResult: !!data.result,
+      resultType: typeof data.result,
+      resultKeys: data.result ? Object.keys(data.result) : [],
+    });
+
     return data.result;
   } catch (error) {
     logger.error('Address validation error:', error);
@@ -161,6 +173,16 @@ export async function getAddressDetails(
 export function isAddressValidForSearch(
   validationResult: AddressValidationResult
 ): boolean {
+  // Log the validation result for debugging
+  logger.info('Address validation result:', {
+    hasVerdict: !!validationResult.verdict,
+    geocodeGranularity: validationResult.verdict?.geocodeGranularity,
+    inputGranularity: validationResult.verdict?.inputGranularity,
+    validationGranularity: validationResult.verdict?.validationGranularity,
+    hasAddressComponents: !!validationResult.addressComponents,
+    addressComponentsCount: validationResult.addressComponents?.length || 0,
+  });
+
   // Check if the address has sufficient granularity for restaurant search
   const hasGoodGranularity =
     validationResult.verdict.geocodeGranularity === 'PREMISE' ||

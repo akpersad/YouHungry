@@ -49,6 +49,7 @@ export function AddressInput({
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isValid, setIsValid] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
+  const [justSelected, setJustSelected] = useState(false);
   const [sessionToken] = useState(() =>
     Math.random().toString(36).substring(2, 15)
   );
@@ -57,6 +58,9 @@ export function AddressInput({
   const suggestionsRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const validationDebounceRef = useRef<NodeJS.Timeout | undefined>(undefined);
+  const justSelectedRef = useRef(false);
+  const hasMountedRef = useRef(false);
+  const userHasInteractedRef = useRef(false);
 
   // Debounced search for suggestions
   const searchSuggestions = useCallback(
@@ -125,8 +129,14 @@ export function AddressInput({
   // Handle input change with debouncing
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
+
+    // Mark that user has interacted with the input
+    userHasInteractedRef.current = true;
+
     onChange(newValue);
     setShowSuggestions(true);
+    setJustSelected(false); // Reset the flag when user types
+    justSelectedRef.current = false; // Reset the ref when user types
 
     // Clear previous debounces
     if (debounceRef.current) {
@@ -149,9 +159,23 @@ export function AddressInput({
 
   // Handle suggestion selection
   const handleSuggestionSelect = (suggestion: AddressSuggestion) => {
+    // Clear any pending searches
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+    }
+    if (validationDebounceRef.current) {
+      clearTimeout(validationDebounceRef.current);
+    }
+
+    // Set ref immediately to prevent useEffect from running
+    justSelectedRef.current = true;
+    setJustSelected(true);
+
     onChange(suggestion.formattedAddress);
     setShowSuggestions(false);
     setSuggestions([]);
+
+    // Since this came from a valid suggestion, mark it as valid immediately
     setIsValid(true);
     setValidationError(null);
     onValidationChange?.(true);
@@ -163,6 +187,20 @@ export function AddressInput({
 
   // Handle input focus
   const handleFocus = () => {
+    if (justSelected) {
+      // Don't trigger search if we just selected a suggestion
+      setJustSelected(false);
+      return;
+    }
+
+    // Don't search on initial mount to avoid unnecessary API calls
+    if (!hasMountedRef.current) {
+      return;
+    }
+
+    // Mark that user has interacted with the input
+    userHasInteractedRef.current = true;
+
     if (suggestions.length > 0) {
       setShowSuggestions(true);
     } else if (value.length >= 3) {
@@ -223,10 +261,31 @@ export function AddressInput({
     }
   };
 
-  // Trigger search when component mounts with a value
+  // Track initial mount to prevent unnecessary searches
   useEffect(() => {
-    if (value.length >= 3) {
-      searchSuggestions(value);
+    hasMountedRef.current = true;
+
+    // Validate the initial address if it exists
+    if (value && value.length >= 3) {
+      validateCurrentAddress(value);
+    }
+  }, [value, validateCurrentAddress]);
+
+  // Trigger search when value changes (but not on initial mount)
+  useEffect(() => {
+    // Skip search on initial mount or if user hasn't interacted to avoid unnecessary API calls
+    if (!hasMountedRef.current || !userHasInteractedRef.current) {
+      return;
+    }
+
+    // Only trigger search if we have a value and haven't just selected
+    if (value.length >= 3 && !justSelectedRef.current) {
+      // Use a small delay to avoid conflicts with other search triggers
+      const timeoutId = setTimeout(() => {
+        searchSuggestions(value);
+      }, 100);
+
+      return () => clearTimeout(timeoutId);
     }
   }, [value, searchSuggestions]);
 
