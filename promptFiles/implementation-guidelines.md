@@ -1032,57 +1032,209 @@ export function SkeletonCard() {
 }
 ```
 
-### Notification System with Sonner
+### Notification System with Sonner ✅ IMPLEMENTED
+
+Epic 7 has implemented a comprehensive notification system with multiple channels:
 
 ```typescript
-// lib/notifications.ts
+// lib/notification-service.ts - Unified notification orchestrator
+export class NotificationService {
+  async sendGroupDecisionNotification(
+    decision: GroupDecision,
+    recipient: NotificationRecipient,
+    channels: NotificationChannels
+  ) {
+    const results = await Promise.allSettled([
+      channels.smsEnabled && this.sendSMS(recipient, decision),
+      channels.emailEnabled && this.sendEmail(recipient, decision),
+      channels.pushEnabled && this.sendPush(recipient, decision),
+      channels.inAppEnabled &&
+        this.createInAppNotification(recipient, decision),
+      channels.toastEnabled && this.showToast(decision),
+    ]);
+
+    // Log any failures but don't throw - graceful degradation
+    results.forEach((result, index) => {
+      if (result.status === 'rejected') {
+        console.error(`Notification channel ${index} failed:`, result.reason);
+      }
+    });
+  }
+}
+
+// lib/toast-notifications.ts - Sonner integration
 import { toast } from 'sonner';
 
-export const notifications = {
-  success: (message: string) => {
+export class ToastNotificationService {
+  static success(message: string, options?: { description?: string }) {
     toast.success(message, {
+      description: options?.description,
       duration: 4000,
       position: 'top-center',
     });
-  },
+  }
 
-  error: (message: string) => {
+  static error(message: string, options?: { description?: string }) {
     toast.error(message, {
+      description: options?.description,
       duration: 6000,
       position: 'top-center',
     });
-  },
+  }
 
-  info: (message: string) => {
-    toast.info(message, {
-      duration: 4000,
-      position: 'top-center',
+  // Predefined notification messages
+  static collectionCreated(name: string) {
+    this.success('Collection created!', { description: name });
+  }
+
+  static restaurantAdded(name: string) {
+    this.success('Restaurant added!', { description: name });
+  }
+
+  static groupDecisionStarted(groupName: string, type: string) {
+    this.info(`New ${type} decision in ${groupName}`, {
+      description: 'Tap to vote now',
     });
-  },
+  }
+}
 
-  loading: (message: string) => {
-    return toast.loading(message, {
-      position: 'top-center',
+// lib/sms-notifications.ts - Twilio SMS integration
+export async function sendSMS(phoneNumber: string, message: string) {
+  const response = await fetch('/api/sms', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      to: phoneNumber,
+      message: message,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to send SMS');
+  }
+
+  return response.json();
+}
+
+// lib/user-email-notifications.ts - Resend email integration
+export async function sendEmail(
+  to: string,
+  type: EmailNotificationType,
+  data: EmailNotificationData
+) {
+  const response = await fetch('/api/email', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ to, type, data }),
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to send email');
+  }
+
+  return response.json();
+}
+
+// lib/in-app-notifications.ts - Database-backed notifications
+export async function createInAppNotification(
+  userId: string,
+  type: NotificationType,
+  title: string,
+  message: string,
+  data?: any
+) {
+  const response = await fetch('/api/notifications', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ userId, type, title, message, data }),
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to create notification');
+  }
+
+  return response.json();
+}
+
+// lib/push-notifications.ts - PWA push notifications
+export class PushNotificationManager {
+  async subscribe(): Promise<PushSubscription | null> {
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+      return null;
+    }
+
+    const permission = await Notification.requestPermission();
+    if (permission !== 'granted') {
+      return null;
+    }
+
+    const registration = await navigator.serviceWorker.ready;
+    return await registration.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: this.urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
     });
-  },
+  }
 
-  dismiss: (toastId: string) => {
-    toast.dismiss(toastId);
-  },
-};
+  async sendTestNotification() {
+    if ('Notification' in window && Notification.permission === 'granted') {
+      new Notification('You Hungry? Test', {
+        body: 'This is a test notification from your PWA!',
+        icon: '/icon-192x192.png',
+        badge: '/icon-96x96.png',
+        tag: 'test-notification',
+        requireInteraction: false,
+      });
+    }
+  }
+}
+
+// hooks/useInAppNotifications.ts - React hook for in-app notifications
+export function useInAppNotifications() {
+  return useQuery({
+    queryKey: ['notifications'],
+    queryFn: async () => {
+      const response = await fetch('/api/notifications');
+      return response.json();
+    },
+    refetchInterval: 30000, // Refresh every 30 seconds
+  });
+}
+
+// hooks/useEmailNotifications.ts - React hook for email notifications
+export function useEmailNotifications() {
+  const queryClient = useQueryClient();
+
+  const testEmail = useMutation({
+    mutationFn: async ({ email }: { email: string }) => {
+      const response = await fetch('/api/email/test', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      ToastNotificationService.success('Test email sent successfully!');
+    },
+  });
+
+  return { testEmail };
+}
 
 // Usage examples
 export function useDecisionNotifications() {
   const handleVoteSubmitted = () => {
-    notifications.success('Your vote has been submitted!');
+    ToastNotificationService.success('Your vote has been submitted!');
   };
 
   const handleDecisionComplete = (restaurant: Restaurant) => {
-    notifications.success(`Decision made! You're going to ${restaurant.name}`);
+    ToastNotificationService.success(
+      `Decision made! You're going to ${restaurant.name}`
+    );
   };
 
   const handleError = (error: string) => {
-    notifications.error(`Something went wrong: ${error}`);
+    ToastNotificationService.error(`Something went wrong: ${error}`);
   };
 
   return {
@@ -1683,20 +1835,144 @@ export async function searchRestaurants(
 }
 ````
 
+## 👤 User Profile Management Implementation ✅ IMPLEMENTED
+
+Epic 7 Story 6 has implemented a comprehensive user profile management system with Vercel Blob integration:
+
+```typescript
+// hooks/useProfile.ts - Profile management hook
+export function useProfile() {
+  const queryClient = useQueryClient();
+
+  const { data: profile, isLoading } = useQuery({
+    queryKey: ['profile'],
+    queryFn: async () => {
+      const response = await fetch('/api/user/profile');
+      return response.json();
+    },
+  });
+
+  const updateProfile = useMutation({
+    mutationFn: async (data: UpdateProfileData) => {
+      const response = await fetch('/api/user/profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['profile'] });
+      ToastNotificationService.success('Profile updated successfully!');
+    },
+  });
+
+  const uploadPicture = useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch('/api/user/profile/picture', {
+        method: 'POST',
+        body: formData,
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['profile'] });
+      ToastNotificationService.success('Profile picture updated!');
+    },
+  });
+
+  return { profile, isLoading, updateProfile, uploadPicture };
+}
+
+// app/api/user/profile/picture/route.ts - Vercel Blob integration
+import { put, del } from '@vercel/blob';
+
+export async function POST(request: NextRequest) {
+  const formData = await request.formData();
+  const file = formData.get('file') as File;
+
+  // Validate file
+  if (!file) {
+    return NextResponse.json({ error: 'No file provided' }, { status: 400 });
+  }
+
+  const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
+  if (!validTypes.includes(file.type)) {
+    return NextResponse.json({ error: 'Invalid file type' }, { status: 400 });
+  }
+
+  if (file.size > 5 * 1024 * 1024) {
+    // 5MB
+    return NextResponse.json({ error: 'File too large' }, { status: 400 });
+  }
+
+  // Upload to Vercel Blob
+  const blob = await put(
+    `profile-pictures/${userId}-${Date.now()}.${ext}`,
+    file,
+    {
+      access: 'public',
+      contentType: file.type,
+    }
+  );
+
+  // Update user profile with blob URL
+  await updateUserProfilePicture(userId, blob.url);
+
+  return NextResponse.json({ url: blob.url });
+}
+
+export async function DELETE(request: NextRequest) {
+  const user = await requireAuth();
+  const { url } = await request.json();
+
+  // Delete from Vercel Blob
+  await del(url);
+
+  // Update user profile to remove picture
+  await updateUserProfilePicture(user._id.toString(), null);
+
+  return NextResponse.json({ success: true });
+}
+```
+
 ## 🚀 Deployment Guidelines
 
 ### Environment Variables
 
 ```bash
-# .env.local
+# .env.local - Database
 MONGODB_URI=mongodb+srv://...
+MONGODB_DATABASE=you-hungry
+
+# Authentication
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_...
 CLERK_SECRET_KEY=sk_...
+CLERK_WEBHOOK_SECRET=whsec_...
+
+# Google APIs
 GOOGLE_PLACES_API_KEY=AIza...
 GOOGLE_ADDRESS_VALIDATION_API_KEY=AIza...
+NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=AIza...
+
+# Twilio SMS (Epic 7)
 TWILIO_ACCOUNT_SID=AC...
 TWILIO_AUTH_TOKEN=...
-TWILIO_PHONE_NUMBER=+1...
+TWILIO_PHONE_NUMBER=+18663101886
+TWILIO_MESSAGING_SERVICE_SID=MG...  # Optional
+
+# Resend Email (Epic 7)
+RESEND_API_KEY=re_...
+FROM_EMAIL=noreply@yourdomain.com
+
+# Vercel Blob (Epic 7)
+BLOB_READ_WRITE_TOKEN=vercel_blob_rw_...
+
+# Application
+NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
 ### Build Configuration

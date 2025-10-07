@@ -191,6 +191,133 @@ export const typeDefs = gql`
     isAdmin: Boolean!
   }
 
+  # Analytics Types
+  type PersonalAnalytics {
+    overview: AnalyticsOverview!
+    popularRestaurants: [PopularRestaurant!]!
+    trends: [DecisionTrend!]!
+    collections: CollectionStats!
+    groups: GroupStats!
+    favoriteCuisines: [CuisineStat!]!
+  }
+
+  type AnalyticsOverview {
+    totalDecisions: Int!
+    personalDecisions: Int!
+    groupDecisions: Int!
+    uniqueRestaurants: Int!
+  }
+
+  type PopularRestaurant {
+    id: ID!
+    name: String!
+    address: String!
+    cuisine: String!
+    rating: Float!
+    priceRange: String
+    selectionCount: Int!
+  }
+
+  type DecisionTrend {
+    month: String!
+    personal: Int!
+    group: Int!
+    total: Int!
+  }
+
+  type CollectionStats {
+    total: Int!
+    personal: Int!
+    group: Int!
+    avgRestaurantsPerCollection: Int!
+  }
+
+  type GroupStats {
+    totalGroups: Int!
+    activeGroups: Int!
+    adminGroups: Int!
+  }
+
+  type CuisineStat {
+    cuisine: String!
+    count: Int!
+  }
+
+  # Weight Management Types
+  type RestaurantWeightInfo {
+    restaurantId: ID!
+    name: String!
+    currentWeight: Float!
+    selectionCount: Int!
+    lastSelected: Date
+    daysUntilFullWeight: Int!
+  }
+
+  type WeightsResponse {
+    collectionId: ID!
+    weights: [RestaurantWeightInfo!]!
+    totalDecisions: Int!
+  }
+
+  # Decision History Types
+  type DecisionHistoryItem {
+    id: ID!
+    type: String!
+    collectionId: ID!
+    collectionName: String!
+    groupId: ID
+    groupName: String
+    method: String!
+    visitDate: Date!
+    result: DecisionHistoryResult
+    createdAt: Date!
+  }
+
+  type DecisionHistoryResult {
+    restaurantId: ID!
+    restaurant: Restaurant!
+    selectedAt: Date!
+    reasoning: String!
+  }
+
+  type DecisionHistoryResponse {
+    decisions: [DecisionHistoryItem!]!
+    pagination: PaginationInfo!
+  }
+
+  type PaginationInfo {
+    total: Int!
+    offset: Int!
+    limit: Int!
+    hasMore: Boolean!
+  }
+
+  input DecisionHistoryFilters {
+    type: String
+    collectionId: ID
+    groupId: ID
+    restaurantId: ID
+    startDate: Date
+    endDate: Date
+    search: String
+    limit: Int
+    offset: Int
+  }
+
+  input ManualDecisionInput {
+    collectionId: ID!
+    restaurantId: ID!
+    visitDate: Date!
+    type: String
+    groupId: ID
+    notes: String
+  }
+
+  input ResetWeightsInput {
+    collectionId: ID!
+    restaurantId: ID
+  }
+
   type Query {
     # Search restaurants with text query
     searchRestaurants(
@@ -251,6 +378,17 @@ export const typeDefs = gql`
     # Group Decision Queries
     getGroupDecisions(groupId: ID!): [Decision!]!
     getGroupDecision(decisionId: ID!): Decision
+
+    # Analytics Queries
+    getPersonalAnalytics: PersonalAnalytics!
+
+    # Weight Management Queries
+    getRestaurantWeights(collectionId: ID!): WeightsResponse!
+
+    # Decision History Queries
+    getDecisionHistoryFiltered(
+      filters: DecisionHistoryFilters!
+    ): DecisionHistoryResponse!
   }
 
   type Subscription {
@@ -258,6 +396,10 @@ export const typeDefs = gql`
     groupDecisionUpdated(groupId: ID!): Decision!
     voteSubmitted(decisionId: ID!): Vote!
     decisionCompleted(decisionId: ID!): Decision!
+
+    # Analytics Subscriptions
+    analyticsUpdated(userId: ID!): PersonalAnalytics!
+    weightsUpdated(collectionId: ID!): WeightsResponse!
   }
 
   input CreateDecisionInput {
@@ -363,6 +505,13 @@ export const typeDefs = gql`
 
     # Leave group
     leaveGroup(groupId: ID!, userId: ID!): Boolean!
+
+    # Analytics & History Mutations
+    # Create manual decision entry
+    createManualDecision(input: ManualDecisionInput!): DecisionHistoryItem!
+
+    # Reset restaurant weights
+    resetWeights(input: ResetWeightsInput!): WeightsResponse!
   }
 `;
 

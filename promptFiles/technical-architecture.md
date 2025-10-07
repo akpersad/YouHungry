@@ -65,6 +65,111 @@ This document outlines the technical architecture, technology stack, and impleme
 - **Real-time**: GraphQL subscriptions for group decision making
 - **Error Handling**: React Error Boundaries + Error monitoring
 
+## 🔔 Notification System Architecture (Epic 7 - COMPLETED)
+
+### Unified Notification Service
+
+The app implements a comprehensive notification system that orchestrates multiple communication channels:
+
+**Notification Channels**:
+
+- **SMS** - Twilio integration with phone validation and E.164 formatting
+- **Email** - Resend API with rich HTML templates
+- **In-App** - Database-backed with real-time updates (30-second refresh)
+- **Push** - PWA push notifications with iOS 16.4+ support
+- **Toast** - React Hot Toast (Sonner) for immediate UI feedback
+
+**Architecture Pattern**:
+
+```typescript
+// Unified notification orchestrator
+class NotificationService {
+  async sendGroupDecisionNotification(decision, recipient, channels) {
+    // Sends to all enabled channels in parallel
+    await Promise.allSettled([
+      channels.smsEnabled && this.sendSMS(recipient, decision),
+      channels.emailEnabled && this.sendEmail(recipient, decision),
+      channels.pushEnabled && this.sendPush(recipient, decision),
+      channels.inAppEnabled &&
+        this.createInAppNotification(recipient, decision),
+      channels.toastEnabled && this.showToast(decision),
+    ]);
+  }
+}
+```
+
+**Key Features**:
+
+- Smart routing based on user preferences and capabilities
+- Graceful degradation when individual channels fail
+- Promise-based parallel sending for optimal performance
+- Error isolation - channel failures don't affect others
+
+### Notification Storage Schema
+
+```typescript
+interface InAppNotification {
+  _id: ObjectId;
+  userId: ObjectId;
+  type:
+    | 'group_decision'
+    | 'friend_request'
+    | 'group_invitation'
+    | 'decision_result'
+    | 'admin_alert';
+  title: string;
+  message: string;
+  data?: { [key: string]: any };
+  read: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface ShortUrl {
+  _id: ObjectId;
+  originalUrl: string;
+  shortCode: string;
+  createdAt: Date;
+  expiresAt?: Date;
+  clickCount: number;
+}
+```
+
+### Enhanced User Schema for Notifications
+
+```typescript
+interface User {
+  // ... existing fields
+  smsOptIn: boolean;
+  smsPhoneNumber?: string;
+  profilePicture?: string; // Vercel Blob URL
+  preferences: {
+    notificationSettings: {
+      groupDecisions: boolean;
+      friendRequests: boolean;
+      groupInvites: boolean;
+      smsEnabled: boolean;
+      emailEnabled: boolean;
+      pushEnabled: boolean;
+    };
+  };
+}
+```
+
+### URL Shortener Service
+
+**Dual Strategy Implementation**:
+
+- Primary: TinyURL API (free external service)
+- Fallback: Custom database-backed shortener with 6-character codes
+- SMS Integration: Automatically shortens URLs to save 50-70 characters
+- Click Tracking: Monitors engagement with shortened links
+
+**API Endpoints**:
+
+- `/api/shorten` - Create shortened URLs
+- `/s/[shortCode]` - Resolve and redirect with click tracking
+
 ## 🗄️ Database Schema
 
 ### Collections Structure

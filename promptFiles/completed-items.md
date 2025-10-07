@@ -4,6 +4,73 @@ This document tracks all completed items, organized by completion date and categ
 
 ## 🎉 Recently Completed
 
+### Epic 8 Completed: Analytics & History ✅ COMPLETED
+
+- [x] **Story 1: Decision History** - Comprehensive decision tracking and history management ✅ COMPLETED
+  - [x] **History API Endpoint** - `/api/decisions/history` with advanced filtering and pagination ✅ COMPLETED
+  - [x] **Filter Support** - Filter by type, collection, group, restaurant, date range, and search ✅ COMPLETED
+  - [x] **Pagination System** - Efficient pagination with offset/limit and hasMore indication ✅ COMPLETED
+  - [x] **History UI Component** - Complete decision history page at `/history` route ✅ COMPLETED
+  - [x] **List View** - Detailed list view with restaurant info, dates, and decision context ✅ COMPLETED
+  - [x] **Search Functionality** - Real-time search across restaurants, collections, and groups ✅ COMPLETED
+  - [x] **Export Capabilities** - CSV and JSON export for decision history data ✅ COMPLETED
+
+- [x] **Story 1: Manual Decision Entry** - Add decisions made outside the app ✅ COMPLETED
+  - [x] **Manual Entry API** - `/api/decisions/manual` for creating manual decision records ✅ COMPLETED
+  - [x] **Manual Entry Form** - User-friendly form for adding past decisions ✅ COMPLETED
+  - [x] **Personal & Group Support** - Support for both personal and group manual entries ✅ COMPLETED
+  - [x] **Notes Field** - Optional notes field for additional context ✅ COMPLETED
+  - [x] **Validation** - Comprehensive validation for collection, restaurant, and date ✅ COMPLETED
+
+- [x] **Story 2: Weighting System** - Restaurant weight management and visualization ✅ COMPLETED
+  - [x] **Weights API Endpoint** - `/api/decisions/weights` for weight queries and resets ✅ COMPLETED
+  - [x] **Weight Calculation** - Calculate current weights based on 30-day rolling system ✅ COMPLETED
+  - [x] **Days Until Full Weight** - Display days remaining until restaurant returns to full weight ✅ COMPLETED
+  - [x] **Weight Visualization** - Visual weight indicators with color-coded status ✅ COMPLETED
+  - [x] **Weight Reset Logic** - Reset weights for individual restaurants or entire collections ✅ COMPLETED
+  - [x] **Weight Management UI** - Complete weight management component with visual feedback ✅ COMPLETED
+  - [x] **Confirmation Dialogs** - Safety confirmations for destructive weight reset operations ✅ COMPLETED
+
+- [x] **Story 3: Analytics Dashboard** - User analytics and insights ✅ COMPLETED
+  - [x] **Personal Analytics API** - `/api/analytics/personal` for user-specific analytics ✅ COMPLETED
+  - [x] **Group Analytics API** - `/api/analytics/group/[groupId]` for group activity tracking ✅ COMPLETED
+  - [x] **Analytics Dashboard** - Complete analytics page at `/analytics` route ✅ COMPLETED
+  - [x] **Overview Stats** - Total decisions, unique restaurants, group/personal breakdown ✅ COMPLETED
+  - [x] **Popular Restaurants** - Most visited restaurants with selection counts ✅ COMPLETED
+  - [x] **Decision Trends** - Monthly trends visualization for personal and group decisions ✅ COMPLETED
+  - [x] **Favorite Cuisines** - Cuisine preference analysis with percentage breakdowns ✅ COMPLETED
+  - [x] **Collection Stats** - Collection statistics and average restaurants per collection ✅ COMPLETED
+  - [x] **Group Stats** - Group participation, active groups, and admin group counts ✅ COMPLETED
+  - [x] **Member Participation** - Track individual member participation in group decisions ✅ COMPLETED
+  - [x] **Method Breakdown** - Analysis of decision methods (tiered, random, manual) ✅ COMPLETED
+
+- [x] **GraphQL Integration** - Extended GraphQL schema for analytics and history ✅ COMPLETED
+  - [x] **Analytics Types** - PersonalAnalytics, GroupAnalytics, and supporting types ✅ COMPLETED
+  - [x] **Weight Types** - RestaurantWeightInfo and WeightsResponse types ✅ COMPLETED
+  - [x] **History Types** - DecisionHistoryItem and DecisionHistoryResponse types ✅ COMPLETED
+  - [x] **Analytics Queries** - getPersonalAnalytics and getRestaurantWeights queries ✅ COMPLETED
+  - [x] **History Queries** - getDecisionHistoryFiltered with comprehensive filters ✅ COMPLETED
+  - [x] **Analytics Mutations** - createManualDecision and resetWeights mutations ✅ COMPLETED
+  - [x] **Subscriptions** - analyticsUpdated and weightsUpdated subscriptions ✅ COMPLETED
+
+- [x] **React Hooks & State Management** - TanStack Query integration for all Epic 8 features ✅ COMPLETED
+  - [x] **useDecisionHistory** - Hook for fetching decision history with filters ✅ COMPLETED
+  - [x] **useManualDecision** - Hook for creating manual decision entries ✅ COMPLETED
+  - [x] **useRestaurantWeights** - Hook for fetching restaurant weights ✅ COMPLETED
+  - [x] **useResetWeights** - Hook for resetting restaurant weights ✅ COMPLETED
+  - [x] **usePersonalAnalytics** - Hook for fetching personal analytics ✅ COMPLETED
+
+- [x] **Utility Functions** - Export and data processing utilities ✅ COMPLETED
+  - [x] **CSV Export** - Export decision history to CSV format ✅ COMPLETED
+  - [x] **JSON Export** - Export decision history to JSON format ✅ COMPLETED
+  - [x] **Data Formatting** - Proper formatting for export data ✅ COMPLETED
+
+- [x] **Comprehensive Testing** - Full test coverage for Epic 8 features ✅ COMPLETED
+  - [x] **History API Tests** - Tests for filtering, pagination, and search ✅ COMPLETED
+  - [x] **Manual Entry Tests** - Tests for personal and group manual entries ✅ COMPLETED
+  - [x] **Weights API Tests** - Tests for weight calculation and reset operations ✅ COMPLETED
+  - [x] **Edge Cases** - Validation errors, unauthorized access, and not found scenarios ✅ COMPLETED
+
 ### Epic 7 Stories 1 & 1a Completed: Custom Authentication Pages with Phone Registration & SMS Opt-in
 
 - [x] **Custom Registration Page** - Complete multi-step registration flow explaining app benefits ✅ COMPLETED
@@ -28,12 +95,14 @@ This document tracks all completed items, organized by completion date and categ
 
 - [x] **Clerk Webhook Updates** - Enhanced webhook to handle new registration data ✅ COMPLETED
 
-### Epic 7 Stories 2-5 Completed: Comprehensive Notification System ✅ COMPLETED
+### Epic 7 Stories 2-6 Completed: Comprehensive Notification System ✅ COMPLETED
 
 - [x] **Story 2: SMS Integration & Admin Alerts** - Complete Twilio SMS service with opt-in/opt-out system and admin alerts ✅ COMPLETED
   - [x] **Twilio Integration** - SMS service with phone validation and E.164 formatting ✅ COMPLETED
   - [x] **SMS Opt-in/Opt-out System** - User preferences for SMS notifications with database storage ✅ COMPLETED
   - [x] **Admin Alert System** - SMS alerts for cost spikes and system issues ✅ COMPLETED
+  - [x] **Messaging Service Support** - Enhanced to support Twilio Messaging Service SID ✅ COMPLETED
+  - [x] **URL Shortening Integration** - Integrated URL shortener for SMS-friendly links ✅ COMPLETED
   - [x] **Development Configuration** - Uses +1 866 310 1886 and +18777804236 for testing ✅ COMPLETED
   - [x] **API Endpoints** - `/api/sms` and `/api/admin/sms` for SMS management ✅ COMPLETED
   - [x] **React Hook** - `useSMSNotifications` with TanStack Query integration ✅ COMPLETED
@@ -87,6 +156,14 @@ This document tracks all completed items, organized by completion date and categ
   - [x] **Email Notifications** - 51/51 tests passing with comprehensive coverage ✅ COMPLETED
   - [x] **Integration Tests** - End-to-end testing of notification workflows ✅ COMPLETED
   - [x] **Error Handling** - Graceful failure scenarios tested ✅ COMPLETED
+
+- [x] **URL Shortener Service** - Complete URL shortening service for SMS optimization ✅ COMPLETED
+  - [x] **Dual Strategy** - Uses TinyURL (free) first, falls back to custom shortener ✅ COMPLETED
+  - [x] **Custom Shortener** - Database-backed with 6-character codes and expiration ✅ COMPLETED
+  - [x] **SMS Integration** - Automatically shortens URLs in SMS notifications ✅ COMPLETED
+  - [x] **Click Tracking** - Monitors engagement with shortened links ✅ COMPLETED
+  - [x] **API Endpoints** - `/api/shorten` for shortening, `/s/[shortCode]` for resolution ✅ COMPLETED
+  - [x] **Character Savings** - Reduces SMS length by 50-70 characters per message ✅ COMPLETED
 
 - [x] **Documentation** - Complete implementation documentation and testing guide ✅ COMPLETED
   - [x] **Implementation Summary** - Comprehensive overview of all notification systems ✅ COMPLETED
@@ -828,11 +905,11 @@ This document tracks all completed items, organized by completion date and categ
 - **Epic 3: Social Features & Group Management**: 100% complete ✅ (All 3 stories completed: Friend Management, Group Creation & Management, Group Collections)
 - **Epic 4: Group Decision Making**: 100% complete ✅ (All 3 stories completed: Tiered Choice System, Random Selection for Groups, Decision Management)
 - **Epic 5: Mobile-First Experience**: 100% complete ✅ (All 4 stories completed: Mobile UI Optimization, PWA Implementation, Performance Optimization, Map View Implementation)
-- **Epic 6: Admin Panel & Monitoring**: 28% complete ✅ (Stories 1 & 2 completed: Admin Panel Foundation, Cost Monitoring Dashboard)
-- **Epic 7: Notifications & Communication**: 100% complete ✅ (All 6 stories completed: SMS Integration, In-App Notifications, Toast Notifications, Push Notifications, Email Notifications, User Profile Management)
-- **Epic 8: Polish & Optimization**: 0% complete
-- **Epic 9: Deployment & Launch**: 0% complete
-- **Epic 10: Future Enhancements**: 0% complete
+- **Epic 6: Admin Panel & Monitoring**: 100% complete ✅ (All 6 stories completed: Admin Panel Foundation, Cost Monitoring Dashboard, User Management, Database Management, Usage Analytics, System Settings, Admin Alerts)
+- **Epic 7: Notifications & Communication**: 100% complete ✅ (All 6 stories completed: Custom Auth Pages, SMS Integration, In-App Notifications, Toast Notifications, Push Notifications, Email Notifications, User Profile Management)
+- **Epic 8: Analytics & History**: 0% complete
+- **Epic 9: Polish & Optimization**: 0% complete
+- **Epic 10: Deployment & Launch**: 0% complete
 
 ## 🏆 Major Milestones Achieved
 

@@ -7,6 +7,7 @@ import { useUser } from '@clerk/nextjs';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Modal } from '@/components/ui/Modal';
+import { DatePicker } from '@/components/ui/DatePicker';
 import { DecisionResultModal } from './DecisionResultModal';
 import { useGroupDecisionSubscription } from '@/hooks/api/useGroupDecisionSubscription';
 import { Restaurant as DatabaseRestaurant } from '@/types/database';
@@ -629,19 +630,13 @@ export function GroupDecisionMaking({
       >
         <div className="space-y-4">
           <div>
-            <label
-              htmlFor="visit-date"
-              className="block text-sm font-medium text-gray-700 mb-2"
-            >
-              Visit Date
-            </label>
-            <input
+            <DatePicker
               id="visit-date"
-              type="datetime-local"
+              label="Visit Date"
               value={visitDate}
-              onChange={(e) => setVisitDate(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              onChange={setVisitDate}
               required
+              placeholder="Select date and time for your visit"
             />
           </div>
 

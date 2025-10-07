@@ -23,10 +23,10 @@ This file is for planning and reference only, not for tracking progress.
 - **Epic 4**: Drag & drop ranking (@dnd-kit)
 - **Epic 5**: Animations and interactions (Framer Motion)
 - **Epic 6**: Toast notifications (Sonner)
-- **Epic 8**: Error boundaries and graceful error handling + Performance benchmarking
-- **Epic 9**: GraphQL integration (Apollo Server + Client)
+- **Epic 9**: Error boundaries and graceful error handling + Performance benchmarking
+- **Epic 10**: GraphQL integration (Apollo Server + Client)
 
-**📊 Performance Benchmarking Note**: Performance benchmarking has been moved to Epic 8 (Polish & Optimization) to establish baselines before implementing advanced technologies like GraphQL. This ensures we have proper metrics to measure the effectiveness of optimizations.
+**📊 Performance Benchmarking Note**: Performance benchmarking has been moved to Epic 9 (Polish & Optimization) to establish baselines before implementing advanced technologies like GraphQL. This ensures we have proper metrics to measure the effectiveness of optimizations.
 
 These technologies will be implemented when they solve specific problems in each epic, ensuring they add real value rather than being added prematurely.
 
@@ -457,7 +457,7 @@ Epic 6 Work Group B has been **100% completed**, implementing comprehensive syst
    - **Unit test profile management components and API endpoints**
    - **Update user database schema to support profile picture URLs and enhanced preferences**
 
-## 📊 Epic 7: Analytics & History
+## 📊 Epic 8: Analytics & History
 
 **Goal**: Provide insights and historical data to users
 
@@ -485,7 +485,7 @@ Epic 6 Work Group B has been **100% completed**, implementing comprehensive syst
 
 **🔄 Parallel Work Note**: Stories 1, 2, and 3 SHOULD be worked on in parallel - they are all analytics features that need to work together, and developing them simultaneously ensures consistent data models and proper integration between history, weighting, and dashboard features.
 
-## 🎨 Epic 8: Polish & Optimization
+## 🎨 Epic 9: Polish & Optimization
 
 **Goal**: Refine the user experience and optimize performance
 
@@ -527,7 +527,7 @@ Epic 6 Work Group B has been **100% completed**, implementing comprehensive syst
    - Set up automated performance testing in CI/CD pipeline
    - **Note**: This should be completed before implementing GraphQL or other advanced optimizations to establish proper baselines
 
-## 🚀 Epic 9: Deployment & Launch
+## 🚀 Epic 10: Deployment & Launch
 
 **Goal**: Deploy the app and prepare for production use
 
@@ -570,7 +570,7 @@ Epic 6 Work Group B has been **100% completed**, implementing comprehensive syst
    - Implement feature flags for gradual rollout
    - Prepare for user onboarding and support
 
-## 📋 Epic 10: Future Enhancements
+## 📋 Epic 11: Future Enhancements
 
 **Goal**: Plan and prepare for future features and iOS app
 
