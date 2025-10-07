@@ -316,7 +316,7 @@ describe('FriendSelectionModal', () => {
   it('calls onClose when close button is clicked', () => {
     render(<FriendSelectionModal {...defaultProps} />);
 
-    const closeButton = screen.getByRole('button', { name: '×' });
+    const closeButton = screen.getByRole('button', { name: 'Close dialog' });
     fireEvent.click(closeButton);
 
     expect(defaultProps.onClose).toHaveBeenCalled();
@@ -379,7 +379,7 @@ describe('FriendSelectionModal', () => {
     fireEvent.click(inviteButtons[0]);
 
     // Try to close modal
-    const closeButton = screen.getByRole('button', { name: '×' });
+    const closeButton = screen.getByRole('button', { name: 'Close dialog' });
     fireEvent.click(closeButton);
 
     // Modal should still be open

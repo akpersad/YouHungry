@@ -1,5 +1,23 @@
 import '@testing-library/jest-dom';
 
+// Polyfill for PointerEvent (not available in jsdom)
+if (!global.PointerEvent) {
+  class PointerEvent extends MouseEvent {
+    constructor(type, params = {}) {
+      super(type, params);
+      this.pointerId = params.pointerId || 0;
+      this.width = params.width || 0;
+      this.height = params.height || 0;
+      this.pressure = params.pressure || 0;
+      this.tiltX = params.tiltX || 0;
+      this.tiltY = params.tiltY || 0;
+      this.pointerType = params.pointerType || '';
+      this.isPrimary = params.isPrimary || false;
+    }
+  }
+  global.PointerEvent = PointerEvent;
+}
+
 // Polyfill for Request/Response globals needed for Next.js API tests
 // Simple polyfill that provides the minimal interface needed for tests
 global.Request = class Request {

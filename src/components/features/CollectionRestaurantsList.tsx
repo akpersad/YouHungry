@@ -172,7 +172,10 @@ export function CollectionRestaurantsList({
     return (
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+          <h3
+            className="text-lg font-semibold text-primary"
+            style={{ color: 'var(--text-primary)' }}
+          >
             Restaurants in {collection.name}
           </h3>
           {/* View Toggle - Hidden on mobile during loading for now */}
@@ -201,7 +204,10 @@ export function CollectionRestaurantsList({
   if (error) {
     return (
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+        <h3
+          className="text-lg font-semibold text-primary"
+          style={{ color: 'var(--text-primary)' }}
+        >
           Restaurants in {collection.name}
         </h3>
         <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md p-4">
@@ -222,10 +228,16 @@ export function CollectionRestaurantsList({
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+          <h3
+            className="text-lg font-semibold text-primary"
+            style={{ color: 'var(--text-primary)' }}
+          >
             Restaurants in {collection.name}
           </h3>
-          <span className="text-sm text-gray-500 dark:text-gray-400">
+          <span
+            className="text-sm text-secondary"
+            style={{ color: 'var(--text-secondary)' }}
+          >
             {restaurants.length} restaurant{restaurants.length !== 1 ? 's' : ''}
           </span>
         </div>

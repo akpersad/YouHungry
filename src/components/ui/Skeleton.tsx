@@ -7,15 +7,25 @@ import { skeletonVariants } from '@/lib/animations';
 interface SkeletonProps {
   className?: string;
   children?: React.ReactNode;
+  srText?: string;
 }
 
-export function Skeleton({ className, children }: SkeletonProps) {
+export function Skeleton({
+  className,
+  children,
+  srText = 'Loading...',
+}: SkeletonProps) {
   return (
     <motion.div
       className={cn('bg-tertiary rounded', className)}
       variants={skeletonVariants}
       animate="animate"
+      role="status"
+      aria-busy="true"
+      aria-live="polite"
+      aria-label={srText}
     >
+      <span className="sr-only">{srText}</span>
       {children}
     </motion.div>
   );

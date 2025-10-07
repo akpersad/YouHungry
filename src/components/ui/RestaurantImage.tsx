@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import Image from 'next/image';
 
 interface RestaurantImageProps {
   src?: string;
@@ -65,14 +64,22 @@ export function RestaurantImage({
           {icon}
         </div>
       )}
-      <Image
+      {/* Using regular img tag for external Google Places API images with custom loading states */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
         src={src}
         alt={alt}
-        fill
-        className={`object-cover ${!imageLoaded || imageError ? 'hidden' : ''}`}
-        onError={() => setImageError(true)}
-        onLoad={() => setImageLoaded(true)}
-        unoptimized={true}
+        className={`w-full h-full object-cover ${!imageLoaded || imageError ? 'hidden' : ''}`}
+        onError={(e) => {
+          console.error('Image failed to load:', src, e);
+          setImageError(true);
+        }}
+        onLoad={() => {
+          console.log('Image loaded successfully:', src);
+          setImageLoaded(true);
+        }}
+        style={{ position: 'absolute', inset: 0 }}
+        loading="lazy"
       />
     </div>
   );

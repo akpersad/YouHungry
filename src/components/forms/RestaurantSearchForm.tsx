@@ -1,11 +1,12 @@
 'use client';
 
 import { logger } from '@/lib/logger';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { AddressInput } from '@/components/ui/AddressInput';
 import { Input } from '@/components/ui/Input';
+import { useProfile } from '@/hooks/useProfile';
 
 interface RestaurantSearchFormProps {
   onSearch: (location: string, query?: string, filters?: SearchFilters) => void;
@@ -24,9 +25,10 @@ export function RestaurantSearchForm({
   onSearch,
   isLoading = false,
 }: RestaurantSearchFormProps) {
+  const { profile } = useProfile();
   const [location, setLocation] = useState('');
   const [query, setQuery] = useState('');
-  const [distance, setDistance] = useState(10);
+  const [distance, setDistance] = useState(5);
   const [cuisine, setCuisine] = useState('');
   const [minRating, setMinRating] = useState(0);
   const [minPrice, setMinPrice] = useState(0);
@@ -39,6 +41,14 @@ export function RestaurantSearchForm({
   const [showFilters, setShowFilters] = useState(false);
   const [isAddressValid, setIsAddressValid] = useState(false);
   const [error, setError] = useState('');
+
+  // Populate default location from profile
+  useEffect(() => {
+    if (profile?.preferences?.defaultLocation && !location) {
+      setLocation(profile.preferences.defaultLocation);
+      setIsAddressValid(true); // Assume stored address is valid
+    }
+  }, [profile, location]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

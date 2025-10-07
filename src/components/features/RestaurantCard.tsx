@@ -77,7 +77,10 @@ export function RestaurantCard({
           {/* Content */}
           <div className="p-4 space-y-3">
             {/* 2. NAME - Clear, readable restaurant name */}
-            <h3 className="text-lg font-semibold text-primary leading-tight">
+            <h3
+              className="text-lg font-semibold text-primary leading-tight"
+              style={{ color: 'var(--text-primary)' }}
+            >
               {restaurant.name}
             </h3>
 
@@ -179,7 +182,10 @@ export function RestaurantCard({
 
             {/* Content */}
             <div className="flex-1 min-w-0">
-              <h3 className="text-base font-medium text-primary truncate">
+              <h3
+                className="text-base font-medium text-primary truncate"
+                style={{ color: 'var(--text-primary)' }}
+              >
                 {restaurant.name}
               </h3>
               <div className="flex items-center gap-3 text-sm text-secondary mt-1">
@@ -223,7 +229,10 @@ export function RestaurantCard({
           {/* Restaurant Header */}
           <div className="flex justify-between items-start">
             <div className="flex-1">
-              <h3 className="text-lg font-semibold text-primary mb-1">
+              <h3
+                className="text-lg font-semibold text-primary mb-1"
+                style={{ color: 'var(--text-primary)' }}
+              >
                 {restaurant.name}
               </h3>
               <p className="text-sm text-secondary mb-2">

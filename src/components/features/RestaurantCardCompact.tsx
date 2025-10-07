@@ -29,17 +29,26 @@ export function RestaurantCardCompact({
       <div className="flex flex-col h-full">
         {/* Restaurant Basic Info */}
         <div className="mb-3">
-          <h3 className="text-sm font-semibold text-gray-900 truncate mb-1">
+          <h3
+            className="text-sm font-semibold text-primary truncate mb-1"
+            style={{ color: 'var(--text-primary)' }}
+          >
             {restaurant.name}
           </h3>
-          <p className="text-xs text-gray-600 dark:text-gray-400 break-words">
+          <p
+            className="text-xs text-secondary break-words"
+            style={{ color: 'var(--text-secondary)' }}
+          >
             {restaurant.address}
           </p>
         </div>
 
         {/* Key Details */}
         <div className="space-y-1 mb-3 flex-1">
-          <div className="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400">
+          <div
+            className="flex items-center justify-between text-xs text-secondary"
+            style={{ color: 'var(--text-secondary)' }}
+          >
             <span className="flex items-center">
               ⭐ {formatRating(restaurant.rating)}
             </span>
@@ -49,13 +58,19 @@ export function RestaurantCardCompact({
           </div>
 
           {restaurant.distance && (
-            <p className="text-xs text-gray-500 dark:text-gray-500 truncate">
+            <p
+              className="text-xs text-tertiary truncate"
+              style={{ color: 'var(--text-tertiary)' }}
+            >
               📍 {restaurant.distance.toFixed(1)} mi
             </p>
           )}
 
           {restaurant.timeToPickUp && (
-            <p className="text-xs text-gray-500 dark:text-gray-500">
+            <p
+              className="text-xs text-tertiary"
+              style={{ color: 'var(--text-tertiary)' }}
+            >
               ⏱️ {restaurant.timeToPickUp} min
             </p>
           )}

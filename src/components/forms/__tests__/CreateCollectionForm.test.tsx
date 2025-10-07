@@ -53,8 +53,12 @@ describe('CreateCollectionForm', () => {
       </TestQueryProvider>
     );
 
-    expect(screen.getByLabelText('Collection Name')).toBeInTheDocument();
-    expect(screen.getByLabelText('Description (Optional)')).toBeInTheDocument();
+    expect(
+      screen.getByPlaceholderText('e.g., Favorite Pizza Places')
+    ).toBeInTheDocument();
+    expect(
+      screen.getByPlaceholderText('Describe your collection...')
+    ).toBeInTheDocument();
     expect(
       screen.getByRole('button', { name: 'Create Collection' })
     ).toBeInTheDocument();
@@ -106,15 +110,21 @@ describe('CreateCollectionForm', () => {
       </TestQueryProvider>
     );
 
-    const nameInput = screen.getByLabelText('Collection Name');
-    const descriptionInput = screen.getByLabelText('Description (Optional)');
+    const nameInput = screen.getByPlaceholderText(
+      'e.g., Favorite Pizza Places'
+    );
+    const descriptionInput = screen.getByPlaceholderText(
+      'Describe your collection...'
+    );
     const submitButton = screen.getByRole('button', {
       name: 'Create Collection',
     });
 
     // Fill in the form fields
-    await user.type(nameInput, 'Test Collection');
-    await user.type(descriptionInput, 'Test description');
+    fireEvent.change(nameInput, { target: { value: 'Test Collection' } });
+    fireEvent.change(descriptionInput, {
+      target: { value: 'Test description' },
+    });
 
     // Button should be enabled now
     expect(submitButton).not.toBeDisabled();
@@ -151,12 +161,14 @@ describe('CreateCollectionForm', () => {
       </TestQueryProvider>
     );
 
-    const nameInput = screen.getByLabelText('Collection Name');
+    const nameInput = screen.getByPlaceholderText(
+      'e.g., Favorite Pizza Places'
+    );
     const submitButton = screen.getByRole('button', {
       name: 'Create Collection',
     });
 
-    await user.type(nameInput, 'Test Collection');
+    fireEvent.change(nameInput, { target: { value: 'Test Collection' } });
     await user.click(submitButton);
 
     await waitFor(() => {
@@ -185,7 +197,6 @@ describe('CreateCollectionForm', () => {
   });
 
   it('shows loading state during submission', async () => {
-    const user = userEvent.setup();
     const mockCollection = { id: 'collection123', name: 'Test Collection' };
 
     mockUseCreateCollection.mockReturnValue({
@@ -203,9 +214,11 @@ describe('CreateCollectionForm', () => {
       </TestQueryProvider>
     );
 
-    const nameInput = screen.getByLabelText('Collection Name');
+    const nameInput = screen.getByPlaceholderText(
+      'e.g., Favorite Pizza Places'
+    );
 
-    await user.type(nameInput, 'Test Collection');
+    fireEvent.change(nameInput, { target: { value: 'Test Collection' } });
 
     // Should show loading state immediately due to isPending: true
     expect(screen.getByText('Creating...')).toBeInTheDocument();

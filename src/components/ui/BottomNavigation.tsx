@@ -15,9 +15,14 @@ interface NavigationItem {
 interface BottomNavigationProps {
   items: NavigationItem[];
   className?: string;
+  ariaLabel?: string;
 }
 
-export function BottomNavigation({ items, className }: BottomNavigationProps) {
+export function BottomNavigation({
+  items,
+  className,
+  ariaLabel = 'Main navigation',
+}: BottomNavigationProps) {
   return (
     <nav
       className={cn(
@@ -30,6 +35,8 @@ export function BottomNavigation({ items, className }: BottomNavigationProps) {
         borderColor: 'var(--bg-quaternary)',
         borderRadius: 'var(--radius-3xl) var(--radius-3xl) 0 0',
       }}
+      role="navigation"
+      aria-label={ariaLabel}
     >
       <div className="flex justify-around items-center h-full">
         {items.map((item) => (
@@ -54,8 +61,12 @@ export function BottomNavigation({ items, className }: BottomNavigationProps) {
               minWidth: '60px',
             }}
             aria-label={item.label}
+            aria-current={item.isActive ? 'page' : undefined}
           >
-            <div className="flex items-center justify-center mb-1">
+            <div
+              className="flex items-center justify-center mb-1"
+              aria-hidden="true"
+            >
               {item.icon}
             </div>
             <span className="text-xs font-medium truncate w-full text-center">

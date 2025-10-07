@@ -77,7 +77,7 @@ export function CreateGroupForm({
     setMemberEmails((prev) => prev.filter((email) => email !== emailToRemove));
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       e.preventDefault();
       handleAddEmail();
@@ -211,7 +211,7 @@ export function CreateGroupForm({
                   setErrors((prev) => ({ ...prev, email: undefined }));
                 }
               }}
-              onKeyPress={handleKeyPress}
+              onKeyDown={handleKeyDown}
               placeholder="Enter email address"
               error={errors.email}
               disabled={isSubmitting || isLoading}

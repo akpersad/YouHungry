@@ -1,4 +1,4 @@
-import { InputHTMLAttributes, forwardRef } from 'react';
+import { InputHTMLAttributes, forwardRef, useId } from 'react';
 import { cn } from '@/lib/utils';
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
@@ -8,8 +8,13 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ className, label, error, helperText, id, ...props }, ref) => {
-    const inputId = id || `input-${Math.random().toString(36).substr(2, 9)}`;
+  ({ className, label, error, helperText, id, required, ...props }, ref) => {
+    const generatedId = useId();
+    const inputId = id || generatedId;
+    const errorId = `${inputId}-error`;
+    const helperId = `${inputId}-helper`;
+    const hasError = Boolean(error);
+    const hasHelper = Boolean(helperText);
 
     return (
       <div className="w-full">
@@ -19,6 +24,11 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             className="block text-sm font-medium text-primary mb-1"
           >
             {label}
+            {required && (
+              <span className="text-error ml-1" aria-label="required">
+                *
+              </span>
+            )}
           </label>
         )}
         <input
@@ -26,21 +36,34 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           className={cn(
             'input-base',
             {
-              'input-error': error,
+              'input-error': hasError,
               'input-disabled': props.disabled,
             },
             className
           )}
           ref={ref}
+          required={required}
+          aria-required={required}
+          aria-invalid={hasError}
+          aria-describedby={
+            hasError ? errorId : hasHelper ? helperId : undefined
+          }
           {...props}
         />
-        {error && (
-          <p className="mt-1 text-sm text-error" role="alert">
+        {hasError && (
+          <p
+            id={errorId}
+            className="mt-1 text-sm text-error"
+            role="alert"
+            aria-live="polite"
+          >
             {error}
           </p>
         )}
-        {helperText && !error && (
-          <p className="mt-1 text-sm text-tertiary">{helperText}</p>
+        {helperText && !hasError && (
+          <p id={helperId} className="mt-1 text-sm text-tertiary">
+            {helperText}
+          </p>
         )}
       </div>
     );

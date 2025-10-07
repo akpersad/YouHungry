@@ -1,5 +1,15 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { RestaurantSearchForm } from '../RestaurantSearchForm';
+import { useProfile } from '@/hooks/useProfile';
+
+// Mock useProfile hook
+jest.mock('@/hooks/useProfile', () => ({
+  useProfile: jest.fn(() => ({
+    profile: null,
+    isLoading: false,
+    error: null,
+  })),
+}));
 
 // Mock AddressInput component
 jest.mock('@/components/ui/AddressInput', () => ({
@@ -13,7 +23,7 @@ jest.mock('@/components/ui/AddressInput', () => ({
     <input
       {...props}
       data-testid="address-input"
-      value={value}
+      value={value as string}
       onChange={(e) => {
         if (onChange) onChange(e.target.value);
         if (onValidationChange) onValidationChange(true); // Mock validation success
@@ -86,7 +96,7 @@ describe('RestaurantSearchForm', () => {
         '123 Main St, City, State',
         'Italian',
         {
-          distance: 10,
+          distance: 5,
           cuisine: undefined,
           minRating: undefined,
           minPrice: undefined,
@@ -123,5 +133,23 @@ describe('RestaurantSearchForm', () => {
       name: 'Search Restaurants',
     });
     expect(submitButton).toBeDisabled();
+  });
+
+  it('populates default location from user profile', () => {
+    const mockUseProfile = useProfile as jest.MockedFunction<typeof useProfile>;
+    mockUseProfile.mockReturnValue({
+      profile: {
+        preferences: {
+          defaultLocation: '123 Default St, Test City, ST 12345',
+        },
+      },
+      isLoading: false,
+      error: null,
+    });
+
+    render(<RestaurantSearchForm onSearch={mockOnSearch} />);
+
+    const addressInput = screen.getByTestId('address-input');
+    expect(addressInput).toHaveValue('123 Default St, Test City, ST 12345');
   });
 });

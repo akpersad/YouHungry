@@ -397,7 +397,7 @@ describe('GroupView', () => {
     fireEvent.click(inviteFriendsButton);
 
     // Click the X button to close the modal
-    const closeButton = screen.getByRole('button', { name: '×' });
+    const closeButton = screen.getByRole('button', { name: 'Close dialog' });
     fireEvent.click(closeButton);
 
     // Modal should be closed
