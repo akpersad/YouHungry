@@ -41,12 +41,62 @@ export async function GET(request: NextRequest) {
           try {
             if (groupId) {
               const decisions = await getActiveGroupDecisions(groupId);
-              sendData({ type: 'groupDecisions', data: decisions });
+              const transformedDecisions = decisions.map((decision) => ({
+                id: decision._id.toString(),
+                type: decision.type,
+                collectionId: decision.collectionId.toString(),
+                groupId: decision.groupId?.toString(),
+                method: decision.method,
+                status: decision.status,
+                deadline: decision.deadline.toISOString(),
+                visitDate: decision.visitDate.toISOString(),
+                participants: decision.participants,
+                votes: decision.votes?.map((vote) => ({
+                  userId: vote.userId,
+                  submittedAt: vote.submittedAt.toISOString(),
+                  hasRankings: vote.rankings.length > 0,
+                })),
+                result: decision.result
+                  ? {
+                      restaurantId: decision.result.restaurantId.toString(),
+                      selectedAt: decision.result.selectedAt.toISOString(),
+                      reasoning: decision.result.reasoning,
+                    }
+                  : null,
+                createdAt: decision.createdAt.toISOString(),
+                updatedAt: decision.updatedAt.toISOString(),
+              }));
+              sendData({ type: 'groupDecisions', data: transformedDecisions });
             }
             if (decisionId) {
               const decision = await getGroupDecision(decisionId);
               if (decision) {
-                sendData({ type: 'decisionUpdate', data: decision });
+                const transformedDecision = {
+                  id: decision._id.toString(),
+                  type: decision.type,
+                  collectionId: decision.collectionId.toString(),
+                  groupId: decision.groupId?.toString(),
+                  method: decision.method,
+                  status: decision.status,
+                  deadline: decision.deadline.toISOString(),
+                  visitDate: decision.visitDate.toISOString(),
+                  participants: decision.participants,
+                  votes: decision.votes?.map((vote) => ({
+                    userId: vote.userId,
+                    submittedAt: vote.submittedAt.toISOString(),
+                    hasRankings: vote.rankings.length > 0,
+                  })),
+                  result: decision.result
+                    ? {
+                        restaurantId: decision.result.restaurantId.toString(),
+                        selectedAt: decision.result.selectedAt.toISOString(),
+                        reasoning: decision.result.reasoning,
+                      }
+                    : null,
+                  createdAt: decision.createdAt.toISOString(),
+                  updatedAt: decision.updatedAt.toISOString(),
+                };
+                sendData({ type: 'decisionUpdate', data: transformedDecision });
               }
             }
           } catch (error) {
@@ -71,12 +121,62 @@ export async function GET(request: NextRequest) {
           try {
             if (groupId) {
               const decisions = await getActiveGroupDecisions(groupId);
-              sendData({ type: 'groupDecisions', data: decisions });
+              const transformedDecisions = decisions.map((decision) => ({
+                id: decision._id.toString(),
+                type: decision.type,
+                collectionId: decision.collectionId.toString(),
+                groupId: decision.groupId?.toString(),
+                method: decision.method,
+                status: decision.status,
+                deadline: decision.deadline.toISOString(),
+                visitDate: decision.visitDate.toISOString(),
+                participants: decision.participants,
+                votes: decision.votes?.map((vote) => ({
+                  userId: vote.userId,
+                  submittedAt: vote.submittedAt.toISOString(),
+                  hasRankings: vote.rankings.length > 0,
+                })),
+                result: decision.result
+                  ? {
+                      restaurantId: decision.result.restaurantId.toString(),
+                      selectedAt: decision.result.selectedAt.toISOString(),
+                      reasoning: decision.result.reasoning,
+                    }
+                  : null,
+                createdAt: decision.createdAt.toISOString(),
+                updatedAt: decision.updatedAt.toISOString(),
+              }));
+              sendData({ type: 'groupDecisions', data: transformedDecisions });
             }
             if (decisionId) {
               const decision = await getGroupDecision(decisionId);
               if (decision) {
-                sendData({ type: 'decisionUpdate', data: decision });
+                const transformedDecision = {
+                  id: decision._id.toString(),
+                  type: decision.type,
+                  collectionId: decision.collectionId.toString(),
+                  groupId: decision.groupId?.toString(),
+                  method: decision.method,
+                  status: decision.status,
+                  deadline: decision.deadline.toISOString(),
+                  visitDate: decision.visitDate.toISOString(),
+                  participants: decision.participants,
+                  votes: decision.votes?.map((vote) => ({
+                    userId: vote.userId,
+                    submittedAt: vote.submittedAt.toISOString(),
+                    hasRankings: vote.rankings.length > 0,
+                  })),
+                  result: decision.result
+                    ? {
+                        restaurantId: decision.result.restaurantId.toString(),
+                        selectedAt: decision.result.selectedAt.toISOString(),
+                        reasoning: decision.result.reasoning,
+                      }
+                    : null,
+                  createdAt: decision.createdAt.toISOString(),
+                  updatedAt: decision.updatedAt.toISOString(),
+                };
+                sendData({ type: 'decisionUpdate', data: transformedDecision });
               }
             }
           } catch (error) {
