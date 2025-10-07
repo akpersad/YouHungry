@@ -71,6 +71,71 @@ CLERK_WEBHOOK_SECRET=whsec_...
 2. Check the Vercel function logs to ensure webhook is working
 3. Verify user is created in your MongoDB database
 
+## 📱 Phone Verification Testing (REQUIRED FOR SMS)
+
+### ⚠️ Critical: Phone Verification Testing
+
+Phone verification is now implemented using **Twilio SMS** instead of Clerk. This provides more control and doesn't require Clerk Pro.
+
+### Step 1: Verify Twilio Configuration
+
+**Ensure these environment variables are set:**
+
+```bash
+TWILIO_ACCOUNT_SID=AC...
+TWILIO_AUTH_TOKEN=...
+TWILIO_PHONE_NUMBER=+1...
+```
+
+### Step 2: Test Phone Verification Flow
+
+**After deployment:**
+
+1. **Enable SMS Notifications** in profile settings
+2. **Enter phone number** in SMS Phone Number field (client-side validation happens automatically)
+3. **Click "Verify"** button to send SMS verification code
+4. **Check for SMS** with 6-digit verification code
+5. **Phone number** is automatically verified and updated in profile
+
+### Step 3: Monitor Phone Verification
+
+**Check these logs after testing:**
+
+1. **Vercel Function Logs**: Look for phone verification API calls
+2. **Twilio Console**: Check SMS delivery logs
+3. **Database**: Confirm phone number is saved to user profile
+4. **MongoDB**: Check `phone_verifications` collection for verification attempts
+
+### Troubleshooting Phone Verification
+
+**Common Issues:**
+
+1. **"Phone verification failed"**
+   - Check Twilio credentials are correct
+   - Verify phone number format (+1XXXXXXXXXX)
+   - Ensure Twilio account has sufficient credits
+
+2. **"SMS not received"**
+   - Check Twilio phone number is valid
+   - Verify destination phone number format
+   - Check Twilio console for delivery errors
+   - Ensure Twilio account is not in trial mode (upgrade required)
+
+3. **"Invalid phone number format"**
+   - Phone numbers must be in E.164 format (+1XXXXXXXXXX)
+   - 10-digit US numbers are automatically formatted
+   - International numbers must include country code
+
+### Success Criteria
+
+- [ ] ✅ Phone verification API endpoint working (`/api/user/verify-phone`)
+- [ ] ✅ Twilio SMS delivery successful
+- [ ] ✅ SMS notifications can be enabled
+- [ ] ✅ Phone numbers can be verified via SMS
+- [ ] ✅ Verified phone numbers update user profile automatically
+- [ ] ✅ Phone verification works without "Save Changes" click
+- [ ] ✅ Verification codes expire after 10 minutes
+
 ## 🗄️ MongoDB Atlas Post-Deployment Verification
 
 ### Database Connection Testing

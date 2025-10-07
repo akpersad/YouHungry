@@ -81,12 +81,24 @@ These can be prepared before deployment since they don't require the live URL:
   - [ ] Verify APIs are enabled in Google Cloud Console
   - [ ] Test API keys work with your application logic
 
-- [ ] **Twilio Configuration** (if using SMS)
+- [ ] **Twilio Configuration** (REQUIRED for SMS and Phone Verification)
+
   ```bash
   TWILIO_ACCOUNT_SID=AC...
   TWILIO_AUTH_TOKEN=...
   TWILIO_PHONE_NUMBER=+1...
+  TWILIO_TO_PHONE_NUMBER=+1...  # For development testing only
   ```
+
+  **Phone Verification Setup:**
+  - [ ] **Upgrade to Twilio Paid Plan** (required for phone verification)
+    - [ ] Purchase Twilio paid plan to enable SMS to any number
+    - [ ] Verify account with Twilio (may require credit card)
+    - [ ] Test SMS delivery to your phone number
+  - [ ] **Configure Phone Verification**
+    - [ ] Set up verification code generation (6-digit codes)
+    - [ ] Configure code expiration (10 minutes recommended)
+    - [ ] Test verification flow with your phone number
 
 ### Post-Deployment Environment Variables
 
