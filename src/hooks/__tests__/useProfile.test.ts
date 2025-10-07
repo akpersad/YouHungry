@@ -245,7 +245,7 @@ describe('useProfile', () => {
 
     try {
       await result.current.updateProfile(updateData);
-    } catch (error) {
+    } catch {
       // Expected to throw
     }
 
