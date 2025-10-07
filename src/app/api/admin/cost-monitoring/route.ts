@@ -1,6 +1,6 @@
 import { logger } from '@/lib/logger';
 import { NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/db';
+import { getAPIUsageStats } from '@/lib/api-usage-tracker';
 import { getCacheStats } from '@/lib/optimized-google-places';
 
 interface APICostMetrics {
@@ -28,9 +28,7 @@ interface APICostMetrics {
 
 export async function GET() {
   try {
-    const db = await connectToDatabase();
-
-    // Get API usage from logs (you might want to implement proper API usage tracking)
+    // Get date ranges
     const today = new Date();
     const startOfDay = new Date(
       today.getFullYear(),
@@ -39,90 +37,58 @@ export async function GET() {
     );
     const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
 
-    // Get cache stats
-    const cacheStats = await getCacheStats();
+    // Get actual API usage statistics
+    const [dailyStats, monthlyStats, cacheStats] = await Promise.all([
+      getAPIUsageStats(startOfDay, today),
+      getAPIUsageStats(startOfMonth, today),
+      getCacheStats(),
+    ]);
 
-    // Calculate estimated API usage based on restaurant searches
-    const restaurantSearches = await db
-      .collection('performance_metrics')
-      .countDocuments({
-        url: { $regex: '/restaurants/search' },
-        timestamp: { $gte: startOfDay.getTime() },
-      });
-
-    const monthlySearches = await db
-      .collection('performance_metrics')
-      .countDocuments({
-        url: { $regex: '/restaurants/search' },
-        timestamp: { $gte: startOfMonth.getTime() },
-      });
-
-    // Estimate API calls based on search patterns
-    // Each search typically involves: 1 geocoding + 1 text/nearby search + N place details
-    const estimatedGeocodingCalls = Math.floor(restaurantSearches * 0.8); // 80% need geocoding
-    const estimatedSearchCalls = restaurantSearches;
-    const estimatedDetailsCalls = Math.floor(restaurantSearches * 2.5); // Average 2.5 details per search
-
-    const monthlyGeocodingCalls = Math.floor(monthlySearches * 0.8);
-    const monthlySearchCalls = monthlySearches;
-    const monthlyDetailsCalls = Math.floor(monthlySearches * 2.5);
-
-    // Google Places API pricing (as of 2024)
-    const GOOGLE_PLACES_PRICING = {
-      textSearch: 0.032, // $32 per 1000 requests
-      nearbySearch: 0.032,
-      placeDetails: 0.017, // $17 per 1000 requests
-      geocoding: 0.005, // $5 per 1000 requests
-      addressValidation: 0.005,
+    // Extract call counts by type
+    const dailyUsage = {
+      textSearch: dailyStats.byType.google_places_text_search?.count || 0,
+      nearbySearch: dailyStats.byType.google_places_nearby_search?.count || 0,
+      placeDetails: dailyStats.byType.google_places_details?.count || 0,
+      geocoding: dailyStats.byType.google_geocoding?.count || 0,
+      addressValidation:
+        dailyStats.byType.google_address_validation?.count || 0,
+      mapsLoads: dailyStats.byType.google_maps_load?.count || 0,
     };
 
-    // const GOOGLE_MAPS_PRICING = {
-    //   mapsLoads: 0.007, // $7 per 1000 loads
-    // };
-
-    // Calculate costs
-    const dailyCosts = {
-      geocoding:
-        (estimatedGeocodingCalls / 1000) * GOOGLE_PLACES_PRICING.geocoding,
-      textSearch:
-        (estimatedSearchCalls / 1000) * GOOGLE_PLACES_PRICING.textSearch,
-      placeDetails:
-        (estimatedDetailsCalls / 1000) * GOOGLE_PLACES_PRICING.placeDetails,
+    const monthlyUsage = {
+      textSearch: monthlyStats.byType.google_places_text_search?.count || 0,
+      nearbySearch: monthlyStats.byType.google_places_nearby_search?.count || 0,
+      placeDetails: monthlyStats.byType.google_places_details?.count || 0,
+      geocoding: monthlyStats.byType.google_geocoding?.count || 0,
+      addressValidation:
+        monthlyStats.byType.google_address_validation?.count || 0,
+      mapsLoads: monthlyStats.byType.google_maps_load?.count || 0,
     };
 
-    const monthlyCosts = {
-      geocoding:
-        (monthlyGeocodingCalls / 1000) * GOOGLE_PLACES_PRICING.geocoding,
-      textSearch:
-        (monthlySearchCalls / 1000) * GOOGLE_PLACES_PRICING.textSearch,
-      placeDetails:
-        (monthlyDetailsCalls / 1000) * GOOGLE_PLACES_PRICING.placeDetails,
-    };
+    // Calculate total costs (already calculated by getAPIUsageStats)
+    const dailyTotal = dailyStats.totalCost;
+    const monthlyTotal = monthlyStats.totalCost;
 
-    const dailyTotal = Object.values(dailyCosts).reduce(
-      (sum, cost) => sum + cost,
-      0
-    );
-    const monthlyTotal = Object.values(monthlyCosts).reduce(
-      (sum, cost) => sum + cost,
-      0
-    );
-
-    // Calculate savings from caching (assuming 70% cache hit rate)
+    // Calculate potential savings from caching
+    // This is an estimate based on cache hit rate
+    // If we had 70% cache hit rate, we would have made 70% more API calls without caching
     const cacheSavingsRate = cacheStats.hitRate / 100;
-    // const dailySavings = dailyTotal * cacheSavingsRate;
-    const monthlySavings = monthlyTotal * cacheSavingsRate;
+    const potentialAdditionalCalls =
+      monthlyStats.totalCalls / (1 - cacheSavingsRate) -
+      monthlyStats.totalCalls;
+    const monthlySavings =
+      (potentialAdditionalCalls / monthlyStats.totalCalls) * monthlyTotal;
 
     const metrics: APICostMetrics = {
       googlePlaces: {
-        textSearch: estimatedSearchCalls,
-        nearbySearch: Math.floor(restaurantSearches * 0.3), // Estimate 30% nearby searches
-        placeDetails: estimatedDetailsCalls,
-        geocoding: estimatedGeocodingCalls,
-        addressValidation: Math.floor(restaurantSearches * 0.1), // Estimate 10% need validation
+        textSearch: monthlyUsage.textSearch,
+        nearbySearch: monthlyUsage.nearbySearch,
+        placeDetails: monthlyUsage.placeDetails,
+        geocoding: monthlyUsage.geocoding,
+        addressValidation: monthlyUsage.addressValidation,
       },
       googleMaps: {
-        mapsLoads: Math.floor(restaurantSearches * 0.2), // Estimate 20% load maps
+        mapsLoads: monthlyUsage.mapsLoads,
       },
       cache: {
         hitRate: cacheStats.hitRate,
@@ -132,16 +98,17 @@ export async function GET() {
       estimatedCosts: {
         daily: dailyTotal,
         monthly: monthlyTotal,
-        savings: monthlySavings,
+        savings: isFinite(monthlySavings) ? monthlySavings : 0,
       },
     };
 
     logger.debug('API cost monitoring data:', {
-      restaurantSearches,
-      monthlySearches,
+      dailyUsage,
+      monthlyUsage,
       cacheStats,
-      dailyCosts,
-      monthlyCosts,
+      dailyTotal,
+      monthlyTotal,
+      monthlySavings,
     });
 
     return NextResponse.json({

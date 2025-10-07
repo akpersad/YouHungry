@@ -185,6 +185,7 @@ export async function searchRestaurantsOptimized(
     {
       ttl: 7 * 24 * 60 * 60 * 1000, // 7 days
       staleWhileRevalidate: true,
+      apiType: 'google_places_text_search',
     }
   );
 }
@@ -256,6 +257,7 @@ export async function searchRestaurantsByLocationOptimized(
     {
       ttl: 7 * 24 * 60 * 60 * 1000, // 7 days
       staleWhileRevalidate: true,
+      apiType: 'google_places_nearby_search',
     }
   );
 }
@@ -312,6 +314,7 @@ export async function geocodeAddressOptimized(
     {
       ttl: 90 * 24 * 60 * 60 * 1000, // 90 days - addresses don't change often
       staleWhileRevalidate: false,
+      apiType: 'google_geocoding',
     }
   );
 }
@@ -412,6 +415,7 @@ export async function getRestaurantDetailsBatch(
         {
           ttl: 30 * 24 * 60 * 60 * 1000, // 30 days
           staleWhileRevalidate: true,
+          apiType: 'google_places_details',
         }
       );
     });

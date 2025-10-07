@@ -264,11 +264,29 @@ export async function withCache<T>(
   key: string,
   cacheType: string,
   fetchFn: () => Promise<T>,
-  options?: { ttl?: number; staleWhileRevalidate?: boolean }
+  options?: {
+    ttl?: number;
+    staleWhileRevalidate?: boolean;
+    apiType?: string;
+  }
 ): Promise<T> {
   // Try to get from cache first
   const cached = await apiCache.get<T>(key, cacheType);
   if (cached) {
+    // Track cache hit if API type is provided
+    if (options?.apiType) {
+      // Lazy import to avoid circular dependencies
+      import('./api-usage-tracker')
+        .then(({ trackAPIUsage }) => {
+          trackAPIUsage(
+            options.apiType as import('./api-usage-tracker').APIType,
+            true
+          );
+        })
+        .catch((err) => {
+          logger.error('Failed to track API usage (cache hit):', err);
+        });
+    }
     return cached;
   }
 
@@ -276,6 +294,22 @@ export async function withCache<T>(
     // Fetch fresh data
     const data = await fetchFn();
     await apiCache.set(key, data, cacheType, options?.ttl);
+
+    // Track actual API call if API type is provided
+    if (options?.apiType) {
+      // Lazy import to avoid circular dependencies
+      import('./api-usage-tracker')
+        .then(({ trackAPIUsage }) => {
+          trackAPIUsage(
+            options.apiType as import('./api-usage-tracker').APIType,
+            false
+          );
+        })
+        .catch((err) => {
+          logger.error('Failed to track API usage (API call):', err);
+        });
+    }
+
     return data;
   } catch (error) {
     // If fetch fails and we have stale data, return it
