@@ -738,6 +738,57 @@ This document tracks all completed items, organized by completion date and categ
   - [x] **Clerk User Sync** - Implemented temporary user sync process for existing Clerk users ✅ COMPLETED
   - [x] **Documentation Updates** - Updated all relevant documentation to reflect completed work ✅ COMPLETED
 
+### Epic 7 Story 6 Completed: User Profile Management ✅ COMPLETED
+
+- [x] **Profile Page Route** - Complete profile page at `/profile` with comprehensive user settings ✅ COMPLETED
+  - [x] **Profile Page Component** - Full-featured profile management interface with form validation ✅ COMPLETED
+  - [x] **Profile Picture Upload** - Vercel Blob integration for profile picture management ✅ COMPLETED
+  - [x] **Phone Number Management** - Clerk integration for phone number verification ✅ COMPLETED
+  - [x] **SMS Preferences** - SMS opt-in/opt-out toggle with clear explanations ✅ COMPLETED
+  - [x] **Notification Preferences** - Per-group notification settings interface ✅ COMPLETED
+  - [x] **Location Settings** - Default location and location preferences management ✅ COMPLETED
+  - [x] **Push Preferences** - Push notification preferences in profile settings ✅ COMPLETED
+  - [x] **Profile Validation** - Comprehensive validation and error handling ✅ COMPLETED
+
+- [x] **API Endpoints** - Complete profile management API with proper validation ✅ COMPLETED
+  - [x] **Profile API** - `/api/user/profile` endpoint for GET and PUT operations ✅ COMPLETED
+  - [x] **Profile Picture API** - `/api/user/profile/picture` endpoint for upload/delete ✅ COMPLETED
+  - [x] **Input Validation** - Comprehensive validation with Zod schemas ✅ COMPLETED
+  - [x] **Error Handling** - Proper error responses and user feedback ✅ COMPLETED
+  - [x] **File Upload Validation** - File type, size, and format validation ✅ COMPLETED
+
+- [x] **React Hook Integration** - Custom useProfile hook with TanStack Query ✅ COMPLETED
+  - [x] **useProfile Hook** - Complete profile management hook with mutations ✅ COMPLETED
+  - [x] **useToast Hook** - Toast notification hook wrapping Sonner ✅ COMPLETED
+  - [x] **State Management** - Optimistic updates and error handling ✅ COMPLETED
+  - [x] **Loading States** - Proper loading states for all operations ✅ COMPLETED
+
+- [x] **UI Components** - Complete profile management interface ✅ COMPLETED
+  - [x] **Label Component** - Form label component with accessibility ✅ COMPLETED
+  - [x] **Switch Component** - Toggle switch component for preferences ✅ COMPLETED
+  - [x] **Profile Form** - Comprehensive profile editing form ✅ COMPLETED
+  - [x] **Picture Upload** - Drag-and-drop profile picture upload ✅ COMPLETED
+  - [x] **Preference Toggles** - Notification and SMS preference toggles ✅ COMPLETED
+
+- [x] **Comprehensive Testing** - Full test coverage for profile functionality ✅ COMPLETED
+  - [x] **Profile Page Tests** - 12 comprehensive test cases for profile page component ✅ COMPLETED
+  - [x] **Profile Hook Tests** - 6 comprehensive test cases for useProfile hook ✅ COMPLETED
+  - [x] **API Endpoint Tests** - Profile and picture upload API endpoint tests ✅ COMPLETED
+  - [x] **Component Tests** - Label and Switch component tests ✅ COMPLETED
+  - [x] **Integration Tests** - End-to-end profile management workflow testing ✅ COMPLETED
+
+- [x] **Vercel Blob Integration** - Complete file upload system ✅ COMPLETED
+  - [x] **Blob Configuration** - Vercel Blob setup with proper environment variables ✅ COMPLETED
+  - [x] **File Upload Service** - Profile picture upload with validation ✅ COMPLETED
+  - [x] **File Management** - Upload, delete, and URL management ✅ COMPLETED
+  - [x] **Error Handling** - File upload error handling and user feedback ✅ COMPLETED
+
+- [x] **Documentation Updates** - Complete profile management documentation ✅ COMPLETED
+  - [x] **Implementation Summary** - Updated epic7-implementation-summary.md with Story 6 ✅ COMPLETED
+  - [x] **Testing Instructions** - Profile management testing guide ✅ COMPLETED
+  - [x] **API Documentation** - Profile API endpoint documentation ✅ COMPLETED
+  - [x] **Component Documentation** - Profile components and hooks documentation ✅ COMPLETED
+
 - [x] **Epic 3 Story 2: Group Creation & Management** - Complete group management functionality with creation, editing, member management, and admin privileges ✅ COMPLETED
   - [x] **Database Schema & Types** - Implemented Group collection with proper relationships and validation ✅ COMPLETED
   - [x] **REST API Endpoints** - Created comprehensive API for group CRUD operations (GET, POST, PUT, DELETE, invite, promote, remove, leave) ✅ COMPLETED
@@ -778,7 +829,7 @@ This document tracks all completed items, organized by completion date and categ
 - **Epic 4: Group Decision Making**: 100% complete ✅ (All 3 stories completed: Tiered Choice System, Random Selection for Groups, Decision Management)
 - **Epic 5: Mobile-First Experience**: 100% complete ✅ (All 4 stories completed: Mobile UI Optimization, PWA Implementation, Performance Optimization, Map View Implementation)
 - **Epic 6: Admin Panel & Monitoring**: 28% complete ✅ (Stories 1 & 2 completed: Admin Panel Foundation, Cost Monitoring Dashboard)
-- **Epic 7: Notifications & Communication**: 100% complete ✅ (All 5 stories completed: SMS Integration, In-App Notifications, Toast Notifications, Push Notifications, Email Notifications)
+- **Epic 7: Notifications & Communication**: 100% complete ✅ (All 6 stories completed: SMS Integration, In-App Notifications, Toast Notifications, Push Notifications, Email Notifications, User Profile Management)
 - **Epic 8: Polish & Optimization**: 0% complete
 - **Epic 9: Deployment & Launch**: 0% complete
 - **Epic 10: Future Enhancements**: 0% complete

@@ -1,5 +1,11 @@
 import React from 'react';
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import {
+  render,
+  screen,
+  waitFor,
+  fireEvent,
+  act,
+} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { CreateGroupForm } from '../CreateGroupForm';
 
@@ -10,7 +16,10 @@ describe('CreateGroupForm', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     // Make mockOnSubmit return a resolved promise by default to avoid act() warnings
-    mockOnSubmit.mockResolvedValue(undefined);
+    mockOnSubmit.mockImplementation(async () => {
+      // Simulate a small delay to allow React to process state updates
+      await new Promise((resolve) => setTimeout(resolve, 10));
+    });
   });
 
   it('should render form fields', () => {
@@ -150,7 +159,10 @@ describe('CreateGroupForm', () => {
     await user.type(descriptionInput, 'A test group description');
 
     const submitButton = screen.getByRole('button', { name: 'Create Group' });
-    await user.click(submitButton);
+
+    await act(async () => {
+      await user.click(submitButton);
+    });
 
     await waitFor(() => {
       expect(mockOnSubmit).toHaveBeenCalledWith({
@@ -177,7 +189,10 @@ describe('CreateGroupForm', () => {
     await user.type(nameInput, 'Test Group');
 
     const submitButton = screen.getByRole('button', { name: 'Create Group' });
-    await user.click(submitButton);
+
+    await act(async () => {
+      await user.click(submitButton);
+    });
 
     await waitFor(() => {
       expect(mockOnSubmit).toHaveBeenCalledWith({
@@ -206,7 +221,10 @@ describe('CreateGroupForm', () => {
     await user.type(descriptionInput, '  A test group description  ');
 
     const submitButton = screen.getByRole('button', { name: 'Create Group' });
-    await user.click(submitButton);
+
+    await act(async () => {
+      await user.click(submitButton);
+    });
 
     await waitFor(() => {
       expect(mockOnSubmit).toHaveBeenCalledWith({
@@ -219,19 +237,33 @@ describe('CreateGroupForm', () => {
   it('should call onClose when cancel button is clicked', async () => {
     const user = userEvent.setup();
 
+    // Create a fresh mock function for this test to avoid interference
+    const mockOnCloseForTest = jest.fn();
+    const mockOnSubmitForTest = jest.fn().mockImplementation(async () => {
+      // Don't call onClose in this test - just return without doing anything
+      return Promise.resolve();
+    });
+
     render(
       <CreateGroupForm
         isOpen={true}
-        onClose={mockOnClose}
-        onSubmit={mockOnSubmit}
+        onClose={mockOnCloseForTest}
+        onSubmit={mockOnSubmitForTest}
         isLoading={false}
       />
     );
 
+    // Verify that onClose hasn't been called yet
+    expect(mockOnCloseForTest).not.toHaveBeenCalled();
+
     const cancelButton = screen.getByRole('button', { name: 'Cancel' });
     await user.click(cancelButton);
 
-    expect(mockOnClose).toHaveBeenCalledTimes(1);
+    // Wait a bit to ensure all async operations complete
+    await new Promise((resolve) => setTimeout(resolve, 10));
+
+    expect(mockOnCloseForTest).toHaveBeenCalledTimes(1);
+    expect(mockOnSubmitForTest).not.toHaveBeenCalled();
   });
 
   it('should disable form when submitting', async () => {
@@ -515,7 +547,10 @@ describe('CreateGroupForm', () => {
     await user.click(addButton);
 
     const submitButton = screen.getByRole('button', { name: 'Create Group' });
-    await user.click(submitButton);
+
+    await act(async () => {
+      await user.click(submitButton);
+    });
 
     await waitFor(() => {
       expect(mockOnSubmit).toHaveBeenCalledWith({
@@ -543,7 +578,10 @@ describe('CreateGroupForm', () => {
     await user.type(nameInput, 'Test Group');
 
     const submitButton = screen.getByRole('button', { name: 'Create Group' });
-    await user.click(submitButton);
+
+    await act(async () => {
+      await user.click(submitButton);
+    });
 
     await waitFor(() => {
       expect(mockOnSubmit).toHaveBeenCalledWith({

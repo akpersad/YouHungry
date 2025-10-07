@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "node scripts/check-server.js 3000 && next dev --turbopack",
+    "dev:force": "next dev --turbopack",
+    "dev:kill": "lsof -ti:3000 | xargs kill -9",
     "build": "next build --turbopack",
     "build:webpack": "next build",
     "analyze": "ANALYZE=true npm run build",
@@ -36,6 +38,7 @@
     "@hookform/resolvers": "^5.2.2",
     "@tanstack/react-query": "^5.90.2",
     "@tanstack/react-query-devtools": "^5.90.2",
+    "@vercel/blob": "^2.0.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "critters": "^0.0.23",

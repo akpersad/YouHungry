@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
   SignInButton as ClerkSignInButton,
@@ -14,9 +14,34 @@ interface AuthButtonsProps {
 }
 
 export function AuthButtons({ className, children }: AuthButtonsProps) {
-  // Check if we're in development mode
-  const isDevelopment =
-    typeof window !== 'undefined' && window.location.hostname === 'localhost';
+  const [isDevelopment, setIsDevelopment] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+    setIsDevelopment(window.location.hostname === 'localhost');
+  }, []);
+
+  // Show loading state during hydration to prevent mismatch
+  if (!isClient) {
+    return (
+      <div
+        className={`flex flex-col sm:flex-row gap-4 justify-center ${className || ''}`}
+      >
+        <Button size="lg" className="w-full sm:w-auto" disabled>
+          Get Started
+        </Button>
+        <Button
+          variant="outline"
+          size="lg"
+          className="w-full sm:w-auto"
+          disabled
+        >
+          Sign In
+        </Button>
+      </div>
+    );
+  }
 
   if (isDevelopment) {
     // Development mode: Use Clerk's out-of-the-box modals

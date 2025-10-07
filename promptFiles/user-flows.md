@@ -222,17 +222,109 @@ Notes: Love it
 
 ## 6. Profile & Settings
 
-### 6.1 Profile Management
+### 6.1 Profile Management (IMPLEMENTED ✅)
 
-1. **Profile Page** → User views current profile information
-2. **Edit Profile** → User can update name, city, profile picture
-3. **SMS Settings** → User can toggle SMS notifications per group
-4. **Location Settings** → User can update default location
-5. **Save Changes** → Profile updates are saved
+1. **Profile Page** → User navigates to `/profile` to view comprehensive profile settings
+2. **Profile Information** → User can update name, username, city, and state
+3. **Profile Picture Management** → User can upload, view, and remove profile pictures using Vercel Blob
+4. **Phone Number Management** → User can manage phone number with verification flow
+5. **SMS Preferences** → User can toggle SMS notifications with clear explanations
+6. **Notification Preferences** → User can configure per-group notification settings
+7. **Location Settings** → User can set default location and location preferences
+8. **Push Notification Settings** → User can configure push notification preferences
+9. **Save Changes** → All profile updates are saved with validation and error handling
 
-Notes: Love it
+**Key Features Implemented**:
 
-### 6.2 History View
+- Complete profile page at `/profile` route with comprehensive user settings
+- Vercel Blob integration for secure profile picture uploads and management
+- Phone number verification flow with Twilio SMS integration
+- SMS opt-in/opt-out toggle with clear explanations and benefits
+- Per-group notification preferences interface
+- Location settings and default location management
+- Push notification preferences in profile settings
+- Comprehensive validation and error handling
+- Real-time updates with TanStack Query integration
+- Mobile-responsive design with accessibility features
+
+Notes: ✅ COMPLETED - Complete user profile management system with picture uploads, preferences, and settings
+
+### 6.2 Phone Number Verification Flow (IMPLEMENTED ✅)
+
+**Initial Setup (No Verified Number)**:
+
+1. **Profile Page** → User sees "Enable SMS Notifications" toggle
+2. **Toggle SMS** → User enables SMS notifications
+3. **Phone Input Field** → SMS phone number input field appears
+4. **Enter Number** → User enters phone number (formatted as "1 (XXX) XXX-XXXX")
+5. **Click Verify** → User clicks "Verify" button to start verification
+
+**Verification Process**: 6. **Send Code** → System sends 6-digit verification code via Twilio SMS 7. **Verification UI** → Blue verification panel appears with:
+
+- Code input field (6 digits)
+- Submit button
+- Cancel button
+- Resend code option
+
+8. **Enter Code** → User enters 6-digit verification code
+9. **Submit Code** → User clicks "Submit" to verify
+10. **Verification Success** → System:
+    - Updates phone number in database
+    - Shows green "✓ Phone number verified and updated automatically!" message
+    - Moves verified number to main phone number field
+    - Shows "Verified" badge next to phone number
+11. **Auto-close Panel** → Verification panel closes, user can now save profile
+
+**Editing Verified Number**:
+
+1. **Edit Number** → User modifies their verified phone number
+2. **Verify Badge Changes** → "Verified" badge changes to "Verify" button
+3. **Re-verification** → User must verify the new number before saving
+4. **Same Flow** → Follows same verification process as initial setup
+
+**Cancel Verification**:
+
+1. **Cancel Button** → User can click "Cancel" during verification
+2. **Clear State** → System clears verification code and pending number
+3. **Return to Edit** → User can continue editing without verification
+
+**Resend Code**:
+
+1. **Resend Button** → User can click "Resend Code" if code wasn't received
+2. **New Code** → System sends new 6-digit code via SMS
+3. **Continue Verification** → User enters new code to verify
+
+**Key Features Implemented**:
+
+- Real-time phone number formatting with US format (1 (XXX) XXX-XXXX)
+- Twilio SMS integration for verification code delivery
+- 6-digit verification code system
+- Verification state management (idle → validating → pending → verifying → verified)
+- Inline verification UI with clear instructions
+- Resend code functionality
+- Cancel verification option
+- Visual status indicators (loading, verified, pending)
+- Automatic profile update on successful verification
+- Phone number normalization and validation
+- Error handling for failed verification attempts
+- Development mode displays verification code in toast for testing
+
+**API Endpoints**:
+
+- `POST /api/user/verify-phone` - Sends verification code via SMS
+- `PUT /api/user/verify-phone` - Verifies code and updates phone number
+
+**Validation Rules**:
+
+- Phone number must be 10-15 digits
+- Must follow international E.164 format
+- US numbers automatically formatted with country code
+- Verification code must be exactly 6 digits
+- Code expires based on Twilio settings
+
+Notes: ✅ COMPLETED - Full phone verification flow with Twilio SMS integration
+
+### 6.3 History View
 
 1. **History Page** → User sees chronological list of decisions with both calendar and list views
 2. **View Options** → User can toggle between:

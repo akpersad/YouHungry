@@ -26,3 +26,16 @@ export const SignInButton = ({ children }) => children;
 export const SignOutButton = ({ children }) => children;
 export const UserButton = () => null;
 export const ClerkProvider = ({ children }) => children;
+
+// Server-side exports
+export const auth = jest.fn(() => ({
+  userId: 'test-user-id',
+  sessionId: 'test-session-id',
+}));
+
+export const currentUser = jest.fn(() => ({
+  id: 'test-user-id',
+  emailAddresses: [{ emailAddress: 'test@example.com' }],
+  firstName: 'Test',
+  lastName: 'User',
+}));

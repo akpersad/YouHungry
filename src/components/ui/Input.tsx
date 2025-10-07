@@ -27,6 +27,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             'input-base',
             {
               'input-error': error,
+              'input-disabled': props.disabled,
             },
             className
           )}

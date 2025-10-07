@@ -56,6 +56,20 @@ Epic 7 Stories 2-4 have been **100% completed**, implementing a comprehensive no
 - **React Hook Integration**: TanStack Query integration for email notifications ✅ COMPLETED
 - **Comprehensive Testing**: 51 passing tests covering all email functionality ✅ COMPLETED
 
+### Story 6: User Profile Management ✅ COMPLETED
+
+- **Profile Page Route**: Complete profile page at `/profile` with comprehensive user settings ✅ COMPLETED
+- **Profile Picture Upload**: Vercel Blob integration for profile picture management ✅ COMPLETED
+- **Phone Number Management**: Clerk integration for phone number verification ✅ COMPLETED
+- **SMS Preferences**: SMS opt-in/opt-out toggle with clear explanations ✅ COMPLETED
+- **Notification Preferences**: Per-group notification settings interface ✅ COMPLETED
+- **Location Settings**: Default location and location preferences management ✅ COMPLETED
+- **Push Preferences**: Push notification preferences in profile settings ✅ COMPLETED
+- **Profile Validation**: Comprehensive validation and error handling ✅ COMPLETED
+- **API Endpoints**: Complete profile management API with proper validation ✅ COMPLETED
+- **React Hook Integration**: Custom useProfile hook with TanStack Query ✅ COMPLETED
+- **Comprehensive Testing**: 19 passing tests covering profile functionality ✅ COMPLETED
+
 ## 🏗️ Architecture
 
 ### Notification Service Integration
@@ -135,6 +149,8 @@ interface User {
 - `src/app/s/[shortCode]/route.ts` - Short URL resolution endpoint
 - `src/app/api/email/route.ts` - Email notification management API
 - `src/app/api/email/unsubscribe/route.ts` - Email unsubscribe endpoint
+- `src/app/api/user/profile/route.ts` - User profile management API
+- `src/app/api/user/profile/picture/route.ts` - Profile picture upload/delete API
 
 ### React Hooks
 
@@ -143,12 +159,20 @@ interface User {
 - `src/hooks/useEmailNotifications.ts` - Email notification hook with TanStack Query integration
 - `src/hooks/usePushNotifications.ts` - Enhanced push notification hook (updated)
 - `src/hooks/useURLShortener.ts` - URL shortening hook for client-side usage
+- `src/hooks/useProfile.ts` - Profile management hook with TanStack Query integration
+- `src/hooks/useToast.ts` - Toast notification hook wrapping Sonner
 
 ### UI Components
 
 - `src/components/ui/NotificationBell.tsx` - Animated notification bell with unread count
 - `src/components/ui/NotificationPanel.tsx` - Comprehensive notification management panel
+- `src/components/ui/Label.tsx` - Form label component
+- `src/components/ui/Switch.tsx` - Toggle switch component
 - `src/app/layout.tsx` - Added Toaster component for toast notifications (updated)
+
+### Pages
+
+- `src/app/profile/page.tsx` - Complete user profile management page
 
 ### Test Pages
 
@@ -165,6 +189,7 @@ interface User {
 - **SMS Notifications**: 13/13 tests passing
 - **Toast Notifications**: 18/18 tests passing
 - **Email Notifications**: 51/51 tests passing
+- **Profile Management**: 19/19 tests passing
 - **Integration Tests**: Comprehensive end-to-end testing
 - **Error Handling**: Graceful failure scenarios tested
 
@@ -176,6 +201,10 @@ interface User {
 - `src/__tests__/useEmailNotifications.test.ts` - Email notification hook tests
 - `src/app/api/__tests__/email.test.ts` - Email notification API endpoint tests
 - `src/app/api/__tests__/email-unsubscribe.test.ts` - Email unsubscribe API endpoint tests
+- `src/app/api/user/profile/__tests__/route.test.ts` - Profile API endpoint tests
+- `src/app/api/user/profile/picture/__tests__/route.test.ts` - Profile picture API endpoint tests
+- `src/hooks/__tests__/useProfile.test.ts` - Profile management hook tests
+- `src/app/profile/__tests__/page.test.tsx` - Profile page component tests
 
 ## 🔧 Configuration
 
@@ -191,6 +220,9 @@ TWILIO_MESSAGING_SERVICE_SID=MG...  # Optional: Messaging Service SID
 # Resend Configuration
 RESEND_API_KEY=re_...  # Required for email notifications
 FROM_EMAIL=noreply@yourdomain.com  # Your verified sender email
+
+# Vercel Blob Configuration
+BLOB_READ_WRITE_TOKEN=vercel_blob_rw_...  # Required for profile picture uploads
 
 # Application Configuration
 NEXT_PUBLIC_APP_URL=http://localhost:3000  # Required for URL shortening
@@ -308,6 +340,20 @@ if (config.data?.valid) {
 5. Test clicking the shortened URL to ensure it redirects correctly
 6. Verify SMS notifications now include shortened URLs for group decisions
 
+### 7. Profile Management
+
+1. Navigate to `/profile`
+2. Test profile picture upload by clicking "Upload Picture"
+3. Select an image file (JPEG, PNG, or WebP, max 5MB)
+4. Verify the image uploads and displays correctly
+5. Test profile picture removal by clicking "Remove"
+6. Update profile information (name, username, city, state)
+7. Test notification preferences toggles
+8. Test SMS opt-in/opt-out functionality
+9. Test location settings and default location
+10. Click "Save Changes" to persist all updates
+11. Verify all changes are saved and reflected in the UI
+
 ## 🎨 UI/UX Features
 
 ### Notification Bell
@@ -404,14 +450,25 @@ if (config.data?.valid) {
 
 ## 📝 Conclusion
 
-Epic 7 Stories 2-4 have been successfully implemented with a comprehensive, production-ready notification system. The implementation provides:
+Epic 7 has been **100% completed** with a comprehensive, production-ready notification and profile management system. The implementation provides:
 
 - ✅ **Complete SMS Integration** with Twilio and admin alerts
 - ✅ **Real-time In-App Notifications** with database persistence
 - ✅ **Enhanced Push Notifications** with iOS compatibility
 - ✅ **Rich Toast Notifications** with React Hot Toast
+- ✅ **Email Notifications** with Resend integration and rich templates
+- ✅ **URL Shortener Service** for SMS-friendly links
+- ✅ **User Profile Management** with Vercel Blob integration
 - ✅ **Unified Notification Service** orchestrating all channels
-- ✅ **Comprehensive Testing** with 31 passing tests
+- ✅ **Comprehensive Testing** with 101 passing tests
 - ✅ **Production-Ready Architecture** with error handling and monitoring
 
-The notification system is now ready for production deployment and provides users with timely, relevant updates across all communication channels while maintaining privacy, security, and performance standards.
+The notification and profile management system is now ready for production deployment and provides users with:
+
+- Timely, relevant updates across all communication channels
+- Complete profile management with picture uploads
+- Granular notification preferences
+- Location and SMS settings
+- Privacy, security, and performance standards
+
+**Epic 7 Status: ✅ COMPLETED**

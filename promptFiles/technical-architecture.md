@@ -22,7 +22,7 @@ This document outlines the technical architecture, technology stack, and impleme
 - **API Layer**: REST architecture + GraphQL ✅
 - **Data Models**: Complete TypeScript interfaces ✅
 - **API Integration**: Google Places API ✅, Google Address Validation API ✅, Twilio (planned)
-- **File Storage**: Vercel Blob (for user uploads) (planned)
+- **File Storage**: Vercel Blob for user profile picture uploads ✅
 
 ### Development & Deployment
 
@@ -304,6 +304,13 @@ type Decision {
 - `GET /api/user/current` - Get current user's MongoDB ObjectId
 - `GET /api/user/profile` - Get user profile (via Clerk)
 - `PUT /api/user/profile` - Update user profile (via Clerk)
+
+##### Profile Management Routes (UPDATED ✅ IMPLEMENTED)
+
+- `GET /api/user/profile` - Get user profile information
+- `PUT /api/user/profile` - Update user profile information
+- `POST /api/user/profile/picture` - Upload profile picture using Vercel Blob
+- `DELETE /api/user/profile/picture` - Remove profile picture
 
 **Key Authentication Updates Implemented**:
 
@@ -646,6 +653,7 @@ The following environment variables are configured and ready for use:
 - **TWILIO_ACCOUNT_SID**: Twilio account SID for SMS notifications
 - **TWILIO_AUTH_TOKEN**: Twilio authentication token
 - **TWILIO_PHONE_NUMBER**: Twilio phone number for SMS sending
+- **BLOB_READ_WRITE_TOKEN**: Vercel Blob token for profile picture uploads
 
 #### Application Configuration
 
