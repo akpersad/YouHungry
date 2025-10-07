@@ -444,6 +444,26 @@ body {
   --tw-ring-opacity: 0.3;
 }
 
+/* Input Disabled States */
+.input-disabled {
+  background: var(--bg-quaternary) !important;
+  color: var(--text-tertiary) !important;
+  border-color: var(--bg-quinary) !important;
+  cursor: not-allowed !important;
+  opacity: 0.7;
+}
+
+.input-disabled:hover {
+  border-color: var(--bg-quinary) !important;
+  box-shadow: none !important;
+}
+
+.input-disabled:focus {
+  outline: none !important;
+  box-shadow: none !important;
+  border-color: var(--bg-quinary) !important;
+}
+
 /* Input Success States */
 .input-success {
   border-color: var(--color-success);
