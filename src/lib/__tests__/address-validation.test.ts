@@ -286,9 +286,9 @@ describe('Address Validation API', () => {
           residential: true,
         },
         verdict: {
-          inputGranularity: 'PREMISE',
-          validationGranularity: 'PREMISE',
-          geocodeGranularity: 'PREMISE',
+          inputGranularity: 'PREMISE' as const,
+          validationGranularity: 'PREMISE' as const,
+          geocodeGranularity: 'PREMISE' as const,
           addressComplete: true,
           hasUnconfirmedComponents: false,
           hasInferredComponents: false,
@@ -319,9 +319,9 @@ describe('Address Validation API', () => {
           residential: true,
         },
         verdict: {
-          inputGranularity: 'PREMISE',
-          validationGranularity: 'PREMISE',
-          geocodeGranularity: 'OTHER',
+          inputGranularity: 'PREMISE' as const,
+          validationGranularity: 'PREMISE' as const,
+          geocodeGranularity: 'OTHER' as const,
           addressComplete: false,
           hasUnconfirmedComponents: false,
           hasInferredComponents: false,
@@ -335,36 +335,8 @@ describe('Address Validation API', () => {
 
   describe('getCoordinatesFromValidation', () => {
     it('should return null (not implemented)', () => {
-      const validationResult = {
-        formattedAddress: '123 Main St, New York, NY',
-        postalAddress: {
-          addressLines: ['123 Main St'],
-          locality: 'New York',
-          administrativeArea: 'NY',
-          postalCode: '10001',
-          regionCode: 'US',
-        },
-        addressComponents: [],
-        missingComponentTypes: [],
-        unconfirmedComponentTypes: [],
-        unresolvedTokens: [],
-        metadata: {
-          business: false,
-          poBox: false,
-          residential: true,
-        },
-        verdict: {
-          inputGranularity: 'PREMISE',
-          validationGranularity: 'PREMISE',
-          geocodeGranularity: 'PREMISE',
-          addressComplete: true,
-          hasUnconfirmedComponents: false,
-          hasInferredComponents: false,
-          hasReplacedComponents: false,
-        },
-      };
-
-      expect(getCoordinatesFromValidation(validationResult)).toBeNull();
+      // Function is currently a stub that takes no arguments and returns null
+      expect(getCoordinatesFromValidation()).toBeNull();
     });
   });
 });

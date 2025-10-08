@@ -50,7 +50,7 @@ describe('Restaurant API Functions', () => {
         mockDbInstance as unknown as ReturnType<typeof db.connectToDatabase>
       );
       mockGooglePlaces.searchRestaurantsWithGooglePlaces.mockResolvedValue([
-        mockGoogleRestaurant,
+        mockGoogleRestaurant as any,
       ]);
 
       const result = await searchRestaurants('pizza', 'New York');
@@ -78,7 +78,7 @@ describe('Restaurant API Functions', () => {
         mockDbInstance as unknown as ReturnType<typeof db.connectToDatabase>
       );
       mockGooglePlaces.searchRestaurantsWithGooglePlaces.mockResolvedValue([
-        mockGoogleRestaurant,
+        mockGoogleRestaurant as any,
       ]);
 
       const result = await searchRestaurants('pizza');
@@ -122,7 +122,7 @@ describe('Restaurant API Functions', () => {
         mockDbInstance as unknown as ReturnType<typeof db.connectToDatabase>
       );
       mockGooglePlaces.searchRestaurantsWithGooglePlaces.mockResolvedValue([
-        mockGoogleRestaurant,
+        mockGoogleRestaurant as any,
       ]);
 
       // Should not throw error, just log it
@@ -135,7 +135,7 @@ describe('Restaurant API Functions', () => {
   describe('searchRestaurantsByCoordinates', () => {
     it('should search restaurants by coordinates successfully', async () => {
       mockGooglePlaces.searchRestaurantsByLocationConsistent.mockResolvedValue([
-        mockGoogleRestaurant,
+        mockGoogleRestaurant as any,
       ]);
 
       const result = await searchRestaurantsByCoordinates(
@@ -188,7 +188,9 @@ describe('Restaurant API Functions', () => {
       mockDb.connectToDatabase.mockResolvedValue(
         mockDbInstance as unknown as ReturnType<typeof db.connectToDatabase>
       );
-      mockGooglePlaces.getPlaceDetails.mockResolvedValue(mockGoogleRestaurant);
+      mockGooglePlaces.getPlaceDetails.mockResolvedValue(
+        mockGoogleRestaurant as any
+      );
 
       const result = await getRestaurantDetails('ChIJN1t_tDeuEmsRUsoyG83frY4');
 
@@ -244,7 +246,7 @@ describe('Restaurant API Functions', () => {
         mockDbInstance as unknown as ReturnType<typeof db.connectToDatabase>
       );
       mockGooglePlaces.searchRestaurantsWithGooglePlaces.mockResolvedValue(
-        restaurants
+        restaurants as any
       );
 
       const result = await searchRestaurantsWithFilters(
@@ -279,7 +281,7 @@ describe('Restaurant API Functions', () => {
         mockDbInstance as unknown as ReturnType<typeof db.connectToDatabase>
       );
       mockGooglePlaces.searchRestaurantsWithGooglePlaces.mockResolvedValue(
-        restaurants
+        restaurants as any
       );
 
       const result = await searchRestaurantsWithFilters(
@@ -319,7 +321,7 @@ describe('Restaurant API Functions', () => {
         mockDbInstance as unknown as ReturnType<typeof db.connectToDatabase>
       );
       mockGooglePlaces.searchRestaurantsWithGooglePlaces.mockResolvedValue(
-        restaurants
+        restaurants as any
       );
 
       const result = await searchRestaurantsWithFilters(
@@ -347,7 +349,7 @@ describe('Restaurant API Functions', () => {
         mockDbInstance as unknown as ReturnType<typeof db.connectToDatabase>
       );
       mockGooglePlaces.searchRestaurantsWithGooglePlaces.mockResolvedValue(
-        restaurants
+        restaurants as any
       );
 
       const result = await searchRestaurantsWithFilters('restaurant');
@@ -382,7 +384,7 @@ describe('Restaurant API Functions', () => {
         mockDbInstance as unknown as ReturnType<typeof db.connectToDatabase>
       );
       mockGooglePlaces.searchRestaurantsWithGooglePlaces.mockResolvedValue(
-        restaurants
+        restaurants as any
       );
 
       const result = await searchRestaurantsWithFilters(

@@ -49,7 +49,7 @@ describe('useProfile', () => {
     mockUseToast.mockReturnValue(mockToast);
     mockUseQueryClient.mockReturnValue({
       invalidateQueries: jest.fn(),
-    });
+    } as any);
   });
 
   afterEach(() => {
@@ -94,12 +94,12 @@ describe('useProfile', () => {
       data: mockProfile,
       isLoading: false,
       error: null,
-    });
+    } as any);
 
     mockUseMutation.mockReturnValue({
       mutateAsync: jest.fn(),
       isPending: false,
-    });
+    } as any);
 
     const wrapper = ({ children }: { children: React.ReactNode }) => {
       return React.createElement(
@@ -124,7 +124,7 @@ describe('useProfile', () => {
       data: null,
       isLoading: false,
       error: null,
-    });
+    } as any);
 
     // Mock the updateProfile mutation to simulate the onSuccess callback
     const mockMutateAsync = jest.fn().mockImplementation(async (data) => {
@@ -141,22 +141,22 @@ describe('useProfile', () => {
     mockUseMutation.mockReturnValueOnce({
       mutateAsync: mockMutateAsync,
       isPending: false,
-    });
+    } as any);
 
     // Mock the other two mutations: uploadPicture, removePicture
     mockUseMutation
       .mockReturnValueOnce({
         mutateAsync: jest.fn(),
         isPending: false,
-      })
+      } as any)
       .mockReturnValueOnce({
         mutateAsync: jest.fn(),
         isPending: false,
-      });
+      } as any);
 
     mockUseQueryClient.mockReturnValue({
       invalidateQueries: mockInvalidateQueries,
-    });
+    } as any);
 
     const wrapper = ({ children }: { children: React.ReactNode }) => {
       return React.createElement(
@@ -194,7 +194,7 @@ describe('useProfile', () => {
       data: null,
       isLoading: false,
       error: null,
-    });
+    } as any);
 
     // Mock the updateProfile mutation to simulate the onError callback
     const mockMutateAsync = jest.fn().mockImplementation(async (data) => {
@@ -215,19 +215,19 @@ describe('useProfile', () => {
       .mockReturnValueOnce({
         mutateAsync: mockMutateAsync,
         isPending: false,
-      })
+      } as any)
       .mockReturnValueOnce({
         mutateAsync: jest.fn(),
         isPending: false,
-      })
+      } as any)
       .mockReturnValueOnce({
         mutateAsync: jest.fn(),
         isPending: false,
-      });
+      } as any);
 
     mockUseQueryClient.mockReturnValue({
       invalidateQueries: jest.fn(),
-    });
+    } as any);
 
     const wrapper = ({ children }: { children: React.ReactNode }) => {
       return React.createElement(
@@ -264,7 +264,7 @@ describe('useProfile', () => {
       data: null,
       isLoading: false,
       error: null,
-    });
+    } as any);
 
     // Mock the uploadPicture mutation to simulate the onSuccess callback
     const mockUploadMutateAsync = jest.fn().mockImplementation(async (file) => {
@@ -282,19 +282,19 @@ describe('useProfile', () => {
       .mockReturnValueOnce({
         mutateAsync: jest.fn(),
         isPending: false,
-      })
+      } as any)
       .mockReturnValueOnce({
         mutateAsync: mockUploadMutateAsync,
         isPending: false,
-      })
+      } as any)
       .mockReturnValueOnce({
         mutateAsync: jest.fn(),
         isPending: false,
-      });
+      } as any);
 
     mockUseQueryClient.mockReturnValue({
       invalidateQueries: mockInvalidateQueries,
-    });
+    } as any);
 
     const wrapper = ({ children }: { children: React.ReactNode }) => {
       return React.createElement(
@@ -328,7 +328,7 @@ describe('useProfile', () => {
       data: null,
       isLoading: false,
       error: null,
-    });
+    } as any);
 
     // Mock the removePicture mutation to simulate the onSuccess callback
     const mockRemoveMutateAsync = jest.fn().mockImplementation(async () => {
@@ -346,19 +346,19 @@ describe('useProfile', () => {
       .mockReturnValueOnce({
         mutateAsync: jest.fn(),
         isPending: false,
-      })
+      } as any)
       .mockReturnValueOnce({
         mutateAsync: jest.fn(),
         isPending: false,
-      })
+      } as any)
       .mockReturnValueOnce({
         mutateAsync: mockRemoveMutateAsync,
         isPending: false,
-      });
+      } as any);
 
     mockUseQueryClient.mockReturnValue({
       invalidateQueries: mockInvalidateQueries,
-    });
+    } as any);
 
     const wrapper = ({ children }: { children: React.ReactNode }) => {
       return React.createElement(
@@ -387,12 +387,12 @@ describe('useProfile', () => {
       data: null,
       isLoading: true,
       error: null,
-    });
+    } as any);
 
     mockUseMutation.mockReturnValue({
       mutateAsync: jest.fn(),
       isPending: true,
-    });
+    } as any);
 
     const wrapper = ({ children }: { children: React.ReactNode }) => {
       return React.createElement(
