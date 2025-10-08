@@ -264,19 +264,19 @@ describe('CollectionView', () => {
       isLoading: true,
       error: null,
       refetch: jest.fn(),
-    });
+    } as any);
 
     mockUseRandomDecision.mockReturnValue({
       mutateAsync: jest.fn(),
       isPending: false,
       error: null,
-    });
+    } as any);
 
     mockUseGroup.mockReturnValue({
       data: undefined,
       isLoading: false,
       error: null,
-    });
+    } as any);
   });
 
   it('renders loading state initially', () => {
@@ -297,7 +297,7 @@ describe('CollectionView', () => {
       isLoading: false,
       error: null,
       refetch: jest.fn(),
-    });
+    } as any);
 
     render(
       <TestQueryProvider>
@@ -321,7 +321,7 @@ describe('CollectionView', () => {
       isLoading: false,
       error: new Error(errorMessage),
       refetch: jest.fn(),
-    });
+    } as any);
 
     render(
       <TestQueryProvider>
@@ -344,7 +344,7 @@ describe('CollectionView', () => {
       isLoading: false,
       error: new Error(errorMessage),
       refetch: jest.fn(),
-    });
+    } as any);
 
     render(
       <TestQueryProvider>
@@ -359,11 +359,11 @@ describe('CollectionView', () => {
 
   it('shows collection not found when collection is null', async () => {
     mockUseCollection.mockReturnValue({
-      data: null,
+      data: undefined,
       isLoading: false,
       error: null,
       refetch: jest.fn(),
-    });
+    } as any);
 
     render(
       <TestQueryProvider>
@@ -382,7 +382,7 @@ describe('CollectionView', () => {
       isLoading: false,
       error: null,
       refetch: jest.fn(),
-    });
+    } as any);
 
     render(
       <TestQueryProvider>
@@ -410,7 +410,7 @@ describe('CollectionView', () => {
       isLoading: false,
       error: null,
       refetch: jest.fn(),
-    });
+    } as any);
 
     render(
       <TestQueryProvider>
@@ -432,7 +432,7 @@ describe('CollectionView', () => {
       isLoading: false,
       error: null,
       refetch: jest.fn(),
-    });
+    } as any);
 
     render(
       <TestQueryProvider>
@@ -453,7 +453,7 @@ describe('CollectionView', () => {
       isLoading: false,
       error: null,
       refetch: jest.fn(),
-    });
+    } as any);
 
     mockUseRandomDecision.mockReturnValue({
       mutateAsync: jest.fn().mockResolvedValue({
@@ -470,7 +470,7 @@ describe('CollectionView', () => {
       }),
       isPending: false,
       error: null,
-    });
+    } as any);
 
     render(
       <TestQueryProvider>
@@ -510,7 +510,7 @@ describe('CollectionView', () => {
       isLoading: false,
       error: null,
       refetch: jest.fn(),
-    });
+    } as any);
 
     render(
       <TestQueryProvider>
@@ -532,7 +532,7 @@ describe('CollectionView', () => {
       isLoading: false,
       error: null,
       refetch: jest.fn(),
-    });
+    } as any);
 
     render(
       <TestQueryProvider>
@@ -556,7 +556,7 @@ describe('CollectionView', () => {
       isLoading: false,
       error: null,
       refetch: jest.fn(),
-    });
+    } as any);
 
     render(
       <TestQueryProvider>
@@ -583,7 +583,7 @@ describe('CollectionView', () => {
       isLoading: false,
       error: null,
       refetch: jest.fn(),
-    });
+    } as any);
 
     render(
       <TestQueryProvider>
@@ -610,7 +610,7 @@ describe('CollectionView', () => {
       isLoading: false,
       error: null,
       refetch: jest.fn(),
-    });
+    } as any);
 
     render(
       <TestQueryProvider>

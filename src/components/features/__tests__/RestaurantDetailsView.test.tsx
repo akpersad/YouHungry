@@ -87,7 +87,6 @@ describe('RestaurantDetailsView', () => {
     render(
       <RestaurantDetailsView
         restaurant={mockRestaurant}
-        onClose={mockOnClose}
         onManage={mockOnManage}
       />
     );
@@ -110,7 +109,6 @@ describe('RestaurantDetailsView', () => {
     render(
       <RestaurantDetailsView
         restaurant={mockRestaurant}
-        onClose={mockOnClose}
         onManage={mockOnManage}
       />
     );
@@ -124,7 +122,6 @@ describe('RestaurantDetailsView', () => {
     render(
       <RestaurantDetailsView
         restaurant={mockRestaurant}
-        onClose={mockOnClose}
         onManage={mockOnManage}
       />
     );
@@ -137,7 +134,6 @@ describe('RestaurantDetailsView', () => {
     render(
       <RestaurantDetailsView
         restaurant={mockRestaurant}
-        onClose={mockOnClose}
         onManage={mockOnManage}
       />
     );
@@ -168,7 +164,6 @@ describe('RestaurantDetailsView', () => {
     render(
       <RestaurantDetailsView
         restaurant={restaurantWithoutOptionalFields}
-        onClose={mockOnClose}
         onManage={mockOnManage}
       />
     );
@@ -189,7 +184,6 @@ describe('RestaurantDetailsView', () => {
     render(
       <RestaurantDetailsView
         restaurant={restaurantWithoutCustomFields}
-        onClose={mockOnClose}
         onManage={mockOnManage}
       />
     );
@@ -213,7 +207,6 @@ describe('RestaurantDetailsView', () => {
     render(
       <RestaurantDetailsView
         restaurant={mockRestaurant}
-        onClose={mockOnClose}
         onManage={mockOnManage}
         showManageButton={true}
       />
@@ -242,7 +235,6 @@ describe('RestaurantDetailsView', () => {
       const { unmount } = render(
         <RestaurantDetailsView
           restaurant={restaurant}
-          onClose={mockOnClose}
           onManage={mockOnManage}
         />
       );
@@ -260,11 +252,7 @@ describe('RestaurantDetailsView', () => {
     const restaurant = { ...mockRestaurant, timeToPickUp: 30 };
 
     render(
-      <RestaurantDetailsView
-        restaurant={restaurant}
-        onClose={mockOnClose}
-        onManage={mockOnManage}
-      />
+      <RestaurantDetailsView restaurant={restaurant} onManage={mockOnManage} />
     );
 
     expect(screen.getByText('30 minutes')).toBeInTheDocument();
@@ -279,7 +267,6 @@ describe('RestaurantDetailsView', () => {
     render(
       <RestaurantDetailsView
         restaurant={restaurantWithSinglePhoto}
-        onClose={mockOnClose}
         onManage={mockOnManage}
       />
     );
@@ -301,7 +288,6 @@ describe('RestaurantDetailsView', () => {
     render(
       <RestaurantDetailsView
         restaurant={restaurantWithNoPhotos}
-        onClose={mockOnClose}
         onManage={mockOnManage}
       />
     );
@@ -324,7 +310,6 @@ describe('RestaurantDetailsView', () => {
     render(
       <RestaurantDetailsView
         restaurant={restaurantWithPartialHours}
-        onClose={mockOnClose}
         onManage={mockOnManage}
       />
     );

@@ -44,6 +44,7 @@ const mockGroup = {
   description: 'A test group',
   memberIds: ['user1', 'user2'],
   adminIds: ['user1'],
+  collectionIds: [],
   members: [
     {
       _id: 'user1',
@@ -63,7 +64,7 @@ const mockGroup = {
 };
 
 const defaultProps = {
-  group: mockGroup,
+  group: mockGroup as any,
   currentUserId: 'user1',
   onUpdateGroup: jest.fn(),
   onInviteUser: jest.fn(),
@@ -158,7 +159,7 @@ describe('GroupView', () => {
       await mockOnInviteFriends(['friend1']);
     } catch (error) {
       // Error should be re-thrown to let modal handle it
-      expect(error.message).toBe('Failed to invite');
+      expect((error as Error).message).toBe('Failed to invite');
     }
   });
 
@@ -324,7 +325,10 @@ describe('GroupView', () => {
     // Check that buttons show loading state
     const buttons = screen.getAllByRole('button');
     buttons.forEach((button) => {
-      if (button.textContent?.includes('Loading') || button.disabled) {
+      if (
+        button.textContent?.includes('Loading') ||
+        (button as HTMLButtonElement).disabled
+      ) {
         // Some buttons should be disabled or show loading
         expect(button).toBeInTheDocument();
       }

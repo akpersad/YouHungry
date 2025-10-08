@@ -1,6 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { RestaurantCard } from '../RestaurantCard';
 import { mockRestaurant } from '@/test-utils/mockData';
+import { Restaurant } from '@/types/database';
 
 describe('RestaurantCard', () => {
   const mockOnAddToCollection = jest.fn();

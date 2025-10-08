@@ -1,10 +1,11 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { RestaurantSearchResults } from '../RestaurantSearchResults';
 import { Restaurant } from '@/types/database';
+import { ObjectId } from 'mongodb';
 
 const mockRestaurants: Restaurant[] = [
   {
-    _id: '507f1f77bcf86cd799439011' as unknown as string,
+    _id: new ObjectId('507f1f77bcf86cd799439011'),
     googlePlaceId: 'ChIJN1t_tDeuEmsRUsoyG83frY4',
     name: 'Test Restaurant 1',
     address: '123 Test Street, Test City, TC 12345',
@@ -23,7 +24,7 @@ const mockRestaurants: Restaurant[] = [
     lastUpdated: new Date('2024-01-01'),
   },
   {
-    _id: '507f1f77bcf86cd799439012' as unknown as string,
+    _id: new ObjectId('507f1f77bcf86cd799439012'),
     googlePlaceId: 'ChIJN1t_tDeuEmsRUsoyG83frY5',
     name: 'Test Restaurant 2',
     address: '456 Test Avenue, Test City, TC 12345',

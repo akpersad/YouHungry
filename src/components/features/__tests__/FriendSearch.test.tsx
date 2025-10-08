@@ -50,7 +50,7 @@ describe('FriendSearch', () => {
       isError: false,
       isSuccess: true,
       refetch: jest.fn(),
-    } as ReturnType<typeof useUserSearch>);
+    } as any);
 
     mockUseSendFriendRequest.mockReturnValue({
       mutateAsync: mockSendFriendRequest,
@@ -58,7 +58,7 @@ describe('FriendSearch', () => {
       isError: false,
       isSuccess: false,
       error: null,
-    } as ReturnType<typeof useUserSearch>);
+    } as any);
   });
 
   it('renders search form correctly', () => {
@@ -87,7 +87,7 @@ describe('FriendSearch', () => {
       isError: false,
       isSuccess: false,
       refetch: jest.fn(),
-    } as ReturnType<typeof useUserSearch>);
+    } as any);
 
     render(
       <TestWrapper>
@@ -106,7 +106,7 @@ describe('FriendSearch', () => {
       isError: true,
       isSuccess: false,
       refetch: jest.fn(),
-    } as ReturnType<typeof useUserSearch>);
+    } as any);
 
     render(
       <TestWrapper>
@@ -144,7 +144,7 @@ describe('FriendSearch', () => {
       isError: false,
       isSuccess: true,
       refetch: jest.fn(),
-    } as ReturnType<typeof useUserSearch>);
+    } as any);
 
     render(
       <TestWrapper>
@@ -180,7 +180,7 @@ describe('FriendSearch', () => {
       isError: false,
       isSuccess: true,
       refetch: jest.fn(),
-    } as ReturnType<typeof useUserSearch>);
+    } as any);
 
     mockSendFriendRequest.mockResolvedValue(undefined);
 
@@ -220,7 +220,7 @@ describe('FriendSearch', () => {
       isError: false,
       isSuccess: true,
       refetch: jest.fn(),
-    } as ReturnType<typeof useUserSearch>);
+    } as any);
 
     mockUseSendFriendRequest.mockReturnValue({
       mutateAsync: mockSendFriendRequest,
@@ -228,7 +228,7 @@ describe('FriendSearch', () => {
       isError: false,
       isSuccess: false,
       error: null,
-    } as ReturnType<typeof useUserSearch>);
+    } as any);
 
     render(
       <TestWrapper>
@@ -247,15 +247,15 @@ describe('FriendSearch', () => {
       isError: false,
       isSuccess: true,
       refetch: jest.fn(),
-    } as ReturnType<typeof useUserSearch>);
+    } as any);
 
     // Mock search query to simulate a search was performed
-    jest.spyOn(React, 'useState').mockImplementation((initial) => {
+    jest.spyOn(React, 'useState').mockImplementation(((initial: any) => {
       if (typeof initial === 'string') {
         return ['test', jest.fn()];
       }
       return [initial, jest.fn()];
-    });
+    }) as any);
 
     render(
       <TestWrapper>
@@ -270,12 +270,12 @@ describe('FriendSearch', () => {
 
   it('shows placeholder message when no search query', () => {
     // Mock useState to return empty query
-    jest.spyOn(React, 'useState').mockImplementation((initial) => {
+    jest.spyOn(React, 'useState').mockImplementation(((initial: any) => {
       if (typeof initial === 'string') {
         return ['', jest.fn()];
       }
       return [initial, jest.fn()];
-    });
+    }) as any);
 
     render(
       <TestWrapper>
@@ -320,7 +320,7 @@ describe('FriendSearch', () => {
       isError: false,
       isSuccess: true,
       refetch: jest.fn(),
-    } as ReturnType<typeof useUserSearch>);
+    } as any);
 
     render(
       <TestWrapper>

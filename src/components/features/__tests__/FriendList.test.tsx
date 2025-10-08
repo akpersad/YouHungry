@@ -47,7 +47,7 @@ describe('FriendList', () => {
       isError: false,
       isSuccess: true,
       refetch: jest.fn(),
-    } as ReturnType<typeof useFriends>);
+    } as any);
 
     mockUseRemoveFriend.mockReturnValue({
       mutateAsync: mockRemoveFriend,
@@ -55,7 +55,7 @@ describe('FriendList', () => {
       isError: false,
       isSuccess: false,
       error: null,
-    } as ReturnType<typeof useFriends>);
+    } as any);
   });
 
   it('renders friends list correctly', () => {
@@ -77,7 +77,7 @@ describe('FriendList', () => {
       isError: false,
       isSuccess: false,
       refetch: jest.fn(),
-    } as ReturnType<typeof useFriends>);
+    } as any);
 
     render(
       <TestWrapper>
@@ -96,7 +96,7 @@ describe('FriendList', () => {
       isError: true,
       isSuccess: false,
       refetch: jest.fn(),
-    } as ReturnType<typeof useFriends>);
+    } as any);
 
     render(
       <TestWrapper>
@@ -138,7 +138,7 @@ describe('FriendList', () => {
       isError: false,
       isSuccess: true,
       refetch: jest.fn(),
-    } as ReturnType<typeof useFriends>);
+    } as any);
 
     render(
       <TestWrapper>
@@ -163,7 +163,7 @@ describe('FriendList', () => {
       isError: false,
       isSuccess: true,
       refetch: jest.fn(),
-    } as ReturnType<typeof useFriends>);
+    } as any);
 
     render(
       <TestWrapper>
@@ -198,7 +198,7 @@ describe('FriendList', () => {
       isError: false,
       isSuccess: true,
       refetch: jest.fn(),
-    } as ReturnType<typeof useFriends>);
+    } as any);
 
     render(
       <TestWrapper>
@@ -238,7 +238,7 @@ describe('FriendList', () => {
       isError: false,
       isSuccess: true,
       refetch: jest.fn(),
-    } as ReturnType<typeof useFriends>);
+    } as any);
 
     mockRemoveFriend.mockResolvedValue(undefined);
 
@@ -283,7 +283,7 @@ describe('FriendList', () => {
       isError: false,
       isSuccess: true,
       refetch: jest.fn(),
-    } as ReturnType<typeof useFriends>);
+    } as any);
 
     render(
       <TestWrapper>
@@ -321,7 +321,7 @@ describe('FriendList', () => {
       isError: false,
       isSuccess: true,
       refetch: jest.fn(),
-    } as ReturnType<typeof useFriends>);
+    } as any);
 
     mockUseRemoveFriend.mockReturnValue({
       mutateAsync: mockRemoveFriend,
@@ -329,7 +329,7 @@ describe('FriendList', () => {
       isError: false,
       isSuccess: false,
       error: null,
-    } as ReturnType<typeof useFriends>);
+    } as any);
 
     render(
       <TestWrapper>
@@ -364,7 +364,7 @@ describe('FriendList', () => {
       isError: false,
       isSuccess: true,
       refetch: jest.fn(),
-    } as ReturnType<typeof useFriends>);
+    } as any);
 
     render(
       <TestWrapper>

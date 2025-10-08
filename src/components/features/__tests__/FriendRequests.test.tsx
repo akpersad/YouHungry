@@ -51,7 +51,7 @@ describe('FriendRequests', () => {
       isError: false,
       isSuccess: true,
       refetch: jest.fn(),
-    } as ReturnType<typeof useFriendRequests>);
+    } as any);
 
     mockUseUpdateFriendRequest.mockReturnValue({
       mutateAsync: mockUpdateFriendRequest,
@@ -59,7 +59,7 @@ describe('FriendRequests', () => {
       isError: false,
       isSuccess: false,
       error: null,
-    } as ReturnType<typeof useFriendRequests>);
+    } as any);
   });
 
   it('renders friend requests correctly', () => {
@@ -81,7 +81,7 @@ describe('FriendRequests', () => {
       isError: false,
       isSuccess: false,
       refetch: jest.fn(),
-    } as ReturnType<typeof useFriendRequests>);
+    } as any);
 
     render(
       <TestWrapper>
@@ -100,7 +100,7 @@ describe('FriendRequests', () => {
       isError: true,
       isSuccess: false,
       refetch: jest.fn(),
-    } as ReturnType<typeof useFriendRequests>);
+    } as any);
 
     render(
       <TestWrapper>
@@ -121,7 +121,7 @@ describe('FriendRequests', () => {
       isError: false,
       isSuccess: true,
       refetch: jest.fn(),
-    } as ReturnType<typeof useFriendRequests>);
+    } as any);
 
     render(
       <TestWrapper>
@@ -166,7 +166,7 @@ describe('FriendRequests', () => {
       isError: false,
       isSuccess: true,
       refetch: jest.fn(),
-    } as ReturnType<typeof useFriendRequests>);
+    } as any);
 
     render(
       <TestWrapper>
@@ -216,7 +216,7 @@ describe('FriendRequests', () => {
       isError: false,
       isSuccess: true,
       refetch: jest.fn(),
-    } as ReturnType<typeof useFriendRequests>);
+    } as any);
 
     render(
       <TestWrapper>
@@ -265,7 +265,7 @@ describe('FriendRequests', () => {
       isError: false,
       isSuccess: true,
       refetch: jest.fn(),
-    } as ReturnType<typeof useFriendRequests>);
+    } as any);
 
     mockUpdateFriendRequest.mockResolvedValue(undefined);
 
@@ -321,7 +321,7 @@ describe('FriendRequests', () => {
       isError: false,
       isSuccess: true,
       refetch: jest.fn(),
-    } as ReturnType<typeof useFriendRequests>);
+    } as any);
 
     mockUpdateFriendRequest.mockResolvedValue(undefined);
 
@@ -377,7 +377,7 @@ describe('FriendRequests', () => {
       isError: false,
       isSuccess: true,
       refetch: jest.fn(),
-    } as ReturnType<typeof useFriendRequests>);
+    } as any);
 
     mockUseUpdateFriendRequest.mockReturnValue({
       mutateAsync: mockUpdateFriendRequest,
@@ -385,7 +385,7 @@ describe('FriendRequests', () => {
       isError: false,
       isSuccess: false,
       error: null,
-    } as ReturnType<typeof useFriendRequests>);
+    } as any);
 
     render(
       <TestWrapper>
@@ -431,7 +431,7 @@ describe('FriendRequests', () => {
       isError: false,
       isSuccess: true,
       refetch: jest.fn(),
-    } as ReturnType<typeof useFriendRequests>);
+    } as any);
 
     render(
       <TestWrapper>

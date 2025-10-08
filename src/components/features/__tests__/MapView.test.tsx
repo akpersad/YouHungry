@@ -1,6 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { Restaurant } from '@/types/database';
+import { ObjectId } from 'mongodb';
 
 // Mock the entire MapView component to avoid Google Maps complexity in tests
 jest.mock('../MapView', () => ({
@@ -84,32 +85,32 @@ afterEach(() => {
 
 const mockRestaurants: Restaurant[] = [
   {
-    _id: '1',
+    _id: new ObjectId('507f1f77bcf86cd799439011'),
     name: 'Test Restaurant 1',
     address: '123 Test St, Test City, TC 12345',
     coordinates: { lat: 37.7749, lng: -122.4194 },
     rating: 4.5,
     priceLevel: 2,
-    photos: [{ url: 'https://example.com/photo1.jpg' }],
+    photos: ['https://example.com/photo1.jpg'],
     cuisine: 'Test Cuisine',
     googlePlaceId: 'test-place-1',
     cachedAt: new Date(),
     lastUpdated: new Date(),
   },
   {
-    _id: '2',
+    _id: new ObjectId('507f1f77bcf86cd799439012'),
     name: 'Test Restaurant 2',
     address: '456 Test Ave, Test City, TC 12345',
     coordinates: { lat: 37.7849, lng: -122.4294 },
     rating: 4.2,
     priceLevel: 3,
-    photos: [{ url: 'https://example.com/photo2.jpg' }],
+    photos: ['https://example.com/photo2.jpg'],
     cuisine: 'Test Cuisine 2',
     googlePlaceId: 'test-place-2',
     cachedAt: new Date(),
     lastUpdated: new Date(),
   },
-];
+] as any;
 
 describe('MapView', () => {
   const defaultProps = {
@@ -165,7 +166,7 @@ describe('MapView', () => {
         ...mockRestaurants[0],
         coordinates: undefined,
       },
-    ];
+    ] as any;
 
     render(
       <MapView {...defaultProps} restaurants={restaurantsWithoutCoords} />
