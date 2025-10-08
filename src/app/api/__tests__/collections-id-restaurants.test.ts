@@ -72,11 +72,17 @@ describe('/api/collections/[id]/restaurants', () => {
     _id: '507f1f77bcf86cd799439011',
     name: 'Test Collection',
     restaurantIds: ['507f1f77bcf86cd799439013', '507f1f77bcf86cd799439014'],
-  };
+    type: 'personal' as const,
+    ownerId: '507f1f77bcf86cd799439010',
+    createdAt: new Date('2024-01-01T00:00:00.000Z'),
+    updatedAt: new Date('2024-01-01T00:00:00.000Z'),
+  } as any;
 
   describe('GET', () => {
     it('should get restaurants by collection successfully', async () => {
-      mockGetRestaurantsByCollection.mockResolvedValue(mockRestaurants);
+      (mockGetRestaurantsByCollection as jest.Mock).mockResolvedValue(
+        mockRestaurants as any
+      );
 
       const request = new NextRequest(
         'http://localhost:3000/api/collections/507f1f77bcf86cd799439011/restaurants'
@@ -110,7 +116,7 @@ describe('/api/collections/[id]/restaurants', () => {
     });
 
     it('should handle internal server error', async () => {
-      mockGetRestaurantsByCollection.mockRejectedValue(
+      (mockGetRestaurantsByCollection as jest.Mock).mockRejectedValue(
         new Error('Database error')
       );
 
@@ -152,7 +158,11 @@ describe('/api/collections/[id]/restaurants', () => {
 
       expect(response.status).toBe(200);
       expect(data.success).toBe(true);
-      expect(data.collection).toEqual(mockCollection);
+      expect(data.collection).toEqual({
+        ...mockCollection,
+        createdAt: mockCollection.createdAt.toISOString(),
+        updatedAt: mockCollection.updatedAt.toISOString(),
+      });
       expect(data.message).toBe('Restaurant added to collection successfully');
       expect(mockAddRestaurantToCollection).toHaveBeenCalledWith(
         '507f1f77bcf86cd799439011',
@@ -283,7 +293,11 @@ describe('/api/collections/[id]/restaurants', () => {
 
       expect(response.status).toBe(200);
       expect(data.success).toBe(true);
-      expect(data.collection).toEqual(mockCollection);
+      expect(data.collection).toEqual({
+        ...mockCollection,
+        createdAt: mockCollection.createdAt.toISOString(),
+        updatedAt: mockCollection.updatedAt.toISOString(),
+      });
       expect(data.message).toBe(
         'Restaurant removed from collection successfully'
       );
