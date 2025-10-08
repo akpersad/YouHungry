@@ -34,7 +34,7 @@ describe('/api/user/current', () => {
       },
     };
 
-    mockRequireAuth.mockResolvedValue(mockUser);
+    mockRequireAuth.mockResolvedValue(mockUser as any);
 
     const response = await GET();
     const data = await response.json();
