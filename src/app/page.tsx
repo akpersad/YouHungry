@@ -1,3 +1,5 @@
+import { auth } from '@clerk/nextjs/server';
+import { redirect } from 'next/navigation';
 import { MainLayout } from '@/components/layout/MainLayout';
 import {
   Card,
@@ -9,7 +11,13 @@ import {
 import { Button } from '@/components/ui/Button';
 import { AuthButtons } from '@/components/auth/AuthButtons';
 
-export default function Home() {
+export default async function Home() {
+  // Redirect authenticated users to dashboard
+  const { userId } = await auth();
+  if (userId) {
+    redirect('/dashboard');
+  }
+
   return (
     <MainLayout>
       <div className="max-w-4xl mx-auto">

@@ -1,4 +1,3 @@
-import { MainLayout } from '@/components/layout/MainLayout';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { CollectionList } from '@/components/features/CollectionList';
 import {
@@ -13,64 +12,61 @@ import Link from 'next/link';
 
 export default function DashboardPage() {
   return (
-    <MainLayout>
-      <ProtectedRoute>
-        <div className="max-w-4xl mx-auto">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-text mb-2">Dashboard</h1>
-            <p className="text-text-light">
-              Welcome to your personal restaurant collection manager.
-            </p>
-          </div>
-
-          <CollectionList />
-
-          <div className="mt-8 grid md:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Find Restaurants</CardTitle>
-                <CardDescription>
-                  Search and discover new restaurants
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Link href="/restaurants">
-                  <Button className="w-full">Search Restaurants</Button>
-                </Link>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Groups</CardTitle>
-                <CardDescription>
-                  Create and manage groups with friends
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button className="w-full">Manage Groups</Button>
-              </CardContent>
-            </Card>
-          </div>
-
-          <div className="mt-8">
-            <Card>
-              <CardHeader>
-                <CardTitle>Recent Activity</CardTitle>
-                <CardDescription>
-                  Your latest restaurant decisions and activities
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-text-muted text-center py-8">
-                  No recent activity yet. Start by creating your first
-                  collection!
-                </p>
-              </CardContent>
-            </Card>
-          </div>
+    <ProtectedRoute>
+      <div className="max-w-4xl mx-auto">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-text mb-2">Dashboard</h1>
+          <p className="text-text-light">
+            Welcome to your personal restaurant collection manager.
+          </p>
         </div>
-      </ProtectedRoute>
-    </MainLayout>
+
+        <CollectionList />
+
+        <div className="mt-8 grid md:grid-cols-2 gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Find Restaurants</CardTitle>
+              <CardDescription>
+                Search and discover new restaurants
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Link href="/restaurants">
+                <Button className="w-full">Search Restaurants</Button>
+              </Link>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Groups</CardTitle>
+              <CardDescription>
+                Create and manage groups with friends
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button className="w-full">Manage Groups</Button>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="mt-8">
+          <Card>
+            <CardHeader>
+              <CardTitle>Recent Activity</CardTitle>
+              <CardDescription>
+                Your latest restaurant decisions and activities
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-text-muted text-center py-8">
+                No recent activity yet. Start by creating your first collection!
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </ProtectedRoute>
   );
 }

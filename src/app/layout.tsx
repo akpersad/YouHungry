@@ -4,6 +4,7 @@ import { ClerkProvider } from '@clerk/nextjs';
 import { QueryProvider } from '@/components/providers/QueryProvider';
 import { ThemeProvider } from '@/components/providers/ThemeProvider';
 import { PageTransition } from '@/components/ui/PageTransition';
+import { AppLayout } from '@/components/layout/AppLayout';
 import {
   PWAInstallPrompt,
   PWAOfflineBanner,
@@ -110,7 +111,9 @@ export default function RootLayout({
         >
           <ThemeProvider>
             <QueryProvider>
-              <PageTransition>{children}</PageTransition>
+              <PageTransition>
+                <AppLayout>{children}</AppLayout>
+              </PageTransition>
               <PWAInstallPrompt />
               <PWAOfflineBanner />
               <Toaster
