@@ -23,6 +23,7 @@ describe('Logger', () => {
     jest.clearAllMocks();
 
     // Reset environment
+    // @ts-expect-error - Deleting for test purposes
     delete process.env.NODE_ENV;
     delete process.env.ENABLE_CONSOLE_LOGS;
 
@@ -32,6 +33,7 @@ describe('Logger', () => {
 
   describe('Development Environment', () => {
     beforeEach(() => {
+      // @ts-expect-error - Setting for test purposes
       process.env.NODE_ENV = 'development';
       logger = new Logger();
       // @ts-expect-error - accessing private method for testing
@@ -95,6 +97,7 @@ describe('Logger', () => {
 
   describe('Production Environment', () => {
     beforeEach(() => {
+      // @ts-expect-error - Setting for test purposes
       process.env.NODE_ENV = 'production';
       process.env.ENABLE_CONSOLE_LOGS = 'true';
       logger = new Logger();
@@ -149,6 +152,7 @@ describe('Logger', () => {
 
   describe('Production with ENABLE_CONSOLE_LOGS', () => {
     beforeEach(() => {
+      // @ts-expect-error - Setting for test purposes
       process.env.NODE_ENV = 'production';
       process.env.ENABLE_CONSOLE_LOGS = 'true';
       logger = new Logger();
@@ -169,6 +173,7 @@ describe('Logger', () => {
 
   describe('Log Level Filtering', () => {
     it('should respect log levels in development', () => {
+      // @ts-expect-error - Setting for test purposes
       process.env.NODE_ENV = 'development';
       logger = new Logger();
       // @ts-expect-error - accessing private method for testing
@@ -187,6 +192,7 @@ describe('Logger', () => {
     });
 
     it('should respect log levels in production', () => {
+      // @ts-expect-error - Setting for test purposes
       process.env.NODE_ENV = 'production';
       process.env.ENABLE_CONSOLE_LOGS = 'true';
       logger = new Logger();
@@ -208,6 +214,7 @@ describe('Logger', () => {
 
   describe('Message Formatting', () => {
     beforeEach(() => {
+      // @ts-expect-error - Setting for test purposes
       process.env.NODE_ENV = 'development';
       logger = new Logger();
       // @ts-expect-error - accessing private method for testing

@@ -30,6 +30,12 @@ describe('Notification Service', () => {
     smsOptIn: true,
     smsPhoneNumber: '+18777804236',
     preferences: {
+      locationSettings: {
+        city: 'Test City',
+        state: 'Test State',
+        country: 'US',
+        timezone: 'America/New_York',
+      },
       notificationSettings: {
         groupDecisions: true,
         friendRequests: true,

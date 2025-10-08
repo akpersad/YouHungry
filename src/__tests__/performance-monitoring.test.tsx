@@ -33,7 +33,8 @@ global.PerformanceObserver = jest.fn().mockImplementation((callback) => ({
   observe: jest.fn(),
   disconnect: jest.fn(),
   takeRecords: jest.fn(() => []),
-}));
+})) as any;
+(global.PerformanceObserver as any).supportedEntryTypes = [];
 
 // Mock IntersectionObserver
 global.IntersectionObserver = jest.fn().mockImplementation(() => ({
@@ -55,6 +56,7 @@ describe('Performance Monitoring', () => {
   let queryClient: QueryClient;
 
   beforeEach(() => {
+    // @ts-expect-error - Setting for test purposes
     process.env.NODE_ENV = 'development';
     queryClient = new QueryClient({
       defaultOptions: {
@@ -79,6 +81,7 @@ describe('Performance Monitoring', () => {
 
     it('should only run in production', () => {
       const originalEnv = process.env.NODE_ENV;
+      // @ts-expect-error - Setting for test purposes
       process.env.NODE_ENV = 'development';
 
       render(
@@ -90,11 +93,13 @@ describe('Performance Monitoring', () => {
       // Should not call performance methods in development
       expect(mockPerformance.mark).not.toHaveBeenCalled();
 
+      // @ts-expect-error - Restoring for test purposes
       process.env.NODE_ENV = originalEnv;
     });
 
     it('should collect performance metrics in production', () => {
       const originalEnv = process.env.NODE_ENV;
+      // @ts-expect-error - Setting for test purposes
       process.env.NODE_ENV = 'production';
 
       render(
@@ -109,18 +114,21 @@ describe('Performance Monitoring', () => {
         // Component should render without throwing
       }).not.toThrow();
 
+      // @ts-expect-error - Restoring for test purposes
       process.env.NODE_ENV = originalEnv;
     });
 
     it('should handle performance observer errors gracefully', () => {
       const originalEnv = process.env.NODE_ENV;
+      // @ts-expect-error - Setting for test purposes
       process.env.NODE_ENV = 'production';
 
       // Mock PerformanceObserver to throw an error
       const originalPerformanceObserver = global.PerformanceObserver;
       global.PerformanceObserver = jest.fn().mockImplementation(() => {
         throw new Error('PerformanceObserver not supported');
-      });
+      }) as any;
+      (global.PerformanceObserver as any).supportedEntryTypes = [];
 
       expect(() => {
         render(
@@ -132,6 +140,7 @@ describe('Performance Monitoring', () => {
 
       // Restore original PerformanceObserver
       global.PerformanceObserver = originalPerformanceObserver;
+      // @ts-expect-error - Restoring for test purposes
       process.env.NODE_ENV = originalEnv;
     });
   });
