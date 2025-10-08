@@ -35,9 +35,22 @@ describe('CreateCollectionForm', () => {
     // Setup default mock for TanStack Query hook
     mockUseCreateCollection.mockReturnValue({
       mutateAsync: jest.fn(),
+      mutate: jest.fn(),
       isPending: false,
+      isIdle: true,
+      isError: false,
+      isSuccess: false,
+      data: undefined,
       error: null,
-    });
+      variables: undefined,
+      context: undefined,
+      failureCount: 0,
+      failureReason: null,
+      reset: jest.fn(),
+      status: 'idle',
+      submittedAt: 0,
+      isPaused: false,
+    } as any);
 
     mockOnSuccess.mockClear();
     mockOnCancel.mockClear();
@@ -97,9 +110,22 @@ describe('CreateCollectionForm', () => {
 
     mockUseCreateCollection.mockReturnValue({
       mutateAsync: mockMutateAsync,
+      mutate: jest.fn(),
       isPending: false,
+      isIdle: false,
+      isError: false,
+      isSuccess: true,
+      data: undefined,
       error: null,
-    });
+      variables: undefined,
+      context: undefined,
+      failureCount: 0,
+      failureReason: null,
+      reset: jest.fn(),
+      status: 'success',
+      submittedAt: 0,
+      isPaused: false,
+    } as any);
 
     render(
       <TestQueryProvider>
@@ -148,9 +174,22 @@ describe('CreateCollectionForm', () => {
 
     mockUseCreateCollection.mockReturnValue({
       mutateAsync: jest.fn().mockRejectedValue(mockError),
+      mutate: jest.fn(),
       isPending: false,
+      isIdle: false,
+      isError: true,
+      isSuccess: false,
+      data: undefined,
       error: mockError,
-    });
+      variables: undefined,
+      context: undefined,
+      failureCount: 1,
+      failureReason: mockError,
+      reset: jest.fn(),
+      status: 'error',
+      submittedAt: 0,
+      isPaused: false,
+    } as any);
 
     render(
       <TestQueryProvider>
@@ -201,9 +240,22 @@ describe('CreateCollectionForm', () => {
 
     mockUseCreateCollection.mockReturnValue({
       mutateAsync: jest.fn().mockResolvedValue(mockCollection),
+      mutate: jest.fn(),
       isPending: true,
+      isIdle: false,
+      isError: false,
+      isSuccess: false,
+      data: undefined,
       error: null,
-    });
+      variables: undefined,
+      context: undefined,
+      failureCount: 0,
+      failureReason: null,
+      reset: jest.fn(),
+      status: 'pending',
+      submittedAt: Date.now(),
+      isPaused: false,
+    } as any);
 
     render(
       <TestQueryProvider>

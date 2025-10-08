@@ -19,7 +19,13 @@ jest.mock('@/components/ui/AddressInput', () => ({
     onAddressSelect,
     value,
     ...props
-  }: Record<string, unknown>) => (
+  }: {
+    onValidationChange?: (isValid: boolean) => void;
+    onChange?: (value: string) => void;
+    onAddressSelect?: (address: string) => void;
+    value?: string;
+    [key: string]: any;
+  }) => (
     <input
       {...props}
       data-testid="address-input"
@@ -141,11 +147,21 @@ describe('RestaurantSearchForm', () => {
       profile: {
         preferences: {
           defaultLocation: '123 Default St, Test City, ST 12345',
+          locationSettings: {
+            city: 'Test City',
+            state: 'ST',
+            country: 'US',
+            timezone: 'America/New_York',
+          },
+          notificationSettings: {
+            emailEnabled: true,
+            pushEnabled: true,
+          },
         },
       },
       isLoading: false,
       error: null,
-    });
+    } as any);
 
     render(<RestaurantSearchForm onSearch={mockOnSearch} />);
 
