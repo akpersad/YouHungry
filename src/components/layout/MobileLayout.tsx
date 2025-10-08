@@ -25,8 +25,8 @@ export function MobileLayout({ children, className }: MobileLayoutProps) {
 
   return (
     <div className={cn('min-h-screen bg-primary', className)}>
-      {/* Mobile Header - only visible on mobile */}
-      <div className="md:hidden bg-secondary border-b border-quaternary px-4 py-3">
+      {/* Mobile Header - hidden since we use bottom navigation */}
+      {/* <div className="md:hidden bg-secondary border-b border-quaternary px-4 py-3">
         <div className="flex items-center justify-between">
           <h1 className="text-lg font-bold text-accent">You Hungry?</h1>
           {isLoaded && (
@@ -52,10 +52,15 @@ export function MobileLayout({ children, className }: MobileLayoutProps) {
             </div>
           )}
         </div>
-      </div>
+      </div> */}
 
-      {/* Main content with bottom padding for navigation */}
-      <main className="pb-24 md:pb-28">{children}</main>
+      {/* Main content with padding matching bottom navigation */}
+      <main
+        className="px-6 pb-24 md:pb-28"
+        style={{ paddingTop: '4rem' }} // 64px for proper status bar spacing
+      >
+        {children}
+      </main>
 
       {/* Bottom Navigation */}
       <BottomNavigation

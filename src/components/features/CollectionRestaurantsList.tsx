@@ -261,7 +261,7 @@ export function CollectionRestaurantsList({
         <>
           {/* List View */}
           {viewType === 'list' && (
-            <div className="space-y-4 md:grid md:grid-cols-2 md:gap-4 md:space-y-0">
+            <div className="space-y-4 md:grid md:grid-cols-3 md:gap-4 md:space-y-0">
               {restaurants.map((restaurant) => (
                 <div key={restaurant._id.toString()} className="relative group">
                   <RestaurantCard

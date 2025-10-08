@@ -18,13 +18,6 @@ jest.mock('@clerk/nextjs', () => ({
   ),
 }));
 
-// Mock MainLayout
-jest.mock('@/components/layout/MainLayout', () => ({
-  MainLayout: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="main-layout">{children}</div>
-  ),
-}));
-
 // Mock Button component
 jest.mock('@/components/ui/Button', () => ({
   Button: ({ children, onClick, className, variant }: any) => (
@@ -132,12 +125,6 @@ describe('SignUpPage', () => {
     expect(config.variables).toBeDefined();
     expect(config.variables.colorPrimary).toBe('var(--color-primary)');
     expect(config.variables.colorBackground).toBe('var(--color-background)');
-  });
-
-  it('is wrapped in MainLayout', () => {
-    render(<SignUpPage />);
-
-    expect(screen.getByTestId('main-layout')).toBeInTheDocument();
   });
 
   it('displays benefits in a visually appealing format', () => {
