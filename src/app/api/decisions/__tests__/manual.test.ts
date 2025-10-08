@@ -13,7 +13,7 @@ const mockConnectToDatabase = connectToDatabase as jest.MockedFunction<
 >;
 
 describe('POST /api/decisions/manual', () => {
-  let mockDb: Partial<Db>;
+  let mockDb: any;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -24,7 +24,7 @@ describe('POST /api/decisions/manual', () => {
       insertOne: jest.fn(),
     };
 
-    mockConnectToDatabase.mockResolvedValue(mockDb);
+    mockConnectToDatabase.mockResolvedValue(mockDb as any);
   });
 
   it('should return unauthorized if user is not authenticated', async () => {
@@ -38,7 +38,7 @@ describe('POST /api/decisions/manual', () => {
       orgPermissions: null,
       actor: null,
       factorVerificationAge: null,
-    });
+    } as any);
 
     const request = new NextRequest(
       'http://localhost:3000/api/decisions/manual',
@@ -66,7 +66,7 @@ describe('POST /api/decisions/manual', () => {
       orgPermissions: null,
       actor: null,
       factorVerificationAge: null,
-    });
+    } as any);
 
     const mockCollection = {
       _id: { toString: () => 'collection1' },
@@ -124,7 +124,7 @@ describe('POST /api/decisions/manual', () => {
       orgPermissions: null,
       actor: null,
       factorVerificationAge: null,
-    });
+    } as any);
 
     const mockUser = {
       _id: { toString: () => 'userObjectId1' },
@@ -191,7 +191,7 @@ describe('POST /api/decisions/manual', () => {
       orgPermissions: null,
       actor: null,
       factorVerificationAge: null,
-    });
+    } as any);
 
     mockDb.findOne.mockResolvedValueOnce(null);
 
@@ -227,7 +227,7 @@ describe('POST /api/decisions/manual', () => {
       orgPermissions: null,
       actor: null,
       factorVerificationAge: null,
-    });
+    } as any);
 
     const mockCollection = {
       _id: { toString: () => 'collection1' },
@@ -269,7 +269,7 @@ describe('POST /api/decisions/manual', () => {
       orgPermissions: null,
       actor: null,
       factorVerificationAge: null,
-    });
+    } as any);
 
     const requestBody = {
       collectionId: '',

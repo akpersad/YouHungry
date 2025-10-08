@@ -19,7 +19,7 @@ const mockGetDecisionHistory = getDecisionHistory as jest.MockedFunction<
 >;
 
 describe('GET /api/decisions/weights', () => {
-  let mockDb: Partial<Db>;
+  let mockDb: any;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -31,7 +31,7 @@ describe('GET /api/decisions/weights', () => {
       toArray: jest.fn(),
     };
 
-    mockConnectToDatabase.mockResolvedValue(mockDb);
+    mockConnectToDatabase.mockResolvedValue(mockDb as any);
   });
 
   it('should return unauthorized if user is not authenticated', async () => {
@@ -45,7 +45,7 @@ describe('GET /api/decisions/weights', () => {
       orgPermissions: null,
       actor: null,
       factorVerificationAge: null,
-    });
+    } as any);
 
     const request = new NextRequest(
       'http://localhost:3000/api/decisions/weights?collectionId=collection1'
@@ -66,7 +66,7 @@ describe('GET /api/decisions/weights', () => {
       orgPermissions: null,
       actor: null,
       factorVerificationAge: null,
-    });
+    } as any);
 
     const mockCollection = {
       _id: { toString: () => 'collection1' },
@@ -119,7 +119,7 @@ describe('GET /api/decisions/weights', () => {
       orgPermissions: null,
       actor: null,
       factorVerificationAge: null,
-    });
+    } as any);
     mockDb.findOne.mockResolvedValue(null);
 
     const request = new NextRequest(
@@ -132,7 +132,7 @@ describe('GET /api/decisions/weights', () => {
 });
 
 describe('POST /api/decisions/weights', () => {
-  let mockDb: Partial<Db>;
+  let mockDb: any;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -143,7 +143,7 @@ describe('POST /api/decisions/weights', () => {
       deleteMany: jest.fn(),
     };
 
-    mockConnectToDatabase.mockResolvedValue(mockDb);
+    mockConnectToDatabase.mockResolvedValue(mockDb as any);
   });
 
   it('should reset all weights for a collection', async () => {
@@ -157,7 +157,7 @@ describe('POST /api/decisions/weights', () => {
       orgPermissions: null,
       actor: null,
       factorVerificationAge: null,
-    });
+    } as any);
 
     const mockCollection = {
       _id: { toString: () => 'collection1' },
@@ -198,7 +198,7 @@ describe('POST /api/decisions/weights', () => {
       orgPermissions: null,
       actor: null,
       factorVerificationAge: null,
-    });
+    } as any);
 
     const mockCollection = {
       _id: { toString: () => 'collection1' },

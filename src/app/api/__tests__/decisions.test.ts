@@ -33,8 +33,8 @@ describe('/api/decisions', () => {
 
   describe('POST /api/decisions', () => {
     it('should create a personal decision successfully', async () => {
-      auth.mockResolvedValue({ userId: 'user123' });
-      createPersonalDecision.mockResolvedValue({
+      (auth as unknown as jest.Mock).mockResolvedValue({ userId: 'user123' });
+      (createPersonalDecision as jest.Mock).mockResolvedValue({
         _id: 'decision123',
         type: 'personal',
         collectionId: 'collection123',
@@ -78,7 +78,7 @@ describe('/api/decisions', () => {
     });
 
     it('should return 401 if user not authenticated', async () => {
-      auth.mockResolvedValue({ userId: null });
+      (auth as unknown as jest.Mock).mockResolvedValue({ userId: null });
 
       const request = new NextRequest('http://localhost:3000/api/decisions', {
         method: 'POST',
@@ -100,7 +100,7 @@ describe('/api/decisions', () => {
     });
 
     it('should return 400 for invalid input', async () => {
-      auth.mockResolvedValue({ userId: 'user123' });
+      (auth as unknown as jest.Mock).mockResolvedValue({ userId: 'user123' });
 
       const request = new NextRequest('http://localhost:3000/api/decisions', {
         method: 'POST',
@@ -125,8 +125,8 @@ describe('/api/decisions', () => {
 
   describe('GET /api/decisions', () => {
     it('should return decision history successfully', async () => {
-      auth.mockResolvedValue({ userId: 'user123' });
-      getDecisionHistory.mockResolvedValue([
+      (auth as unknown as jest.Mock).mockResolvedValue({ userId: 'user123' });
+      (getDecisionHistory as jest.Mock).mockResolvedValue([
         {
           _id: 'decision123',
           type: 'personal',
@@ -171,7 +171,7 @@ describe('/api/decisions', () => {
     });
 
     it('should return 400 if collectionId missing', async () => {
-      auth.mockResolvedValue({ userId: 'user123' });
+      (auth as unknown as jest.Mock).mockResolvedValue({ userId: 'user123' });
 
       const request = new NextRequest('http://localhost:3000/api/decisions');
 
@@ -191,8 +191,8 @@ describe('/api/decisions/random-select', () => {
 
   describe('POST /api/decisions/random-select', () => {
     it('should perform random selection successfully', async () => {
-      auth.mockResolvedValue({ userId: 'user123' });
-      performRandomSelection.mockResolvedValue({
+      (auth as unknown as jest.Mock).mockResolvedValue({ userId: 'user123' });
+      (performRandomSelection as jest.Mock).mockResolvedValue({
         restaurantId: 'restaurant123',
         selectedAt: new Date('2024-01-01T18:30:00Z'),
         reasoning:
@@ -240,7 +240,7 @@ describe('/api/decisions/random-select', () => {
     });
 
     it('should return 400 for invalid input', async () => {
-      auth.mockResolvedValue({ userId: 'user123' });
+      (auth as unknown as jest.Mock).mockResolvedValue({ userId: 'user123' });
 
       const request = new NextRequest(
         'http://localhost:3000/api/decisions/random-select',
@@ -264,8 +264,8 @@ describe('/api/decisions/random-select', () => {
     });
 
     it('should handle decision errors', async () => {
-      auth.mockResolvedValue({ userId: 'user123' });
-      performRandomSelection.mockRejectedValue(
+      (auth as unknown as jest.Mock).mockResolvedValue({ userId: 'user123' });
+      (performRandomSelection as jest.Mock).mockRejectedValue(
         new Error('No restaurants in collection')
       );
 
@@ -293,8 +293,8 @@ describe('/api/decisions/random-select', () => {
 
   describe('GET /api/decisions/random-select', () => {
     it('should return decision statistics successfully', async () => {
-      auth.mockResolvedValue({ userId: 'user123' });
-      getDecisionStatistics.mockResolvedValue({
+      (auth as unknown as jest.Mock).mockResolvedValue({ userId: 'user123' });
+      (getDecisionStatistics as jest.Mock).mockResolvedValue({
         totalDecisions: 5,
         restaurantStats: [
           {
@@ -346,7 +346,7 @@ describe('/api/decisions/random-select', () => {
     });
 
     it('should return 400 if collectionId missing', async () => {
-      auth.mockResolvedValue({ userId: 'user123' });
+      (auth as unknown as jest.Mock).mockResolvedValue({ userId: 'user123' });
 
       const request = new NextRequest(
         'http://localhost:3000/api/decisions/random-select'
