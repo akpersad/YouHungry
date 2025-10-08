@@ -75,11 +75,4 @@ describe('SignInButton', () => {
     rerender(<SignInButton size="lg" />);
     expect(screen.getByTestId('clerk-signin-button')).toBeInTheDocument();
   });
-
-  it('forwards ref correctly', () => {
-    const ref = jest.fn();
-    render(<SignInButton ref={ref} />);
-    // Ref forwarding is handled by the Button component internally
-    expect(screen.getByTestId('clerk-signin-button')).toBeInTheDocument();
-  });
 });

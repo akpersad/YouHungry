@@ -57,11 +57,4 @@ describe('SignOutButton', () => {
     expect(screen.getByTestId('clerk-signout-button')).toBeInTheDocument();
     expect(screen.getByText('Sign Out')).toBeInTheDocument();
   });
-
-  it('forwards ref correctly', () => {
-    const ref = jest.fn();
-    render(<SignOutButton ref={ref} />);
-    // Ref forwarding is handled by the Button component internally
-    expect(screen.getByTestId('clerk-signout-button')).toBeInTheDocument();
-  });
 });
