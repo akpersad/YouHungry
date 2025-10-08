@@ -38,7 +38,7 @@ describe('/api/admin/alerts/test-email', () => {
       const request = new NextRequest(
         'http://localhost:3000/api/admin/alerts/test-email'
       );
-      const response = await GET(request);
+      const response = await GET();
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -56,7 +56,7 @@ describe('/api/admin/alerts/test-email', () => {
       const request = new NextRequest(
         'http://localhost:3000/api/admin/alerts/test-email'
       );
-      const response = await GET(request);
+      const response = await GET();
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -76,7 +76,7 @@ describe('/api/admin/alerts/test-email', () => {
       const request = new NextRequest(
         'http://localhost:3000/api/admin/alerts/test-email'
       );
-      const response = await GET(request);
+      const response = await GET();
       const data = await response.json();
 
       expect(response.status).toBe(500);

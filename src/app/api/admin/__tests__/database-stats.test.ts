@@ -34,7 +34,7 @@ describe('/api/admin/database/stats', () => {
       clerkId: 'clerk123',
       email: 'admin@example.com',
       name: 'Admin User',
-    } as { _id: string; clerkId: string; email: string; name: string });
+    } as any);
   });
 
   it('returns database statistics successfully', async () => {
@@ -69,7 +69,7 @@ describe('/api/admin/database/stats', () => {
     const request = new NextRequest(
       'http://localhost:3000/api/admin/database/stats'
     );
-    const response = await GET(request);
+    const response = await GET();
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -107,7 +107,7 @@ describe('/api/admin/database/stats', () => {
     const request = new NextRequest(
       'http://localhost:3000/api/admin/database/stats'
     );
-    const response = await GET(request);
+    const response = await GET();
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -145,7 +145,7 @@ describe('/api/admin/database/stats', () => {
     const request = new NextRequest(
       'http://localhost:3000/api/admin/database/stats'
     );
-    const response = await GET(request);
+    const response = await GET();
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -191,7 +191,7 @@ describe('/api/admin/database/stats', () => {
     const request = new NextRequest(
       'http://localhost:3000/api/admin/database/stats'
     );
-    const response = await GET(request);
+    const response = await GET();
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -205,7 +205,7 @@ describe('/api/admin/database/stats', () => {
     const request = new NextRequest(
       'http://localhost:3000/api/admin/database/stats'
     );
-    const response = await GET(request);
+    const response = await GET();
     const data = await response.json();
 
     expect(response.status).toBe(500);
@@ -220,7 +220,7 @@ describe('/api/admin/database/stats', () => {
     const request = new NextRequest(
       'http://localhost:3000/api/admin/database/stats'
     );
-    const response = await GET(request);
+    const response = await GET();
     const data = await response.json();
 
     expect(response.status).toBe(500);
@@ -247,7 +247,7 @@ describe('/api/admin/database/stats', () => {
     const request = new NextRequest(
       'http://localhost:3000/api/admin/database/stats'
     );
-    const response = await GET(request);
+    const response = await GET();
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -285,7 +285,7 @@ describe('/api/admin/database/stats', () => {
     const request = new NextRequest(
       'http://localhost:3000/api/admin/database/stats'
     );
-    const response = await GET(request);
+    const response = await GET();
     const data = await response.json();
 
     expect(response.status).toBe(200);
