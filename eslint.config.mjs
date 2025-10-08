@@ -21,6 +21,9 @@ const eslintConfig = [
       'scripts/**',
       'performance-metrics/**',
       'src/__tests__/**',
+      '**/__tests__/**',
+      '**/*.test.ts',
+      '**/*.test.tsx',
     ],
   },
 ];
