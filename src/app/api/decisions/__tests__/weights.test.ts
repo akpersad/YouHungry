@@ -1,7 +1,11 @@
 import { GET, POST } from '../weights/route';
 import { auth } from '@clerk/nextjs/server';
 import { connectToDatabase } from '@/lib/db';
-import { getDecisionHistory } from '@/lib/decisions';
+import {
+  getDecisionHistory,
+  getUserDecisionHistory,
+  getGroupDecisionHistory,
+} from '@/lib/decisions';
 import { NextRequest } from 'next/server';
 import { Db } from 'mongodb';
 import { Decision } from '@/types/database';
@@ -17,6 +21,12 @@ const mockConnectToDatabase = connectToDatabase as jest.MockedFunction<
 const mockGetDecisionHistory = getDecisionHistory as jest.MockedFunction<
   typeof getDecisionHistory
 >;
+const mockGetUserDecisionHistory =
+  getUserDecisionHistory as jest.MockedFunction<typeof getUserDecisionHistory>;
+const mockGetGroupDecisionHistory =
+  getGroupDecisionHistory as jest.MockedFunction<
+    typeof getGroupDecisionHistory
+  >;
 
 describe('GET /api/decisions/weights', () => {
   let mockDb: any;
@@ -71,6 +81,7 @@ describe('GET /api/decisions/weights', () => {
     const mockCollection = {
       _id: { toString: () => 'collection1' },
       restaurantIds: [{ toString: () => 'restaurant1' }],
+      type: 'personal',
     };
 
     const mockDecisions = [
@@ -92,7 +103,7 @@ describe('GET /api/decisions/weights', () => {
 
     mockDb.findOne.mockResolvedValue(mockCollection);
     mockDb.toArray.mockResolvedValue(mockRestaurants);
-    mockGetDecisionHistory.mockResolvedValue(mockDecisions as Decision[]);
+    mockGetUserDecisionHistory.mockResolvedValue(mockDecisions as Decision[]);
 
     const request = new NextRequest(
       'http://localhost:3000/api/decisions/weights?collectionId=collection1'

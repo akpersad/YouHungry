@@ -77,9 +77,17 @@ Two decision methods available:
 
 - Track all decisions (personal and group)
 - 30-day rolling weight system
-- Manual entry for decisions made outside the app
+- **Manual Entry System** for decisions made outside the app:
+  - Add past restaurant visits with visit date and optional notes
+  - Support for both personal and group decisions
+  - Validates restaurant exists in user's collections
+  - Integrates with decision history and weight system
+  - Uses dedicated `method: 'manual'` field in database
+  - Accessible via `/history` page with modal form
 - Separate weighting for personal vs group decisions
 - Group decisions appear in individual history with "group" label
+- Decision filtering and search across all decision types
+- Export capabilities (CSV/JSON) for all decision data
 
 ## 🎨 User Experience
 

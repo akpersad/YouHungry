@@ -18,9 +18,6 @@ export function MobileLayout({ children, className }: MobileLayoutProps) {
     isMoreMenuOpen,
     setIsMoreMenuOpen,
     moreMenuActions,
-    isSignedIn,
-    isLoaded,
-    user,
   } = useMobileNavigation();
 
   return (

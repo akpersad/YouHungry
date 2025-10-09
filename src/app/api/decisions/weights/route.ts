@@ -5,7 +5,6 @@ import { connectToDatabase } from '@/lib/db';
 import { ObjectId } from 'mongodb';
 import {
   calculateRestaurantWeight,
-  getDecisionHistory,
   getUserDecisionHistory,
   getGroupDecisionHistory,
 } from '@/lib/decisions';

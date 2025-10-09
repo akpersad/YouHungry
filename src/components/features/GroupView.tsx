@@ -17,7 +17,7 @@ import { Modal } from '@/components/ui/Modal';
 import { Input } from '@/components/ui/Input';
 import { FriendSelectionModal } from './FriendSelectionModal';
 import { useDecisionHistory } from '@/hooks/api/useHistory';
-import { Clock, Users, User, Calendar } from 'lucide-react';
+import { Clock, Users, Calendar } from 'lucide-react';
 
 interface GroupViewProps {
   group: Group & { members: User[] };
@@ -428,7 +428,7 @@ export function GroupView({
             <div className="space-y-4">
               {recentDecisions.decisions.map((decision, index) => (
                 <div
-                  key={decision._id || `decision-${index}`}
+                  key={decision.id || `decision-${index}`}
                   className="flex items-start gap-3 p-3 border border-gray-200 rounded-lg"
                 >
                   <div className="flex-shrink-0 mt-1">

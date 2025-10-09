@@ -25,6 +25,7 @@
     "perf:compare": "node performance-metrics/compare-metrics.js",
     "perf:dashboard": "node performance-metrics/dashboard.js",
     "perf:all": "npm run perf:collect && npm run perf:dashboard",
+    "perf:morning": "npm run perf:all && npm run perf:compare",
     "logs:replace": "node scripts/replace-console-logs.js",
     "logs:clean": "npm run logs:replace && npm run lint:fix"
   },

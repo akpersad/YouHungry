@@ -87,7 +87,7 @@ export default function DashboardPage() {
                 <div className="space-y-4">
                   {recentDecisions.decisions.map((decision, index) => (
                     <div
-                      key={decision._id || `decision-${index}`}
+                      key={decision.id || `decision-${index}`}
                       className="flex items-start gap-3 p-3 border border-gray-200 rounded-lg"
                     >
                       <div className="flex-shrink-0 mt-1">

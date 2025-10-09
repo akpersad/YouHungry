@@ -324,18 +324,68 @@ Notes: ✅ COMPLETED - Complete user profile management system with picture uplo
 
 Notes: ✅ COMPLETED - Full phone verification flow with Twilio SMS integration
 
-### 6.3 History View
+### 6.3 History View & Manual Entry
 
-1. **History Page** → User sees chronological list of decisions with both calendar and list views
+1. **History Page** → User navigates to `/history` to view comprehensive decision history
 2. **View Options** → User can toggle between:
-   - Timeline/list view (recent decisions in simple list, older grouped by week/month)
-   - Calendar view (decisions plotted on calendar dates)
-3. **Filter Options** → User can filter by personal/group decisions
-4. **Decision Details** → User can view full decision context including visit date/time
-5. **Manual Entry** → User can add decisions made outside the app
-6. **Search** → User can search for specific restaurants or groups
+   - List view (detailed cards with restaurant info, dates, and context)
+   - Calendar view (decisions plotted on calendar dates - UI placeholder)
+3. **Filter Options** → User can filter by:
+   - Decision type (personal/group/all)
+   - Date range (start and end dates)
+   - Collection, group, or specific restaurant
+4. **Search Functionality** → Real-time search across restaurants, collections, and groups
+5. **Export Options** → Download history as CSV or JSON for external analysis
+6. **Pagination** → Efficient pagination showing 50 decisions per page
+7. **Decision Details** → Each decision card shows:
+   - Restaurant name, address, cuisine, rating, price range
+   - Visit date (when they actually went to the restaurant)
+   - Decision type (personal/group) and collection name
+   - Decision method (Random Selection, Tiered Choice, or manually entered)
+   - Group name (for group decisions)
 
-Notes: Love it. We'll play with the UI of the chronlogical view. I'm undecidied what that'll look like, if it's like a calendar or a list.
+#### Manual Entry Flow (IMPLEMENTED ✅)
+
+1. **Open Manual Entry** → User clicks "Add Manual Entry" button on history page
+2. **Modal Opens** → ManualDecisionForm displays in a modal overlay
+3. **Select Decision Type** → User chooses:
+   - Personal decision
+   - Group decision (requires selecting a group)
+4. **Select Group (if applicable)** → Dropdown shows user's groups
+5. **Select Restaurant** → User chooses from available restaurants in their collections:
+   - For personal: Shows restaurants from all personal collections
+   - For group: Shows restaurants from selected group's collections
+   - Restaurants are sorted alphabetically for easy selection
+   - If no collections with restaurants exist, helpful message is shown
+6. **Choose Visit Date** → Date picker with validation:
+   - Can only select past dates (up to today)
+   - Date represents when they actually visited the restaurant
+7. **Add Notes (Optional)** → Text area for additional context:
+   - Notes about the meal, experience, or why they went
+   - Stored in decision's `result.reasoning` field
+8. **Validation & Submit** → System validates:
+   - Restaurant must exist in user's/group's collections
+   - User must be a group member (for group decisions)
+   - All required fields must be filled
+9. **Success** → Decision is saved with:
+   - Status: `completed`
+   - Method: `manual`
+   - Visit date as specified
+   - Notes in result.reasoning
+10. **History Update** → Decision immediately appears in history view
+11. **Weight System Integration** → Manual decision affects 30-day rolling weights
+
+**Key Features Implemented**:
+
+- Dynamic restaurant loading based on selected type/group
+- Real-time form validation with clear error messages
+- Loading states during submission
+- Automatic cache invalidation after creation
+- Integration with existing decision history system
+- Support for both personal and group contexts
+- Notes field for rich historical context
+
+Notes: Manual entry system fully implemented and integrated with history tracking and weight system.
 
 ## 7. PWA Offline Experience
 
