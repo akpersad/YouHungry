@@ -586,6 +586,9 @@ export function GroupView({
         groupId={group._id.toString()}
         isLoading={actionLoading === 'invite-friends'}
       />
+
+      {/* Mobile Spacer - prevents content from being cut off by bottom navigation */}
+      <div className="h-32 md:hidden" aria-hidden="true" />
     </div>
   );
 }

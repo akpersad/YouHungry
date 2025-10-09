@@ -21,7 +21,7 @@ export function MobileLayout({ children, className }: MobileLayoutProps) {
   } = useMobileNavigation();
 
   return (
-    <div className={cn('min-h-screen bg-primary', className)}>
+    <div className={cn('flex flex-col flex-1 bg-primary', className)}>
       {/* Mobile Header - hidden since we use bottom navigation */}
       {/* <div className="md:hidden bg-secondary border-b border-quaternary px-4 py-3">
         <div className="flex items-center justify-between">
@@ -53,11 +53,23 @@ export function MobileLayout({ children, className }: MobileLayoutProps) {
 
       {/* Main content with padding matching bottom navigation */}
       <main
-        className="px-6 pb-24 md:pb-28"
+        className="flex-1 px-6 pb-24 md:pb-0"
         style={{ paddingTop: '4rem' }} // 64px for proper status bar spacing
       >
         {children}
       </main>
+
+      {/* Desktop Footer */}
+      <footer className="hidden md:block border-t border-quaternary bg-primary mt-auto">
+        <div className="max-w-7xl mx-auto px-6 py-6">
+          <div className="text-center text-sm text-tertiary">
+            <p>
+              © {new Date().getFullYear()} You Hungry? - Making food decisions
+              easier
+            </p>
+          </div>
+        </div>
+      </footer>
 
       {/* Bottom Navigation */}
       <BottomNavigation
