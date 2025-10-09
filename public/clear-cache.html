@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Clear Cache - You Hungry?</title>
+    <style>
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+      }
+      .container {
+        background: white;
+        padding: 40px;
+        border-radius: 16px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        max-width: 600px;
+        width: 100%;
+      }
+      h1 {
+        color: #333;
+        margin-bottom: 16px;
+        font-size: 28px;
+      }
+      p {
+        color: #666;
+        margin-bottom: 24px;
+        line-height: 1.6;
+      }
+      button {
+        background: #ff6b6b;
+        color: white;
+        border: none;
+        padding: 14px 28px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: 600;
+        width: 100%;
+        margin-bottom: 12px;
+        transition: background 0.2s;
+      }
+      button:hover {
+        background: #ee5a52;
+      }
+      button:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+      }
+      .status {
+        padding: 12px;
+        border-radius: 8px;
+        margin-top: 20px;
+        display: none;
+      }
+      .status.success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+        display: block;
+      }
+      .status.error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+        display: block;
+      }
+      .status.info {
+        background: #d1ecf1;
+        color: #0c5460;
+        border: 1px solid #bee5eb;
+        display: block;
+      }
+      code {
+        background: #f4f4f4;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-family: 'Courier New', monospace;
+        font-size: 14px;
+      }
+      .steps {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        margin-top: 20px;
+      }
+      .steps ol {
+        margin: 0;
+        padding-left: 20px;
+      }
+      .steps li {
+        margin-bottom: 8px;
+        color: #495057;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🧹 Clear Cache & Service Worker</h1>
+      <p>
+        This page will help you clear all cached data and unregister the service
+        worker to fix the "Server Action not found" error.
+      </p>
+
+      <button id="clearAll" onclick="clearAll()">
+        🚀 Clear Everything & Reload
+      </button>
+
+      <button id="clearCache" onclick="clearCaches()">
+        🗑️ Clear Caches Only
+      </button>
+
+      <button id="unregisterSW" onclick="unregisterServiceWorker()">
+        ⚙️ Unregister Service Worker
+      </button>
+
+      <div id="status" class="status"></div>
+
+      <div class="steps">
+        <h3 style="margin-top: 0; color: #333">What gets cleared:</h3>
+        <ol>
+          <li>All service worker caches (v1, v2, v3)</li>
+          <li>Service worker registration</li>
+          <li>Local storage</li>
+          <li>Session storage</li>
+          <li>IndexedDB</li>
+        </ol>
+      </div>
+
+      <div class="steps" style="margin-top: 16px">
+        <h3 style="margin-top: 0; color: #333">Manual steps if needed:</h3>
+        <ol>
+          <li>
+            Open DevTools (F12) → <strong>Application</strong> tab → Clear site
+            data
+          </li>
+          <li>
+            Or visit <code>chrome://serviceworker-internals/</code> and
+            unregister
+          </li>
+          <li>Hard refresh: <code>Ctrl/Cmd + Shift + R</code></li>
+        </ol>
+      </div>
+    </div>
+
+    <script>
+      function showStatus(message, type = 'info') {
+        const status = document.getElementById('status');
+        status.textContent = message;
+        status.className = `status ${type}`;
+      }
+
+      async function clearCaches() {
+        try {
+          showStatus('Clearing caches...', 'info');
+
+          if ('caches' in window) {
+            const cacheNames = await caches.keys();
+            await Promise.all(cacheNames.map((name) => caches.delete(name)));
+            showStatus(
+              `✅ Cleared ${cacheNames.length} cache(s): ${cacheNames.join(', ')}`,
+              'success'
+            );
+          } else {
+            showStatus('⚠️ Cache API not supported', 'error');
+          }
+        } catch (error) {
+          showStatus(`❌ Error clearing caches: ${error.message}`, 'error');
+        }
+      }
+
+      async function unregisterServiceWorker() {
+        try {
+          showStatus('Unregistering service workers...', 'info');
+
+          if ('serviceWorker' in navigator) {
+            const registrations =
+              await navigator.serviceWorker.getRegistrations();
+            await Promise.all(
+              registrations.map((registration) => registration.unregister())
+            );
+            showStatus(
+              `✅ Unregistered ${registrations.length} service worker(s)`,
+              'success'
+            );
+          } else {
+            showStatus('⚠️ Service Workers not supported', 'error');
+          }
+        } catch (error) {
+          showStatus(
+            `❌ Error unregistering service workers: ${error.message}`,
+            'error'
+          );
+        }
+      }
+
+      function clearStorage() {
+        try {
+          localStorage.clear();
+          sessionStorage.clear();
+          showStatus('✅ Cleared local and session storage', 'success');
+        } catch (error) {
+          showStatus(`⚠️ Could not clear storage: ${error.message}`, 'error');
+        }
+      }
+
+      async function clearIndexedDB() {
+        try {
+          if ('indexedDB' in window) {
+            const databases = await indexedDB.databases();
+            await Promise.all(
+              databases.map(
+                (db) =>
+                  new Promise((resolve, reject) => {
+                    const request = indexedDB.deleteDatabase(db.name);
+                    request.onsuccess = resolve;
+                    request.onerror = reject;
+                  })
+              )
+            );
+            showStatus(
+              `✅ Cleared ${databases.length} IndexedDB database(s)`,
+              'success'
+            );
+          }
+        } catch (error) {
+          console.error('Error clearing IndexedDB:', error);
+          // IndexedDB clearing is best-effort
+        }
+      }
+
+      async function clearAll() {
+        try {
+          showStatus('🧹 Clearing everything...', 'info');
+
+          // Clear all in sequence
+          await clearCaches();
+          await new Promise((resolve) => setTimeout(resolve, 500));
+
+          await unregisterServiceWorker();
+          await new Promise((resolve) => setTimeout(resolve, 500));
+
+          clearStorage();
+          await new Promise((resolve) => setTimeout(resolve, 500));
+
+          await clearIndexedDB();
+          await new Promise((resolve) => setTimeout(resolve, 500));
+
+          showStatus(
+            '✅ All data cleared! Redirecting to home page...',
+            'success'
+          );
+
+          // Reload after a short delay
+          setTimeout(() => {
+            window.location.href = '/';
+          }, 2000);
+        } catch (error) {
+          showStatus(`❌ Error: ${error.message}`, 'error');
+        }
+      }
+
+      // Show current service worker status on load
+      window.addEventListener('load', async () => {
+        if ('serviceWorker' in navigator) {
+          const registrations =
+            await navigator.serviceWorker.getRegistrations();
+          const cacheNames = await caches.keys();
+
+          if (registrations.length > 0 || cacheNames.length > 0) {
+            showStatus(
+              `Found ${registrations.length} service worker(s) and ${cacheNames.length} cache(s)`,
+              'info'
+            );
+          } else {
+            showStatus('✅ No service workers or caches found', 'success');
+          }
+        }
+      });
+    </script>
+  </body>
+</html>

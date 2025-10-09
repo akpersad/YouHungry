@@ -15,9 +15,19 @@ import { Button } from '@/components/ui/Button';
 import { UserAvatar } from '@/components/ui/UserAvatar';
 import { Modal } from '@/components/ui/Modal';
 import { Input } from '@/components/ui/Input';
+import { DropdownMenu, DropdownMenuItem } from '@/components/ui/DropdownMenu';
 import { FriendSelectionModal } from './FriendSelectionModal';
 import { useDecisionHistory } from '@/hooks/api/useHistory';
-import { Clock, Users, Calendar } from 'lucide-react';
+import {
+  Clock,
+  Users,
+  Calendar,
+  MoreVertical,
+  Edit,
+  UserPlus,
+  UserMinus,
+  Crown,
+} from 'lucide-react';
 
 interface GroupViewProps {
   group: Group & { members: User[] };
@@ -178,11 +188,11 @@ export function GroupView({
   };
 
   return (
-    <div className="space-y-6">
+    <div>
       {/* Group Header */}
-      <Card className="p-6">
-        <div className="flex items-start justify-between mb-4">
-          <div className="flex-1">
+      <Card className="p-6 !mb-4">
+        <div className="flex items-start justify-between mb-6">
+          <div className="flex-1 min-w-0">
             {isEditing ? (
               <form onSubmit={handleEditSubmit} className="space-y-4">
                 <div>
@@ -207,7 +217,7 @@ export function GroupView({
                     }
                     placeholder="Group description"
                     rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-quinary rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
                 <div className="flex space-x-2">
@@ -237,13 +247,13 @@ export function GroupView({
               </form>
             ) : (
               <div>
-                <h1 className="text-2xl font-bold text-gray-900 mb-2">
+                <h1 className="text-2xl font-bold text-primary mb-2">
                   {group.name}
                 </h1>
                 {group.description && (
-                  <p className="text-gray-600 mb-4">{group.description}</p>
+                  <p className="text-secondary mb-4">{group.description}</p>
                 )}
-                <div className="flex items-center space-x-4 text-sm text-gray-500">
+                <div className="flex items-center space-x-4 text-sm text-tertiary">
                   <span>
                     {group.memberIds.length} member
                     {group.memberIds.length !== 1 ? 's' : ''}
@@ -263,29 +273,34 @@ export function GroupView({
           </div>
 
           {!isEditing && isCurrentUserAdmin && (
-            <div className="flex space-x-2">
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => setIsEditing(true)}
-              >
-                Edit
-              </Button>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => setShowInviteModal(true)}
-              >
-                Invite
-              </Button>
-            </div>
+            <DropdownMenu
+              trigger={
+                <button
+                  className="p-2 rounded-lg bg-secondary hover:bg-tertiary transition-colors duration-200"
+                  aria-label="Group options"
+                >
+                  <MoreVertical className="w-5 h-5 text-primary" />
+                </button>
+              }
+            >
+              <DropdownMenuItem onClick={() => setIsEditing(true)}>
+                <Edit className="w-4 h-4" />
+                Edit Group
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setShowInviteModal(true)}>
+                <UserPlus className="w-4 h-4" />
+                Invite by Email
+              </DropdownMenuItem>
+            </DropdownMenu>
           )}
         </div>
 
         {/* Action Buttons */}
-        <div className="flex space-x-3">
-          <Link href={`/groups/${group._id}/collections`}>
-            <Button variant="primary">View Collections</Button>
+        <div className="flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:space-x-3">
+          <Link href={`/groups/${group._id}/collections`} className="flex-1">
+            <Button variant="primary" className="w-full">
+              View Collections
+            </Button>
           </Link>
 
           {!isLastAdmin ? (
@@ -293,19 +308,20 @@ export function GroupView({
               variant="secondary"
               onClick={handleLeaveGroup}
               isLoading={actionLoading === 'leave'}
+              className="flex-1 sm:flex-none"
             >
               Leave Group
             </Button>
           ) : (
-            <div className="flex flex-col items-end">
+            <div className="flex flex-col items-center sm:items-end flex-1 sm:flex-none">
               <Button
                 variant="secondary"
                 disabled
-                className="opacity-50 cursor-not-allowed"
+                className="opacity-50 cursor-not-allowed w-full sm:w-auto"
               >
                 Leave Group
               </Button>
-              <span className="text-xs text-gray-500 mt-1">
+              <span className="text-xs text-tertiary mt-1">
                 Cannot leave as the only admin
               </span>
             </div>
@@ -316,6 +332,7 @@ export function GroupView({
               variant="outline"
               onClick={() => setShowDeleteModal(true)}
               isLoading={actionLoading === 'delete'}
+              className="flex-1 sm:flex-none"
             >
               Delete Group
             </Button>
@@ -324,28 +341,31 @@ export function GroupView({
       </Card>
 
       {/* Members Section */}
-      <Card className="p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">Members</h2>
-          <div className="flex space-x-2">
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => setShowFriendSelectionModal(true)}
-            >
+      <Card className="p-6 !mb-4">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-lg font-semibold text-primary">Members</h2>
+          <DropdownMenu
+            trigger={
+              <button
+                className="p-2 rounded-lg bg-secondary hover:bg-tertiary transition-colors duration-200"
+                aria-label="Invite options"
+              >
+                <UserPlus className="w-5 h-5 text-primary" />
+              </button>
+            }
+          >
+            <DropdownMenuItem onClick={() => setShowFriendSelectionModal(true)}>
+              <Users className="w-4 h-4" />
               Invite Friends
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowInviteModal(true)}
-            >
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setShowInviteModal(true)}>
+              <UserPlus className="w-4 h-4" />
               Invite by Email
-            </Button>
-          </div>
+            </DropdownMenuItem>
+          </DropdownMenu>
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-4">
           {group.members.map((member) => {
             const isAdmin = group.adminIds.some(
               (adminId) => adminId.toString() === member._id.toString()
@@ -355,50 +375,58 @@ export function GroupView({
             return (
               <div
                 key={member._id.toString()}
-                className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                className="flex items-center justify-between p-4 bg-secondary rounded-lg"
               >
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-3 min-w-0 flex-1">
                   <UserAvatar
                     name={member.name}
                     profilePicture={member.profilePicture}
                     size="md"
                   />
-                  <div>
-                    <div className="flex items-center space-x-2">
-                      <span className="font-medium text-gray-900">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center space-x-2 mb-1">
+                      <span className="font-medium text-primary truncate">
                         {member.name}
                       </span>
                       {isAdmin && (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 flex-shrink-0">
                           Admin
                         </span>
                       )}
                     </div>
-                    <p className="text-sm text-gray-500">{member.email}</p>
+                    <p className="text-sm text-tertiary truncate">
+                      {member.email}
+                    </p>
                   </div>
                 </div>
 
                 {isCurrentUserAdmin && !isCurrentUser && (
-                  <div className="flex space-x-2">
-                    {!isAdmin && (
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        onClick={() => handlePromoteUser(member.email)}
-                        isLoading={actionLoading === `promote-${member.email}`}
+                  <DropdownMenu
+                    trigger={
+                      <button
+                        className="p-2 rounded-lg bg-secondary hover:bg-tertiary transition-colors duration-200 flex-shrink-0"
+                        aria-label={`Manage ${member.name}`}
                       >
-                        Promote
-                      </Button>
+                        <MoreVertical className="w-4 h-4 text-primary" />
+                      </button>
+                    }
+                  >
+                    {!isAdmin && (
+                      <DropdownMenuItem
+                        onClick={() => handlePromoteUser(member.email)}
+                      >
+                        <Crown className="w-4 h-4" />
+                        Promote to Admin
+                      </DropdownMenuItem>
                     )}
-                    <Button
-                      variant="outline"
-                      size="sm"
+                    <DropdownMenuItem
                       onClick={() => handleRemoveUser(member.email)}
-                      isLoading={actionLoading === `remove-${member.email}`}
+                      variant="destructive"
                     >
+                      <UserMinus className="w-4 h-4" />
                       Remove from Group
-                    </Button>
-                  </div>
+                    </DropdownMenuItem>
+                  </DropdownMenu>
                 )}
               </div>
             );
@@ -429,22 +457,22 @@ export function GroupView({
               {recentDecisions.decisions.map((decision, index) => (
                 <div
                   key={decision.id || `decision-${index}`}
-                  className="flex items-start gap-3 p-3 border border-gray-200 rounded-lg"
+                  className="flex items-start gap-3 p-3 border border-quaternary rounded-lg"
                 >
                   <div className="flex-shrink-0 mt-1">
                     <Users className="w-4 h-4 text-blue-600" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="font-medium text-gray-900">
+                      <span className="font-medium text-primary">
                         {decision.result?.restaurant?.name ||
                           'Restaurant Decision'}
                       </span>
-                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-tertiary text-primary">
                         {decision.method}
                       </span>
                     </div>
-                    <div className="flex items-center gap-4 text-sm text-gray-600">
+                    <div className="flex items-center gap-4 text-sm text-secondary">
                       <div className="flex items-center gap-1">
                         <Calendar className="w-3 h-3" />
                         Visited:{' '}
@@ -456,7 +484,7 @@ export function GroupView({
                         {new Date(decision.createdAt).toLocaleDateString()}
                       </div>
                     </div>
-                    <div className="text-sm text-gray-500 mt-1">
+                    <div className="text-sm text-tertiary mt-1">
                       Group Decision • {decision.collectionName}
                     </div>
                   </div>
@@ -486,7 +514,7 @@ export function GroupView({
           <div>
             <label
               htmlFor="invite-email"
-              className="block text-sm font-medium text-gray-700 mb-1"
+              className="block text-sm font-medium text-primary mb-1"
             >
               Email Address
             </label>
@@ -526,7 +554,7 @@ export function GroupView({
         title="Delete Group"
       >
         <div className="space-y-4">
-          <p className="text-gray-600">
+          <p className="text-secondary">
             Are you sure you want to delete &quot;{group.name}&quot;? This
             action cannot be undone. All group collections and data will be
             permanently removed.

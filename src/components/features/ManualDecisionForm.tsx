@@ -209,7 +209,7 @@ export function ManualDecisionForm({ onSuccess }: ManualDecisionFormProps) {
     <form onSubmit={handleSubmit} className="space-y-4">
       {/* Type Selection */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-primary mb-2">
           Decision Type
         </label>
         <div className="flex gap-4">
@@ -246,7 +246,7 @@ export function ManualDecisionForm({ onSuccess }: ManualDecisionFormProps) {
       {/* Group Selection (if group type) */}
       {type === 'group' && (
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-primary mb-2">
             Group <span className="text-red-500">*</span>
           </label>
           <select
@@ -255,7 +255,7 @@ export function ManualDecisionForm({ onSuccess }: ManualDecisionFormProps) {
               setGroupId(e.target.value);
               setRestaurantId(''); // Reset restaurant selection when group changes
             }}
-            className="w-full rounded-lg border border-gray-300 px-3 py-2"
+            className="w-full rounded-lg border border-quinary px-3 py-2"
             required
           >
             <option value="">Select a group</option>
@@ -270,13 +270,13 @@ export function ManualDecisionForm({ onSuccess }: ManualDecisionFormProps) {
 
       {/* Restaurant Selection */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-primary mb-2">
           Restaurant <span className="text-red-500">*</span>
         </label>
         <select
           value={restaurantId}
           onChange={(e) => setRestaurantId(e.target.value)}
-          className="w-full rounded-lg border border-gray-300 px-3 py-2"
+          className="w-full rounded-lg border border-quinary px-3 py-2"
           required
           disabled={type === 'group' ? !groupId : false}
         >
@@ -317,14 +317,14 @@ export function ManualDecisionForm({ onSuccess }: ManualDecisionFormProps) {
 
       {/* Notes */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-primary mb-2">
           Notes (Optional)
         </label>
         <textarea
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           placeholder="Add any notes about this visit..."
-          className="w-full rounded-lg border border-gray-300 px-3 py-2 h-24 resize-none"
+          className="w-full rounded-lg border border-quinary px-3 py-2 h-24 resize-none"
         />
       </div>
 

@@ -147,7 +147,7 @@ export function CreateGroupForm({
         <div>
           <label
             htmlFor="group-name"
-            className="block text-sm font-medium text-gray-700 mb-1"
+            className="block text-sm font-medium text-primary mb-1"
           >
             Group Name *
           </label>
@@ -166,7 +166,7 @@ export function CreateGroupForm({
         <div>
           <label
             htmlFor="group-description"
-            className="block text-sm font-medium text-gray-700 mb-1"
+            className="block text-sm font-medium text-primary mb-1"
           >
             Description (Optional)
           </label>
@@ -179,24 +179,24 @@ export function CreateGroupForm({
             className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
               errors.description
                 ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
-                : 'border-gray-300'
-            } ${isSubmitting ? 'bg-gray-50 cursor-not-allowed' : ''}`}
+                : 'border-quinary'
+            } ${isSubmitting ? 'bg-secondary cursor-not-allowed' : ''}`}
             disabled={isSubmitting || isLoading}
           />
           {errors.description && (
             <p className="mt-1 text-sm text-red-600">{errors.description}</p>
           )}
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-1 text-sm text-tertiary">
             {formData.description.length}/500 characters
           </p>
         </div>
 
         {/* Member Invitation Section */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-primary mb-1">
             Invite Members (Optional)
           </label>
-          <p className="text-sm text-gray-500 mb-3">
+          <p className="text-sm text-tertiary mb-3">
             Add email addresses of people you want to invite to this group
           </p>
 
@@ -229,16 +229,16 @@ export function CreateGroupForm({
 
           {memberEmails.length > 0 && (
             <div className="space-y-2">
-              <p className="text-sm font-medium text-gray-700">
+              <p className="text-sm font-medium text-primary">
                 Invited Members:
               </p>
               <div className="space-y-1">
                 {memberEmails.map((email) => (
                   <div
                     key={email}
-                    className="flex items-center justify-between bg-gray-50 px-3 py-2 rounded-md"
+                    className="flex items-center justify-between bg-secondary px-3 py-2 rounded-md"
                   >
-                    <span className="text-sm text-gray-700">{email}</span>
+                    <span className="text-sm text-primary">{email}</span>
                     <button
                       type="button"
                       onClick={() => handleRemoveEmail(email)}

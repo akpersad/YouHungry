@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "node scripts/check-server.js 3000 && next dev --turbopack",
     "dev:force": "next dev --turbopack",
+    "dev:fix": "node scripts/fix-server-actions.js && npm run dev",
     "dev:kill": "lsof -ti:3000 | xargs kill -9",
     "build": "next build --turbopack",
     "build:webpack": "next build",

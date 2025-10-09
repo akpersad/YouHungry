@@ -92,7 +92,7 @@
     --bg-secondary: #1a1a1a; /* Primary dark background - charcoal */
     --bg-tertiary: #2d2d2d; /* Card surfaces - dark gray */
     --bg-quaternary: #404040; /* Secondary surfaces - medium dark gray */
-    --bg-quinary: #666666; /* Borders, dividers - light dark gray */
+    --bg-quinary: #ababab; /* Borders, dividers - light dark gray (WCAG AA 4.5:1 on all backgrounds) */
 
     /* Strategic Accent Colors - Infrared (Dark Mode maintains original for better contrast) */
     --accent-primary: #ff3366; /* Vibrant infrared - primary actions */
@@ -103,7 +103,7 @@
     /* Text Colors */
     --text-primary: #ffffff; /* Primary text - high contrast */
     --text-secondary: #d1d1d1; /* Secondary text - body text */
-    --text-tertiary: #a0a0a0; /* Tertiary text - muted (adjusted for WCAG AA on dark cards) */
+    --text-tertiary: #b8b8b8; /* Tertiary text - muted (WCAG AA 5.0:1+ on all backgrounds) */
     --text-inverse: #1a1a1a; /* Text on light backgrounds */
 
     /* Enhanced Shadow & Depth System */

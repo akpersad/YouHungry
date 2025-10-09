@@ -14,12 +14,15 @@ import {
   Cog6ToothIcon,
   ArrowRightOnRectangleIcon,
   ArrowLeftOnRectangleIcon,
+  SunIcon,
+  MoonIcon,
 } from '@heroicons/react/24/outline';
 import {
   HomeIcon as HomeIconSolid,
   MagnifyingGlassIcon as MagnifyingGlassIconSolid,
   UserGroupIcon as UserGroupIconSolid,
 } from '@heroicons/react/24/solid';
+import { useTheme } from '@/components/providers/ThemeProvider';
 
 export interface NavigationItem {
   id: string;
@@ -36,6 +39,7 @@ export function useMobileNavigation() {
   const { isSignedIn, isLoaded, user } = useUser();
   const { signOut } = useClerk();
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
+  const { resolvedTheme, toggleTheme } = useTheme();
 
   // Determine active tab based on current path
   const getActiveTab = (path: string): string => {
@@ -127,6 +131,18 @@ export function useMobileNavigation() {
             icon: <Cog6ToothIcon className="w-5 h-5" />,
             onClick: () => router.push('/profile'),
           },
+          // Theme toggle
+          {
+            id: 'theme-toggle',
+            label: resolvedTheme === 'dark' ? 'Light Mode' : 'Dark Mode',
+            icon:
+              resolvedTheme === 'dark' ? (
+                <SunIcon className="w-5 h-5" />
+              ) : (
+                <MoonIcon className="w-5 h-5" />
+              ),
+            onClick: toggleTheme,
+          },
           // Sign out
           {
             id: 'signout',
@@ -139,7 +155,19 @@ export function useMobileNavigation() {
           },
         ]
       : [
-          // Not signed in - show sign in option
+          // Not signed in - show theme toggle first
+          {
+            id: 'theme-toggle',
+            label: resolvedTheme === 'dark' ? 'Light Mode' : 'Dark Mode',
+            icon:
+              resolvedTheme === 'dark' ? (
+                <SunIcon className="w-5 h-5" />
+              ) : (
+                <MoonIcon className="w-5 h-5" />
+              ),
+            onClick: toggleTheme,
+          },
+          // Sign in option
           {
             id: 'signin',
             label: 'Sign In',

@@ -20,7 +20,7 @@ This document defines the visual design system, color palette, typography, and c
 - **Charcoal**: `#1a1a1a` - Primary dark background
 - **Dark Gray**: `#2d2d2d` - Card surfaces, elevated elements
 - **Medium Dark Gray**: `#404040` - Secondary surfaces, subtle variations
-- **Light Dark Gray**: `#666666` - Borders, dividers in dark mode
+- **Light Dark Gray**: `#ababab` - Borders, dividers in dark mode (WCAG AA 4.5:1 compliant)
 
 ### **Strategic Accent Colors**
 
@@ -44,7 +44,7 @@ This document defines the visual design system, color palette, typography, and c
 
 - **Primary Text**: `#ffffff` - High contrast, headings, primary content
 - **Secondary Text**: `#d1d1d1` - Body text, descriptions
-- **Tertiary Text**: `#8a8a8a` - Muted text, captions, metadata
+- **Tertiary Text**: `#b8b8b8` - Muted text, captions, metadata (WCAG AA compliant)
 - **Inverse Text**: `#1a1a1a` - Text on light backgrounds
 
 ### **Enhanced Shadow & Depth System**
@@ -785,7 +785,7 @@ A. I think what's most important is capturing all of this and making sure every 
 --bg-secondary-dark: #1a1a1a; /* Primary dark background - charcoal */
 --bg-tertiary-dark: #2d2d2d; /* Card surfaces - dark gray */
 --bg-quaternary-dark: #404040; /* Secondary surfaces - medium dark gray */
---bg-quinary-dark: #666666; /* Borders, dividers - light dark gray */
+--bg-quinary-dark: #ababab; /* Borders, dividers - light dark gray (WCAG AA 4.5:1) */
 ```
 
 #### **Strategic Accent Colors**
@@ -810,7 +810,7 @@ A. I think what's most important is capturing all of this and making sure every 
 /* Dark Mode Text */
 --text-primary-dark: #ffffff; /* Primary text - high contrast */
 --text-secondary-dark: #d1d1d1; /* Secondary text - body text */
---text-tertiary-dark: #8a8a8a; /* Tertiary text - muted */
+--text-tertiary-dark: #b8b8b8; /* Tertiary text - muted (WCAG AA) */
 --text-inverse-dark: #1a1a1a; /* Text on light backgrounds */
 ```
 

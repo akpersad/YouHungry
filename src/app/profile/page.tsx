@@ -366,7 +366,7 @@ export default function ProfilePage() {
 
   if (!isLoaded || isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-primary flex items-center justify-center">
         <div className="flex items-center space-x-2">
           <Loader2 className="h-6 w-6 animate-spin" />
           <span>Loading profile...</span>
@@ -377,12 +377,12 @@ export default function ProfilePage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-primary flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">
+          <h2 className="text-xl font-semibold text-primary mb-2">
             Error Loading Profile
           </h2>
-          <p className="text-gray-600 mb-4">
+          <p className="text-secondary mb-4">
             There was an error loading your profile.
           </p>
           <Button onClick={() => window.location.reload()}>Try Again</Button>
@@ -393,12 +393,12 @@ export default function ProfilePage() {
 
   if (!clerkUser) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-primary flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">
+          <h2 className="text-xl font-semibold text-primary mb-2">
             Not Signed In
           </h2>
-          <p className="text-gray-600 mb-4">
+          <p className="text-secondary mb-4">
             Please sign in to view your profile.
           </p>
           <Button onClick={() => (window.location.href = '/sign-in')}>
@@ -410,11 +410,11 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-primary py-8">
       <div className="max-w-4xl mx-auto lg:px-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Profile Settings</h1>
-          <p className="mt-2 text-gray-600">
+          <h1 className="text-3xl font-bold text-primary">Profile Settings</h1>
+          <p className="mt-2 text-secondary">
             Manage your account settings and preferences.
           </p>
         </div>
@@ -477,7 +477,7 @@ export default function ProfilePage() {
                         </Button>
                       )}
                     </div>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-secondary">
                       Upload a JPEG, PNG, or WebP image (max 5MB)
                     </p>
                     <input
@@ -524,7 +524,7 @@ export default function ProfilePage() {
               <div>
                 <Label htmlFor="email">Email Address</Label>
                 <Input id="email" value={profile?.email || ''} disabled />
-                <p className="text-sm text-gray-500 mt-1">
+                <p className="text-sm text-tertiary mt-1">
                   Email is managed through your Clerk account.
                 </p>
               </div>
@@ -561,7 +561,7 @@ export default function ProfilePage() {
                   onValidationChange={setIsDefaultLocationValid}
                   placeholder="Enter your default location for restaurant searches"
                 />
-                <p className="text-sm text-gray-500 mt-1">
+                <p className="text-sm text-tertiary mt-1">
                   This will be used as the default location for restaurant
                   searches.
                 </p>
@@ -714,7 +714,7 @@ export default function ProfilePage() {
                     </p>
                   )}
                   {phoneValidationStatus !== 'pending' && (
-                    <p className="text-sm text-gray-500 mt-1">
+                    <p className="text-sm text-tertiary mt-1">
                       {normalizePhoneNumber(formData.phoneNumber) ===
                       normalizePhoneNumber(profile?.phoneNumber || '')
                         ? 'Verified phone number for SMS notifications. Edit to change and re-verify.'
@@ -732,7 +732,7 @@ export default function ProfilePage() {
                     disabled
                     placeholder="No verified phone number"
                   />
-                  <p className="text-sm text-gray-500 mt-1">
+                  <p className="text-sm text-tertiary mt-1">
                     No verified phone number yet. Enable SMS notifications below
                     to verify a number.
                   </p>
@@ -888,7 +888,7 @@ export default function ProfilePage() {
                   )}
                   {phoneValidationStatus !== 'pending' &&
                     phoneValidationStatus !== 'verified' && (
-                      <p className="text-sm text-gray-500 mt-1">
+                      <p className="text-sm text-tertiary mt-1">
                         Enter your mobile phone number to receive SMS
                         notifications. Verification is required.
                       </p>
@@ -908,14 +908,14 @@ export default function ProfilePage() {
             </CardHeader>
             <CardContent className="space-y-6">
               <div>
-                <h4 className="text-sm font-medium text-gray-900 mb-3">
+                <h4 className="text-sm font-medium text-primary mb-3">
                   Notification Channels
                 </h4>
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <div>
                       <Label htmlFor="emailEnabled">Email Notifications</Label>
-                      <p className="text-sm text-gray-500">
+                      <p className="text-sm text-tertiary">
                         Receive notifications via email
                       </p>
                     </div>
@@ -930,7 +930,7 @@ export default function ProfilePage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <Label htmlFor="pushEnabled">Push Notifications</Label>
-                      <p className="text-sm text-gray-500">
+                      <p className="text-sm text-tertiary">
                         Receive push notifications on your device
                       </p>
                     </div>
@@ -945,7 +945,7 @@ export default function ProfilePage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <Label htmlFor="smsEnabled">SMS Notifications</Label>
-                      <p className="text-sm text-gray-500">
+                      <p className="text-sm text-tertiary">
                         Receive notifications via SMS
                       </p>
                     </div>
@@ -961,14 +961,14 @@ export default function ProfilePage() {
               </div>
 
               <div>
-                <h4 className="text-sm font-medium text-gray-900 mb-3">
+                <h4 className="text-sm font-medium text-primary mb-3">
                   Notification Types
                 </h4>
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <div>
                       <Label htmlFor="groupDecisions">Group Decisions</Label>
-                      <p className="text-sm text-gray-500">
+                      <p className="text-sm text-tertiary">
                         Notifications about group decision making
                       </p>
                     </div>
@@ -983,7 +983,7 @@ export default function ProfilePage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <Label htmlFor="friendRequests">Friend Requests</Label>
-                      <p className="text-sm text-gray-500">
+                      <p className="text-sm text-tertiary">
                         Notifications about friend requests
                       </p>
                     </div>
@@ -998,7 +998,7 @@ export default function ProfilePage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <Label htmlFor="groupInvites">Group Invitations</Label>
-                      <p className="text-sm text-gray-500">
+                      <p className="text-sm text-tertiary">
                         Notifications about group invitations
                       </p>
                     </div>
@@ -1024,7 +1024,7 @@ export default function ProfilePage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-gray-600 mb-4">
+              <p className="text-sm text-secondary mb-4">
                 Manage your password, two-factor authentication, and other
                 security settings.
               </p>
@@ -1051,7 +1051,7 @@ export default function ProfilePage() {
                   <p className="font-medium">
                     Click your avatar to manage security settings
                   </p>
-                  <p className="text-gray-500">
+                  <p className="text-tertiary">
                     Password, 2FA, connected accounts, and more
                   </p>
                 </div>

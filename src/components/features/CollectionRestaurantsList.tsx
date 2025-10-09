@@ -193,7 +193,7 @@ export function CollectionRestaurantsList({
               className="animate-pulse"
               data-testid="animate-pulse"
             >
-              <div className="bg-gray-200 dark:bg-gray-700 rounded-lg h-48"></div>
+              <div className="bg-quaternary dark:bg-gray-700 rounded-lg h-48"></div>
             </div>
           ))}
         </div>
@@ -249,10 +249,10 @@ export function CollectionRestaurantsList({
 
       {restaurants.length === 0 ? (
         <div className="text-center py-8">
-          <p className="text-gray-500 dark:text-gray-400 mb-4">
+          <p className="text-tertiary dark:text-gray-400 mb-4">
             No restaurants in this collection yet.
           </p>
-          <p className="text-sm text-gray-400 dark:text-gray-500">
+          <p className="text-sm text-gray-400 dark:text-tertiary">
             Search for restaurants and add them to this collection to get
             started.
           </p>

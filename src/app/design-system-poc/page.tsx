@@ -64,7 +64,7 @@ export default function DesignSystemPOC() {
     bgQuinary: '#d1d1d1', // Stronger borders - dark gray
     textPrimary: '#1a1a1a', // Primary text - high contrast
     textSecondary: '#4a4a4a', // Secondary text - body text
-    textTertiary: '#8a8a8a', // Tertiary text - muted
+    textTertiary: '#6b6b6b', // Tertiary text - muted (WCAG AA)
     textInverse: '#ffffff', // Text on dark backgrounds
 
     // Dark mode - Shades of Black & Gray
@@ -72,10 +72,10 @@ export default function DesignSystemPOC() {
     bgSecondaryDark: '#1a1a1a', // Primary dark background - charcoal
     bgTertiaryDark: '#2d2d2d', // Card surfaces - dark gray
     bgQuaternaryDark: '#404040', // Secondary surfaces - medium dark gray
-    bgQuinaryDark: '#666666', // Borders, dividers - light dark gray
+    bgQuinaryDark: '#ababab', // Borders, dividers - light dark gray (WCAG AA)
     textPrimaryDark: '#ffffff', // Primary text - high contrast
     textSecondaryDark: '#d1d1d1', // Secondary text - body text
-    textTertiaryDark: '#8a8a8a', // Tertiary text - muted
+    textTertiaryDark: '#b8b8b8', // Tertiary text - muted (WCAG AA)
     textInverseDark: '#1a1a1a', // Text on light backgrounds
   };
 
@@ -1028,7 +1028,7 @@ export default function DesignSystemPOC() {
                 • Secondary text (#4a4a4a) on white: 9.1:1 contrast ratio ✅
               </li>
               <li>
-                • Tertiary text (#8a8a8a) on white: 4.5:1 contrast ratio ✅
+                • Tertiary text (#6b6b6b) on white: 5.33:1 contrast ratio ✅
               </li>
               <li>
                 • Infrared accent (#ff3366) on white: 4.5:1 contrast ratio ✅

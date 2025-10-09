@@ -88,7 +88,7 @@ export default function DashboardPage() {
                   {recentDecisions.decisions.map((decision, index) => (
                     <div
                       key={decision.id || `decision-${index}`}
-                      className="flex items-start gap-3 p-3 border border-gray-200 rounded-lg"
+                      className="flex items-start gap-3 p-3 border border-quaternary rounded-lg"
                     >
                       <div className="flex-shrink-0 mt-1">
                         {decision.type === 'group' ? (
@@ -99,15 +99,15 @@ export default function DashboardPage() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
-                          <span className="font-medium text-gray-900">
+                          <span className="font-medium text-primary">
                             {decision.result?.restaurant?.name ||
                               'Restaurant Decision'}
                           </span>
-                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-tertiary text-primary">
                             {decision.method}
                           </span>
                         </div>
-                        <div className="flex items-center gap-4 text-sm text-gray-600">
+                        <div className="flex items-center gap-4 text-sm text-secondary">
                           <div className="flex items-center gap-1">
                             <Calendar className="w-3 h-3" />
                             Visited:{' '}
@@ -119,7 +119,7 @@ export default function DashboardPage() {
                             {new Date(decision.createdAt).toLocaleDateString()}
                           </div>
                         </div>
-                        <div className="text-sm text-gray-500 mt-1">
+                        <div className="text-sm text-tertiary mt-1">
                           {decision.type === 'group'
                             ? `Group: ${decision.groupName}`
                             : 'Personal Decision'}{' '}

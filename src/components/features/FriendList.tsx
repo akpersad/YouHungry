@@ -47,10 +47,10 @@ export function FriendList({ userId }: FriendListProps) {
   if (isLoading) {
     return (
       <div className="space-y-4">
-        <h2 className="text-xl font-semibold text-gray-900">Friends</h2>
+        <h2 className="text-xl font-semibold text-primary">Friends</h2>
         <div className="text-center py-8">
           <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-          <p className="text-sm text-gray-500 mt-2">Loading friends...</p>
+          <p className="text-sm text-tertiary mt-2">Loading friends...</p>
         </div>
       </div>
     );
@@ -59,7 +59,7 @@ export function FriendList({ userId }: FriendListProps) {
   if (error) {
     return (
       <div className="space-y-4">
-        <h2 className="text-xl font-semibold text-gray-900">Friends</h2>
+        <h2 className="text-xl font-semibold text-primary">Friends</h2>
         <div className="text-center py-8">
           <p className="text-sm text-red-600">
             {error instanceof Error ? error.message : 'Failed to load friends'}
@@ -72,8 +72,8 @@ export function FriendList({ userId }: FriendListProps) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-gray-900">Friends</h2>
-        <span className="text-sm text-gray-500">
+        <h2 className="text-xl font-semibold text-primary">Friends</h2>
+        <span className="text-sm text-tertiary">
           {friends?.length || 0} friend{(friends?.length || 0) !== 1 ? 's' : ''}
         </span>
       </div>
@@ -92,10 +92,10 @@ export function FriendList({ userId }: FriendListProps) {
                     />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate">
+                    <p className="text-sm font-medium text-primary truncate">
                       {friend.name}
                     </p>
-                    <p className="text-sm text-gray-500 truncate">
+                    <p className="text-sm text-tertiary truncate">
                       {friend.email}
                     </p>
                     {friend.username && (
@@ -145,7 +145,7 @@ export function FriendList({ userId }: FriendListProps) {
               />
             </svg>
           </div>
-          <p className="text-sm text-gray-500">No friends yet</p>
+          <p className="text-sm text-tertiary">No friends yet</p>
           <p className="text-xs text-gray-400 mt-1">
             Search for friends to add them to your network
           </p>
@@ -159,7 +159,7 @@ export function FriendList({ userId }: FriendListProps) {
         title="Remove Friend"
       >
         <div className="space-y-4">
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-secondary">
             Are you sure you want to remove this friend? This action cannot be
             undone.
           </p>
