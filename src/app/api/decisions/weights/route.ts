@@ -3,7 +3,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { connectToDatabase } from '@/lib/db';
 import { ObjectId } from 'mongodb';
-import { calculateRestaurantWeight, getDecisionHistory } from '@/lib/decisions';
+import {
+  calculateRestaurantWeight,
+  getDecisionHistory,
+  getUserDecisionHistory,
+  getGroupDecisionHistory,
+} from '@/lib/decisions';
 import { z } from 'zod';
 
 const resetWeightsSchema = z.object({
@@ -21,6 +26,9 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const collectionId = searchParams.get('collectionId');
+
+    logger.debug('Weights API: collectionId:', collectionId);
+    logger.debug('Weights API: userId:', userId);
 
     if (!collectionId) {
       return NextResponse.json(
@@ -43,8 +51,27 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Get decision history
-    const decisionHistory = await getDecisionHistory(collectionId);
+    // Determine collection type and get appropriate decision history
+    let decisionHistory;
+    if (collection.type === 'group') {
+      // For group collections, get decision history across all group collections
+      // The ownerId contains the Group ID for group collections
+      logger.debug(
+        'Getting group decision history for groupId:',
+        collection.ownerId.toString()
+      );
+      decisionHistory = await getGroupDecisionHistory(
+        collection.ownerId.toString()
+      );
+      logger.debug(
+        'Found group decision history:',
+        decisionHistory.length,
+        'decisions'
+      );
+    } else {
+      // For personal collections, get decision history across all user's personal collections
+      decisionHistory = await getUserDecisionHistory(userId);
+    }
 
     // Get all restaurants in the collection
     const restaurantIds = collection.restaurantIds.map(
@@ -141,17 +168,27 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Build filter based on collection type
     const filter: Record<string, unknown> = {
-      collectionId: new ObjectId(collectionId),
       status: 'completed',
     };
+
+    // For group collections, reset across all group collections
+    // For personal collections, reset across all user's personal collections
+    if (collection.type === 'group' && collection.groupId) {
+      filter.groupId = new ObjectId(collection.groupId);
+      filter.type = 'group';
+    } else {
+      filter.participants = userId;
+      filter.type = 'personal';
+    }
 
     // If restaurantId is provided, only reset that restaurant's history
     if (restaurantId) {
       filter['result.restaurantId'] = new ObjectId(restaurantId);
     }
 
-    // Delete decision history (this will reset weights)
+    // Delete decision history (this will reset weights across all relevant collections)
     const result = await db.collection('decisions').deleteMany(filter);
 
     logger.info('Weights reset:', {

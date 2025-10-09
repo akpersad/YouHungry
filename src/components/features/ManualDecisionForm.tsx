@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { useManualDecision } from '@/hooks/api/useHistory';
-import { useCollections } from '@/hooks/api/useCollections';
 import { useProfile } from '@/hooks/useProfile';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -15,7 +14,6 @@ interface ManualDecisionFormProps {
 }
 
 export function ManualDecisionForm({ onSuccess }: ManualDecisionFormProps) {
-  const [collectionId, setCollectionId] = useState('');
   const [restaurantId, setRestaurantId] = useState('');
   const [visitDate, setVisitDate] = useState('');
   const [type, setType] = useState<'personal' | 'group'>('personal');
@@ -24,26 +22,137 @@ export function ManualDecisionForm({ onSuccess }: ManualDecisionFormProps) {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
 
   const { profile } = useProfile();
-  const { data: collectionsData } = useCollections(profile?._id);
   const manualDecisionMutation = useManualDecision();
 
-  // Fetch restaurants when collection changes
-  const { data: restaurantsData } = useQuery({
-    queryKey: ['collection-restaurants', collectionId],
+  // Fetch all collections (both personal and group)
+  const { data: collectionsData } = useQuery({
+    queryKey: ['all-collections', profile?.clerkId],
     queryFn: async () => {
-      if (!collectionId) return [];
+      if (!profile?.clerkId) return [];
+      console.log('ManualDecisionForm: Profile Clerk ID:', profile.clerkId);
       const response = await fetch(
-        `/api/collections/${collectionId}/restaurants`
+        `/api/collections?userId=${profile.clerkId}&type=all`
       );
-      if (!response.ok) throw new Error('Failed to fetch restaurants');
+      if (!response.ok) throw new Error('Failed to fetch collections');
       const data = await response.json();
-      return data.restaurants || [];
+      console.log('ManualDecisionForm: Collections API response:', data);
+
+      // Handle different response formats
+      let allCollections = [];
+      if (data.collections && typeof data.collections === 'object') {
+        // If collections is an object with personal/group properties
+        allCollections = [
+          ...(data.collections.personal || []),
+          ...(data.collections.group || []),
+        ];
+      } else if (Array.isArray(data.collections)) {
+        // If collections is directly an array
+        allCollections = data.collections;
+      } else if (Array.isArray(data)) {
+        // If the response is directly an array
+        allCollections = data;
+      }
+
+      console.log('ManualDecisionForm: Combined collections:', allCollections);
+      console.log(
+        'ManualDecisionForm: Full collection data:',
+        JSON.stringify(allCollections, null, 2)
+      );
+      return allCollections;
     },
-    enabled: !!collectionId,
+    enabled: !!profile?.clerkId,
+  });
+
+  // Fetch all unique restaurants across collections
+  const { data: restaurantsData, isLoading: isLoadingRestaurants } = useQuery({
+    queryKey: ['all-restaurants', type, groupId, collectionsData],
+    queryFn: async () => {
+      console.log('ManualDecisionForm: Fetching restaurants...', {
+        type,
+        groupId,
+        collectionsDataLength: collectionsData?.length,
+        collectionsData,
+      });
+
+      // For personal decisions, get all restaurants from personal collections
+      // For group decisions, get all restaurants from the selected group's collections
+      if (type === 'group' && !groupId) {
+        console.log('ManualDecisionForm: Group type but no groupId');
+        return [];
+      }
+
+      const collections =
+        collectionsData?.filter((c: Collection) => {
+          if (type === 'group') {
+            // For group collections, ownerId is the Group ID
+            return c.type === 'group' && c.ownerId?.toString() === groupId;
+          }
+          return c.type === 'personal';
+        }) || [];
+
+      console.log('ManualDecisionForm: Filtered collections:', collections);
+
+      if (collections.length === 0) {
+        console.log('ManualDecisionForm: No collections found');
+        return [];
+      }
+
+      // Get all restaurant IDs from these collections
+      const allRestaurantIds = new Set<string>();
+      collections.forEach((collection: Collection) => {
+        console.log('ManualDecisionForm: Processing collection:', {
+          name: collection.name,
+          restaurantIds: collection.restaurantIds,
+          restaurantIdsLength: collection.restaurantIds?.length,
+        });
+
+        collection.restaurantIds?.forEach((restId) => {
+          const id =
+            typeof restId === 'object' && '_id' in restId
+              ? restId._id.toString()
+              : restId.toString();
+          allRestaurantIds.add(id);
+        });
+      });
+
+      console.log(
+        'ManualDecisionForm: All restaurant IDs:',
+        Array.from(allRestaurantIds)
+      );
+
+      if (allRestaurantIds.size === 0) {
+        console.log('ManualDecisionForm: No restaurant IDs found');
+        return [];
+      }
+
+      // Fetch all unique restaurants
+      const response = await fetch(
+        `/api/restaurants?restaurantIds=${Array.from(allRestaurantIds).join(',')}`
+      );
+
+      if (!response.ok) {
+        console.error(
+          'ManualDecisionForm: Failed to fetch restaurants:',
+          response.status
+        );
+        throw new Error('Failed to fetch restaurants');
+      }
+
+      const data = await response.json();
+      console.log('ManualDecisionForm: Fetched restaurants:', data.restaurants);
+      const restaurants = data.restaurants || [];
+      // Sort restaurants alphabetically by name (A-Z)
+      return restaurants.sort((a: Restaurant, b: Restaurant) =>
+        a.name.localeCompare(b.name)
+      );
+    },
+    enabled:
+      !!collectionsData &&
+      (type === 'personal' || (type === 'group' && !!groupId)),
   });
 
   useEffect(() => {
-    if (restaurantsData) {
+    if (restaurantsData && Array.isArray(restaurantsData)) {
       setRestaurants(restaurantsData);
     }
   }, [restaurantsData]);
@@ -60,10 +169,17 @@ export function ManualDecisionForm({ onSuccess }: ManualDecisionFormProps) {
     enabled: type === 'group',
   });
 
+  // Check if all required fields are filled
+  const isFormValid = () => {
+    if (!restaurantId || !visitDate) return false;
+    if (type === 'group' && !groupId) return false;
+    return true;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!collectionId || !restaurantId || !visitDate) {
+    if (!restaurantId || !visitDate) {
       toast.error('Please fill in all required fields');
       return;
     }
@@ -75,7 +191,6 @@ export function ManualDecisionForm({ onSuccess }: ManualDecisionFormProps) {
 
     try {
       await manualDecisionMutation.mutateAsync({
-        collectionId,
         restaurantId,
         visitDate: new Date(visitDate).toISOString(),
         type,
@@ -103,7 +218,10 @@ export function ManualDecisionForm({ onSuccess }: ManualDecisionFormProps) {
               type="radio"
               value="personal"
               checked={type === 'personal'}
-              onChange={(e) => setType(e.target.value as 'personal' | 'group')}
+              onChange={(e) => {
+                setType(e.target.value as 'personal' | 'group');
+                setRestaurantId(''); // Reset restaurant selection when type changes
+              }}
               className="mr-2"
             />
             Personal
@@ -113,42 +231,16 @@ export function ManualDecisionForm({ onSuccess }: ManualDecisionFormProps) {
               type="radio"
               value="group"
               checked={type === 'group'}
-              onChange={(e) => setType(e.target.value as 'personal' | 'group')}
+              onChange={(e) => {
+                setType(e.target.value as 'personal' | 'group');
+                setRestaurantId(''); // Reset restaurant selection when type changes
+                setGroupId(''); // Reset group selection when switching to personal
+              }}
               className="mr-2"
             />
             Group
           </label>
         </div>
-      </div>
-
-      {/* Collection Selection */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Collection <span className="text-red-500">*</span>
-        </label>
-        <select
-          value={collectionId}
-          onChange={(e) => {
-            setCollectionId(e.target.value);
-            setRestaurantId(''); // Reset restaurant when collection changes
-          }}
-          className="w-full rounded-lg border border-gray-300 px-3 py-2"
-          required
-        >
-          <option value="">Select a collection</option>
-          {collectionsData
-            ?.filter((c: Collection) =>
-              type === 'group' ? c.type === 'group' : true
-            )
-            .map((collection: Collection) => (
-              <option
-                key={collection._id.toString()}
-                value={collection._id.toString()}
-              >
-                {collection.name} ({collection.type})
-              </option>
-            ))}
-        </select>
       </div>
 
       {/* Group Selection (if group type) */}
@@ -159,7 +251,10 @@ export function ManualDecisionForm({ onSuccess }: ManualDecisionFormProps) {
           </label>
           <select
             value={groupId}
-            onChange={(e) => setGroupId(e.target.value)}
+            onChange={(e) => {
+              setGroupId(e.target.value);
+              setRestaurantId(''); // Reset restaurant selection when group changes
+            }}
             className="w-full rounded-lg border border-gray-300 px-3 py-2"
             required
           >
@@ -183,17 +278,25 @@ export function ManualDecisionForm({ onSuccess }: ManualDecisionFormProps) {
           onChange={(e) => setRestaurantId(e.target.value)}
           className="w-full rounded-lg border border-gray-300 px-3 py-2"
           required
-          disabled={!collectionId}
+          disabled={type === 'group' ? !groupId : false}
         >
           <option value="">
-            {collectionId ? 'Select a restaurant' : 'Select a collection first'}
+            {type === 'group' && !groupId
+              ? 'Select a group first'
+              : isLoadingRestaurants
+                ? 'Loading restaurants...'
+                : restaurants.length === 0
+                  ? type === 'personal'
+                    ? 'No personal collections with restaurants found'
+                    : 'No restaurants found'
+                  : 'Select a restaurant'}
           </option>
           {restaurants.map((restaurant) => (
             <option
               key={restaurant._id.toString()}
               value={restaurant._id.toString()}
             >
-              {restaurant.name}
+              {restaurant.name} - {restaurant.address}
             </option>
           ))}
         </select>
@@ -201,15 +304,14 @@ export function ManualDecisionForm({ onSuccess }: ManualDecisionFormProps) {
 
       {/* Visit Date */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Visit Date <span className="text-red-500">*</span>
-        </label>
         <Input
           type="date"
+          label="Visit Date"
           value={visitDate}
           onChange={(e) => setVisitDate(e.target.value)}
           max={new Date().toISOString().split('T')[0]}
           required
+          helperText="Click to open calendar picker"
         />
       </div>
 
@@ -231,7 +333,7 @@ export function ManualDecisionForm({ onSuccess }: ManualDecisionFormProps) {
         <Button
           type="submit"
           variant="primary"
-          disabled={manualDecisionMutation.isPending}
+          disabled={!isFormValid() || manualDecisionMutation.isPending}
           className="flex-1"
         >
           {manualDecisionMutation.isPending ? 'Adding...' : 'Add Decision'}

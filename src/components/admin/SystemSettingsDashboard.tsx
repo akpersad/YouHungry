@@ -91,6 +91,7 @@ export function SystemSettingsDashboard() {
   const [success, setSuccess] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [activeSection, setActiveSection] = useState<string>('rateLimiting');
+  const [cacheClearing, setCacheClearing] = useState<string | null>(null);
 
   const fetchSettings = async () => {
     try {
@@ -231,6 +232,40 @@ export function SystemSettingsDashboard() {
     });
   };
 
+  const clearCache = async (cacheType: string) => {
+    try {
+      setCacheClearing(cacheType);
+      setError(null);
+      setSuccess(null);
+
+      const response = await fetch('/api/admin/cache/clear', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ cacheType }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to clear cache');
+      }
+
+      setSuccess(
+        `Cleared ${data.deletedCount} cache entries of type: ${cacheType}`
+      );
+      logger.info(`Admin: Cleared cache type ${cacheType}`, data);
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : 'Failed to clear cache';
+      setError(errorMessage);
+      logger.error('Admin: Error clearing cache', { error: err });
+    } finally {
+      setCacheClearing(null);
+    }
+  };
+
   useEffect(() => {
     fetchSettings();
   }, []);
@@ -241,6 +276,7 @@ export function SystemSettingsDashboard() {
     { id: 'alertThresholds', label: 'Alert Thresholds', icon: '⚠️' },
     { id: 'notificationSettings', label: 'Notifications', icon: '📧' },
     { id: 'maintenance', label: 'Maintenance', icon: '🔧' },
+    { id: 'cache', label: 'Cache Management', icon: '🗄️' },
   ];
 
   if (loading) {
@@ -1305,6 +1341,114 @@ export function SystemSettingsDashboard() {
                           placeholder="akpersad@gmail.com, +1234567890"
                         />
                       </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeSection === 'cache' && (
+              <div className="p-6">
+                <h3 className="text-lg font-medium text-gray-900 mb-4">
+                  Cache Management
+                </h3>
+                <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <p className="text-sm text-blue-700">
+                    Clear cached data to force fresh API calls. Use this when
+                    you suspect cached data is stale or causing issues.
+                  </p>
+                </div>
+                <div className="space-y-4">
+                  {/* Restaurant Search Cache */}
+                  <div className="border border-gray-200 rounded-lg p-4">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <h4 className="text-md font-medium text-gray-900">
+                          Restaurant Search Cache
+                        </h4>
+                        <p className="text-sm text-gray-600 mt-1">
+                          Cached restaurant search results from Google Places
+                          API (7 day TTL)
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => clearCache('restaurant_search')}
+                        disabled={cacheClearing === 'restaurant_search'}
+                        className="px-4 py-2 bg-red-600 text-white rounded-md text-sm font-medium hover:bg-red-700 disabled:opacity-50"
+                      >
+                        {cacheClearing === 'restaurant_search'
+                          ? 'Clearing...'
+                          : 'Clear Cache'}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Geocoding Cache */}
+                  <div className="border border-gray-200 rounded-lg p-4">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <h4 className="text-md font-medium text-gray-900">
+                          Geocoding Cache
+                        </h4>
+                        <p className="text-sm text-gray-600 mt-1">
+                          Cached address-to-coordinates conversions (90 day TTL)
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => clearCache('geocoding')}
+                        disabled={cacheClearing === 'geocoding'}
+                        className="px-4 py-2 bg-red-600 text-white rounded-md text-sm font-medium hover:bg-red-700 disabled:opacity-50"
+                      >
+                        {cacheClearing === 'geocoding'
+                          ? 'Clearing...'
+                          : 'Clear Cache'}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Address Validation Cache */}
+                  <div className="border border-gray-200 rounded-lg p-4">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <h4 className="text-md font-medium text-gray-900">
+                          Address Validation Cache
+                        </h4>
+                        <p className="text-sm text-gray-600 mt-1">
+                          Cached address validation results (90 day TTL)
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => clearCache('address_validation')}
+                        disabled={cacheClearing === 'address_validation'}
+                        className="px-4 py-2 bg-red-600 text-white rounded-md text-sm font-medium hover:bg-red-700 disabled:opacity-50"
+                      >
+                        {cacheClearing === 'address_validation'
+                          ? 'Clearing...'
+                          : 'Clear Cache'}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Restaurant Details Cache */}
+                  <div className="border border-gray-200 rounded-lg p-4">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <h4 className="text-md font-medium text-gray-900">
+                          Restaurant Details Cache
+                        </h4>
+                        <p className="text-sm text-gray-600 mt-1">
+                          Cached detailed restaurant information (30 day TTL)
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => clearCache('restaurant_details')}
+                        disabled={cacheClearing === 'restaurant_details'}
+                        className="px-4 py-2 bg-red-600 text-white rounded-md text-sm font-medium hover:bg-red-700 disabled:opacity-50"
+                      >
+                        {cacheClearing === 'restaurant_details'
+                          ? 'Clearing...'
+                          : 'Clear Cache'}
+                      </button>
                     </div>
                   </div>
                 </div>

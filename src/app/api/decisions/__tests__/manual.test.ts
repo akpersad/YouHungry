@@ -68,10 +68,16 @@ describe('POST /api/decisions/manual', () => {
       factorVerificationAge: null,
     } as any);
 
+    const mockUser = {
+      _id: { toString: () => 'userObjectId1' },
+      clerkId: 'user123',
+    };
+
     const mockCollection = {
       _id: { toString: () => 'collection1' },
       type: 'personal',
-      ownerId: 'user123',
+      userId: mockUser._id,
+      restaurantIds: ['restaurant1'],
     };
 
     const mockRestaurant = {
@@ -80,15 +86,15 @@ describe('POST /api/decisions/manual', () => {
     };
 
     mockDb.findOne
-      .mockResolvedValueOnce(mockCollection)
-      .mockResolvedValueOnce(mockRestaurant);
+      .mockResolvedValueOnce(mockUser) // First call: find user
+      .mockResolvedValueOnce(mockRestaurant) // Second call: find restaurant
+      .mockResolvedValueOnce(mockCollection); // Third call: find collection containing restaurant
 
     mockDb.insertOne.mockResolvedValue({
       insertedId: { toString: () => 'decision1' },
     });
 
     const requestBody = {
-      collectionId: 'collection1',
       restaurantId: 'restaurant1',
       visitDate: '2024-01-15T18:00:00.000Z',
       type: 'personal',
@@ -131,9 +137,16 @@ describe('POST /api/decisions/manual', () => {
       clerkId: 'user123',
     };
 
+    const mockGroup = {
+      _id: { toString: () => 'group1' },
+      memberIds: [mockUser._id],
+    };
+
     const mockCollection = {
       _id: { toString: () => 'collection1' },
       type: 'group',
+      groupId: mockGroup._id,
+      restaurantIds: ['restaurant1'],
     };
 
     const mockRestaurant = {
@@ -141,23 +154,17 @@ describe('POST /api/decisions/manual', () => {
       name: 'Test Restaurant',
     };
 
-    const mockGroup = {
-      _id: { toString: () => 'group1' },
-      memberIds: [mockUser._id],
-    };
-
     mockDb.findOne
-      .mockResolvedValueOnce(mockCollection)
-      .mockResolvedValueOnce(mockRestaurant)
-      .mockResolvedValueOnce(mockGroup)
-      .mockResolvedValueOnce(mockUser);
+      .mockResolvedValueOnce(mockUser) // First call: find user
+      .mockResolvedValueOnce(mockRestaurant) // Second call: find restaurant
+      .mockResolvedValueOnce(mockGroup) // Third call: find group
+      .mockResolvedValueOnce(mockCollection); // Fourth call: find group collection containing restaurant
 
     mockDb.insertOne.mockResolvedValue({
       insertedId: { toString: () => 'decision1' },
     });
 
     const requestBody = {
-      collectionId: 'collection1',
       restaurantId: 'restaurant1',
       visitDate: '2024-01-15T18:00:00.000Z',
       type: 'group',
@@ -180,7 +187,7 @@ describe('POST /api/decisions/manual', () => {
     expect(data.success).toBe(true);
   });
 
-  it('should return 404 if collection not found', async () => {
+  it('should return 404 if user not found', async () => {
     mockAuth.mockResolvedValue({
       userId: 'user123',
       sessionId: 'session123',
@@ -193,12 +200,12 @@ describe('POST /api/decisions/manual', () => {
       factorVerificationAge: null,
     } as any);
 
-    mockDb.findOne.mockResolvedValueOnce(null);
+    mockDb.findOne.mockResolvedValueOnce(null); // User not found
 
     const requestBody = {
-      collectionId: 'collection1',
       restaurantId: 'restaurant1',
       visitDate: '2024-01-15T18:00:00.000Z',
+      type: 'personal',
     };
 
     const request = new NextRequest(
@@ -213,7 +220,7 @@ describe('POST /api/decisions/manual', () => {
 
     expect(response.status).toBe(404);
     const data = await response.json();
-    expect(data.error).toBe('Collection not found');
+    expect(data.error).toBe('User not found');
   });
 
   it('should return 404 if restaurant not found', async () => {
@@ -229,18 +236,19 @@ describe('POST /api/decisions/manual', () => {
       factorVerificationAge: null,
     } as any);
 
-    const mockCollection = {
-      _id: { toString: () => 'collection1' },
+    const mockUser = {
+      _id: { toString: () => 'userObjectId1' },
+      clerkId: 'user123',
     };
 
     mockDb.findOne
-      .mockResolvedValueOnce(mockCollection)
-      .mockResolvedValueOnce(null);
+      .mockResolvedValueOnce(mockUser) // First call: find user
+      .mockResolvedValueOnce(null); // Second call: restaurant not found
 
     const requestBody = {
-      collectionId: 'collection1',
       restaurantId: 'restaurant1',
       visitDate: '2024-01-15T18:00:00.000Z',
+      type: 'personal',
     };
 
     const request = new NextRequest(
@@ -272,8 +280,7 @@ describe('POST /api/decisions/manual', () => {
     } as any);
 
     const requestBody = {
-      collectionId: '',
-      restaurantId: 'restaurant1',
+      restaurantId: '',
       visitDate: 'invalid-date',
     };
 

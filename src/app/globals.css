@@ -445,6 +445,22 @@ body {
   color: var(--text-secondary);
 }
 
+/* Date input styling */
+.input-base[type='date'] {
+  position: relative;
+  cursor: pointer;
+}
+
+.input-base[type='date']::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.8;
+  filter: invert(0.5);
+}
+
+.input-base[type='date']::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
 /* Input Error States */
 .input-error {
   border-color: var(--color-error);
@@ -532,7 +548,7 @@ body {
   border-radius: var(--radius-3xl);
   box-shadow: var(--shadow-layered);
   border: 1px solid var(--bg-quaternary);
-  max-width: 90vw;
+  width: 90vw;
   max-height: 90vh;
   overflow: auto;
   z-index: 1001;

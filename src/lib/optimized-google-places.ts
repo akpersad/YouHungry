@@ -154,16 +154,36 @@ export async function searchRestaurantsOptimized(
         params.append('radius', radius.toString());
       }
 
+      logger.info('Calling Google Places Text Search API:', {
+        query,
+        location,
+        radius,
+      });
+
       const response = await fetch(`${baseUrl}?${params.toString()}`);
 
       if (!response.ok) {
+        logger.error('Google Places Text Search HTTP error:', {
+          status: response.status,
+          statusText: response.statusText,
+        });
         throw new Error(`Google Places API error: ${response.status}`);
       }
 
       const data: GooglePlacesResponse = await response.json();
 
+      logger.info('Google Places Text Search API response:', {
+        status: data.status,
+        resultsCount: data.results?.length || 0,
+        errorMessage: data.error_message,
+      });
+
       if (data.status !== 'OK' && data.status !== 'ZERO_RESULTS') {
         const errorMessage = data.error_message || data.status;
+        logger.error('Google Places Text Search API error:', {
+          status: data.status,
+          errorMessage,
+        });
         throw new Error(
           `Google Places API error: ${data.status} - ${errorMessage}`
         );
@@ -172,11 +192,12 @@ export async function searchRestaurantsOptimized(
       // Convert results to our Restaurant format
       const restaurants = data.results.map(convertGooglePlaceToRestaurant);
 
-      logger.debug('Google Places search results:', {
+      logger.info('Google Places Text Search results:', {
         totalResults: data.results.length,
         restaurantsWithPhotos: restaurants.filter(
           (r) => r.photos && r.photos.length > 0
         ).length,
+        sampleNames: restaurants.slice(0, 5).map((r) => r.name),
         cacheKey,
       });
 
@@ -226,16 +247,37 @@ export async function searchRestaurantsByLocationOptimized(
         key: apiKey,
       });
 
+      logger.info('Calling Google Places Nearby Search API:', {
+        lat,
+        lng,
+        radius,
+        type,
+      });
+
       const response = await fetch(`${baseUrl}?${params.toString()}`);
 
       if (!response.ok) {
+        logger.error('Google Places API HTTP error:', {
+          status: response.status,
+          statusText: response.statusText,
+        });
         throw new Error(`Google Places API error: ${response.status}`);
       }
 
       const data: GooglePlacesResponse = await response.json();
 
+      logger.info('Google Places API response:', {
+        status: data.status,
+        resultsCount: data.results?.length || 0,
+        errorMessage: data.error_message,
+      });
+
       if (data.status !== 'OK' && data.status !== 'ZERO_RESULTS') {
         const errorMessage = data.error_message || data.status;
+        logger.error('Google Places API error:', {
+          status: data.status,
+          errorMessage,
+        });
         throw new Error(
           `Google Places API error: ${data.status} - ${errorMessage}`
         );
@@ -244,7 +286,7 @@ export async function searchRestaurantsByLocationOptimized(
       // Convert results to our Restaurant format
       const restaurants = data.results.map(convertGooglePlaceToRestaurant);
 
-      logger.debug('Google Places nearby search results:', {
+      logger.info('Google Places nearby search results:', {
         totalResults: data.results.length,
         restaurantsWithPhotos: restaurants.filter(
           (r) => r.photos && r.photos.length > 0
@@ -255,7 +297,8 @@ export async function searchRestaurantsByLocationOptimized(
       return restaurants as Restaurant[];
     },
     {
-      ttl: 7 * 24 * 60 * 60 * 1000, // 7 days
+      // Use shorter cache time to avoid stale data issues
+      ttl: 24 * 60 * 60 * 1000, // 1 day
       staleWhileRevalidate: true,
       apiType: 'google_places_nearby_search',
     }
@@ -325,32 +368,45 @@ export async function smartRestaurantSearch(
   location: string,
   radius: number = 5000
 ): Promise<Restaurant[]> {
-  // First, try to geocode the location (with caching)
+  // If we have a specific query, use text search for better results
+  if (query && query.trim()) {
+    logger.info('Using Text Search API for query:', {
+      query,
+      location,
+      radius,
+    });
+
+    // First, geocode the location to get coordinates for the text search
+    const coordinates = await geocodeAddressOptimized(location);
+
+    if (coordinates) {
+      // Use text search with location bias
+      const locationParam = `${coordinates.lat},${coordinates.lng}`;
+      return searchRestaurantsOptimized(query, locationParam, radius);
+    } else {
+      // Fallback to text search without location
+      return searchRestaurantsOptimized(query, location, radius);
+    }
+  }
+
+  // If no query, use nearby search to get all nearby restaurants
   const coordinates = await geocodeAddressOptimized(location);
 
   if (!coordinates) {
-    // Fallback to text search if geocoding fails
-    return searchRestaurantsOptimized(query, location, radius);
+    logger.warn('Could not geocode location for nearby search:', location);
+    return [];
   }
 
-  // Use nearby search for better results when we have coordinates
-  const nearbyResults = await searchRestaurantsByLocationOptimized(
+  logger.info('Using Nearby Search API (no specific query):', {
+    coordinates,
+    radius,
+  });
+
+  return searchRestaurantsByLocationOptimized(
     coordinates.lat,
     coordinates.lng,
     radius
   );
-
-  // If we have a specific query, filter results
-  if (query && query.trim()) {
-    const queryLower = query.toLowerCase();
-    return nearbyResults.filter(
-      (restaurant) =>
-        restaurant.name.toLowerCase().includes(queryLower) ||
-        restaurant.cuisine.toLowerCase().includes(queryLower)
-    );
-  }
-
-  return nearbyResults;
 }
 
 // Batch restaurant details fetching to reduce API calls

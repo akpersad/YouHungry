@@ -205,6 +205,85 @@ class APICache {
     }
   }
 
+  async delete(key: string): Promise<void> {
+    // Remove from memory cache
+    this.memoryCache.delete(key);
+
+    // Remove from database cache
+    try {
+      const db = await connectToDatabase();
+      await db.collection('api_cache').deleteOne({ key });
+      logger.debug(`Deleted cache entry: ${key}`);
+    } catch (error) {
+      logger.error('Error deleting cache entry:', error);
+    }
+  }
+
+  async clearByPattern(pattern: string): Promise<number> {
+    let deletedCount = 0;
+
+    // Clear from memory cache
+    for (const key of this.memoryCache.keys()) {
+      if (key.includes(pattern)) {
+        this.memoryCache.delete(key);
+        deletedCount++;
+      }
+    }
+
+    // Clear from database cache
+    try {
+      const db = await connectToDatabase();
+      const result = await db.collection('api_cache').deleteMany({
+        key: { $regex: pattern },
+      });
+      deletedCount += result.deletedCount;
+      logger.info(
+        `Cleared ${deletedCount} cache entries matching pattern: ${pattern}`
+      );
+    } catch (error) {
+      logger.error('Error clearing cache by pattern:', error);
+    }
+
+    return deletedCount;
+  }
+
+  async clearByCacheType(cacheType: string): Promise<number> {
+    let deletedCount = 0;
+
+    try {
+      const db = await connectToDatabase();
+
+      // First, get all keys from database for this cache type
+      const dbEntries = await db
+        .collection('api_cache')
+        .find({ cacheType })
+        .toArray();
+
+      const dbKeys = new Set(dbEntries.map((entry) => entry.key));
+
+      // Clear memory cache entries that match database keys
+      let memoryClearedCount = 0;
+      for (const key of dbKeys) {
+        if (this.memoryCache.has(key)) {
+          this.memoryCache.delete(key);
+          memoryClearedCount++;
+        }
+      }
+
+      // Clear from database cache
+      const result = await db.collection('api_cache').deleteMany({ cacheType });
+      deletedCount = result.deletedCount;
+
+      logger.info(
+        `Cleared ${deletedCount} database cache entries and ${memoryClearedCount} memory cache entries of type: ${cacheType}`
+      );
+    } catch (error) {
+      logger.error('Error clearing cache by type:', error);
+    }
+
+    return deletedCount;
+  }
+
   async getStats(): Promise<{
     memoryEntries: number;
     totalHits: number;

@@ -6,7 +6,6 @@ import { ObjectId } from 'mongodb';
 import { z } from 'zod';
 
 const manualDecisionSchema = z.object({
-  collectionId: z.string().min(1),
   restaurantId: z.string().min(1),
   visitDate: z.string().datetime(),
   type: z.enum(['personal', 'group']).default('personal'),
@@ -22,21 +21,15 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { collectionId, restaurantId, visitDate, type, groupId, notes } =
+    const { restaurantId, visitDate, type, groupId, notes } =
       manualDecisionSchema.parse(body);
 
     const db = await connectToDatabase();
 
-    // Verify collection exists and user has access
-    const collection = await db
-      .collection('collections')
-      .findOne({ _id: new ObjectId(collectionId) });
-
-    if (!collection) {
-      return NextResponse.json(
-        { error: 'Collection not found' },
-        { status: 404 }
-      );
+    // Get user's MongoDB ID
+    const user = await db.collection('users').findOne({ clerkId: userId });
+    if (!user) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
     // Verify restaurant exists
@@ -61,10 +54,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Group not found' }, { status: 404 });
       }
 
-      // Get user's MongoDB ID
-      const user = await db.collection('users').findOne({ clerkId: userId });
       if (
-        !user ||
         !group.memberIds.some(
           (id: ObjectId) => id.toString() === user._id.toString()
         )
@@ -76,10 +66,79 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // For manual decisions, we need to find a collection that contains this restaurant
+    // Since we're now using user-wide/group-wide history, any collection will do
+    let collectionId: ObjectId;
+
+    if (type === 'group' && groupId) {
+      // For group decisions, find any group collection that has this restaurant
+      const groupCollection = await db.collection('collections').findOne({
+        ownerId: new ObjectId(groupId),
+        type: 'group',
+        $or: [
+          { restaurantIds: new ObjectId(restaurantId) },
+          { 'restaurantIds._id': new ObjectId(restaurantId) },
+        ],
+      });
+
+      if (!groupCollection) {
+        return NextResponse.json(
+          { error: 'Restaurant not found in any group collection' },
+          { status: 404 }
+        );
+      }
+      collectionId = groupCollection._id;
+    } else {
+      // For personal decisions, find any personal collection that has this restaurant
+      logger.debug('Searching for personal collection with:', {
+        ownerId: user._id,
+        type: 'personal',
+        restaurantId,
+        restaurantObjectId: new ObjectId(restaurantId),
+      });
+
+      // For personal decisions, we need to find collections by Clerk ID
+      // First, let's see what personal collections exist with the Clerk ID
+      const personalCollections = await db
+        .collection('collections')
+        .find({
+          ownerId: user.clerkId,
+          type: 'personal',
+        })
+        .toArray();
+
+      logger.debug(
+        'Found personal collections with Clerk ID:',
+        personalCollections.map((c) => ({
+          _id: c._id,
+          name: c.name,
+          ownerId: c.ownerId,
+          restaurantIds: c.restaurantIds,
+        }))
+      );
+
+      const personalCollection = await db.collection('collections').findOne({
+        ownerId: user.clerkId,
+        type: 'personal',
+        $or: [
+          { restaurantIds: new ObjectId(restaurantId) },
+          { 'restaurantIds._id': new ObjectId(restaurantId) },
+        ],
+      });
+
+      if (!personalCollection) {
+        return NextResponse.json(
+          { error: 'Restaurant not found in any personal collection' },
+          { status: 404 }
+        );
+      }
+      collectionId = personalCollection._id;
+    }
+
     const now = new Date();
     const decision = {
       type,
-      collectionId: new ObjectId(collectionId),
+      collectionId,
       groupId: groupId ? new ObjectId(groupId) : undefined,
       participants: [userId],
       method: 'manual' as const,
@@ -88,7 +147,7 @@ export async function POST(request: NextRequest) {
       visitDate: new Date(visitDate),
       result: {
         restaurantId: new ObjectId(restaurantId),
-        selectedAt: now,
+        selectedAt: new Date(visitDate), // Use the visit date, not the current date
         reasoning: notes || 'Manually entered decision',
         weights: {},
       },

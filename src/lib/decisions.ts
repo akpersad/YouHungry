@@ -1,6 +1,7 @@
 import { ObjectId } from 'mongodb';
 import { connectToDatabase } from './db';
 import { Restaurant, Decision } from '@/types/database';
+import { logger } from './logger';
 
 export interface DecisionResult {
   restaurantId: ObjectId;
@@ -75,6 +76,57 @@ export async function getDecisionHistory(
     .sort({ createdAt: -1 })
     .limit(limit)
     .toArray();
+
+  return decisions as Decision[];
+}
+
+/**
+ * Get decision history for all user's personal collections
+ * Used for weight calculation across all personal collections
+ */
+export async function getUserDecisionHistory(
+  userId: string,
+  limit: number = 100
+): Promise<Decision[]> {
+  const db = await connectToDatabase();
+  const decisions = await db
+    .collection('decisions')
+    .find({
+      participants: userId,
+      type: 'personal',
+      status: 'completed',
+    })
+    .sort({ createdAt: -1 })
+    .limit(limit)
+    .toArray();
+
+  return decisions as Decision[];
+}
+
+/**
+ * Get decision history for all group collections
+ * Used for weight calculation across all group collections
+ */
+export async function getGroupDecisionHistory(
+  groupId: string,
+  limit: number = 100
+): Promise<Decision[]> {
+  const db = await connectToDatabase();
+  logger.debug('getGroupDecisionHistory: Searching for groupId:', groupId);
+  logger.debug('getGroupDecisionHistory: ObjectId:', new ObjectId(groupId));
+
+  const decisions = await db
+    .collection('decisions')
+    .find({
+      groupId: new ObjectId(groupId),
+      type: 'group',
+      status: 'completed',
+    })
+    .sort({ createdAt: -1 })
+    .limit(limit)
+    .toArray();
+
+  logger.debug('getGroupDecisionHistory: Found decisions:', decisions.length);
 
   return decisions as Decision[];
 }
@@ -162,8 +214,8 @@ export async function performRandomSelection(
     throw new Error('No restaurants in collection');
   }
 
-  // Get decision history for weight calculation
-  const decisionHistory = await getDecisionHistory(collectionId);
+  // Get decision history for weight calculation across ALL user's personal collections
+  const decisionHistory = await getUserDecisionHistory(userId);
 
   // Calculate weights for each restaurant
   const restaurantWeights: RestaurantWeight[] = restaurants.map(
@@ -327,9 +379,45 @@ export async function getDecisionStatistics(collectionId: string): Promise<{
     currentWeight: number;
   }>;
 }> {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _db = await connectToDatabase();
-  const decisionHistory = await getDecisionHistory(collectionId);
+  const db = await connectToDatabase();
+
+  // Get the collection to determine its type
+  const collection = await db.collection('collections').findOne({
+    _id: new ObjectId(collectionId),
+  });
+
+  if (!collection) {
+    throw new Error('Collection not found');
+  }
+
+  // Get appropriate decision history based on collection type
+  let decisionHistory;
+  if (collection.type === 'group') {
+    // For group collections, get decision history across all group collections
+    logger.debug(
+      'getDecisionStatistics: Collection is group type, ownerId:',
+      collection.ownerId.toString()
+    );
+    decisionHistory = await getGroupDecisionHistory(
+      collection.ownerId.toString()
+    );
+    logger.debug(
+      'getDecisionStatistics: Found group decisions:',
+      decisionHistory.length
+    );
+  } else {
+    // For personal collections, get decision history for this specific collection
+    logger.debug(
+      'getDecisionStatistics: Collection is personal type, collectionId:',
+      collectionId
+    );
+    decisionHistory = await getDecisionHistory(collectionId);
+    logger.debug(
+      'getDecisionStatistics: Found personal decisions:',
+      decisionHistory.length
+    );
+  }
+
   const restaurants = await getRestaurantsByCollection(collectionId);
 
   const restaurantStats = restaurants.map((restaurant) => {
@@ -675,18 +763,8 @@ export async function performGroupRandomSelection(
     throw new Error('No restaurants in collection');
   }
 
-  // Get decision history for this group collection (for weight calculation)
-  const decisionHistory = (await db
-    .collection('decisions')
-    .find({
-      collectionId: new ObjectId(collectionId),
-      type: 'group',
-      groupId: new ObjectId(groupId),
-      status: 'completed',
-    })
-    .sort({ createdAt: -1 })
-    .limit(100)
-    .toArray()) as Decision[];
+  // Get decision history for ALL group collections (for weight calculation)
+  const decisionHistory = await getGroupDecisionHistory(groupId);
 
   // Calculate weights for each restaurant
   const restaurantWeights: RestaurantWeight[] = restaurants.map(

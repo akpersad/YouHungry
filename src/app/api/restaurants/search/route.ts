@@ -102,13 +102,16 @@ export async function GET(request: NextRequest) {
       } else {
         // Use optimized geocoding with caching
         try {
+          logger.info('Geocoding address:', { location });
           const coordinates = await geocodeAddressOptimized(location);
           if (!coordinates) {
+            logger.error('No coordinates returned for address:', { location });
             return NextResponse.json(
               { error: 'Could not find coordinates for the provided address' },
               { status: 400 }
             );
           }
+          logger.info('Geocoded coordinates:', { coordinates });
           latitude = coordinates.lat;
           longitude = coordinates.lng;
         } catch (error) {
@@ -160,6 +163,15 @@ export async function GET(request: NextRequest) {
         ? parseInt(radius)
         : Math.round(distanceInMiles * 1609.34);
 
+      logger.info('Searching for restaurants:', {
+        hasQuery: !!query,
+        query,
+        latitude,
+        longitude,
+        searchRadius,
+        distanceInMiles,
+      });
+
       let restaurants;
       if (query) {
         // Use smart search that combines multiple strategies for better results
@@ -176,6 +188,11 @@ export async function GET(request: NextRequest) {
           searchRadius
         );
       }
+
+      logger.info('Restaurant search results:', {
+        count: restaurants.length,
+        hasQuery: !!query,
+      });
 
       // Apply filters to the results
       const filteredRestaurants = restaurants.filter((restaurant) => {
