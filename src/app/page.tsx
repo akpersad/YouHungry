@@ -112,8 +112,8 @@ export default async function Home() {
       </div>
 
       {/* Developer Tools Section */}
-      <div className="mt-8 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-        <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+      <div className="mt-8 p-4 bg-surface dark:bg-background rounded-lg border border-border dark:border-border">
+        <h3 className="text-sm font-semibold text-text dark:text-text-light mb-3">
           🛠️ Developer Tools
         </h3>
         <div className="flex flex-wrap gap-2">

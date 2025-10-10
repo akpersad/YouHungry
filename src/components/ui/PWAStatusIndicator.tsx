@@ -33,7 +33,7 @@ export function PWAStatusIndicator({
           }`}
           title={status.isOnline ? 'Online' : 'Offline'}
         />
-        <span className="text-xs text-gray-600 dark:text-gray-400">
+        <span className="text-xs text-text-light dark:text-text-light">
           {status.isOnline ? 'Online' : 'Offline'}
         </span>
       </div>
@@ -42,7 +42,7 @@ export function PWAStatusIndicator({
       {showOfflineActions && status.offlineActionsCount > 0 && (
         <div className="flex items-center gap-1">
           <div className="w-2 h-2 rounded-full bg-yellow-500" />
-          <span className="text-xs text-gray-600 dark:text-gray-400">
+          <span className="text-xs text-text-light dark:text-text-light">
             {status.offlineActionsCount} pending
           </span>
         </div>
@@ -64,7 +64,7 @@ export function PWAStatusIndicator({
       {status.isInstalled && (
         <div className="flex items-center gap-1">
           <div className="w-2 h-2 rounded-full bg-blue-500" />
-          <span className="text-xs text-gray-600 dark:text-gray-400">
+          <span className="text-xs text-text-light dark:text-text-light">
             Installed
           </span>
         </div>
@@ -97,7 +97,7 @@ export function PWAInstallPrompt({
   };
 
   return (
-    <div className="fixed bottom-4 left-4 right-4 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-4">
+    <div className="fixed bottom-4 left-4 right-4 z-50 bg-white dark:bg-background border border-border dark:border-border rounded-lg shadow-lg p-4">
       <div className="flex items-start gap-3">
         <div className="flex-shrink-0">
           <div className="w-8 h-8 bg-red-500 rounded-lg flex items-center justify-center">
@@ -106,10 +106,10 @@ export function PWAInstallPrompt({
         </div>
 
         <div className="flex-1 min-w-0">
-          <h3 className="text-sm font-medium text-gray-900 dark:text-white">
+          <h3 className="text-sm font-medium text-text dark:text-white">
             Install You Hungry?
           </h3>
-          <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+          <p className="text-xs text-text-light dark:text-text-light mt-1">
             Install this app on your device for a better experience and offline
             access.
           </p>
@@ -269,7 +269,7 @@ Check server logs for full details.`);
         <button
           onClick={handleManualInstall}
           disabled={!canInstall}
-          className="w-full bg-blue-600 text-white px-2 py-2 rounded text-xs disabled:bg-gray-600"
+          className="w-full bg-blue-600 text-white px-2 py-2 rounded text-xs disabled:bg-surface"
           style={{
             minHeight: '44px',
             fontSize: '12px',

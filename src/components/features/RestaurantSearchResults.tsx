@@ -67,7 +67,7 @@ export function RestaurantSearchResults({
     return (
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-gray-900">
+          <h2 className="text-xl font-semibold text-text">
             {searchQuery ? `Results for "${searchQuery}"` : 'Restaurants'}
           </h2>
           {/* View Toggle - Hidden during loading */}
@@ -79,8 +79,8 @@ export function RestaurantSearchResults({
           </div>
         </div>
         <div className="text-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-2 text-gray-600">Searching for restaurants...</p>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-2 text-text-light">Searching for restaurants...</p>
         </div>
       </div>
     );
@@ -89,11 +89,11 @@ export function RestaurantSearchResults({
   if (restaurants.length === 0) {
     return (
       <div className="text-center py-8">
-        <div className="text-gray-400 text-6xl mb-4">🍽️</div>
-        <h3 className="text-lg font-medium text-gray-900 mb-2">
+        <div className="text-text-light text-6xl mb-4">🍽️</div>
+        <h3 className="text-lg font-medium text-text mb-2">
           No restaurants found
         </h3>
-        <p className="text-gray-600">
+        <p className="text-text-light">
           {searchQuery
             ? `No restaurants found for "${searchQuery}". Try a different search term.`
             : 'Try searching for restaurants in your area.'}
@@ -107,10 +107,10 @@ export function RestaurantSearchResults({
       {/* Results Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4">
-          <h2 className="text-xl font-semibold text-gray-900">
+          <h2 className="text-xl font-semibold text-text">
             {searchQuery ? `Results for "${searchQuery}"` : 'Restaurants'}
           </h2>
-          <span className="text-sm text-gray-600">
+          <span className="text-sm text-text-light">
             {restaurants.length} restaurant{restaurants.length !== 1 ? 's' : ''}{' '}
             found
           </span>
@@ -164,13 +164,13 @@ export function RestaurantSearchResults({
             className="rounded-lg overflow-hidden shadow-lg"
           />
           {mapSelectedRestaurant && (
-            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+            <div className="bg-primary/10 dark:bg-primary/20/20 border border-primary dark:border-primary rounded-lg p-4">
               <div className="flex items-center justify-between">
                 <div>
                   <h4 className="font-semibold text-blue-900 dark:text-blue-100">
                     {mapSelectedRestaurant.name}
                   </h4>
-                  <p className="text-sm text-blue-700 dark:text-blue-300">
+                  <p className="text-sm text-primary dark:text-primary">
                     {mapSelectedRestaurant.address}
                   </p>
                 </div>
@@ -181,7 +181,7 @@ export function RestaurantSearchResults({
                     }
                     size="sm"
                     variant="outline"
-                    className="border-blue-300 text-blue-700 hover:bg-blue-100 dark:border-blue-600 dark:text-blue-300 dark:hover:bg-blue-900/30"
+                    className="border-primary text-primary hover:bg-primary/10 dark:border-primary dark:text-primary dark:hover:bg-primary/20/30"
                   >
                     View Details
                   </Button>
@@ -189,7 +189,7 @@ export function RestaurantSearchResults({
                     onClick={() => setMapSelectedRestaurant(null)}
                     size="sm"
                     variant="outline"
-                    className="text-blue-600 hover:bg-blue-100 dark:text-blue-400 dark:hover:bg-blue-900/30"
+                    className="text-primary hover:bg-primary/10 dark:text-primary dark:hover:bg-primary/20/30"
                   >
                     Clear
                   </Button>

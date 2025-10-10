@@ -98,9 +98,9 @@ export function CostMonitoringDashboard() {
   if (error) {
     return (
       <div className="p-6">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+        <div className="bg-destructive/10 border border-destructive rounded-lg p-4">
           <h3 className="text-red-800 font-medium">Error Loading Cost Data</h3>
-          <p className="text-red-600 text-sm mt-1">{error}</p>
+          <p className="text-destructive text-sm mt-1">{error}</p>
           <button
             onClick={fetchCostData}
             className="mt-3 px-4 py-2 bg-red-600 text-white rounded-md text-sm hover:bg-red-700 transition-colors"
@@ -115,7 +115,9 @@ export function CostMonitoringDashboard() {
   if (!costData) {
     return (
       <div className="p-6">
-        <div className="text-center text-gray-500">No cost data available</div>
+        <div className="text-center text-text-light">
+          No cost data available
+        </div>
       </div>
     );
   }
@@ -127,12 +129,12 @@ export function CostMonitoringDashboard() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Cost Monitoring</h2>
-          <p className="text-gray-600">
+          <h2 className="text-2xl font-bold text-text">Cost Monitoring</h2>
+          <p className="text-text-light">
             Track API usage and costs in real-time
           </p>
         </div>
-        <div className="text-sm text-gray-500">
+        <div className="text-sm text-text-light">
           {lastUpdated && `Last updated: ${lastUpdated.toLocaleTimeString()}`}
         </div>
       </div>
@@ -142,12 +144,12 @@ export function CostMonitoringDashboard() {
         <div className="bg-white rounded-lg shadow-sm border p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Daily Cost</p>
-              <p className="text-2xl font-bold text-gray-900">
+              <p className="text-sm font-medium text-text-light">Daily Cost</p>
+              <p className="text-2xl font-bold text-text">
                 {formatCurrency(metrics.estimatedCosts.daily)}
               </p>
             </div>
-            <div className="text-green-600">
+            <div className="text-success">
               <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z" />
                 <path
@@ -163,12 +165,14 @@ export function CostMonitoringDashboard() {
         <div className="bg-white rounded-lg shadow-sm border p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Monthly Cost</p>
-              <p className="text-2xl font-bold text-gray-900">
+              <p className="text-sm font-medium text-text-light">
+                Monthly Cost
+              </p>
+              <p className="text-2xl font-bold text-text">
                 {formatCurrency(metrics.estimatedCosts.monthly)}
               </p>
             </div>
-            <div className="text-blue-600">
+            <div className="text-primary">
               <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
                 <path
                   fillRule="evenodd"
@@ -183,14 +187,14 @@ export function CostMonitoringDashboard() {
         <div className="bg-white rounded-lg shadow-sm border p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">
+              <p className="text-sm font-medium text-text-light">
                 Monthly Savings
               </p>
-              <p className="text-2xl font-bold text-green-600">
+              <p className="text-2xl font-bold text-success">
                 {formatCurrency(metrics.estimatedCosts.savings)}
               </p>
             </div>
-            <div className="text-green-600">
+            <div className="text-success">
               <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
                 <path
                   fillRule="evenodd"
@@ -205,43 +209,41 @@ export function CostMonitoringDashboard() {
 
       {/* API Usage Breakdown */}
       <div className="bg-white rounded-lg shadow-sm border p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+        <h3 className="text-lg font-semibold text-text mb-4">
           API Usage Breakdown
         </h3>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Google Places API */}
           <div>
-            <h4 className="font-medium text-gray-900 mb-3">
-              Google Places API
-            </h4>
+            <h4 className="font-medium text-text mb-3">Google Places API</h4>
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Text Search</span>
+                <span className="text-text-light">Text Search</span>
                 <span className="font-medium">
                   {formatNumber(metrics.googlePlaces.textSearch)} calls
                 </span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Nearby Search</span>
+                <span className="text-text-light">Nearby Search</span>
                 <span className="font-medium">
                   {formatNumber(metrics.googlePlaces.nearbySearch)} calls
                 </span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Place Details</span>
+                <span className="text-text-light">Place Details</span>
                 <span className="font-medium">
                   {formatNumber(metrics.googlePlaces.placeDetails)} calls
                 </span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Geocoding</span>
+                <span className="text-text-light">Geocoding</span>
                 <span className="font-medium">
                   {formatNumber(metrics.googlePlaces.geocoding)} calls
                 </span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Address Validation</span>
+                <span className="text-text-light">Address Validation</span>
                 <span className="font-medium">
                   {formatNumber(metrics.googlePlaces.addressValidation)} calls
                 </span>
@@ -251,10 +253,10 @@ export function CostMonitoringDashboard() {
 
           {/* Google Maps API */}
           <div>
-            <h4 className="font-medium text-gray-900 mb-3">Google Maps API</h4>
+            <h4 className="font-medium text-text mb-3">Google Maps API</h4>
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Maps Loads</span>
+                <span className="text-text-light">Maps Loads</span>
                 <span className="font-medium">
                   {formatNumber(metrics.googleMaps.mapsLoads)} loads
                 </span>
@@ -266,28 +268,28 @@ export function CostMonitoringDashboard() {
 
       {/* Cache Performance */}
       <div className="bg-white rounded-lg shadow-sm border p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+        <h3 className="text-lg font-semibold text-text mb-4">
           Cache Performance
         </h3>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="text-center">
-            <div className="text-3xl font-bold text-blue-600">
+            <div className="text-3xl font-bold text-primary">
               {metrics.cache.hitRate.toFixed(1)}%
             </div>
-            <div className="text-sm text-gray-600">Hit Rate</div>
+            <div className="text-sm text-text-light">Hit Rate</div>
           </div>
           <div className="text-center">
-            <div className="text-3xl font-bold text-green-600">
+            <div className="text-3xl font-bold text-success">
               {formatNumber(metrics.cache.totalHits)}
             </div>
-            <div className="text-sm text-gray-600">Total Hits</div>
+            <div className="text-sm text-text-light">Total Hits</div>
           </div>
           <div className="text-center">
             <div className="text-3xl font-bold text-purple-600">
               {formatNumber(metrics.cache.memoryEntries)}
             </div>
-            <div className="text-sm text-gray-600">Memory Entries</div>
+            <div className="text-sm text-text-light">Memory Entries</div>
           </div>
         </div>
       </div>
@@ -295,7 +297,7 @@ export function CostMonitoringDashboard() {
       {/* Recommendations */}
       {recommendations.length > 0 && (
         <div className="bg-white rounded-lg shadow-sm border p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+          <h3 className="text-lg font-semibold text-text mb-4">
             Recommendations
           </h3>
           <div className="space-y-3">

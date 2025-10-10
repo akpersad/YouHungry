@@ -413,21 +413,21 @@ export function GroupDecisionMaking({
   if (decisionsLoading || restaurantsLoading) {
     return (
       <div className="flex justify-center items-center p-8">
-        <div className="text-gray-600">Loading decisions...</div>
+        <div className="text-text-light">Loading decisions...</div>
       </div>
     );
   }
 
   // Show connection status
   const connectionStatus = isConnected ? 'Connected' : 'Disconnected';
-  const connectionColor = isConnected ? 'text-green-600' : 'text-red-600';
+  const connectionColor = isConnected ? 'text-success' : 'text-destructive';
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Group Decisions</h2>
+          <h2 className="text-2xl font-bold text-text">Group Decisions</h2>
           <div className="flex items-center space-x-2 mt-1">
             <div
               className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}
@@ -439,7 +439,7 @@ export function GroupDecisionMaking({
               <Button
                 onClick={reconnect}
                 size="sm"
-                className="text-xs bg-gray-600 hover:bg-gray-700"
+                className="text-xs bg-surface hover:bg-surface"
               >
                 Reconnect
               </Button>
@@ -466,11 +466,11 @@ export function GroupDecisionMaking({
           >
             {decision.status === 'completed' ? (
               // Completed Decision Display
-              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+              <div className="bg-success/10 border border-green-200 rounded-lg p-4">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="flex-shrink-0">
                     <svg
-                      className="h-6 w-6 text-green-500"
+                      className="h-6 w-6 text-success"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -498,7 +498,7 @@ export function GroupDecisionMaking({
 
                 {decision.result && (
                   <div className="mt-3 p-3 bg-white rounded border">
-                    <p className="font-medium text-gray-900 mb-2">
+                    <p className="font-medium text-text mb-2">
                       Selected Restaurant:
                     </p>
                     {(() => {
@@ -507,36 +507,36 @@ export function GroupDecisionMaking({
                       );
                       return restaurant ? (
                         <div className="space-y-1">
-                          <p className="text-lg font-semibold text-gray-900">
+                          <p className="text-lg font-semibold text-text">
                             {restaurant.name}
                           </p>
                           {restaurant.address && (
-                            <p className="text-sm text-gray-600">
+                            <p className="text-sm text-text-light">
                               📍 {restaurant.address}
                             </p>
                           )}
                           {restaurant.phoneNumber && (
-                            <p className="text-sm text-gray-600">
+                            <p className="text-sm text-text-light">
                               📞 {restaurant.phoneNumber}
                             </p>
                           )}
                           {restaurant.rating && (
-                            <p className="text-sm text-gray-600">
+                            <p className="text-sm text-text-light">
                               ⭐ {restaurant.rating}/5
                             </p>
                           )}
                           {restaurant.priceRange && (
-                            <p className="text-sm text-gray-600">
+                            <p className="text-sm text-text-light">
                               💰 {restaurant.priceRange}
                             </p>
                           )}
                         </div>
                       ) : (
-                        <p className="text-gray-700">Restaurant not found</p>
+                        <p className="text-text">Restaurant not found</p>
                       );
                     })()}
                     {decision.result.reasoning && (
-                      <p className="text-sm text-gray-600 mt-3 pt-2 border-t">
+                      <p className="text-sm text-text-light mt-3 pt-2 border-t">
                         <span className="font-medium">Reasoning:</span>{' '}
                         {decision.result.reasoning}
                       </p>
@@ -549,29 +549,29 @@ export function GroupDecisionMaking({
               <div className="flex justify-between items-start">
                 <div>
                   <div className="flex items-center gap-3 mb-2">
-                    <h3 className="text-lg font-semibold text-gray-900">
+                    <h3 className="text-lg font-semibold text-text">
                       {decision.method === 'tiered'
                         ? 'Tiered Choice'
                         : 'Random Selection'}
                     </h3>
                     {hasUserVoted(decision) && (
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-success/10 text-green-800">
                         ✓ You&apos;ve Voted
                       </span>
                     )}
                   </div>
-                  <p className="text-gray-600">
+                  <p className="text-text-light">
                     Visit Date:{' '}
                     {new Date(decision.visitDate).toLocaleDateString()}
                   </p>
-                  <p className="text-gray-600">
+                  <p className="text-text-light">
                     Deadline: {new Date(decision.deadline).toLocaleString()}
                   </p>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-text-light">
                     Status: {getVoteStatus(decision)}
                   </p>
                   {decision.votes && (
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-text-light">
                       Votes: {decision.votes.length} /{' '}
                       {decision.participants.length}
                     </p>
@@ -617,7 +617,7 @@ export function GroupDecisionMaking({
 
         {getVisibleDecisions(currentDecisions || []).length === 0 && (
           <Card className="p-6 text-center">
-            <p className="text-gray-600">No active or recent decisions</p>
+            <p className="text-text-light">No active or recent decisions</p>
           </Card>
         )}
       </div>
@@ -641,7 +641,7 @@ export function GroupDecisionMaking({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-text mb-2">
               Decision Method
             </label>
             <div className="space-y-2">
@@ -696,7 +696,7 @@ export function GroupDecisionMaking({
               </div>
             </div>
           )}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div className="bg-primary/10 border border-primary rounded-lg p-4">
             <h4 className="font-medium text-blue-900 mb-2">How to vote:</h4>
             <ol className="text-sm text-blue-800 space-y-1">
               <li>1. Click on up to 3 restaurants you want to vote for</li>
@@ -711,7 +711,7 @@ export function GroupDecisionMaking({
           {/* Rankings Display */}
           {rankings.length > 0 && (
             <div className="space-y-2">
-              <h4 className="font-medium text-gray-900">
+              <h4 className="font-medium text-text">
                 Your Rankings ({rankings.length}/3):
               </h4>
               <div className="space-y-2">
@@ -724,7 +724,7 @@ export function GroupDecisionMaking({
                   return (
                     <div
                       key={`ranking-${restaurantId}`}
-                      className={`p-3 border-2 border-blue-500 bg-blue-50 rounded-lg cursor-move transition-all hover:shadow-md ${
+                      className={`p-3 border-2 border-primary bg-primary/10 rounded-lg cursor-move transition-all hover:shadow-md ${
                         draggedItem === restaurantId ? 'opacity-50' : ''
                       }`}
                       draggable
@@ -738,17 +738,17 @@ export function GroupDecisionMaking({
                             {index + 1}
                           </div>
                           <div>
-                            <h4 className="font-medium text-gray-900">
+                            <h4 className="font-medium text-text">
                               {restaurant.name}
                             </h4>
-                            <p className="text-sm text-gray-600">
+                            <p className="text-sm text-text-light">
                               {restaurant.cuisine}
                             </p>
                           </div>
                         </div>
                         <button
                           onClick={() => handleRemoveFromRankings(restaurantId)}
-                          className="text-red-600 hover:text-red-800 text-sm px-2 py-1 rounded hover:bg-red-50"
+                          className="text-destructive hover:text-red-800 text-sm px-2 py-1 rounded hover:bg-destructive/10"
                         >
                           Remove
                         </button>
@@ -762,7 +762,7 @@ export function GroupDecisionMaking({
 
           {/* Available Restaurants */}
           <div className="space-y-2">
-            <h4 className="font-medium text-gray-900">
+            <h4 className="font-medium text-text">
               Click to Select Restaurants ({rankings.length}/3 selected):
             </h4>
             {restaurants?.map((restaurant) => {
@@ -774,10 +774,10 @@ export function GroupDecisionMaking({
                   key={restaurant._id}
                   className={`p-3 border rounded-lg transition-all ${
                     isSelected
-                      ? 'border-green-500 bg-green-50 cursor-not-allowed'
+                      ? 'border-success bg-success/10 cursor-not-allowed'
                       : canSelect
-                        ? 'border-gray-200 hover:border-green-300 hover:bg-green-50 cursor-pointer'
-                        : 'border-gray-200 bg-gray-50 cursor-not-allowed opacity-50'
+                        ? 'border-border hover:border-success hover:bg-success/10 cursor-pointer'
+                        : 'border-border bg-surface cursor-not-allowed opacity-50'
                   }`}
                   onClick={() =>
                     canSelect && handleRankRestaurant(restaurant._id)
@@ -790,27 +790,27 @@ export function GroupDecisionMaking({
                           isSelected
                             ? 'bg-green-500 text-white'
                             : canSelect
-                              ? 'border-2 border-gray-300'
-                              : 'bg-gray-300'
+                              ? 'border-2 border-border'
+                              : 'bg-surface'
                         }`}
                       >
                         {isSelected ? '✓' : ''}
                       </div>
                       <div>
-                        <h4 className="font-medium text-gray-900">
+                        <h4 className="font-medium text-text">
                           {restaurant.name}
                         </h4>
-                        <p className="text-sm text-gray-600">
+                        <p className="text-sm text-text-light">
                           {restaurant.cuisine}
                         </p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm font-medium text-gray-900">
+                      <p className="text-sm font-medium text-text">
                         ⭐ {restaurant.rating}
                       </p>
                       {restaurant.priceRange && (
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-text-light">
                           {restaurant.priceRange}
                         </p>
                       )}
@@ -824,7 +824,7 @@ export function GroupDecisionMaking({
           <div className="flex justify-end space-x-2">
             <Button
               onClick={() => setShowVotingInterface(false)}
-              className="bg-gray-600 hover:bg-gray-700"
+              className="bg-surface hover:bg-surface"
             >
               Cancel
             </Button>

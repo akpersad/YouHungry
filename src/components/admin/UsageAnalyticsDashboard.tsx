@@ -130,11 +130,11 @@ export function UsageAnalyticsDashboard() {
 
   const getTrendIcon = (trend: string) => {
     if (trend.startsWith('+')) {
-      return <ArrowUpRight className="h-4 w-4 text-green-500" />;
+      return <ArrowUpRight className="h-4 w-4 text-success" />;
     } else if (trend.startsWith('-')) {
-      return <ArrowDownRight className="h-4 w-4 text-red-500" />;
+      return <ArrowDownRight className="h-4 w-4 text-destructive" />;
     }
-    return <Activity className="h-4 w-4 text-gray-500" />;
+    return <Activity className="h-4 w-4 text-text-light" />;
   };
 
   if (loading) {
@@ -153,8 +153,8 @@ export function UsageAnalyticsDashboard() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Usage Analytics</h2>
-          <p className="text-gray-600">
+          <h2 className="text-2xl font-bold text-text">Usage Analytics</h2>
+          <p className="text-text-light">
             Track API usage, user behavior, and feature adoption
           </p>
         </div>
@@ -162,7 +162,7 @@ export function UsageAnalyticsDashboard() {
           <select
             value={selectedPeriod}
             onChange={(e) => handlePeriodChange(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+            className="px-3 py-2 border border-border rounded-md text-sm"
           >
             <option value="7d">Last 7 days</option>
             <option value="30d">Last 30 days</option>
@@ -180,17 +180,17 @@ export function UsageAnalyticsDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <Card className="p-6">
             <div className="flex items-center">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <Zap className="h-6 w-6 text-blue-600" />
+              <div className="p-2 bg-primary/10 rounded-lg">
+                <Zap className="h-6 w-6 text-primary" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">
+                <p className="text-sm font-medium text-text-light">
                   Google Places API
                 </p>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-2xl font-bold text-text">
                   {formatNumber(analytics.apiUsage.googlePlaces.calls)}
                 </p>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-text-light">
                   ${analytics.apiUsage.googlePlaces.cost.toFixed(2)} cost
                 </p>
               </div>
@@ -199,17 +199,17 @@ export function UsageAnalyticsDashboard() {
 
           <Card className="p-6">
             <div className="flex items-center">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <BarChart3 className="h-6 w-6 text-green-600" />
+              <div className="p-2 bg-success/10 rounded-lg">
+                <BarChart3 className="h-6 w-6 text-success" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">
+                <p className="text-sm font-medium text-text-light">
                   Google Maps API
                 </p>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-2xl font-bold text-text">
                   {formatNumber(analytics.apiUsage.googleMaps.calls)}
                 </p>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-text-light">
                   ${analytics.apiUsage.googleMaps.cost.toFixed(2)} cost
                 </p>
               </div>
@@ -222,30 +222,32 @@ export function UsageAnalyticsDashboard() {
                 <Activity className="h-6 w-6 text-purple-600" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">
+                <p className="text-sm font-medium text-text-light">
                   Internal API
                 </p>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-2xl font-bold text-text">
                   {formatNumber(analytics.apiUsage.internal.calls)}
                 </p>
-                <p className="text-xs text-gray-500">Total calls</p>
+                <p className="text-xs text-text-light">Total calls</p>
               </div>
             </div>
           </Card>
 
           <Card className="p-6">
             <div className="flex items-center">
-              <div className="p-2 bg-red-100 rounded-lg">
-                <AlertCircle className="h-6 w-6 text-red-600" />
+              <div className="p-2 bg-destructive/10 rounded-lg">
+                <AlertCircle className="h-6 w-6 text-destructive" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">API Errors</p>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-sm font-medium text-text-light">
+                  API Errors
+                </p>
+                <p className="text-2xl font-bold text-text">
                   {analytics.apiUsage.googlePlaces.errors +
                     analytics.apiUsage.googleMaps.errors +
                     analytics.apiUsage.internal.errors}
                 </p>
-                <p className="text-xs text-gray-500">Total errors</p>
+                <p className="text-xs text-text-light">Total errors</p>
               </div>
             </div>
           </Card>
@@ -258,15 +260,15 @@ export function UsageAnalyticsDashboard() {
           <h3 className="text-lg font-semibold mb-4">Feature Usage</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {Object.entries(analytics.featureUsage).map(([feature, usage]) => (
-              <div key={feature} className="p-4 bg-gray-50 rounded-lg">
+              <div key={feature} className="p-4 bg-surface rounded-lg">
                 <div className="flex justify-between items-center">
                   <div>
-                    <p className="text-sm font-medium text-gray-900 capitalize">
+                    <p className="text-sm font-medium text-text capitalize">
                       {feature.replace(/([A-Z])/g, ' $1').trim()}
                     </p>
                     <p className="text-2xl font-bold text-primary">{usage}</p>
                   </div>
-                  <div className="text-sm text-gray-500">
+                  <div className="text-sm text-text-light">
                     {selectedPeriod === '7d'
                       ? 'This week'
                       : selectedPeriod === '30d'
@@ -287,25 +289,25 @@ export function UsageAnalyticsDashboard() {
             <h3 className="text-lg font-semibold mb-4">User Engagement</h3>
             <div className="space-y-4">
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Total Users</span>
+                <span className="text-sm text-text-light">Total Users</span>
                 <span className="font-semibold">
                   {analytics.userBehavior.totalUsers.toLocaleString()}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Active Users</span>
+                <span className="text-sm text-text-light">Active Users</span>
                 <span className="font-semibold">
                   {analytics.userBehavior.activeUsers.toLocaleString()}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Engagement Rate</span>
-                <span className="font-semibold text-green-600">
+                <span className="text-sm text-text-light">Engagement Rate</span>
+                <span className="font-semibold text-success">
                   {analytics.userBehavior.engagementRate.toFixed(1)}%
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">
+                <span className="text-sm text-text-light">
                   Avg Collections/User
                 </span>
                 <span className="font-semibold">
@@ -313,13 +315,13 @@ export function UsageAnalyticsDashboard() {
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Avg Groups/User</span>
+                <span className="text-sm text-text-light">Avg Groups/User</span>
                 <span className="font-semibold">
                   {analytics.userBehavior.avgGroupsPerUser.toFixed(1)}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">
+                <span className="text-sm text-text-light">
                   Avg Decisions/User
                 </span>
                 <span className="font-semibold">
@@ -333,25 +335,27 @@ export function UsageAnalyticsDashboard() {
             <h3 className="text-lg font-semibold mb-4">Capacity Planning</h3>
             <div className="space-y-4">
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Current Users</span>
+                <span className="text-sm text-text-light">Current Users</span>
                 <span className="font-semibold">
                   {analytics.capacityPlanning.currentUsers.toLocaleString()}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Projected Growth</span>
-                <span className="font-semibold text-blue-600">
+                <span className="text-sm text-text-light">
+                  Projected Growth
+                </span>
+                <span className="font-semibold text-primary">
                   {analytics.capacityPlanning.projectedGrowth.toLocaleString()}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Storage Usage</span>
+                <span className="text-sm text-text-light">Storage Usage</span>
                 <span className="font-semibold">
                   {analytics.capacityPlanning.storageUsage.toFixed(1)}%
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">API Quota Usage</span>
+                <span className="text-sm text-text-light">API Quota Usage</span>
                 <span className="font-semibold">
                   {analytics.capacityPlanning.apiQuotaUsage.toFixed(1)}%
                 </span>
@@ -369,17 +373,17 @@ export function UsageAnalyticsDashboard() {
             {analytics.popularFeatures.map((feature, index) => (
               <div
                 key={feature.name}
-                className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                className="flex items-center justify-between p-3 bg-surface rounded-lg"
               >
                 <div className="flex items-center">
                   <div className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-medium">
                     {index + 1}
                   </div>
                   <div className="ml-3">
-                    <div className="text-sm font-medium text-gray-900">
+                    <div className="text-sm font-medium text-text">
                       {feature.name}
                     </div>
-                    <div className="text-xs text-gray-500">
+                    <div className="text-xs text-text-light">
                       {feature.usage} uses
                     </div>
                   </div>
@@ -389,10 +393,10 @@ export function UsageAnalyticsDashboard() {
                   <span
                     className={`text-sm font-medium ${
                       feature.trend.startsWith('+')
-                        ? 'text-green-600'
+                        ? 'text-success'
                         : feature.trend.startsWith('-')
-                          ? 'text-red-600'
-                          : 'text-gray-600'
+                          ? 'text-destructive'
+                          : 'text-text-light'
                     }`}
                   >
                     {feature.trend}
@@ -412,15 +416,15 @@ export function UsageAnalyticsDashboard() {
             {analytics.trends.dailyActivity.slice(-7).map((day) => (
               <div
                 key={day.date}
-                className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                className="flex items-center justify-between p-3 bg-surface rounded-lg"
               >
                 <div className="flex items-center">
-                  <Clock className="h-4 w-4 text-gray-500 mr-2" />
-                  <span className="text-sm font-medium text-gray-900">
+                  <Clock className="h-4 w-4 text-text-light mr-2" />
+                  <span className="text-sm font-medium text-text">
                     {new Date(day.date).toLocaleDateString()}
                   </span>
                 </div>
-                <div className="flex gap-4 text-sm text-gray-600">
+                <div className="flex gap-4 text-sm text-text-light">
                   <span>{day.decisions} decisions</span>
                   <span>{day.uniqueUsers} users</span>
                 </div>
@@ -441,10 +445,10 @@ export function UsageAnalyticsDashboard() {
               (recommendation, index) => (
                 <div
                   key={index}
-                  className="flex items-start p-3 bg-blue-50 rounded-lg"
+                  className="flex items-start p-3 bg-primary/10 rounded-lg"
                 >
                   <div className="flex-shrink-0 mt-0.5">
-                    <CheckCircle className="h-4 w-4 text-blue-500" />
+                    <CheckCircle className="h-4 w-4 text-primary" />
                   </div>
                   <div className="ml-3">
                     <p className="text-sm text-blue-800">{recommendation}</p>

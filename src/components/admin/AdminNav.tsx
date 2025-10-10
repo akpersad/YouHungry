@@ -65,7 +65,7 @@ const adminNavItems = [
 export function AdminNav({ activeTab, onTabChange }: AdminNavProps) {
   return (
     <div className="bg-white rounded-lg shadow-sm border">
-      <div className="border-b border-gray-200">
+      <div className="border-b border-border">
         <nav className="flex space-x-8 px-6" aria-label="Tabs">
           {adminNavItems.map((item) => {
             const Icon = item.icon;
@@ -79,7 +79,7 @@ export function AdminNav({ activeTab, onTabChange }: AdminNavProps) {
                   'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors flex items-center gap-2',
                   isActive
                     ? 'border-primary text-primary'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    : 'border-transparent text-text-light hover:text-text hover:border-border'
                 )}
               >
                 <Icon className="h-4 w-4" />
@@ -91,8 +91,8 @@ export function AdminNav({ activeTab, onTabChange }: AdminNavProps) {
       </div>
 
       {/* External Links */}
-      <div className="px-6 py-4 border-t border-gray-200">
-        <div className="flex items-center gap-2 text-sm text-gray-600">
+      <div className="px-6 py-4 border-t border-border">
+        <div className="flex items-center gap-2 text-sm text-text-light">
           <span>External Tools:</span>
           <a
             href="/performance-dashboard.html"

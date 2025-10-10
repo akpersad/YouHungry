@@ -176,15 +176,17 @@ export function CreateGroupForm({
             onChange={(e) => handleInputChange('description', e.target.value)}
             placeholder="Describe your group..."
             rows={3}
-            className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+            className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary ${
               errors.description
-                ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                ? 'border-destructive focus:ring-destructive focus:border-destructive'
                 : 'border-quinary'
             } ${isSubmitting ? 'bg-secondary cursor-not-allowed' : ''}`}
             disabled={isSubmitting || isLoading}
           />
           {errors.description && (
-            <p className="mt-1 text-sm text-red-600">{errors.description}</p>
+            <p className="mt-1 text-sm text-destructive">
+              {errors.description}
+            </p>
           )}
           <p className="mt-1 text-sm text-tertiary">
             {formData.description.length}/500 characters
@@ -243,7 +245,7 @@ export function CreateGroupForm({
                       type="button"
                       onClick={() => handleRemoveEmail(email)}
                       disabled={isSubmitting || isLoading}
-                      className="text-red-500 hover:text-red-700 text-sm font-medium"
+                      className="text-destructive hover:text-red-700 text-sm font-medium"
                     >
                       Remove
                     </button>

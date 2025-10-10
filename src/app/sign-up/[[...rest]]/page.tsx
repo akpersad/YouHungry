@@ -85,7 +85,7 @@ export default function SignUpPage() {
                 dividerText: 'text-sm text-muted-foreground',
                 formFieldErrorText: 'text-sm text-destructive',
                 footerActionText: 'text-sm text-muted-foreground',
-                formFieldSuccessText: 'text-sm text-green-600',
+                formFieldSuccessText: 'text-sm text-success',
               },
               variables: {
                 colorPrimary: 'var(--color-primary)',
@@ -103,7 +103,7 @@ export default function SignUpPage() {
         </div>
 
         {/* SMS Benefits Info */}
-        <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
+        <div className="bg-primary/10 dark:bg-primary/20/20 rounded-lg p-4 border border-primary dark:border-primary">
           <h4 className="font-medium mb-2 text-blue-900 dark:text-blue-100">
             📱 SMS Notifications (Optional)
           </h4>

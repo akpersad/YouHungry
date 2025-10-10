@@ -359,7 +359,7 @@ export function CollectionView({ collectionId }: CollectionViewProps) {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="text-red-600">⚠️</div>
+                  <div className="text-destructive">⚠️</div>
                   <div>
                     <p className="font-medium text-red-900">Decision Error</p>
                     <p className="text-red-700 text-sm">{decisionError}</p>

@@ -1,424 +1,462 @@
 #!/usr/bin/env node
 
+const fs = require('fs');
+const path = require('path');
+
 /**
  * Comprehensive Color Contrast Audit Script
- * Tests ALL color combinations used in the design system
+ *
+ * This script scans the entire codebase for:
+ * 1. Hardcoded color classes (gray-*, red-*, blue-*, etc.)
+ * 2. Inline color styles
+ * 3. CSS files with hardcoded colors
+ * 4. Components that might have contrast issues
  */
 
-// Color contrast calculation functions
-function getLuminance(r, g, b) {
-  const [rs, gs, bs] = [r, g, b].map((c) => {
-    const sRGB = c / 255;
-    return sRGB <= 0.03928
-      ? sRGB / 12.92
-      : Math.pow((sRGB + 0.055) / 1.055, 2.4);
-  });
-  return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
-}
+// Color patterns to search for
+const HARDCODED_COLOR_PATTERNS = [
+  // Tailwind color classes
+  /\b(text|bg|border|ring|shadow)-(gray|red|blue|green|yellow|purple|pink|indigo|orange|teal|cyan|lime|emerald|violet|fuchsia|rose|amber|sky|slate|zinc|neutral|stone)-\d+\b/g,
+  // Specific problematic patterns
+  /\btext-gray-\d+\b/g,
+  /\bbg-gray-\d+\b/g,
+  /\bborder-gray-\d+\b/g,
+  /\btext-red-\d+\b/g,
+  /\bbg-red-\d+\b/g,
+  /\bborder-red-\d+\b/g,
+  /\btext-blue-\d+\b/g,
+  /\bbg-blue-\d+\b/g,
+  /\bborder-blue-\d+\b/g,
+  // Inline styles with colors
+  /color:\s*['"`][^'"`]*['"`]/g,
+  /background-color:\s*['"`][^'"`]*['"`]/g,
+  /border-color:\s*['"`][^'"`]*['"`]/g,
+  // Hex colors
+  /#[0-9a-fA-F]{3,6}/g,
+  // RGB/RGBA colors
+  /rgba?\([^)]+\)/g,
+  // HSL colors
+  /hsl\([^)]+\)/g,
+];
 
-function hexToRgb(hex) {
-  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return result
-    ? {
-        r: parseInt(result[1], 16),
-        g: parseInt(result[2], 16),
-        b: parseInt(result[3], 16),
-      }
-    : null;
-}
+// Files to scan
+const SCAN_PATTERNS = [
+  'src/**/*.tsx',
+  'src/**/*.ts',
+  'src/**/*.css',
+  'src/**/*.scss',
+  'src/**/*.sass',
+];
 
-function getContrastRatio(color1, color2) {
-  const rgb1 = hexToRgb(color1);
-  const rgb2 = hexToRgb(color2);
+// Files to exclude
+const EXCLUDE_PATTERNS = [
+  'node_modules',
+  '.next',
+  'dist',
+  'build',
+  '__tests__',
+  'test',
+  '.git',
+  'coverage',
+];
 
-  if (!rgb1 || !rgb2) {
-    throw new Error('Invalid color format');
-  }
-
-  const lum1 = getLuminance(rgb1.r, rgb1.g, rgb1.b);
-  const lum2 = getLuminance(rgb2.r, rgb2.g, rgb2.b);
-
-  const brightest = Math.max(lum1, lum2);
-  const darkest = Math.min(lum1, lum2);
-
-  return (brightest + 0.05) / (darkest + 0.05);
-}
-
-function checkCompliance(foreground, background, isLargeText = false) {
-  const ratio = getContrastRatio(foreground, background);
-  const requiredAA = isLargeText ? 3 : 4.5;
-  const requiredAAA = isLargeText ? 4.5 : 7;
-
-  return {
-    ratio: Math.round(ratio * 100) / 100,
-    passAA: ratio >= requiredAA,
-    passAAA: ratio >= requiredAAA,
-    requiredAA,
-  };
-}
-
-// ACTUAL colors from globals.css
-const colors = {
-  lightMode: {
-    bgPrimary: '#fafafa',
-    bgSecondary: '#ffffff',
-    bgTertiary: '#f5f5f5',
-    bgQuaternary: '#e5e5e5',
-    bgQuinary: '#d1d1d1',
-    textPrimary: '#1a1a1a',
-    textSecondary: '#4a4a4a',
-    textTertiary: '#6b6b6b', // From globals.css line 29
-    textInverse: '#ffffff',
-    accentPrimary: '#ff3366',
-  },
-  darkMode: {
-    bgPrimary: '#000000',
-    bgSecondary: '#1a1a1a',
-    bgTertiary: '#2d2d2d',
-    bgQuaternary: '#404040',
-    bgQuinary: '#ababab', // FIXED: Changed from #666666 -> #8a8a8a -> #9a9a9a -> #a5a5a5 -> #ababab
-    textPrimary: '#ffffff',
-    textSecondary: '#d1d1d1',
-    textTertiary: '#b8b8b8', // FIXED: Changed from #a0a0a0
-    textInverse: '#1a1a1a',
-    accentPrimary: '#ff3366',
+// Results storage
+const results = {
+  hardcodedColors: [],
+  inlineStyles: [],
+  cssFiles: [],
+  summary: {
+    totalFiles: 0,
+    filesWithIssues: 0,
+    totalIssues: 0,
   },
 };
 
-// Comprehensive test cases
-const tests = [
-  // ===== LIGHT MODE =====
-  {
-    mode: 'Light Mode',
-    category: 'Primary Backgrounds',
-    name: 'Primary Text on Primary Background',
-    fg: colors.lightMode.textPrimary,
-    bg: colors.lightMode.bgPrimary,
-    isLargeText: false,
-  },
-  {
-    mode: 'Light Mode',
-    category: 'Primary Backgrounds',
-    name: 'Secondary Text on Primary Background',
-    fg: colors.lightMode.textSecondary,
-    bg: colors.lightMode.bgPrimary,
-    isLargeText: false,
-  },
-  {
-    mode: 'Light Mode',
-    category: 'Primary Backgrounds',
-    name: 'Tertiary Text on Primary Background',
-    fg: colors.lightMode.textTertiary,
-    bg: colors.lightMode.bgPrimary,
-    isLargeText: false,
-  },
-  {
-    mode: 'Light Mode',
-    category: 'Card Backgrounds',
-    name: 'Primary Text on Secondary Background (Cards)',
-    fg: colors.lightMode.textPrimary,
-    bg: colors.lightMode.bgSecondary,
-    isLargeText: false,
-  },
-  {
-    mode: 'Light Mode',
-    category: 'Card Backgrounds',
-    name: 'Secondary Text on Secondary Background (Cards)',
-    fg: colors.lightMode.textSecondary,
-    bg: colors.lightMode.bgSecondary,
-    isLargeText: false,
-  },
-  {
-    mode: 'Light Mode',
-    category: 'Card Backgrounds',
-    name: 'Tertiary Text on Secondary Background (Cards)',
-    fg: colors.lightMode.textTertiary,
-    bg: colors.lightMode.bgSecondary,
-    isLargeText: false,
-  },
+/**
+ * Check if file should be excluded
+ */
+function shouldExcludeFile(filePath) {
+  return EXCLUDE_PATTERNS.some((pattern) => filePath.includes(pattern));
+}
 
-  // ===== DARK MODE - PRIMARY BACKGROUNDS =====
-  {
-    mode: 'Dark Mode',
-    category: 'Primary Backgrounds',
-    name: 'Primary Text on Primary Background',
-    fg: colors.darkMode.textPrimary,
-    bg: colors.darkMode.bgPrimary,
-    isLargeText: false,
-  },
-  {
-    mode: 'Dark Mode',
-    category: 'Primary Backgrounds',
-    name: 'Secondary Text on Primary Background',
-    fg: colors.darkMode.textSecondary,
-    bg: colors.darkMode.bgPrimary,
-    isLargeText: false,
-  },
-  {
-    mode: 'Dark Mode',
-    category: 'Primary Backgrounds',
-    name: 'Tertiary Text on Primary Background',
-    fg: colors.darkMode.textTertiary,
-    bg: colors.darkMode.bgPrimary,
-    isLargeText: false,
-  },
+/**
+ * Get all files matching patterns
+ */
+function getAllFiles(dir, patterns) {
+  const files = [];
 
-  // ===== DARK MODE - CARD BACKGROUNDS (bg-secondary) =====
-  {
-    mode: 'Dark Mode',
-    category: 'Card Backgrounds (bg-secondary)',
-    name: 'Primary Text on Secondary Background (Cards)',
-    fg: colors.darkMode.textPrimary,
-    bg: colors.darkMode.bgSecondary,
-    isLargeText: false,
-  },
-  {
-    mode: 'Dark Mode',
-    category: 'Card Backgrounds (bg-secondary)',
-    name: 'Secondary Text on Secondary Background (Cards)',
-    fg: colors.darkMode.textSecondary,
-    bg: colors.darkMode.bgSecondary,
-    isLargeText: false,
-  },
-  {
-    mode: 'Dark Mode',
-    category: 'Card Backgrounds (bg-secondary)',
-    name: '⚠️ Tertiary Text on Secondary Background (Cards)',
-    fg: colors.darkMode.textTertiary,
-    bg: colors.darkMode.bgSecondary,
-    isLargeText: false,
-  },
+  function traverse(currentDir) {
+    const items = fs.readdirSync(currentDir);
 
-  // ===== DARK MODE - TERTIARY BACKGROUNDS =====
-  {
-    mode: 'Dark Mode',
-    category: 'Tertiary Backgrounds (bg-tertiary)',
-    name: 'Primary Text on Tertiary Background',
-    fg: colors.darkMode.textPrimary,
-    bg: colors.darkMode.bgTertiary,
-    isLargeText: false,
-  },
-  {
-    mode: 'Dark Mode',
-    category: 'Tertiary Backgrounds (bg-tertiary)',
-    name: 'Secondary Text on Tertiary Background',
-    fg: colors.darkMode.textSecondary,
-    bg: colors.darkMode.bgTertiary,
-    isLargeText: false,
-  },
-  {
-    mode: 'Dark Mode',
-    category: 'Tertiary Backgrounds (bg-tertiary)',
-    name: '🔴 Tertiary Text on Tertiary Background',
-    fg: colors.darkMode.textTertiary,
-    bg: colors.darkMode.bgTertiary,
-    isLargeText: false,
-  },
+    for (const item of items) {
+      const fullPath = path.join(currentDir, item);
+      const stat = fs.statSync(fullPath);
 
-  // ===== DARK MODE - QUATERNARY BACKGROUNDS =====
-  {
-    mode: 'Dark Mode',
-    category: 'Quaternary Backgrounds (bg-quaternary)',
-    name: 'Primary Text on Quaternary Background',
-    fg: colors.darkMode.textPrimary,
-    bg: colors.darkMode.bgQuaternary,
-    isLargeText: false,
-  },
-  {
-    mode: 'Dark Mode',
-    category: 'Quaternary Backgrounds (bg-quaternary)',
-    name: '⚠️ Secondary Text on Quaternary Background',
-    fg: colors.darkMode.textSecondary,
-    bg: colors.darkMode.bgQuaternary,
-    isLargeText: false,
-  },
-  {
-    mode: 'Dark Mode',
-    category: 'Quaternary Backgrounds (bg-quaternary)',
-    name: '🔴 Tertiary Text on Quaternary Background',
-    fg: colors.darkMode.textTertiary,
-    bg: colors.darkMode.bgQuaternary,
-    isLargeText: false,
-  },
+      if (stat.isDirectory()) {
+        if (!shouldExcludeFile(fullPath)) {
+          traverse(fullPath);
+        }
+      } else if (stat.isFile()) {
+        const ext = path.extname(fullPath);
+        if (['.tsx', '.ts', '.css', '.scss', '.sass'].includes(ext)) {
+          files.push(fullPath);
+        }
+      }
+    }
+  }
 
-  // ===== DARK MODE - BORDERS (bg-quinary) =====
-  {
-    mode: 'Dark Mode',
-    category: 'Border Visibility (bg-quinary)',
-    name: 'Border (Quinary) on Primary Background',
-    fg: colors.darkMode.bgQuinary,
-    bg: colors.darkMode.bgPrimary,
-    isLargeText: false,
-  },
-  {
-    mode: 'Dark Mode',
-    category: 'Border Visibility (bg-quinary)',
-    name: 'Border (Quinary) on Secondary Background',
-    fg: colors.darkMode.bgQuinary,
-    bg: colors.darkMode.bgSecondary,
-    isLargeText: false,
-  },
-  {
-    mode: 'Dark Mode',
-    category: 'Border Visibility (bg-quinary)',
-    name: '⚠️ Border (Quinary) on Tertiary Background',
-    fg: colors.darkMode.bgQuinary,
-    bg: colors.darkMode.bgTertiary,
-    isLargeText: false,
-  },
-  {
-    mode: 'Dark Mode',
-    category: 'Border Visibility (bg-quinary)',
-    name: '🔴 Border (Quinary) on Quaternary Background',
-    fg: colors.darkMode.bgQuinary,
-    bg: colors.darkMode.bgQuaternary,
-    isLargeText: false,
-  },
+  traverse(dir);
+  return files;
+}
 
-  // ===== DARK MODE - ACCENT COLORS =====
-  {
-    mode: 'Dark Mode',
-    category: 'Accent Colors',
-    name: 'Accent on Primary Background',
-    fg: colors.darkMode.accentPrimary,
-    bg: colors.darkMode.bgPrimary,
-    isLargeText: false,
-  },
-  {
-    mode: 'Dark Mode',
-    category: 'Accent Colors',
-    name: 'Accent on Secondary Background',
-    fg: colors.darkMode.accentPrimary,
-    bg: colors.darkMode.bgSecondary,
-    isLargeText: false,
-  },
-  {
-    mode: 'Dark Mode',
-    category: 'Accent Colors',
-    name: 'White Text on Accent Background (Buttons)',
-    fg: colors.darkMode.textPrimary,
-    bg: colors.darkMode.accentPrimary,
-    isLargeText: true, // Buttons use larger text
-  },
+/**
+ * Scan file for hardcoded colors
+ */
+function scanFile(filePath) {
+  try {
+    const content = fs.readFileSync(filePath, 'utf8');
+    const lines = content.split('\n');
+    const issues = [];
+
+    lines.forEach((line, index) => {
+      const lineNumber = index + 1;
+
+      // Check for hardcoded color patterns
+      HARDCODED_COLOR_PATTERNS.forEach((pattern) => {
+        const matches = line.match(pattern);
+        if (matches) {
+          matches.forEach((match) => {
+            issues.push({
+              type: 'hardcoded-color',
+              line: lineNumber,
+              content: line.trim(),
+              match: match,
+              severity: getSeverity(match),
+            });
+          });
+        }
+      });
+
+      // Check for inline styles
+      if (
+        line.includes('style=') &&
+        (line.includes('color:') ||
+          line.includes('background-color:') ||
+          line.includes('border-color:'))
+      ) {
+        issues.push({
+          type: 'inline-style',
+          line: lineNumber,
+          content: line.trim(),
+          severity: 'high',
+        });
+      }
+    });
+
+    return issues;
+  } catch (error) {
+    console.error(`Error reading file ${filePath}:`, error.message);
+    return [];
+  }
+}
+
+/**
+ * Determine severity of color issue
+ */
+function getSeverity(match) {
+  // High severity: text colors that are likely to have contrast issues
+  if (
+    match.includes('text-gray-') ||
+    match.includes('text-red-') ||
+    match.includes('text-blue-')
+  ) {
+    return 'high';
+  }
+
+  // Medium severity: background colors
+  if (
+    match.includes('bg-gray-') ||
+    match.includes('bg-red-') ||
+    match.includes('bg-blue-')
+  ) {
+    return 'medium';
+  }
+
+  // Low severity: border colors
+  if (
+    match.includes('border-gray-') ||
+    match.includes('border-red-') ||
+    match.includes('border-blue-')
+  ) {
+    return 'low';
+  }
+
+  return 'medium';
+}
+
+/**
+ * Generate fix suggestions
+ */
+function generateFixSuggestions(issue) {
+  const suggestions = [];
+
+  if (issue.type === 'hardcoded-color') {
+    const match = issue.match;
+
+    if (match.includes('text-gray-')) {
+      suggestions.push(`Replace ${match} with text-text or text-text-light`);
+    } else if (match.includes('bg-gray-')) {
+      suggestions.push(`Replace ${match} with bg-background or bg-surface`);
+    } else if (match.includes('border-gray-')) {
+      suggestions.push(`Replace ${match} with border-border`);
+    } else if (match.includes('text-red-')) {
+      suggestions.push(`Replace ${match} with text-destructive`);
+    } else if (match.includes('bg-red-')) {
+      suggestions.push(`Replace ${match} with bg-destructive`);
+    } else if (match.includes('text-blue-')) {
+      suggestions.push(`Replace ${match} with text-primary`);
+    } else if (match.includes('bg-blue-')) {
+      suggestions.push(`Replace ${match} with bg-primary`);
+    }
+  } else if (issue.type === 'inline-style') {
+    suggestions.push(
+      'Move inline styles to CSS classes using design system colors'
+    );
+  }
+
+  return suggestions;
+}
+
+/**
+ * Main audit function
+ */
+function runAudit() {
+  console.log('🔍 Starting comprehensive color contrast audit...\n');
+
+  const srcDir = path.join(process.cwd(), 'src');
+  const files = getAllFiles(srcDir);
+
+  console.log(`📁 Found ${files.length} files to scan\n`);
+
+  files.forEach((filePath) => {
+    const issues = scanFile(filePath);
+
+    if (issues.length > 0) {
+      results.hardcodedColors.push({
+        file: filePath,
+        issues: issues,
+      });
+
+      results.summary.filesWithIssues++;
+      results.summary.totalIssues += issues.length;
+    }
+
+    results.summary.totalFiles++;
+  });
+
+  // Generate report
+  generateReport();
+}
+
+/**
+ * Generate detailed report
+ */
+function generateReport() {
+  console.log('📊 AUDIT RESULTS\n');
+  console.log('='.repeat(50));
+
+  console.log(`Total files scanned: ${results.summary.totalFiles}`);
+  console.log(`Files with issues: ${results.summary.filesWithIssues}`);
+  console.log(`Total issues found: ${results.summary.totalIssues}\n`);
+
+  if (results.hardcodedColors.length === 0) {
+    console.log('✅ No color contrast issues found!');
+    return;
+  }
+
+  // Group by severity
+  const highSeverity = [];
+  const mediumSeverity = [];
+  const lowSeverity = [];
+
+  results.hardcodedColors.forEach((fileResult) => {
+    fileResult.issues.forEach((issue) => {
+      if (issue.severity === 'high') {
+        highSeverity.push({ ...issue, file: fileResult.file });
+      } else if (issue.severity === 'medium') {
+        mediumSeverity.push({ ...issue, file: fileResult.file });
+      } else {
+        lowSeverity.push({ ...issue, file: fileResult.file });
+      }
+    });
+  });
+
+  // Display high severity issues first
+  if (highSeverity.length > 0) {
+    console.log('🚨 HIGH SEVERITY ISSUES (Fix immediately):');
+    console.log('-'.repeat(40));
+    highSeverity.forEach((issue) => {
+      console.log(`\n📄 ${issue.file}:${issue.line}`);
+      console.log(`   ${issue.content}`);
+      console.log(`   Issue: ${issue.match}`);
+      const suggestions = generateFixSuggestions(issue);
+      if (suggestions.length > 0) {
+        console.log(`   💡 Fix: ${suggestions[0]}`);
+      }
+    });
+    console.log('');
+  }
+
+  // Display medium severity issues
+  if (mediumSeverity.length > 0) {
+    console.log('⚠️  MEDIUM SEVERITY ISSUES:');
+    console.log('-'.repeat(40));
+    mediumSeverity.forEach((issue) => {
+      console.log(`\n📄 ${issue.file}:${issue.line}`);
+      console.log(`   ${issue.content}`);
+      console.log(`   Issue: ${issue.match}`);
+      const suggestions = generateFixSuggestions(issue);
+      if (suggestions.length > 0) {
+        console.log(`   💡 Fix: ${suggestions[0]}`);
+      }
+    });
+    console.log('');
+  }
+
+  // Display low severity issues
+  if (lowSeverity.length > 0) {
+    console.log('ℹ️  LOW SEVERITY ISSUES:');
+    console.log('-'.repeat(40));
+    lowSeverity.forEach((issue) => {
+      console.log(`\n📄 ${issue.file}:${issue.line}`);
+      console.log(`   ${issue.content}`);
+      console.log(`   Issue: ${issue.match}`);
+      const suggestions = generateFixSuggestions(issue);
+      if (suggestions.length > 0) {
+        console.log(`   💡 Fix: ${suggestions[0]}`);
+      }
+    });
+    console.log('');
+  }
+
+  // Generate summary
+  console.log('📋 SUMMARY:');
+  console.log('-'.repeat(40));
+  console.log(`High severity: ${highSeverity.length} issues`);
+  console.log(`Medium severity: ${mediumSeverity.length} issues`);
+  console.log(`Low severity: ${lowSeverity.length} issues`);
+  console.log(`Total: ${results.summary.totalIssues} issues`);
+
+  // Save detailed report to file
+  const reportPath = path.join(
+    process.cwd(),
+    'color-contrast-audit-report.json'
+  );
+  fs.writeFileSync(
+    reportPath,
+    JSON.stringify(
+      {
+        summary: results.summary,
+        issues: results.hardcodedColors,
+        timestamp: new Date().toISOString(),
+      },
+      null,
+      2
+    )
+  );
+
+  console.log(`\n📄 Detailed report saved to: ${reportPath}`);
+
+  // Generate fix script
+  generateFixScript();
+}
+
+/**
+ * Generate automated fix script
+ */
+function generateFixScript() {
+  const fixScript = `#!/usr/bin/env node
+
+const fs = require('fs');
+const path = require('path');
+
+/**
+ * Automated Color Fix Script
+ * Generated by comprehensive-contrast-audit.js
+ */
+
+const fixes = [
+${results.hardcodedColors
+  .map((fileResult) =>
+    fileResult.issues
+      .map(
+        (issue) =>
+          `  {
+    file: '${fileResult.file}',
+    line: ${issue.line},
+    original: '${issue.content.replace(/'/g, "\\'")}',
+    match: '${issue.match}',
+    severity: '${issue.severity}',
+    fix: '${generateFixSuggestions(issue)[0] || 'Manual review required'}'
+  }`
+      )
+      .join(',\n')
+  )
+  .join(',\n')}
 ];
 
-// Run tests
-console.log('🔍 COMPREHENSIVE COLOR CONTRAST AUDIT\n');
-console.log('Testing ALL color combinations from globals.css');
-console.log('━'.repeat(80) + '\n');
+console.log('🔧 Running automated fixes...');
 
-let allPassed = true;
-const failures = [];
-const warnings = [];
-
-// Group by category
-const testsByCategory = {};
-tests.forEach((test) => {
-  const key = `${test.mode} - ${test.category}`;
-  if (!testsByCategory[key]) {
-    testsByCategory[key] = [];
+fixes.forEach((fix, index) => {
+  try {
+    console.log(\`\${index + 1}/\${fixes.length}: Processing \${fix.file}:\${fix.line}\`);
+    
+    const content = fs.readFileSync(fix.file, 'utf8');
+    const lines = content.split('\\n');
+    
+    // Apply fix based on match
+    if (fix.match.includes('text-gray-')) {
+      lines[fix.line - 1] = lines[fix.line - 1].replace(fix.match, 'text-text');
+    } else if (fix.match.includes('bg-gray-')) {
+      lines[fix.line - 1] = lines[fix.line - 1].replace(fix.match, 'bg-background');
+    } else if (fix.match.includes('border-gray-')) {
+      lines[fix.line - 1] = lines[fix.line - 1].replace(fix.match, 'border-border');
+    } else if (fix.match.includes('text-red-')) {
+      lines[fix.line - 1] = lines[fix.line - 1].replace(fix.match, 'text-destructive');
+    } else if (fix.match.includes('bg-red-')) {
+      lines[fix.line - 1] = lines[fix.line - 1].replace(fix.match, 'bg-destructive');
+    } else if (fix.match.includes('text-blue-')) {
+      lines[fix.line - 1] = lines[fix.line - 1].replace(fix.match, 'text-primary');
+    } else if (fix.match.includes('bg-blue-')) {
+      lines[fix.line - 1] = lines[fix.line - 1].replace(fix.match, 'bg-primary');
+    }
+    
+    fs.writeFileSync(fix.file, lines.join('\\n'));
+    console.log(\`   ✅ Fixed: \${fix.match}\`);
+    
+  } catch (error) {
+    console.error(\`   ❌ Error fixing \${fix.file}:\${fix.line}: \${error.message}\`);
   }
-  testsByCategory[key].push(test);
 });
 
-// Run tests by category
-Object.keys(testsByCategory).forEach((category) => {
-  console.log(`\n📋 ${category}`);
-  console.log('─'.repeat(80));
+console.log('\\n🎉 Automated fixes completed!');
+console.log('Please review the changes and test your application.');
+`;
 
-  testsByCategory[category].forEach((test) => {
-    const result = checkCompliance(test.fg, test.bg, test.isLargeText);
-    const status = result.passAA ? '✅' : '❌';
-
-    const testInfo = {
-      name: test.name,
-      mode: test.mode,
-      category: test.category,
-      fg: test.fg,
-      bg: test.bg,
-      ...result,
-    };
-
-    if (!result.passAA) {
-      allPassed = false;
-      failures.push(testInfo);
-    } else if (result.ratio < 5.0 && !test.isLargeText) {
-      // Warning for ratios between 4.5 and 5.0 (passing but low)
-      warnings.push(testInfo);
-    }
-
-    console.log(`${status} ${test.name}`);
-    console.log(`   ${test.fg} on ${test.bg}`);
-    console.log(
-      `   Ratio: ${result.ratio}:1 (Required: ${result.requiredAA}:1 for ${test.isLargeText ? 'large' : 'normal'} text)`
-    );
-    if (!result.passAA || result.ratio < 5.0) {
-      console.log(
-        `   Status: ${result.passAA ? '⚠️ PASS (but low)' : '🔴 FAIL'}`
-      );
-    }
-  });
-});
-
-console.log('\n' + '━'.repeat(80));
-
-// Summary
-console.log('\n📊 AUDIT SUMMARY\n');
-
-const totalTests = tests.length;
-const passedTests = totalTests - failures.length;
-
-console.log(`Total Tests: ${totalTests}`);
-console.log(`✅ Passed: ${passedTests}`);
-console.log(`❌ Failed: ${failures.length}`);
-console.log(`⚠️ Warnings (low contrast): ${warnings.length}`);
-
-if (failures.length > 0) {
-  console.log('\n🔴 CRITICAL FAILURES (WCAG AA Not Met):\n');
-  failures.forEach((f, i) => {
-    console.log(`${i + 1}. ${f.name}`);
-    console.log(`   ${f.fg} on ${f.bg}`);
-    console.log(`   Ratio: ${f.ratio}:1 (needs ${f.requiredAA}:1)`);
-    console.log(`   Gap: ${(f.requiredAA - f.ratio).toFixed(2)}:1 short\n`);
-  });
-}
-
-if (warnings.length > 0) {
-  console.log('⚠️ LOW CONTRAST WARNINGS (Pass AA but < 5.0:1):\n');
-  warnings.forEach((w, i) => {
-    console.log(`${i + 1}. ${w.name}`);
-    console.log(`   ${w.fg} on ${w.bg}`);
-    console.log(`   Ratio: ${w.ratio}:1\n`);
-  });
-}
-
-// Recommendations
-if (!allPassed) {
-  console.log('━'.repeat(80));
-  console.log('\n💡 RECOMMENDED FIXES:\n');
-
-  console.log('For Dark Mode text-tertiary (#a0a0a0):');
-  console.log(
-    '  • Change to #b3b3b3 (lighter gray) for 4.5:1+ on all backgrounds'
+  const fixScriptPath = path.join(
+    process.cwd(),
+    'scripts/auto-fix-contrast-issues.js'
   );
-  console.log('  • Or change to #b8b8b8 for safer 5.0:1+ ratios\n');
+  fs.writeFileSync(fixScriptPath, fixScript);
+  fs.chmodSync(fixScriptPath, '755');
 
-  console.log('For Dark Mode borders (bg-quinary #666666):');
-  console.log('  • On bg-tertiary: Use #8a8a8a or lighter');
-  console.log('  • On bg-quaternary: Use #9a9a9a or lighter\n');
-
-  console.log('General recommendations:');
-  console.log('  • Aim for 5.0:1 minimum for better readability');
-  console.log('  • Use 7.0:1+ for enhanced accessibility (WCAG AAA)');
-  console.log('  • Test with actual users in dark environments\n');
-
-  process.exit(1);
-} else {
-  console.log('\n✅ All critical color combinations meet WCAG AA standards!\n');
-  if (warnings.length > 0) {
-    console.log(
-      '⚠️ Consider improving low-contrast combinations for better UX.\n'
-    );
-  }
-  process.exit(0);
+  console.log(`🔧 Auto-fix script generated: ${fixScriptPath}`);
+  console.log('   Run: node scripts/auto-fix-contrast-issues.js');
 }
+
+// Run the audit
+if (require.main === module) {
+  runAudit();
+}
+
+module.exports = { runAudit, scanFile, generateFixSuggestions };

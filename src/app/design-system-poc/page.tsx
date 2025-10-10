@@ -203,7 +203,7 @@ export default function DesignSystemPOC() {
                 <span className="text-xs font-medium">Discover</span>
               </div>
               <div
-                className="flex flex-col items-center p-3 rounded-xl transition-all duration-200 hover:bg-gray-100 hover:shadow-sm"
+                className="flex flex-col items-center p-3 rounded-xl transition-all duration-200 hover:bg-surface hover:shadow-sm"
                 style={{
                   color: currentColors.textSecondary,
                   backgroundColor: 'transparent',
@@ -224,7 +224,7 @@ export default function DesignSystemPOC() {
                 <span className="text-xs font-medium">Collections</span>
               </div>
               <div
-                className="flex flex-col items-center p-3 rounded-xl transition-all duration-200 hover:bg-gray-100 hover:shadow-sm"
+                className="flex flex-col items-center p-3 rounded-xl transition-all duration-200 hover:bg-surface hover:shadow-sm"
                 style={{
                   color: currentColors.textSecondary,
                   backgroundColor: 'transparent',
@@ -699,7 +699,7 @@ export default function DesignSystemPOC() {
                 📋 List
               </button>
               <button
-                className="px-4 py-2 rounded-lg transition-all duration-200 hover:bg-gray-100"
+                className="px-4 py-2 rounded-lg transition-all duration-200 hover:bg-surface"
                 style={{
                   color: currentColors.textSecondary,
                   backgroundColor: 'transparent',
@@ -799,7 +799,7 @@ export default function DesignSystemPOC() {
                       </span>
                       <button
                         onClick={() => removeFromRanking(rank - 1)}
-                        className="text-red-500 hover:text-red-700 transition-colors"
+                        className="text-destructive hover:text-red-700 transition-colors"
                       >
                         ✕
                       </button>

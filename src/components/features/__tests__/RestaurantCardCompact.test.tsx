@@ -63,8 +63,10 @@ describe('RestaurantCardCompact', () => {
       />
     );
 
-    expect(screen.getByText('View')).toBeInTheDocument();
-    expect(screen.getByText('Manage')).toBeInTheDocument();
+    expect(
+      screen.getByLabelText('View restaurant details')
+    ).toBeInTheDocument();
+    expect(screen.getByLabelText('Manage restaurant')).toBeInTheDocument();
   });
 
   it('calls onViewDetails when View button is clicked', () => {
@@ -76,7 +78,7 @@ describe('RestaurantCardCompact', () => {
       />
     );
 
-    const viewButton = screen.getByText('View');
+    const viewButton = screen.getByLabelText('View restaurant details');
     fireEvent.click(viewButton);
 
     expect(mockOnViewDetails).toHaveBeenCalledWith(mockRestaurant);
@@ -91,7 +93,7 @@ describe('RestaurantCardCompact', () => {
       />
     );
 
-    const manageButton = screen.getByText('Manage');
+    const manageButton = screen.getByLabelText('Manage restaurant');
     fireEvent.click(manageButton);
 
     expect(mockOnManageRestaurant).toHaveBeenCalledWith(mockRestaurant);
@@ -124,7 +126,11 @@ describe('RestaurantCardCompact', () => {
   it('renders without action buttons when callbacks are not provided', () => {
     render(<RestaurantCardCompact restaurant={mockRestaurant} />);
 
-    expect(screen.queryByText('View')).not.toBeInTheDocument();
-    expect(screen.queryByText('Manage')).not.toBeInTheDocument();
+    expect(
+      screen.queryByLabelText('View restaurant details')
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByLabelText('Manage restaurant')
+    ).not.toBeInTheDocument();
   });
 });

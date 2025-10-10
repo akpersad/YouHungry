@@ -247,7 +247,7 @@ export function ManualDecisionForm({ onSuccess }: ManualDecisionFormProps) {
       {type === 'group' && (
         <div>
           <label className="block text-sm font-medium text-primary mb-2">
-            Group <span className="text-red-500">*</span>
+            Group <span className="text-destructive">*</span>
           </label>
           <select
             value={groupId}
@@ -271,7 +271,7 @@ export function ManualDecisionForm({ onSuccess }: ManualDecisionFormProps) {
       {/* Restaurant Selection */}
       <div>
         <label className="block text-sm font-medium text-primary mb-2">
-          Restaurant <span className="text-red-500">*</span>
+          Restaurant <span className="text-destructive">*</span>
         </label>
         <select
           value={restaurantId}

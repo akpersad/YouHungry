@@ -406,10 +406,10 @@ export function RestaurantSearchPage({
 
       {/* Error Message */}
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-md p-4">
+        <div className="bg-destructive/10 border border-destructive rounded-md p-4">
           <div className="flex">
             <div className="flex-shrink-0">
-              <span className="text-red-400">⚠️</span>
+              <span className="text-destructive">⚠️</span>
             </div>
             <div className="ml-3">
               <h3 className="text-sm font-medium text-red-800">Search Error</h3>
@@ -439,35 +439,37 @@ export function RestaurantSearchPage({
       >
         {selectedRestaurant && (
           <div className="space-y-4">
-            <div className="p-4 bg-gray-50 rounded-lg">
-              <h3 className="font-medium text-gray-900">
+            <div className="p-4 bg-surface rounded-lg">
+              <h3 className="font-medium text-text">
                 {selectedRestaurant.name}
               </h3>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-text-light">
                 {selectedRestaurant.cuisine}
               </p>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-text-light">
                 {selectedRestaurant.address}
               </p>
             </div>
 
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-text">
                 Select Collection
               </label>
               {!isLoaded ? (
                 <div className="flex items-center justify-center py-4">
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-                  <span className="ml-2 text-sm text-gray-600">Loading...</span>
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                  <span className="ml-2 text-sm text-text-light">
+                    Loading...
+                  </span>
                 </div>
               ) : !user ? (
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-text-light">
                   Please sign in to add restaurants to collections.
                 </p>
               ) : isLoadingCollections ? (
                 <div className="flex items-center justify-center py-4">
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-                  <span className="ml-2 text-sm text-gray-600">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                  <span className="ml-2 text-sm text-text-light">
                     Loading collections...
                   </span>
                 </div>
@@ -498,14 +500,14 @@ export function RestaurantSearchPage({
                           disabled={isAlreadyInCollection}
                           className={`w-full text-left p-3 border rounded-lg transition-colors ${
                             isAlreadyInCollection
-                              ? 'border-green-300 bg-green-50 text-green-700 cursor-not-allowed'
-                              : 'border-gray-200 hover:bg-gray-50 cursor-pointer'
+                              ? 'border-success bg-success/10 text-green-700 cursor-not-allowed'
+                              : 'border-border hover:bg-surface cursor-pointer'
                           }`}
                         >
                           <div className="flex items-center justify-between">
                             <span>{collection.name}</span>
                             {isAlreadyInCollection && (
-                              <span className="text-green-600 font-medium">
+                              <span className="text-success font-medium">
                                 ✓ Added
                               </span>
                             )}
@@ -520,7 +522,7 @@ export function RestaurantSearchPage({
                     <select
                       value={selectedCollectionId}
                       onChange={(e) => setSelectedCollectionId(e.target.value)}
-                      className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full p-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
                     >
                       <option value="">Select a collection...</option>
                       {effectiveCollections
@@ -544,7 +546,7 @@ export function RestaurantSearchPage({
                         collection._id.toString()
                       )
                     ) && (
-                      <div className="text-sm text-green-600 bg-green-50 border border-green-200 rounded-lg p-2">
+                      <div className="text-sm text-success bg-success/10 border border-green-200 rounded-lg p-2">
                         <div className="font-medium mb-1">
                           Already in collections:
                         </div>
@@ -560,7 +562,7 @@ export function RestaurantSearchPage({
                                 key={collection._id.toString()}
                                 className="flex items-center"
                               >
-                                <span className="text-green-600 mr-2">✓</span>
+                                <span className="text-success mr-2">✓</span>
                                 <span>{collection.name}</span>
                               </div>
                             ))}
@@ -584,7 +586,7 @@ export function RestaurantSearchPage({
                   </div>
                 )
               ) : (
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-text-light">
                   No collections available. Create a collection first.
                 </p>
               )}
@@ -609,44 +611,44 @@ export function RestaurantSearchPage({
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
-                <span className="font-medium text-gray-700">Cuisine:</span>
-                <p className="text-gray-600">{selectedRestaurant.cuisine}</p>
+                <span className="font-medium text-text">Cuisine:</span>
+                <p className="text-text-light">{selectedRestaurant.cuisine}</p>
               </div>
               <div>
-                <span className="font-medium text-gray-700">Rating:</span>
-                <p className="text-gray-600">
+                <span className="font-medium text-text">Rating:</span>
+                <p className="text-text-light">
                   {selectedRestaurant.rating > 0
                     ? selectedRestaurant.rating.toFixed(1)
                     : 'No rating'}
                 </p>
               </div>
               <div>
-                <span className="font-medium text-gray-700">Price Range:</span>
-                <p className="text-gray-600">
+                <span className="font-medium text-text">Price Range:</span>
+                <p className="text-text-light">
                   {selectedRestaurant.priceRange || 'Not available'}
                 </p>
               </div>
               <div>
-                <span className="font-medium text-gray-700">Phone:</span>
-                <p className="text-gray-600">
+                <span className="font-medium text-text">Phone:</span>
+                <p className="text-text-light">
                   {selectedRestaurant.phoneNumber || 'Not available'}
                 </p>
               </div>
             </div>
 
             <div>
-              <span className="font-medium text-gray-700">Address:</span>
-              <p className="text-gray-600">{selectedRestaurant.address}</p>
+              <span className="font-medium text-text">Address:</span>
+              <p className="text-text-light">{selectedRestaurant.address}</p>
             </div>
 
             {selectedRestaurant.website && (
               <div>
-                <span className="font-medium text-gray-700">Website:</span>
+                <span className="font-medium text-text">Website:</span>
                 <a
                   href={selectedRestaurant.website}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-600 hover:text-blue-800 ml-2"
+                  className="text-primary hover:text-blue-800 ml-2"
                 >
                   Visit Website
                 </a>
@@ -655,11 +657,11 @@ export function RestaurantSearchPage({
 
             {selectedRestaurant.hours && (
               <div>
-                <span className="font-medium text-gray-700">Hours:</span>
+                <span className="font-medium text-text">Hours:</span>
                 <div className="mt-1 space-y-1">
                   {Object.entries(selectedRestaurant.hours).map(
                     ([day, hours]) => (
-                      <p key={day} className="text-sm text-gray-600">
+                      <p key={day} className="text-sm text-text-light">
                         {day}: {hours}
                       </p>
                     )

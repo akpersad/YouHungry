@@ -187,10 +187,10 @@ export function DatePicker({
       {label && (
         <label
           htmlFor={id}
-          className="block text-sm font-medium text-gray-700 mb-2"
+          className="block text-sm font-medium text-text mb-2"
         >
           {label}
-          {required && <span className="text-red-500 ml-1">*</span>}
+          {required && <span className="text-destructive ml-1">*</span>}
         </label>
       )}
 
@@ -207,34 +207,34 @@ export function DatePicker({
           disabled={disabled}
           required={required}
           className={cn(
-            'w-full px-3 py-2 pr-10 border border-gray-300 rounded-md',
-            'focus:outline-none focus:ring-2 focus:ring-blue-500',
-            'disabled:bg-gray-100 disabled:cursor-not-allowed',
+            'w-full px-3 py-2 pr-10 border border-border rounded-md',
+            'focus:outline-none focus:ring-2 focus:ring-primary',
+            'disabled:bg-surface disabled:cursor-not-allowed',
             'cursor-pointer',
-            error && 'border-red-500 focus:ring-red-500'
+            error && 'border-destructive focus:ring-destructive'
           )}
           readOnly
         />
 
         <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-          <Calendar className="h-4 w-4 text-gray-400" />
+          <Calendar className="h-4 w-4 text-text-light" />
         </div>
       </div>
 
       {error && (
-        <p className="mt-1 text-sm text-red-600" role="alert">
+        <p className="mt-1 text-sm text-destructive" role="alert">
           {error}
         </p>
       )}
 
       {isOpen && (
-        <div className="absolute z-50 mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg">
+        <div className="absolute z-50 mt-1 w-full bg-white border border-border rounded-md shadow-lg">
           {/* Calendar Header */}
           <div className="flex items-center justify-between p-3 border-b">
             <button
               type="button"
               onClick={() => navigateMonth('prev')}
-              className="p-1 hover:bg-gray-100 rounded"
+              className="p-1 hover:bg-surface rounded"
             >
               <svg
                 className="w-4 h-4"
@@ -251,14 +251,14 @@ export function DatePicker({
               </svg>
             </button>
 
-            <h3 className="text-sm font-medium text-gray-900">
+            <h3 className="text-sm font-medium text-text">
               {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
             </h3>
 
             <button
               type="button"
               onClick={() => navigateMonth('next')}
-              className="p-1 hover:bg-gray-100 rounded"
+              className="p-1 hover:bg-surface rounded"
             >
               <svg
                 className="w-4 h-4"
@@ -283,7 +283,7 @@ export function DatePicker({
               {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map((day) => (
                 <div
                   key={day}
-                  className="text-xs text-gray-500 text-center py-1"
+                  className="text-xs text-text-light text-center py-1"
                 >
                   {day}
                 </div>
@@ -299,10 +299,10 @@ export function DatePicker({
                   onClick={() => handleDateSelect(day.date)}
                   disabled={day.isPast}
                   className={cn(
-                    'text-xs py-2 px-1 rounded hover:bg-gray-100',
+                    'text-xs py-2 px-1 rounded hover:bg-surface',
                     'disabled:opacity-50 disabled:cursor-not-allowed',
-                    day.isCurrentMonth ? 'text-gray-900' : 'text-gray-400',
-                    day.isToday && 'bg-blue-100 text-blue-900 font-medium',
+                    day.isCurrentMonth ? 'text-text' : 'text-text-light',
+                    day.isToday && 'bg-primary/10 text-blue-900 font-medium',
                     day.isSelected &&
                       'bg-blue-600 text-white hover:bg-blue-700',
                     !day.isCurrentMonth && 'hover:bg-transparent'
@@ -315,15 +315,15 @@ export function DatePicker({
           </div>
 
           {/* Time picker */}
-          <div className="p-3 border-t bg-gray-50">
+          <div className="p-3 border-t bg-surface">
             <div className="flex items-center gap-2">
-              <Clock className="h-4 w-4 text-gray-400" />
-              <label className="text-sm font-medium text-gray-700">Time:</label>
+              <Clock className="h-4 w-4 text-text-light" />
+              <label className="text-sm font-medium text-text">Time:</label>
               <input
                 type="time"
                 value={selectedTime}
                 onChange={(e) => handleTimeChange(e.target.value)}
-                className="px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="px-2 py-1 text-sm border border-border rounded focus:outline-none focus:ring-1 focus:ring-primary"
               />
             </div>
           </div>

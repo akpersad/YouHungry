@@ -47,7 +47,7 @@ export function RestaurantImage({
   if (!src || imageError) {
     return (
       <div
-        className={`${className} bg-gray-200 flex items-center justify-center text-2xl`}
+        className={`${className} bg-surface flex items-center justify-center text-2xl`}
         title={alt}
       >
         {icon}
@@ -59,7 +59,7 @@ export function RestaurantImage({
     <div className={`relative ${className}`}>
       {!imageLoaded && !imageError && (
         <div
-          className={`absolute inset-0 bg-gray-200 flex items-center justify-center text-2xl animate-pulse`}
+          className={`absolute inset-0 bg-surface flex items-center justify-center text-2xl animate-pulse`}
         >
           {icon}
         </div>

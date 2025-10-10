@@ -46,7 +46,7 @@ export function NotificationBell({
     <button
       onClick={onClick}
       className={cn(
-        'relative inline-flex items-center justify-center rounded-full p-1.5 transition-colors hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2',
+        'relative inline-flex items-center justify-center rounded-full p-1.5 transition-colors hover:bg-surface focus:outline-none focus:ring-2 focus:ring-destructive focus:ring-offset-2',
         className
       )}
       aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ''}`}
@@ -55,12 +55,12 @@ export function NotificationBell({
         <BellRing
           className={cn(
             sizeClasses[size],
-            'text-red-500',
+            'text-destructive',
             isAnimating && 'animate-pulse'
           )}
         />
       ) : (
-        <Bell className={cn(sizeClasses[size], 'text-gray-600')} />
+        <Bell className={cn(sizeClasses[size], 'text-text-light')} />
       )}
 
       {unreadCount > 0 && (
@@ -76,7 +76,7 @@ export function NotificationBell({
       )}
 
       {isLoading && (
-        <span className="absolute -top-1 -right-1 h-3 w-3 animate-spin rounded-full border-2 border-gray-300 border-t-red-500" />
+        <span className="absolute -top-1 -right-1 h-3 w-3 animate-spin rounded-full border-2 border-border border-t-red-500" />
       )}
     </button>
   );

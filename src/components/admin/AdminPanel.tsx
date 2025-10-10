@@ -50,17 +50,17 @@ export function AdminPanel() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-surface">
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Admin Panel</h1>
-              <p className="text-sm text-gray-600">
+              <h1 className="text-2xl font-bold text-text">Admin Panel</h1>
+              <p className="text-sm text-text-light">
                 System administration and monitoring
               </p>
             </div>
-            <div className="text-sm text-gray-500">
+            <div className="text-sm text-text-light">
               You Hungry? Admin Dashboard
             </div>
           </div>

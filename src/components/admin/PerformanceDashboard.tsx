@@ -150,11 +150,11 @@ export function PerformanceDashboard() {
   const getTrendIcon = (trend: string) => {
     switch (trend) {
       case 'improvement':
-        return <TrendingUp className="h-4 w-4 text-green-600" />;
+        return <TrendingUp className="h-4 w-4 text-success" />;
       case 'degradation':
-        return <TrendingDown className="h-4 w-4 text-red-600" />;
+        return <TrendingDown className="h-4 w-4 text-destructive" />;
       default:
-        return <Minus className="h-4 w-4 text-gray-600" />;
+        return <Minus className="h-4 w-4 text-text-light" />;
     }
   };
 
@@ -214,7 +214,7 @@ export function PerformanceDashboard() {
 
   if (error) {
     return (
-      <Card className="border-red-200 bg-red-50">
+      <Card className="border-destructive bg-destructive/10">
         <CardHeader>
           <CardTitle className="text-red-800 flex items-center">
             <AlertTriangle className="h-5 w-5 mr-2" />
@@ -413,22 +413,22 @@ export function PerformanceDashboard() {
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
               <div className="text-center">
-                <div className="text-2xl font-bold text-green-600">
+                <div className="text-2xl font-bold text-success">
                   {comparison.summary.improvements}
                 </div>
-                <div className="text-sm text-gray-600">Improvements</div>
+                <div className="text-sm text-text-light">Improvements</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-red-600">
+                <div className="text-2xl font-bold text-destructive">
                   {comparison.summary.degradations}
                 </div>
-                <div className="text-sm text-gray-600">Degradations</div>
+                <div className="text-sm text-text-light">Degradations</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-gray-600">
+                <div className="text-2xl font-bold text-text-light">
                   {comparison.summary.neutral}
                 </div>
-                <div className="text-sm text-gray-600">No Change</div>
+                <div className="text-sm text-text-light">No Change</div>
               </div>
             </div>
 
@@ -464,7 +464,7 @@ export function PerformanceDashboard() {
                         return (
                           <div
                             key={metric}
-                            className="flex items-center justify-between p-2 bg-gray-50 rounded"
+                            className="flex items-center justify-between p-2 bg-surface rounded"
                           >
                             <span className="text-sm font-medium">
                               {formatMetricName(metric)}
@@ -498,23 +498,25 @@ export function PerformanceDashboard() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
               <div>
                 <div className="font-medium">Platform</div>
-                <div className="text-gray-600">
+                <div className="text-text-light">
                   {latestMetrics.system.platform}
                 </div>
               </div>
               <div>
                 <div className="font-medium">Architecture</div>
-                <div className="text-gray-600">{latestMetrics.system.arch}</div>
+                <div className="text-text-light">
+                  {latestMetrics.system.arch}
+                </div>
               </div>
               <div>
                 <div className="font-medium">Node Version</div>
-                <div className="text-gray-600">
+                <div className="text-text-light">
                   {latestMetrics.system.nodeVersion}
                 </div>
               </div>
               <div>
                 <div className="font-medium">Memory Usage</div>
-                <div className="text-gray-600">
+                <div className="text-text-light">
                   {typeof latestMetrics.system.memoryUsage === 'object'
                     ? `${Math.round(latestMetrics.system.memoryUsage.heapUsed / 1024 / 1024)}MB`
                     : `${latestMetrics.system.memoryUsage}MB`}

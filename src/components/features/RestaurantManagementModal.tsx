@@ -118,21 +118,21 @@ export function RestaurantManagementModal({
             />
           </div>
           <div className="flex-1">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            <h3 className="text-lg font-semibold text-text dark:text-white">
               {restaurant.name}
             </h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
+            <p className="text-sm text-text-light dark:text-text-light">
               {restaurant.cuisine} • {restaurant.rating}⭐
             </p>
-            <p className="text-sm text-gray-500 dark:text-gray-500">
+            <p className="text-sm text-text-light dark:text-text-light">
               {restaurant.address}
             </p>
           </div>
         </div>
 
         {/* Collection Info */}
-        <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+        <div className="bg-surface dark:bg-background rounded-lg p-3">
+          <p className="text-sm text-text-light dark:text-text-light">
             <span className="font-medium">Collection:</span> {collection.name}
           </p>
         </div>
@@ -142,7 +142,7 @@ export function RestaurantManagementModal({
           <div>
             <label
               htmlFor="priceRange"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              className="block text-sm font-medium text-text dark:text-text-light mb-1"
             >
               Price Range
             </label>
@@ -150,7 +150,7 @@ export function RestaurantManagementModal({
               id="priceRange"
               value={priceRange}
               onChange={(e) => setPriceRange(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+              className="w-full px-3 py-2 border border-border dark:border-border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary dark:bg-surface dark:text-white"
             >
               {priceRangeOptions.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -163,7 +163,7 @@ export function RestaurantManagementModal({
           <div>
             <label
               htmlFor="timeToPickUp"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              className="block text-sm font-medium text-text dark:text-text-light mb-1"
             >
               Time to Pick Up (minutes)
             </label>
@@ -180,13 +180,15 @@ export function RestaurantManagementModal({
 
         {/* Error Message */}
         {error && (
-          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md p-3">
-            <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+          <div className="bg-destructive/10 dark:bg-destructive/20/20 border border-destructive dark:border-destructive rounded-md p-3">
+            <p className="text-sm text-destructive dark:text-destructive">
+              {error}
+            </p>
           </div>
         )}
 
         {/* Action Buttons */}
-        <div className="flex gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+        <div className="flex gap-3 pt-4 border-t border-border dark:border-border">
           <Button onClick={handleSave} disabled={isLoading} className="flex-1">
             {isLoading ? 'Saving...' : 'Save Changes'}
           </Button>
@@ -194,7 +196,7 @@ export function RestaurantManagementModal({
             onClick={handleRemove}
             variant="outline"
             disabled={isLoading}
-            className="text-red-600 border-red-300 hover:bg-red-50 dark:text-red-400 dark:border-red-600 dark:hover:bg-red-900/20"
+            className="text-destructive border-destructive hover:bg-destructive/10 dark:text-destructive dark:border-destructive dark:hover:bg-destructive/20/20"
           >
             Remove from Collection
           </Button>

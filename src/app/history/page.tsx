@@ -99,7 +99,7 @@ export default function HistoryPage() {
           {/* Search and View Toggle */}
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-text-light" />
               <Input
                 type="text"
                 placeholder="Search restaurants, collections, or groups..."
@@ -258,14 +258,14 @@ export default function HistoryPage() {
           </Card>
         ) : error ? (
           <Card className="p-8">
-            <div className="text-center text-red-600">
+            <div className="text-center text-destructive">
               Error loading history: {(error as Error).message}
             </div>
           </Card>
         ) : !data?.decisions?.length ? (
           <Card className="p-8">
             <div className="text-center text-tertiary">
-              <Calendar className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+              <Calendar className="w-16 h-16 mx-auto mb-4 text-text-light" />
               <p className="text-lg font-medium mb-2">No decisions found</p>
               <p className="text-sm">
                 {search || filters.type !== 'all' || filters.startDate
@@ -326,7 +326,7 @@ export default function HistoryPage() {
 
                       {decision.result?.restaurant?.cuisine && (
                         <div className="flex items-center gap-2">
-                          <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs">
+                          <span className="px-2 py-1 bg-primary/10 text-primary rounded-full text-xs">
                             {decision.result.restaurant.cuisine}
                           </span>
                           {decision.result.restaurant.rating && (
@@ -335,7 +335,7 @@ export default function HistoryPage() {
                             </span>
                           )}
                           {decision.result.restaurant.priceRange && (
-                            <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs">
+                            <span className="px-2 py-1 bg-success/10 text-green-700 rounded-full text-xs">
                               {decision.result.restaurant.priceRange}
                             </span>
                           )}

@@ -42,7 +42,7 @@ export function GroupList({
       <div className="text-center py-8">
         <div className="text-tertiary mb-4">
           <svg
-            className="mx-auto h-12 w-12 text-gray-400"
+            className="mx-auto h-12 w-12 text-text-light"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -82,7 +82,7 @@ export function GroupList({
                 <h3 className="text-lg font-semibold text-primary">
                   {group.name}
                 </h3>
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-blue-800">
                   {group.memberIds.length} member
                   {group.memberIds.length !== 1 ? 's' : ''}
                 </span>
@@ -99,7 +99,7 @@ export function GroupList({
                   {group.collectionIds.length} collection
                   {group.collectionIds.length !== 1 ? 's' : ''}
                 </span>
-                <span className="text-gray-300">•</span>
+                <span className="text-text-light">•</span>
                 <span className="text-sm text-tertiary">
                   Created {new Date(group.createdAt).toLocaleDateString()}
                 </span>

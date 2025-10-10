@@ -511,14 +511,10 @@ export default function ProfilePage() {
                 </div>
                 <div>
                   <Label htmlFor="username">Username</Label>
-                  <Input
-                    id="username"
-                    value={formData.username}
-                    onChange={(e) =>
-                      handleInputChange('username', e.target.value)
-                    }
-                    placeholder="Enter your username"
-                  />
+                  <Input id="username" value={formData.username} disabled />
+                  <p className="text-sm text-tertiary mt-1">
+                    Username is managed through your Clerk account.
+                  </p>
                 </div>
               </div>
               <div>
@@ -631,7 +627,7 @@ export default function ProfilePage() {
                       )
                     ) : (
                       /* Show verified badge if number matches profile */
-                      <div className="flex items-center text-green-600 font-medium px-4">
+                      <div className="flex items-center text-success font-medium px-4">
                         <Check className="h-5 w-5 mr-2" />
                         Verified
                       </div>
@@ -641,7 +637,7 @@ export default function ProfilePage() {
                   {/* Show verification code input when pending or verifying */}
                   {(phoneValidationStatus === 'pending' ||
                     phoneValidationStatus === 'verifying') && (
-                    <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div className="mt-4 p-4 bg-primary/10 border border-primary rounded-lg">
                       <Label htmlFor="verificationCode">
                         Verification Code
                       </Label>
@@ -690,7 +686,7 @@ export default function ProfilePage() {
                         </Button>
                       </div>
                       <div className="flex justify-between items-center mt-2">
-                        <p className="text-sm text-blue-600">
+                        <p className="text-sm text-primary">
                           Enter the 6-digit code sent to your phone.
                         </p>
                         <Button
@@ -709,7 +705,7 @@ export default function ProfilePage() {
                   )}
 
                   {phoneValidationError && (
-                    <p className="text-sm text-red-500 mt-1">
+                    <p className="text-sm text-destructive mt-1">
                       {phoneValidationError}
                     </p>
                   )}
@@ -780,7 +776,7 @@ export default function ProfilePage() {
                         Pending
                       </div>
                     ) : phoneValidationStatus === 'verified' ? (
-                      <div className="flex items-center text-green-600 font-medium px-4">
+                      <div className="flex items-center text-success font-medium px-4">
                         <Check className="h-5 w-5 mr-2" />
                         Verified
                       </div>
@@ -809,7 +805,7 @@ export default function ProfilePage() {
                   {/* Show verification code input when pending or verifying */}
                   {(phoneValidationStatus === 'pending' ||
                     phoneValidationStatus === 'verifying') && (
-                    <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div className="mt-4 p-4 bg-primary/10 border border-primary rounded-lg">
                       <Label htmlFor="verificationCodeSMS">
                         Verification Code
                       </Label>
@@ -858,7 +854,7 @@ export default function ProfilePage() {
                         </Button>
                       </div>
                       <div className="flex justify-between items-center mt-2">
-                        <p className="text-sm text-blue-600">
+                        <p className="text-sm text-primary">
                           Enter the 6-digit code sent to your phone.
                         </p>
                         <Button
@@ -877,12 +873,12 @@ export default function ProfilePage() {
                   )}
 
                   {phoneValidationError && (
-                    <p className="text-sm text-red-500 mt-1">
+                    <p className="text-sm text-destructive mt-1">
                       {phoneValidationError}
                     </p>
                   )}
                   {phoneValidationStatus === 'verified' && (
-                    <p className="text-sm text-green-600 mt-1">
+                    <p className="text-sm text-success mt-1">
                       ✓ Phone number verified and updated automatically!
                     </p>
                   )}
@@ -1083,7 +1079,7 @@ export default function ProfilePage() {
           </div>
           {formData.defaultLocation && !isDefaultLocationValid && (
             <div className="flex justify-end mt-2">
-              <p className="text-sm text-red-600">
+              <p className="text-sm text-destructive">
                 Please enter a valid address for your default location.
               </p>
             </div>

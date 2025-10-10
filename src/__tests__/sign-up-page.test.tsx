@@ -120,7 +120,7 @@ describe('SignUpPage', () => {
       'btn-base btn-outline'
     );
     expect(config.elements.formFieldInput).toBe('input-base');
-    expect(config.elements.formFieldSuccessText).toBe('text-sm text-green-600');
+    expect(config.elements.formFieldSuccessText).toBe('text-sm text-success');
 
     expect(config.variables).toBeDefined();
     expect(config.variables.colorPrimary).toBe('var(--color-primary)');
@@ -147,13 +147,13 @@ describe('SignUpPage', () => {
       .getByText('📱 SMS Notifications (Optional)')
       .closest('div');
     expect(smsInfo).toHaveClass(
-      'bg-blue-50',
-      'dark:bg-blue-900/20',
+      'bg-primary/10',
+      'dark:bg-primary/20/20',
       'rounded-lg',
       'p-4',
       'border',
-      'border-blue-200',
-      'dark:border-blue-800'
+      'border-primary',
+      'dark:border-primary'
     );
   });
 });

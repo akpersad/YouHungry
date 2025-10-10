@@ -50,7 +50,7 @@ describe('AdminNav', () => {
     const costsButton = screen.getByText('Cost Monitoring');
     expect(costsButton.closest('button')).toHaveClass(
       'border-transparent',
-      'text-gray-500'
+      'text-text-light'
     );
   });
 
@@ -110,8 +110,8 @@ describe('AdminNav', () => {
 
     const costsButton = screen.getByText('Cost Monitoring');
     expect(costsButton.closest('button')).toHaveClass(
-      'hover:text-gray-700',
-      'hover:border-gray-300'
+      'hover:text-text',
+      'hover:border-border'
     );
   });
 
@@ -173,7 +173,7 @@ describe('AdminNav', () => {
     analyticsButton = screen.getByText('Analytics');
     expect(analyticsButton.closest('button')).toHaveClass(
       'border-transparent',
-      'text-gray-500'
+      'text-text-light'
     );
   });
 });

@@ -66,13 +66,15 @@ export function DecisionResultModal({
 
               <div className="flex-1 space-y-3">
                 <div>
-                  <h3 className="text-xl font-semibold text-gray-900">
+                  <h3 className="text-xl font-semibold text-text">
                     {selectedRestaurant.name}
                   </h3>
-                  <p className="text-gray-600">{selectedRestaurant.address}</p>
+                  <p className="text-text-light">
+                    {selectedRestaurant.address}
+                  </p>
                 </div>
 
-                <div className="flex flex-wrap gap-4 text-sm text-gray-600">
+                <div className="flex flex-wrap gap-4 text-sm text-text-light">
                   <div className="flex items-center gap-1">
                     <span className="font-medium">Rating:</span>
                     <span className="text-yellow-600">
@@ -107,17 +109,15 @@ export function DecisionResultModal({
         </Card>
 
         {/* Visit Date */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div className="bg-primary/10 border border-primary rounded-lg p-4">
           <h4 className="font-medium text-blue-900 mb-2">Planned Visit</h4>
           <p className="text-blue-800">{formatVisitDate(visitDate)}</p>
         </div>
 
         {/* Reasoning */}
-        <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-          <h4 className="font-medium text-gray-900 mb-2">
-            Selection Reasoning
-          </h4>
-          <p className="text-gray-700 text-sm">{reasoning}</p>
+        <div className="bg-surface border border-border rounded-lg p-4">
+          <h4 className="font-medium text-text mb-2">Selection Reasoning</h4>
+          <p className="text-text text-sm">{reasoning}</p>
         </div>
 
         {/* Action Buttons */}

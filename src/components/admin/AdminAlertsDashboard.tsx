@@ -241,15 +241,15 @@ export function AdminAlertsDashboard() {
   const getSeverityColor = (severity: string) => {
     switch (severity) {
       case 'critical':
-        return 'text-red-600 bg-red-100';
+        return 'text-destructive bg-destructive/10';
       case 'high':
         return 'text-orange-600 bg-orange-100';
       case 'medium':
         return 'text-yellow-600 bg-yellow-100';
       case 'low':
-        return 'text-blue-600 bg-blue-100';
+        return 'text-primary bg-primary/10';
       default:
-        return 'text-gray-600 bg-gray-100';
+        return 'text-text-light bg-surface';
     }
   };
 
@@ -276,11 +276,11 @@ export function AdminAlertsDashboard() {
     return (
       <div className="p-6">
         <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded w-1/4 mb-6"></div>
+          <div className="h-8 bg-surface rounded w-1/4 mb-6"></div>
           <div className="space-y-4">
-            <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-            <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-            <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+            <div className="h-4 bg-surface rounded w-3/4"></div>
+            <div className="h-4 bg-surface rounded w-1/2"></div>
+            <div className="h-4 bg-surface rounded w-2/3"></div>
           </div>
         </div>
       </div>
@@ -290,11 +290,11 @@ export function AdminAlertsDashboard() {
   if (error) {
     return (
       <div className="p-6">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+        <div className="bg-destructive/10 border border-destructive rounded-lg p-4">
           <div className="flex">
             <div className="flex-shrink-0">
               <svg
-                className="h-5 w-5 text-red-400"
+                className="h-5 w-5 text-destructive"
                 viewBox="0 0 20 20"
                 fill="currentColor"
               >
@@ -313,7 +313,7 @@ export function AdminAlertsDashboard() {
               <div className="mt-4">
                 <button
                   onClick={() => fetchAlerts(activeFilter)}
-                  className="bg-red-100 px-3 py-2 rounded-md text-sm font-medium text-red-800 hover:bg-red-200"
+                  className="bg-destructive/10 px-3 py-2 rounded-md text-sm font-medium text-red-800 hover:bg-destructive/10"
                 >
                   Retry
                 </button>
@@ -329,15 +329,15 @@ export function AdminAlertsDashboard() {
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Admin Alerts</h2>
-          <p className="text-sm text-gray-600">
+          <h2 className="text-2xl font-bold text-text">Admin Alerts</h2>
+          <p className="text-sm text-text-light">
             Monitor system alerts and notifications
           </p>
         </div>
         <div className="flex space-x-3">
           <button
             onClick={validateEmailConfig}
-            className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+            className="px-4 py-2 border border-border rounded-md text-sm font-medium text-text hover:bg-surface"
           >
             Validate Email Config
           </button>
@@ -351,18 +351,18 @@ export function AdminAlertsDashboard() {
       </div>
 
       {/* Email Test Section */}
-      <div className="mb-6 bg-gray-50 rounded-lg p-4">
-        <h3 className="text-lg font-medium text-gray-900 mb-3">Email Test</h3>
+      <div className="mb-6 bg-surface rounded-lg p-4">
+        <h3 className="text-lg font-medium text-text mb-3">Email Test</h3>
         <div className="flex space-x-3 items-end">
           <div className="flex-1">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-text mb-1">
               Test Email Address
             </label>
             <input
               type="email"
               value={testEmail}
               onChange={(e) => setTestEmail(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-primary focus:border-primary"
               placeholder="akpersad@gmail.com"
             />
           </div>
@@ -379,8 +379,8 @@ export function AdminAlertsDashboard() {
             className={`mt-3 p-3 rounded-md text-sm ${
               emailTestResult.includes('successfully') ||
               emailTestResult.includes('valid')
-                ? 'bg-green-100 text-green-800'
-                : 'bg-red-100 text-red-800'
+                ? 'bg-success/10 text-green-800'
+                : 'bg-destructive/10 text-red-800'
             }`}
           >
             {emailTestResult}
@@ -392,44 +392,42 @@ export function AdminAlertsDashboard() {
       {stats && (
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 mb-6">
           <div className="bg-white rounded-lg shadow p-4">
-            <div className="text-2xl font-bold text-gray-900">
-              {stats.total}
-            </div>
-            <div className="text-sm text-gray-600">Total</div>
+            <div className="text-2xl font-bold text-text">{stats.total}</div>
+            <div className="text-sm text-text-light">Total</div>
           </div>
           <div className="bg-white rounded-lg shadow p-4">
-            <div className="text-2xl font-bold text-red-600">
+            <div className="text-2xl font-bold text-destructive">
               {stats.critical}
             </div>
-            <div className="text-sm text-gray-600">Critical</div>
+            <div className="text-sm text-text-light">Critical</div>
           </div>
           <div className="bg-white rounded-lg shadow p-4">
             <div className="text-2xl font-bold text-orange-600">
               {stats.high}
             </div>
-            <div className="text-sm text-gray-600">High</div>
+            <div className="text-sm text-text-light">High</div>
           </div>
           <div className="bg-white rounded-lg shadow p-4">
             <div className="text-2xl font-bold text-yellow-600">
               {stats.medium}
             </div>
-            <div className="text-sm text-gray-600">Medium</div>
+            <div className="text-sm text-text-light">Medium</div>
           </div>
           <div className="bg-white rounded-lg shadow p-4">
-            <div className="text-2xl font-bold text-blue-600">{stats.low}</div>
-            <div className="text-sm text-gray-600">Low</div>
+            <div className="text-2xl font-bold text-primary">{stats.low}</div>
+            <div className="text-sm text-text-light">Low</div>
           </div>
           <div className="bg-white rounded-lg shadow p-4">
             <div className="text-2xl font-bold text-purple-600">
               {stats.unacknowledged}
             </div>
-            <div className="text-sm text-gray-600">Unacknowledged</div>
+            <div className="text-sm text-text-light">Unacknowledged</div>
           </div>
           <div className="bg-white rounded-lg shadow p-4">
             <div className="text-2xl font-bold text-indigo-600">
               {stats.unresolved}
             </div>
-            <div className="text-sm text-gray-600">Unresolved</div>
+            <div className="text-sm text-text-light">Unresolved</div>
           </div>
         </div>
       )}
@@ -451,8 +449,8 @@ export function AdminAlertsDashboard() {
               onClick={() => setActiveFilter(filter.key)}
               className={`px-3 py-2 rounded-md text-sm font-medium ${
                 activeFilter === filter.key
-                  ? 'bg-blue-100 text-blue-700'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ? 'bg-primary/10 text-primary'
+                  : 'bg-surface text-text hover:bg-surface'
               }`}
             >
               {filter.label}
@@ -465,9 +463,9 @@ export function AdminAlertsDashboard() {
       <div className="bg-white rounded-lg shadow">
         {!alerts || alerts.length === 0 ? (
           <div className="p-8 text-center">
-            <div className="text-gray-500">
+            <div className="text-text-light">
               <svg
-                className="mx-auto h-12 w-12 text-gray-400"
+                className="mx-auto h-12 w-12 text-text-light"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -479,10 +477,8 @@ export function AdminAlertsDashboard() {
                   d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                 />
               </svg>
-              <h3 className="mt-2 text-sm font-medium text-gray-900">
-                No alerts
-              </h3>
-              <p className="mt-1 text-sm text-gray-500">
+              <h3 className="mt-2 text-sm font-medium text-text">No alerts</h3>
+              <p className="mt-1 text-sm text-text-light">
                 {activeFilter === 'all'
                   ? 'No alerts have been generated yet.'
                   : `No ${activeFilter} alerts found.`}
@@ -494,8 +490,8 @@ export function AdminAlertsDashboard() {
             {alerts.map((alert) => (
               <div
                 key={alert.id}
-                className={`p-4 hover:bg-gray-50 cursor-pointer ${
-                  selectedAlert?.id === alert.id ? 'bg-blue-50' : ''
+                className={`p-4 hover:bg-surface cursor-pointer ${
+                  selectedAlert?.id === alert.id ? 'bg-primary/10' : ''
                 }`}
                 onClick={() => setSelectedAlert(alert)}
               >
@@ -506,7 +502,7 @@ export function AdminAlertsDashboard() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center space-x-2">
-                        <h3 className="text-sm font-medium text-gray-900 truncate">
+                        <h3 className="text-sm font-medium text-text truncate">
                           {alert.title}
                         </h3>
                         <span
@@ -525,10 +521,10 @@ export function AdminAlertsDashboard() {
                           </span>
                         )}
                       </div>
-                      <p className="mt-1 text-sm text-gray-600 line-clamp-2">
+                      <p className="mt-1 text-sm text-text-light line-clamp-2">
                         {alert.message}
                       </p>
-                      <div className="mt-2 flex items-center space-x-4 text-xs text-gray-500">
+                      <div className="mt-2 flex items-center space-x-4 text-xs text-text-light">
                         <span>
                           {new Date(alert.timestamp).toLocaleString()}
                         </span>
@@ -548,7 +544,7 @@ export function AdminAlertsDashboard() {
                           e.stopPropagation();
                           acknowledgeAlert(alert.id);
                         }}
-                        className="px-3 py-1 text-xs font-medium text-blue-600 hover:text-blue-800"
+                        className="px-3 py-1 text-xs font-medium text-primary hover:text-blue-800"
                       >
                         Acknowledge
                       </button>
@@ -559,7 +555,7 @@ export function AdminAlertsDashboard() {
                           e.stopPropagation();
                           resolveAlert(alert.id);
                         }}
-                        className="px-3 py-1 text-xs font-medium text-green-600 hover:text-green-800"
+                        className="px-3 py-1 text-xs font-medium text-success hover:text-green-800"
                       >
                         Resolve
                       </button>
@@ -569,7 +565,7 @@ export function AdminAlertsDashboard() {
                         e.stopPropagation();
                         deleteAlert(alert.id);
                       }}
-                      className="px-3 py-1 text-xs font-medium text-red-600 hover:text-red-800"
+                      className="px-3 py-1 text-xs font-medium text-destructive hover:text-red-800"
                     >
                       Delete
                     </button>
@@ -583,15 +579,13 @@ export function AdminAlertsDashboard() {
 
       {/* Alert Details Modal */}
       {selectedAlert && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div className="fixed inset-0 bg-surface bg-opacity-50 overflow-y-auto h-full w-full z-50">
           <div className="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-medium text-gray-900">
-                Alert Details
-              </h3>
+              <h3 className="text-lg font-medium text-text">Alert Details</h3>
               <button
                 onClick={() => setSelectedAlert(null)}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-text-light hover:text-text-light"
               >
                 <svg
                   className="h-6 w-6"
@@ -615,7 +609,7 @@ export function AdminAlertsDashboard() {
                   <span className="text-2xl">
                     {getSeverityIcon(selectedAlert.severity)}
                   </span>
-                  <h4 className="text-lg font-medium text-gray-900">
+                  <h4 className="text-lg font-medium text-text">
                     {selectedAlert.title}
                   </h4>
                   <span
@@ -624,31 +618,31 @@ export function AdminAlertsDashboard() {
                     {selectedAlert.severity}
                   </span>
                 </div>
-                <p className="text-sm text-gray-600">{selectedAlert.message}</p>
+                <p className="text-sm text-text-light">
+                  {selectedAlert.message}
+                </p>
               </div>
 
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <span className="font-medium text-gray-700">Timestamp:</span>
-                  <p className="text-gray-600">
+                  <span className="font-medium text-text">Timestamp:</span>
+                  <p className="text-text-light">
                     {new Date(selectedAlert.timestamp).toLocaleString()}
                   </p>
                 </div>
                 <div>
-                  <span className="font-medium text-gray-700">Type:</span>
-                  <p className="text-gray-600">{selectedAlert.type}</p>
+                  <span className="font-medium text-text">Type:</span>
+                  <p className="text-text-light">{selectedAlert.type}</p>
                 </div>
                 <div>
-                  <span className="font-medium text-gray-700">
-                    Acknowledged:
-                  </span>
-                  <p className="text-gray-600">
+                  <span className="font-medium text-text">Acknowledged:</span>
+                  <p className="text-text-light">
                     {selectedAlert.acknowledged ? 'Yes' : 'No'}
                   </p>
                 </div>
                 <div>
-                  <span className="font-medium text-gray-700">Resolved:</span>
-                  <p className="text-gray-600">
+                  <span className="font-medium text-text">Resolved:</span>
+                  <p className="text-text-light">
                     {selectedAlert.resolved ? 'Yes' : 'No'}
                   </p>
                 </div>
@@ -657,10 +651,10 @@ export function AdminAlertsDashboard() {
               {selectedAlert.affectedServices &&
                 selectedAlert.affectedServices.length > 0 && (
                   <div>
-                    <span className="font-medium text-gray-700">
+                    <span className="font-medium text-text">
                       Affected Services:
                     </span>
-                    <ul className="mt-1 text-sm text-gray-600">
+                    <ul className="mt-1 text-sm text-text-light">
                       {selectedAlert.affectedServices.map((service, index) => (
                         <li key={index}>• {service}</li>
                       ))}
@@ -671,10 +665,10 @@ export function AdminAlertsDashboard() {
               {selectedAlert.metadata &&
                 Object.keys(selectedAlert.metadata).length > 0 && (
                   <div>
-                    <span className="font-medium text-gray-700">
+                    <span className="font-medium text-text">
                       Additional Information:
                     </span>
-                    <div className="mt-1 text-sm text-gray-600">
+                    <div className="mt-1 text-sm text-text-light">
                       {Object.entries(selectedAlert.metadata).map(
                         ([key, value]) => (
                           <div key={key}>
@@ -689,10 +683,10 @@ export function AdminAlertsDashboard() {
               {selectedAlert.recommendedActions &&
                 selectedAlert.recommendedActions.length > 0 && (
                   <div>
-                    <span className="font-medium text-gray-700">
+                    <span className="font-medium text-text">
                       Recommended Actions:
                     </span>
-                    <ul className="mt-1 text-sm text-gray-600">
+                    <ul className="mt-1 text-sm text-text-light">
                       {selectedAlert.recommendedActions.map((action, index) => (
                         <li key={index}>• {action}</li>
                       ))}

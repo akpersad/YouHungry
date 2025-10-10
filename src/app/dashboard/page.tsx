@@ -92,9 +92,9 @@ export default function DashboardPage() {
                     >
                       <div className="flex-shrink-0 mt-1">
                         {decision.type === 'group' ? (
-                          <Users className="w-4 h-4 text-blue-600" />
+                          <Users className="w-4 h-4 text-primary" />
                         ) : (
-                          <User className="w-4 h-4 text-green-600" />
+                          <User className="w-4 h-4 text-success" />
                         )}
                       </div>
                       <div className="flex-1 min-w-0">

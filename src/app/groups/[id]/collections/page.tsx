@@ -60,11 +60,11 @@ export default function GroupCollectionsPage({
       <ProtectedRoute>
         <div className="max-w-4xl mx-auto">
           <div className="animate-pulse">
-            <div className="h-8 bg-gray-200 rounded w-1/3 mb-4"></div>
-            <div className="h-4 bg-gray-200 rounded w-2/3 mb-8"></div>
+            <div className="h-8 bg-surface rounded w-1/3 mb-4"></div>
+            <div className="h-4 bg-surface rounded w-2/3 mb-8"></div>
             <div className="space-y-4">
               {[...Array(3)].map((_, i) => (
-                <div key={i} className="h-24 bg-gray-200 rounded"></div>
+                <div key={i} className="h-24 bg-surface rounded"></div>
               ))}
             </div>
           </div>
@@ -130,7 +130,9 @@ export default function GroupCollectionsPage({
         {collectionsError ? (
           <Card className="p-6">
             <div className="text-center">
-              <p className="text-red-600 mb-4">Failed to load collections</p>
+              <p className="text-destructive mb-4">
+                Failed to load collections
+              </p>
               <Button
                 variant="secondary"
                 onClick={() => window.location.reload()}

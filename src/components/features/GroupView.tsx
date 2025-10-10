@@ -217,7 +217,7 @@ export function GroupView({
                     }
                     placeholder="Group description"
                     rows={3}
-                    className="w-full px-3 py-2 border border-quinary rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-quinary rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
                   />
                 </div>
                 <div className="flex space-x-2">
@@ -389,7 +389,7 @@ export function GroupView({
                         {member.name}
                       </span>
                       {isAdmin && (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 flex-shrink-0">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-blue-800 flex-shrink-0">
                           Admin
                         </span>
                       )}
@@ -460,7 +460,7 @@ export function GroupView({
                   className="flex items-start gap-3 p-3 border border-quaternary rounded-lg"
                 >
                   <div className="flex-shrink-0 mt-1">
-                    <Users className="w-4 h-4 text-blue-600" />
+                    <Users className="w-4 h-4 text-primary" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">

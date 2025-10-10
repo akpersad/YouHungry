@@ -109,7 +109,7 @@ export default function GroupsPage() {
         <div className="max-w-4xl mx-auto">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-text mb-4">Groups</h1>
-            <div className="bg-red-50 border border-red-200 rounded-md p-4">
+            <div className="bg-destructive/10 border border-destructive rounded-md p-4">
               <p className="text-red-800">
                 Failed to load groups. Please try again later.
               </p>
@@ -143,14 +143,14 @@ export default function GroupsPage() {
 
         {/* Tab Navigation */}
         <div className="mb-6">
-          <div className="border-b border-gray-200">
+          <div className="border-b border-border">
             <nav className="-mb-px flex space-x-8">
               <button
                 onClick={() => setActiveTab('groups')}
                 className={`py-2 px-1 border-b-2 font-medium text-sm ${
                   activeTab === 'groups'
                     ? 'border-primary text-primary'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    : 'border-transparent text-text-light hover:text-text hover:border-border'
                 }`}
               >
                 My Groups ({groups.length})
@@ -160,7 +160,7 @@ export default function GroupsPage() {
                 className={`py-2 px-1 border-b-2 font-medium text-sm ${
                   activeTab === 'invitations'
                     ? 'border-primary text-primary'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    : 'border-transparent text-text-light hover:text-text hover:border-border'
                 }`}
               >
                 Invitations ({groupInvitations.length})
