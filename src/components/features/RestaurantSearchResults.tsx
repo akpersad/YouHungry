@@ -8,6 +8,7 @@ import { RestaurantCardCompact } from './RestaurantCardCompact';
 import { LazyMapView } from './LazyMapView';
 import { ViewToggle, ViewType } from '@/components/ui/ViewToggle';
 import { Button } from '@/components/ui/Button';
+import { SortOption } from './RestaurantSearchPage';
 
 interface RestaurantSearchResultsProps {
   restaurants: Restaurant[];
@@ -18,6 +19,12 @@ interface RestaurantSearchResultsProps {
   hasMore?: boolean;
   searchQuery?: string;
   restaurantInCollections?: Set<string>;
+  sortBy?: SortOption;
+  onSortChange?: (sort: SortOption) => void;
+  currentPage?: number;
+  totalPages?: number;
+  onPageChange?: (page: number) => void;
+  totalResults?: number;
 }
 
 export function RestaurantSearchResults({
@@ -29,6 +36,12 @@ export function RestaurantSearchResults({
   hasMore = false,
   searchQuery,
   restaurantInCollections = new Set(),
+  sortBy = 'distance-asc',
+  onSortChange,
+  currentPage = 1,
+  totalPages = 1,
+  onPageChange,
+  totalResults = 0,
 }: RestaurantSearchResultsProps) {
   const [viewType, setViewType] = useState<ViewType>('list');
   const [mapSelectedRestaurant, setMapSelectedRestaurant] =
@@ -102,23 +115,60 @@ export function RestaurantSearchResults({
     );
   }
 
+  const sortOptions: { value: SortOption; label: string }[] = [
+    { value: 'distance-asc', label: 'Distance (closest first)' },
+    { value: 'name-asc', label: 'Name (A-Z)' },
+    { value: 'name-desc', label: 'Name (Z-A)' },
+    { value: 'price-asc', label: 'Price ($ to $$$$)' },
+    { value: 'price-desc', label: 'Price ($$$$ to $)' },
+  ];
+
   return (
     <div className="space-y-4">
       {/* Results Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4">
-          <h2 className="text-xl font-semibold text-text">
-            {searchQuery ? `Results for "${searchQuery}"` : 'Restaurants'}
-          </h2>
-          <span className="text-sm text-text-light">
-            {restaurants.length} restaurant{restaurants.length !== 1 ? 's' : ''}{' '}
-            found
-          </span>
+      <div className="flex flex-col gap-3">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4">
+            <h2 className="text-xl font-semibold text-text">
+              {searchQuery ? `Results for "${searchQuery}"` : 'Restaurants'}
+            </h2>
+            <span className="text-sm text-text-light">
+              {totalResults} restaurant{totalResults !== 1 ? 's' : ''}{' '}
+              {totalResults !== restaurants.length &&
+                `(showing ${restaurants.length})`}
+            </span>
+          </div>
+          {/* View Toggle */}
+          <div className="flex justify-end">
+            <ViewToggle
+              currentView={viewType}
+              onToggle={handleViewTypeChange}
+            />
+          </div>
         </div>
-        {/* View Toggle */}
-        <div className="flex justify-end">
-          <ViewToggle currentView={viewType} onToggle={handleViewTypeChange} />
-        </div>
+
+        {/* Sort Dropdown */}
+        {onSortChange && restaurants.length > 0 && (
+          <div className="flex justify-end">
+            <div className="flex items-center gap-2">
+              <label htmlFor="sort" className="text-sm text-text-light">
+                Sort by:
+              </label>
+              <select
+                id="sort"
+                value={sortBy}
+                onChange={(e) => onSortChange(e.target.value as SortOption)}
+                className="input-base shadow-neumorphic-light dark:shadow-neumorphic-dark py-2 px-3 text-sm"
+              >
+                {sortOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* List View */}
@@ -200,12 +250,93 @@ export function RestaurantSearchResults({
         </div>
       )}
 
-      {/* Load More Button */}
-      {hasMore && onLoadMore && (
+      {/* Load More Button (legacy) */}
+      {hasMore && onLoadMore && !onPageChange && (
         <div className="text-center pt-6">
           <Button variant="outline" onClick={onLoadMore} disabled={isLoading}>
             {isLoading ? 'Loading...' : 'Load More Restaurants'}
           </Button>
+        </div>
+      )}
+
+      {/* Pagination Controls */}
+      {onPageChange && totalPages > 1 && restaurants.length > 0 && (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-border">
+          <div className="text-sm text-text-light">
+            Page {currentPage} of {totalPages}
+          </div>
+          <div className="flex gap-2">
+            <Button
+              onClick={() => onPageChange(1)}
+              disabled={currentPage === 1}
+              variant="outline"
+              size="sm"
+            >
+              First
+            </Button>
+            <Button
+              onClick={() => onPageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              variant="outline"
+              size="sm"
+            >
+              Previous
+            </Button>
+
+            {/* Page Numbers */}
+            <div className="flex gap-1">
+              {[...Array(totalPages)].map((_, i) => {
+                const pageNum = i + 1;
+                // Show first page, last page, current page, and pages around current
+                if (
+                  pageNum === 1 ||
+                  pageNum === totalPages ||
+                  (pageNum >= currentPage - 1 && pageNum <= currentPage + 1)
+                ) {
+                  return (
+                    <Button
+                      key={pageNum}
+                      onClick={() => onPageChange(pageNum)}
+                      variant={currentPage === pageNum ? 'primary' : 'outline'}
+                      size="sm"
+                      className={`min-w-[2.5rem] ${
+                        currentPage === pageNum ? 'bg-primary text-white' : ''
+                      }`}
+                    >
+                      {pageNum}
+                    </Button>
+                  );
+                } else if (
+                  (pageNum === currentPage - 2 && currentPage > 3) ||
+                  (pageNum === currentPage + 2 && currentPage < totalPages - 2)
+                ) {
+                  return (
+                    <span key={pageNum} className="px-2 py-1">
+                      ...
+                    </span>
+                  );
+                }
+                return null;
+              })}
+            </div>
+
+            <Button
+              onClick={() => onPageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              variant="outline"
+              size="sm"
+            >
+              Next
+            </Button>
+            <Button
+              onClick={() => onPageChange(totalPages)}
+              disabled={currentPage === totalPages}
+              variant="outline"
+              size="sm"
+            >
+              Last
+            </Button>
+          </div>
         </div>
       )}
     </div>

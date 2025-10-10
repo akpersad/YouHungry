@@ -12,6 +12,7 @@ import { useRestaurantSearch, useAddRestaurantToCollection } from '@/hooks/api';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { toast } from 'react-hot-toast';
+import { useSearchParams, useRouter } from 'next/navigation';
 
 interface RestaurantSearchPageProps {
   onAddToCollection?: (restaurant: Restaurant) => void;
@@ -26,12 +27,33 @@ interface SearchFilters {
   distance?: number;
 }
 
+export type SortOption =
+  | 'distance-asc'
+  | 'name-asc'
+  | 'name-desc'
+  | 'price-asc'
+  | 'price-desc';
+
 export function RestaurantSearchPage({
   onAddToCollection,
   collections: propCollections = [],
 }: RestaurantSearchPageProps) {
   const { user, isLoaded } = useUser();
   const queryClient = useQueryClient();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // URL state management
+  const [currentPage, setCurrentPage] = useState(
+    parseInt(searchParams.get('page') || '1')
+  );
+  const [sortBy, setSortBy] = useState<SortOption>(
+    (searchParams.get('sort') as SortOption) || 'distance-asc'
+  );
+  const [radiusFilter, setRadiusFilter] = useState(
+    parseInt(searchParams.get('radius') || '5')
+  );
+
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRestaurant, setSelectedRestaurant] =
     useState<Restaurant | null>(null);
@@ -82,8 +104,9 @@ export function RestaurantSearchPage({
   // Handle the collections data structure
   const collections = useMemo(() => collectionsData || [], [collectionsData]);
 
+  // Fetch ALL restaurants (up to 25 miles) - no server-side filtering
   const {
-    data: restaurants = [],
+    data: allRestaurants = [],
     isLoading,
     error,
   } = useRestaurantSearch(
@@ -92,6 +115,125 @@ export function RestaurantSearchPage({
   );
 
   const addRestaurantMutation = useAddRestaurantToCollection();
+
+  // Update URL params when sort, page, or radius changes
+  useEffect(() => {
+    if (!searchFilters?.location) return;
+
+    const params = new URLSearchParams();
+    if (sortBy !== 'distance-asc') params.set('sort', sortBy);
+    if (currentPage !== 1) params.set('page', currentPage.toString());
+    if (radiusFilter !== 5) params.set('radius', radiusFilter.toString());
+    if (searchQuery) params.set('q', searchQuery);
+
+    const newUrl = params.toString() ? `?${params.toString()}` : '';
+    router.replace(newUrl, { scroll: false });
+  }, [
+    sortBy,
+    currentPage,
+    radiusFilter,
+    searchQuery,
+    router,
+    searchFilters?.location,
+  ]);
+
+  // Client-side filtering, sorting, and pagination
+  const {
+    filteredRestaurants,
+    paginatedRestaurants,
+    totalPages,
+    availableRadii,
+  } = useMemo(() => {
+    let filtered = [...allRestaurants];
+
+    // 1. Filter by radius (miles)
+    filtered = filtered.filter((r) => {
+      const dist = r.distance || 0;
+      return dist <= radiusFilter;
+    });
+
+    // 2. Filter by cuisine (if provided)
+    if (searchFilters?.cuisine) {
+      filtered = filtered.filter((r) =>
+        r.cuisine.toLowerCase().includes(searchFilters.cuisine!.toLowerCase())
+      );
+    }
+
+    // 3. Filter by rating (if provided)
+    if (searchFilters?.minRating) {
+      filtered = filtered.filter((r) => r.rating >= searchFilters.minRating!);
+    }
+
+    // 4. Filter by price (if provided)
+    if (searchFilters?.minPrice || searchFilters?.maxPrice) {
+      filtered = filtered.filter((r) => {
+        const priceLevel = r.priceRange
+          ? r.priceRange === '$'
+            ? 1
+            : r.priceRange === '$$'
+              ? 2
+              : r.priceRange === '$$$'
+                ? 3
+                : 4
+          : 0;
+
+        if (searchFilters?.minPrice && priceLevel < searchFilters.minPrice) {
+          return false;
+        }
+        if (searchFilters?.maxPrice && priceLevel > searchFilters.maxPrice) {
+          return false;
+        }
+        return true;
+      });
+    }
+
+    // 5. Sort restaurants
+    filtered.sort((a, b) => {
+      switch (sortBy) {
+        case 'distance-asc':
+          return (a.distance || 0) - (b.distance || 0);
+        case 'name-asc':
+          return a.name.localeCompare(b.name);
+        case 'name-desc':
+          return b.name.localeCompare(a.name);
+        case 'price-asc': {
+          const priceA = a.priceRange?.length || 0;
+          const priceB = b.priceRange?.length || 0;
+          return priceA - priceB;
+        }
+        case 'price-desc': {
+          const priceA = a.priceRange?.length || 0;
+          const priceB = b.priceRange?.length || 0;
+          return priceB - priceA;
+        }
+        default:
+          return 0;
+      }
+    });
+
+    // 6. Calculate available radii for smart no-results message
+    const radiiOptions = [1, 5, 10, 25];
+    const available = radiiOptions.filter((radius) =>
+      allRestaurants.some((r) => (r.distance || 0) <= radius)
+    );
+
+    // 7. Paginate (12 per page)
+    const ITEMS_PER_PAGE = 12;
+    const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
+    const startIdx = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIdx = startIdx + ITEMS_PER_PAGE;
+    const paginated = filtered.slice(startIdx, endIdx);
+
+    return {
+      filteredRestaurants: filtered,
+      paginatedRestaurants: paginated,
+      totalPages,
+      availableRadii: available,
+    };
+  }, [allRestaurants, radiusFilter, searchFilters, sortBy, currentPage]);
+
+  // Alias for compatibility with existing code
+  const restaurants = paginatedRestaurants;
 
   const checkRestaurantsInCollections = useCallback(
     async (collections: Collection[]) => {
@@ -182,7 +324,15 @@ export function RestaurantSearchPage({
     filters?: SearchFilters
   ) => {
     setSearchQuery(query || '');
+    setCurrentPage(1); // Reset to page 1 on new search
 
+    // Set radius from filters if provided
+    if (filters?.distance) {
+      setRadiusFilter(filters.distance);
+    }
+
+    // Store filters for client-side filtering
+    // Don't pass to API - we fetch all restaurants within 25 miles
     const searchParams = {
       location,
       ...(query && { q: query }),
@@ -194,6 +344,24 @@ export function RestaurantSearchPage({
     };
 
     setSearchFilters(searchParams);
+  };
+
+  // Handler for sort change
+  const handleSortChange = (newSort: SortOption) => {
+    setSortBy(newSort);
+    setCurrentPage(1); // Reset to page 1 when sorting changes
+  };
+
+  // Handler for radius change (from re-search)
+  const handleRadiusChange = (newRadius: number) => {
+    setRadiusFilter(newRadius);
+    setCurrentPage(1); // Reset to page 1 when radius changes
+  };
+
+  // Handler for page change
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const checkRestaurantInSpecificCollections = (
@@ -421,6 +589,68 @@ export function RestaurantSearchPage({
         </div>
       )}
 
+      {/* Smart No Results Message */}
+      {!isLoading &&
+        searchFilters &&
+        filteredRestaurants.length === 0 &&
+        allRestaurants.length > 0 && (
+          <div className="bg-info/10 border border-info/20 rounded-lg p-4">
+            <p className="text-text">
+              No results within {radiusFilter}{' '}
+              {radiusFilter === 1 ? 'mile' : 'miles'}.
+              {availableRadii.length > 0 &&
+                availableRadii[0] > radiusFilter && (
+                  <>
+                    {' '}
+                    But{' '}
+                    {
+                      allRestaurants.filter(
+                        (r) =>
+                          (r.distance || 0) <=
+                          availableRadii.find((r) => r > radiusFilter)!
+                      ).length
+                    }{' '}
+                    restaurant
+                    {allRestaurants.filter(
+                      (r) =>
+                        (r.distance || 0) <=
+                        availableRadii.find((r) => r > radiusFilter)!
+                    ).length !== 1
+                      ? 's'
+                      : ''}{' '}
+                    found within {availableRadii.find((r) => r > radiusFilter)}{' '}
+                    {availableRadii.find((r) => r > radiusFilter) === 1
+                      ? 'mile'
+                      : 'miles'}
+                    .
+                  </>
+                )}
+            </p>
+            {availableRadii.length > 0 && availableRadii[0] > radiusFilter && (
+              <button
+                onClick={() =>
+                  handleRadiusChange(
+                    availableRadii.find((r) => r > radiusFilter)!
+                  )
+                }
+                className="mt-2 text-primary hover:underline font-medium"
+              >
+                Expand to {availableRadii.find((r) => r > radiusFilter)}{' '}
+                {availableRadii.find((r) => r > radiusFilter) === 1
+                  ? 'mile'
+                  : 'miles'}
+              </button>
+            )}
+          </div>
+        )}
+
+      {/* Zero Results (no restaurants at all) */}
+      {!isLoading && searchFilters && allRestaurants.length === 0 && (
+        <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
+          <p className="text-text">0 Results</p>
+        </div>
+      )}
+
       {/* Search Results */}
       <RestaurantSearchResults
         restaurants={restaurants}
@@ -429,6 +659,12 @@ export function RestaurantSearchPage({
         onViewDetails={handleViewDetails}
         searchQuery={searchQuery}
         restaurantInCollections={restaurantInCollections}
+        sortBy={sortBy}
+        onSortChange={handleSortChange}
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+        totalResults={filteredRestaurants.length}
       />
 
       {/* Add to Collection Modal */}

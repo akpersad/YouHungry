@@ -1456,6 +1456,30 @@ export function SystemSettingsDashboard() {
                     </div>
                   </div>
 
+                  {/* Location Cache (25-mile search results) */}
+                  <div className="border border-border rounded-lg p-4">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <h4 className="text-md font-medium text-text">
+                          Location Cache (25-mile Results)
+                        </h4>
+                        <p className="text-sm text-text-light mt-1">
+                          Cached 25-mile restaurant search results by location
+                          (48 hour TTL)
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => clearCache('location_cache')}
+                        disabled={cacheClearing === 'location_cache'}
+                        className="px-4 py-2 bg-red-600 text-white rounded-md text-sm font-medium hover:bg-red-700 disabled:opacity-50"
+                      >
+                        {cacheClearing === 'location_cache'
+                          ? 'Clearing...'
+                          : 'Clear Cache'}
+                      </button>
+                    </div>
+                  </div>
+
                   {/* Geocoding Cache */}
                   <div className="border border-border rounded-lg p-4">
                     <div className="flex justify-between items-center">

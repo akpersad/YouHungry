@@ -19,6 +19,15 @@ interface APICostMetrics {
     totalHits: number;
     memoryEntries: number;
   };
+  locationCache: {
+    totalEntries: number;
+    locationOnlyEntries: number;
+    locationQueryEntries: number;
+    averageRestaurantsPerEntry: number;
+    estimatedSizeKB: number;
+    oldestEntry?: string;
+    newestEntry?: string;
+  };
   estimatedCosts: {
     daily: number;
     monthly: number;
@@ -425,6 +434,100 @@ export function CostMonitoringDashboard() {
               Memory Entries
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Location Cache (25-mile Search Results) */}
+      <div
+        className="rounded-lg shadow-subtle border p-6"
+        style={{
+          background: 'var(--bg-secondary)',
+          borderColor: 'var(--bg-quaternary)',
+        }}
+      >
+        <h3
+          className="text-lg font-semibold mb-4"
+          style={{ color: 'var(--text-primary)' }}
+        >
+          Location Cache (25-mile Search Results)
+        </h3>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-4">
+          <div className="text-center">
+            <div
+              className="text-3xl font-bold"
+              style={{ color: 'var(--accent-primary)' }}
+            >
+              {formatNumber(metrics.locationCache.totalEntries)}
+            </div>
+            <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+              Total Entries
+            </div>
+          </div>
+          <div className="text-center">
+            <div
+              className="text-3xl font-bold"
+              style={{ color: 'var(--color-success)' }}
+            >
+              {formatNumber(metrics.locationCache.locationOnlyEntries)}
+            </div>
+            <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+              Location-Only
+            </div>
+          </div>
+          <div className="text-center">
+            <div className="text-3xl font-bold" style={{ color: '#3b82f6' }}>
+              {formatNumber(metrics.locationCache.locationQueryEntries)}
+            </div>
+            <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+              With Query
+            </div>
+          </div>
+          <div className="text-center">
+            <div className="text-3xl font-bold" style={{ color: '#9333ea' }}>
+              {formatNumber(metrics.locationCache.estimatedSizeKB)} KB
+            </div>
+            <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+              Estimated Size
+            </div>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div
+            className="text-center p-3 rounded-lg"
+            style={{ background: 'var(--bg-tertiary)' }}
+          >
+            <div
+              className="text-xl font-semibold"
+              style={{ color: 'var(--text-primary)' }}
+            >
+              {metrics.locationCache.averageRestaurantsPerEntry} restaurants
+            </div>
+            <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+              Average Per Entry
+            </div>
+          </div>
+          {metrics.locationCache.oldestEntry && (
+            <div
+              className="text-center p-3 rounded-lg"
+              style={{ background: 'var(--bg-tertiary)' }}
+            >
+              <div
+                className="text-sm font-semibold"
+                style={{ color: 'var(--text-primary)' }}
+              >
+                {new Date(
+                  metrics.locationCache.oldestEntry
+                ).toLocaleDateString()}
+              </div>
+              <div
+                className="text-sm"
+                style={{ color: 'var(--text-secondary)' }}
+              >
+                Oldest Entry
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

@@ -341,7 +341,7 @@ export function AddressInput({
       {showSuggestions && suggestions.length > 0 && (
         <div
           ref={suggestionsRef}
-          className="absolute z-50 w-full mt-1 bg-white border border-border rounded-md shadow-lg max-h-60 overflow-y-auto"
+          className="absolute z-[60] w-full mt-1 bg-white dark:bg-gray-800 border border-border rounded-md shadow-xl max-h-60 overflow-y-auto"
         >
           {suggestions.map((suggestion) => (
             <button
