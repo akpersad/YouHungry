@@ -136,7 +136,7 @@ function convertGooglePlaceToRestaurant(
   };
 }
 
-// Search restaurants using Google Places API
+// Search restaurants using Google Places API - with pagination support
 export async function searchRestaurantsWithGooglePlaces(
   query: string,
   location?: string,
@@ -148,57 +148,83 @@ export async function searchRestaurantsWithGooglePlaces(
     throw new Error('Google Places API key not configured');
   }
 
-  // Build the search URL
   const baseUrl = 'https://maps.googleapis.com/maps/api/place/textsearch/json';
-  const params = new URLSearchParams({
-    query: query, // Don't automatically append "restaurant" - let the user specify what they want
-    key: apiKey,
-    type: 'restaurant',
-  });
 
-  if (location) {
-    params.append('location', location);
-    params.append('radius', radius.toString());
-  }
+  let allRestaurants: Restaurant[] = [];
+  let nextPageToken: string | undefined;
+  let pageCount = 0;
+  const MAX_PAGES = 3; // Google Places returns max 60 results (3 pages of 20)
 
   try {
-    const response = await fetch(`${baseUrl}?${params.toString()}`);
+    // Fetch all pages of results
+    do {
+      const params = new URLSearchParams({
+        query: query, // Don't automatically append "restaurant" - let the user specify what they want
+        key: apiKey,
+        type: 'restaurant',
+      });
 
-    if (!response.ok) {
-      throw new Error(`Google Places API error: ${response.status}`);
-    }
+      if (location) {
+        params.append('location', location);
+        params.append('radius', radius.toString());
+      }
 
-    const data: GooglePlacesResponse = await response.json();
+      // Add page token if we have one (for subsequent pages)
+      if (nextPageToken) {
+        params.append('pagetoken', nextPageToken);
+      }
 
-    if (data.status !== 'OK' && data.status !== 'ZERO_RESULTS') {
-      const errorMessage = data.error_message || data.status;
-      throw new Error(
-        `Google Places API error: ${data.status} - ${errorMessage}`
+      const response = await fetch(`${baseUrl}?${params.toString()}`);
+
+      if (!response.ok) {
+        throw new Error(`Google Places API error: ${response.status}`);
+      }
+
+      const data: GooglePlacesResponse = await response.json();
+
+      if (data.status !== 'OK' && data.status !== 'ZERO_RESULTS') {
+        const errorMessage = data.error_message || data.status;
+        throw new Error(
+          `Google Places API error: ${data.status} - ${errorMessage}`
+        );
+      }
+
+      // Convert results to our Restaurant format and add to collection
+      const restaurants = data.results.map(convertGooglePlaceToRestaurant);
+      allRestaurants = [...allRestaurants, ...(restaurants as Restaurant[])];
+
+      // Get next page token if available
+      nextPageToken = data.next_page_token;
+      pageCount++;
+
+      logger.debug(
+        `Fetched text search page ${pageCount} with ${restaurants.length} restaurants`,
+        {
+          hasNextPage: !!nextPageToken,
+          totalSoFar: allRestaurants.length,
+          query,
+        }
       );
-    }
 
-    // Convert results to our Restaurant format
-    const restaurants = data.results.map(convertGooglePlaceToRestaurant);
+      // Google requires a short delay before using next_page_token
+      if (nextPageToken && pageCount < MAX_PAGES) {
+        await new Promise((resolve) => setTimeout(resolve, 2000)); // 2 second delay
+      }
+    } while (nextPageToken && pageCount < MAX_PAGES);
 
     // Debug logging for photos
     if (process.env.NODE_ENV === 'development') {
-      logger.debug('Google Places search results:', {
-        totalResults: data.results.length,
-        restaurantsWithPhotos: restaurants.filter(
+      logger.debug('Google Places text search complete:', {
+        query,
+        totalPages: pageCount,
+        totalResults: allRestaurants.length,
+        restaurantsWithPhotos: allRestaurants.filter(
           (r) => r.photos && r.photos.length > 0
         ).length,
-        sampleRestaurant: restaurants[0]
-          ? {
-              name: restaurants[0].name,
-              hasPhotos: !!restaurants[0].photos,
-              photoCount: restaurants[0].photos?.length || 0,
-              firstPhoto: restaurants[0].photos?.[0],
-            }
-          : null,
       });
     }
 
-    return restaurants as Restaurant[];
+    return allRestaurants as Restaurant[];
   } catch (error) {
     logger.error('Google Places API search error:', error);
     throw error;
@@ -244,7 +270,7 @@ export async function getPlaceDetails(
   }
 }
 
-// Search restaurants by location (lat, lng)
+// Search restaurants by location (lat, lng) - with pagination support
 export async function searchRestaurantsByLocation(
   lat: number,
   lng: number,
@@ -259,118 +285,121 @@ export async function searchRestaurantsByLocation(
 
   const baseUrl =
     'https://maps.googleapis.com/maps/api/place/nearbysearch/json';
-  const params = new URLSearchParams({
-    location: `${lat},${lng}`,
-    radius: radius.toString(),
-    type,
-    key: apiKey,
-  });
+
+  let allRestaurants: Restaurant[] = [];
+  let nextPageToken: string | undefined;
+  let pageCount = 0;
+  const MAX_PAGES = 3; // Google Places returns max 60 results (3 pages of 20)
 
   try {
-    const response = await fetch(`${baseUrl}?${params.toString()}`);
+    // Fetch all pages of results
+    do {
+      const params = new URLSearchParams({
+        location: `${lat},${lng}`,
+        radius: radius.toString(),
+        type,
+        key: apiKey,
+      });
 
-    if (!response.ok) {
-      throw new Error(`Google Places API error: ${response.status}`);
-    }
+      // Add page token if we have one (for subsequent pages)
+      if (nextPageToken) {
+        params.append('pagetoken', nextPageToken);
+      }
 
-    const data: GooglePlacesResponse = await response.json();
+      const response = await fetch(`${baseUrl}?${params.toString()}`);
 
-    if (data.status !== 'OK' && data.status !== 'ZERO_RESULTS') {
-      const errorMessage = data.error_message || data.status;
-      throw new Error(
-        `Google Places API error: ${data.status} - ${errorMessage}`
+      if (!response.ok) {
+        throw new Error(`Google Places API error: ${response.status}`);
+      }
+
+      const data: GooglePlacesResponse = await response.json();
+
+      if (data.status !== 'OK' && data.status !== 'ZERO_RESULTS') {
+        const errorMessage = data.error_message || data.status;
+        throw new Error(
+          `Google Places API error: ${data.status} - ${errorMessage}`
+        );
+      }
+
+      // Convert results to our Restaurant format and add to collection
+      const restaurants = data.results.map(convertGooglePlaceToRestaurant);
+      allRestaurants = [...allRestaurants, ...(restaurants as Restaurant[])];
+
+      // Get next page token if available
+      nextPageToken = data.next_page_token;
+      pageCount++;
+
+      logger.debug(
+        `Fetched page ${pageCount} with ${restaurants.length} restaurants`,
+        {
+          hasNextPage: !!nextPageToken,
+          totalSoFar: allRestaurants.length,
+        }
       );
-    }
 
-    // Convert results to our Restaurant format
-    const restaurants = data.results.map(convertGooglePlaceToRestaurant);
+      // Google requires a short delay before using next_page_token
+      // https://developers.google.com/maps/documentation/places/web-service/search-nearby#PlaceSearchPaging
+      if (nextPageToken && pageCount < MAX_PAGES) {
+        await new Promise((resolve) => setTimeout(resolve, 2000)); // 2 second delay
+      }
+    } while (nextPageToken && pageCount < MAX_PAGES);
 
     // Debug logging for photos
     if (process.env.NODE_ENV === 'development') {
-      logger.debug('Google Places nearby search results:', {
-        totalResults: data.results.length,
-        restaurantsWithPhotos: restaurants.filter(
+      logger.debug('Google Places nearby search complete:', {
+        totalPages: pageCount,
+        totalResults: allRestaurants.length,
+        restaurantsWithPhotos: allRestaurants.filter(
           (r) => r.photos && r.photos.length > 0
         ).length,
-        sampleRestaurant: restaurants[0]
-          ? {
-              name: restaurants[0].name,
-              hasPhotos: !!restaurants[0].photos,
-              photoCount: restaurants[0].photos?.length || 0,
-              firstPhoto: restaurants[0].photos?.[0],
-            }
-          : null,
       });
     }
 
-    return restaurants as Restaurant[];
+    return allRestaurants as Restaurant[];
   } catch (error) {
     logger.error('Google Places API nearby search error:', error);
-    return [];
+    return allRestaurants.length > 0 ? allRestaurants : []; // Return what we have so far
   }
 }
 
 // Search restaurants by location with consistent results across different radius values
 // This function uses intelligent caching and progressive search to minimize API costs
+// ALWAYS fetches 25 miles of data and returns ALL results with distance calculated
 export async function searchRestaurantsByLocationConsistent(
   lat: number,
   lng: number,
-  requestedRadius: number = 5000,
+  _requestedRadius: number = 5000,
   type: string = 'restaurant'
 ): Promise<Restaurant[]> {
-  const requestedRadiusInMiles = requestedRadius / 1609.34; // Convert meters to miles
-
-  // Check if we have cached results for this location
+  // Check if we have cached results for this location (location-only cache)
   const cachedResults = await getCachedRestaurantsForLocation(lat, lng);
 
-  if (cachedResults && cachedResults.length > 0) {
-    // Use cached results and filter by requested radius
-    const restaurantsWithDistance = cachedResults.map((restaurant) => {
-      const distance = calculateDistance(
-        lat,
-        lng,
-        restaurant.coordinates.lat,
-        restaurant.coordinates.lng
-      );
-      return {
-        ...restaurant,
-        distance,
-      };
-    });
+  let allRestaurants: Restaurant[];
 
-    const filteredRestaurants = restaurantsWithDistance.filter(
-      (restaurant) => restaurant.distance <= requestedRadiusInMiles
+  if (cachedResults && cachedResults.length > 0) {
+    logger.debug(
+      `Using cached results for location (${lat.toFixed(4)}, ${lng.toFixed(4)})`
+    );
+    allRestaurants = cachedResults;
+  } else {
+    // No cached results, fetch from Google Places API
+    // ALWAYS fetch 25 miles to maximize coverage and enable client-side filtering
+    const MAX_SEARCH_RADIUS = 40234; // 25 miles in meters
+
+    const googleResults = await searchRestaurantsByLocation(
+      lat,
+      lng,
+      MAX_SEARCH_RADIUS,
+      type
     );
 
-    // Sort by distance first, then by rating (descending)
-    const sortedRestaurants = filteredRestaurants.sort((a, b) => {
-      if (Math.abs(a.distance - b.distance) > 0.1) {
-        return a.distance - b.distance;
-      }
-      return b.rating - a.rating;
-    });
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    return sortedRestaurants.map(({ distance, ...restaurant }) => restaurant);
+    // Cache the results for future use
+    await cacheRestaurantsForLocation(lat, lng, googleResults);
+    allRestaurants = googleResults;
   }
 
-  // No cached results, fetch from Google Places API
-  // Use a reasonable default radius (10 miles) to balance cost and coverage
-  const defaultRadius = 16093; // 10 miles in meters
-  const searchRadius = Math.max(requestedRadius, defaultRadius);
-
-  const googleResults = await searchRestaurantsByLocation(
-    lat,
-    lng,
-    searchRadius,
-    type
-  );
-
-  // Cache the results for future use
-  await cacheRestaurantsForLocation(lat, lng, googleResults);
-
-  // Calculate distances and filter by requested radius
-  const restaurantsWithDistance = googleResults.map((restaurant) => {
+  // Calculate distances for all restaurants and attach to the object
+  const restaurantsWithDistance = allRestaurants.map((restaurant) => {
     const distance = calculateDistance(
       lat,
       lng,
@@ -381,22 +410,83 @@ export async function searchRestaurantsByLocationConsistent(
       ...restaurant,
       distance,
     };
-  });
+  }) as Restaurant[];
 
-  const filteredRestaurants = restaurantsWithDistance.filter(
-    (restaurant) => restaurant.distance <= requestedRadiusInMiles
-  );
-
-  // Sort by distance first, then by rating (descending)
-  const sortedRestaurants = filteredRestaurants.sort((a, b) => {
-    if (Math.abs(a.distance - b.distance) > 0.1) {
-      return a.distance - b.distance;
+  // Return ALL restaurants with distance calculated (no filtering here - done on client)
+  // Sort by distance by default
+  return restaurantsWithDistance.sort((a, b) => {
+    const distA = a.distance || 0;
+    const distB = b.distance || 0;
+    if (Math.abs(distA - distB) > 0.1) {
+      return distA - distB;
     }
     return b.rating - a.rating;
   });
+}
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  return sortedRestaurants.map(({ distance, ...restaurant }) => restaurant);
+// Search restaurants by location AND text query with separate caching
+// This enables text-specific searches while maintaining location-only cache
+export async function searchRestaurantsByLocationAndQuery(
+  lat: number,
+  lng: number,
+  query: string,
+  _requestedRadius: number = 5000,
+  _type: string = 'restaurant'
+): Promise<Restaurant[]> {
+  // Check if we have cached results for this location + query combination
+  const cachedResults = await getCachedRestaurantsForLocationAndQuery(
+    lat,
+    lng,
+    query
+  );
+
+  let allRestaurants: Restaurant[];
+
+  if (cachedResults && cachedResults.length > 0) {
+    logger.debug(
+      `Using cached results for location+query (${lat.toFixed(4)}, ${lng.toFixed(4)}, "${query}")`
+    );
+    allRestaurants = cachedResults;
+  } else {
+    // No cached results, fetch from Google Places API with text search
+    // ALWAYS fetch 25 miles to maximize coverage and enable client-side filtering
+    const MAX_SEARCH_RADIUS = 40234; // 25 miles in meters
+
+    const googleResults = await searchRestaurantsWithGooglePlaces(
+      query,
+      `${lat},${lng}`,
+      MAX_SEARCH_RADIUS
+    );
+
+    // Cache the results for future use (with query in cache key)
+    await cacheRestaurantsForLocationAndQuery(lat, lng, query, googleResults);
+    allRestaurants = googleResults;
+  }
+
+  // Calculate distances for all restaurants and attach to the object
+  const restaurantsWithDistance = allRestaurants.map((restaurant) => {
+    const distance = calculateDistance(
+      lat,
+      lng,
+      restaurant.coordinates.lat,
+      restaurant.coordinates.lng
+    );
+    return {
+      ...restaurant,
+      distance,
+    };
+  }) as Restaurant[];
+
+  // Return ALL restaurants with distance calculated (no filtering here - done on client)
+  // Sort by distance by default
+  return restaurantsWithDistance.sort((a, b) => {
+    const distA = a.distance || 0;
+    const distB = b.distance || 0;
+    if (Math.abs(distA - distB) > 0.1) {
+      return distA - distB;
+    }
+    return b.rating - a.rating;
+  });
 }
 
 // Cache restaurants for a specific location
@@ -415,7 +505,7 @@ async function cacheRestaurantsForLocation(
       lng,
       restaurants,
       cachedAt: new Date(),
-      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
+      expiresAt: new Date(Date.now() + 48 * 60 * 60 * 1000), // 48 hours
     };
 
     // Store in a cache collection
@@ -457,6 +547,67 @@ async function getCachedRestaurantsForLocation(
   }
 }
 
+// Cache restaurants for a specific location + query combination
+async function cacheRestaurantsForLocationAndQuery(
+  lat: number,
+  lng: number,
+  query: string,
+  restaurants: Restaurant[]
+): Promise<void> {
+  try {
+    const db = await connectToDatabase();
+    const locationKey = `${lat.toFixed(4)},${lng.toFixed(4)}:${query.toLowerCase().trim()}`;
+
+    const cacheData = {
+      locationKey,
+      lat,
+      lng,
+      query: query.toLowerCase().trim(),
+      restaurants,
+      cachedAt: new Date(),
+      expiresAt: new Date(Date.now() + 48 * 60 * 60 * 1000), // 48 hours
+    };
+
+    // Store in the same cache collection but with query in the key
+    await db
+      .collection('location_cache')
+      .replaceOne({ locationKey }, cacheData, { upsert: true });
+
+    logger.debug(
+      `Cached ${restaurants.length} restaurants for location+query ${locationKey}`
+    );
+  } catch (error) {
+    logger.error('Error caching restaurants for location+query:', error);
+  }
+}
+
+// Get cached restaurants for a location + query combination
+async function getCachedRestaurantsForLocationAndQuery(
+  lat: number,
+  lng: number,
+  query: string
+): Promise<Restaurant[] | null> {
+  try {
+    const db = await connectToDatabase();
+    const locationKey = `${lat.toFixed(4)},${lng.toFixed(4)}:${query.toLowerCase().trim()}`;
+
+    const cacheEntry = await db.collection('location_cache').findOne({
+      locationKey,
+      expiresAt: { $gt: new Date() }, // Only return if not expired
+    });
+
+    if (cacheEntry && cacheEntry.restaurants) {
+      logger.debug(`Using cached results for location+query ${locationKey}`);
+      return cacheEntry.restaurants;
+    }
+
+    return null;
+  } catch (error) {
+    logger.error('Error getting cached restaurants for location+query:', error);
+    return null;
+  }
+}
+
 // Clean up expired cache entries (call this periodically)
 export async function cleanupExpiredCache(): Promise<void> {
   try {
@@ -470,6 +621,111 @@ export async function cleanupExpiredCache(): Promise<void> {
     }
   } catch (error) {
     logger.error('Error cleaning up cache:', error);
+  }
+}
+
+// Get location cache statistics for monitoring
+export async function getLocationCacheStats(): Promise<{
+  totalEntries: number;
+  locationOnlyEntries: number;
+  locationQueryEntries: number;
+  oldestEntry?: Date;
+  newestEntry?: Date;
+  averageRestaurantsPerEntry: number;
+  estimatedSizeKB: number;
+}> {
+  try {
+    const db = await connectToDatabase();
+    const collection = db.collection('location_cache');
+
+    // Get total count
+    const totalEntries = await collection.countDocuments();
+
+    // Get location-only entries (no query in locationKey)
+    const locationOnlyEntries = await collection.countDocuments({
+      locationKey: { $not: { $regex: ':' } },
+    });
+
+    // Get location+query entries (has query in locationKey)
+    const locationQueryEntries = await collection.countDocuments({
+      locationKey: { $regex: ':' },
+    });
+
+    // Get oldest and newest entries
+    const oldestEntry = await collection
+      .find({})
+      .sort({ cachedAt: 1 })
+      .limit(1)
+      .toArray();
+    const newestEntry = await collection
+      .find({})
+      .sort({ cachedAt: -1 })
+      .limit(1)
+      .toArray();
+
+    // Calculate average restaurants per entry
+    const allEntries = await collection.find({}).toArray();
+    const totalRestaurants = allEntries.reduce(
+      (sum, entry) =>
+        sum +
+        ((entry as { restaurants?: Restaurant[] }).restaurants?.length || 0),
+      0
+    );
+    const averageRestaurantsPerEntry =
+      totalEntries > 0 ? totalRestaurants / totalEntries : 0;
+
+    // Estimate size in KB (rough estimate based on document count and average doc size)
+    const estimatedSizeKB = totalRestaurants * 2; // ~2KB per restaurant estimate
+
+    return {
+      totalEntries,
+      locationOnlyEntries,
+      locationQueryEntries,
+      oldestEntry: oldestEntry[0]?.cachedAt,
+      newestEntry: newestEntry[0]?.cachedAt,
+      averageRestaurantsPerEntry:
+        Math.round(averageRestaurantsPerEntry * 10) / 10,
+      estimatedSizeKB: Math.round(estimatedSizeKB),
+    };
+  } catch (error) {
+    logger.error('Error getting location cache stats:', error);
+    return {
+      totalEntries: 0,
+      locationOnlyEntries: 0,
+      locationQueryEntries: 0,
+      averageRestaurantsPerEntry: 0,
+      estimatedSizeKB: 0,
+    };
+  }
+}
+
+// Clear cache for a specific location (admin function)
+export async function clearLocationCache(
+  lat?: number,
+  lng?: number
+): Promise<number> {
+  try {
+    const db = await connectToDatabase();
+
+    if (lat !== undefined && lng !== undefined) {
+      // Clear specific location (both location-only and location+query caches)
+      const locationPrefix = `${lat.toFixed(4)},${lng.toFixed(4)}`;
+      const result = await db.collection('location_cache').deleteMany({
+        locationKey: { $regex: `^${locationPrefix}` },
+      });
+      logger.info(
+        `Cleared ${result.deletedCount} cache entries for location (${lat}, ${lng})`
+      );
+      return result.deletedCount;
+    } else {
+      // Clear all location caches
+      const result = await db.collection('location_cache').deleteMany({});
+      logger.info(`Cleared all ${result.deletedCount} location cache entries`);
+      return result.deletedCount;
+    }
+  } catch (error) {
+    logger.error('Error clearing location cache:', error);
+    throw error;
   }
 }
 

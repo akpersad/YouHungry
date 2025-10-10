@@ -250,7 +250,6 @@ export async function performRandomSelection(
   }
 
   // Find the selected restaurant data for potential future use
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const _selectedRestaurantData = restaurants.find(
     (r) => r._id.toString() === selectedRestaurant!.restaurantId.toString()
   )!;
