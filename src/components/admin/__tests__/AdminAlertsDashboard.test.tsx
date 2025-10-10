@@ -133,7 +133,7 @@ describe('AdminAlertsDashboard', () => {
 
       // Check that the statistics cards are rendered
       const statsCards = document.querySelectorAll(
-        '.bg-white.rounded-lg.shadow.p-4'
+        '.rounded-lg.shadow-subtle.p-4'
       );
       expect(statsCards.length).toBe(7); // Total, Critical, High, Medium, Low, Unacknowledged, Unresolved
     });

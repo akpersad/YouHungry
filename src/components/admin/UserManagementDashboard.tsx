@@ -160,8 +160,13 @@ export function UserManagementDashboard() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-text">User Management</h2>
-          <p className="text-text-light">
+          <h2
+            className="text-2xl font-bold"
+            style={{ color: 'var(--text-primary)' }}
+          >
+            User Management
+          </h2>
+          <p style={{ color: 'var(--text-secondary)' }}>
             Monitor user activity and manage accounts
           </p>
         </div>
@@ -321,60 +326,115 @@ export function UserManagementDashboard() {
         {/* Search Results */}
         {searchResults && (
           <div className="space-y-4">
-            <div className="text-sm text-text-light">
+            <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
               Showing {searchResults.users.length} of{' '}
               {searchResults.pagination.totalCount} users
             </div>
 
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-surface">
+              <table
+                className="min-w-full divide-y"
+                style={{ borderColor: 'var(--bg-quaternary)' }}
+              >
+                <thead style={{ background: 'var(--bg-tertiary)' }}>
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-text-light uppercase tracking-wider">
+                    <th
+                      className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
+                      style={{ color: 'var(--text-secondary)' }}
+                    >
                       User
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-text-light uppercase tracking-wider">
+                    <th
+                      className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
+                      style={{ color: 'var(--text-secondary)' }}
+                    >
                       Collections
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-text-light uppercase tracking-wider">
+                    <th
+                      className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
+                      style={{ color: 'var(--text-secondary)' }}
+                    >
                       Groups
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-text-light uppercase tracking-wider">
+                    <th
+                      className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
+                      style={{ color: 'var(--text-secondary)' }}
+                    >
                       Decisions
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-text-light uppercase tracking-wider">
+                    <th
+                      className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
+                      style={{ color: 'var(--text-secondary)' }}
+                    >
                       Joined
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody
+                  className="divide-y"
+                  style={{
+                    background: 'var(--bg-secondary)',
+                    borderColor: 'var(--bg-quaternary)',
+                  }}
+                >
                   {searchResults.users.map((user) => (
-                    <tr key={user.id} className="hover:bg-surface">
+                    <tr
+                      key={user.id}
+                      style={{ background: 'var(--bg-secondary)' }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = 'var(--bg-tertiary)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background =
+                          'var(--bg-secondary)';
+                      }}
+                    >
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div>
-                          <div className="text-sm font-medium text-text">
+                          <div
+                            className="text-sm font-medium"
+                            style={{ color: 'var(--text-primary)' }}
+                          >
                             {user.name}
                           </div>
-                          <div className="text-sm text-text-light">
+                          <div
+                            className="text-sm"
+                            style={{ color: 'var(--text-secondary)' }}
+                          >
                             {user.email}
                           </div>
                           {user.username && (
-                            <div className="text-xs text-text-light">
+                            <div
+                              className="text-xs"
+                              style={{ color: 'var(--text-secondary)' }}
+                            >
                               @{user.username}
                             </div>
                           )}
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-text">
+                      <td
+                        className="px-6 py-4 whitespace-nowrap text-sm"
+                        style={{ color: 'var(--text-primary)' }}
+                      >
                         {user.collectionCount}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-text">
+                      <td
+                        className="px-6 py-4 whitespace-nowrap text-sm"
+                        style={{ color: 'var(--text-primary)' }}
+                      >
                         {user.groupCount}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-text">
+                      <td
+                        className="px-6 py-4 whitespace-nowrap text-sm"
+                        style={{ color: 'var(--text-primary)' }}
+                      >
                         {user.decisionCount}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-text-light">
+                      <td
+                        className="px-6 py-4 whitespace-nowrap text-sm"
+                        style={{ color: 'var(--text-secondary)' }}
+                      >
                         {new Date(user.createdAt).toLocaleDateString()}
                       </td>
                     </tr>
@@ -386,7 +446,10 @@ export function UserManagementDashboard() {
             {/* Pagination */}
             {searchResults.pagination.totalPages > 1 && (
               <div className="flex justify-between items-center">
-                <div className="text-sm text-text">
+                <div
+                  className="text-sm"
+                  style={{ color: 'var(--text-primary)' }}
+                >
                   Page {searchResults.pagination.page} of{' '}
                   {searchResults.pagination.totalPages}
                 </div>

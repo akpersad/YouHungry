@@ -346,12 +346,20 @@ export function SystemSettingsDashboard() {
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-text">System Settings</h2>
-          <p className="text-sm text-text-light">
+          <h2
+            className="text-2xl font-bold"
+            style={{ color: 'var(--text-primary)' }}
+          >
+            System Settings
+          </h2>
+          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
             Configure system-wide settings and monitoring thresholds
           </p>
           {lastUpdated && (
-            <p className="text-xs text-text-light mt-1">
+            <p
+              className="text-xs mt-1"
+              style={{ color: 'var(--text-secondary)' }}
+            >
               Last updated: {lastUpdated.toLocaleString()}
             </p>
           )}
@@ -360,14 +368,44 @@ export function SystemSettingsDashboard() {
           <button
             onClick={resetSettings}
             disabled={saving}
-            className="px-4 py-2 border border-border rounded-md text-sm font-medium text-text hover:bg-surface disabled:opacity-50"
+            className="px-4 py-2 border rounded-md text-sm font-medium disabled:opacity-50"
+            style={{
+              borderColor: 'var(--bg-quaternary)',
+              color: 'var(--text-primary)',
+              background: 'var(--bg-secondary)',
+            }}
+            onMouseEnter={(e) => {
+              if (!saving) {
+                e.currentTarget.style.background = 'var(--bg-tertiary)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!saving) {
+                e.currentTarget.style.background = 'var(--bg-secondary)';
+              }
+            }}
           >
             Reset to Defaults
           </button>
           <button
             onClick={saveSettings}
             disabled={saving}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
+            className="px-4 py-2 rounded-md text-sm font-medium disabled:opacity-50"
+            style={{
+              background: 'var(--accent-primary)',
+              color: 'var(--text-inverse)',
+            }}
+            onMouseEnter={(e) => {
+              if (!saving) {
+                e.currentTarget.style.background =
+                  'var(--accent-primary-light)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!saving) {
+                e.currentTarget.style.background = 'var(--accent-primary)';
+              }
+            }}
           >
             {saving ? 'Saving...' : 'Save Settings'}
           </button>
@@ -375,11 +413,18 @@ export function SystemSettingsDashboard() {
       </div>
 
       {success && (
-        <div className="mb-6 bg-success/10 border border-green-200 rounded-lg p-4">
+        <div
+          className="mb-6 border rounded-lg p-4"
+          style={{
+            background: 'rgba(34, 197, 94, 0.1)',
+            borderColor: 'rgba(34, 197, 94, 0.3)',
+          }}
+        >
           <div className="flex">
             <div className="flex-shrink-0">
               <svg
-                className="h-5 w-5 text-success"
+                className="h-5 w-5"
+                style={{ color: 'var(--color-success)' }}
                 viewBox="0 0 20 20"
                 fill="currentColor"
               >
@@ -391,7 +436,12 @@ export function SystemSettingsDashboard() {
               </svg>
             </div>
             <div className="ml-3">
-              <p className="text-sm font-medium text-green-800">{success}</p>
+              <p
+                className="text-sm font-medium"
+                style={{ color: 'var(--color-success)' }}
+              >
+                {success}
+              </p>
             </div>
           </div>
         </div>
@@ -405,11 +455,27 @@ export function SystemSettingsDashboard() {
               <button
                 key={section.id}
                 onClick={() => setActiveSection(section.id)}
-                className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                  activeSection === section.id
-                    ? 'bg-primary/10 text-primary'
-                    : 'text-text-light hover:bg-surface'
-                }`}
+                className="w-full text-left px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                style={{
+                  background:
+                    activeSection === section.id
+                      ? 'rgba(255, 51, 102, 0.1)'
+                      : 'transparent',
+                  color:
+                    activeSection === section.id
+                      ? 'var(--accent-primary)'
+                      : 'var(--text-secondary)',
+                }}
+                onMouseEnter={(e) => {
+                  if (activeSection !== section.id) {
+                    e.currentTarget.style.background = 'var(--bg-tertiary)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (activeSection !== section.id) {
+                    e.currentTarget.style.background = 'transparent';
+                  }
+                }}
               >
                 <span className="mr-2">{section.icon}</span>
                 {section.label}
@@ -420,7 +486,14 @@ export function SystemSettingsDashboard() {
 
         {/* Main Content */}
         <div className="lg:col-span-3">
-          <div className="bg-white rounded-lg shadow">
+          <div
+            className="rounded-lg shadow-subtle"
+            style={{
+              background: 'var(--bg-secondary)',
+              borderColor: 'var(--bg-quaternary)',
+              border: '1px solid',
+            }}
+          >
             {activeSection === 'rateLimiting' && (
               <div className="p-6">
                 <h3 className="text-lg font-medium text-text mb-4">

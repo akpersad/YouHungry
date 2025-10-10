@@ -172,7 +172,14 @@ export async function searchRestaurantsByCoordinates(
       })
     );
 
-    return storedRestaurants;
+    // Enrich restaurants with missing addresses using Place Details API
+    const { enrichRestaurantsWithAddresses } = await import(
+      './optimized-google-places'
+    );
+    const enrichedRestaurants =
+      await enrichRestaurantsWithAddresses(storedRestaurants);
+
+    return enrichedRestaurants;
   } catch (error) {
     logger.error('Location-based search failed:', error);
     return [];

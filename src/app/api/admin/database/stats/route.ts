@@ -28,15 +28,23 @@ export async function GET() {
       connectionStatus = 'disconnected';
     }
 
-    // Get collection statistics
+    // Get collection statistics (sorted alphabetically)
     const collections = [
-      'users',
+      'api_cache',
+      'api_usage',
       'collections',
-      'restaurants',
-      'groups',
-      'friendships',
       'decisions',
+      'friendships',
       'groupInvitations',
+      'groups',
+      'location_cache',
+      'notifications',
+      'performance_metrics',
+      'phone_verifications',
+      'restaurants',
+      'short_urls',
+      'user_interactions',
+      'users',
     ];
     const collectionStats = await Promise.all(
       collections.map(async (collectionName) => {
@@ -45,14 +53,26 @@ export async function GET() {
           const count = await collection.countDocuments();
           const indexes = await collection.indexes();
 
-          // Get storage size (approximate) - using count as fallback since stats() doesn't exist on Collection type
-          const stats = { storageSize: 0 }; // Placeholder since stats() method doesn't exist on Collection type
+          // Get storage size using MongoDB stats() method
+          let storageSize = 0;
+          let indexSize = 0;
+
+          try {
+            const stats = await db.command({ collStats: collectionName });
+            storageSize = stats.storageSize || stats.size || 0;
+            indexSize = stats.totalIndexSize || 0;
+          } catch {
+            // Fallback: estimate storage size based on document count
+            // This is a rough approximation - actual size may vary
+            storageSize = count * 1024; // Assume ~1KB per document average
+            indexSize = indexes.length * 8192; // Assume ~8KB per index average
+          }
 
           return {
             name: collectionName,
             count,
-            storageSize: stats.storageSize || 0,
-            indexSize: 0, // Placeholder since stats() method doesn't exist on Collection type
+            storageSize,
+            indexSize,
             indexes: indexes.length,
           };
         } catch (err) {

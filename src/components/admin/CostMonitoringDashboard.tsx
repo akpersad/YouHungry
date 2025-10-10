@@ -86,7 +86,8 @@ export function CostMonitoringDashboard() {
       <div className="p-6">
         <div className="flex items-center justify-center h-64">
           <div
-            className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"
+            className="animate-spin rounded-full h-8 w-8 border-b-2"
+            style={{ borderColor: 'var(--accent-primary)' }}
             role="status"
             aria-label="Loading"
           ></div>
@@ -98,12 +99,32 @@ export function CostMonitoringDashboard() {
   if (error) {
     return (
       <div className="p-6">
-        <div className="bg-destructive/10 border border-destructive rounded-lg p-4">
-          <h3 className="text-red-800 font-medium">Error Loading Cost Data</h3>
-          <p className="text-destructive text-sm mt-1">{error}</p>
+        <div
+          className="border rounded-lg p-4"
+          style={{
+            background: 'rgba(239, 68, 68, 0.1)',
+            borderColor: 'var(--color-error)',
+          }}
+        >
+          <h3 className="font-medium" style={{ color: 'var(--color-error)' }}>
+            Error Loading Cost Data
+          </h3>
+          <p className="text-sm mt-1" style={{ color: 'var(--color-error)' }}>
+            {error}
+          </p>
           <button
             onClick={fetchCostData}
-            className="mt-3 px-4 py-2 bg-red-600 text-white rounded-md text-sm hover:bg-red-700 transition-colors"
+            className="mt-3 px-4 py-2 rounded-md text-sm transition-colors"
+            style={{
+              background: 'var(--color-error)',
+              color: 'var(--text-inverse)',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = '#dc2626';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'var(--color-error)';
+            }}
           >
             Retry
           </button>
@@ -115,7 +136,7 @@ export function CostMonitoringDashboard() {
   if (!costData) {
     return (
       <div className="p-6">
-        <div className="text-center text-text-light">
+        <div className="text-center" style={{ color: 'var(--text-secondary)' }}>
           No cost data available
         </div>
       </div>
@@ -129,27 +150,46 @@ export function CostMonitoringDashboard() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-text">Cost Monitoring</h2>
-          <p className="text-text-light">
+          <h2
+            className="text-2xl font-bold"
+            style={{ color: 'var(--text-primary)' }}
+          >
+            Cost Monitoring
+          </h2>
+          <p style={{ color: 'var(--text-secondary)' }}>
             Track API usage and costs in real-time
           </p>
         </div>
-        <div className="text-sm text-text-light">
+        <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
           {lastUpdated && `Last updated: ${lastUpdated.toLocaleTimeString()}`}
         </div>
       </div>
 
       {/* Cost Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white rounded-lg shadow-sm border p-6">
+        <div
+          className="rounded-lg shadow-subtle border p-6"
+          style={{
+            background: 'var(--bg-secondary)',
+            borderColor: 'var(--bg-quaternary)',
+          }}
+        >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-text-light">Daily Cost</p>
-              <p className="text-2xl font-bold text-text">
+              <p
+                className="text-sm font-medium"
+                style={{ color: 'var(--text-secondary)' }}
+              >
+                Daily Cost
+              </p>
+              <p
+                className="text-2xl font-bold"
+                style={{ color: 'var(--text-primary)' }}
+              >
                 {formatCurrency(metrics.estimatedCosts.daily)}
               </p>
             </div>
-            <div className="text-success">
+            <div style={{ color: 'var(--color-success)' }}>
               <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z" />
                 <path
@@ -162,17 +202,29 @@ export function CostMonitoringDashboard() {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm border p-6">
+        <div
+          className="rounded-lg shadow-subtle border p-6"
+          style={{
+            background: 'var(--bg-secondary)',
+            borderColor: 'var(--bg-quaternary)',
+          }}
+        >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-text-light">
+              <p
+                className="text-sm font-medium"
+                style={{ color: 'var(--text-secondary)' }}
+              >
                 Monthly Cost
               </p>
-              <p className="text-2xl font-bold text-text">
+              <p
+                className="text-2xl font-bold"
+                style={{ color: 'var(--text-primary)' }}
+              >
                 {formatCurrency(metrics.estimatedCosts.monthly)}
               </p>
             </div>
-            <div className="text-primary">
+            <div style={{ color: 'var(--accent-primary)' }}>
               <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
                 <path
                   fillRule="evenodd"
@@ -184,17 +236,29 @@ export function CostMonitoringDashboard() {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm border p-6">
+        <div
+          className="rounded-lg shadow-subtle border p-6"
+          style={{
+            background: 'var(--bg-secondary)',
+            borderColor: 'var(--bg-quaternary)',
+          }}
+        >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-text-light">
+              <p
+                className="text-sm font-medium"
+                style={{ color: 'var(--text-secondary)' }}
+              >
                 Monthly Savings
               </p>
-              <p className="text-2xl font-bold text-success">
+              <p
+                className="text-2xl font-bold"
+                style={{ color: 'var(--color-success)' }}
+              >
                 {formatCurrency(metrics.estimatedCosts.savings)}
               </p>
             </div>
-            <div className="text-success">
+            <div style={{ color: 'var(--color-success)' }}>
               <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
                 <path
                   fillRule="evenodd"
@@ -208,43 +272,82 @@ export function CostMonitoringDashboard() {
       </div>
 
       {/* API Usage Breakdown */}
-      <div className="bg-white rounded-lg shadow-sm border p-6">
-        <h3 className="text-lg font-semibold text-text mb-4">
+      <div
+        className="rounded-lg shadow-subtle border p-6"
+        style={{
+          background: 'var(--bg-secondary)',
+          borderColor: 'var(--bg-quaternary)',
+        }}
+      >
+        <h3
+          className="text-lg font-semibold mb-4"
+          style={{ color: 'var(--text-primary)' }}
+        >
           API Usage Breakdown
         </h3>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Google Places API */}
           <div>
-            <h4 className="font-medium text-text mb-3">Google Places API</h4>
+            <h4
+              className="font-medium mb-3"
+              style={{ color: 'var(--text-primary)' }}
+            >
+              Google Places API
+            </h4>
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
-                <span className="text-text-light">Text Search</span>
-                <span className="font-medium">
+                <span style={{ color: 'var(--text-secondary)' }}>
+                  Text Search
+                </span>
+                <span
+                  className="font-medium"
+                  style={{ color: 'var(--text-primary)' }}
+                >
                   {formatNumber(metrics.googlePlaces.textSearch)} calls
                 </span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-text-light">Nearby Search</span>
-                <span className="font-medium">
+                <span style={{ color: 'var(--text-secondary)' }}>
+                  Nearby Search
+                </span>
+                <span
+                  className="font-medium"
+                  style={{ color: 'var(--text-primary)' }}
+                >
                   {formatNumber(metrics.googlePlaces.nearbySearch)} calls
                 </span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-text-light">Place Details</span>
-                <span className="font-medium">
+                <span style={{ color: 'var(--text-secondary)' }}>
+                  Place Details
+                </span>
+                <span
+                  className="font-medium"
+                  style={{ color: 'var(--text-primary)' }}
+                >
                   {formatNumber(metrics.googlePlaces.placeDetails)} calls
                 </span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-text-light">Geocoding</span>
-                <span className="font-medium">
+                <span style={{ color: 'var(--text-secondary)' }}>
+                  Geocoding
+                </span>
+                <span
+                  className="font-medium"
+                  style={{ color: 'var(--text-primary)' }}
+                >
                   {formatNumber(metrics.googlePlaces.geocoding)} calls
                 </span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-text-light">Address Validation</span>
-                <span className="font-medium">
+                <span style={{ color: 'var(--text-secondary)' }}>
+                  Address Validation
+                </span>
+                <span
+                  className="font-medium"
+                  style={{ color: 'var(--text-primary)' }}
+                >
                   {formatNumber(metrics.googlePlaces.addressValidation)} calls
                 </span>
               </div>
@@ -253,11 +356,21 @@ export function CostMonitoringDashboard() {
 
           {/* Google Maps API */}
           <div>
-            <h4 className="font-medium text-text mb-3">Google Maps API</h4>
+            <h4
+              className="font-medium mb-3"
+              style={{ color: 'var(--text-primary)' }}
+            >
+              Google Maps API
+            </h4>
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
-                <span className="text-text-light">Maps Loads</span>
-                <span className="font-medium">
+                <span style={{ color: 'var(--text-secondary)' }}>
+                  Maps Loads
+                </span>
+                <span
+                  className="font-medium"
+                  style={{ color: 'var(--text-primary)' }}
+                >
                   {formatNumber(metrics.googleMaps.mapsLoads)} loads
                 </span>
               </div>
@@ -267,46 +380,84 @@ export function CostMonitoringDashboard() {
       </div>
 
       {/* Cache Performance */}
-      <div className="bg-white rounded-lg shadow-sm border p-6">
-        <h3 className="text-lg font-semibold text-text mb-4">
+      <div
+        className="rounded-lg shadow-subtle border p-6"
+        style={{
+          background: 'var(--bg-secondary)',
+          borderColor: 'var(--bg-quaternary)',
+        }}
+      >
+        <h3
+          className="text-lg font-semibold mb-4"
+          style={{ color: 'var(--text-primary)' }}
+        >
           Cache Performance
         </h3>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="text-center">
-            <div className="text-3xl font-bold text-primary">
+            <div
+              className="text-3xl font-bold"
+              style={{ color: 'var(--accent-primary)' }}
+            >
               {metrics.cache.hitRate.toFixed(1)}%
             </div>
-            <div className="text-sm text-text-light">Hit Rate</div>
+            <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+              Hit Rate
+            </div>
           </div>
           <div className="text-center">
-            <div className="text-3xl font-bold text-success">
+            <div
+              className="text-3xl font-bold"
+              style={{ color: 'var(--color-success)' }}
+            >
               {formatNumber(metrics.cache.totalHits)}
             </div>
-            <div className="text-sm text-text-light">Total Hits</div>
+            <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+              Total Hits
+            </div>
           </div>
           <div className="text-center">
-            <div className="text-3xl font-bold text-purple-600">
+            <div className="text-3xl font-bold" style={{ color: '#9333ea' }}>
               {formatNumber(metrics.cache.memoryEntries)}
             </div>
-            <div className="text-sm text-text-light">Memory Entries</div>
+            <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+              Memory Entries
+            </div>
           </div>
         </div>
       </div>
 
       {/* Recommendations */}
       {recommendations.length > 0 && (
-        <div className="bg-white rounded-lg shadow-sm border p-6">
-          <h3 className="text-lg font-semibold text-text mb-4">
+        <div
+          className="rounded-lg shadow-subtle border p-6"
+          style={{
+            background: 'var(--bg-secondary)',
+            borderColor: 'var(--bg-quaternary)',
+          }}
+        >
+          <h3
+            className="text-lg font-semibold mb-4"
+            style={{ color: 'var(--text-primary)' }}
+          >
             Recommendations
           </h3>
           <div className="space-y-3">
             {recommendations.map((recommendation, index) => (
               <div
                 key={index}
-                className="flex items-start gap-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg"
+                className="flex items-start gap-3 p-3 rounded-lg"
+                style={{
+                  background: 'rgba(245, 158, 11, 0.1)',
+                  borderColor: 'rgba(245, 158, 11, 0.3)',
+                  border: '1px solid',
+                }}
               >
-                <div className="text-yellow-600 mt-0.5">
+                <div
+                  className="mt-0.5"
+                  style={{ color: 'var(--color-warning)' }}
+                >
                   <svg
                     className="w-5 h-5"
                     fill="currentColor"
@@ -319,7 +470,12 @@ export function CostMonitoringDashboard() {
                     />
                   </svg>
                 </div>
-                <p className="text-yellow-800 text-sm">{recommendation}</p>
+                <p
+                  className="text-sm"
+                  style={{ color: 'var(--color-warning)' }}
+                >
+                  {recommendation}
+                </p>
               </div>
             ))}
           </div>
@@ -331,7 +487,21 @@ export function CostMonitoringDashboard() {
         <button
           onClick={fetchCostData}
           disabled={loading}
-          className="px-4 py-2 bg-primary text-white rounded-md text-sm hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-4 py-2 rounded-md text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          style={{
+            background: 'var(--accent-primary)',
+            color: 'var(--text-inverse)',
+          }}
+          onMouseEnter={(e) => {
+            if (!loading) {
+              e.currentTarget.style.background = 'var(--accent-primary-light)';
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (!loading) {
+              e.currentTarget.style.background = 'var(--accent-primary)';
+            }
+          }}
         >
           {loading ? 'Refreshing...' : 'Refresh Data'}
         </button>

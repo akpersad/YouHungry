@@ -150,11 +150,26 @@ export function PerformanceDashboard() {
   const getTrendIcon = (trend: string) => {
     switch (trend) {
       case 'improvement':
-        return <TrendingUp className="h-4 w-4 text-success" />;
+        return (
+          <TrendingUp
+            className="h-4 w-4"
+            style={{ color: 'var(--color-success)' }}
+          />
+        );
       case 'degradation':
-        return <TrendingDown className="h-4 w-4 text-destructive" />;
+        return (
+          <TrendingDown
+            className="h-4 w-4"
+            style={{ color: 'var(--color-error)' }}
+          />
+        );
       default:
-        return <Minus className="h-4 w-4 text-text-light" />;
+        return (
+          <Minus
+            className="h-4 w-4"
+            style={{ color: 'var(--text-secondary)' }}
+          />
+        );
     }
   };
 
@@ -197,7 +212,15 @@ export function PerformanceDashboard() {
   ) => {
     const isGood = type === 'lower' ? value <= threshold : value >= threshold;
     return (
-      <Badge variant={isGood ? 'default' : 'destructive'}>
+      <Badge
+        variant={isGood ? 'default' : 'destructive'}
+        style={{
+          backgroundColor: isGood
+            ? 'var(--color-success)'
+            : 'var(--color-error)',
+          color: 'var(--text-inverse)',
+        }}
+      >
         {isGood ? 'Good' : 'Needs Attention'}
       </Badge>
     );
@@ -206,23 +229,38 @@ export function PerformanceDashboard() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <RefreshCw className="h-8 w-8 animate-spin text-primary" />
-        <span className="ml-2">Loading performance metrics...</span>
+        <RefreshCw
+          className="h-8 w-8 animate-spin"
+          style={{ color: 'var(--accent-primary)' }}
+        />
+        <span className="ml-2" style={{ color: 'var(--text-primary)' }}>
+          Loading performance metrics...
+        </span>
       </div>
     );
   }
 
   if (error) {
     return (
-      <Card className="border-destructive bg-destructive/10">
+      <Card
+        style={{
+          borderColor: 'var(--color-error)',
+          background: 'rgba(239, 68, 68, 0.1)',
+        }}
+      >
         <CardHeader>
-          <CardTitle className="text-red-800 flex items-center">
+          <CardTitle
+            className="flex items-center"
+            style={{ color: 'var(--color-error)' }}
+          >
             <AlertTriangle className="h-5 w-5 mr-2" />
             Error Loading Metrics
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-red-700 mb-4">{error}</p>
+          <p className="mb-4" style={{ color: 'var(--color-error)' }}>
+            {error}
+          </p>
           <Button onClick={loadMetrics} variant="outline">
             <RefreshCw className="h-4 w-4 mr-2" />
             Retry
@@ -254,7 +292,7 @@ export function PerformanceDashboard() {
                 id="days"
                 value={selectedDays}
                 onChange={(e) => setSelectedDays(Number(e.target.value))}
-                className="px-3 py-1 border rounded-md text-sm"
+                className="px-3 py-1 border rounded-md text-sm input-base"
               >
                 <option value={1}>Yesterday</option>
                 <option value={2}>2 days ago</option>
@@ -413,22 +451,46 @@ export function PerformanceDashboard() {
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
               <div className="text-center">
-                <div className="text-2xl font-bold text-success">
+                <div
+                  className="text-2xl font-bold"
+                  style={{ color: 'var(--color-success)' }}
+                >
                   {comparison.summary.improvements}
                 </div>
-                <div className="text-sm text-text-light">Improvements</div>
+                <div
+                  className="text-sm"
+                  style={{ color: 'var(--text-secondary)' }}
+                >
+                  Improvements
+                </div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-destructive">
+                <div
+                  className="text-2xl font-bold"
+                  style={{ color: 'var(--color-error)' }}
+                >
                   {comparison.summary.degradations}
                 </div>
-                <div className="text-sm text-text-light">Degradations</div>
+                <div
+                  className="text-sm"
+                  style={{ color: 'var(--text-secondary)' }}
+                >
+                  Degradations
+                </div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-text-light">
+                <div
+                  className="text-2xl font-bold"
+                  style={{ color: 'var(--text-secondary)' }}
+                >
                   {comparison.summary.neutral}
                 </div>
-                <div className="text-sm text-text-light">No Change</div>
+                <div
+                  className="text-sm"
+                  style={{ color: 'var(--text-secondary)' }}
+                >
+                  No Change
+                </div>
               </div>
             </div>
 
@@ -464,7 +526,8 @@ export function PerformanceDashboard() {
                         return (
                           <div
                             key={metric}
-                            className="flex items-center justify-between p-2 bg-surface rounded"
+                            className="flex items-center justify-between p-2 rounded"
+                            style={{ background: 'var(--bg-tertiary)' }}
                           >
                             <span className="text-sm font-medium">
                               {formatMetricName(metric)}
@@ -498,25 +561,25 @@ export function PerformanceDashboard() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
               <div>
                 <div className="font-medium">Platform</div>
-                <div className="text-text-light">
+                <div style={{ color: 'var(--text-secondary)' }}>
                   {latestMetrics.system.platform}
                 </div>
               </div>
               <div>
                 <div className="font-medium">Architecture</div>
-                <div className="text-text-light">
+                <div style={{ color: 'var(--text-secondary)' }}>
                   {latestMetrics.system.arch}
                 </div>
               </div>
               <div>
                 <div className="font-medium">Node Version</div>
-                <div className="text-text-light">
+                <div style={{ color: 'var(--text-secondary)' }}>
                   {latestMetrics.system.nodeVersion}
                 </div>
               </div>
               <div>
                 <div className="font-medium">Memory Usage</div>
-                <div className="text-text-light">
+                <div style={{ color: 'var(--text-secondary)' }}>
                   {typeof latestMetrics.system.memoryUsage === 'object'
                     ? `${Math.round(latestMetrics.system.memoryUsage.heapUsed / 1024 / 1024)}MB`
                     : `${latestMetrics.system.memoryUsage}MB`}

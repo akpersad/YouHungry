@@ -50,8 +50,14 @@ export function AdminPanel() {
   };
 
   return (
-    <div className="min-h-screen bg-surface">
-      <div className="bg-white shadow-sm border-b">
+    <div className="min-h-screen" style={{ background: 'var(--bg-primary)' }}>
+      <div
+        className="shadow-subtle border-b"
+        style={{
+          background: 'var(--bg-secondary)',
+          borderColor: 'var(--bg-quaternary)',
+        }}
+      >
         <div className="max-w-7xl mx-auto lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div>
@@ -60,7 +66,7 @@ export function AdminPanel() {
                 System administration and monitoring
               </p>
             </div>
-            <div className="text-sm text-text-light">
+            <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
               You Hungry? Admin Dashboard
             </div>
           </div>

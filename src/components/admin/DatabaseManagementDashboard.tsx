@@ -128,8 +128,13 @@ export function DatabaseManagementDashboard() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-text">Database Management</h2>
-          <p className="text-text-light">
+          <h2
+            className="text-2xl font-bold"
+            style={{ color: 'var(--text-primary)' }}
+          >
+            Database Management
+          </h2>
+          <p style={{ color: 'var(--text-secondary)' }}>
             Monitor database performance and health
           </p>
         </div>
@@ -239,54 +244,117 @@ export function DatabaseManagementDashboard() {
         <Card className="p-6">
           <h3 className="text-lg font-semibold mb-4">Collection Statistics</h3>
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-surface">
+            <table
+              className="min-w-full divide-y"
+              style={{ borderColor: 'var(--bg-quaternary)' }}
+            >
+              <thead style={{ background: 'var(--bg-tertiary)' }}>
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-text-light uppercase tracking-wider">
+                  <th
+                    className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
+                    style={{ color: 'var(--text-secondary)' }}
+                  >
                     Collection
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-text-light uppercase tracking-wider">
+                  <th
+                    className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
+                    style={{ color: 'var(--text-secondary)' }}
+                  >
                     Documents
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-text-light uppercase tracking-wider">
+                  <th
+                    className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
+                    style={{ color: 'var(--text-secondary)' }}
+                  >
                     Storage Size
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-text-light uppercase tracking-wider">
+                  <th
+                    className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
+                    style={{ color: 'var(--text-secondary)' }}
+                  >
                     Index Size
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-text-light uppercase tracking-wider">
+                  <th
+                    className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
+                    style={{ color: 'var(--text-secondary)' }}
+                  >
                     Indexes
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-text-light uppercase tracking-wider">
+                  <th
+                    className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
+                    style={{ color: 'var(--text-secondary)' }}
+                  >
                     Status
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody
+                className="divide-y"
+                style={{
+                  background: 'var(--bg-secondary)',
+                  borderColor: 'var(--bg-quaternary)',
+                }}
+              >
                 {stats.collections.map((collection) => (
-                  <tr key={collection.name} className="hover:bg-surface">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-text">
+                  <tr
+                    key={collection.name}
+                    style={{ background: 'var(--bg-secondary)' }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = 'var(--bg-tertiary)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = 'var(--bg-secondary)';
+                    }}
+                  >
+                    <td
+                      className="px-6 py-4 whitespace-nowrap text-sm font-medium"
+                      style={{ color: 'var(--text-primary)' }}
+                    >
                       {collection.name}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-text">
+                    <td
+                      className="px-6 py-4 whitespace-nowrap text-sm"
+                      style={{ color: 'var(--text-primary)' }}
+                    >
                       {collection.count.toLocaleString()}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-text">
+                    <td
+                      className="px-6 py-4 whitespace-nowrap text-sm"
+                      style={{ color: 'var(--text-primary)' }}
+                    >
                       {formatBytes(collection.storageSize)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-text">
+                    <td
+                      className="px-6 py-4 whitespace-nowrap text-sm"
+                      style={{ color: 'var(--text-primary)' }}
+                    >
                       {formatBytes(collection.indexSize)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-text">
+                    <td
+                      className="px-6 py-4 whitespace-nowrap text-sm"
+                      style={{ color: 'var(--text-primary)' }}
+                    >
                       {collection.indexes}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       {collection.error ? (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-destructive/10 text-red-800">
+                        <span
+                          className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                          style={{
+                            background: 'rgba(239, 68, 68, 0.1)',
+                            color: 'var(--color-error)',
+                          }}
+                        >
                           Error
                         </span>
                       ) : (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-success/10 text-green-800">
+                        <span
+                          className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                          style={{
+                            background: 'rgba(34, 197, 94, 0.1)',
+                            color: 'var(--color-success)',
+                          }}
+                        >
                           Healthy
                         </span>
                       )}

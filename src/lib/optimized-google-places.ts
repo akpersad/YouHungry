@@ -125,7 +125,7 @@ export async function searchRestaurantsOptimized(
   location?: string,
   radius: number = 5000
 ): Promise<Restaurant[]> {
-  const cacheKey = generateCacheKey('restaurant_search', {
+  const cacheKey = generateCacheKey('restaurant_search_v2', {
     query: query.toLowerCase().trim(),
     location: location?.toLowerCase().trim(),
     radius,
@@ -197,11 +197,18 @@ export async function searchRestaurantsOptimized(
         restaurantsWithPhotos: restaurants.filter(
           (r) => r.photos && r.photos.length > 0
         ).length,
+        restaurantsNeedingAddresses: restaurants.filter(
+          (r) => !r.address || r.address === 'Address not available'
+        ).length,
         sampleNames: restaurants.slice(0, 5).map((r) => r.name),
         cacheKey,
       });
 
-      return restaurants as Restaurant[];
+      // Enrich restaurants with missing addresses
+      const enrichedRestaurants = await enrichRestaurantsWithAddresses(
+        restaurants as Restaurant[]
+      );
+      return enrichedRestaurants;
     },
     {
       ttl: 7 * 24 * 60 * 60 * 1000, // 7 days
@@ -222,7 +229,7 @@ export async function searchRestaurantsByLocationOptimized(
   const roundedLat = Math.round(lat * 1000) / 1000; // ~100m precision
   const roundedLng = Math.round(lng * 1000) / 1000;
 
-  const cacheKey = generateCacheKey('restaurant_nearby', {
+  const cacheKey = generateCacheKey('restaurant_nearby_v2', {
     lat: roundedLat,
     lng: roundedLng,
     radius,
@@ -291,10 +298,17 @@ export async function searchRestaurantsByLocationOptimized(
         restaurantsWithPhotos: restaurants.filter(
           (r) => r.photos && r.photos.length > 0
         ).length,
+        restaurantsNeedingAddresses: restaurants.filter(
+          (r) => !r.address || r.address === 'Address not available'
+        ).length,
         cacheKey,
       });
 
-      return restaurants as Restaurant[];
+      // Enrich restaurants with missing addresses
+      const enrichedRestaurants = await enrichRestaurantsWithAddresses(
+        restaurants as Restaurant[]
+      );
+      return enrichedRestaurants;
     },
     {
       // Use shorter cache time to avoid stale data issues
@@ -368,6 +382,8 @@ export async function smartRestaurantSearch(
   location: string,
   radius: number = 5000
 ): Promise<Restaurant[]> {
+  let restaurants: Restaurant[] = [];
+
   // If we have a specific query, use text search for better results
   if (query && query.trim()) {
     logger.info('Using Text Search API for query:', {
@@ -382,31 +398,118 @@ export async function smartRestaurantSearch(
     if (coordinates) {
       // Use text search with location bias
       const locationParam = `${coordinates.lat},${coordinates.lng}`;
-      return searchRestaurantsOptimized(query, locationParam, radius);
+      restaurants = await searchRestaurantsOptimized(
+        query,
+        locationParam,
+        radius
+      );
     } else {
       // Fallback to text search without location
-      return searchRestaurantsOptimized(query, location, radius);
+      restaurants = await searchRestaurantsOptimized(query, location, radius);
     }
+  } else {
+    // If no query, use nearby search to get all nearby restaurants
+    const coordinates = await geocodeAddressOptimized(location);
+
+    if (!coordinates) {
+      logger.warn('Could not geocode location for nearby search:', location);
+      return [];
+    }
+
+    logger.info('Using Nearby Search API (no specific query):', {
+      coordinates,
+      radius,
+    });
+
+    restaurants = await searchRestaurantsByLocationOptimized(
+      coordinates.lat,
+      coordinates.lng,
+      radius
+    );
   }
 
-  // If no query, use nearby search to get all nearby restaurants
-  const coordinates = await geocodeAddressOptimized(location);
+  // Enrich restaurants with missing addresses
+  return await enrichRestaurantsWithAddresses(restaurants);
+}
 
-  if (!coordinates) {
-    logger.warn('Could not geocode location for nearby search:', location);
-    return [];
+// Enrich restaurant data with missing addresses using Place Details API
+export async function enrichRestaurantsWithAddresses(
+  restaurants: Restaurant[]
+): Promise<Restaurant[]> {
+  try {
+    // Find restaurants that need address enrichment
+    const restaurantsNeedingAddresses = restaurants.filter(
+      (restaurant) =>
+        !restaurant.address ||
+        restaurant.address === 'Address not available' ||
+        restaurant.address === null
+    );
+
+    logger.info(
+      `Enrichment check: ${restaurants.length} total restaurants, ${restaurantsNeedingAddresses.length} need addresses`
+    );
+
+    if (restaurantsNeedingAddresses.length === 0) {
+      logger.info('No restaurants need address enrichment');
+      return restaurants;
+    }
+
+    logger.info(
+      `Enriching ${restaurantsNeedingAddresses.length} restaurants with missing addresses`
+    );
+
+    // Get Place IDs for restaurants needing addresses
+    const placeIds = restaurantsNeedingAddresses.map((r) => r.googlePlaceId);
+    logger.info(
+      `Place IDs for enrichment: ${placeIds.slice(0, 3).join(', ')}${placeIds.length > 3 ? '...' : ''}`
+    );
+
+    // Fetch detailed information for these restaurants
+    const enrichedRestaurants = await getRestaurantDetailsBatch(placeIds);
+    logger.info(
+      `Got ${enrichedRestaurants.length} enriched restaurants from Place Details API`
+    );
+
+    // Create a map of enriched restaurants by Google Place ID
+    const enrichedMap = new Map(
+      enrichedRestaurants.map((r) => [r.googlePlaceId, r])
+    );
+
+    // Update the original restaurants with enriched data
+    const result = restaurants.map((restaurant) => {
+      const enriched = enrichedMap.get(restaurant.googlePlaceId);
+      if (
+        enriched &&
+        enriched.address &&
+        enriched.address !== 'Address not available'
+      ) {
+        logger.info(
+          `Enriched ${restaurant.name} with address: ${enriched.address}`
+        );
+        return {
+          ...restaurant,
+          address: enriched.address,
+          phoneNumber: enriched.phoneNumber || restaurant.phoneNumber,
+          website: enriched.website || restaurant.website,
+          hours: enriched.hours || restaurant.hours,
+        };
+      }
+      return restaurant;
+    });
+
+    const enrichedCount = result.filter(
+      (r) => r.address && r.address !== 'Address not available'
+    ).length;
+    logger.info(
+      `Enrichment complete: ${enrichedCount}/${restaurants.length} restaurants now have addresses`
+    );
+
+    return result;
+  } catch (error) {
+    logger.error('Error in enrichRestaurantsWithAddresses:', error);
+    // Return original restaurants if enrichment fails
+    return restaurants;
   }
-
-  logger.info('Using Nearby Search API (no specific query):', {
-    coordinates,
-    radius,
-  });
-
-  return searchRestaurantsByLocationOptimized(
-    coordinates.lat,
-    coordinates.lng,
-    radius
-  );
 }
 
 // Batch restaurant details fetching to reduce API calls
