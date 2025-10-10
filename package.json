@@ -31,7 +31,10 @@
     "logs:clean": "npm run logs:replace && npm run lint:fix",
     "check-colors": "node scripts/comprehensive-contrast-audit.js",
     "fix-colors": "node scripts/comprehensive-fix-contrast-issues.js",
-    "lint-colors": "npx eslint src --ext .ts,.tsx --rule \"no-hardcoded-colors: error\""
+    "lint-colors": "npx eslint src --ext .ts,.tsx --rule \"no-hardcoded-colors: error\"",
+    "prod": "node scripts/run-production.js all",
+    "prod:build": "node scripts/run-production.js build",
+    "prod:start": "node scripts/run-production.js start"
   },
   "dependencies": {
     "@apollo/server": "^5.0.0",

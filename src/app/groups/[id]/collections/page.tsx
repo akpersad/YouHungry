@@ -9,6 +9,7 @@ import { CreateCollectionForm } from '@/components/forms/CreateCollectionForm';
 import { Collection } from '@/types/database';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import { Modal } from '@/components/ui/Modal';
 import { useGroup } from '@/hooks/api/useGroups';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
@@ -148,6 +149,7 @@ export default function GroupCollectionsPage({
               isLoading={collectionsLoading}
               onCreateCollection={() => setShowCreateForm(true)}
               showType={false} // Don't show type since all are group collections
+              showHeader={false} // Hide header since page has its own
               // Remove onCollectionSelect so View button navigates to collection detail page
             />
 
@@ -156,18 +158,24 @@ export default function GroupCollectionsPage({
         )}
 
         {showCreateForm && (
-          <CreateCollectionForm
-            groupId={groupId}
-            onSuccess={() => {
-              toast.success('Collection created successfully!');
-              setShowCreateForm(false);
-              // Invalidate the group collections cache to refresh the data
-              queryClient.invalidateQueries({
-                queryKey: ['groupCollections', groupId],
-              });
-            }}
-            onCancel={() => setShowCreateForm(false)}
-          />
+          <Modal
+            isOpen={showCreateForm}
+            onClose={() => setShowCreateForm(false)}
+            title="Create New Collection"
+          >
+            <CreateCollectionForm
+              groupId={groupId}
+              onSuccess={() => {
+                toast.success('Collection created successfully!');
+                setShowCreateForm(false);
+                // Invalidate the group collections cache to refresh the data
+                queryClient.invalidateQueries({
+                  queryKey: ['groupCollections', groupId],
+                });
+              }}
+              onCancel={() => setShowCreateForm(false)}
+            />
+          </Modal>
         )}
       </div>
     </ProtectedRoute>

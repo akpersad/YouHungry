@@ -307,9 +307,6 @@ describe('AdminAlertsDashboard', () => {
         }),
       } as Response);
 
-    // Mock confirm dialog
-    window.confirm = jest.fn(() => true);
-
     render(<AdminAlertsDashboard />);
 
     await waitFor(() => {
@@ -319,6 +316,18 @@ describe('AdminAlertsDashboard', () => {
     // Click delete button - use getAllByRole to get the first delete button
     const deleteButtons = screen.getAllByRole('button', { name: 'Delete' });
     fireEvent.click(deleteButtons[0]);
+
+    // Wait for the confirmation modal to appear
+    await waitFor(() => {
+      expect(screen.getByText('Delete Alert?')).toBeInTheDocument();
+    });
+
+    // Click the confirm delete button in the modal
+    const confirmDeleteButtons = screen.getAllByRole('button', {
+      name: 'Delete',
+    });
+    // The last one should be the one in the modal
+    fireEvent.click(confirmDeleteButtons[confirmDeleteButtons.length - 1]);
 
     await waitFor(() => {
       expect(global.fetch).toHaveBeenCalledWith(

@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { logger } from '@/lib/logger';
+import { Modal } from '@/components/ui/Modal';
+import { Button } from '@/components/ui/Button';
 
 interface SystemSettings {
   rateLimiting: {
@@ -87,6 +89,7 @@ export function SystemSettingsDashboard() {
   const [settings, setSettings] = useState<SystemSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [showResetConfirmation, setShowResetConfirmation] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
@@ -152,19 +155,16 @@ export function SystemSettingsDashboard() {
     }
   };
 
-  const resetSettings = async () => {
-    if (
-      !confirm(
-        'Are you sure you want to reset all settings to defaults? This action cannot be undone.'
-      )
-    ) {
-      return;
-    }
+  const resetSettings = () => {
+    setShowResetConfirmation(true);
+  };
 
+  const confirmResetSettings = async () => {
     try {
       setSaving(true);
       setError(null);
       setSuccess(null);
+      setShowResetConfirmation(false);
 
       const response = await fetch('/api/admin/settings', {
         method: 'POST',
@@ -1457,6 +1457,35 @@ export function SystemSettingsDashboard() {
           </div>
         </div>
       </div>
+
+      {/* Reset Confirmation Modal */}
+      <Modal
+        isOpen={showResetConfirmation}
+        onClose={() => setShowResetConfirmation(false)}
+        title="Reset Settings to Defaults?"
+      >
+        <div className="space-y-4">
+          <p className="text-text">
+            Are you sure you want to reset all settings to defaults? This action
+            cannot be undone.
+          </p>
+          <div className="flex justify-end space-x-2">
+            <Button
+              onClick={() => setShowResetConfirmation(false)}
+              variant="outline"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={confirmResetSettings}
+              className="bg-red-600 hover:bg-red-700"
+              disabled={saving}
+            >
+              Reset Settings
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

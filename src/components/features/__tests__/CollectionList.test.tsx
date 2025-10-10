@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { CollectionList } from '../CollectionList';
 import { TestQueryProvider } from '@/test-utils/testQueryClient';
 import { ObjectId } from 'mongodb';
@@ -193,9 +193,6 @@ describe('CollectionList', () => {
       isPending: false,
     } as any);
 
-    // Mock window.confirm
-    window.confirm = jest.fn(() => true);
-
     render(
       <TestQueryProvider>
         <CollectionList />
@@ -212,11 +209,25 @@ describe('CollectionList', () => {
 
     fireEvent.click(deleteButtons[0]);
 
-    expect(window.confirm).toHaveBeenCalledWith(
-      'Are you sure you want to delete this collection? This action cannot be undone.'
-    );
+    // Wait for the confirmation modal to appear
+    await waitFor(() => {
+      expect(screen.getByText('Delete Collection?')).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          'Are you sure you want to delete this collection? This action cannot be undone.'
+        )
+      ).toBeInTheDocument();
+    });
 
-    expect(mockMutateAsync).toHaveBeenCalledWith('507f1f77bcf86cd799439011');
+    // Click the confirm delete button in the modal
+    const confirmButton = screen.getByRole('button', {
+      name: /delete collection/i,
+    });
+    fireEvent.click(confirmButton);
+
+    await waitFor(() => {
+      expect(mockMutateAsync).toHaveBeenCalledWith('507f1f77bcf86cd799439011');
+    });
   });
 
   it('handles fetch error', () => {

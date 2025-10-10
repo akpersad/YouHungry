@@ -11,6 +11,7 @@ import { DatePicker } from '@/components/ui/DatePicker';
 import { DecisionResultModal } from './DecisionResultModal';
 import { useGroupDecisionSubscription } from '@/hooks/api/useGroupDecisionSubscription';
 import { Restaurant as DatabaseRestaurant } from '@/types/database';
+import { toast } from 'sonner';
 
 interface GroupDecisionMakingProps {
   groupId: string;
@@ -80,6 +81,10 @@ export function GroupDecisionMaking({
   const [draggedItem, setDraggedItem] = useState<string | null>(null);
   const [visitDate, setVisitDate] = useState('');
   const [deadlineHours] = useState(24);
+  const [showCloseConfirmation, setShowCloseConfirmation] = useState(false);
+  const [decisionToClose, setDecisionToClose] = useState<GroupDecision | null>(
+    null
+  );
 
   const queryClient = useQueryClient();
 
@@ -249,7 +254,7 @@ export function GroupDecisionMaking({
 
   const handleCreateDecision = (method: 'random' | 'tiered') => {
     if (!visitDate) {
-      alert('Please select a visit date');
+      toast.error('Please select a visit date');
       return;
     }
 
@@ -275,7 +280,7 @@ export function GroupDecisionMaking({
 
   const handleVote = () => {
     if (!selectedDecision || rankings.length === 0) {
-      alert('Please select at least one restaurant');
+      toast.error('Please select at least one restaurant');
       return;
     }
 
@@ -284,7 +289,7 @@ export function GroupDecisionMaking({
 
     if (!decisionId) {
       logger.error('Selected decision has no ID!');
-      alert('Error: Decision ID is missing. Please try again.');
+      toast.error('Error: Decision ID is missing. Please try again.');
       return;
     }
 
@@ -300,14 +305,17 @@ export function GroupDecisionMaking({
   };
 
   const handleCloseDecision = (decision: GroupDecision) => {
-    if (
-      confirm(
-        'Are you sure you want to close this decision? This will end voting without selecting a restaurant.'
-      )
-    ) {
-      const decisionId = decision.id;
+    setDecisionToClose(decision);
+    setShowCloseConfirmation(true);
+  };
+
+  const confirmCloseDecision = () => {
+    if (decisionToClose) {
+      const decisionId = decisionToClose.id;
       closeDecisionMutation.mutate(decisionId);
     }
+    setShowCloseConfirmation(false);
+    setDecisionToClose(null);
   };
 
   const handleRankRestaurant = (restaurantId: string) => {
@@ -316,7 +324,7 @@ export function GroupDecisionMaking({
     } else if (rankings.length < 3) {
       setRankings([...rankings, restaurantId]);
     } else {
-      alert('You can only rank up to 3 restaurants');
+      toast.warning('You can only rank up to 3 restaurants');
     }
   };
 
@@ -853,6 +861,40 @@ export function GroupDecisionMaking({
           onTryAgain={() => setShowDecisionResult(false)}
         />
       )}
+
+      {/* Close Decision Confirmation Modal */}
+      <Modal
+        isOpen={showCloseConfirmation}
+        onClose={() => {
+          setShowCloseConfirmation(false);
+          setDecisionToClose(null);
+        }}
+        title="Close Decision?"
+      >
+        <div className="space-y-4">
+          <p className="text-text">
+            Are you sure you want to close this decision? This will end voting
+            without selecting a restaurant.
+          </p>
+          <div className="flex justify-end space-x-2">
+            <Button
+              onClick={() => {
+                setShowCloseConfirmation(false);
+                setDecisionToClose(null);
+              }}
+              variant="outline"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={confirmCloseDecision}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Close Decision
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

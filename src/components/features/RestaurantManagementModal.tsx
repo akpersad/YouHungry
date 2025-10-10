@@ -33,6 +33,7 @@ export function RestaurantManagementModal({
   );
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showRemoveConfirmation, setShowRemoveConfirmation] = useState(false);
 
   const handleSave = async () => {
     if (!restaurant) return;
@@ -67,26 +68,25 @@ export function RestaurantManagementModal({
     }
   };
 
-  const handleRemove = async () => {
-    if (
-      !restaurant ||
-      !confirm(
-        'Are you sure you want to remove this restaurant from the collection?'
-      )
-    ) {
-      return;
-    }
+  const handleRemove = () => {
+    setShowRemoveConfirmation(true);
+  };
+
+  const confirmRemove = async () => {
+    if (!restaurant) return;
 
     setIsLoading(true);
     setError(null);
 
     try {
       await onRemoveFromCollection(restaurant._id.toString());
+      setShowRemoveConfirmation(false);
       onClose();
     } catch (err) {
       setError(
         err instanceof Error ? err.message : 'Failed to remove restaurant'
       );
+      setShowRemoveConfirmation(false);
     } finally {
       setIsLoading(false);
     }
@@ -202,6 +202,34 @@ export function RestaurantManagementModal({
           </Button>
         </div>
       </div>
+
+      {/* Remove Confirmation Modal */}
+      <Modal
+        isOpen={showRemoveConfirmation}
+        onClose={() => setShowRemoveConfirmation(false)}
+        title="Remove Restaurant?"
+      >
+        <div className="space-y-4">
+          <p className="text-text">
+            Are you sure you want to remove this restaurant from the collection?
+          </p>
+          <div className="flex justify-end space-x-2">
+            <Button
+              onClick={() => setShowRemoveConfirmation(false)}
+              variant="outline"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={confirmRemove}
+              className="bg-red-600 hover:bg-red-700"
+              disabled={isLoading}
+            >
+              Remove
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </Modal>
   );
 }

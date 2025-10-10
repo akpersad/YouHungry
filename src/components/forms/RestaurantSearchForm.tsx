@@ -7,6 +7,7 @@ import { Card } from '@/components/ui/Card';
 import { AddressInput } from '@/components/ui/AddressInput';
 import { Input } from '@/components/ui/Input';
 import { useProfile } from '@/hooks/useProfile';
+import { toast } from 'sonner';
 
 interface RestaurantSearchFormProps {
   onSearch: (location: string, query?: string, filters?: SearchFilters) => void;
@@ -95,19 +96,21 @@ export function RestaurantSearchForm({
             setUseCurrentLocation(true);
             setLocation('Current Location');
             setIsAddressValid(true);
+            toast.success('Location detected successfully');
           },
           (error) => {
             logger.error('Error getting location:', error);
-            alert(
+            toast.error(
               'Unable to get your location. Please enter an address manually.'
             );
           }
         );
       } else {
-        alert('Geolocation is not supported by this browser.');
+        toast.error('Geolocation is not supported by this browser.');
       }
     } catch (error) {
       logger.error('Error getting location:', error);
+      toast.error('An error occurred while getting your location.');
     }
   };
 

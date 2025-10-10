@@ -245,8 +245,6 @@ describe('RestaurantManagementModal', () => {
 
   it('removes restaurant when remove button is clicked', async () => {
     mockOnRemoveFromCollection.mockResolvedValue(undefined);
-    // Mock window.confirm
-    window.confirm = jest.fn(() => true);
 
     render(
       <RestaurantManagementModal
@@ -261,6 +259,18 @@ describe('RestaurantManagementModal', () => {
 
     const removeButton = screen.getByText('Remove from Collection');
     fireEvent.click(removeButton);
+
+    // Wait for confirmation modal
+    await waitFor(() => {
+      expect(screen.getByText('Remove Restaurant?')).toBeInTheDocument();
+    });
+
+    // Click the confirm button in the modal
+    const confirmButtons = screen.getAllByRole('button', { name: /remove/i });
+    const confirmButton = confirmButtons.find((button) =>
+      button.textContent?.match(/^Remove$/)
+    );
+    fireEvent.click(confirmButton!);
 
     await waitFor(() => {
       expect(mockOnRemoveFromCollection).toHaveBeenCalledWith(
@@ -273,8 +283,6 @@ describe('RestaurantManagementModal', () => {
 
   it('does not remove restaurant when confirmation is cancelled', async () => {
     mockOnRemoveFromCollection.mockResolvedValue(undefined);
-    // Mock window.confirm to return false
-    window.confirm = jest.fn(() => false);
 
     render(
       <RestaurantManagementModal
@@ -290,10 +298,21 @@ describe('RestaurantManagementModal', () => {
     const removeButton = screen.getByText('Remove from Collection');
     fireEvent.click(removeButton);
 
+    // Wait for confirmation modal
     await waitFor(() => {
-      expect(mockOnRemoveFromCollection).not.toHaveBeenCalled();
+      expect(screen.getByText('Remove Restaurant?')).toBeInTheDocument();
     });
 
+    // Click the cancel button
+    const cancelButton = screen.getByRole('button', { name: /cancel/i });
+    fireEvent.click(cancelButton);
+
+    // Modal should be closed
+    await waitFor(() => {
+      expect(screen.queryByText('Remove Restaurant?')).not.toBeInTheDocument();
+    });
+
+    expect(mockOnRemoveFromCollection).not.toHaveBeenCalled();
     expect(mockOnClose).not.toHaveBeenCalled();
   });
 
@@ -330,7 +349,6 @@ describe('RestaurantManagementModal', () => {
   it('displays error message when remove fails', async () => {
     const errorMessage = 'Failed to remove restaurant';
     mockOnRemoveFromCollection.mockRejectedValue(new Error(errorMessage));
-    window.confirm = jest.fn(() => true);
 
     render(
       <RestaurantManagementModal
@@ -345,6 +363,18 @@ describe('RestaurantManagementModal', () => {
 
     const removeButton = screen.getByText('Remove from Collection');
     fireEvent.click(removeButton);
+
+    // Wait for confirmation modal
+    await waitFor(() => {
+      expect(screen.getByText('Remove Restaurant?')).toBeInTheDocument();
+    });
+
+    // Click the confirm button in the modal
+    const confirmButtons = screen.getAllByRole('button', { name: /remove/i });
+    const confirmButton = confirmButtons.find((button) =>
+      button.textContent?.match(/^Remove$/)
+    );
+    fireEvent.click(confirmButton!);
 
     await waitFor(() => {
       expect(screen.getByText(errorMessage)).toBeInTheDocument();

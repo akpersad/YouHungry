@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { logger } from '@/lib/logger';
+import { Modal } from '@/components/ui/Modal';
+import { Button } from '@/components/ui/Button';
 
 interface Alert {
   id: string;
@@ -53,6 +55,8 @@ export function AdminAlertsDashboard() {
   const [emailTestLoading, setEmailTestLoading] = useState(false);
   const [emailTestResult, setEmailTestResult] = useState<string | null>(null);
   const [testEmail, setTestEmail] = useState('akpersad@gmail.com');
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [alertToDelete, setAlertToDelete] = useState<string | null>(null);
 
   const fetchAlerts = async (filter: string = 'all') => {
     try {
@@ -168,13 +172,16 @@ export function AdminAlertsDashboard() {
     }
   };
 
-  const deleteAlert = async (alertId: string) => {
-    if (!confirm('Are you sure you want to delete this alert?')) {
-      return;
-    }
+  const deleteAlert = (alertId: string) => {
+    setAlertToDelete(alertId);
+    setShowDeleteConfirmation(true);
+  };
+
+  const confirmDeleteAlert = async () => {
+    if (!alertToDelete) return;
 
     try {
-      const response = await fetch(`/api/admin/alerts?id=${alertId}`, {
+      const response = await fetch(`/api/admin/alerts?id=${alertToDelete}`, {
         method: 'DELETE',
       });
 
@@ -183,12 +190,15 @@ export function AdminAlertsDashboard() {
       }
 
       // Update local state
-      setAlerts((prev) => prev.filter((alert) => alert.id !== alertId));
+      setAlerts((prev) => prev.filter((alert) => alert.id !== alertToDelete));
       setSelectedAlert(null);
 
-      logger.info('Admin: Alert deleted', { alertId });
+      logger.info('Admin: Alert deleted', { alertId: alertToDelete });
     } catch (err) {
-      logger.error('Admin: Error deleting alert', { error: err, alertId });
+      logger.error('Admin: Error deleting alert', {
+        error: err,
+        alertId: alertToDelete,
+      });
     }
   };
 
@@ -731,6 +741,44 @@ export function AdminAlertsDashboard() {
           </div>
         </div>
       )}
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        isOpen={showDeleteConfirmation}
+        onClose={() => {
+          setShowDeleteConfirmation(false);
+          setAlertToDelete(null);
+        }}
+        title="Delete Alert?"
+      >
+        <div className="space-y-4">
+          <p className="text-text">
+            Are you sure you want to delete this alert? This action cannot be
+            undone.
+          </p>
+          <div className="flex justify-end space-x-2">
+            <Button
+              onClick={() => {
+                setShowDeleteConfirmation(false);
+                setAlertToDelete(null);
+              }}
+              variant="outline"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                confirmDeleteAlert();
+                setShowDeleteConfirmation(false);
+                setAlertToDelete(null);
+              }}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Delete
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }
