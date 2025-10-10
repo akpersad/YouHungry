@@ -231,10 +231,12 @@ export const deduplicatedGeocoding = withDeduplication(
   { ttl: 3000, maxAge: 300000 } // 3s dedup, 5min cache (addresses don't change often)
 );
 
-// Cleanup expired requests periodically
-setInterval(() => {
-  requestDeduplicator.cleanupPendingRequests();
-}, 60000); // Every minute
+// Cleanup expired requests periodically (skip in test environment)
+if (process.env.NODE_ENV !== 'test') {
+  setInterval(() => {
+    requestDeduplicator.cleanupPendingRequests();
+  }, 60000); // Every minute
+}
 
 // Export for monitoring
 export async function getDeduplicationStats() {

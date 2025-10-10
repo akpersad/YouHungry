@@ -403,10 +403,12 @@ export async function withCache<T>(
   }
 }
 
-// Cleanup expired entries periodically
-setInterval(
-  () => {
-    apiCache.cleanupExpired();
-  },
-  60 * 60 * 1000
-); // Every hour
+// Cleanup expired entries periodically (skip in test environment)
+if (process.env.NODE_ENV !== 'test') {
+  setInterval(
+    () => {
+      apiCache.cleanupExpired();
+    },
+    60 * 60 * 1000
+  ); // Every hour
+}

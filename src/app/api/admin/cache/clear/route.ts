@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { getUserByClerkId } from '@/lib/users';
 import { apiCache } from '@/lib/api-cache';
+import { clearLocationCache } from '@/lib/google-places';
 
 // List of authorized admin MongoDB user IDs
 const ADMIN_USER_IDS = ['68d9b010a25dec569c34c111', '68d9ae3528a9bab6c334d9f9'];
@@ -27,8 +28,17 @@ export async function POST(request: NextRequest) {
     let deletedCount = 0;
 
     if (cacheType) {
-      // Clear by cache type (e.g., "restaurant_search")
-      deletedCount = await apiCache.clearByCacheType(cacheType);
+      // Special handling for location_cache (stored in MongoDB, not api-cache)
+      if (cacheType === 'location_cache') {
+        deletedCount = await clearLocationCache();
+        logger.info('Location cache cleared by admin:', {
+          userId,
+          deletedCount,
+        });
+      } else {
+        // Clear by cache type (e.g., "restaurant_search")
+        deletedCount = await apiCache.clearByCacheType(cacheType);
+      }
     } else if (pattern) {
       // Clear by pattern (e.g., "restaurant_nearby")
       deletedCount = await apiCache.clearByPattern(pattern);
