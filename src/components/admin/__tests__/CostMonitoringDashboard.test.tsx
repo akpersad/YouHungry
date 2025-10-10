@@ -37,6 +37,14 @@ const mockCostData = {
       totalHits: 1250,
       memoryEntries: 89,
     },
+    locationCache: {
+      totalEntries: 156,
+      locationOnlyEntries: 89,
+      locationQueryEntries: 67,
+      estimatedSizeKB: 312,
+      averageRestaurantsPerEntry: 12.5,
+      oldestEntry: '2024-01-15T10:30:00Z',
+    },
     estimatedCosts: {
       daily: 12.45,
       monthly: 373.5,
@@ -92,7 +100,11 @@ describe('CostMonitoringDashboard', () => {
     // Check cache performance
     expect(screen.getByText('75.5%')).toBeInTheDocument(); // Hit Rate
     expect(screen.getByText('1,250')).toBeInTheDocument(); // Total Hits
-    expect(screen.getByText('89')).toBeInTheDocument(); // Memory Entries
+    // Check for Memory Entries specifically in the Cache Performance section
+    const cachePerformanceSection = screen
+      .getByText('Cache Performance')
+      .closest('div');
+    expect(cachePerformanceSection).toHaveTextContent('89'); // Memory Entries
   });
 
   it('should render recommendations when available', async () => {

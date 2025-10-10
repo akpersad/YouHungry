@@ -114,11 +114,12 @@ describe('RestaurantSearchResults', () => {
         onAddToCollection={mockOnAddToCollection}
         onViewDetails={mockOnViewDetails}
         searchQuery="test"
+        totalResults={2}
       />
     );
 
     expect(screen.getByText('Results for "test"')).toBeInTheDocument();
-    expect(screen.getByText('2 restaurants found')).toBeInTheDocument();
+    expect(screen.getByText('2 restaurants')).toBeInTheDocument();
     expect(screen.getByText('Test Restaurant 1')).toBeInTheDocument();
     expect(screen.getByText('Test Restaurant 2')).toBeInTheDocument();
   });
@@ -130,11 +131,12 @@ describe('RestaurantSearchResults', () => {
         isLoading={false}
         onAddToCollection={mockOnAddToCollection}
         onViewDetails={mockOnViewDetails}
+        totalResults={2}
       />
     );
 
     expect(screen.getByText('Restaurants')).toBeInTheDocument();
-    expect(screen.getByText('2 restaurants found')).toBeInTheDocument();
+    expect(screen.getByText('2 restaurants')).toBeInTheDocument();
   });
 
   it('calls onAddToCollection when Add to Collection is clicked', () => {
@@ -244,9 +246,10 @@ describe('RestaurantSearchResults', () => {
         isLoading={false}
         onAddToCollection={mockOnAddToCollection}
         onViewDetails={mockOnViewDetails}
+        totalResults={1}
       />
     );
 
-    expect(screen.getByText('1 restaurant found')).toBeInTheDocument();
+    expect(screen.getByText('1 restaurant')).toBeInTheDocument();
   });
 });

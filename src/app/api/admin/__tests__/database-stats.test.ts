@@ -42,29 +42,34 @@ describe('/api/admin/database/stats', () => {
       ping: jest.fn().mockResolvedValue(undefined),
     };
 
+    const mockCollection = {
+      countDocuments: jest.fn().mockResolvedValue(150),
+      indexes: jest
+        .fn()
+        .mockResolvedValue([
+          { name: '_id_' },
+          { name: 'email_1' },
+          { name: 'createdAt_1' },
+        ]),
+    };
+
     const mockDb = {
       admin: jest.fn().mockReturnValue(mockAdminDb),
-      collection: jest.fn().mockReturnThis(),
-      countDocuments: jest.fn(),
-      runCommand: jest.fn(),
-      indexes: jest.fn(),
+      collection: jest.fn().mockReturnValue(mockCollection),
+      command: jest.fn().mockImplementation((cmd) => {
+        if (cmd.collStats) {
+          return Promise.resolve({
+            storageSize: 1048576, // 1MB
+            totalIndexSize: 262144, // 256KB
+          });
+        }
+        return Promise.resolve({});
+      }),
     };
 
     mockConnectToDatabase.mockResolvedValue(
       mockDb as unknown as ReturnType<typeof connectToDatabase>
     );
-
-    // Mock collection stats
-    mockDb.countDocuments.mockResolvedValue(150);
-    mockDb.runCommand.mockResolvedValue({
-      storageSize: 1048576, // 1MB
-      totalIndexSize: 262144, // 256KB
-    });
-    mockDb.indexes.mockResolvedValue([
-      { name: '_id_' },
-      { name: 'email_1' },
-      { name: 'createdAt_1' },
-    ]);
 
     const request = new NextRequest(
       'http://localhost:3000/api/admin/database/stats'
@@ -274,9 +279,14 @@ describe('/api/admin/database/stats', () => {
       admin: jest.fn().mockReturnValue(mockAdminDb),
       collection: jest.fn().mockReturnThis(),
       countDocuments: jest.fn().mockResolvedValue(150),
-      runCommand: jest.fn().mockResolvedValue({
-        storageSize: 1048576, // 1MB
-        totalIndexSize: 262144, // 256KB
+      command: jest.fn().mockImplementation((cmd) => {
+        if (cmd.collStats) {
+          return Promise.resolve({
+            storageSize: 1048576, // 1MB
+            totalIndexSize: 262144, // 256KB
+          });
+        }
+        return Promise.resolve({});
       }),
       indexes: jest
         .fn()
