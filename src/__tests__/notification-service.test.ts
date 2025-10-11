@@ -37,7 +37,10 @@ describe('Notification Service', () => {
         timezone: 'America/New_York',
       },
       notificationSettings: {
-        groupDecisions: true,
+        groupDecisions: {
+          started: true,
+          completed: true,
+        },
         friendRequests: true,
         groupInvites: true,
         smsEnabled: true,
@@ -95,7 +98,9 @@ describe('Notification Service', () => {
         mockUser.smsPhoneNumber,
         data.groupName,
         data.decisionType,
-        data.deadline
+        data.deadline,
+        data.groupId.toString(),
+        undefined // shortUrl
       );
 
       expect(

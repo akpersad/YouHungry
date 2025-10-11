@@ -91,7 +91,10 @@ describe('ProfilePage', () => {
         timezone: 'America/New_York',
       },
       notificationSettings: {
-        groupDecisions: true,
+        groupDecisions: {
+          started: true,
+          completed: true,
+        },
         friendRequests: true,
         groupInvites: true,
         smsEnabled: true,
@@ -309,7 +312,10 @@ describe('ProfilePage', () => {
             state: 'Test State',
           },
           notificationSettings: {
-            groupDecisions: true,
+            groupDecisions: {
+              started: true,
+              completed: true,
+            },
             friendRequests: true,
             groupInvites: true,
             smsEnabled: true,

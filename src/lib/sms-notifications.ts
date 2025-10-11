@@ -154,19 +154,23 @@ export class SMSNotificationService {
     groupName: string,
     decisionType: 'tiered' | 'random',
     deadline: Date,
-    groupId?: string
+    groupId?: string,
+    shortUrl?: string
   ): Promise<SMSDeliveryStatus> {
     let message: string;
 
-    if (groupId) {
-      // Shorten the group URL
+    // Use provided shortUrl or generate one from groupId
+    let urlToUse = shortUrl;
+    if (!urlToUse && groupId) {
       const groupUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/groups/${groupId}`;
-      const shortUrl = await this.shortenUrlForSMS(groupUrl);
+      urlToUse = await this.shortenUrlForSMS(groupUrl);
+    }
 
+    if (urlToUse) {
       message =
         decisionType === 'tiered'
-          ? `🍽️ You Hungry? - ${groupName} has started a group decision! Vote by ${deadline.toLocaleDateString()} at ${deadline.toLocaleTimeString()}. ${shortUrl}`
-          : `🎲 You Hungry? - ${groupName} has started a random selection! Decision at ${deadline.toLocaleDateString()} at ${deadline.toLocaleTimeString()}. ${shortUrl}`;
+          ? `🍽️ You Hungry? - ${groupName} has started a group decision! Vote by ${deadline.toLocaleDateString()} at ${deadline.toLocaleTimeString()}. ${urlToUse}`
+          : `🎲 You Hungry? - ${groupName} has started a random selection! Decision at ${deadline.toLocaleDateString()} at ${deadline.toLocaleTimeString()}. ${urlToUse}`;
     } else {
       // Fallback to original message without URL
       message =
@@ -174,6 +178,27 @@ export class SMSNotificationService {
           ? `🍽️ You Hungry? - ${groupName} has started a group decision! Vote for your top 3 restaurants by ${deadline.toLocaleDateString()} at ${deadline.toLocaleTimeString()}.`
           : `🎲 You Hungry? - ${groupName} has started a random selection! The decision will be made at ${deadline.toLocaleDateString()} at ${deadline.toLocaleTimeString()}.`;
     }
+
+    return this.sendSMS({
+      to: phoneNumber,
+      body: message,
+    });
+  }
+
+  /**
+   * Send decision result notification SMS
+   */
+  public async sendDecisionResultNotification(
+    phoneNumber: string,
+    groupName: string,
+    restaurantName: string,
+    decisionType: 'tiered' | 'random',
+    shortUrl?: string
+  ): Promise<SMSDeliveryStatus> {
+    const typeText = decisionType === 'random' ? 'random choice' : 'group vote';
+    const message = shortUrl
+      ? `🎉 You Hungry? - ${groupName} decision complete! You're going to ${restaurantName} (${typeText})! ${shortUrl}`
+      : `🎉 You Hungry? - ${groupName} decision complete! You're going to ${restaurantName} (${typeText})!`;
 
     return this.sendSMS({
       to: phoneNumber,

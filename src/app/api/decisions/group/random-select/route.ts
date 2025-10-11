@@ -1,7 +1,12 @@
 import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
+import { getCurrentUser } from '@/lib/auth';
 import { performGroupRandomSelection } from '@/lib/decisions';
+import { getGroupById } from '@/lib/groups';
+import { sendDecisionCompletedNotifications } from '@/lib/decision-notifications';
+import { connectToDatabase } from '@/lib/db';
+import { ObjectId } from 'mongodb';
 import { z } from 'zod';
 
 const groupRandomSelectSchema = z.object({
@@ -17,20 +22,64 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    // Get current user for createdBy field
+    const currentUser = await getCurrentUser();
+    if (!currentUser) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+
     const body = await request.json();
     const { collectionId, groupId, visitDate } =
       groupRandomSelectSchema.parse(body);
 
-    // For now, we'll need to get the group members - this should be enhanced
-    // to get actual group members from the group
-    const participants = [userId]; // TODO: Get actual group members
+    // Get the group to find all members
+    const group = await getGroupById(groupId);
+    if (!group) {
+      return NextResponse.json({ error: 'Group not found' }, { status: 404 });
+    }
+
+    // Get all group members (both admins and regular members) and remove duplicates
+    const allMemberIds = [...group.adminIds, ...group.memberIds];
+    const uniqueMemberIds = [
+      ...new Set(allMemberIds.map((id) => id.toString())),
+    ];
+    const participants = uniqueMemberIds;
 
     const result = await performGroupRandomSelection(
       collectionId,
       groupId,
       participants,
-      new Date(visitDate)
+      new Date(visitDate),
+      currentUser._id.toString() // Pass createdBy
     );
+
+    // Get the created decision to get its ID
+    const db = await connectToDatabase();
+    const decision = await db.collection('decisions').findOne(
+      {
+        groupId: new ObjectId(groupId),
+        collectionId: new ObjectId(collectionId),
+        'result.restaurantId': result.restaurantId,
+        status: 'completed',
+      },
+      { sort: { createdAt: -1 } }
+    );
+
+    // Send decision completed notifications to all group members
+    if (decision) {
+      try {
+        await sendDecisionCompletedNotifications(
+          groupId,
+          collectionId,
+          decision._id.toString(),
+          result.restaurantId.toString(),
+          'random'
+        );
+      } catch (error) {
+        // Log error but don't fail the request
+        logger.error('Failed to send decision completed notifications:', error);
+      }
+    }
 
     return NextResponse.json({
       success: true,

@@ -145,7 +145,10 @@ interface User {
   profilePicture?: string; // Vercel Blob URL
   preferences: {
     notificationSettings: {
-      groupDecisions: boolean;
+      groupDecisions: {
+        started: boolean; // Notify when decision starts
+        completed: boolean; // Notify when decision completes
+      };
       friendRequests: boolean;
       groupInvites: boolean;
       smsEnabled: boolean;
@@ -155,6 +158,16 @@ interface User {
   };
 }
 ```
+
+**Group Decision Notifications** (Epic 9 - Communication):
+
+- Granular control over decision lifecycle notifications
+- `started`: Notifies when a group decision is created (prompting members to vote)
+- `completed`: Notifies when a decision is finalized (result announced)
+- Multi-channel delivery: Email, SMS, Push, In-App
+- SMS uses URL shortener for concise messages
+- Respects user preferences and opt-in settings
+- Backward compatible with old boolean `groupDecisions` format
 
 ### URL Shortener Service
 
@@ -283,6 +296,7 @@ interface Decision {
   type: 'personal' | 'group';
   collectionId: ObjectId;
   groupId?: ObjectId;
+  createdBy?: ObjectId; // User ID of person who started the decision
   participants: ObjectId[]; // User IDs
   method: 'tiered' | 'random' | 'manual'; // 'manual' for user-entered past decisions
   status: 'active' | 'completed' | 'expired' | 'closed';

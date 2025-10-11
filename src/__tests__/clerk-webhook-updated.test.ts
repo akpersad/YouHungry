@@ -86,7 +86,10 @@ describe('Clerk Webhook (Updated)', () => {
             timezone: undefined,
           },
           notificationSettings: {
-            groupDecisions: true,
+            groupDecisions: {
+              started: true,
+              completed: true,
+            },
             friendRequests: true,
             groupInvites: true,
             smsEnabled: false,
@@ -116,7 +119,10 @@ describe('Clerk Webhook (Updated)', () => {
             timezone: undefined,
           },
           notificationSettings: {
-            groupDecisions: true,
+            groupDecisions: {
+              started: true,
+              completed: true,
+            },
             friendRequests: true,
             groupInvites: true,
             smsEnabled: false,
@@ -209,7 +215,10 @@ describe('Clerk Webhook (Updated)', () => {
         preferences: {
           locationSettings: {},
           notificationSettings: {
-            groupDecisions: true,
+            groupDecisions: {
+              started: true,
+              completed: true,
+            },
             friendRequests: true,
             groupInvites: true,
             smsEnabled: false,

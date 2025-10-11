@@ -12,7 +12,12 @@ export const userProfileSchema = z.object({
   preferences: z.object({
     defaultLocation: z.string().max(200).optional(),
     notificationSettings: z.object({
-      groupDecisions: z.boolean().default(true),
+      groupDecisions: z
+        .object({
+          started: z.boolean().default(true),
+          completed: z.boolean().default(true),
+        })
+        .default({ started: true, completed: true }),
       friendRequests: z.boolean().default(true),
       groupInvites: z.boolean().default(true),
     }),

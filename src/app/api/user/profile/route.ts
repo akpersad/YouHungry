@@ -82,7 +82,15 @@ const profileUpdateSchema = z.object({
         .optional(),
       notificationSettings: z
         .object({
-          groupDecisions: z.boolean().optional(),
+          groupDecisions: z
+            .union([
+              z.boolean(), // Backward compatibility - if boolean, convert to object
+              z.object({
+                started: z.boolean().optional(),
+                completed: z.boolean().optional(),
+              }),
+            ])
+            .optional(),
           friendRequests: z.boolean().optional(),
           groupInvites: z.boolean().optional(),
           smsEnabled: z.boolean().optional(),
@@ -179,6 +187,43 @@ export async function PUT(request: NextRequest) {
       updateData.smsPhoneNumber = updates.smsPhoneNumber;
 
     if (updates.preferences) {
+      // Handle backward compatibility for groupDecisions boolean -> object conversion
+      let notificationSettings = updates.preferences.notificationSettings;
+      if (
+        notificationSettings &&
+        typeof notificationSettings.groupDecisions === 'boolean'
+      ) {
+        // Convert boolean to object format
+        const boolValue = notificationSettings.groupDecisions;
+        notificationSettings = {
+          ...notificationSettings,
+          groupDecisions: {
+            started: boolValue,
+            completed: boolValue,
+          },
+        };
+      }
+
+      // Merge the notification settings, handling the granular groupDecisions
+      const mergedNotificationSettings = {
+        ...user.preferences.notificationSettings,
+        ...notificationSettings,
+      };
+
+      // If groupDecisions is being updated and is an object, merge it properly
+      if (
+        notificationSettings?.groupDecisions &&
+        typeof notificationSettings.groupDecisions === 'object'
+      ) {
+        mergedNotificationSettings.groupDecisions = {
+          ...(typeof user.preferences.notificationSettings.groupDecisions ===
+          'object'
+            ? user.preferences.notificationSettings.groupDecisions
+            : { started: true, completed: true }),
+          ...notificationSettings.groupDecisions,
+        };
+      }
+
       updateData.preferences = {
         ...user.preferences,
         ...updates.preferences,
@@ -186,10 +231,7 @@ export async function PUT(request: NextRequest) {
           ...user.preferences.locationSettings,
           ...updates.preferences.locationSettings,
         },
-        notificationSettings: {
-          ...user.preferences.notificationSettings,
-          ...updates.preferences.notificationSettings,
-        },
+        notificationSettings: mergedNotificationSettings,
       };
     }
 

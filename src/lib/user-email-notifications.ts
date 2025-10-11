@@ -23,6 +23,9 @@ export interface UserEmailData {
   inviterId?: string;
   restaurantName?: string;
   restaurantId?: string;
+  collectionName?: string;
+  collectionUrl?: string;
+  createdByName?: string;
   unsubscribeToken?: string;
 }
 
@@ -46,7 +49,12 @@ export const USER_EMAIL_TEMPLATES = {
         </div>
         
         <div style="background: #f9fafb; border-radius: 8px; padding: 25px; margin-bottom: 20px;">
-          <h2 style="margin-top: 0; color: #374151; font-size: 24px;">${data.groupName} Decision</h2>
+          <h2 style="margin-top: 0; color: #374151; font-size: 24px;">${data.groupName} Decision${data.collectionName ? ` - ${data.collectionName}` : ''}</h2>
+          ${
+            data.createdByName
+              ? `<p style="color: #9ca3af; font-size: 14px; margin-top: 0;">Started by ${data.createdByName}</p>`
+              : ''
+          }
           <p style="color: #6b7280; font-size: 16px; line-height: 1.6;">
             ${
               data.decisionType === 'tiered'
@@ -60,7 +68,7 @@ export const USER_EMAIL_TEMPLATES = {
               ? `
             <div style="background: #dbeafe; border: 1px solid #93c5fd; border-radius: 6px; padding: 15px; margin: 20px 0;">
               <p style="margin: 0; color: #1e40af; font-weight: 600;">
-                ⏰ Deadline: ${data.deadline.toLocaleString()}
+                ⏰ Decision needed by: ${data.deadline.toLocaleString()}
               </p>
             </div>
           `
@@ -68,7 +76,7 @@ export const USER_EMAIL_TEMPLATES = {
           }
           
           <div style="text-align: center; margin: 25px 0;">
-            <a href="${process.env.NEXT_PUBLIC_APP_URL}/groups/${data.groupId}/decisions/${data.decisionId}" 
+            <a href="${data.collectionUrl || `${process.env.NEXT_PUBLIC_APP_URL}/groups/${data.groupId}/decisions/${data.decisionId}`}" 
                style="background: #667eea; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-block;">
               ${data.decisionType === 'tiered' ? 'Vote Now' : 'View Decision'}
             </a>
@@ -194,20 +202,24 @@ export const USER_EMAIL_TEMPLATES = {
         </div>
         
         <div style="background: #f9fafb; border-radius: 8px; padding: 25px; margin-bottom: 20px;">
-          <h2 style="margin-top: 0; color: #374151; font-size: 24px;">Decision Result</h2>
+          <h2 style="margin-top: 0; color: #374151; font-size: 24px;">Decision Result${data.collectionName ? ` - ${data.collectionName}` : ''}</h2>
           <p style="color: #6b7280; font-size: 16px; line-height: 1.6;">
-            Your group <strong>"${data.groupName}"</strong> has decided on a restaurant!
+            Your group <strong>"${data.groupName}"</strong> has decided on a restaurant${
+              data.decisionType
+                ? ` using ${data.decisionType === 'random' ? 'random selection' : 'group voting'}`
+                : ''
+            }!
           </p>
           
           <div style="background: #d1fae5; border: 1px solid #34d399; border-radius: 6px; padding: 20px; margin: 20px 0; text-align: center;">
-            <h3 style="margin: 0 0 10px 0; color: #059669; font-size: 20px;">🎉 ${data.restaurantName}</h3>
+            <h3 style="margin: 0 0 10px 0; color: #059669; font-size: 20px;">${data.decisionType === 'random' ? '🎲' : '🎉'} ${data.restaurantName}</h3>
             <p style="margin: 0; color: #047857;">This is where you'll be eating!</p>
           </div>
           
           <div style="text-align: center; margin: 25px 0;">
-            <a href="${process.env.NEXT_PUBLIC_APP_URL}/groups/${data.groupId}/decisions/${data.decisionId}" 
+            <a href="${data.collectionUrl || `${process.env.NEXT_PUBLIC_APP_URL}/groups/${data.groupId}/decisions/${data.decisionId}`}" 
                style="background: #10b981; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-block;">
-              View Decision Details
+              View Details
             </a>
           </div>
         </div>

@@ -24,7 +24,10 @@ interface UserProfile {
       timezone?: string;
     };
     notificationSettings: {
-      groupDecisions: boolean;
+      groupDecisions: {
+        started: boolean;
+        completed: boolean;
+      };
       friendRequests: boolean;
       groupInvites: boolean;
       smsEnabled: boolean;
@@ -36,7 +39,7 @@ interface UserProfile {
   updatedAt: string;
 }
 
-interface ProfileUpdateData {
+export interface ProfileUpdateData {
   name?: string;
   username?: string;
   city?: string;
@@ -52,7 +55,10 @@ interface ProfileUpdateData {
       timezone?: string;
     };
     notificationSettings?: {
-      groupDecisions?: boolean;
+      groupDecisions?: {
+        started?: boolean;
+        completed?: boolean;
+      };
       friendRequests?: boolean;
       groupInvites?: boolean;
       smsEnabled?: boolean;
