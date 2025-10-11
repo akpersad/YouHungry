@@ -217,10 +217,10 @@ describe('RestaurantCard', () => {
   });
 
   it('does not display address section when address is missing', () => {
-    const restaurantWithoutAddress: Restaurant = {
+    const restaurantWithoutAddress = {
       ...mockRestaurant,
       address: undefined,
-    };
+    } as unknown as Restaurant;
 
     render(
       <RestaurantCard
