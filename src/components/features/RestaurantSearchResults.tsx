@@ -214,13 +214,13 @@ export function RestaurantSearchResults({
             className="rounded-lg overflow-hidden shadow-lg"
           />
           {mapSelectedRestaurant && (
-            <div className="bg-primary/10 dark:bg-primary/20/20 border border-primary dark:border-primary rounded-lg p-4">
+            <div className="bg-accent/10 border border-accent/20 rounded-lg p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className="font-semibold text-blue-900 dark:text-blue-100">
+                  <h4 className="font-semibold text-text">
                     {mapSelectedRestaurant.name}
                   </h4>
-                  <p className="text-sm text-primary dark:text-primary">
+                  <p className="text-sm text-text-secondary">
                     {mapSelectedRestaurant.address}
                   </p>
                 </div>
@@ -231,7 +231,7 @@ export function RestaurantSearchResults({
                     }
                     size="sm"
                     variant="outline"
-                    className="border-primary text-primary hover:bg-primary/10 dark:border-primary dark:text-primary dark:hover:bg-primary/20/30"
+                    className="border-accent text-accent hover:bg-accent/10"
                   >
                     View Details
                   </Button>
@@ -239,7 +239,7 @@ export function RestaurantSearchResults({
                     onClick={() => setMapSelectedRestaurant(null)}
                     size="sm"
                     variant="outline"
-                    className="text-primary hover:bg-primary/10 dark:text-primary dark:hover:bg-primary/20/30"
+                    className="text-accent hover:bg-accent/10"
                   >
                     Clear
                   </Button>

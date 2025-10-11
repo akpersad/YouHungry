@@ -329,7 +329,7 @@ export function CollectionView({ collectionId }: CollectionViewProps) {
                   );
                   if (groupDecisionSection) {
                     groupDecisionSection.scrollIntoView({ behavior: 'smooth' });
-                    // Trigger the start decision modal
+                    // Trigger the start decision modal after scrolling
                     setTimeout(() => {
                       const startButton = groupDecisionSection.querySelector(
                         '[data-start-decision]'
@@ -337,7 +337,7 @@ export function CollectionView({ collectionId }: CollectionViewProps) {
                       if (startButton) {
                         startButton.click();
                       }
-                    }, 500);
+                    }, 800);
                   }
                 }}
                 className="bg-blue-600 hover:bg-blue-700 text-white"

@@ -457,7 +457,7 @@ export function GroupDecisionMaking({
         {isAdmin && (
           <Button
             onClick={() => setShowCreateDecision(true)}
-            className="bg-blue-600 hover:bg-blue-700"
+            className="bg-accent hover:bg-accent/90 text-inverse"
             data-start-decision
           >
             Start Decision
@@ -474,7 +474,7 @@ export function GroupDecisionMaking({
           >
             {decision.status === 'completed' ? (
               // Completed Decision Display
-              <div className="bg-success/10 border border-green-200 rounded-lg p-4">
+              <div className="bg-success/10 border border-success/20 rounded-lg p-4">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="flex-shrink-0">
                     <svg
@@ -492,10 +492,10 @@ export function GroupDecisionMaking({
                     </svg>
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-green-900">
+                    <h3 className="text-lg font-semibold text-success">
                       Decision Completed!
                     </h3>
-                    <p className="text-sm text-green-700">
+                    <p className="text-sm text-success">
                       {decision.method === 'tiered'
                         ? 'Tiered Choice'
                         : 'Random Selection'}{' '}
@@ -505,7 +505,7 @@ export function GroupDecisionMaking({
                 </div>
 
                 {decision.result && (
-                  <div className="mt-3 p-3 bg-white rounded border">
+                  <div className="mt-3 p-3 bg-secondary rounded border border-quaternary">
                     <p className="font-medium text-text mb-2">
                       Selected Restaurant:
                     </p>
@@ -554,38 +554,75 @@ export function GroupDecisionMaking({
               </div>
             ) : (
               // Active Decision Display
-              <div className="flex justify-between items-start">
-                <div>
-                  <div className="flex items-center gap-3 mb-2">
+              <div className="block md:flex md:justify-between md:items-start">
+                <div className="w-full md:w-auto">
+                  <div className="flex justify-between items-center md:flex md:items-center md:gap-3 mb-4 md:mb-2">
                     <h3 className="text-lg font-semibold text-text">
                       {decision.method === 'tiered'
                         ? 'Tiered Choice'
                         : 'Random Selection'}
                     </h3>
                     {hasUserVoted(decision) && (
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-success/10 text-green-800">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-success/10 text-success">
                         ✓ You&apos;ve Voted
                       </span>
                     )}
                   </div>
-                  <p className="text-text-light">
-                    Visit Date:{' '}
-                    {new Date(decision.visitDate).toLocaleDateString()}
-                  </p>
-                  <p className="text-text-light">
-                    Deadline: {new Date(decision.deadline).toLocaleString()}
-                  </p>
-                  <p className="text-sm text-text-light">
-                    Status: {getVoteStatus(decision)}
-                  </p>
-                  {decision.votes && (
-                    <p className="text-sm text-text-light">
-                      Votes: {decision.votes.length} /{' '}
-                      {decision.participants.length}
-                    </p>
-                  )}
+
+                  {/* Mobile: Better formatted details */}
+                  <div className="space-y-2 md:space-y-0 mb-6 md:mb-0">
+                    <div className="flex justify-between items-center md:block">
+                      <span className="text-text-light md:hidden">
+                        Visit Date:
+                      </span>
+                      <p className="text-text-light">
+                        <span className="hidden md:inline">Visit Date: </span>
+                        {new Date(decision.visitDate).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <div className="flex justify-between items-center md:block">
+                      <span className="text-text-light md:hidden">
+                        Deadline:
+                      </span>
+                      <p className="text-text-light">
+                        <span className="hidden md:inline">Deadline: </span>
+                        {new Date(decision.deadline).toLocaleDateString()}
+                        <br className="md:hidden" />
+                        <span className="text-sm md:hidden">
+                          {new Date(decision.deadline).toLocaleTimeString([], {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </span>
+                        <span className="hidden md:inline">
+                          {' '}
+                          {new Date(decision.deadline).toLocaleString()}
+                        </span>
+                      </p>
+                    </div>
+                    <div className="flex justify-between items-center md:block">
+                      <span className="text-text-light md:hidden">Status:</span>
+                      <p className="text-sm text-text-light">
+                        <span className="hidden md:inline">Status: </span>
+                        {getVoteStatus(decision)}
+                      </p>
+                    </div>
+                    {decision.votes && (
+                      <div className="flex justify-between items-center md:block">
+                        <span className="text-text-light md:hidden">
+                          Votes:
+                        </span>
+                        <p className="text-sm text-text-light">
+                          <span className="hidden md:inline">Votes: </span>
+                          {decision.votes.length} /{' '}
+                          {decision.participants.length}
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 </div>
-                <div className="flex space-x-2">
+
+                <div className="flex flex-col space-y-2 md:flex-row md:space-y-0 md:space-x-2 mt-6 md:mt-0">
                   {decision.method === 'tiered' &&
                     decision.status === 'active' && (
                       <Button
@@ -594,7 +631,7 @@ export function GroupDecisionMaking({
                           setSelectedDecision(decision);
                           setShowVotingInterface(true);
                         }}
-                        className="bg-green-600 hover:bg-green-700"
+                        className="w-full md:w-auto bg-success hover:bg-success/90 text-inverse touch-target"
                       >
                         {hasUserVoted(decision) ? 'Re-vote' : 'Vote'}
                       </Button>
@@ -603,7 +640,7 @@ export function GroupDecisionMaking({
                     <Button
                       key={`complete-${decision.id || index}`}
                       onClick={() => handleCompleteDecision(decision)}
-                      className="bg-purple-600 hover:bg-purple-700"
+                      className="w-full md:w-auto bg-accent hover:bg-accent/90 text-inverse touch-target"
                     >
                       Complete
                     </Button>
@@ -612,7 +649,8 @@ export function GroupDecisionMaking({
                     <Button
                       key={`close-${decision.id || index}`}
                       onClick={() => handleCloseDecision(decision)}
-                      className="bg-red-600 hover:bg-red-700"
+                      variant="outline"
+                      className="w-full md:w-auto border-destructive text-destructive hover:bg-destructive/10 touch-target"
                     >
                       Close
                     </Button>
@@ -704,9 +742,9 @@ export function GroupDecisionMaking({
               </div>
             </div>
           )}
-          <div className="bg-primary/10 border border-primary rounded-lg p-4">
-            <h4 className="font-medium text-blue-900 mb-2">How to vote:</h4>
-            <ol className="text-sm text-blue-800 space-y-1">
+          <div className="bg-accent/10 border border-accent/20 rounded-lg p-4">
+            <h4 className="font-medium text-text mb-2">How to vote:</h4>
+            <ol className="text-sm text-text-secondary space-y-1">
               <li>1. Click on up to 3 restaurants you want to vote for</li>
               <li>
                 2. Drag and drop to reorder them by preference (1st, 2nd, 3rd
@@ -732,7 +770,7 @@ export function GroupDecisionMaking({
                   return (
                     <div
                       key={`ranking-${restaurantId}`}
-                      className={`p-3 border-2 border-primary bg-primary/10 rounded-lg cursor-move transition-all hover:shadow-md ${
+                      className={`p-3 border-2 border-accent bg-accent/10 rounded-lg cursor-move transition-all hover:shadow-md ${
                         draggedItem === restaurantId ? 'opacity-50' : ''
                       }`}
                       draggable
@@ -742,7 +780,7 @@ export function GroupDecisionMaking({
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-3">
-                          <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                          <div className="w-8 h-8 bg-accent text-inverse rounded-full flex items-center justify-center text-sm font-bold">
                             {index + 1}
                           </div>
                           <div>
@@ -796,10 +834,10 @@ export function GroupDecisionMaking({
                       <div
                         className={`w-6 h-6 rounded-full flex items-center justify-center text-sm ${
                           isSelected
-                            ? 'bg-green-500 text-white'
+                            ? 'bg-success text-inverse'
                             : canSelect
-                              ? 'border-2 border-border'
-                              : 'bg-surface'
+                              ? 'border-2 border-quaternary'
+                              : 'bg-tertiary'
                         }`}
                       >
                         {isSelected ? '✓' : ''}

@@ -182,6 +182,9 @@ export function DatePicker({
     'December',
   ];
 
+  // Check if we're on mobile
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+
   return (
     <div className={cn('relative', className)} ref={containerRef}>
       {label && (
@@ -195,30 +198,54 @@ export function DatePicker({
       )}
 
       <div className="relative">
-        <input
-          ref={inputRef}
-          id={id}
-          type="text"
-          value={formatDisplayValue()}
-          onChange={() => {}} // Controlled by our component
-          onClick={handleInputClick}
-          onKeyDown={handleKeyDown}
-          placeholder={placeholder}
-          disabled={disabled}
-          required={required}
-          className={cn(
-            'w-full px-3 py-2 pr-10 border border-border rounded-md',
-            'focus:outline-none focus:ring-2 focus:ring-primary',
-            'disabled:bg-surface disabled:cursor-not-allowed',
-            'cursor-pointer',
-            error && 'border-destructive focus:ring-destructive'
-          )}
-          readOnly
-        />
+        {isMobile ? (
+          // Mobile: Use native datetime-local input
+          <input
+            ref={inputRef}
+            id={id}
+            type="datetime-local"
+            value={value ? new Date(value).toISOString().slice(0, 16) : ''}
+            onChange={(e) => onChange(new Date(e.target.value).toISOString())}
+            placeholder={placeholder}
+            disabled={disabled}
+            required={required}
+            className={cn(
+              'w-full px-4 py-3 text-base border border-border rounded-lg',
+              'focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary',
+              'disabled:bg-surface disabled:cursor-not-allowed',
+              'touch-target', // Ensure proper touch target size
+              error && 'border-destructive focus:ring-destructive'
+            )}
+          />
+        ) : (
+          // Desktop: Use custom picker
+          <>
+            <input
+              ref={inputRef}
+              id={id}
+              type="text"
+              value={formatDisplayValue()}
+              onChange={() => {}} // Controlled by our component
+              onClick={handleInputClick}
+              onKeyDown={handleKeyDown}
+              placeholder={placeholder}
+              disabled={disabled}
+              required={required}
+              className={cn(
+                'w-full px-3 py-2 pr-10 border border-border rounded-md',
+                'focus:outline-none focus:ring-2 focus:ring-primary',
+                'disabled:bg-surface disabled:cursor-not-allowed',
+                'cursor-pointer',
+                error && 'border-destructive focus:ring-destructive'
+              )}
+              readOnly
+            />
 
-        <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-          <Calendar className="h-4 w-4 text-text-light" />
-        </div>
+            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+              <Calendar className="h-4 w-4 text-text-light" />
+            </div>
+          </>
+        )}
       </div>
 
       {error && (
@@ -227,7 +254,7 @@ export function DatePicker({
         </p>
       )}
 
-      {isOpen && (
+      {isOpen && !isMobile && (
         <div className="absolute z-50 mt-1 w-full bg-white border border-border rounded-md shadow-lg">
           {/* Calendar Header */}
           <div className="flex items-center justify-between p-3 border-b">

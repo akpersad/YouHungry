@@ -101,8 +101,8 @@ export function RestaurantCard({
               )}
             </div>
 
-            {/* 4. DISTANCE - Practical info (if not shown in badge) */}
-            {restaurant.distance && (
+            {/* 4. ADDRESS - Always show address */}
+            {restaurant.address && (
               <div className="text-sm text-tertiary">
                 📍 {restaurant.address}
               </div>
