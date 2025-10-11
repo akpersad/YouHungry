@@ -9,8 +9,8 @@ describe('PWA Core Functionality', () => {
   describe('PWA Manifest', () => {
     it('should have correct manifest structure', () => {
       const manifest = {
-        name: 'You Hungry? - Restaurant Discovery',
-        short_name: 'You Hungry?',
+        name: 'ForkInTheRoad - Restaurant Discovery',
+        short_name: 'ForkInTheRoad',
         description: 'Discover and decide on restaurants with friends',
         start_url: '/',
         display: 'standalone',
@@ -23,8 +23,8 @@ describe('PWA Core Functionality', () => {
         scope: '/',
       };
 
-      expect(manifest.name).toBe('You Hungry? - Restaurant Discovery');
-      expect(manifest.short_name).toBe('You Hungry?');
+      expect(manifest.name).toBe('ForkInTheRoad - Restaurant Discovery');
+      expect(manifest.short_name).toBe('ForkInTheRoad');
       expect(manifest.display).toBe('standalone');
       expect(manifest.theme_color).toBe('#ff6b6b');
       expect(manifest.orientation).toBe('portrait-primary');
@@ -56,14 +56,14 @@ describe('PWA Core Functionality', () => {
   describe('Service Worker Configuration', () => {
     it('should have correct cache names', () => {
       const cacheNames = {
-        static: 'you-hungry-static-v2',
-        dynamic: 'you-hungry-dynamic-v2',
-        api: 'you-hungry-api-v2',
+        static: 'forkintheroad-static-v3',
+        dynamic: 'forkintheroad-dynamic-v3',
+        api: 'forkintheroad-api-v3',
       };
 
-      expect(cacheNames.static).toBe('you-hungry-static-v2');
-      expect(cacheNames.dynamic).toBe('you-hungry-dynamic-v2');
-      expect(cacheNames.api).toBe('you-hungry-api-v2');
+      expect(cacheNames.static).toBe('forkintheroad-static-v3');
+      expect(cacheNames.dynamic).toBe('forkintheroad-dynamic-v3');
+      expect(cacheNames.api).toBe('forkintheroad-api-v3');
     });
 
     it('should have static assets to cache', () => {
