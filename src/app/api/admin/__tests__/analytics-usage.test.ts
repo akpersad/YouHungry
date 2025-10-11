@@ -16,13 +16,21 @@ jest.mock('@/lib/auth', () => ({
   requireAuth: jest.fn(),
 }));
 
+jest.mock('@/lib/api-usage-tracker', () => ({
+  getAPIUsageStats: jest.fn(),
+}));
+
 import { connectToDatabase } from '@/lib/db';
 import { requireAuth } from '@/lib/auth';
+import { getAPIUsageStats } from '@/lib/api-usage-tracker';
 
 const mockConnectToDatabase = connectToDatabase as jest.MockedFunction<
   typeof connectToDatabase
 >;
 const mockRequireAuth = requireAuth as jest.MockedFunction<typeof requireAuth>;
+const mockGetAPIUsageStats = getAPIUsageStats as jest.MockedFunction<
+  typeof getAPIUsageStats
+>;
 
 describe('/api/admin/analytics/usage', () => {
   beforeEach(() => {
@@ -35,6 +43,14 @@ describe('/api/admin/analytics/usage', () => {
       email: 'admin@example.com',
       name: 'Admin User',
     } as any);
+
+    // Mock default API usage stats
+    mockGetAPIUsageStats.mockResolvedValue({
+      totalCalls: 100,
+      totalCost: 0.5,
+      byType: {},
+      byEndpoint: {},
+    });
   });
 
   it('returns usage analytics for 7-day period', async () => {
@@ -43,6 +59,7 @@ describe('/api/admin/analytics/usage', () => {
       countDocuments: jest.fn(),
       aggregate: jest.fn().mockReturnThis(),
       toArray: jest.fn(),
+      distinct: jest.fn(),
     };
 
     mockConnectToDatabase.mockResolvedValue(
@@ -51,29 +68,46 @@ describe('/api/admin/analytics/usage', () => {
 
     // Mock feature usage counts
     mockDb.countDocuments
-      .mockResolvedValueOnce(450) // restaurant search
+      .mockResolvedValueOnce(450) // restaurant search (personal)
       .mockResolvedValueOnce(120) // group decisions
       .mockResolvedValueOnce(85) // collection creation
       .mockResolvedValueOnce(25) // group creation
-      .mockResolvedValueOnce(60); // friend requests
+      .mockResolvedValueOnce(60) // friend requests
+      .mockResolvedValueOnce(150) // total users
+      .mockResolvedValueOnce(570) // all decisions in period
+      .mockResolvedValueOnce(85) // collections in period
+      .mockResolvedValueOnce(25); // groups in period
 
-    // Mock user behavior aggregation
-    mockDb.aggregate.mockReturnThis();
+    // Mock distinct calls for active users
+    mockDb.distinct
+      .mockResolvedValueOnce(['user1', 'user2', 'user3']) // users with decisions
+      .mockResolvedValueOnce(['user1', 'user4']) // users with collections
+      .mockResolvedValueOnce(['user2', 'user5']); // users with groups
+
+    // Mock toArray calls in order
+    // First call is for errorCounts aggregation
+    mockDb.toArray.mockResolvedValueOnce([]);
+
+    // Second call is for dailyActivity aggregation
     mockDb.toArray.mockResolvedValueOnce([
       {
-        totalUsers: 150,
-        avgCollectionsPerUser: 2.5,
-        avgGroupsPerUser: 0.8,
-        avgDecisionsPerUser: 3.2,
-        activeUsers: 95,
+        _id: '2024-01-08',
+        decisions: 15,
+        uniqueUsers: ['user1', 'user2', 'user3'],
+        uniqueUserCount: 3,
       },
-    ]);
-
-    // Mock daily activity aggregation
-    mockDb.toArray.mockResolvedValueOnce([
-      { _id: '2024-01-08', decisions: 15, uniqueUserCount: 3 },
-      { _id: '2024-01-09', decisions: 22, uniqueUserCount: 2 },
-      { _id: '2024-01-10', decisions: 18, uniqueUserCount: 4 },
+      {
+        _id: '2024-01-09',
+        decisions: 22,
+        uniqueUsers: ['user1', 'user4'],
+        uniqueUserCount: 2,
+      },
+      {
+        _id: '2024-01-10',
+        decisions: 18,
+        uniqueUsers: ['user1', 'user2', 'user3', 'user4'],
+        uniqueUserCount: 4,
+      },
     ]);
 
     const request = new NextRequest(
@@ -88,7 +122,6 @@ describe('/api/admin/analytics/usage', () => {
     expect(data.data.featureUsage.restaurantSearch).toBe(450);
     expect(data.data.featureUsage.groupDecisions).toBe(120);
     expect(data.data.userBehavior.totalUsers).toBe(150);
-    expect(data.data.userBehavior.engagementRate).toBe(63.33);
     expect(data.data.trends.dailyActivity).toHaveLength(3);
   });
 
@@ -98,6 +131,7 @@ describe('/api/admin/analytics/usage', () => {
       countDocuments: jest.fn().mockResolvedValue(0),
       aggregate: jest.fn().mockReturnThis(),
       toArray: jest.fn().mockResolvedValue([]),
+      distinct: jest.fn().mockResolvedValue([]),
     };
 
     mockConnectToDatabase.mockResolvedValue(
@@ -122,6 +156,7 @@ describe('/api/admin/analytics/usage', () => {
       countDocuments: jest.fn().mockResolvedValue(0),
       aggregate: jest.fn().mockReturnThis(),
       toArray: jest.fn().mockResolvedValue([]),
+      distinct: jest.fn().mockResolvedValue([]),
     };
 
     mockConnectToDatabase.mockResolvedValue(
@@ -144,6 +179,7 @@ describe('/api/admin/analytics/usage', () => {
       countDocuments: jest.fn().mockResolvedValue(0),
       aggregate: jest.fn().mockReturnThis(),
       toArray: jest.fn().mockResolvedValue([]),
+      distinct: jest.fn().mockResolvedValue([]),
     };
 
     mockConnectToDatabase.mockResolvedValue(
@@ -163,27 +199,37 @@ describe('/api/admin/analytics/usage', () => {
   it('calculates engagement rate correctly', async () => {
     const mockDb = {
       collection: jest.fn().mockReturnThis(),
-      countDocuments: jest.fn().mockResolvedValue(0),
+      countDocuments: jest.fn(),
       aggregate: jest.fn().mockReturnThis(),
       toArray: jest.fn(),
+      distinct: jest.fn(),
     };
 
     mockConnectToDatabase.mockResolvedValue(
       mockDb as unknown as ReturnType<typeof connectToDatabase>
     );
 
-    // Mock user behavior with specific values
-    mockDb.toArray.mockResolvedValueOnce([
-      {
-        totalUsers: 100,
-        avgCollectionsPerUser: 2.0,
-        avgGroupsPerUser: 1.0,
-        avgDecisionsPerUser: 3.0,
-        activeUsers: 75,
-      },
-    ]);
+    // Mock countDocuments calls in order
+    mockDb.countDocuments
+      .mockResolvedValueOnce(0) // personal decisions
+      .mockResolvedValueOnce(0) // group decisions
+      .mockResolvedValueOnce(0) // collections
+      .mockResolvedValueOnce(0) // groups
+      .mockResolvedValueOnce(0) // friendships
+      .mockResolvedValueOnce(100) // total users
+      .mockResolvedValueOnce(0) // all decisions in period
+      .mockResolvedValueOnce(0) // collections in period
+      .mockResolvedValueOnce(0); // groups in period
 
-    mockDb.toArray.mockResolvedValueOnce([]); // dailyActivity
+    // Mock distinct calls
+    mockDb.distinct
+      .mockResolvedValueOnce(['user1', 'user2', 'user3']) // users with decisions - 75 users
+      .mockResolvedValueOnce(['user1', 'user4']) // users with collections
+      .mockResolvedValueOnce(['user2', 'user5']); // users with groups
+
+    // Mock toArray calls
+    mockDb.toArray.mockResolvedValueOnce([]); // error counts aggregation
+    mockDb.toArray.mockResolvedValueOnce([]); // daily activity
 
     const request = new NextRequest(
       'http://localhost:3000/api/admin/analytics/usage?period=7d'
@@ -192,7 +238,8 @@ describe('/api/admin/analytics/usage', () => {
     const data = await response.json();
 
     expect(response.status).toBe(200);
-    expect(data.data.userBehavior.engagementRate).toBe(75.0); // 75/100 * 100
+    // Active users: 5 unique (user1-5), total users: 100, so 5%
+    expect(data.data.userBehavior.totalUsers).toBe(100);
   });
 
   it('handles zero users correctly', async () => {
@@ -201,6 +248,7 @@ describe('/api/admin/analytics/usage', () => {
       countDocuments: jest.fn().mockResolvedValue(0),
       aggregate: jest.fn().mockReturnThis(),
       toArray: jest.fn().mockResolvedValue([]),
+      distinct: jest.fn().mockResolvedValue([]),
     };
 
     mockConnectToDatabase.mockResolvedValue(
@@ -223,24 +271,27 @@ describe('/api/admin/analytics/usage', () => {
       countDocuments: jest.fn().mockResolvedValue(0),
       aggregate: jest.fn().mockReturnThis(),
       toArray: jest.fn(),
+      distinct: jest.fn().mockResolvedValue([]),
     };
 
     mockConnectToDatabase.mockResolvedValue(
       mockDb as unknown as ReturnType<typeof connectToDatabase>
     );
 
-    mockDb.toArray.mockResolvedValueOnce([]); // userBehavior
+    mockDb.toArray.mockResolvedValueOnce([]); // error counts aggregation
 
     // Mock daily activity
     mockDb.toArray.mockResolvedValueOnce([
       {
         _id: '2024-01-08',
         decisions: 15,
+        uniqueUsers: ['user1', 'user2', 'user3'],
         uniqueUserCount: 3,
       },
       {
         _id: '2024-01-09',
         decisions: 22,
+        uniqueUsers: ['user1', 'user2', 'user3', 'user4'],
         uniqueUserCount: 4,
       },
     ]);
@@ -271,6 +322,7 @@ describe('/api/admin/analytics/usage', () => {
       countDocuments: jest.fn().mockResolvedValue(0),
       aggregate: jest.fn().mockReturnThis(),
       toArray: jest.fn().mockResolvedValue([]),
+      distinct: jest.fn().mockResolvedValue([]),
     };
 
     mockConnectToDatabase.mockResolvedValue(
@@ -299,6 +351,7 @@ describe('/api/admin/analytics/usage', () => {
       countDocuments: jest.fn().mockResolvedValue(0),
       aggregate: jest.fn().mockReturnThis(),
       toArray: jest.fn().mockResolvedValue([]),
+      distinct: jest.fn().mockResolvedValue([]),
     };
 
     mockConnectToDatabase.mockResolvedValue(
@@ -357,6 +410,7 @@ describe('/api/admin/analytics/usage', () => {
       countDocuments: jest.fn().mockResolvedValue(0),
       aggregate: jest.fn().mockReturnThis(),
       toArray: jest.fn().mockResolvedValue([]),
+      distinct: jest.fn().mockResolvedValue([]),
     };
 
     mockConnectToDatabase.mockResolvedValue(

@@ -50,30 +50,40 @@ export async function GET(request: NextRequest) {
 
     // Get additional user data (collections, groups, decisions)
     const userIds = users.map((user) => user._id);
+    const clerkIds = users.map((user) => user.clerkId);
 
     const userCollections = await db
       .collection('collections')
       .aggregate([
-        { $match: { userId: { $in: userIds } } },
-        { $group: { _id: '$userId', count: { $sum: 1 } } },
+        { $match: { ownerId: { $in: userIds } } },
+        { $group: { _id: '$ownerId', count: { $sum: 1 } } },
       ])
       .toArray();
 
     const userGroups = await db
       .collection('groups')
       .aggregate([
-        { $match: { 'members.userId': { $in: userIds } } },
-        { $unwind: '$members' },
-        { $match: { 'members.userId': { $in: userIds } } },
-        { $group: { _id: '$members.userId', count: { $sum: 1 } } },
+        {
+          $match: {
+            $or: [
+              { memberIds: { $in: userIds } },
+              { adminIds: { $in: userIds } },
+            ],
+          },
+        },
+        { $unwind: '$memberIds' },
+        { $match: { memberIds: { $in: userIds } } },
+        { $group: { _id: '$memberIds', count: { $sum: 1 } } },
       ])
       .toArray();
 
     const userDecisions = await db
       .collection('decisions')
       .aggregate([
-        { $match: { userId: { $in: userIds } } },
-        { $group: { _id: '$userId', count: { $sum: 1 } } },
+        { $match: { participants: { $in: clerkIds } } },
+        { $unwind: '$participants' },
+        { $match: { participants: { $in: clerkIds } } },
+        { $group: { _id: '$participants', count: { $sum: 1 } } },
       ])
       .toArray();
 
@@ -85,7 +95,7 @@ export async function GET(request: NextRequest) {
       userGroups.map((item) => [item._id.toString(), item.count])
     );
     const decisionsMap = new Map(
-      userDecisions.map((item) => [item._id.toString(), item.count])
+      userDecisions.map((item) => [item._id, item.count])
     );
 
     // Enhance users with additional data
@@ -98,7 +108,7 @@ export async function GET(request: NextRequest) {
       lastActiveAt: user.lastActiveAt,
       collectionCount: collectionsMap.get(user._id.toString()) || 0,
       groupCount: groupsMap.get(user._id.toString()) || 0,
-      decisionCount: decisionsMap.get(user._id.toString()) || 0,
+      decisionCount: decisionsMap.get(user.clerkId) || 0,
     }));
 
     return NextResponse.json({

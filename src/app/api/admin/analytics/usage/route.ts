@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/db';
 import { requireAuth } from '@/lib/auth';
+import { getAPIUsageStats } from '@/lib/api-usage-tracker';
 // import { ObjectId } from 'mongodb';
 
 export async function GET(request: NextRequest) {
@@ -36,21 +37,101 @@ export async function GET(request: NextRequest) {
         startDate.setDate(endDate.getDate() - 7);
     }
 
-    // Get API usage patterns (simplified - in production you'd track actual API calls)
+    // Get actual API usage data from tracking system
+    const apiStats = await getAPIUsageStats(startDate, endDate);
+
+    // Categorize API calls
+    const googlePlacesCalls =
+      (apiStats.byType.google_places_text_search?.count || 0) +
+      (apiStats.byType.google_places_nearby_search?.count || 0) +
+      (apiStats.byType.google_places_details?.count || 0) +
+      (apiStats.byType.google_geocoding?.count || 0) +
+      (apiStats.byType.google_address_validation?.count || 0);
+
+    const googlePlacesCost =
+      (apiStats.byType.google_places_text_search?.cost || 0) +
+      (apiStats.byType.google_places_nearby_search?.cost || 0) +
+      (apiStats.byType.google_places_details?.cost || 0) +
+      (apiStats.byType.google_geocoding?.cost || 0) +
+      (apiStats.byType.google_address_validation?.cost || 0);
+
+    const googleMapsCalls = apiStats.byType.google_maps_load?.count || 0;
+    const googleMapsCost = apiStats.byType.google_maps_load?.cost || 0;
+
+    // Internal APIs (Clerk, Vercel Blob, Messaging)
+    const internalCalls =
+      (apiStats.byType.clerk_user_create?.count || 0) +
+      (apiStats.byType.clerk_user_update?.count || 0) +
+      (apiStats.byType.clerk_user_read?.count || 0) +
+      (apiStats.byType.vercel_blob_put?.count || 0) +
+      (apiStats.byType.vercel_blob_delete?.count || 0) +
+      (apiStats.byType.vercel_blob_read?.count || 0) +
+      (apiStats.byType.twilio_sms_sent?.count || 0) +
+      (apiStats.byType.resend_email_sent?.count || 0);
+
+    // Count errors from api_usage collection
+    const errorCounts = await db
+      .collection('api_usage')
+      .aggregate([
+        {
+          $match: {
+            timestamp: { $gte: startDate.getTime(), $lte: endDate.getTime() },
+            'metadata.error': { $exists: true },
+          },
+        },
+        {
+          $group: {
+            _id: '$apiType',
+            errorCount: { $sum: 1 },
+          },
+        },
+      ])
+      .toArray();
+
+    const googlePlacesErrors = errorCounts
+      .filter((e) =>
+        [
+          'google_places_text_search',
+          'google_places_nearby_search',
+          'google_places_details',
+          'google_geocoding',
+          'google_address_validation',
+        ].includes(e._id)
+      )
+      .reduce((sum, e) => sum + e.errorCount, 0);
+
+    const googleMapsErrors = errorCounts
+      .filter((e) => e._id === 'google_maps_load')
+      .reduce((sum, e) => sum + e.errorCount, 0);
+
+    const internalErrors = errorCounts
+      .filter(
+        (e) =>
+          ![
+            'google_places_text_search',
+            'google_places_nearby_search',
+            'google_places_details',
+            'google_geocoding',
+            'google_address_validation',
+            'google_maps_load',
+          ].includes(e._id)
+      )
+      .reduce((sum, e) => sum + e.errorCount, 0);
+
     const apiUsage = {
       googlePlaces: {
-        calls: 0, // Would be tracked in production
-        cost: 0,
-        errors: 0,
+        calls: googlePlacesCalls,
+        cost: googlePlacesCost,
+        errors: googlePlacesErrors,
       },
       googleMaps: {
-        calls: 0,
-        cost: 0,
-        errors: 0,
+        calls: googleMapsCalls,
+        cost: googleMapsCost,
+        errors: googleMapsErrors,
       },
       internal: {
-        calls: 0,
-        errors: 0,
+        calls: internalCalls,
+        errors: internalErrors,
       },
     };
 
@@ -85,66 +166,70 @@ export async function GET(request: NextRequest) {
     ]);
 
     // Get user behavior analytics
-    const userBehavior = await db
-      .collection('users')
-      .aggregate([
-        {
-          $lookup: {
-            from: 'collections',
-            localField: '_id',
-            foreignField: 'userId',
-            as: 'collections',
-          },
-        },
-        {
-          $lookup: {
-            from: 'groups',
-            localField: '_id',
-            foreignField: 'members.userId',
-            as: 'groups',
-          },
-        },
-        {
-          $lookup: {
-            from: 'decisions',
-            localField: '_id',
-            foreignField: 'userId',
-            as: 'decisions',
-          },
-        },
-        {
-          $addFields: {
-            collectionCount: { $size: '$collections' },
-            groupCount: { $size: '$groups' },
-            decisionCount: { $size: '$decisions' },
-          },
-        },
-        {
-          $group: {
-            _id: null,
-            totalUsers: { $sum: 1 },
-            avgCollectionsPerUser: { $avg: '$collectionCount' },
-            avgGroupsPerUser: { $avg: '$groupCount' },
-            avgDecisionsPerUser: { $avg: '$decisionCount' },
-            activeUsers: {
-              $sum: {
-                $cond: [
-                  {
-                    $or: [
-                      { $gt: ['$collectionCount', 0] },
-                      { $gt: ['$groupCount', 0] },
-                      { $gt: ['$decisionCount', 0] },
-                    ],
-                  },
-                  1,
-                  0,
-                ],
-              },
-            },
-          },
-        },
-      ])
-      .toArray();
+    // First get total users
+    const totalUsers = await db.collection('users').countDocuments();
+
+    // Get users with activity in the period
+    const activeUserIds = new Set();
+
+    // Users who made decisions in the period
+    const usersWithDecisions = await db
+      .collection('decisions')
+      .distinct('createdBy', {
+        createdAt: { $gte: startDate, $lte: endDate },
+      });
+    usersWithDecisions.forEach((id) => {
+      if (id) activeUserIds.add(id.toString());
+    });
+
+    // Users who created collections in the period
+    const usersWithCollections = await db
+      .collection('collections')
+      .distinct('ownerId', {
+        createdAt: { $gte: startDate, $lte: endDate },
+      });
+    usersWithCollections.forEach((id) => {
+      if (id) activeUserIds.add(id.toString());
+    });
+
+    // Users who created groups in the period
+    const usersWithGroups = await db
+      .collection('groups')
+      .distinct('createdBy', {
+        createdAt: { $gte: startDate, $lte: endDate },
+      });
+    usersWithGroups.forEach((id) => {
+      if (id) activeUserIds.add(id.toString());
+    });
+
+    const activeUsers = activeUserIds.size;
+
+    // Calculate averages based on period activity
+    const decisionsInPeriod = await db.collection('decisions').countDocuments({
+      createdAt: { $gte: startDate, $lte: endDate },
+    });
+
+    const collectionsInPeriod = await db
+      .collection('collections')
+      .countDocuments({
+        createdAt: { $gte: startDate, $lte: endDate },
+      });
+
+    const groupsInPeriod = await db.collection('groups').countDocuments({
+      createdAt: { $gte: startDate, $lte: endDate },
+    });
+
+    const userBehavior = [
+      {
+        totalUsers,
+        avgCollectionsPerUser:
+          activeUsers > 0 ? collectionsInPeriod / activeUsers : 0,
+        avgGroupsPerUser: activeUsers > 0 ? groupsInPeriod / activeUsers : 0,
+        avgDecisionsPerUser:
+          activeUsers > 0 ? decisionsInPeriod / activeUsers : 0,
+        activeUsers,
+      },
+    ];
 
     // Get engagement metrics
     const engagement = userBehavior[0] || {
@@ -178,12 +263,24 @@ export async function GET(request: NextRequest) {
               },
             },
             decisions: { $sum: 1 },
-            uniqueUsers: { $addToSet: '$userId' },
+            uniqueUsers: {
+              $addToSet: {
+                $cond: [{ $ifNull: ['$createdBy', false] }, '$createdBy', null],
+              },
+            },
           },
         },
         {
           $addFields: {
-            uniqueUserCount: { $size: '$uniqueUsers' },
+            uniqueUserCount: {
+              $size: {
+                $filter: {
+                  input: '$uniqueUsers',
+                  as: 'user',
+                  cond: { $ne: ['$$user', null] },
+                },
+              },
+            },
           },
         },
         {

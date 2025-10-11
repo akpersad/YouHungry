@@ -9,10 +9,15 @@ import { GET } from '../cost-monitoring/route';
 // Mock dependencies
 jest.mock('@/lib/api-usage-tracker', () => ({
   getAPIUsageStats: jest.fn(),
+  getAvailableDataYears: jest.fn(),
 }));
 
 jest.mock('@/lib/optimized-google-places', () => ({
   getCacheStats: jest.fn(),
+}));
+
+jest.mock('@/lib/google-places', () => ({
+  getLocationCacheStats: jest.fn(),
 }));
 
 jest.mock('@/lib/logger', () => ({
@@ -24,14 +29,24 @@ jest.mock('@/lib/logger', () => ({
   },
 }));
 
-import { getAPIUsageStats } from '@/lib/api-usage-tracker';
+import {
+  getAPIUsageStats,
+  getAvailableDataYears,
+} from '@/lib/api-usage-tracker';
 import { getCacheStats } from '@/lib/optimized-google-places';
+import { getLocationCacheStats } from '@/lib/google-places';
 
 const mockGetAPIUsageStats = getAPIUsageStats as jest.MockedFunction<
   typeof getAPIUsageStats
 >;
 const mockGetCacheStats = getCacheStats as jest.MockedFunction<
   typeof getCacheStats
+>;
+const mockGetLocationCacheStats = getLocationCacheStats as jest.MockedFunction<
+  typeof getLocationCacheStats
+>;
+const mockGetAvailableDataYears = getAvailableDataYears as jest.MockedFunction<
+  typeof getAvailableDataYears
 >;
 
 describe('/api/admin/cost-monitoring', () => {
@@ -45,12 +60,24 @@ describe('/api/admin/cost-monitoring', () => {
         totalCalls: 100,
         totalCost: 0.05,
         byType: {
-          google_places_text_search: { count: 100, cost: 0.032 },
-          google_places_nearby_search: { count: 30, cost: 0.01 },
-          google_places_details: { count: 250, cost: 0.04 },
-          google_geocoding: { count: 80, cost: 0.004 },
-          google_address_validation: { count: 10, cost: 0.003 },
-          google_maps_load: { count: 20, cost: 0.002 },
+          google_places_text_search: {
+            count: 100,
+            cost: 0.032,
+            costPerCall: 0.032,
+          },
+          google_places_nearby_search: {
+            count: 30,
+            cost: 0.01,
+            costPerCall: 0.032,
+          },
+          google_places_details: { count: 250, cost: 0.04, costPerCall: 0.017 },
+          google_geocoding: { count: 80, cost: 0.004, costPerCall: 0.005 },
+          google_address_validation: {
+            count: 10,
+            cost: 0.003,
+            costPerCall: 0.005,
+          },
+          google_maps_load: { count: 20, cost: 0.002, costPerCall: 0.007 },
         },
         byEndpoint: {},
       })
@@ -59,12 +86,28 @@ describe('/api/admin/cost-monitoring', () => {
         totalCalls: 3000,
         totalCost: 1.5,
         byType: {
-          google_places_text_search: { count: 3000, cost: 0.96 },
-          google_places_nearby_search: { count: 900, cost: 0.3 },
-          google_places_details: { count: 7500, cost: 1.275 },
-          google_geocoding: { count: 2400, cost: 0.12 },
-          google_address_validation: { count: 300, cost: 0.09 },
-          google_maps_load: { count: 600, cost: 0.06 },
+          google_places_text_search: {
+            count: 3000,
+            cost: 0.96,
+            costPerCall: 0.032,
+          },
+          google_places_nearby_search: {
+            count: 900,
+            cost: 0.3,
+            costPerCall: 0.032,
+          },
+          google_places_details: {
+            count: 7500,
+            cost: 1.275,
+            costPerCall: 0.017,
+          },
+          google_geocoding: { count: 2400, cost: 0.12, costPerCall: 0.005 },
+          google_address_validation: {
+            count: 300,
+            cost: 0.09,
+            costPerCall: 0.005,
+          },
+          google_maps_load: { count: 600, cost: 0.06, costPerCall: 0.007 },
         },
         byEndpoint: {},
       });
@@ -74,10 +117,25 @@ describe('/api/admin/cost-monitoring', () => {
       totalHits: 1250,
       memoryEntries: 89,
     });
+
+    mockGetLocationCacheStats.mockResolvedValue({
+      totalEntries: 50,
+      locationOnlyEntries: 30,
+      locationQueryEntries: 20,
+      averageRestaurantsPerEntry: 15,
+      estimatedSizeKB: 125,
+      oldestEntry: new Date('2024-01-01'),
+      newestEntry: new Date('2024-01-15'),
+    });
+
+    mockGetAvailableDataYears.mockResolvedValue([2024, 2023]);
   });
 
   it('should return cost monitoring data successfully', async () => {
-    const response = await GET();
+    const request = new Request(
+      'http://localhost:3000/api/admin/cost-monitoring'
+    );
+    const response = await GET(request);
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -106,12 +164,24 @@ describe('/api/admin/cost-monitoring', () => {
         totalCalls: 100,
         totalCost: 0.05,
         byType: {
-          google_places_text_search: { count: 100, cost: 0.032 },
-          google_places_nearby_search: { count: 30, cost: 0.01 },
-          google_places_details: { count: 250, cost: 0.04 },
-          google_geocoding: { count: 80, cost: 0.004 },
-          google_address_validation: { count: 10, cost: 0.003 },
-          google_maps_load: { count: 20, cost: 0.002 },
+          google_places_text_search: {
+            count: 100,
+            cost: 0.032,
+            costPerCall: 0.032,
+          },
+          google_places_nearby_search: {
+            count: 30,
+            cost: 0.01,
+            costPerCall: 0.032,
+          },
+          google_places_details: { count: 250, cost: 0.04, costPerCall: 0.017 },
+          google_geocoding: { count: 80, cost: 0.004, costPerCall: 0.005 },
+          google_address_validation: {
+            count: 10,
+            cost: 0.003,
+            costPerCall: 0.005,
+          },
+          google_maps_load: { count: 20, cost: 0.002, costPerCall: 0.007 },
         },
         byEndpoint: {},
       })
@@ -120,17 +190,36 @@ describe('/api/admin/cost-monitoring', () => {
         totalCalls: 3000,
         totalCost: 1.5,
         byType: {
-          google_places_text_search: { count: 3000, cost: 0.96 },
-          google_places_nearby_search: { count: 900, cost: 0.3 },
-          google_places_details: { count: 7500, cost: 1.275 },
-          google_geocoding: { count: 2400, cost: 0.12 },
-          google_address_validation: { count: 300, cost: 0.09 },
-          google_maps_load: { count: 600, cost: 0.06 },
+          google_places_text_search: {
+            count: 3000,
+            cost: 0.96,
+            costPerCall: 0.032,
+          },
+          google_places_nearby_search: {
+            count: 900,
+            cost: 0.3,
+            costPerCall: 0.032,
+          },
+          google_places_details: {
+            count: 7500,
+            cost: 1.275,
+            costPerCall: 0.017,
+          },
+          google_geocoding: { count: 2400, cost: 0.12, costPerCall: 0.005 },
+          google_address_validation: {
+            count: 300,
+            cost: 0.09,
+            costPerCall: 0.005,
+          },
+          google_maps_load: { count: 600, cost: 0.06, costPerCall: 0.007 },
         },
         byEndpoint: {},
       });
 
-    const response = await GET();
+    const request = new Request(
+      'http://localhost:3000/api/admin/cost-monitoring'
+    );
+    const response = await GET(request);
     const data = await response.json();
 
     // Check Google Places API calculations (from monthly stats)
@@ -145,7 +234,10 @@ describe('/api/admin/cost-monitoring', () => {
   });
 
   it('should calculate costs correctly', async () => {
-    const response = await GET();
+    const request = new Request(
+      'http://localhost:3000/api/admin/cost-monitoring'
+    );
+    const response = await GET(request);
     const data = await response.json();
 
     // Daily costs should be calculated
@@ -175,7 +267,10 @@ describe('/api/admin/cost-monitoring', () => {
         byEndpoint: {},
       });
 
-    const response = await GET();
+    const request = new Request(
+      'http://localhost:3000/api/admin/cost-monitoring'
+    );
+    const response = await GET(request);
     const data = await response.json();
 
     expect(data.recommendations).toBeInstanceOf(Array);
@@ -204,7 +299,10 @@ describe('/api/admin/cost-monitoring', () => {
       memoryEntries: 50,
     });
 
-    const response = await GET();
+    const request = new Request(
+      'http://localhost:3000/api/admin/cost-monitoring'
+    );
+    const response = await GET(request);
     const data = await response.json();
 
     const hasCacheRecommendation = data.recommendations.some((rec: string) =>
@@ -222,12 +320,28 @@ describe('/api/admin/cost-monitoring', () => {
         totalCalls: 10000,
         totalCost: 5,
         byType: {
-          google_places_text_search: { count: 10000, cost: 3.2 },
-          google_places_nearby_search: { count: 3000, cost: 1.0 },
-          google_places_details: { count: 25000, cost: 4.25 },
-          google_geocoding: { count: 8000, cost: 0.4 },
-          google_address_validation: { count: 1000, cost: 0.3 },
-          google_maps_load: { count: 2000, cost: 0.2 },
+          google_places_text_search: {
+            count: 10000,
+            cost: 3.2,
+            costPerCall: 0.032,
+          },
+          google_places_nearby_search: {
+            count: 3000,
+            cost: 1.0,
+            costPerCall: 0.032,
+          },
+          google_places_details: {
+            count: 25000,
+            cost: 4.25,
+            costPerCall: 0.017,
+          },
+          google_geocoding: { count: 8000, cost: 0.4, costPerCall: 0.005 },
+          google_address_validation: {
+            count: 1000,
+            cost: 0.3,
+            costPerCall: 0.005,
+          },
+          google_maps_load: { count: 2000, cost: 0.2, costPerCall: 0.007 },
         },
         byEndpoint: {},
       })
@@ -236,24 +350,43 @@ describe('/api/admin/cost-monitoring', () => {
         totalCalls: 300000,
         totalCost: 150,
         byType: {
-          google_places_text_search: { count: 300000, cost: 96 },
-          google_places_nearby_search: { count: 90000, cost: 30 },
-          google_places_details: { count: 750000, cost: 127.5 },
-          google_geocoding: { count: 240000, cost: 12 },
-          google_address_validation: { count: 30000, cost: 9 },
-          google_maps_load: { count: 60000, cost: 6 },
+          google_places_text_search: {
+            count: 300000,
+            cost: 96,
+            costPerCall: 0.032,
+          },
+          google_places_nearby_search: {
+            count: 90000,
+            cost: 30,
+            costPerCall: 0.032,
+          },
+          google_places_details: {
+            count: 750000,
+            cost: 127.5,
+            costPerCall: 0.017,
+          },
+          google_geocoding: { count: 240000, cost: 12, costPerCall: 0.005 },
+          google_address_validation: {
+            count: 30000,
+            cost: 9,
+            costPerCall: 0.005,
+          },
+          google_maps_load: { count: 60000, cost: 6, costPerCall: 0.007 },
         },
         byEndpoint: {},
       });
 
-    const response = await GET();
+    const request = new Request(
+      'http://localhost:3000/api/admin/cost-monitoring'
+    );
+    const response = await GET(request);
     const data = await response.json();
 
     // Should have high monthly costs
     expect(data.metrics.estimatedCosts.monthly).toBeGreaterThan(100);
 
     const hasCostRecommendation = data.recommendations.some((rec: string) =>
-      rec.includes('Monthly API costs exceed')
+      rec.includes('Monthly API costs')
     );
     expect(hasCostRecommendation).toBe(true);
   });
@@ -264,7 +397,10 @@ describe('/api/admin/cost-monitoring', () => {
       new Error('Failed to get API usage stats')
     );
 
-    const response = await GET();
+    const request = new Request(
+      'http://localhost:3000/api/admin/cost-monitoring'
+    );
+    const response = await GET(request);
     const data = await response.json();
 
     expect(response.status).toBe(500);
@@ -289,7 +425,10 @@ describe('/api/admin/cost-monitoring', () => {
 
     mockGetCacheStats.mockRejectedValue(new Error('Cache stats failed'));
 
-    const response = await GET();
+    const request = new Request(
+      'http://localhost:3000/api/admin/cost-monitoring'
+    );
+    const response = await GET(request);
     const data = await response.json();
 
     expect(response.status).toBe(500);
@@ -312,7 +451,10 @@ describe('/api/admin/cost-monitoring', () => {
         byEndpoint: {},
       });
 
-    await GET();
+    const request = new Request(
+      'http://localhost:3000/api/admin/cost-monitoring'
+    );
+    await GET(request);
 
     // Should be called twice - once for daily, once for monthly
     expect(mockGetAPIUsageStats).toHaveBeenCalledTimes(2);
@@ -334,12 +476,28 @@ describe('/api/admin/cost-monitoring', () => {
         totalCalls: 5310,
         totalCost: 0.0785, // Expected total
         byType: {
-          google_places_text_search: { count: 1000, cost: 0.032 },
-          google_places_nearby_search: { count: 300, cost: 0.01 },
-          google_places_details: { count: 2500, cost: 0.0425 },
-          google_geocoding: { count: 800, cost: 0.004 },
-          google_address_validation: { count: 100, cost: 0.003 },
-          google_maps_load: { count: 200, cost: 0.002 },
+          google_places_text_search: {
+            count: 1000,
+            cost: 0.032,
+            costPerCall: 0.032,
+          },
+          google_places_nearby_search: {
+            count: 300,
+            cost: 0.01,
+            costPerCall: 0.032,
+          },
+          google_places_details: {
+            count: 2500,
+            cost: 0.0425,
+            costPerCall: 0.017,
+          },
+          google_geocoding: { count: 800, cost: 0.004, costPerCall: 0.005 },
+          google_address_validation: {
+            count: 100,
+            cost: 0.003,
+            costPerCall: 0.005,
+          },
+          google_maps_load: { count: 200, cost: 0.002, costPerCall: 0.007 },
         },
         byEndpoint: {},
       })
@@ -348,17 +506,36 @@ describe('/api/admin/cost-monitoring', () => {
         totalCalls: 159300,
         totalCost: 2.355,
         byType: {
-          google_places_text_search: { count: 30000, cost: 0.96 },
-          google_places_nearby_search: { count: 9000, cost: 0.3 },
-          google_places_details: { count: 75000, cost: 1.275 },
-          google_geocoding: { count: 24000, cost: 0.12 },
-          google_address_validation: { count: 3000, cost: 0.09 },
-          google_maps_load: { count: 6000, cost: 0.06 },
+          google_places_text_search: {
+            count: 30000,
+            cost: 0.96,
+            costPerCall: 0.032,
+          },
+          google_places_nearby_search: {
+            count: 9000,
+            cost: 0.3,
+            costPerCall: 0.032,
+          },
+          google_places_details: {
+            count: 75000,
+            cost: 1.275,
+            costPerCall: 0.017,
+          },
+          google_geocoding: { count: 24000, cost: 0.12, costPerCall: 0.005 },
+          google_address_validation: {
+            count: 3000,
+            cost: 0.09,
+            costPerCall: 0.005,
+          },
+          google_maps_load: { count: 6000, cost: 0.06, costPerCall: 0.007 },
         },
         byEndpoint: {},
       });
 
-    const response = await GET();
+    const request = new Request(
+      'http://localhost:3000/api/admin/cost-monitoring'
+    );
+    const response = await GET(request);
     const data = await response.json();
 
     // Total daily cost should be around $0.0785
@@ -387,7 +564,10 @@ describe('/api/admin/cost-monitoring', () => {
       memoryEntries: 100,
     });
 
-    const response = await GET();
+    const request = new Request(
+      'http://localhost:3000/api/admin/cost-monitoring'
+    );
+    const response = await GET(request);
     const data = await response.json();
 
     // Savings should be calculated based on 80% cache hit rate
