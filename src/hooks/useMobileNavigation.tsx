@@ -16,6 +16,7 @@ import {
   ArrowLeftOnRectangleIcon,
   SunIcon,
   MoonIcon,
+  ShieldCheckIcon,
 } from '@heroicons/react/24/outline';
 import {
   HomeIcon as HomeIconSolid,
@@ -23,6 +24,7 @@ import {
   UserGroupIcon as UserGroupIconSolid,
 } from '@heroicons/react/24/solid';
 import { useTheme } from '@/components/providers/ThemeProvider';
+import { useIsAdmin } from '@/hooks/useIsAdmin';
 
 export interface NavigationItem {
   id: string;
@@ -40,6 +42,7 @@ export function useMobileNavigation() {
   const { signOut } = useClerk();
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
   const { resolvedTheme, toggleTheme } = useTheme();
+  const { isAdmin, isChecking: isCheckingAdmin } = useIsAdmin();
 
   // Determine active tab based on current path
   const getActiveTab = (path: string): string => {
@@ -50,7 +53,8 @@ export function useMobileNavigation() {
       path.startsWith('/friends') ||
       path.startsWith('/history') ||
       path.startsWith('/profile') ||
-      path.startsWith('/analytics')
+      path.startsWith('/analytics') ||
+      path.startsWith('/admin')
     ) {
       return 'more';
     }
@@ -131,6 +135,17 @@ export function useMobileNavigation() {
             icon: <Cog6ToothIcon className="w-5 h-5" />,
             onClick: () => router.push('/profile'),
           },
+          // Admin Dashboard - only show for authorized admins
+          ...(isAdmin && !isCheckingAdmin
+            ? [
+                {
+                  id: 'admin-dashboard',
+                  label: 'Admin Dashboard',
+                  icon: <ShieldCheckIcon className="w-5 h-5" />,
+                  onClick: () => router.push('/admin'),
+                },
+              ]
+            : []),
           // Theme toggle
           {
             id: 'theme-toggle',

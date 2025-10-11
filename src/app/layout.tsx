@@ -27,9 +27,9 @@ export const metadata: Metadata = {
   title: 'ForkInTheRoad - Restaurant Discovery',
   description: 'Discover and decide on restaurants with friends',
   keywords: ['restaurants', 'food', 'discovery', 'decision making', 'groups'],
-  authors: [{ name: 'ForkInTheRoad Team' }],
-  creator: 'ForkInTheRoad Team',
-  publisher: 'ForkInTheRoad Team',
+  authors: [{ name: 'Andrew Persad' }],
+  creator: 'Andrew Persad',
+  publisher: 'Andrew Persad',
   formatDetection: {
     email: false,
     address: false,
