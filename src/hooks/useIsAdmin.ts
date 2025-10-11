@@ -1,9 +1,7 @@
 import { useUser } from '@clerk/nextjs';
 import { useState, useEffect } from 'react';
 import { logger } from '@/lib/logger';
-
-// List of authorized admin MongoDB user IDs
-const ADMIN_USER_IDS = ['68d9b010a25dec569c34c111', '68d9ae3528a9bab6c334d9f9'];
+import { ADMIN_USER_IDS } from '@/constants/admin';
 
 export function useIsAdmin() {
   const { user, isLoaded } = useUser();
