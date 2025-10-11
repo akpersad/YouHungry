@@ -72,7 +72,10 @@ export function AdminNav({ activeTab, onTabChange }: AdminNavProps) {
       }}
     >
       <div className="border-b" style={{ borderColor: 'var(--bg-quaternary)' }}>
-        <nav className="flex space-x-8 px-6" aria-label="Tabs">
+        <nav
+          className="flex space-x-8 px-6 overflow-y-scroll"
+          aria-label="Tabs"
+        >
           {adminNavItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;

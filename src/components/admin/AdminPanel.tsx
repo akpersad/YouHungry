@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { AdminNav } from './AdminNav';
 import { PerformanceDashboard } from './PerformanceDashboard';
 import { CostMonitoringDashboard } from './CostMonitoringDashboard';
@@ -19,14 +20,49 @@ type AdminTab =
   | 'settings'
   | 'alerts';
 
-export function AdminPanel() {
-  const [activeTab, setActiveTab] = useState<AdminTab>('performance');
-  // const [cacheBuster, setCacheBuster] = useState(Date.now());
+const VALID_TABS: AdminTab[] = [
+  'performance',
+  'analytics',
+  'costs',
+  'users',
+  'database',
+  'settings',
+  'alerts',
+];
 
-  // Add cache busting when component mounts or tab changes
-  // useEffect(() => {
-  //   setCacheBuster(Date.now());
-  // }, [activeTab]);
+export function AdminPanel() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get('tab');
+
+  // Initialize active tab from URL param, defaulting to 'performance'
+  const [activeTab, setActiveTab] = useState<AdminTab>(() => {
+    if (tabParam && VALID_TABS.includes(tabParam as AdminTab)) {
+      return tabParam as AdminTab;
+    }
+    return 'performance';
+  });
+
+  // Update active tab when URL changes
+  useEffect(() => {
+    if (tabParam && VALID_TABS.includes(tabParam as AdminTab)) {
+      setActiveTab(tabParam as AdminTab);
+    } else if (!tabParam) {
+      // If no tab param, default to performance
+      setActiveTab('performance');
+    }
+  }, [tabParam]);
+
+  // Handle tab changes by updating URL
+  const handleTabChange = (tab: string) => {
+    const newTab = tab as AdminTab;
+    setActiveTab(newTab);
+
+    // Update URL with new tab parameter
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('tab', newTab);
+    router.push(`/admin?${params.toString()}`, { scroll: false });
+  };
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -74,10 +110,7 @@ export function AdminPanel() {
       </div>
 
       <div className="max-w-7xl mx-auto lg:px-8 py-6">
-        <AdminNav
-          activeTab={activeTab}
-          onTabChange={(tab) => setActiveTab(tab as AdminTab)}
-        />
+        <AdminNav activeTab={activeTab} onTabChange={handleTabChange} />
 
         <div className="mt-6">{renderTabContent()}</div>
       </div>
