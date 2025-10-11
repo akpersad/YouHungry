@@ -43,7 +43,7 @@ describe('SignUpPage', () => {
   it('renders the sign-up page with correct title and description', () => {
     render(<SignUpPage />);
 
-    expect(screen.getByText('Join You Hungry?')).toBeInTheDocument();
+    expect(screen.getByText('Join ForkInTheRoad')).toBeInTheDocument();
     expect(
       screen.getByText(
         'Create your account to start discovering amazing restaurants'

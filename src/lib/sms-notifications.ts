@@ -169,14 +169,14 @@ export class SMSNotificationService {
     if (urlToUse) {
       message =
         decisionType === 'tiered'
-          ? `🍽️ You Hungry? - ${groupName} has started a group decision! Vote by ${deadline.toLocaleDateString()} at ${deadline.toLocaleTimeString()}. ${urlToUse}`
-          : `🎲 You Hungry? - ${groupName} has started a random selection! Decision at ${deadline.toLocaleDateString()} at ${deadline.toLocaleTimeString()}. ${urlToUse}`;
+          ? `🍽️ ForkInTheRoad - ${groupName} has started a group decision! Vote by ${deadline.toLocaleDateString()} at ${deadline.toLocaleTimeString()}. ${urlToUse}`
+          : `🎲 ForkInTheRoad - ${groupName} has started a random selection! Decision at ${deadline.toLocaleDateString()} at ${deadline.toLocaleTimeString()}. ${urlToUse}`;
     } else {
       // Fallback to original message without URL
       message =
         decisionType === 'tiered'
-          ? `🍽️ You Hungry? - ${groupName} has started a group decision! Vote for your top 3 restaurants by ${deadline.toLocaleDateString()} at ${deadline.toLocaleTimeString()}.`
-          : `🎲 You Hungry? - ${groupName} has started a random selection! The decision will be made at ${deadline.toLocaleDateString()} at ${deadline.toLocaleTimeString()}.`;
+          ? `🍽️ ForkInTheRoad - ${groupName} has started a group decision! Vote for your top 3 restaurants by ${deadline.toLocaleDateString()} at ${deadline.toLocaleTimeString()}.`
+          : `🎲 ForkInTheRoad - ${groupName} has started a random selection! The decision will be made at ${deadline.toLocaleDateString()} at ${deadline.toLocaleTimeString()}.`;
     }
 
     return this.sendSMS({
@@ -197,8 +197,8 @@ export class SMSNotificationService {
   ): Promise<SMSDeliveryStatus> {
     const typeText = decisionType === 'random' ? 'random choice' : 'group vote';
     const message = shortUrl
-      ? `🎉 You Hungry? - ${groupName} decision complete! You're going to ${restaurantName} (${typeText})! ${shortUrl}`
-      : `🎉 You Hungry? - ${groupName} decision complete! You're going to ${restaurantName} (${typeText})!`;
+      ? `🎉 ForkInTheRoad - ${groupName} decision complete! You're going to ${restaurantName} (${typeText})! ${shortUrl}`
+      : `🎉 ForkInTheRoad - ${groupName} decision complete! You're going to ${restaurantName} (${typeText})!`;
 
     return this.sendSMS({
       to: phoneNumber,
@@ -213,7 +213,7 @@ export class SMSNotificationService {
     phoneNumber: string,
     requesterName: string
   ): Promise<SMSDeliveryStatus> {
-    const message = `👋 You Hungry? - ${requesterName} sent you a friend request! Check the app to accept.`;
+    const message = `👋 ForkInTheRoad - ${requesterName} sent you a friend request! Check the app to accept.`;
 
     return this.sendSMS({
       to: phoneNumber,
@@ -229,7 +229,7 @@ export class SMSNotificationService {
     groupName: string,
     inviterName: string
   ): Promise<SMSDeliveryStatus> {
-    const message = `👥 You Hungry? - ${inviterName} invited you to join "${groupName}"! Check the app to accept.`;
+    const message = `👥 ForkInTheRoad - ${inviterName} invited you to join "${groupName}"! Check the app to accept.`;
 
     return this.sendSMS({
       to: phoneNumber,
@@ -246,9 +246,9 @@ export class SMSNotificationService {
     details: string
   ): Promise<SMSDeliveryStatus> {
     const alertMessages = {
-      cost_spike: '🚨 You Hungry? - Cost spike detected!',
-      system_failure: '🚨 You Hungry? - System failure detected!',
-      circuit_breaker: '⚠️ You Hungry? - Circuit breaker activated!',
+      cost_spike: '🚨 ForkInTheRoad - Cost spike detected!',
+      system_failure: '🚨 ForkInTheRoad - System failure detected!',
+      circuit_breaker: '⚠️ ForkInTheRoad - Circuit breaker activated!',
     };
 
     const message = `${alertMessages[alertType]} ${details}`;
@@ -263,7 +263,7 @@ export class SMSNotificationService {
    * Send test SMS (for development)
    */
   public async sendTestSMS(phoneNumber: string): Promise<SMSDeliveryStatus> {
-    const message = `🧪 You Hungry? - This is a test SMS from the notification system.`;
+    const message = `🧪 ForkInTheRoad - This is a test SMS from the notification system.`;
 
     return this.sendSMS({
       to: phoneNumber,

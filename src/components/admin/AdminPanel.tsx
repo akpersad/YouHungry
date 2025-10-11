@@ -67,7 +67,7 @@ export function AdminPanel() {
               </p>
             </div>
             <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-              You Hungry? Admin Dashboard
+              ForkInTheRoad Admin Dashboard
             </div>
           </div>
         </div>

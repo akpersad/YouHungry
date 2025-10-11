@@ -1,6 +1,6 @@
-# Technical Architecture - You Hungry? App
+# Technical Architecture - ForkInTheRoad App
 
-This document outlines the technical architecture, technology stack, and implementation strategy for the You Hungry? app.
+This document outlines the technical architecture, technology stack, and implementation strategy for the ForkInTheRoad app.
 
 ## 🏗️ Current Technology Stack (Implemented)
 
@@ -832,7 +832,7 @@ The following environment variables are configured and ready for use:
 
 ### App Manifest
 
-- **App Name**: "You Hungry?"
+- **App Name**: "ForkInTheRoad"
 - **Icons**: Multiple sizes for different devices
 - **Theme Colors**: Match design system
 - **Display Mode**: Standalone for app-like experience

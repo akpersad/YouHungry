@@ -96,7 +96,9 @@ describe('AdminPanel', () => {
     expect(
       screen.getByText('System administration and monitoring')
     ).toBeInTheDocument();
-    expect(screen.getByText('You Hungry? Admin Dashboard')).toBeInTheDocument();
+    expect(
+      screen.getByText('ForkInTheRoad Admin Dashboard')
+    ).toBeInTheDocument();
   });
 
   it('should render admin navigation', () => {

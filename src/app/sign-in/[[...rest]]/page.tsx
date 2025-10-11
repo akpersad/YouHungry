@@ -19,7 +19,7 @@ export default function SignInPage() {
             Welcome Back
           </h1>
           <p className="text-sm" style={{ color: 'var(--color-text-light)' }}>
-            Sign in to continue to You Hungry?
+            Sign in to continue to ForkInTheRoad
           </p>
         </div>
 
