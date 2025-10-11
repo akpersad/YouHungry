@@ -371,6 +371,17 @@ export class UserEmailNotificationService {
         emailId: result.id,
       });
 
+      // Track API usage for cost monitoring
+      try {
+        const { trackAPIUsage } = await import('./api-usage-tracker');
+        await trackAPIUsage('resend_email_sent', false, {
+          type: data.type,
+          recipient: data.recipientEmail,
+        });
+      } catch (error) {
+        logger.error('Failed to track email API usage:', error);
+      }
+
       return {
         success: true,
         emailId: result.id,

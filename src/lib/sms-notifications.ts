@@ -133,6 +133,17 @@ export class SMSNotificationService {
 
       logger.info(`SMS sent successfully. SID: ${result.sid}`);
 
+      // Track API usage for cost monitoring
+      try {
+        const { trackAPIUsage } = await import('./api-usage-tracker');
+        await trackAPIUsage('twilio_sms_sent', false, {
+          to: formattedTo,
+          messageLength: message.body.length,
+        });
+      } catch (error) {
+        logger.error('Failed to track SMS API usage:', error);
+      }
+
       return {
         success: true,
         messageId: result.sid,
