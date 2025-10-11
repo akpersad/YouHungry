@@ -1,0 +1,42 @@
+{
+  "bundleSize": {
+    "firstLoadJS": 102,
+    "totalBundleSize": 1347,
+    "fileCount": 34,
+    "timestamp": 1760203627220
+  },
+  "buildTime": {
+    "buildTime": 18413,
+    "timestamp": 1760203645633
+  },
+  "webVitals": {
+    "fcp": 1116.1220886192846,
+    "lcp": 2501.769731084949,
+    "fid": 90.78704359944211,
+    "cls": 0.018663299961005953,
+    "ttfb": 415.9745193139663,
+    "timestamp": 1760203645634
+  },
+  "system": {
+    "platform": "darwin",
+    "arch": "arm64",
+    "nodeVersion": "v22.18.0",
+    "memoryUsage": {
+      "rss": 33800192,
+      "heapTotal": 5373952,
+      "heapUsed": 4596648,
+      "external": 1612453,
+      "arrayBuffers": 24629
+    },
+    "uptime": 44.686387541,
+    "timestamp": 1760203645634
+  },
+  "apiPerformance": {
+    "averageResponseTime": 154.02138274749117,
+    "successRate": 98.16328080898843,
+    "errorRate": 1.9792247056291985,
+    "totalRequests": 1470,
+    "timestamp": 1760203645634
+  },
+  "lastUpdated": "2025-10-11T17:27:25.634Z"
+}

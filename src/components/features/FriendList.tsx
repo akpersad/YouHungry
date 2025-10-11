@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Modal } from '@/components/ui/Modal';
 import { UserAvatar } from '@/components/ui/UserAvatar';
+import { DropdownMenu, DropdownMenuItem } from '@/components/ui/DropdownMenu';
 
 interface FriendListProps {
   userId: string;
@@ -81,7 +82,7 @@ export function FriendList({ userId }: FriendListProps) {
       {friends && friends.length > 0 ? (
         <div className="space-y-2">
           {friends.map((friend) => (
-            <Card key={friend._id} className="p-4">
+            <Card key={friend._id} className="p-4 !overflow-visible">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                   <div className="flex-shrink-0">
@@ -113,7 +114,9 @@ export function FriendList({ userId }: FriendListProps) {
                     </p>
                   </div>
                 </div>
-                <div className="flex-shrink-0">
+
+                {/* Desktop: Show button directly */}
+                <div className="hidden md:flex flex-shrink-0">
                   <Button
                     size="sm"
                     variant="outline"
@@ -123,6 +126,54 @@ export function FriendList({ userId }: FriendListProps) {
                   >
                     Remove
                   </Button>
+                </div>
+
+                {/* Mobile: Show dropdown menu */}
+                <div className="flex md:hidden flex-shrink-0">
+                  <DropdownMenu
+                    trigger={
+                      <button
+                        className="p-2 hover:bg-tertiary rounded-lg transition-colors"
+                        aria-label="Friend actions"
+                      >
+                        <svg
+                          className="w-5 h-5 text-primary"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
+                          />
+                        </svg>
+                      </button>
+                    }
+                    align="right"
+                  >
+                    <DropdownMenuItem
+                      onClick={() => handleRemoveClick(friend.friendshipId)}
+                      variant="destructive"
+                      disabled={removeFriendMutation.isPending}
+                    >
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                        />
+                      </svg>
+                      Remove Friend
+                    </DropdownMenuItem>
+                  </DropdownMenu>
                 </div>
               </div>
             </Card>
