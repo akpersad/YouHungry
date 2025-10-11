@@ -125,7 +125,7 @@ describe('Lazy Loading Components', () => {
 
   describe('Lazy Component Loading', () => {
     it('should lazy load RestaurantCard component', async () => {
-      const mockRestaurant = { id: '1', name: 'Test Restaurant' };
+      const mockRestaurant = { id: '1', name: 'Test Restaurant' } as any;
 
       render(
         <Suspense fallback={<div data-testid="loading">Loading...</div>}>
@@ -148,7 +148,7 @@ describe('Lazy Loading Components', () => {
       const mockCollections = [
         { id: '1', name: 'Collection 1' },
         { id: '2', name: 'Collection 2' },
-      ];
+      ] as any;
 
       render(
         <Suspense fallback={<div data-testid="loading">Loading...</div>}>
@@ -167,7 +167,7 @@ describe('Lazy Loading Components', () => {
       const mockGroups = [
         { id: '1', name: 'Group 1' },
         { id: '2', name: 'Group 2' },
-      ];
+      ] as any;
 
       render(
         <Suspense fallback={<div data-testid="loading">Loading...</div>}>
@@ -186,11 +186,17 @@ describe('Lazy Loading Components', () => {
       const mockRestaurants = [
         { id: '1', name: 'Restaurant 1' },
         { id: '2', name: 'Restaurant 2' },
-      ];
+      ] as any;
 
       render(
         <Suspense fallback={<div data-testid="loading">Loading...</div>}>
-          <LazyMobileDecisionInterface restaurants={mockRestaurants} />
+          <LazyMobileDecisionInterface
+            restaurants={mockRestaurants}
+            onVote={() => {}}
+            onSkip={() => {}}
+            onRandomSelect={() => {}}
+            onEndDecision={() => {}}
+          />
         </Suspense>
       );
 
@@ -206,7 +212,13 @@ describe('Lazy Loading Components', () => {
     it('should lazy load MobileSearchInterface component', async () => {
       render(
         <Suspense fallback={<div data-testid="loading">Loading...</div>}>
-          <LazyMobileSearchInterface searchQuery="test query" />
+          <LazyMobileSearchInterface
+            searchQuery="test query"
+            onSearchChange={() => {}}
+            onSearchSubmit={() => {}}
+            currentView="list"
+            onViewToggle={() => {}}
+          />
         </Suspense>
       );
 
@@ -223,7 +235,7 @@ describe('Lazy Loading Components', () => {
       const mockRestaurants = [
         { id: '1', name: 'Restaurant 1' },
         { id: '2', name: 'Restaurant 2' },
-      ];
+      ] as any;
 
       render(
         <Suspense fallback={<div data-testid="loading">Loading...</div>}>
@@ -245,7 +257,10 @@ describe('Lazy Loading Components', () => {
 
       render(
         <Suspense fallback={<div data-testid="loading">Loading...</div>}>
-          <LazyCreateCollectionForm onSuccess={mockOnSuccess} />
+          <LazyCreateCollectionForm
+            onSuccess={mockOnSuccess}
+            onCancel={() => {}}
+          />
         </Suspense>
       );
 
@@ -263,7 +278,11 @@ describe('Lazy Loading Components', () => {
 
       render(
         <Suspense fallback={<div data-testid="loading">Loading...</div>}>
-          <LazyCreateGroupForm onSubmit={mockOnSubmit} />
+          <LazyCreateGroupForm
+            onSubmit={mockOnSubmit}
+            isOpen={true}
+            onClose={() => {}}
+          />
         </Suspense>
       );
 
@@ -277,7 +296,7 @@ describe('Lazy Loading Components', () => {
 
   describe('Skeleton Loading States', () => {
     it('should render RestaurantCardWithSkeleton without errors', () => {
-      const mockRestaurant = { id: '1', name: 'Test Restaurant' };
+      const mockRestaurant = { id: '1', name: 'Test Restaurant' } as any;
 
       expect(() => {
         render(<RestaurantCardWithSkeleton restaurant={mockRestaurant} />);
@@ -288,7 +307,7 @@ describe('Lazy Loading Components', () => {
     });
 
     it('should render CollectionListWithSkeleton without errors', () => {
-      const mockCollections = [{ id: '1', name: 'Collection 1' }];
+      const mockCollections = [{ id: '1', name: 'Collection 1' }] as any;
 
       expect(() => {
         render(<CollectionListWithSkeleton collections={mockCollections} />);
@@ -299,7 +318,7 @@ describe('Lazy Loading Components', () => {
     });
 
     it('should render GroupListWithSkeleton without errors', () => {
-      const mockGroups = [{ id: '1', name: 'Group 1' }];
+      const mockGroups = [{ id: '1', name: 'Group 1' }] as any;
 
       expect(() => {
         render(<GroupListWithSkeleton groups={mockGroups} />);
@@ -310,11 +329,17 @@ describe('Lazy Loading Components', () => {
     });
 
     it('should render MobileDecisionInterfaceWithSkeleton without errors', () => {
-      const mockRestaurants = [{ id: '1', name: 'Restaurant 1' }];
+      const mockRestaurants = [{ id: '1', name: 'Restaurant 1' }] as any;
 
       expect(() => {
         render(
-          <MobileDecisionInterfaceWithSkeleton restaurants={mockRestaurants} />
+          <MobileDecisionInterfaceWithSkeleton
+            restaurants={mockRestaurants}
+            onVote={() => {}}
+            onSkip={() => {}}
+            onRandomSelect={() => {}}
+            onEndDecision={() => {}}
+          />
         );
       }).not.toThrow();
 
@@ -326,7 +351,15 @@ describe('Lazy Loading Components', () => {
 
     it('should render MobileSearchInterfaceWithSkeleton without errors', () => {
       expect(() => {
-        render(<MobileSearchInterfaceWithSkeleton searchQuery="test" />);
+        render(
+          <MobileSearchInterfaceWithSkeleton
+            searchQuery="test"
+            onSearchChange={() => {}}
+            onSearchSubmit={() => {}}
+            currentView="list"
+            onViewToggle={() => {}}
+          />
+        );
       }).not.toThrow();
 
       // Should render the component successfully
@@ -334,11 +367,14 @@ describe('Lazy Loading Components', () => {
     });
 
     it('should render RestaurantSearchResultsWithSkeleton without errors', () => {
-      const mockRestaurants = [{ id: '1', name: 'Restaurant 1' }];
+      const mockRestaurants = [{ id: '1', name: 'Restaurant 1' }] as any;
 
       expect(() => {
         render(
-          <RestaurantSearchResultsWithSkeleton restaurants={mockRestaurants} />
+          <RestaurantSearchResultsWithSkeleton
+            restaurants={mockRestaurants}
+            isLoading={false}
+          />
         );
       }).not.toThrow();
 
@@ -352,7 +388,12 @@ describe('Lazy Loading Components', () => {
       const mockOnSuccess = jest.fn();
 
       expect(() => {
-        render(<CreateCollectionFormWithSkeleton onSuccess={mockOnSuccess} />);
+        render(
+          <CreateCollectionFormWithSkeleton
+            onSuccess={mockOnSuccess}
+            onCancel={() => {}}
+          />
+        );
       }).not.toThrow();
 
       // Should render the component successfully
@@ -363,7 +404,13 @@ describe('Lazy Loading Components', () => {
       const mockOnSubmit = jest.fn();
 
       expect(() => {
-        render(<CreateGroupFormWithSkeleton onSubmit={mockOnSubmit} />);
+        render(
+          <CreateGroupFormWithSkeleton
+            onSubmit={mockOnSubmit}
+            isOpen={true}
+            onClose={() => {}}
+          />
+        );
       }).not.toThrow();
 
       // Should render the component successfully
@@ -440,7 +487,7 @@ describe('Lazy Loading Components', () => {
 
   describe('Error Handling', () => {
     it('should handle component load errors gracefully', async () => {
-      const mockRestaurant = { id: '1', name: 'Test Restaurant' };
+      const mockRestaurant = { id: '1', name: 'Test Restaurant' } as any;
 
       expect(() => {
         render(

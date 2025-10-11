@@ -18,13 +18,6 @@ jest.mock('@clerk/nextjs', () => ({
   ),
 }));
 
-// Mock MainLayout
-jest.mock('@/components/layout/MainLayout', () => ({
-  MainLayout: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="main-layout">{children}</div>
-  ),
-}));
-
 // Mock Button component
 jest.mock('@/components/ui/Button', () => ({
   Button: ({ children, onClick, className, variant }: any) => (
@@ -127,17 +120,11 @@ describe('SignUpPage', () => {
       'btn-base btn-outline'
     );
     expect(config.elements.formFieldInput).toBe('input-base');
-    expect(config.elements.formFieldSuccessText).toBe('text-sm text-green-600');
+    expect(config.elements.formFieldSuccessText).toBe('text-sm text-success');
 
     expect(config.variables).toBeDefined();
     expect(config.variables.colorPrimary).toBe('var(--color-primary)');
     expect(config.variables.colorBackground).toBe('var(--color-background)');
-  });
-
-  it('is wrapped in MainLayout', () => {
-    render(<SignUpPage />);
-
-    expect(screen.getByTestId('main-layout')).toBeInTheDocument();
   });
 
   it('displays benefits in a visually appealing format', () => {
@@ -160,13 +147,13 @@ describe('SignUpPage', () => {
       .getByText('📱 SMS Notifications (Optional)')
       .closest('div');
     expect(smsInfo).toHaveClass(
-      'bg-blue-50',
-      'dark:bg-blue-900/20',
+      'bg-primary/10',
+      'dark:bg-primary/20/20',
       'rounded-lg',
       'p-4',
       'border',
-      'border-blue-200',
-      'dark:border-blue-800'
+      'border-primary',
+      'dark:border-primary'
     );
   });
 });

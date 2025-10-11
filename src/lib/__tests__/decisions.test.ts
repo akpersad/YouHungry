@@ -2,6 +2,8 @@ import { ObjectId } from 'mongodb';
 import {
   calculateRestaurantWeight,
   getDecisionHistory,
+  getUserDecisionHistory,
+  getGroupDecisionHistory,
   createPersonalDecision,
   performRandomSelection,
   getDecisionStatistics,
@@ -46,7 +48,7 @@ describe('Decision System', () => {
         _id: new ObjectId(),
         type: 'personal',
         collectionId: new ObjectId(),
-        participants: [new ObjectId()],
+        participants: [new ObjectId().toString()],
         method: 'random',
         status: 'completed',
         deadline: new Date(),
@@ -70,7 +72,7 @@ describe('Decision System', () => {
         _id: new ObjectId(),
         type: 'personal',
         collectionId: new ObjectId(),
-        participants: [new ObjectId()],
+        participants: [new ObjectId().toString()],
         method: 'random',
         status: 'completed',
         deadline: new Date(),
@@ -97,7 +99,7 @@ describe('Decision System', () => {
         _id: new ObjectId(),
         type: 'personal',
         collectionId: new ObjectId(),
-        participants: [new ObjectId()],
+        participants: [new ObjectId().toString()],
         method: 'random',
         status: 'completed',
         deadline: new Date(),
@@ -123,7 +125,7 @@ describe('Decision System', () => {
         _id: new ObjectId(),
         type: 'personal',
         collectionId: new ObjectId(),
-        participants: [new ObjectId()],
+        participants: [new ObjectId().toString()],
         method: 'random',
         status: 'completed',
         deadline: new Date(),
@@ -141,7 +143,7 @@ describe('Decision System', () => {
         _id: new ObjectId(),
         type: 'personal',
         collectionId: new ObjectId(),
-        participants: [new ObjectId()],
+        participants: [new ObjectId().toString()],
         method: 'random',
         status: 'completed',
         deadline: new Date(),
@@ -172,7 +174,7 @@ describe('Decision System', () => {
           _id: new ObjectId(),
           type: 'personal',
           collectionId: new ObjectId(collectionId),
-          participants: [new ObjectId()],
+          participants: [new ObjectId().toString()],
           method: 'random',
           status: 'completed',
           deadline: new Date(),
@@ -454,7 +456,7 @@ describe('Decision System', () => {
           _id: new ObjectId(),
           type: 'personal',
           collectionId: new ObjectId(collectionId),
-          participants: [new ObjectId()],
+          participants: [new ObjectId().toString()],
           method: 'random',
           status: 'completed',
           deadline: new Date(),
@@ -517,6 +519,336 @@ describe('Decision System', () => {
             currentWeight: expect.any(Number),
           },
         ],
+      });
+    });
+  });
+
+  describe('Cross-Collection Weight Propagation', () => {
+    describe('getUserDecisionHistory', () => {
+      it('should fetch decision history across all user personal collections', async () => {
+        const userId = 'user_123';
+        const collection1Id = new ObjectId();
+        const collection2Id = new ObjectId();
+        const restaurant1Id = new ObjectId();
+        const restaurant2Id = new ObjectId();
+
+        const mockDecisions: Decision[] = [
+          {
+            _id: new ObjectId(),
+            type: 'personal',
+            collectionId: collection1Id,
+            participants: [userId],
+            method: 'random',
+            status: 'completed',
+            deadline: new Date(),
+            visitDate: new Date(),
+            result: {
+              restaurantId: restaurant1Id,
+              selectedAt: new Date(),
+              reasoning: 'Random selection',
+            },
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+          {
+            _id: new ObjectId(),
+            type: 'personal',
+            collectionId: collection2Id,
+            participants: [userId],
+            method: 'random',
+            status: 'completed',
+            deadline: new Date(),
+            visitDate: new Date(),
+            result: {
+              restaurantId: restaurant2Id,
+              selectedAt: new Date(),
+              reasoning: 'Random selection',
+            },
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+        ];
+
+        const mockDecisionsCollection = {
+          find: jest.fn().mockReturnThis(),
+          sort: jest.fn().mockReturnThis(),
+          limit: jest.fn().mockReturnThis(),
+          toArray: jest.fn().mockResolvedValue(mockDecisions),
+        };
+
+        mockDb.collection.mockImplementation((name: string) => {
+          if (name === 'decisions') {
+            return mockDecisionsCollection;
+          }
+          return {};
+        });
+
+        const result = await getUserDecisionHistory(userId);
+
+        expect(mockDecisionsCollection.find).toHaveBeenCalledWith({
+          participants: userId,
+          type: 'personal',
+          status: 'completed',
+        });
+        expect(result).toHaveLength(2);
+        expect(result[0].collectionId).toEqual(collection1Id);
+        expect(result[1].collectionId).toEqual(collection2Id);
+      });
+
+      it('should return empty array if user has no decisions', async () => {
+        const userId = 'user_123';
+
+        const mockDecisionsCollection = {
+          find: jest.fn().mockReturnThis(),
+          sort: jest.fn().mockReturnThis(),
+          limit: jest.fn().mockReturnThis(),
+          toArray: jest.fn().mockResolvedValue([]),
+        };
+
+        mockDb.collection.mockImplementation((name: string) => {
+          if (name === 'decisions') {
+            return mockDecisionsCollection;
+          }
+          return {};
+        });
+
+        const result = await getUserDecisionHistory(userId);
+
+        expect(result).toHaveLength(0);
+      });
+    });
+
+    describe('getGroupDecisionHistory', () => {
+      it('should fetch decision history across all group collections', async () => {
+        const groupId = new ObjectId();
+        const collection1Id = new ObjectId();
+        const collection2Id = new ObjectId();
+        const restaurant1Id = new ObjectId();
+        const restaurant2Id = new ObjectId();
+
+        const mockDecisions: Decision[] = [
+          {
+            _id: new ObjectId(),
+            type: 'group',
+            collectionId: collection1Id,
+            groupId: groupId,
+            participants: ['user_1', 'user_2'],
+            method: 'tiered',
+            status: 'completed',
+            deadline: new Date(),
+            visitDate: new Date(),
+            result: {
+              restaurantId: restaurant1Id,
+              selectedAt: new Date(),
+              reasoning: 'Tiered choice',
+            },
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+          {
+            _id: new ObjectId(),
+            type: 'group',
+            collectionId: collection2Id,
+            groupId: groupId,
+            participants: ['user_1', 'user_2'],
+            method: 'random',
+            status: 'completed',
+            deadline: new Date(),
+            visitDate: new Date(),
+            result: {
+              restaurantId: restaurant2Id,
+              selectedAt: new Date(),
+              reasoning: 'Random selection',
+            },
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+        ];
+
+        const mockDecisionsCollection = {
+          find: jest.fn().mockReturnThis(),
+          sort: jest.fn().mockReturnThis(),
+          limit: jest.fn().mockReturnThis(),
+          toArray: jest.fn().mockResolvedValue(mockDecisions),
+        };
+
+        mockDb.collection.mockImplementation((name: string) => {
+          if (name === 'decisions') {
+            return mockDecisionsCollection;
+          }
+          return {};
+        });
+
+        const result = await getGroupDecisionHistory(groupId.toString());
+
+        // The function converts the string back to ObjectId, so we need to check the call was made
+        expect(mockDecisionsCollection.find).toHaveBeenCalled();
+        const findCall = mockDecisionsCollection.find.mock.calls[0][0];
+        expect(findCall.groupId.toString()).toBe(groupId.toString());
+        expect(findCall.type).toBe('group');
+        expect(findCall.status).toBe('completed');
+        expect(result).toHaveLength(2);
+        expect(result[0].groupId).toEqual(groupId);
+        expect(result[1].groupId).toEqual(groupId);
+      });
+
+      it('should return empty array if group has no decisions', async () => {
+        const groupId = new ObjectId();
+
+        const mockDecisionsCollection = {
+          find: jest.fn().mockReturnThis(),
+          sort: jest.fn().mockReturnThis(),
+          limit: jest.fn().mockReturnThis(),
+          toArray: jest.fn().mockResolvedValue([]),
+        };
+
+        mockDb.collection.mockImplementation((name: string) => {
+          if (name === 'decisions') {
+            return mockDecisionsCollection;
+          }
+          return {};
+        });
+
+        const result = await getGroupDecisionHistory(groupId.toString());
+
+        expect(result).toHaveLength(0);
+      });
+    });
+
+    describe('Weight Propagation Across Collections', () => {
+      it('should use user-wide history for personal collection weight calculation', async () => {
+        const userId = 'user_123';
+        const restaurantId = new ObjectId();
+        const collection1Id = new ObjectId();
+        const collection2Id = new ObjectId();
+
+        // Decision made in collection1 should affect weights in collection2
+        const decisionInCollection1: Decision = {
+          _id: new ObjectId(),
+          type: 'personal',
+          collectionId: collection1Id,
+          participants: [userId],
+          method: 'random',
+          status: 'completed',
+          deadline: new Date(),
+          visitDate: new Date(),
+          result: {
+            restaurantId,
+            selectedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // 5 days ago
+            reasoning: 'Random selection',
+          },
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        };
+
+        // When calculating weight in collection2, it should consider decision from collection1
+        const userHistory = [decisionInCollection1];
+        const weight = calculateRestaurantWeight(restaurantId, userHistory);
+
+        // Weight should be reduced because restaurant was selected 5 days ago (in any collection)
+        expect(weight).toBeLessThan(1.0);
+        expect(weight).toBeGreaterThan(0.1);
+      });
+
+      it('should use group-wide history for group collection weight calculation', async () => {
+        const groupId = new ObjectId();
+        const restaurantId = new ObjectId();
+        const collection1Id = new ObjectId();
+        const collection2Id = new ObjectId();
+
+        // Decision made in collection1 should affect weights in collection2
+        const decisionInCollection1: Decision = {
+          _id: new ObjectId(),
+          type: 'group',
+          collectionId: collection1Id,
+          groupId: groupId,
+          participants: ['user_1', 'user_2'],
+          method: 'tiered',
+          status: 'completed',
+          deadline: new Date(),
+          visitDate: new Date(),
+          result: {
+            restaurantId,
+            selectedAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000), // 10 days ago
+            reasoning: 'Tiered choice',
+          },
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        };
+
+        // When calculating weight in collection2, it should consider decision from collection1
+        const groupHistory = [decisionInCollection1];
+        const weight = calculateRestaurantWeight(restaurantId, groupHistory);
+
+        // Weight should be reduced because restaurant was selected 10 days ago (in any group collection)
+        expect(weight).toBeLessThan(1.0);
+        expect(weight).toBeGreaterThan(0.1);
+      });
+
+      it('should not mix personal and group decision histories', async () => {
+        const userId = 'user_123';
+        const groupId = new ObjectId();
+        const restaurantId = new ObjectId();
+        const personalCollectionId = new ObjectId();
+        const groupCollectionId = new ObjectId();
+
+        const personalDecision: Decision = {
+          _id: new ObjectId(),
+          type: 'personal',
+          collectionId: personalCollectionId,
+          participants: [userId],
+          method: 'random',
+          status: 'completed',
+          deadline: new Date(),
+          visitDate: new Date(),
+          result: {
+            restaurantId,
+            selectedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
+            reasoning: 'Personal random selection',
+          },
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        };
+
+        const groupDecision: Decision = {
+          _id: new ObjectId(),
+          type: 'group',
+          collectionId: groupCollectionId,
+          groupId: groupId,
+          participants: [userId, 'user_2'],
+          method: 'tiered',
+          status: 'completed',
+          deadline: new Date(),
+          visitDate: new Date(),
+          result: {
+            restaurantId,
+            selectedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
+            reasoning: 'Group tiered choice',
+          },
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        };
+
+        // Personal history should only include personal decisions
+        const personalHistory = [personalDecision];
+        const personalWeight = calculateRestaurantWeight(
+          restaurantId,
+          personalHistory
+        );
+
+        // Group history should only include group decisions
+        const groupHistory = [groupDecision];
+        const groupWeight = calculateRestaurantWeight(
+          restaurantId,
+          groupHistory
+        );
+
+        // Both should be reduced, but by different amounts based on recency
+        expect(personalWeight).toBeLessThan(1.0);
+        expect(groupWeight).toBeLessThan(1.0);
+
+        // Group decision was more recent (3 days vs 5 days), so should have lower weight
+        expect(groupWeight).toBeLessThan(personalWeight);
       });
     });
   });

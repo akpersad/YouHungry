@@ -21,7 +21,21 @@ const eslintConfig = [
       'scripts/**',
       'performance-metrics/**',
       'src/__tests__/**',
+      '**/__tests__/**',
+      '**/*.test.ts',
+      '**/*.test.tsx',
     ],
+  },
+  {
+    rules: {
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+        },
+      ],
+    },
   },
 ];
 

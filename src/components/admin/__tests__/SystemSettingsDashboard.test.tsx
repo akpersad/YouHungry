@@ -228,9 +228,6 @@ describe('SystemSettingsDashboard', () => {
         }),
       } as Response);
 
-    // Mock confirm dialog
-    window.confirm = jest.fn(() => true);
-
     render(<SystemSettingsDashboard />);
 
     await waitFor(() => {
@@ -239,6 +236,22 @@ describe('SystemSettingsDashboard', () => {
 
     // Click reset button
     fireEvent.click(screen.getByText('Reset to Defaults'));
+
+    // Wait for confirmation modal
+    await waitFor(() => {
+      expect(
+        screen.getByText('Reset Settings to Defaults?')
+      ).toBeInTheDocument();
+    });
+
+    // Click confirm button in modal
+    const confirmButtons = screen.getAllByRole('button', {
+      name: /reset settings/i,
+    });
+    const confirmButton = confirmButtons.find((button) =>
+      button.textContent?.match(/^Reset Settings$/)
+    );
+    fireEvent.click(confirmButton!);
 
     await waitFor(() => {
       expect(mockFetch).toHaveBeenCalledWith('/api/admin/settings', {
@@ -261,7 +274,13 @@ describe('SystemSettingsDashboard', () => {
           lastUpdated: new Date().toISOString(),
         }),
       } as Response)
-      .mockRejectedValueOnce(new Error('Save failed'));
+      .mockResolvedValueOnce({
+        ok: false,
+        json: async () => ({
+          success: false,
+          error: 'Save failed',
+        }),
+      } as Response);
 
     render(<SystemSettingsDashboard />);
 

@@ -58,10 +58,8 @@ export function FriendSearch({ userId, onClose }: FriendSearchProps) {
   return (
     <div className="space-y-4">
       <div>
-        <h2 className="text-xl font-semibold text-gray-900 mb-2">
-          Add Friends
-        </h2>
-        <p className="text-sm text-gray-600 mb-4">
+        <h2 className="text-xl font-semibold text-text mb-2">Add Friends</h2>
+        <p className="text-sm text-text-light mb-4">
           Search for friends by email, name, or username to send them a friend
           request.
         </p>
@@ -78,14 +76,14 @@ export function FriendSearch({ userId, onClose }: FriendSearchProps) {
 
         {isLoading && (
           <div className="text-center py-4">
-            <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-            <p className="text-sm text-gray-500 mt-2">Searching...</p>
+            <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+            <p className="text-sm text-text-light mt-2">Searching...</p>
           </div>
         )}
 
         {error && (
           <div className="text-center py-4">
-            <p className="text-sm text-red-600">
+            <p className="text-sm text-destructive">
               {error instanceof Error
                 ? error.message
                 : 'Failed to search users'}
@@ -95,15 +93,13 @@ export function FriendSearch({ userId, onClose }: FriendSearchProps) {
 
         {errorMessage && (
           <div className="text-center py-4">
-            <p className="text-sm text-red-600">{errorMessage}</p>
+            <p className="text-sm text-destructive">{errorMessage}</p>
           </div>
         )}
 
         {searchResults && searchResults.length > 0 && (
           <div className="space-y-2">
-            <h3 className="text-sm font-medium text-gray-700">
-              Search Results
-            </h3>
+            <h3 className="text-sm font-medium text-text">Search Results</h3>
             {searchResults.map((user) => (
               <Card key={user._id} className="p-4">
                 <div className="flex items-center space-x-3">
@@ -115,30 +111,30 @@ export function FriendSearch({ userId, onClose }: FriendSearchProps) {
                     />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate">
+                    <p className="text-sm font-medium text-text truncate">
                       {user.name}
                     </p>
-                    <p className="text-sm text-gray-500 truncate">
+                    <p className="text-sm text-text-light truncate">
                       {user.email}
                     </p>
                     {user.username && (
-                      <p className="text-xs text-gray-400 truncate">
+                      <p className="text-xs text-text-light truncate">
                         @{user.username}
                       </p>
                     )}
                     {user.city && (
-                      <p className="text-xs text-gray-400 truncate">
+                      <p className="text-xs text-text-light truncate">
                         {user.city}
                       </p>
                     )}
                   </div>
                   <div className="flex-shrink-0">
                     {user.relationshipStatus === 'accepted' ? (
-                      <span className="text-sm text-green-600 font-medium">
+                      <span className="text-sm text-success font-medium">
                         Already Friends
                       </span>
                     ) : user.relationshipStatus === 'pending_sent' ? (
-                      <span className="text-sm text-blue-600 font-medium">
+                      <span className="text-sm text-primary font-medium">
                         Request Sent
                       </span>
                     ) : user.relationshipStatus === 'pending_received' ? (
@@ -150,7 +146,7 @@ export function FriendSearch({ userId, onClose }: FriendSearchProps) {
                         size="sm"
                         onClick={() => handleSendRequest(user.clerkId)}
                         disabled={sendFriendRequestMutation.isPending}
-                        className="bg-gray-600 hover:bg-gray-700 text-white"
+                        className="bg-surface hover:bg-surface text-white"
                       >
                         {sendFriendRequestMutation.isPending
                           ? 'Sending...'
@@ -177,7 +173,7 @@ export function FriendSearch({ userId, onClose }: FriendSearchProps) {
 
         {searchResults && searchResults.length === 0 && searchQuery && (
           <div className="text-center py-4">
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-text-light">
               No users found matching &quot;{searchQuery}&quot;
             </p>
           </div>
@@ -185,7 +181,7 @@ export function FriendSearch({ userId, onClose }: FriendSearchProps) {
 
         {!searchQuery && (
           <div className="text-center py-8">
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-text-light">
               Enter an email or name to search for friends
             </p>
           </div>
@@ -197,7 +193,7 @@ export function FriendSearch({ userId, onClose }: FriendSearchProps) {
           <Button
             variant="outline"
             onClick={onClose}
-            className="text-gray-600 hover:text-gray-800"
+            className="text-text-light hover:text-text"
           >
             Close
           </Button>

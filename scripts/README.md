@@ -1,51 +1,100 @@
-# Development Server Management
+# Scripts Directory
 
-## Available Commands
+This directory contains utility scripts for the You Hungry? application.
 
-### Start Development Server
+## 🚀 Production Simulation
 
-```bash
-npm run dev
-```
+### `run-production.js`
 
-- Checks if port 3000 is available before starting
-- Prevents multiple servers from running simultaneously
-- Uses Turbopack for faster builds
+Simulates running the app in production mode using `.env.prod` configuration.
 
-### Force Start (Skip Port Check)
+**Usage:**
 
 ```bash
-npm run dev:force
+npm run prod          # Build and start
+npm run prod:build    # Build only
+npm run prod:start    # Start only (assumes built)
 ```
 
-- Starts server even if port 3000 is in use
-- Use when you know what you're doing
+**What it does:**
 
-### Kill Running Server
+- Loads environment variables from `.env.prod`
+- Sets `NODE_ENV=production`
+- Validates required environment variables
+- Builds and/or starts the production server
+- Masks sensitive values in console output
 
-```bash
-npm run dev:kill
-```
+**Documentation:** See [PRODUCTION_SIMULATION.md](../docs/PRODUCTION_SIMULATION.md)
 
-- Kills any process running on port 3000
-- Useful when you have a stuck server
+---
 
-## Manual Port Management
+## 🛠️ Other Utility Scripts
 
-### Check if port is in use
+### `check-server.js`
 
-```bash
-lsof -ti:3000
-```
+Checks if a port is available before starting the development server.
 
-### Kill process on port
+### `fix-server-actions.js`
 
-```bash
-lsof -ti:3000 | xargs kill -9
-```
+Fixes common server action issues in development.
 
-### Check what's running on port
+### `check-clerk-config.js`
 
-```bash
-lsof -i:3000
-```
+Validates Clerk authentication configuration.
+
+### `replace-console-logs.js`
+
+Replaces console.log statements with the logger utility.
+
+---
+
+## 🎨 Accessibility & Design
+
+### `comprehensive-contrast-audit.js`
+
+Audits the application for color contrast accessibility issues.
+
+### `comprehensive-fix-contrast-issues.js`
+
+Automatically fixes color contrast issues found in the audit.
+
+### `auto-fix-contrast-issues.js`
+
+Alternative contrast issue fixing script.
+
+---
+
+## 📧 Email Testing
+
+### `test-email-with-resend.js`
+
+Tests email functionality using the Resend API.
+
+---
+
+## 🔧 Database & Migration
+
+### `backfill-test-data.js`
+
+Populates the database with test data.
+
+### `migrate-restaurant-ids.js`
+
+Migrates restaurant IDs in the database.
+
+---
+
+## 🔬 Testing & Validation
+
+### `test-address-validation.js`
+
+Tests the Google Address Validation API integration.
+
+---
+
+## 📝 Notes
+
+- Most scripts can be run directly: `node scripts/script-name.js`
+- Some scripts have corresponding npm commands in `package.json`
+- Always check script comments for usage instructions
+- Scripts that modify data should be run with caution in production

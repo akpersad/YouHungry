@@ -58,7 +58,7 @@ describe('/api/admin/performance/metrics', () => {
     mockFs.readdirSync.mockReturnValue([
       'metrics-2024-01-01.json',
       'metrics-2024-01-02.json',
-    ]);
+    ] as any);
     mockFs.readFileSync.mockReturnValue(JSON.stringify(mockMetricsData));
 
     const response = await GET();
@@ -96,7 +96,7 @@ describe('/api/admin/performance/metrics', () => {
 
     mockPath.join.mockReturnValue('/app/performance-metrics/daily-metrics');
     mockFs.existsSync.mockReturnValue(true);
-    mockFs.readdirSync.mockReturnValue(mockFiles);
+    mockFs.readdirSync.mockReturnValue(mockFiles as any);
     mockFs.readFileSync.mockReturnValue('{}');
 
     const response = await GET();
@@ -112,7 +112,7 @@ describe('/api/admin/performance/metrics', () => {
 
     mockPath.join.mockReturnValue('/app/performance-metrics/daily-metrics');
     mockFs.existsSync.mockReturnValue(true);
-    mockFs.readdirSync.mockReturnValue(mockFiles);
+    mockFs.readdirSync.mockReturnValue(mockFiles as any);
     mockFs.readFileSync
       .mockReturnValueOnce('{"valid": "json"}')
       .mockReturnValueOnce('invalid json content');
@@ -129,7 +129,7 @@ describe('/api/admin/performance/metrics', () => {
 
     mockPath.join.mockReturnValue('/app/performance-metrics/daily-metrics');
     mockFs.existsSync.mockReturnValue(true);
-    mockFs.readdirSync.mockReturnValue(mockFiles);
+    mockFs.readdirSync.mockReturnValue(mockFiles as any);
     mockFs.readFileSync.mockImplementation(() => {
       throw new Error('File read error');
     });
@@ -144,7 +144,7 @@ describe('/api/admin/performance/metrics', () => {
   it('should return null dateRange when no files exist', async () => {
     mockPath.join.mockReturnValue('/app/performance-metrics/daily-metrics');
     mockFs.existsSync.mockReturnValue(true);
-    mockFs.readdirSync.mockReturnValue([]);
+    mockFs.readdirSync.mockReturnValue([] as any);
 
     const response = await GET();
     const data = await response.json();
@@ -213,22 +213,19 @@ describe('/api/admin/performance/metrics', () => {
 
     mockPath.join.mockReturnValue('/app/performance-metrics/daily-metrics');
     mockFs.existsSync.mockReturnValue(true);
-    mockFs.readdirSync.mockReturnValue(['metrics-2024-01-01.json']);
+    mockFs.readdirSync.mockReturnValue(['metrics-2024-01-01.json'] as any);
     mockFs.readFileSync.mockReturnValue(JSON.stringify(mockMetricsData));
 
     const response = await GET();
     const data = await response.json();
 
-    expect(data.metrics[0]).toEqual({
-      date: '2024-01-01',
-      ...mockMetricsData,
-    });
+    expect(data.metrics[0]).toEqual(mockMetricsData);
   });
 
   it('should handle empty metrics files', async () => {
     mockPath.join.mockReturnValue('/app/performance-metrics/daily-metrics');
     mockFs.existsSync.mockReturnValue(true);
-    mockFs.readdirSync.mockReturnValue(['metrics-2024-01-01.json']);
+    mockFs.readdirSync.mockReturnValue(['metrics-2024-01-01.json'] as any);
     mockFs.readFileSync.mockReturnValue('{}');
 
     const response = await GET();
@@ -263,7 +260,7 @@ describe('/api/admin/performance/metrics', () => {
 
     mockPath.join.mockReturnValue('/app/performance-metrics/daily-metrics');
     mockFs.existsSync.mockReturnValue(true);
-    mockFs.readdirSync.mockReturnValue(mockFiles);
+    mockFs.readdirSync.mockReturnValue(mockFiles as any);
     mockFs.readFileSync
       .mockReturnValueOnce(JSON.stringify(mockMetricsData1))
       .mockReturnValueOnce(JSON.stringify(mockMetricsData2))

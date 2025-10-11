@@ -7,6 +7,7 @@ jest.mock('../db', () => ({
 import {
   searchRestaurants,
   searchRestaurantsByCoordinates,
+  searchRestaurantsByAddress,
   getRestaurantDetails,
   searchRestaurantsWithFilters,
 } from '../restaurants';
@@ -50,7 +51,7 @@ describe('Restaurant API Functions', () => {
         mockDbInstance as unknown as ReturnType<typeof db.connectToDatabase>
       );
       mockGooglePlaces.searchRestaurantsWithGooglePlaces.mockResolvedValue([
-        mockGoogleRestaurant,
+        mockGoogleRestaurant as any,
       ]);
 
       const result = await searchRestaurants('pizza', 'New York');
@@ -78,7 +79,7 @@ describe('Restaurant API Functions', () => {
         mockDbInstance as unknown as ReturnType<typeof db.connectToDatabase>
       );
       mockGooglePlaces.searchRestaurantsWithGooglePlaces.mockResolvedValue([
-        mockGoogleRestaurant,
+        mockGoogleRestaurant as any,
       ]);
 
       const result = await searchRestaurants('pizza');
@@ -122,7 +123,7 @@ describe('Restaurant API Functions', () => {
         mockDbInstance as unknown as ReturnType<typeof db.connectToDatabase>
       );
       mockGooglePlaces.searchRestaurantsWithGooglePlaces.mockResolvedValue([
-        mockGoogleRestaurant,
+        mockGoogleRestaurant as any,
       ]);
 
       // Should not throw error, just log it
@@ -135,7 +136,7 @@ describe('Restaurant API Functions', () => {
   describe('searchRestaurantsByCoordinates', () => {
     it('should search restaurants by coordinates successfully', async () => {
       mockGooglePlaces.searchRestaurantsByLocationConsistent.mockResolvedValue([
-        mockGoogleRestaurant,
+        mockGoogleRestaurant as any,
       ]);
 
       const result = await searchRestaurantsByCoordinates(
@@ -188,7 +189,9 @@ describe('Restaurant API Functions', () => {
       mockDb.connectToDatabase.mockResolvedValue(
         mockDbInstance as unknown as ReturnType<typeof db.connectToDatabase>
       );
-      mockGooglePlaces.getPlaceDetails.mockResolvedValue(mockGoogleRestaurant);
+      mockGooglePlaces.getPlaceDetails.mockResolvedValue(
+        mockGoogleRestaurant as any
+      );
 
       const result = await getRestaurantDetails('ChIJN1t_tDeuEmsRUsoyG83frY4');
 
@@ -244,7 +247,7 @@ describe('Restaurant API Functions', () => {
         mockDbInstance as unknown as ReturnType<typeof db.connectToDatabase>
       );
       mockGooglePlaces.searchRestaurantsWithGooglePlaces.mockResolvedValue(
-        restaurants
+        restaurants as any
       );
 
       const result = await searchRestaurantsWithFilters(
@@ -279,7 +282,7 @@ describe('Restaurant API Functions', () => {
         mockDbInstance as unknown as ReturnType<typeof db.connectToDatabase>
       );
       mockGooglePlaces.searchRestaurantsWithGooglePlaces.mockResolvedValue(
-        restaurants
+        restaurants as any
       );
 
       const result = await searchRestaurantsWithFilters(
@@ -319,7 +322,7 @@ describe('Restaurant API Functions', () => {
         mockDbInstance as unknown as ReturnType<typeof db.connectToDatabase>
       );
       mockGooglePlaces.searchRestaurantsWithGooglePlaces.mockResolvedValue(
-        restaurants
+        restaurants as any
       );
 
       const result = await searchRestaurantsWithFilters(
@@ -347,7 +350,7 @@ describe('Restaurant API Functions', () => {
         mockDbInstance as unknown as ReturnType<typeof db.connectToDatabase>
       );
       mockGooglePlaces.searchRestaurantsWithGooglePlaces.mockResolvedValue(
-        restaurants
+        restaurants as any
       );
 
       const result = await searchRestaurantsWithFilters('restaurant');
@@ -382,7 +385,7 @@ describe('Restaurant API Functions', () => {
         mockDbInstance as unknown as ReturnType<typeof db.connectToDatabase>
       );
       mockGooglePlaces.searchRestaurantsWithGooglePlaces.mockResolvedValue(
-        restaurants
+        restaurants as any
       );
 
       const result = await searchRestaurantsWithFilters(
@@ -395,6 +398,233 @@ describe('Restaurant API Functions', () => {
 
       expect(result).toHaveLength(1);
       expect(result[0].priceRange).toBe('$$');
+    });
+  });
+
+  describe('searchRestaurantsByAddress (Hybrid Search)', () => {
+    const mockDbInstance = {
+      collection: jest.fn().mockReturnValue({
+        findOne: jest.fn().mockResolvedValue(null),
+        insertOne: jest.fn().mockResolvedValue({ insertedId: 'new-id' }),
+      }),
+    };
+
+    beforeEach(() => {
+      mockDb.connectToDatabase.mockResolvedValue(
+        mockDbInstance as unknown as ReturnType<typeof db.connectToDatabase>
+      );
+    });
+
+    it('should search restaurants by specific address', async () => {
+      const addressRestaurants = [
+        {
+          ...mockGoogleRestaurant,
+          name: 'Address Restaurant',
+          googlePlaceId: 'address-place-1',
+        },
+      ];
+
+      mockGooglePlaces.searchRestaurantsWithGooglePlaces
+        .mockResolvedValueOnce(addressRestaurants as any)
+        .mockResolvedValueOnce([] as any);
+
+      const result = await searchRestaurantsByAddress(
+        '123 Main St',
+        40.7128,
+        -74.006
+      );
+
+      expect(
+        mockGooglePlaces.searchRestaurantsWithGooglePlaces
+      ).toHaveBeenCalledTimes(2);
+      expect(
+        mockGooglePlaces.searchRestaurantsWithGooglePlaces
+      ).toHaveBeenCalledWith(
+        'restaurants near 123 Main St',
+        '40.7128,-74.006',
+        1000
+      );
+      expect(
+        mockGooglePlaces.searchRestaurantsWithGooglePlaces
+      ).toHaveBeenCalledWith('123 Main St', '40.7128,-74.006', 1000);
+      expect(result).toHaveLength(1);
+    });
+
+    it('should combine and deduplicate results from both searches', async () => {
+      const nearbyRestaurants = [
+        {
+          ...mockGoogleRestaurant,
+          name: 'Nearby Restaurant',
+          googlePlaceId: 'nearby-1',
+        },
+      ];
+
+      const exactAddressRestaurants = [
+        {
+          ...mockGoogleRestaurant,
+          name: 'Address Restaurant',
+          googlePlaceId: 'address-1',
+        },
+        {
+          ...mockGoogleRestaurant,
+          name: 'Nearby Restaurant', // Duplicate
+          googlePlaceId: 'nearby-1',
+        },
+      ];
+
+      mockGooglePlaces.searchRestaurantsWithGooglePlaces
+        .mockResolvedValueOnce(nearbyRestaurants as any)
+        .mockResolvedValueOnce(exactAddressRestaurants as any);
+
+      const result = await searchRestaurantsByAddress(
+        '456 Elm St',
+        40.7129,
+        -74.007
+      );
+
+      expect(result).toHaveLength(2); // Deduplicated
+      expect(result.some((r) => r.googlePlaceId === 'nearby-1')).toBe(true);
+      expect(result.some((r) => r.googlePlaceId === 'address-1')).toBe(true);
+    });
+
+    it('should calculate distances for all restaurants', async () => {
+      const restaurants = [
+        {
+          ...mockGoogleRestaurant,
+          coordinates: { lat: 40.7128, lng: -74.006 },
+        },
+      ];
+
+      mockGooglePlaces.searchRestaurantsWithGooglePlaces
+        .mockResolvedValueOnce(restaurants as any)
+        .mockResolvedValueOnce([] as any);
+
+      const result = await searchRestaurantsByAddress(
+        '789 Oak Ave',
+        40.7128,
+        -74.006
+      );
+
+      expect(result[0].distance).toBeDefined();
+      expect(typeof result[0].distance).toBe('number');
+    });
+
+    it('should store new restaurants in database', async () => {
+      const newRestaurant = {
+        ...mockGoogleRestaurant,
+        googlePlaceId: 'new-place-id',
+      };
+
+      mockGooglePlaces.searchRestaurantsWithGooglePlaces
+        .mockResolvedValueOnce([newRestaurant] as any)
+        .mockResolvedValueOnce([] as any);
+
+      await searchRestaurantsByAddress('321 Pine St', 40.713, -74.008);
+
+      expect(mockDbInstance.collection().findOne).toHaveBeenCalled();
+      expect(mockDbInstance.collection().insertOne).toHaveBeenCalled();
+    });
+
+    it('should return empty array on error', async () => {
+      mockGooglePlaces.searchRestaurantsWithGooglePlaces.mockRejectedValue(
+        new Error('API Error')
+      );
+
+      const result = await searchRestaurantsByAddress(
+        'Invalid Address',
+        40.7131,
+        -74.009
+      );
+
+      expect(result).toEqual([]);
+    });
+  });
+
+  describe('searchRestaurantsByCoordinates with query (Hybrid)', () => {
+    const mockDbInstance = {
+      collection: jest.fn().mockReturnValue({
+        findOne: jest.fn().mockResolvedValue(null),
+        insertOne: jest.fn().mockResolvedValue({ insertedId: 'new-id' }),
+      }),
+    };
+
+    beforeEach(() => {
+      mockDb.connectToDatabase.mockResolvedValue(
+        mockDbInstance as unknown as ReturnType<typeof db.connectToDatabase>
+      );
+      // Mock enrichRestaurantsWithAddresses
+      jest.doMock('../optimized-google-places', () => ({
+        enrichRestaurantsWithAddresses: jest.fn((restaurants) =>
+          Promise.resolve(restaurants)
+        ),
+      }));
+    });
+
+    it('should use location-only cache when no query provided', async () => {
+      const restaurants = [mockGoogleRestaurant];
+      mockGooglePlaces.searchRestaurantsByLocationConsistent.mockResolvedValue(
+        restaurants as any
+      );
+
+      const result = await searchRestaurantsByCoordinates(
+        40.7128,
+        -74.006,
+        5000
+      );
+
+      expect(
+        mockGooglePlaces.searchRestaurantsByLocationConsistent
+      ).toHaveBeenCalledWith(40.7128, -74.006, 5000);
+      expect(
+        mockGooglePlaces.searchRestaurantsByLocationAndQuery
+      ).not.toHaveBeenCalled();
+      expect(result).toHaveLength(1);
+    });
+
+    it('should use location+query cache when query provided', async () => {
+      const restaurants = [mockGoogleRestaurant];
+      mockGooglePlaces.searchRestaurantsByLocationAndQuery.mockResolvedValue(
+        restaurants as any
+      );
+
+      const result = await searchRestaurantsByCoordinates(
+        40.7128,
+        -74.006,
+        5000,
+        'pizza'
+      );
+
+      expect(
+        mockGooglePlaces.searchRestaurantsByLocationAndQuery
+      ).toHaveBeenCalledWith(40.7128, -74.006, 'pizza', 5000);
+      expect(
+        mockGooglePlaces.searchRestaurantsByLocationConsistent
+      ).not.toHaveBeenCalled();
+      expect(result).toHaveLength(1);
+    });
+
+    it('should preserve distance information from API', async () => {
+      const restaurantWithDistance = {
+        ...mockGoogleRestaurant,
+        distance: 1.5,
+      };
+      mockGooglePlaces.searchRestaurantsByLocationConsistent.mockResolvedValue([
+        restaurantWithDistance,
+      ] as any);
+
+      const result = await searchRestaurantsByCoordinates(40.7128, -74.006);
+
+      expect(result[0].distance).toBe(1.5);
+    });
+
+    it('should return empty array on error', async () => {
+      mockGooglePlaces.searchRestaurantsByLocationConsistent.mockRejectedValue(
+        new Error('API Error')
+      );
+
+      const result = await searchRestaurantsByCoordinates(40.7128, -74.006);
+
+      expect(result).toEqual([]);
     });
   });
 });

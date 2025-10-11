@@ -86,10 +86,10 @@ export default function HistoryPage() {
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          <h1 className="text-3xl font-bold text-primary mb-2">
             Decision History
           </h1>
-          <p className="text-gray-600">
+          <p className="text-secondary">
             View and manage your restaurant decision history
           </p>
         </div>
@@ -99,7 +99,7 @@ export default function HistoryPage() {
           {/* Search and View Toggle */}
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-text-light" />
               <Input
                 type="text"
                 placeholder="Search restaurants, collections, or groups..."
@@ -176,7 +176,7 @@ export default function HistoryPage() {
             <Card className="p-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-primary mb-1">
                     Type
                   </label>
                   <select
@@ -188,7 +188,7 @@ export default function HistoryPage() {
                         offset: 0,
                       })
                     }
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2"
+                    className="w-full rounded-lg border border-quinary px-3 py-2"
                   >
                     <option value="all">All Decisions</option>
                     <option value="personal">Personal Only</option>
@@ -197,7 +197,7 @@ export default function HistoryPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-primary mb-1">
                     Start Date
                   </label>
                   <Input
@@ -216,7 +216,7 @@ export default function HistoryPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-primary mb-1">
                     End Date
                   </label>
                   <Input
@@ -254,18 +254,18 @@ export default function HistoryPage() {
         {/* Content */}
         {isLoading ? (
           <Card className="p-8">
-            <div className="text-center text-gray-500">Loading history...</div>
+            <div className="text-center text-tertiary">Loading history...</div>
           </Card>
         ) : error ? (
           <Card className="p-8">
-            <div className="text-center text-red-600">
+            <div className="text-center text-destructive">
               Error loading history: {(error as Error).message}
             </div>
           </Card>
         ) : !data?.decisions?.length ? (
           <Card className="p-8">
-            <div className="text-center text-gray-500">
-              <Calendar className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+            <div className="text-center text-tertiary">
+              <Calendar className="w-16 h-16 mx-auto mb-4 text-text-light" />
               <p className="text-lg font-medium mb-2">No decisions found</p>
               <p className="text-sm">
                 {search || filters.type !== 'all' || filters.startDate
@@ -284,13 +284,13 @@ export default function HistoryPage() {
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     {/* Restaurant Name */}
-                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                    <h3 className="text-xl font-semibold text-primary mb-2">
                       {decision.result?.restaurant?.name ||
                         'Unknown Restaurant'}
                     </h3>
 
                     {/* Details */}
-                    <div className="space-y-2 text-sm text-gray-600">
+                    <div className="space-y-2 text-sm text-secondary">
                       {decision.result?.restaurant?.address && (
                         <div className="flex items-center gap-2">
                           <MapPin className="w-4 h-4" />
@@ -326,7 +326,7 @@ export default function HistoryPage() {
 
                       {decision.result?.restaurant?.cuisine && (
                         <div className="flex items-center gap-2">
-                          <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs">
+                          <span className="px-2 py-1 bg-primary/10 text-primary rounded-full text-xs">
                             {decision.result.restaurant.cuisine}
                           </span>
                           {decision.result.restaurant.rating && (
@@ -335,7 +335,7 @@ export default function HistoryPage() {
                             </span>
                           )}
                           {decision.result.restaurant.priceRange && (
-                            <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs">
+                            <span className="px-2 py-1 bg-success/10 text-green-700 rounded-full text-xs">
                               {decision.result.restaurant.priceRange}
                             </span>
                           )}
@@ -343,7 +343,7 @@ export default function HistoryPage() {
                       )}
 
                       {decision.method && (
-                        <div className="text-xs text-gray-500">
+                        <div className="text-xs text-tertiary">
                           Method:{' '}
                           {decision.method === 'random'
                             ? 'Random Selection'
@@ -361,7 +361,7 @@ export default function HistoryPage() {
             {/* Pagination */}
             {data.pagination.total > (filters.limit || 50) && (
               <div className="flex items-center justify-between pt-4">
-                <div className="text-sm text-gray-600">
+                <div className="text-sm text-secondary">
                   Showing {(filters.offset || 0) + 1} to{' '}
                   {Math.min(
                     (filters.offset || 0) + (filters.limit || 50),
@@ -394,7 +394,7 @@ export default function HistoryPage() {
           </div>
         ) : (
           <Card className="p-8">
-            <div className="text-center text-gray-500">
+            <div className="text-center text-tertiary">
               Calendar view coming soon
             </div>
           </Card>

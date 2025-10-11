@@ -2,6 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { CollectionRestaurantsList } from '../CollectionRestaurantsList';
 import { Collection, Restaurant } from '@/types/database';
+import { ObjectId } from 'mongodb';
 
 // Mock the MapView component
 jest.mock('../MapView', () => ({
@@ -43,43 +44,44 @@ jest.mock('../MapView', () => ({
 global.fetch = jest.fn();
 
 const mockCollection: Collection = {
-  _id: 'collection-1',
+  _id: new ObjectId('507f1f77bcf86cd799439011'),
   name: 'Test Collection',
   description: 'Test Description',
-  userId: 'user-1',
-  isGroup: false,
+  type: 'personal' as const,
+  ownerId: new ObjectId('507f1f77bcf86cd799439010'),
+  restaurantIds: [],
   createdAt: new Date(),
   updatedAt: new Date(),
 };
 
 const mockRestaurants: Restaurant[] = [
   {
-    _id: '1',
+    _id: new ObjectId('507f1f77bcf86cd799439012'),
     name: 'Test Restaurant 1',
     address: '123 Test St, Test City, TC 12345',
     coordinates: { lat: 37.7749, lng: -122.4194 },
     rating: 4.5,
     priceLevel: 2,
-    photos: [{ url: 'https://example.com/photo1.jpg' }],
+    photos: ['https://example.com/photo1.jpg'],
     cuisine: 'Test Cuisine',
     googlePlaceId: 'test-place-1',
     cachedAt: new Date(),
     lastUpdated: new Date(),
   },
   {
-    _id: '2',
+    _id: new ObjectId('507f1f77bcf86cd799439013'),
     name: 'Test Restaurant 2',
     address: '456 Test Ave, Test City, TC 12345',
     coordinates: { lat: 37.7849, lng: -122.4294 },
     rating: 4.2,
     priceLevel: 3,
-    photos: [{ url: 'https://example.com/photo2.jpg' }],
+    photos: ['https://example.com/photo2.jpg'],
     cuisine: 'Test Cuisine 2',
     googlePlaceId: 'test-place-2',
     cachedAt: new Date(),
     lastUpdated: new Date(),
   },
-];
+] as any;
 
 describe('CollectionRestaurantsList Map View', () => {
   beforeEach(() => {
@@ -236,7 +238,7 @@ describe('CollectionRestaurantsList Map View', () => {
       _id: 'collection-2',
       name: 'New Collection',
     };
-    rerender(<CollectionRestaurantsList collection={newCollection} />);
+    rerender(<CollectionRestaurantsList collection={newCollection as any} />);
 
     // Should still show map view
     await waitFor(() => {

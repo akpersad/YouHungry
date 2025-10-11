@@ -295,15 +295,15 @@ export default function NotificationTestPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
+    <div className="min-h-screen bg-surface p-4">
       <div className="mx-auto max-w-4xl space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">
+            <h1 className="text-3xl font-bold text-text">
               Notification Test Center
             </h1>
-            <p className="text-gray-600">
+            <p className="text-text-light">
               Test all notification systems: SMS, Push, In-App, and Toast
             </p>
           </div>
@@ -330,14 +330,14 @@ export default function NotificationTestPage() {
         {/* Status Cards */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           <Card className="p-4">
-            <h3 className="font-semibold text-gray-900">SMS Notifications</h3>
+            <h3 className="font-semibold text-text">SMS Notifications</h3>
             <div className="mt-2 space-y-2">
-              <div className="text-sm text-gray-600">
+              <div className="text-sm text-text-light">
                 Status:{' '}
                 {smsLoading ? 'Loading...' : smsError ? 'Error' : 'Ready'}
               </div>
               {smsStatus && (
-                <div className="space-y-1 text-xs text-gray-500">
+                <div className="space-y-1 text-xs text-text-light">
                   <div>Account SID: {smsStatus.accountSid || 'Not set'}</div>
                   <div>Phone Number: {smsStatus.fromNumber || 'Not set'}</div>
                   <div>
@@ -366,27 +366,27 @@ export default function NotificationTestPage() {
           </Card>
 
           <Card className="p-4">
-            <h3 className="font-semibold text-gray-900">Push Notifications</h3>
+            <h3 className="font-semibold text-text">Push Notifications</h3>
             <div className="mt-2 space-y-2">
-              <div className="text-sm text-gray-600">
+              <div className="text-sm text-text-light">
                 Status: {pushStatus.supported ? 'Supported' : 'Not Supported'}
               </div>
-              <div className="text-sm text-gray-600">
+              <div className="text-sm text-text-light">
                 Permission: {pushStatus.permission}
               </div>
-              <div className="text-sm text-gray-600">
+              <div className="text-sm text-text-light">
                 Subscribed: {pushStatus.subscribed ? 'Yes' : 'No'}
               </div>
             </div>
           </Card>
 
           <Card className="p-4">
-            <h3 className="font-semibold text-gray-900">
-              In-App Notifications
-            </h3>
+            <h3 className="font-semibold text-text">In-App Notifications</h3>
             <div className="mt-2 space-y-2">
-              <div className="text-sm text-gray-600">Total: {stats.total}</div>
-              <div className="text-sm text-gray-600">
+              <div className="text-sm text-text-light">
+                Total: {stats.total}
+              </div>
+              <div className="text-sm text-text-light">
                 Unread: {stats.unreadCount}
               </div>
               {stats.unreadCount > 0 && (
@@ -398,9 +398,9 @@ export default function NotificationTestPage() {
           </Card>
 
           <Card className="p-4">
-            <h3 className="font-semibold text-gray-900">Email Notifications</h3>
+            <h3 className="font-semibold text-text">Email Notifications</h3>
             <div className="mt-2 space-y-2">
-              <div className="text-sm text-gray-600">
+              <div className="text-sm text-text-light">
                 Status:{' '}
                 {validateConfig.isLoading
                   ? 'Checking...'
@@ -411,7 +411,7 @@ export default function NotificationTestPage() {
                       : 'Not Configured'}
               </div>
               {validateConfig.data?.error && (
-                <div className="text-xs text-red-500">
+                <div className="text-xs text-destructive">
                   {validateConfig.data.error}
                 </div>
               )}
@@ -426,7 +426,7 @@ export default function NotificationTestPage() {
 
         {/* SMS Tests */}
         <Card className="p-6">
-          <h2 className="mb-4 text-xl font-semibold text-gray-900">
+          <h2 className="mb-4 text-xl font-semibold text-text">
             SMS Notification Tests
           </h2>
           <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
@@ -468,12 +468,12 @@ export default function NotificationTestPage() {
 
         {/* URL Shortener Tests */}
         <Card className="p-6">
-          <h2 className="mb-4 text-xl font-semibold text-gray-900">
+          <h2 className="mb-4 text-xl font-semibold text-text">
             URL Shortener Tests
           </h2>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-text mb-2">
                 URL to Shorten
               </label>
               <input
@@ -481,7 +481,7 @@ export default function NotificationTestPage() {
                 value={urlToShorten}
                 onChange={(e) => setUrlToShorten(e.target.value)}
                 placeholder="https://example.com/very/long/url"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
 
@@ -494,7 +494,7 @@ export default function NotificationTestPage() {
             </Button>
 
             {shortenedUrl && (
-              <div className="p-3 bg-green-50 border border-green-200 rounded-md">
+              <div className="p-3 bg-success/10 border border-green-200 rounded-md">
                 <p className="text-sm text-green-800">
                   <strong>Shortened URL:</strong>
                 </p>
@@ -505,7 +505,7 @@ export default function NotificationTestPage() {
             )}
 
             {urlError && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded-md">
+              <div className="p-3 bg-destructive/10 border border-destructive rounded-md">
                 <p className="text-sm text-red-800">
                   <strong>Error:</strong> {urlError}
                 </p>
@@ -516,19 +516,19 @@ export default function NotificationTestPage() {
 
         {/* Email Notification Tests */}
         <Card className="p-6">
-          <h2 className="mb-4 text-xl font-semibold text-gray-900">
+          <h2 className="mb-4 text-xl font-semibold text-text">
             Email Notification Tests
           </h2>
           <div className="space-y-4">
             <div className="grid gap-3 md:grid-cols-2">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-text mb-2">
                   Test Email Address
                 </label>
                 <input
                   type="email"
                   placeholder="test@example.com"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                   defaultValue="test@example.com"
                 />
               </div>
@@ -550,12 +550,12 @@ export default function NotificationTestPage() {
             </div>
 
             {testEmail.isSuccess && (
-              <div className="p-3 bg-green-50 border border-green-200 rounded-md">
+              <div className="p-3 bg-success/10 border border-green-200 rounded-md">
                 <p className="text-sm text-green-800">
                   <strong>Success:</strong> {testEmail.data?.message}
                 </p>
                 {testEmail.data?.emailId && (
-                  <p className="text-xs text-green-600 mt-1">
+                  <p className="text-xs text-success mt-1">
                     Email ID: {testEmail.data.emailId}
                   </p>
                 )}
@@ -563,7 +563,7 @@ export default function NotificationTestPage() {
             )}
 
             {testEmail.isError && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded-md">
+              <div className="p-3 bg-destructive/10 border border-destructive rounded-md">
                 <p className="text-sm text-red-800">
                   <strong>Error:</strong> {testEmail.error?.message}
                 </p>
@@ -573,10 +573,8 @@ export default function NotificationTestPage() {
             <div className="border-t pt-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className="font-medium text-gray-900">
-                    Email Configuration
-                  </h4>
-                  <p className="text-sm text-gray-600">
+                  <h4 className="font-medium text-text">Email Configuration</h4>
+                  <p className="text-sm text-text-light">
                     Status:{' '}
                     {validateConfig.isLoading
                       ? 'Checking...'
@@ -587,7 +585,7 @@ export default function NotificationTestPage() {
                           : 'Invalid'}
                   </p>
                   {validateConfig.data?.error && (
-                    <p className="text-xs text-red-600 mt-1">
+                    <p className="text-xs text-destructive mt-1">
                       {validateConfig.data.error}
                     </p>
                   )}
@@ -607,7 +605,7 @@ export default function NotificationTestPage() {
 
         {/* Push Notification Tests */}
         <Card className="p-6">
-          <h2 className="mb-4 text-xl font-semibold text-gray-900">
+          <h2 className="mb-4 text-xl font-semibold text-text">
             Push Notification Tests
           </h2>
           <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
@@ -647,7 +645,7 @@ export default function NotificationTestPage() {
 
         {/* Toast Notification Tests */}
         <Card className="p-6">
-          <h2 className="mb-4 text-xl font-semibold text-gray-900">
+          <h2 className="mb-4 text-xl font-semibold text-text">
             Toast Notification Tests
           </h2>
           <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
@@ -685,10 +683,10 @@ export default function NotificationTestPage() {
 
         {/* Integrated Notification Tests */}
         <Card className="p-6">
-          <h2 className="mb-4 text-xl font-semibold text-gray-900">
+          <h2 className="mb-4 text-xl font-semibold text-text">
             Integrated Notification Tests
           </h2>
-          <p className="mb-4 text-gray-600">
+          <p className="mb-4 text-text-light">
             These tests send notifications through all channels simultaneously
           </p>
           <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
@@ -725,24 +723,24 @@ export default function NotificationTestPage() {
         {/* Recent Notifications */}
         {notifications.length > 0 && (
           <Card className="p-6">
-            <h2 className="mb-4 text-xl font-semibold text-gray-900">
+            <h2 className="mb-4 text-xl font-semibold text-text">
               Recent In-App Notifications
             </h2>
             <div className="space-y-3">
               {notifications.slice(0, 5).map((notification) => (
                 <div
                   key={notification._id.toString()}
-                  className={`rounded-lg border p-3 ${!notification.read ? 'bg-blue-50 border-blue-200' : 'bg-gray-50 border-gray-200'}`}
+                  className={`rounded-lg border p-3 ${!notification.read ? 'bg-primary/10 border-primary' : 'bg-surface border-border'}`}
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <h4 className="font-medium text-gray-900">
+                      <h4 className="font-medium text-text">
                         {notification.title}
                       </h4>
-                      <p className="text-sm text-gray-600">
+                      <p className="text-sm text-text-light">
                         {notification.message}
                       </p>
-                      <p className="text-xs text-gray-400 mt-1">
+                      <p className="text-xs text-text-light mt-1">
                         {new Date(notification.createdAt).toLocaleString()}
                       </p>
                     </div>

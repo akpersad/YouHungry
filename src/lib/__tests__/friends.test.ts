@@ -347,7 +347,7 @@ describe('getFriendRequests', () => {
       },
     ];
 
-    const mockReceivedRequests = [];
+    const mockReceivedRequests: any[] = [];
 
     mockCollection.findOne.mockResolvedValueOnce({ _id: 'user1' }); // User exists
     mockCollection.toArray

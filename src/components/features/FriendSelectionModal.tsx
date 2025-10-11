@@ -122,19 +122,19 @@ export function FriendSelectionModal({
         <div className="space-y-3 max-h-96 overflow-y-auto">
           {friendsLoading ? (
             <div className="text-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
-              <p className="mt-2 text-sm text-gray-600">Loading friends...</p>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-border mx-auto"></div>
+              <p className="mt-2 text-sm text-text-light">Loading friends...</p>
             </div>
           ) : friendsError ? (
             <div className="text-center py-8">
-              <p className="text-red-600 mb-4">Failed to load friends</p>
+              <p className="text-destructive mb-4">Failed to load friends</p>
               <Button variant="secondary" size="sm" onClick={() => refetch()}>
                 Try Again
               </Button>
             </div>
           ) : paginatedFriends.length === 0 ? (
             <div className="text-center py-8">
-              <p className="text-gray-600">
+              <p className="text-text-light">
                 {searchTerm
                   ? 'No friends found matching your search'
                   : 'No friends available'}
@@ -144,7 +144,7 @@ export function FriendSelectionModal({
             paginatedFriends.map((friend: Friend) => (
               <div
                 key={friend._id}
-                className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 shadow-sm"
+                className="flex items-center justify-between p-4 bg-white border border-border rounded-lg hover:bg-surface hover:border-border transition-all duration-200 shadow-sm"
               >
                 <div className="flex items-center space-x-3 flex-1 min-w-0">
                   <UserAvatar
@@ -153,10 +153,10 @@ export function FriendSelectionModal({
                     size="sm"
                   />
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-gray-900 truncate">
+                    <p className="font-medium text-text truncate">
                       {friend.name}
                     </p>
-                    <p className="text-sm text-gray-500 truncate">
+                    <p className="text-sm text-text-light truncate">
                       {friend.email}
                     </p>
                   </div>
@@ -180,7 +180,7 @@ export function FriendSelectionModal({
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-between pt-4 border-t border-gray-200">
+          <div className="flex items-center justify-between pt-4 border-t border-border">
             <Button
               variant="secondary"
               size="sm"
@@ -189,7 +189,7 @@ export function FriendSelectionModal({
             >
               Previous
             </Button>
-            <span className="text-sm text-gray-600 font-medium">
+            <span className="text-sm text-text-light font-medium">
               Page {currentPage} of {totalPages}
             </span>
             <Button

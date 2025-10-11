@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import Image from 'next/image';
 
 interface RestaurantImageProps {
   src?: string;
@@ -48,7 +47,7 @@ export function RestaurantImage({
   if (!src || imageError) {
     return (
       <div
-        className={`${className} bg-gray-200 flex items-center justify-center text-2xl`}
+        className={`${className} bg-surface flex items-center justify-center text-2xl`}
         title={alt}
       >
         {icon}
@@ -60,19 +59,27 @@ export function RestaurantImage({
     <div className={`relative ${className}`}>
       {!imageLoaded && !imageError && (
         <div
-          className={`absolute inset-0 bg-gray-200 flex items-center justify-center text-2xl animate-pulse`}
+          className={`absolute inset-0 bg-surface flex items-center justify-center text-2xl animate-pulse`}
         >
           {icon}
         </div>
       )}
-      <Image
+      {/* Using regular img tag for external Google Places API images with custom loading states */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
         src={src}
         alt={alt}
-        fill
-        className={`object-cover ${!imageLoaded || imageError ? 'hidden' : ''}`}
-        onError={() => setImageError(true)}
-        onLoad={() => setImageLoaded(true)}
-        unoptimized={true}
+        className={`w-full h-full object-cover ${!imageLoaded || imageError ? 'hidden' : ''}`}
+        onError={(e) => {
+          console.error('Image failed to load:', src, e);
+          setImageError(true);
+        }}
+        onLoad={() => {
+          console.log('Image loaded successfully:', src);
+          setImageLoaded(true);
+        }}
+        style={{ position: 'absolute', inset: 0 }}
+        loading="lazy"
       />
     </div>
   );

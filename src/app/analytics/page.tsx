@@ -21,7 +21,7 @@ export default function AnalyticsPage() {
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
           <Card className="p-8">
-            <div className="text-center text-gray-500">
+            <div className="text-center text-text-light">
               Loading analytics...
             </div>
           </Card>
@@ -35,7 +35,7 @@ export default function AnalyticsPage() {
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
           <Card className="p-8">
-            <div className="text-center text-red-600">
+            <div className="text-center text-destructive">
               Error loading analytics: {(error as Error)?.message}
             </div>
           </Card>
@@ -49,10 +49,8 @@ export default function AnalyticsPage() {
       <div className="max-w-6xl mx-auto space-y-8">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Your Analytics
-          </h1>
-          <p className="text-gray-600">
+          <h1 className="text-3xl font-bold text-text mb-2">Your Analytics</h1>
+          <p className="text-text-light">
             Insights about your restaurant decisions and preferences
           </p>
         </div>
@@ -62,15 +60,15 @@ export default function AnalyticsPage() {
           <Card className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600 mb-1">
+                <p className="text-sm font-medium text-text-light mb-1">
                   Total Decisions
                 </p>
-                <p className="text-3xl font-bold text-gray-900">
+                <p className="text-3xl font-bold text-text">
                   {analytics.overview.totalDecisions}
                 </p>
               </div>
-              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                <BarChart3 className="w-6 h-6 text-blue-600" />
+              <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                <BarChart3 className="w-6 h-6 text-primary" />
               </div>
             </div>
           </Card>
@@ -78,15 +76,15 @@ export default function AnalyticsPage() {
           <Card className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600 mb-1">
+                <p className="text-sm font-medium text-text-light mb-1">
                   Unique Restaurants
                 </p>
-                <p className="text-3xl font-bold text-gray-900">
+                <p className="text-3xl font-bold text-text">
                   {analytics.overview.uniqueRestaurants}
                 </p>
               </div>
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                <MapPin className="w-6 h-6 text-green-600" />
+              <div className="w-12 h-12 bg-success/10 rounded-lg flex items-center justify-center">
+                <MapPin className="w-6 h-6 text-success" />
               </div>
             </div>
           </Card>
@@ -94,10 +92,10 @@ export default function AnalyticsPage() {
           <Card className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600 mb-1">
+                <p className="text-sm font-medium text-text-light mb-1">
                   Group Decisions
                 </p>
-                <p className="text-3xl font-bold text-gray-900">
+                <p className="text-3xl font-bold text-text">
                   {analytics.overview.groupDecisions}
                 </p>
               </div>
@@ -110,10 +108,10 @@ export default function AnalyticsPage() {
           <Card className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600 mb-1">
+                <p className="text-sm font-medium text-text-light mb-1">
                   Personal Decisions
                 </p>
-                <p className="text-3xl font-bold text-gray-900">
+                <p className="text-3xl font-bold text-text">
                   {analytics.overview.personalDecisions}
                 </p>
               </div>
@@ -130,7 +128,7 @@ export default function AnalyticsPage() {
           <Card className="p-6">
             <div className="flex items-center gap-3 mb-6">
               <Award className="w-6 h-6 text-yellow-600" />
-              <h2 className="text-xl font-bold text-gray-900">
+              <h2 className="text-xl font-bold text-text">
                 Most Visited Restaurants
               </h2>
             </div>
@@ -141,30 +139,30 @@ export default function AnalyticsPage() {
                 .map((restaurant, index) => (
                   <div
                     key={restaurant.id}
-                    className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg"
+                    className="flex items-center gap-4 p-3 bg-surface rounded-lg"
                   >
                     <div className="flex-shrink-0 w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center text-yellow-700 font-bold">
                       {index + 1}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-gray-900 truncate">
+                      <p className="font-semibold text-text truncate">
                         {restaurant.name}
                       </p>
-                      <p className="text-sm text-gray-600">
+                      <p className="text-sm text-text-light">
                         {restaurant.cuisine} • {restaurant.priceRange || 'N/A'}
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="text-lg font-bold text-gray-900">
+                      <p className="text-lg font-bold text-text">
                         {restaurant.selectionCount}
                       </p>
-                      <p className="text-xs text-gray-500">visits</p>
+                      <p className="text-xs text-text-light">visits</p>
                     </div>
                   </div>
                 ))}
 
               {analytics.popularRestaurants.length === 0 && (
-                <p className="text-center text-gray-500 py-4">
+                <p className="text-center text-text-light py-4">
                   No restaurant data yet
                 </p>
               )}
@@ -174,10 +172,8 @@ export default function AnalyticsPage() {
           {/* Favorite Cuisines */}
           <Card className="p-6">
             <div className="flex items-center gap-3 mb-6">
-              <PieChart className="w-6 h-6 text-blue-600" />
-              <h2 className="text-xl font-bold text-gray-900">
-                Favorite Cuisines
-              </h2>
+              <PieChart className="w-6 h-6 text-primary" />
+              <h2 className="text-xl font-bold text-text">Favorite Cuisines</h2>
             </div>
 
             <div className="space-y-3">
@@ -191,14 +187,14 @@ export default function AnalyticsPage() {
                 return (
                   <div key={cuisine.cuisine}>
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-sm font-medium text-gray-700">
+                      <span className="text-sm font-medium text-text">
                         {cuisine.cuisine}
                       </span>
-                      <span className="text-sm text-gray-600">
+                      <span className="text-sm text-text-light">
                         {cuisine.count} ({percentage}%)
                       </span>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="w-full bg-surface rounded-full h-2">
                       <div
                         className="bg-blue-600 h-2 rounded-full"
                         style={{ width: `${percentage}%` }}
@@ -209,7 +205,7 @@ export default function AnalyticsPage() {
               })}
 
               {analytics.favoriteCuisines.length === 0 && (
-                <p className="text-center text-gray-500 py-4">
+                <p className="text-center text-text-light py-4">
                   No cuisine data yet
                 </p>
               )}
@@ -220,8 +216,8 @@ export default function AnalyticsPage() {
         {/* Decision Trends */}
         <Card className="p-6">
           <div className="flex items-center gap-3 mb-6">
-            <TrendingUp className="w-6 h-6 text-green-600" />
-            <h2 className="text-xl font-bold text-gray-900">Decision Trends</h2>
+            <TrendingUp className="w-6 h-6 text-success" />
+            <h2 className="text-xl font-bold text-text">Decision Trends</h2>
           </div>
 
           <div className="space-y-2">
@@ -234,7 +230,7 @@ export default function AnalyticsPage() {
 
               return (
                 <div key={trend.month} className="flex items-center gap-4">
-                  <div className="w-24 text-sm font-medium text-gray-700">
+                  <div className="w-24 text-sm font-medium text-text">
                     {monthName}
                   </div>
                   <div className="flex-1 flex gap-2">
@@ -261,7 +257,7 @@ export default function AnalyticsPage() {
                       </div>
                     )}
                   </div>
-                  <div className="w-16 text-right text-sm font-semibold text-gray-900">
+                  <div className="w-16 text-right text-sm font-semibold text-text">
                     {trend.total} total
                   </div>
                 </div>
@@ -269,20 +265,20 @@ export default function AnalyticsPage() {
             })}
 
             {analytics.trends.length === 0 && (
-              <p className="text-center text-gray-500 py-4">
+              <p className="text-center text-text-light py-4">
                 No trend data yet
               </p>
             )}
           </div>
 
-          <div className="flex gap-4 mt-6 pt-4 border-t border-gray-200">
+          <div className="flex gap-4 mt-6 pt-4 border-t border-border">
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 bg-blue-500 rounded"></div>
-              <span className="text-sm text-gray-600">Personal</span>
+              <span className="text-sm text-text-light">Personal</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 bg-purple-500 rounded"></div>
-              <span className="text-sm text-gray-600">Group</span>
+              <span className="text-sm text-text-light">Group</span>
             </div>
           </div>
         </Card>
@@ -291,18 +287,18 @@ export default function AnalyticsPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <Card className="p-6">
             <div className="flex items-center gap-3 mb-6">
-              <Calendar className="w-6 h-6 text-blue-600" />
-              <h2 className="text-xl font-bold text-gray-900">Collections</h2>
+              <Calendar className="w-6 h-6 text-primary" />
+              <h2 className="text-xl font-bold text-text">Collections</h2>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <div className="text-center p-4 bg-blue-50 rounded-lg">
+              <div className="text-center p-4 bg-primary/10 rounded-lg">
                 <p className="text-3xl font-bold text-blue-900">
                   {analytics.collections.total}
                 </p>
-                <p className="text-sm text-blue-700 mt-1">Total Collections</p>
+                <p className="text-sm text-primary mt-1">Total Collections</p>
               </div>
-              <div className="text-center p-4 bg-green-50 rounded-lg">
+              <div className="text-center p-4 bg-success/10 rounded-lg">
                 <p className="text-3xl font-bold text-green-900">
                   {analytics.collections.avgRestaurantsPerCollection}
                 </p>
@@ -326,7 +322,7 @@ export default function AnalyticsPage() {
           <Card className="p-6">
             <div className="flex items-center gap-3 mb-6">
               <Users className="w-6 h-6 text-purple-600" />
-              <h2 className="text-xl font-bold text-gray-900">Groups</h2>
+              <h2 className="text-xl font-bold text-text">Groups</h2>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -336,17 +332,17 @@ export default function AnalyticsPage() {
                 </p>
                 <p className="text-sm text-purple-700 mt-1">Total Groups</p>
               </div>
-              <div className="text-center p-4 bg-green-50 rounded-lg">
+              <div className="text-center p-4 bg-success/10 rounded-lg">
                 <p className="text-3xl font-bold text-green-900">
                   {analytics.groups.activeGroups}
                 </p>
                 <p className="text-sm text-green-700 mt-1">Active Groups</p>
               </div>
-              <div className="text-center p-4 bg-blue-50 rounded-lg col-span-2">
+              <div className="text-center p-4 bg-primary/10 rounded-lg col-span-2">
                 <p className="text-3xl font-bold text-blue-900">
                   {analytics.groups.adminGroups}
                 </p>
-                <p className="text-sm text-blue-700 mt-1">Groups You Admin</p>
+                <p className="text-sm text-primary mt-1">Groups You Admin</p>
               </div>
             </div>
           </Card>

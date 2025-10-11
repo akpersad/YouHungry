@@ -1,6 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { RestaurantCard } from '../RestaurantCard';
 import { mockRestaurant } from '@/test-utils/mockData';
+import { Restaurant } from '@/types/database';
 
 describe('RestaurantCard', () => {
   const mockOnAddToCollection = jest.fn();
@@ -180,5 +181,55 @@ describe('RestaurantCard', () => {
       screen.queryByText('Thursday: 9:00 AM – 10:00 PM')
     ).not.toBeInTheDocument();
     expect(screen.getByText('+4 more days')).toBeInTheDocument();
+  });
+
+  it('displays restaurant address when available', () => {
+    render(
+      <RestaurantCard
+        restaurant={mockRestaurant}
+        onAddToCollection={mockOnAddToCollection}
+        onViewDetails={mockOnViewDetails}
+      />
+    );
+
+    expect(
+      screen.getByText('📍 123 Test Street, Test City, TC 12345')
+    ).toBeInTheDocument();
+  });
+
+  it('displays address even when distance is not available', () => {
+    const restaurantWithoutDistance: Restaurant = {
+      ...mockRestaurant,
+      distance: undefined,
+    };
+
+    render(
+      <RestaurantCard
+        restaurant={restaurantWithoutDistance}
+        onAddToCollection={mockOnAddToCollection}
+        onViewDetails={mockOnViewDetails}
+      />
+    );
+
+    expect(
+      screen.getByText('📍 123 Test Street, Test City, TC 12345')
+    ).toBeInTheDocument();
+  });
+
+  it('does not display address section when address is missing', () => {
+    const restaurantWithoutAddress = {
+      ...mockRestaurant,
+      address: undefined,
+    } as unknown as Restaurant;
+
+    render(
+      <RestaurantCard
+        restaurant={restaurantWithoutAddress}
+        onAddToCollection={mockOnAddToCollection}
+        onViewDetails={mockOnViewDetails}
+      />
+    );
+
+    expect(screen.queryByText(/📍/)).not.toBeInTheDocument();
   });
 });

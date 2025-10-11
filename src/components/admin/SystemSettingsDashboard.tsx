@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { logger } from '@/lib/logger';
+import { Modal } from '@/components/ui/Modal';
+import { Button } from '@/components/ui/Button';
 
 interface SystemSettings {
   rateLimiting: {
@@ -87,10 +89,12 @@ export function SystemSettingsDashboard() {
   const [settings, setSettings] = useState<SystemSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [showResetConfirmation, setShowResetConfirmation] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [activeSection, setActiveSection] = useState<string>('rateLimiting');
+  const [cacheClearing, setCacheClearing] = useState<string | null>(null);
 
   const fetchSettings = async () => {
     try {
@@ -151,19 +155,16 @@ export function SystemSettingsDashboard() {
     }
   };
 
-  const resetSettings = async () => {
-    if (
-      !confirm(
-        'Are you sure you want to reset all settings to defaults? This action cannot be undone.'
-      )
-    ) {
-      return;
-    }
+  const resetSettings = () => {
+    setShowResetConfirmation(true);
+  };
 
+  const confirmResetSettings = async () => {
     try {
       setSaving(true);
       setError(null);
       setSuccess(null);
+      setShowResetConfirmation(false);
 
       const response = await fetch('/api/admin/settings', {
         method: 'POST',
@@ -231,6 +232,40 @@ export function SystemSettingsDashboard() {
     });
   };
 
+  const clearCache = async (cacheType: string) => {
+    try {
+      setCacheClearing(cacheType);
+      setError(null);
+      setSuccess(null);
+
+      const response = await fetch('/api/admin/cache/clear', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ cacheType }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to clear cache');
+      }
+
+      setSuccess(
+        `Cleared ${data.deletedCount} cache entries of type: ${cacheType}`
+      );
+      logger.info(`Admin: Cleared cache type ${cacheType}`, data);
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : 'Failed to clear cache';
+      setError(errorMessage);
+      logger.error('Admin: Error clearing cache', { error: err });
+    } finally {
+      setCacheClearing(null);
+    }
+  };
+
   useEffect(() => {
     fetchSettings();
   }, []);
@@ -241,17 +276,18 @@ export function SystemSettingsDashboard() {
     { id: 'alertThresholds', label: 'Alert Thresholds', icon: '⚠️' },
     { id: 'notificationSettings', label: 'Notifications', icon: '📧' },
     { id: 'maintenance', label: 'Maintenance', icon: '🔧' },
+    { id: 'cache', label: 'Cache Management', icon: '🗄️' },
   ];
 
   if (loading) {
     return (
       <div className="p-6">
         <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded w-1/4 mb-6"></div>
+          <div className="h-8 bg-surface rounded w-1/4 mb-6"></div>
           <div className="space-y-4">
-            <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-            <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-            <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+            <div className="h-4 bg-surface rounded w-3/4"></div>
+            <div className="h-4 bg-surface rounded w-1/2"></div>
+            <div className="h-4 bg-surface rounded w-2/3"></div>
           </div>
         </div>
       </div>
@@ -261,11 +297,11 @@ export function SystemSettingsDashboard() {
   if (error) {
     return (
       <div className="p-6">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+        <div className="bg-destructive/10 border border-destructive rounded-lg p-4">
           <div className="flex">
             <div className="flex-shrink-0">
               <svg
-                className="h-5 w-5 text-red-400"
+                className="h-5 w-5 text-destructive"
                 viewBox="0 0 20 20"
                 fill="currentColor"
               >
@@ -284,7 +320,7 @@ export function SystemSettingsDashboard() {
               <div className="mt-4">
                 <button
                   onClick={fetchSettings}
-                  className="bg-red-100 px-3 py-2 rounded-md text-sm font-medium text-red-800 hover:bg-red-200"
+                  className="bg-destructive/10 px-3 py-2 rounded-md text-sm font-medium text-red-800 hover:bg-destructive/10"
                 >
                   Retry
                 </button>
@@ -300,7 +336,7 @@ export function SystemSettingsDashboard() {
     return (
       <div className="p-6">
         <div className="text-center">
-          <p className="text-gray-500">No settings available</p>
+          <p className="text-text-light">No settings available</p>
         </div>
       </div>
     );
@@ -310,12 +346,20 @@ export function SystemSettingsDashboard() {
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">System Settings</h2>
-          <p className="text-sm text-gray-600">
+          <h2
+            className="text-2xl font-bold"
+            style={{ color: 'var(--text-primary)' }}
+          >
+            System Settings
+          </h2>
+          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
             Configure system-wide settings and monitoring thresholds
           </p>
           {lastUpdated && (
-            <p className="text-xs text-gray-500 mt-1">
+            <p
+              className="text-xs mt-1"
+              style={{ color: 'var(--text-secondary)' }}
+            >
               Last updated: {lastUpdated.toLocaleString()}
             </p>
           )}
@@ -324,14 +368,44 @@ export function SystemSettingsDashboard() {
           <button
             onClick={resetSettings}
             disabled={saving}
-            className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+            className="px-4 py-2 border rounded-md text-sm font-medium disabled:opacity-50"
+            style={{
+              borderColor: 'var(--bg-quaternary)',
+              color: 'var(--text-primary)',
+              background: 'var(--bg-secondary)',
+            }}
+            onMouseEnter={(e) => {
+              if (!saving) {
+                e.currentTarget.style.background = 'var(--bg-tertiary)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!saving) {
+                e.currentTarget.style.background = 'var(--bg-secondary)';
+              }
+            }}
           >
             Reset to Defaults
           </button>
           <button
             onClick={saveSettings}
             disabled={saving}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
+            className="px-4 py-2 rounded-md text-sm font-medium disabled:opacity-50"
+            style={{
+              background: 'var(--accent-primary)',
+              color: 'var(--text-inverse)',
+            }}
+            onMouseEnter={(e) => {
+              if (!saving) {
+                e.currentTarget.style.background =
+                  'var(--accent-primary-light)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!saving) {
+                e.currentTarget.style.background = 'var(--accent-primary)';
+              }
+            }}
           >
             {saving ? 'Saving...' : 'Save Settings'}
           </button>
@@ -339,11 +413,18 @@ export function SystemSettingsDashboard() {
       </div>
 
       {success && (
-        <div className="mb-6 bg-green-50 border border-green-200 rounded-lg p-4">
+        <div
+          className="mb-6 border rounded-lg p-4"
+          style={{
+            background: 'rgba(34, 197, 94, 0.1)',
+            borderColor: 'rgba(34, 197, 94, 0.3)',
+          }}
+        >
           <div className="flex">
             <div className="flex-shrink-0">
               <svg
-                className="h-5 w-5 text-green-400"
+                className="h-5 w-5"
+                style={{ color: 'var(--color-success)' }}
                 viewBox="0 0 20 20"
                 fill="currentColor"
               >
@@ -355,7 +436,12 @@ export function SystemSettingsDashboard() {
               </svg>
             </div>
             <div className="ml-3">
-              <p className="text-sm font-medium text-green-800">{success}</p>
+              <p
+                className="text-sm font-medium"
+                style={{ color: 'var(--color-success)' }}
+              >
+                {success}
+              </p>
             </div>
           </div>
         </div>
@@ -369,11 +455,27 @@ export function SystemSettingsDashboard() {
               <button
                 key={section.id}
                 onClick={() => setActiveSection(section.id)}
-                className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                  activeSection === section.id
-                    ? 'bg-blue-100 text-blue-700'
-                    : 'text-gray-600 hover:bg-gray-100'
-                }`}
+                className="w-full text-left px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                style={{
+                  background:
+                    activeSection === section.id
+                      ? 'rgba(255, 51, 102, 0.1)'
+                      : 'transparent',
+                  color:
+                    activeSection === section.id
+                      ? 'var(--accent-primary)'
+                      : 'var(--text-secondary)',
+                }}
+                onMouseEnter={(e) => {
+                  if (activeSection !== section.id) {
+                    e.currentTarget.style.background = 'var(--bg-tertiary)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (activeSection !== section.id) {
+                    e.currentTarget.style.background = 'transparent';
+                  }
+                }}
               >
                 <span className="mr-2">{section.icon}</span>
                 {section.label}
@@ -384,10 +486,17 @@ export function SystemSettingsDashboard() {
 
         {/* Main Content */}
         <div className="lg:col-span-3">
-          <div className="bg-white rounded-lg shadow">
+          <div
+            className="rounded-lg shadow-subtle"
+            style={{
+              background: 'var(--bg-secondary)',
+              borderColor: 'var(--bg-quaternary)',
+              border: '1px solid',
+            }}
+          >
             {activeSection === 'rateLimiting' && (
               <div className="p-6">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">
+                <h3 className="text-lg font-medium text-text mb-4">
                   Rate Limiting
                 </h3>
                 <div className="space-y-4">
@@ -401,11 +510,11 @@ export function SystemSettingsDashboard() {
                           enabled: e.target.checked,
                         })
                       }
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                      className="h-4 w-4 text-primary focus:ring-primary border-border rounded"
                     />
                     <label
                       htmlFor="rateLimitingEnabled"
-                      className="ml-2 text-sm text-gray-700"
+                      className="ml-2 text-sm text-text"
                     >
                       Enable rate limiting
                     </label>
@@ -413,7 +522,7 @@ export function SystemSettingsDashboard() {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-text mb-1">
                         Requests per minute
                       </label>
                       <input
@@ -424,12 +533,12 @@ export function SystemSettingsDashboard() {
                             requestsPerMinute: parseInt(e.target.value),
                           })
                         }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-primary focus:border-primary"
                         min="1"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-text mb-1">
                         Requests per hour
                       </label>
                       <input
@@ -440,12 +549,12 @@ export function SystemSettingsDashboard() {
                             requestsPerHour: parseInt(e.target.value),
                           })
                         }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-primary focus:border-primary"
                         min="1"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-text mb-1">
                         Requests per day
                       </label>
                       <input
@@ -456,12 +565,12 @@ export function SystemSettingsDashboard() {
                             requestsPerDay: parseInt(e.target.value),
                           })
                         }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-primary focus:border-primary"
                         min="1"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-text mb-1">
                         Burst limit
                       </label>
                       <input
@@ -472,7 +581,7 @@ export function SystemSettingsDashboard() {
                             burstLimit: parseInt(e.target.value),
                           })
                         }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-primary focus:border-primary"
                         min="1"
                       />
                     </div>
@@ -483,13 +592,13 @@ export function SystemSettingsDashboard() {
 
             {activeSection === 'apiKeys' && (
               <div className="p-6">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">
+                <h3 className="text-lg font-medium text-text mb-4">
                   API Key Management
                 </h3>
                 <div className="space-y-6">
                   {/* Google Places API */}
-                  <div className="border border-gray-200 rounded-lg p-4">
-                    <h4 className="text-md font-medium text-gray-900 mb-3">
+                  <div className="border border-border rounded-lg p-4">
+                    <h4 className="text-md font-medium text-text mb-3">
                       Google Places API
                     </h4>
                     <div className="space-y-3">
@@ -503,18 +612,18 @@ export function SystemSettingsDashboard() {
                               enabled: e.target.checked,
                             })
                           }
-                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                          className="h-4 w-4 text-primary focus:ring-primary border-border rounded"
                         />
                         <label
                           htmlFor="googlePlacesEnabled"
-                          className="ml-2 text-sm text-gray-700"
+                          className="ml-2 text-sm text-text"
                         >
                           Enable Google Places API
                         </label>
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                          <label className="block text-sm font-medium text-text mb-1">
                             Daily limit
                           </label>
                           <input
@@ -525,12 +634,12 @@ export function SystemSettingsDashboard() {
                                 dailyLimit: parseInt(e.target.value),
                               })
                             }
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                            className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-primary focus:border-primary"
                             min="1"
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                          <label className="block text-sm font-medium text-text mb-1">
                             Monthly limit
                           </label>
                           <input
@@ -541,7 +650,7 @@ export function SystemSettingsDashboard() {
                                 monthlyLimit: parseInt(e.target.value),
                               })
                             }
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                            className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-primary focus:border-primary"
                             min="1"
                           />
                         </div>
@@ -550,8 +659,8 @@ export function SystemSettingsDashboard() {
                   </div>
 
                   {/* Google Maps API */}
-                  <div className="border border-gray-200 rounded-lg p-4">
-                    <h4 className="text-md font-medium text-gray-900 mb-3">
+                  <div className="border border-border rounded-lg p-4">
+                    <h4 className="text-md font-medium text-text mb-3">
                       Google Maps API
                     </h4>
                     <div className="space-y-3">
@@ -565,18 +674,18 @@ export function SystemSettingsDashboard() {
                               enabled: e.target.checked,
                             })
                           }
-                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                          className="h-4 w-4 text-primary focus:ring-primary border-border rounded"
                         />
                         <label
                           htmlFor="googleMapsEnabled"
-                          className="ml-2 text-sm text-gray-700"
+                          className="ml-2 text-sm text-text"
                         >
                           Enable Google Maps API
                         </label>
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                          <label className="block text-sm font-medium text-text mb-1">
                             Daily limit
                           </label>
                           <input
@@ -587,12 +696,12 @@ export function SystemSettingsDashboard() {
                                 dailyLimit: parseInt(e.target.value),
                               })
                             }
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                            className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-primary focus:border-primary"
                             min="1"
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                          <label className="block text-sm font-medium text-text mb-1">
                             Monthly limit
                           </label>
                           <input
@@ -603,7 +712,7 @@ export function SystemSettingsDashboard() {
                                 monthlyLimit: parseInt(e.target.value),
                               })
                             }
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                            className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-primary focus:border-primary"
                             min="1"
                           />
                         </div>
@@ -616,13 +725,13 @@ export function SystemSettingsDashboard() {
 
             {activeSection === 'alertThresholds' && (
               <div className="p-6">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">
+                <h3 className="text-lg font-medium text-text mb-4">
                   Alert Thresholds
                 </h3>
                 <div className="space-y-6">
                   {/* Cost Alerts */}
-                  <div className="border border-gray-200 rounded-lg p-4">
-                    <h4 className="text-md font-medium text-gray-900 mb-3">
+                  <div className="border border-border rounded-lg p-4">
+                    <h4 className="text-md font-medium text-text mb-3">
                       Cost Alerts
                     </h4>
                     <div className="space-y-3">
@@ -638,18 +747,18 @@ export function SystemSettingsDashboard() {
                               { enabled: e.target.checked }
                             )
                           }
-                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                          className="h-4 w-4 text-primary focus:ring-primary border-border rounded"
                         />
                         <label
                           htmlFor="costAlertsEnabled"
-                          className="ml-2 text-sm text-gray-700"
+                          className="ml-2 text-sm text-text"
                         >
                           Enable cost alerts
                         </label>
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                          <label className="block text-sm font-medium text-text mb-1">
                             Daily threshold ($)
                           </label>
                           <input
@@ -664,13 +773,13 @@ export function SystemSettingsDashboard() {
                                 { dailyThreshold: parseFloat(e.target.value) }
                               )
                             }
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                            className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-primary focus:border-primary"
                             min="0"
                             step="0.01"
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                          <label className="block text-sm font-medium text-text mb-1">
                             Monthly threshold ($)
                           </label>
                           <input
@@ -686,7 +795,7 @@ export function SystemSettingsDashboard() {
                                 { monthlyThreshold: parseFloat(e.target.value) }
                               )
                             }
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                            className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-primary focus:border-primary"
                             min="0"
                             step="0.01"
                           />
@@ -696,8 +805,8 @@ export function SystemSettingsDashboard() {
                   </div>
 
                   {/* Performance Alerts */}
-                  <div className="border border-gray-200 rounded-lg p-4">
-                    <h4 className="text-md font-medium text-gray-900 mb-3">
+                  <div className="border border-border rounded-lg p-4">
+                    <h4 className="text-md font-medium text-text mb-3">
                       Performance Alerts
                     </h4>
                     <div className="space-y-3">
@@ -715,18 +824,18 @@ export function SystemSettingsDashboard() {
                               { enabled: e.target.checked }
                             )
                           }
-                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                          className="h-4 w-4 text-primary focus:ring-primary border-border rounded"
                         />
                         <label
                           htmlFor="performanceAlertsEnabled"
-                          className="ml-2 text-sm text-gray-700"
+                          className="ml-2 text-sm text-text"
                         >
                           Enable performance alerts
                         </label>
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                          <label className="block text-sm font-medium text-text mb-1">
                             Response time threshold (ms)
                           </label>
                           <input
@@ -746,12 +855,12 @@ export function SystemSettingsDashboard() {
                                 }
                               )
                             }
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                            className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-primary focus:border-primary"
                             min="0"
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                          <label className="block text-sm font-medium text-text mb-1">
                             Error rate threshold (%)
                           </label>
                           <input
@@ -771,7 +880,7 @@ export function SystemSettingsDashboard() {
                                 }
                               )
                             }
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                            className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-primary focus:border-primary"
                             min="0"
                             max="100"
                             step="0.1"
@@ -782,8 +891,8 @@ export function SystemSettingsDashboard() {
                   </div>
 
                   {/* System Alerts */}
-                  <div className="border border-gray-200 rounded-lg p-4">
-                    <h4 className="text-md font-medium text-gray-900 mb-3">
+                  <div className="border border-border rounded-lg p-4">
+                    <h4 className="text-md font-medium text-text mb-3">
                       System Alerts
                     </h4>
                     <div className="space-y-3">
@@ -801,18 +910,18 @@ export function SystemSettingsDashboard() {
                               { enabled: e.target.checked }
                             )
                           }
-                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                          className="h-4 w-4 text-primary focus:ring-primary border-border rounded"
                         />
                         <label
                           htmlFor="systemAlertsEnabled"
-                          className="ml-2 text-sm text-gray-700"
+                          className="ml-2 text-sm text-text"
                         >
                           Enable system alerts
                         </label>
                       </div>
                       <div className="grid grid-cols-3 gap-4">
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                          <label className="block text-sm font-medium text-text mb-1">
                             CPU threshold (%)
                           </label>
                           <input
@@ -827,13 +936,13 @@ export function SystemSettingsDashboard() {
                                 { cpuThreshold: parseInt(e.target.value) }
                               )
                             }
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                            className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-primary focus:border-primary"
                             min="0"
                             max="100"
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                          <label className="block text-sm font-medium text-text mb-1">
                             Memory threshold (%)
                           </label>
                           <input
@@ -849,13 +958,13 @@ export function SystemSettingsDashboard() {
                                 { memoryThreshold: parseInt(e.target.value) }
                               )
                             }
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                            className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-primary focus:border-primary"
                             min="0"
                             max="100"
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                          <label className="block text-sm font-medium text-text mb-1">
                             Disk threshold (%)
                           </label>
                           <input
@@ -871,7 +980,7 @@ export function SystemSettingsDashboard() {
                                 { diskThreshold: parseInt(e.target.value) }
                               )
                             }
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                            className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-primary focus:border-primary"
                             min="0"
                             max="100"
                           />
@@ -885,13 +994,13 @@ export function SystemSettingsDashboard() {
 
             {activeSection === 'notificationSettings' && (
               <div className="p-6">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">
+                <h3 className="text-lg font-medium text-text mb-4">
                   Notification Settings
                 </h3>
                 <div className="space-y-6">
                   {/* Email Notifications */}
-                  <div className="border border-gray-200 rounded-lg p-4">
-                    <h4 className="text-md font-medium text-gray-900 mb-3">
+                  <div className="border border-border rounded-lg p-4">
+                    <h4 className="text-md font-medium text-text mb-3">
                       Email Notifications
                     </h4>
                     <div className="space-y-3">
@@ -907,17 +1016,17 @@ export function SystemSettingsDashboard() {
                               { enabled: e.target.checked }
                             )
                           }
-                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                          className="h-4 w-4 text-primary focus:ring-primary border-border rounded"
                         />
                         <label
                           htmlFor="emailEnabled"
-                          className="ml-2 text-sm text-gray-700"
+                          className="ml-2 text-sm text-text"
                         >
                           Enable email notifications
                         </label>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="block text-sm font-medium text-text mb-1">
                           Recipients (comma-separated)
                         </label>
                         <input
@@ -937,12 +1046,12 @@ export function SystemSettingsDashboard() {
                               }
                             )
                           }
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                          className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-primary focus:border-primary"
                           placeholder="akpersad@gmail.com"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="block text-sm font-medium text-text mb-1">
                           Frequency
                         </label>
                         <select
@@ -959,7 +1068,7 @@ export function SystemSettingsDashboard() {
                               }
                             )
                           }
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                          className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-primary focus:border-primary"
                         >
                           <option value="immediate">Immediate</option>
                           <option value="hourly">Hourly</option>
@@ -970,8 +1079,8 @@ export function SystemSettingsDashboard() {
                   </div>
 
                   {/* SMS Notifications */}
-                  <div className="border border-gray-200 rounded-lg p-4">
-                    <h4 className="text-md font-medium text-gray-900 mb-3">
+                  <div className="border border-border rounded-lg p-4">
+                    <h4 className="text-md font-medium text-text mb-3">
                       SMS Notifications
                     </h4>
                     <div className="space-y-3">
@@ -987,17 +1096,17 @@ export function SystemSettingsDashboard() {
                               { enabled: e.target.checked }
                             )
                           }
-                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                          className="h-4 w-4 text-primary focus:ring-primary border-border rounded"
                         />
                         <label
                           htmlFor="smsEnabled"
-                          className="ml-2 text-sm text-gray-700"
+                          className="ml-2 text-sm text-text"
                         >
                           Enable SMS notifications
                         </label>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="block text-sm font-medium text-text mb-1">
                           Recipients (comma-separated phone numbers)
                         </label>
                         <input
@@ -1017,12 +1126,12 @@ export function SystemSettingsDashboard() {
                               }
                             )
                           }
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                          className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-primary focus:border-primary"
                           placeholder="+1234567890, +0987654321"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="block text-sm font-medium text-text mb-1">
                           Frequency
                         </label>
                         <select
@@ -1039,7 +1148,7 @@ export function SystemSettingsDashboard() {
                               }
                             )
                           }
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                          className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-primary focus:border-primary"
                         >
                           <option value="immediate">Immediate</option>
                           <option value="hourly">Hourly</option>
@@ -1050,8 +1159,8 @@ export function SystemSettingsDashboard() {
                   </div>
 
                   {/* Webhook Notifications */}
-                  <div className="border border-gray-200 rounded-lg p-4">
-                    <h4 className="text-md font-medium text-gray-900 mb-3">
+                  <div className="border border-border rounded-lg p-4">
+                    <h4 className="text-md font-medium text-text mb-3">
                       Webhook Notifications
                     </h4>
                     <div className="space-y-3">
@@ -1069,17 +1178,17 @@ export function SystemSettingsDashboard() {
                               { enabled: e.target.checked }
                             )
                           }
-                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                          className="h-4 w-4 text-primary focus:ring-primary border-border rounded"
                         />
                         <label
                           htmlFor="webhookEnabled"
-                          className="ml-2 text-sm text-gray-700"
+                          className="ml-2 text-sm text-text"
                         >
                           Enable webhook notifications
                         </label>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="block text-sm font-medium text-text mb-1">
                           Webhook URL
                         </label>
                         <input
@@ -1092,12 +1201,12 @@ export function SystemSettingsDashboard() {
                               { url: e.target.value }
                             )
                           }
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                          className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-primary focus:border-primary"
                           placeholder="https://hooks.slack.com/services/..."
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="block text-sm font-medium text-text mb-1">
                           Webhook Secret
                         </label>
                         <input
@@ -1110,7 +1219,7 @@ export function SystemSettingsDashboard() {
                               { secret: e.target.value }
                             )
                           }
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                          className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-primary focus:border-primary"
                           placeholder="Enter webhook secret"
                         />
                       </div>
@@ -1122,13 +1231,13 @@ export function SystemSettingsDashboard() {
 
             {activeSection === 'maintenance' && (
               <div className="p-6">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">
+                <h3 className="text-lg font-medium text-text mb-4">
                   Maintenance Settings
                 </h3>
                 <div className="space-y-6">
                   {/* Scheduled Downtime */}
-                  <div className="border border-gray-200 rounded-lg p-4">
-                    <h4 className="text-md font-medium text-gray-900 mb-3">
+                  <div className="border border-border rounded-lg p-4">
+                    <h4 className="text-md font-medium text-text mb-3">
                       Scheduled Downtime
                     </h4>
                     <div className="space-y-3">
@@ -1146,18 +1255,18 @@ export function SystemSettingsDashboard() {
                               { enabled: e.target.checked }
                             )
                           }
-                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                          className="h-4 w-4 text-primary focus:ring-primary border-border rounded"
                         />
                         <label
                           htmlFor="scheduledDowntimeEnabled"
-                          className="ml-2 text-sm text-gray-700"
+                          className="ml-2 text-sm text-text"
                         >
                           Enable scheduled downtime
                         </label>
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                          <label className="block text-sm font-medium text-text mb-1">
                             Start time
                           </label>
                           <input
@@ -1172,11 +1281,11 @@ export function SystemSettingsDashboard() {
                                 { startTime: e.target.value }
                               )
                             }
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                            className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-primary focus:border-primary"
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                          <label className="block text-sm font-medium text-text mb-1">
                             End time
                           </label>
                           <input
@@ -1191,12 +1300,12 @@ export function SystemSettingsDashboard() {
                                 { endTime: e.target.value }
                               )
                             }
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                            className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-primary focus:border-primary"
                           />
                         </div>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="block text-sm font-medium text-text mb-1">
                           Timezone
                         </label>
                         <select
@@ -1210,7 +1319,7 @@ export function SystemSettingsDashboard() {
                               { timezone: e.target.value }
                             )
                           }
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                          className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-primary focus:border-primary"
                         >
                           <option value="UTC">UTC</option>
                           <option value="America/New_York">Eastern Time</option>
@@ -1222,7 +1331,7 @@ export function SystemSettingsDashboard() {
                         </select>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="block text-sm font-medium text-text mb-1">
                           Maintenance message
                         </label>
                         <textarea
@@ -1234,7 +1343,7 @@ export function SystemSettingsDashboard() {
                               { message: e.target.value }
                             )
                           }
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                          className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-primary focus:border-primary"
                           rows={3}
                           placeholder="System is currently under maintenance..."
                         />
@@ -1243,7 +1352,7 @@ export function SystemSettingsDashboard() {
                   </div>
 
                   {/* Emergency Mode */}
-                  <div className="border border-red-200 rounded-lg p-4 bg-red-50">
+                  <div className="border border-destructive rounded-lg p-4 bg-destructive/10">
                     <h4 className="text-md font-medium text-red-900 mb-3">
                       Emergency Mode
                     </h4>
@@ -1260,7 +1369,7 @@ export function SystemSettingsDashboard() {
                               { enabled: e.target.checked }
                             )
                           }
-                          className="h-4 w-4 text-red-600 focus:ring-red-500 border-red-300 rounded"
+                          className="h-4 w-4 text-destructive focus:ring-destructive border-destructive rounded"
                         />
                         <label
                           htmlFor="emergencyModeEnabled"
@@ -1282,7 +1391,7 @@ export function SystemSettingsDashboard() {
                               { message: e.target.value }
                             )
                           }
-                          className="w-full px-3 py-2 border border-red-300 rounded-md focus:outline-none focus:ring-red-500 focus:border-red-500"
+                          className="w-full px-3 py-2 border border-destructive rounded-md focus:outline-none focus:ring-destructive focus:border-destructive"
                           rows={3}
                           placeholder="System is currently experiencing issues..."
                         />
@@ -1301,7 +1410,7 @@ export function SystemSettingsDashboard() {
                               { contactInfo: e.target.value }
                             )
                           }
-                          className="w-full px-3 py-2 border border-red-300 rounded-md focus:outline-none focus:ring-red-500 focus:border-red-500"
+                          className="w-full px-3 py-2 border border-destructive rounded-md focus:outline-none focus:ring-destructive focus:border-destructive"
                           placeholder="akpersad@gmail.com, +1234567890"
                         />
                       </div>
@@ -1310,9 +1419,170 @@ export function SystemSettingsDashboard() {
                 </div>
               </div>
             )}
+
+            {activeSection === 'cache' && (
+              <div className="p-6">
+                <h3 className="text-lg font-medium text-text mb-4">
+                  Cache Management
+                </h3>
+                <div className="mb-4 bg-primary/10 border border-primary rounded-lg p-4">
+                  <p className="text-sm text-primary">
+                    Clear cached data to force fresh API calls. Use this when
+                    you suspect cached data is stale or causing issues.
+                  </p>
+                </div>
+                <div className="space-y-4">
+                  {/* Restaurant Search Cache */}
+                  <div className="border border-border rounded-lg p-4">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <h4 className="text-md font-medium text-text">
+                          Restaurant Search Cache
+                        </h4>
+                        <p className="text-sm text-text-light mt-1">
+                          Cached restaurant search results from Google Places
+                          API (7 day TTL)
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => clearCache('restaurant_search')}
+                        disabled={cacheClearing === 'restaurant_search'}
+                        className="px-4 py-2 bg-red-600 text-white rounded-md text-sm font-medium hover:bg-red-700 disabled:opacity-50"
+                      >
+                        {cacheClearing === 'restaurant_search'
+                          ? 'Clearing...'
+                          : 'Clear Cache'}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Location Cache (25-mile search results) */}
+                  <div className="border border-border rounded-lg p-4">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <h4 className="text-md font-medium text-text">
+                          Location Cache (25-mile Results)
+                        </h4>
+                        <p className="text-sm text-text-light mt-1">
+                          Cached 25-mile restaurant search results by location
+                          (48 hour TTL)
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => clearCache('location_cache')}
+                        disabled={cacheClearing === 'location_cache'}
+                        className="px-4 py-2 bg-red-600 text-white rounded-md text-sm font-medium hover:bg-red-700 disabled:opacity-50"
+                      >
+                        {cacheClearing === 'location_cache'
+                          ? 'Clearing...'
+                          : 'Clear Cache'}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Geocoding Cache */}
+                  <div className="border border-border rounded-lg p-4">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <h4 className="text-md font-medium text-text">
+                          Geocoding Cache
+                        </h4>
+                        <p className="text-sm text-text-light mt-1">
+                          Cached address-to-coordinates conversions (90 day TTL)
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => clearCache('geocoding')}
+                        disabled={cacheClearing === 'geocoding'}
+                        className="px-4 py-2 bg-red-600 text-white rounded-md text-sm font-medium hover:bg-red-700 disabled:opacity-50"
+                      >
+                        {cacheClearing === 'geocoding'
+                          ? 'Clearing...'
+                          : 'Clear Cache'}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Address Validation Cache */}
+                  <div className="border border-border rounded-lg p-4">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <h4 className="text-md font-medium text-text">
+                          Address Validation Cache
+                        </h4>
+                        <p className="text-sm text-text-light mt-1">
+                          Cached address validation results (90 day TTL)
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => clearCache('address_validation')}
+                        disabled={cacheClearing === 'address_validation'}
+                        className="px-4 py-2 bg-red-600 text-white rounded-md text-sm font-medium hover:bg-red-700 disabled:opacity-50"
+                      >
+                        {cacheClearing === 'address_validation'
+                          ? 'Clearing...'
+                          : 'Clear Cache'}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Restaurant Details Cache */}
+                  <div className="border border-border rounded-lg p-4">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <h4 className="text-md font-medium text-text">
+                          Restaurant Details Cache
+                        </h4>
+                        <p className="text-sm text-text-light mt-1">
+                          Cached detailed restaurant information (30 day TTL)
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => clearCache('restaurant_details')}
+                        disabled={cacheClearing === 'restaurant_details'}
+                        className="px-4 py-2 bg-red-600 text-white rounded-md text-sm font-medium hover:bg-red-700 disabled:opacity-50"
+                      >
+                        {cacheClearing === 'restaurant_details'
+                          ? 'Clearing...'
+                          : 'Clear Cache'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
+
+      {/* Reset Confirmation Modal */}
+      <Modal
+        isOpen={showResetConfirmation}
+        onClose={() => setShowResetConfirmation(false)}
+        title="Reset Settings to Defaults?"
+      >
+        <div className="space-y-4">
+          <p className="text-text">
+            Are you sure you want to reset all settings to defaults? This action
+            cannot be undone.
+          </p>
+          <div className="flex justify-end space-x-2">
+            <Button
+              onClick={() => setShowResetConfirmation(false)}
+              variant="outline"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={confirmResetSettings}
+              className="bg-red-600 hover:bg-red-700"
+              disabled={saving}
+            >
+              Reset Settings
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

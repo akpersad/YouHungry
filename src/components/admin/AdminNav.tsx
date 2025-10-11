@@ -64,8 +64,14 @@ const adminNavItems = [
 
 export function AdminNav({ activeTab, onTabChange }: AdminNavProps) {
   return (
-    <div className="bg-white rounded-lg shadow-sm border">
-      <div className="border-b border-gray-200">
+    <div
+      className="rounded-lg shadow-subtle border"
+      style={{
+        background: 'var(--bg-secondary)',
+        borderColor: 'var(--bg-quaternary)',
+      }}
+    >
+      <div className="border-b" style={{ borderColor: 'var(--bg-quaternary)' }}>
         <nav className="flex space-x-8 px-6" aria-label="Tabs">
           {adminNavItems.map((item) => {
             const Icon = item.icon;
@@ -79,7 +85,7 @@ export function AdminNav({ activeTab, onTabChange }: AdminNavProps) {
                   'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors flex items-center gap-2',
                   isActive
                     ? 'border-primary text-primary'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    : 'border-transparent text-text-light hover:text-text hover:border-border'
                 )}
               >
                 <Icon className="h-4 w-4" />
@@ -91,14 +97,27 @@ export function AdminNav({ activeTab, onTabChange }: AdminNavProps) {
       </div>
 
       {/* External Links */}
-      <div className="px-6 py-4 border-t border-gray-200">
-        <div className="flex items-center gap-2 text-sm text-gray-600">
+      <div
+        className="px-6 py-4 border-t"
+        style={{ borderColor: 'var(--bg-quaternary)' }}
+      >
+        <div
+          className="flex items-center gap-2 text-sm"
+          style={{ color: 'var(--text-secondary)' }}
+        >
           <span>External Tools:</span>
           <a
             href="/performance-dashboard.html"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1 text-primary hover:text-primary-dark transition-colors"
+            className="flex items-center gap-1 transition-colors"
+            style={{ color: 'var(--accent-primary)' }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = 'var(--accent-primary-light)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = 'var(--accent-primary)';
+            }}
           >
             <BarChart3 className="h-3 w-3" />
             Legacy Dashboard

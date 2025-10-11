@@ -35,9 +35,22 @@ describe('CreateCollectionForm', () => {
     // Setup default mock for TanStack Query hook
     mockUseCreateCollection.mockReturnValue({
       mutateAsync: jest.fn(),
+      mutate: jest.fn(),
       isPending: false,
+      isIdle: true,
+      isError: false,
+      isSuccess: false,
+      data: undefined,
       error: null,
-    });
+      variables: undefined,
+      context: undefined,
+      failureCount: 0,
+      failureReason: null,
+      reset: jest.fn(),
+      status: 'idle',
+      submittedAt: 0,
+      isPaused: false,
+    } as any);
 
     mockOnSuccess.mockClear();
     mockOnCancel.mockClear();
@@ -53,8 +66,12 @@ describe('CreateCollectionForm', () => {
       </TestQueryProvider>
     );
 
-    expect(screen.getByLabelText('Collection Name')).toBeInTheDocument();
-    expect(screen.getByLabelText('Description (Optional)')).toBeInTheDocument();
+    expect(
+      screen.getByPlaceholderText('e.g., Favorite Pizza Places')
+    ).toBeInTheDocument();
+    expect(
+      screen.getByPlaceholderText('Describe your collection...')
+    ).toBeInTheDocument();
     expect(
       screen.getByRole('button', { name: 'Create Collection' })
     ).toBeInTheDocument();
@@ -93,9 +110,22 @@ describe('CreateCollectionForm', () => {
 
     mockUseCreateCollection.mockReturnValue({
       mutateAsync: mockMutateAsync,
+      mutate: jest.fn(),
       isPending: false,
+      isIdle: false,
+      isError: false,
+      isSuccess: true,
+      data: undefined,
       error: null,
-    });
+      variables: undefined,
+      context: undefined,
+      failureCount: 0,
+      failureReason: null,
+      reset: jest.fn(),
+      status: 'success',
+      submittedAt: 0,
+      isPaused: false,
+    } as any);
 
     render(
       <TestQueryProvider>
@@ -106,15 +136,21 @@ describe('CreateCollectionForm', () => {
       </TestQueryProvider>
     );
 
-    const nameInput = screen.getByLabelText('Collection Name');
-    const descriptionInput = screen.getByLabelText('Description (Optional)');
+    const nameInput = screen.getByPlaceholderText(
+      'e.g., Favorite Pizza Places'
+    );
+    const descriptionInput = screen.getByPlaceholderText(
+      'Describe your collection...'
+    );
     const submitButton = screen.getByRole('button', {
       name: 'Create Collection',
     });
 
     // Fill in the form fields
-    await user.type(nameInput, 'Test Collection');
-    await user.type(descriptionInput, 'Test description');
+    fireEvent.change(nameInput, { target: { value: 'Test Collection' } });
+    fireEvent.change(descriptionInput, {
+      target: { value: 'Test description' },
+    });
 
     // Button should be enabled now
     expect(submitButton).not.toBeDisabled();
@@ -138,9 +174,22 @@ describe('CreateCollectionForm', () => {
 
     mockUseCreateCollection.mockReturnValue({
       mutateAsync: jest.fn().mockRejectedValue(mockError),
+      mutate: jest.fn(),
       isPending: false,
+      isIdle: false,
+      isError: true,
+      isSuccess: false,
+      data: undefined,
       error: mockError,
-    });
+      variables: undefined,
+      context: undefined,
+      failureCount: 1,
+      failureReason: mockError,
+      reset: jest.fn(),
+      status: 'error',
+      submittedAt: 0,
+      isPaused: false,
+    } as any);
 
     render(
       <TestQueryProvider>
@@ -151,12 +200,14 @@ describe('CreateCollectionForm', () => {
       </TestQueryProvider>
     );
 
-    const nameInput = screen.getByLabelText('Collection Name');
+    const nameInput = screen.getByPlaceholderText(
+      'e.g., Favorite Pizza Places'
+    );
     const submitButton = screen.getByRole('button', {
       name: 'Create Collection',
     });
 
-    await user.type(nameInput, 'Test Collection');
+    fireEvent.change(nameInput, { target: { value: 'Test Collection' } });
     await user.click(submitButton);
 
     await waitFor(() => {
@@ -185,14 +236,26 @@ describe('CreateCollectionForm', () => {
   });
 
   it('shows loading state during submission', async () => {
-    const user = userEvent.setup();
     const mockCollection = { id: 'collection123', name: 'Test Collection' };
 
     mockUseCreateCollection.mockReturnValue({
       mutateAsync: jest.fn().mockResolvedValue(mockCollection),
+      mutate: jest.fn(),
       isPending: true,
+      isIdle: false,
+      isError: false,
+      isSuccess: false,
+      data: undefined,
       error: null,
-    });
+      variables: undefined,
+      context: undefined,
+      failureCount: 0,
+      failureReason: null,
+      reset: jest.fn(),
+      status: 'pending',
+      submittedAt: Date.now(),
+      isPaused: false,
+    } as any);
 
     render(
       <TestQueryProvider>
@@ -203,9 +266,11 @@ describe('CreateCollectionForm', () => {
       </TestQueryProvider>
     );
 
-    const nameInput = screen.getByLabelText('Collection Name');
+    const nameInput = screen.getByPlaceholderText(
+      'e.g., Favorite Pizza Places'
+    );
 
-    await user.type(nameInput, 'Test Collection');
+    fireEvent.change(nameInput, { target: { value: 'Test Collection' } });
 
     // Should show loading state immediately due to isPending: true
     expect(screen.getByText('Creating...')).toBeInTheDocument();

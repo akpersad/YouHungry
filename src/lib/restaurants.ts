@@ -2,10 +2,12 @@ import { logger } from '@/lib/logger';
 import { connectToDatabase } from './db';
 import { Restaurant } from '@/types/database';
 import { ObjectId } from 'mongodb';
+import { calculateDistance } from './utils';
 import {
   searchRestaurantsWithGooglePlaces,
   getPlaceDetails,
   searchRestaurantsByLocationConsistent,
+  searchRestaurantsByLocationAndQuery,
 } from './google-places';
 
 export async function getRestaurantById(
@@ -139,19 +141,18 @@ export async function deleteRestaurant(id: string): Promise<boolean> {
   return result.deletedCount > 0;
 }
 
-// Search restaurants by location coordinates
+// Search restaurants by location coordinates (with optional query for hybrid search)
 export async function searchRestaurantsByCoordinates(
   lat: number,
   lng: number,
-  radius: number = 5000
+  radius: number = 5000,
+  query?: string
 ): Promise<Restaurant[]> {
   try {
-    // Use the consistent search function to ensure stable results across different radius values
-    const googleResults = await searchRestaurantsByLocationConsistent(
-      lat,
-      lng,
-      radius
-    );
+    // Use hybrid search: if query provided, use location+query cache, otherwise use location-only cache
+    const googleResults = query
+      ? await searchRestaurantsByLocationAndQuery(lat, lng, query, radius)
+      : await searchRestaurantsByLocationConsistent(lat, lng, radius);
 
     // Store new restaurants in database and get the stored versions
     const storedRestaurants = await Promise.all(
@@ -161,9 +162,11 @@ export async function searchRestaurantsByCoordinates(
             restaurant.googlePlaceId
           );
           if (existing) {
-            return existing;
+            // Preserve the distance from the API result
+            return { ...existing, distance: restaurant.distance };
           } else {
-            return await createRestaurant(restaurant);
+            const created = await createRestaurant(restaurant);
+            return { ...created, distance: restaurant.distance };
           }
         } catch (error) {
           logger.error('Error storing restaurant:', error);
@@ -172,9 +175,89 @@ export async function searchRestaurantsByCoordinates(
       })
     );
 
-    return storedRestaurants;
+    // Enrich restaurants with missing addresses using Place Details API
+    const { enrichRestaurantsWithAddresses } = await import(
+      './optimized-google-places'
+    );
+    const enrichedRestaurants =
+      await enrichRestaurantsWithAddresses(storedRestaurants);
+
+    return enrichedRestaurants;
   } catch (error) {
     logger.error('Location-based search failed:', error);
+    return [];
+  }
+}
+
+// Search restaurants by specific address (fallback for when nearby search misses restaurants)
+export async function searchRestaurantsByAddress(
+  address: string,
+  lat: number,
+  lng: number
+): Promise<Restaurant[]> {
+  try {
+    // Use Google Places Text Search API to find restaurants at specific address
+    const textSearchResults = await searchRestaurantsWithGooglePlaces(
+      `restaurants near ${address}`,
+      `${lat},${lng}`,
+      1000 // 1km radius for specific address search
+    );
+
+    // Also try searching for the exact address
+    const exactAddressResults = await searchRestaurantsWithGooglePlaces(
+      address,
+      `${lat},${lng}`,
+      1000
+    );
+
+    // Combine and deduplicate results
+    const allResults = [...textSearchResults, ...exactAddressResults];
+    const uniqueResults = new Map<string, Restaurant>();
+
+    allResults.forEach((restaurant) => {
+      if (restaurant.googlePlaceId) {
+        uniqueResults.set(restaurant.googlePlaceId, restaurant);
+      }
+    });
+
+    const combinedResults = Array.from(uniqueResults.values());
+
+    // Store new restaurants in database and get the stored versions
+    const storedRestaurants = await Promise.all(
+      combinedResults.map(async (restaurant) => {
+        try {
+          const existing = await getRestaurantByGooglePlaceId(
+            restaurant.googlePlaceId
+          );
+          if (existing) {
+            // Calculate distance from search coordinates
+            const distance = calculateDistance(
+              lat,
+              lng,
+              restaurant.coordinates.lat,
+              restaurant.coordinates.lng
+            );
+            return { ...existing, distance };
+          } else {
+            const created = await createRestaurant(restaurant);
+            const distance = calculateDistance(
+              lat,
+              lng,
+              restaurant.coordinates.lat,
+              restaurant.coordinates.lng
+            );
+            return { ...created, distance };
+          }
+        } catch (error) {
+          logger.error('Error storing restaurant:', error);
+          return restaurant;
+        }
+      })
+    );
+
+    return storedRestaurants;
+  } catch (error) {
+    logger.error('Address-based search failed:', error);
     return [];
   }
 }

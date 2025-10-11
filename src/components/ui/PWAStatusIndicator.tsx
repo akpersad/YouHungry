@@ -1,15 +1,51 @@
 'use client';
 
 // PWA Status Indicator Component
-import React from 'react';
+import React, { useState } from 'react';
 import { usePWA } from '@/hooks/usePWA';
 import { Button } from './Button';
+import { Modal } from './Modal';
 import { logger } from '@/lib/logger';
+import { toast } from 'sonner';
 
 interface PWAStatusIndicatorProps {
   className?: string;
   showInstallButton?: boolean;
   showOfflineActions?: boolean;
+}
+
+interface PWARequirements {
+  hasServiceWorker: boolean;
+  hasManifest: boolean;
+  isHTTPS: boolean;
+  hasIcons: boolean;
+  isOnline: boolean;
+  userAgent: string;
+  url: string;
+  protocol: string;
+  hostname: string;
+  isLocalhost: boolean;
+}
+
+interface PWAServerStatus {
+  hasManifest?: boolean;
+  hasServiceWorker?: boolean;
+  manifestUrl?: string;
+  serviceWorkerUrl?: string;
+  requirements?: {
+    hasServiceWorker?: boolean;
+    manifestExists?: boolean;
+    isHTTPS?: boolean;
+    swExists?: boolean;
+  };
+  mobile?: {
+    isMobile?: boolean;
+    isChromeIOS?: boolean;
+    isChrome?: boolean;
+    isSafari?: boolean;
+    isFirefox?: boolean;
+  };
+  [key: string]: unknown;
 }
 
 export function PWAStatusIndicator({
@@ -33,7 +69,7 @@ export function PWAStatusIndicator({
           }`}
           title={status.isOnline ? 'Online' : 'Offline'}
         />
-        <span className="text-xs text-gray-600 dark:text-gray-400">
+        <span className="text-xs text-text-light dark:text-text-light">
           {status.isOnline ? 'Online' : 'Offline'}
         </span>
       </div>
@@ -42,7 +78,7 @@ export function PWAStatusIndicator({
       {showOfflineActions && status.offlineActionsCount > 0 && (
         <div className="flex items-center gap-1">
           <div className="w-2 h-2 rounded-full bg-yellow-500" />
-          <span className="text-xs text-gray-600 dark:text-gray-400">
+          <span className="text-xs text-text-light dark:text-text-light">
             {status.offlineActionsCount} pending
           </span>
         </div>
@@ -64,7 +100,7 @@ export function PWAStatusIndicator({
       {status.isInstalled && (
         <div className="flex items-center gap-1">
           <div className="w-2 h-2 rounded-full bg-blue-500" />
-          <span className="text-xs text-gray-600 dark:text-gray-400">
+          <span className="text-xs text-text-light dark:text-text-light">
             Installed
           </span>
         </div>
@@ -97,7 +133,7 @@ export function PWAInstallPrompt({
   };
 
   return (
-    <div className="fixed bottom-4 left-4 right-4 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-4">
+    <div className="fixed bottom-4 left-4 right-4 z-50 bg-white dark:bg-background border border-border dark:border-border rounded-lg shadow-lg p-4">
       <div className="flex items-start gap-3">
         <div className="flex-shrink-0">
           <div className="w-8 h-8 bg-red-500 rounded-lg flex items-center justify-center">
@@ -106,10 +142,10 @@ export function PWAInstallPrompt({
         </div>
 
         <div className="flex-1 min-w-0">
-          <h3 className="text-sm font-medium text-gray-900 dark:text-white">
+          <h3 className="text-sm font-medium text-text dark:text-white">
             Install You Hungry?
           </h3>
-          <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+          <p className="text-xs text-text-light dark:text-text-light mt-1">
             Install this app on your device for a better experience and offline
             access.
           </p>
@@ -154,6 +190,12 @@ export function PWAOfflineBanner() {
 // PWA Debug Component (for development/testing)
 export function PWADebugPanel() {
   const { status, installApp, canInstall } = usePWA();
+  const [showRequirements, setShowRequirements] = useState(false);
+  const [requirementsData, setRequirementsData] =
+    useState<PWARequirements | null>(null);
+  const [showServerStatus, setShowServerStatus] = useState(false);
+  const [serverStatusData, setServerStatusData] =
+    useState<PWAServerStatus | null>(null);
 
   const handleManualInstall = async () => {
     logger.debug('Manual install attempt');
@@ -185,25 +227,13 @@ export function PWADebugPanel() {
       };
 
       logger.debug('PWA Requirements Check:', requirements);
-
-      // Also show an alert for mobile debugging
-      alert(`PWA Requirements:
-Service Worker: ${requirements.hasServiceWorker ? '✅' : '❌'}
-Manifest: ${requirements.hasManifest ? '✅' : '❌'}
-HTTPS/Localhost: ${requirements.isHTTPS ? '✅' : '❌'}
-Icons: ${requirements.hasIcons ? '✅' : '❌'}
-Online: ${requirements.isOnline ? '✅' : '❌'}
-
-URL: ${requirements.url}
-Protocol: ${requirements.protocol}
-Hostname: ${requirements.hostname}
-
-Check console for full details.`);
+      setRequirementsData(requirements);
+      setShowRequirements(true);
 
       return requirements;
     } catch (error) {
       logger.error('Error checking PWA requirements:', error);
-      alert('Error checking requirements. Check console for details.');
+      toast.error('Error checking requirements. Check console for details.');
     }
   };
 
@@ -214,23 +244,13 @@ Check console for full details.`);
       const data = await response.json();
 
       logger.debug('Server PWA Status:', data);
-
-      alert(`Server PWA Status:
-Service Worker: ${data.requirements.hasServiceWorker ? '✅' : '❌'}
-Manifest: ${data.requirements.manifestExists ? '✅' : '❌'}
-HTTPS/Localhost: ${data.requirements.isHTTPS ? '✅' : '❌'}
-SW File Exists: ${data.requirements.swExists ? '✅' : '❌'}
-Manifest File Exists: ${data.requirements.manifestExists ? '✅' : '❌'}
-
-Mobile: ${data.mobile.isMobile ? 'Yes' : 'No'}
-Browser: ${data.mobile.isChromeIOS ? 'Chrome (iOS)' : data.mobile.isChrome ? 'Chrome' : data.mobile.isSafari ? 'Safari' : data.mobile.isFirefox ? 'Firefox' : 'Other'}
-
-Check server logs for full details.`);
+      setServerStatusData(data);
+      setShowServerStatus(true);
 
       return data;
     } catch (error) {
       logger.error('Error checking server PWA status:', error);
-      alert('Error checking server status. Check server logs.');
+      toast.error('Error checking server status. Check server logs.');
     }
   };
 
@@ -269,7 +289,7 @@ Check server logs for full details.`);
         <button
           onClick={handleManualInstall}
           disabled={!canInstall}
-          className="w-full bg-blue-600 text-white px-2 py-2 rounded text-xs disabled:bg-gray-600"
+          className="w-full bg-blue-600 text-white px-2 py-2 rounded text-xs disabled:bg-surface"
           style={{
             minHeight: '44px',
             fontSize: '12px',
@@ -314,10 +334,10 @@ URL: ${location.href}`;
             navigator.clipboard
               ?.writeText(info)
               .then(() => {
-                alert('PWA info copied to clipboard!');
+                toast.success('PWA info copied to clipboard!');
               })
               .catch(() => {
-                alert(info);
+                toast.error('Failed to copy to clipboard');
               });
           }}
           className="w-full bg-purple-600 text-white px-2 py-2 rounded text-xs"
@@ -330,6 +350,108 @@ URL: ${location.href}`;
           Copy Status
         </button>
       </div>
+
+      {/* Requirements Modal */}
+      {requirementsData && (
+        <Modal
+          isOpen={showRequirements}
+          onClose={() => setShowRequirements(false)}
+          title="PWA Requirements"
+        >
+          <div className="space-y-3 text-sm">
+            <div className="grid grid-cols-2 gap-2">
+              <div className="font-medium">Service Worker:</div>
+              <div>{requirementsData.hasServiceWorker ? '✅' : '❌'}</div>
+
+              <div className="font-medium">Manifest:</div>
+              <div>{requirementsData.hasManifest ? '✅' : '❌'}</div>
+
+              <div className="font-medium">HTTPS/Localhost:</div>
+              <div>{requirementsData.isHTTPS ? '✅' : '❌'}</div>
+
+              <div className="font-medium">Icons:</div>
+              <div>{requirementsData.hasIcons ? '✅' : '❌'}</div>
+
+              <div className="font-medium">Online:</div>
+              <div>{requirementsData.isOnline ? '✅' : '❌'}</div>
+            </div>
+
+            <div className="border-t pt-3 mt-3">
+              <div className="font-medium mb-2">Environment:</div>
+              <div className="text-xs space-y-1 text-text-light">
+                <div>
+                  <strong>URL:</strong> {requirementsData.url}
+                </div>
+                <div>
+                  <strong>Protocol:</strong> {requirementsData.protocol}
+                </div>
+                <div>
+                  <strong>Hostname:</strong> {requirementsData.hostname}
+                </div>
+              </div>
+            </div>
+
+            <p className="text-xs text-text-light">
+              Check console for full details.
+            </p>
+          </div>
+        </Modal>
+      )}
+
+      {/* Server Status Modal */}
+      {serverStatusData && (
+        <Modal
+          isOpen={showServerStatus}
+          onClose={() => setShowServerStatus(false)}
+          title="Server PWA Status"
+        >
+          <div className="space-y-3 text-sm">
+            <div className="grid grid-cols-2 gap-2">
+              <div className="font-medium">Service Worker:</div>
+              <div>
+                {serverStatusData.requirements?.hasServiceWorker ? '✅' : '❌'}
+              </div>
+
+              <div className="font-medium">Manifest:</div>
+              <div>
+                {serverStatusData.requirements?.manifestExists ? '✅' : '❌'}
+              </div>
+
+              <div className="font-medium">HTTPS/Localhost:</div>
+              <div>{serverStatusData.requirements?.isHTTPS ? '✅' : '❌'}</div>
+
+              <div className="font-medium">SW File Exists:</div>
+              <div>{serverStatusData.requirements?.swExists ? '✅' : '❌'}</div>
+            </div>
+
+            <div className="border-t pt-3 mt-3">
+              <div className="font-medium mb-2">Device Info:</div>
+              <div className="text-xs space-y-1 text-text-light">
+                <div>
+                  <strong>Mobile:</strong>{' '}
+                  {serverStatusData.mobile?.isMobile ? 'Yes' : 'No'}
+                </div>
+                <div>
+                  <strong>Browser:</strong>{' '}
+                  {serverStatusData.mobile?.isChromeIOS
+                    ? 'Chrome (iOS)'
+                    : serverStatusData.mobile?.isChrome
+                      ? 'Chrome'
+                      : serverStatusData.mobile?.isSafari
+                        ? 'Safari'
+                        : serverStatusData.mobile?.isFirefox
+                          ? 'Firefox'
+                          : 'Other'}
+                </div>
+              </div>
+            </div>
+
+            <p className="text-xs text-text-light">
+              Check server logs for full details.
+            </p>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }

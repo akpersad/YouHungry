@@ -35,7 +35,9 @@ describe('/api/email', () => {
 
   describe('POST', () => {
     it('should send test email successfully', async () => {
-      mockAuth.mockResolvedValue({ userId: 'user-123' });
+      (mockAuth as unknown as jest.Mock).mockResolvedValue({
+        userId: 'user-123',
+      } as any);
       mockUserEmailService.sendTestUserEmail.mockResolvedValue({
         success: true,
         emailId: 'email-123',
@@ -66,7 +68,9 @@ describe('/api/email', () => {
     });
 
     it('should handle test email failure', async () => {
-      mockAuth.mockResolvedValue({ userId: 'user-123' });
+      (mockAuth as unknown as jest.Mock).mockResolvedValue({
+        userId: 'user-123',
+      } as any);
       mockUserEmailService.sendTestUserEmail.mockResolvedValue({
         success: false,
         error: 'Failed to send email',
@@ -94,7 +98,9 @@ describe('/api/email', () => {
     });
 
     it('should validate configuration successfully', async () => {
-      mockAuth.mockResolvedValue({ userId: 'user-123' });
+      (mockAuth as unknown as jest.Mock).mockResolvedValue({
+        userId: 'user-123',
+      } as any);
       mockUserEmailService.validateConfiguration.mockResolvedValue({
         valid: true,
       });
@@ -118,7 +124,9 @@ describe('/api/email', () => {
     });
 
     it('should handle validation failure', async () => {
-      mockAuth.mockResolvedValue({ userId: 'user-123' });
+      (mockAuth as unknown as jest.Mock).mockResolvedValue({
+        userId: 'user-123',
+      } as any);
       mockUserEmailService.validateConfiguration.mockResolvedValue({
         valid: false,
         error: 'API key not configured',
@@ -143,7 +151,9 @@ describe('/api/email', () => {
     });
 
     it('should return 401 for unauthenticated requests', async () => {
-      mockAuth.mockResolvedValue({ userId: null });
+      (mockAuth as unknown as jest.Mock).mockResolvedValue({
+        userId: null,
+      } as any);
 
       const request = new NextRequest('http://localhost:3000/api/email', {
         method: 'POST',
@@ -164,7 +174,9 @@ describe('/api/email', () => {
     });
 
     it('should return 400 for missing email in test action', async () => {
-      mockAuth.mockResolvedValue({ userId: 'user-123' });
+      (mockAuth as unknown as jest.Mock).mockResolvedValue({
+        userId: 'user-123',
+      } as any);
 
       const request = new NextRequest('http://localhost:3000/api/email', {
         method: 'POST',
@@ -184,7 +196,9 @@ describe('/api/email', () => {
     });
 
     it('should return 400 for invalid action', async () => {
-      mockAuth.mockResolvedValue({ userId: 'user-123' });
+      (mockAuth as unknown as jest.Mock).mockResolvedValue({
+        userId: 'user-123',
+      } as any);
 
       const request = new NextRequest('http://localhost:3000/api/email', {
         method: 'POST',
@@ -206,7 +220,9 @@ describe('/api/email', () => {
     });
 
     it('should handle service errors', async () => {
-      mockAuth.mockResolvedValue({ userId: 'user-123' });
+      (mockAuth as unknown as jest.Mock).mockResolvedValue({
+        userId: 'user-123',
+      } as any);
       mockUserEmailService.sendTestUserEmail.mockRejectedValue(
         new Error('Service error')
       );

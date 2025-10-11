@@ -47,10 +47,10 @@ export function FriendList({ userId }: FriendListProps) {
   if (isLoading) {
     return (
       <div className="space-y-4">
-        <h2 className="text-xl font-semibold text-gray-900">Friends</h2>
+        <h2 className="text-xl font-semibold text-primary">Friends</h2>
         <div className="text-center py-8">
-          <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-          <p className="text-sm text-gray-500 mt-2">Loading friends...</p>
+          <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+          <p className="text-sm text-tertiary mt-2">Loading friends...</p>
         </div>
       </div>
     );
@@ -59,9 +59,9 @@ export function FriendList({ userId }: FriendListProps) {
   if (error) {
     return (
       <div className="space-y-4">
-        <h2 className="text-xl font-semibold text-gray-900">Friends</h2>
+        <h2 className="text-xl font-semibold text-primary">Friends</h2>
         <div className="text-center py-8">
-          <p className="text-sm text-red-600">
+          <p className="text-sm text-destructive">
             {error instanceof Error ? error.message : 'Failed to load friends'}
           </p>
         </div>
@@ -72,8 +72,8 @@ export function FriendList({ userId }: FriendListProps) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-gray-900">Friends</h2>
-        <span className="text-sm text-gray-500">
+        <h2 className="text-xl font-semibold text-primary">Friends</h2>
+        <span className="text-sm text-tertiary">
           {friends?.length || 0} friend{(friends?.length || 0) !== 1 ? 's' : ''}
         </span>
       </div>
@@ -92,23 +92,23 @@ export function FriendList({ userId }: FriendListProps) {
                     />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate">
+                    <p className="text-sm font-medium text-primary truncate">
                       {friend.name}
                     </p>
-                    <p className="text-sm text-gray-500 truncate">
+                    <p className="text-sm text-tertiary truncate">
                       {friend.email}
                     </p>
                     {friend.username && (
-                      <p className="text-xs text-gray-400 truncate">
+                      <p className="text-xs text-text-light truncate">
                         @{friend.username}
                       </p>
                     )}
                     {friend.city && (
-                      <p className="text-xs text-gray-400 truncate">
+                      <p className="text-xs text-text-light truncate">
                         {friend.city}
                       </p>
                     )}
-                    <p className="text-xs text-gray-400">
+                    <p className="text-xs text-text-light">
                       Added {new Date(friend.addedAt).toLocaleDateString()}
                     </p>
                   </div>
@@ -119,7 +119,7 @@ export function FriendList({ userId }: FriendListProps) {
                     variant="outline"
                     onClick={() => handleRemoveClick(friend.friendshipId)}
                     disabled={removeFriendMutation.isPending}
-                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                    className="text-destructive hover:text-red-700 hover:bg-destructive/10"
                   >
                     Remove
                   </Button>
@@ -130,7 +130,7 @@ export function FriendList({ userId }: FriendListProps) {
         </div>
       ) : (
         <div className="text-center py-8">
-          <div className="text-gray-400 mb-2">
+          <div className="text-text-light mb-2">
             <svg
               className="mx-auto h-12 w-12"
               fill="none"
@@ -145,8 +145,8 @@ export function FriendList({ userId }: FriendListProps) {
               />
             </svg>
           </div>
-          <p className="text-sm text-gray-500">No friends yet</p>
-          <p className="text-xs text-gray-400 mt-1">
+          <p className="text-sm text-tertiary">No friends yet</p>
+          <p className="text-xs text-text-light mt-1">
             Search for friends to add them to your network
           </p>
         </div>
@@ -159,7 +159,7 @@ export function FriendList({ userId }: FriendListProps) {
         title="Remove Friend"
       >
         <div className="space-y-4">
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-secondary">
             Are you sure you want to remove this friend? This action cannot be
             undone.
           </p>

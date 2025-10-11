@@ -28,7 +28,6 @@ import {
   useDeclineGroupInvitation,
 } from '@/hooks/api/useGroups';
 import { toast } from 'react-hot-toast';
-import { MainLayout } from '@/components/layout/MainLayout';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 
 export default function GroupsPage() {
@@ -106,97 +105,93 @@ export default function GroupsPage() {
 
   if (error) {
     return (
-      <MainLayout>
-        <ProtectedRoute>
-          <div className="max-w-4xl mx-auto">
-            <div className="text-center">
-              <h1 className="text-2xl font-bold text-text mb-4">Groups</h1>
-              <div className="bg-red-50 border border-red-200 rounded-md p-4">
-                <p className="text-red-800">
-                  Failed to load groups. Please try again later.
-                </p>
-              </div>
+      <ProtectedRoute>
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-text mb-4">Groups</h1>
+            <div className="bg-destructive/10 border border-destructive rounded-md p-4">
+              <p className="text-red-800">
+                Failed to load groups. Please try again later.
+              </p>
             </div>
           </div>
-        </ProtectedRoute>
-      </MainLayout>
+        </div>
+      </ProtectedRoute>
     );
   }
 
   return (
-    <MainLayout>
-      <ProtectedRoute>
-        <div className="max-w-4xl mx-auto">
-          <div className="mb-8">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold text-text">Groups</h1>
-                <p className="mt-2 text-text-light">
-                  Collaborate with friends on restaurant decisions
-                </p>
-              </div>
-              <Button
-                variant="primary"
-                onClick={() => setShowCreateForm(true)}
-                disabled={isLoading}
-              >
-                Create Group
-              </Button>
+    <ProtectedRoute>
+      <div className="max-w-4xl mx-auto">
+        <div className="mb-8">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-text">Groups</h1>
+              <p className="mt-2 text-text-light">
+                Collaborate with friends on restaurant decisions
+              </p>
             </div>
+            <Button
+              variant="primary"
+              onClick={() => setShowCreateForm(true)}
+              disabled={isLoading}
+            >
+              Create Group
+            </Button>
           </div>
-
-          {/* Tab Navigation */}
-          <div className="mb-6">
-            <div className="border-b border-gray-200">
-              <nav className="-mb-px flex space-x-8">
-                <button
-                  onClick={() => setActiveTab('groups')}
-                  className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                    activeTab === 'groups'
-                      ? 'border-primary text-primary'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
-                >
-                  My Groups ({groups.length})
-                </button>
-                <button
-                  onClick={() => setActiveTab('invitations')}
-                  className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                    activeTab === 'invitations'
-                      ? 'border-primary text-primary'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
-                >
-                  Invitations ({groupInvitations.length})
-                </button>
-              </nav>
-            </div>
-          </div>
-
-          {/* Tab Content */}
-          {activeTab === 'groups' ? (
-            <GroupList
-              groups={groups}
-              isLoading={isLoading}
-              onCreateGroup={() => setShowCreateForm(true)}
-            />
-          ) : (
-            <GroupInvitations
-              invitations={groupInvitations as GroupInvitation[]}
-              onAcceptInvitation={handleAcceptInvitation}
-              onDeclineInvitation={handleDeclineInvitation}
-              isLoading={invitationsLoading}
-            />
-          )}
-
-          <CreateGroupForm
-            isOpen={showCreateForm}
-            onClose={() => setShowCreateForm(false)}
-            onSubmit={handleCreateGroup}
-            isLoading={createGroupMutation.isPending}
-          />
         </div>
-      </ProtectedRoute>
-    </MainLayout>
+
+        {/* Tab Navigation */}
+        <div className="mb-6">
+          <div className="border-b border-border">
+            <nav className="-mb-px flex space-x-8">
+              <button
+                onClick={() => setActiveTab('groups')}
+                className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'groups'
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-text-light hover:text-text hover:border-border'
+                }`}
+              >
+                My Groups ({groups.length})
+              </button>
+              <button
+                onClick={() => setActiveTab('invitations')}
+                className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'invitations'
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-text-light hover:text-text hover:border-border'
+                }`}
+              >
+                Invitations ({groupInvitations.length})
+              </button>
+            </nav>
+          </div>
+        </div>
+
+        {/* Tab Content */}
+        {activeTab === 'groups' ? (
+          <GroupList
+            groups={groups}
+            isLoading={isLoading}
+            onCreateGroup={() => setShowCreateForm(true)}
+          />
+        ) : (
+          <GroupInvitations
+            invitations={groupInvitations as GroupInvitation[]}
+            onAcceptInvitation={handleAcceptInvitation}
+            onDeclineInvitation={handleDeclineInvitation}
+            isLoading={invitationsLoading}
+          />
+        )}
+
+        <CreateGroupForm
+          isOpen={showCreateForm}
+          onClose={() => setShowCreateForm(false)}
+          onSubmit={handleCreateGroup}
+          isLoading={createGroupMutation.isPending}
+        />
+      </div>
+    </ProtectedRoute>
   );
 }

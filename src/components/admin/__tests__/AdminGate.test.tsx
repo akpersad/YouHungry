@@ -45,7 +45,7 @@ describe('AdminGate', () => {
       user: null,
       isLoaded: false,
       isSignedIn: false,
-    });
+    } as any);
 
     render(
       <AdminGate>
@@ -81,7 +81,7 @@ describe('AdminGate', () => {
     const mockUser = {
       id: 'user_unauthorized',
       emailAddresses: [{ emailAddress: 'test@example.com' }],
-    };
+    } as any;
 
     mockUseUser.mockReturnValue({
       user: mockUser,
@@ -117,7 +117,7 @@ describe('AdminGate', () => {
     const mockUser = {
       id: 'user_admin',
       emailAddresses: [{ emailAddress: 'admin@example.com' }],
-    };
+    } as any;
 
     mockUseUser.mockReturnValue({
       user: mockUser,
@@ -150,7 +150,7 @@ describe('AdminGate', () => {
     const mockUser = {
       id: 'user_test',
       emailAddresses: [{ emailAddress: 'test@example.com' }],
-    };
+    } as any;
 
     mockUseUser.mockReturnValue({
       user: mockUser,
@@ -178,7 +178,7 @@ describe('AdminGate', () => {
     const mockUser = {
       id: 'user_test',
       emailAddresses: [{ emailAddress: 'test@example.com' }],
-    };
+    } as any;
 
     mockUseUser.mockReturnValue({
       user: mockUser,
@@ -210,7 +210,7 @@ describe('AdminGate', () => {
     const mockUser = {
       id: 'user_unauthorized',
       emailAddresses: [{ emailAddress: 'test@example.com' }],
-    };
+    } as any;
 
     mockUseUser.mockReturnValue({
       user: mockUser,
@@ -247,7 +247,7 @@ describe('AdminGate', () => {
     };
 
     mockUseUser.mockReturnValue({
-      user: mockUser,
+      user: mockUser as any,
       isLoaded: true,
       isSignedIn: true,
     });

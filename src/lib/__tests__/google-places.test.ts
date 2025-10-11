@@ -3,10 +3,20 @@ import {
   getPlaceDetails,
   searchRestaurantsByLocation,
   getCurrentLocation,
+  searchRestaurantsByLocationConsistent,
+  searchRestaurantsByLocationAndQuery,
+  clearLocationCache,
+  getLocationCacheStats,
 } from '../google-places';
+import { connectToDatabase } from '../db';
 
 // Mock fetch
 global.fetch = jest.fn();
+
+// Mock database
+jest.mock('../db', () => ({
+  connectToDatabase: jest.fn(),
+}));
 
 // Mock navigator.geolocation
 const mockGeolocation = {
@@ -25,6 +35,10 @@ describe('Google Places API Integration', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (global.fetch as jest.Mock).mockClear();
+  });
+
+  afterEach(() => {
+    jest.clearAllTimers();
   });
 
   describe('searchRestaurantsWithGooglePlaces', () => {
@@ -414,6 +428,289 @@ describe('Google Places API Integration', () => {
       expect(result[0].hours).toHaveProperty('Monday');
       expect(result[0].hours).toHaveProperty('Tuesday');
       expect(result[0].hours).toHaveProperty('Wednesday');
+    });
+  });
+
+  describe('Location Caching', () => {
+    const mockDb = {
+      collection: jest.fn(),
+    };
+
+    const mockCollection = {
+      findOne: jest.fn(),
+      replaceOne: jest.fn(),
+      deleteMany: jest.fn(),
+      countDocuments: jest.fn(),
+      find: jest.fn(),
+    };
+
+    beforeEach(() => {
+      (connectToDatabase as jest.Mock).mockResolvedValue(mockDb);
+      mockDb.collection.mockReturnValue(mockCollection);
+      mockCollection.find.mockReturnValue({
+        sort: jest.fn().mockReturnValue({
+          limit: jest.fn().mockReturnValue({
+            toArray: jest.fn().mockResolvedValue([]),
+          }),
+        }),
+        toArray: jest.fn().mockResolvedValue([]),
+      });
+    });
+
+    describe('searchRestaurantsByLocationConsistent', () => {
+      it('should use cached results when available', async () => {
+        const cachedRestaurants = [
+          {
+            googlePlaceId: 'cached1',
+            name: 'Cached Restaurant',
+            address: '123 Cache St',
+            coordinates: { lat: 40.7128, lng: -74.006 },
+            cuisine: 'Italian',
+            rating: 4.5,
+          },
+        ];
+
+        mockCollection.findOne.mockResolvedValue({
+          locationKey: '40.7128,-74.0060',
+          restaurants: cachedRestaurants,
+          cachedAt: new Date(),
+          expiresAt: new Date(Date.now() + 48 * 60 * 60 * 1000),
+        });
+
+        const result = await searchRestaurantsByLocationConsistent(
+          40.7128,
+          -74.006,
+          5000
+        );
+
+        expect(mockCollection.findOne).toHaveBeenCalled();
+        expect(global.fetch).not.toHaveBeenCalled();
+        expect(result).toHaveLength(1);
+        expect(result[0]).toMatchObject({
+          name: 'Cached Restaurant',
+          distance: expect.any(Number),
+        });
+      });
+
+      it('should fetch from API and cache when no cached results', async () => {
+        mockCollection.findOne.mockResolvedValue(null);
+
+        const mockApiResponse = {
+          results: [
+            {
+              place_id: 'place1',
+              name: 'Fresh Restaurant',
+              formatted_address: '456 Fresh St',
+              geometry: { location: { lat: 40.7129, lng: -74.007 } },
+              types: ['restaurant'],
+              rating: 4.7,
+            },
+          ],
+          status: 'OK',
+        };
+
+        (global.fetch as jest.Mock).mockResolvedValue({
+          ok: true,
+          json: async () => mockApiResponse,
+        });
+
+        const result = await searchRestaurantsByLocationConsistent(
+          40.7128,
+          -74.006,
+          5000
+        );
+
+        expect(mockCollection.findOne).toHaveBeenCalled();
+        expect(global.fetch).toHaveBeenCalled();
+        expect(mockCollection.replaceOne).toHaveBeenCalled();
+        expect(result).toHaveLength(1);
+      });
+
+      it('should always fetch 25 miles regardless of requested radius', async () => {
+        mockCollection.findOne.mockResolvedValue(null);
+
+        (global.fetch as jest.Mock).mockResolvedValue({
+          ok: true,
+          json: async () => ({ results: [], status: 'OK' }),
+        });
+
+        await searchRestaurantsByLocationConsistent(40.7128, -74.006, 5000);
+
+        expect(global.fetch).toHaveBeenCalledWith(
+          expect.stringContaining('radius=40234')
+        );
+      });
+    });
+
+    describe('searchRestaurantsByLocationAndQuery', () => {
+      it('should cache results with query in key', async () => {
+        mockCollection.findOne.mockResolvedValue(null);
+
+        const mockApiResponse = {
+          results: [
+            {
+              place_id: 'place1',
+              name: 'Pizza Place',
+              formatted_address: '789 Pizza Ave',
+              geometry: { location: { lat: 40.713, lng: -74.008 } },
+              types: ['restaurant'],
+              rating: 4.8,
+            },
+          ],
+          status: 'OK',
+        };
+
+        (global.fetch as jest.Mock).mockResolvedValue({
+          ok: true,
+          json: async () => mockApiResponse,
+        });
+
+        await searchRestaurantsByLocationAndQuery(40.7128, -74.006, 'pizza');
+
+        expect(mockCollection.replaceOne).toHaveBeenCalledWith(
+          { locationKey: expect.stringContaining(':pizza') },
+          expect.objectContaining({
+            query: 'pizza',
+            restaurants: expect.any(Array),
+          }),
+          { upsert: true }
+        );
+      });
+
+      it('should use cached results for location+query combination', async () => {
+        const cachedRestaurants = [
+          {
+            googlePlaceId: 'pizza1',
+            name: 'Cached Pizza',
+            address: '123 Pizza St',
+            coordinates: { lat: 40.7128, lng: -74.006 },
+            cuisine: 'Italian',
+            rating: 4.5,
+          },
+        ];
+
+        mockCollection.findOne.mockResolvedValue({
+          locationKey: '40.7128,-74.0060:pizza',
+          query: 'pizza',
+          restaurants: cachedRestaurants,
+          cachedAt: new Date(),
+          expiresAt: new Date(Date.now() + 48 * 60 * 60 * 1000),
+        });
+
+        const result = await searchRestaurantsByLocationAndQuery(
+          40.7128,
+          -74.006,
+          'pizza'
+        );
+
+        expect(mockCollection.findOne).toHaveBeenCalledWith({
+          locationKey: expect.stringContaining(':pizza'),
+          expiresAt: { $gt: expect.any(Date) },
+        });
+        expect(global.fetch).not.toHaveBeenCalled();
+        expect(result).toHaveLength(1);
+      });
+    });
+
+    describe('clearLocationCache', () => {
+      it('should clear all caches when no coordinates provided', async () => {
+        mockCollection.deleteMany.mockResolvedValue({ deletedCount: 25 });
+
+        const count = await clearLocationCache();
+
+        expect(mockCollection.deleteMany).toHaveBeenCalledWith({});
+        expect(count).toBe(25);
+      });
+
+      it('should clear specific location cache when coordinates provided', async () => {
+        mockCollection.deleteMany.mockResolvedValue({ deletedCount: 5 });
+
+        const count = await clearLocationCache(40.7128, -74.006);
+
+        expect(mockCollection.deleteMany).toHaveBeenCalledWith({
+          locationKey: { $regex: expect.stringContaining('40.7128,-74.0060') },
+        });
+        expect(count).toBe(5);
+      });
+
+      it('should clear both location-only and location+query caches', async () => {
+        mockCollection.deleteMany.mockResolvedValue({ deletedCount: 10 });
+
+        await clearLocationCache(40.7128, -74.006);
+
+        const regex =
+          mockCollection.deleteMany.mock.calls[0][0].locationKey.$regex;
+        expect(regex).toContain('40.7128,-74.0060');
+      });
+    });
+
+    describe('getLocationCacheStats', () => {
+      it('should return cache statistics', async () => {
+        mockCollection.countDocuments
+          .mockResolvedValueOnce(15) // total
+          .mockResolvedValueOnce(10) // location-only
+          .mockResolvedValueOnce(5); // location+query
+
+        mockCollection.find.mockReturnValueOnce({
+          sort: jest.fn().mockReturnThis(),
+          limit: jest.fn().mockReturnThis(),
+          toArray: jest
+            .fn()
+            .mockResolvedValue([{ cachedAt: new Date('2024-01-01') }]),
+        });
+
+        mockCollection.find.mockReturnValueOnce({
+          sort: jest.fn().mockReturnThis(),
+          limit: jest.fn().mockReturnThis(),
+          toArray: jest
+            .fn()
+            .mockResolvedValue([{ cachedAt: new Date('2024-01-15') }]),
+        });
+
+        mockCollection.find.mockReturnValueOnce({
+          toArray: jest.fn().mockResolvedValue([
+            { restaurants: [1, 2, 3, 4, 5, 6, 7, 8, 9] }, // 9 restaurants
+            { restaurants: [1, 2, 3, 4, 5, 6] }, // 6 restaurants
+            {
+              restaurants: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
+            }, // 15 restaurants
+          ]),
+        });
+
+        const stats = await getLocationCacheStats();
+
+        expect(stats.totalEntries).toBe(15);
+        expect(stats.locationOnlyEntries).toBe(10);
+        expect(stats.locationQueryEntries).toBe(5);
+        // (9+6+15)/15 = 2 restaurants per entry on average
+        expect(stats.averageRestaurantsPerEntry).toBe(2);
+        expect(stats.estimatedSizeKB).toBe(60); // 30 restaurants * 2KB
+      });
+
+      it('should handle empty cache gracefully', async () => {
+        mockCollection.countDocuments.mockResolvedValue(0);
+        mockCollection.find.mockReturnValue({
+          sort: jest.fn().mockReturnThis(),
+          limit: jest.fn().mockReturnThis(),
+          toArray: jest.fn().mockResolvedValue([]),
+        });
+
+        const stats = await getLocationCacheStats();
+
+        expect(stats.totalEntries).toBe(0);
+        expect(stats.averageRestaurantsPerEntry).toBe(0);
+        expect(stats.estimatedSizeKB).toBe(0);
+      });
+
+      it('should handle errors gracefully', async () => {
+        mockCollection.countDocuments.mockRejectedValue(new Error('DB Error'));
+
+        const stats = await getLocationCacheStats();
+
+        expect(stats.totalEntries).toBe(0);
+        expect(stats.locationOnlyEntries).toBe(0);
+        expect(stats.locationQueryEntries).toBe(0);
+      });
     });
   });
 });

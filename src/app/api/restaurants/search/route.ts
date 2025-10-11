@@ -1,12 +1,11 @@
 import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
-import { searchRestaurantsByCoordinates } from '@/lib/restaurants';
-import { validateData, restaurantSearchSchema } from '@/lib/validation';
 import {
-  geocodeAddressOptimized,
-  smartRestaurantSearch,
-} from '@/lib/optimized-google-places';
-import { calculateDistance } from '@/lib/utils';
+  searchRestaurantsByCoordinates,
+  searchRestaurantsByAddress,
+} from '@/lib/restaurants';
+import { validateData, restaurantSearchSchema } from '@/lib/validation';
+import { geocodeAddressOptimized } from '@/lib/optimized-google-places';
 
 export async function GET(request: NextRequest) {
   try {
@@ -15,22 +14,11 @@ export async function GET(request: NextRequest) {
     const location = searchParams.get('location');
     const lat = searchParams.get('lat');
     const lng = searchParams.get('lng');
-    const radius = searchParams.get('radius');
-    const cuisine = searchParams.get('cuisine');
-    const minRating = searchParams.get('minRating');
-    const maxPrice = searchParams.get('maxPrice');
-    const minPrice = searchParams.get('minPrice');
-    const distance = searchParams.get('distance');
 
     // Handle coordinate-based search
     if (lat && lng) {
       const latitude = parseFloat(lat);
       const longitude = parseFloat(lng);
-      // Convert distance from miles to meters (1 mile = 1609.34 meters)
-      const distanceInMiles = distance ? parseInt(distance) : 10;
-      const searchRadius = radius
-        ? parseInt(radius)
-        : Math.round(distanceInMiles * 1609.34);
 
       if (isNaN(latitude) || isNaN(longitude)) {
         return NextResponse.json(
@@ -39,40 +27,22 @@ export async function GET(request: NextRequest) {
         );
       }
 
+      // ALWAYS fetch 25 miles of data - no radius parameter needed
+      // The hybrid search function handles caching internally
       const restaurants = await searchRestaurantsByCoordinates(
         latitude,
         longitude,
-        searchRadius
+        40234, // 25 miles in meters (hard max)
+        query || undefined // Pass query for hybrid search
       );
 
-      // Calculate distances and sort by distance, then by rating
-      const restaurantsWithDistance = restaurants.map((restaurant) => {
-        const distance = calculateDistance(
-          latitude,
-          longitude,
-          restaurant.coordinates.lat,
-          restaurant.coordinates.lng
-        );
-        return {
-          ...restaurant,
-          distance,
-        };
-      });
-
-      // Sort by distance first, then by rating (descending)
-      const sortedRestaurants = restaurantsWithDistance.sort((a, b) => {
-        // First sort by distance
-        if (Math.abs(a.distance - b.distance) > 0.1) {
-          return a.distance - b.distance;
-        }
-        // If distances are very close, sort by rating
-        return b.rating - a.rating;
-      });
-
+      // Return ALL restaurants with distances already calculated
+      // Client-side will handle filtering by radius, cuisine, rating, price, etc.
       return NextResponse.json({
         success: true,
-        restaurants: sortedRestaurants,
-        count: sortedRestaurants.length,
+        restaurants: restaurants,
+        count: restaurants.length,
+        searchCoordinates: { lat: latitude, lng: longitude },
       });
     }
 
@@ -102,13 +72,16 @@ export async function GET(request: NextRequest) {
       } else {
         // Use optimized geocoding with caching
         try {
+          logger.info('Geocoding address:', { location });
           const coordinates = await geocodeAddressOptimized(location);
           if (!coordinates) {
+            logger.error('No coordinates returned for address:', { location });
             return NextResponse.json(
               { error: 'Could not find coordinates for the provided address' },
               { status: 400 }
             );
           }
+          logger.info('Geocoded coordinates:', { coordinates });
           latitude = coordinates.lat;
           longitude = coordinates.lng;
         } catch (error) {
@@ -140,105 +113,86 @@ export async function GET(request: NextRequest) {
         }
       }
 
-      // Build filters object
-      const filters: {
-        cuisine?: string;
-        minRating?: number;
-        maxPrice?: number;
-        minPrice?: number;
-      } = {};
+      console.log('\n=== RESTAURANT SEARCH DEBUG ===');
+      console.log('Search Address:', location);
+      console.log('Query:', query || 'none');
+      console.log('Coordinates:', { lat: latitude, lng: longitude });
 
-      if (cuisine) filters.cuisine = cuisine;
-      if (minRating) filters.minRating = parseFloat(minRating);
-      if (maxPrice) filters.maxPrice = parseInt(maxPrice);
-      if (minPrice) filters.minPrice = parseInt(minPrice);
+      logger.info('Searching for restaurants:', {
+        hasQuery: !!query,
+        query,
+        latitude,
+        longitude,
+      });
 
-      // Search restaurants by coordinates with filters
-      // Convert distance from miles to meters (1 mile = 1609.34 meters)
-      const distanceInMiles = distance ? parseInt(distance) : 10;
-      const searchRadius = radius
-        ? parseInt(radius)
-        : Math.round(distanceInMiles * 1609.34);
+      // ALWAYS fetch 25 miles of data - hybrid search handles caching
+      let restaurants = await searchRestaurantsByCoordinates(
+        latitude,
+        longitude,
+        40234, // 25 miles in meters (hard max)
+        query || undefined // Pass query for hybrid search
+      );
 
-      let restaurants;
-      if (query) {
-        // Use smart search that combines multiple strategies for better results
-        restaurants = await smartRestaurantSearch(
-          query,
+      // HYBRID SEARCH: Also try address-specific search if we have a specific address
+      // This catches restaurants that exist but are filtered out by Google's ranking algorithm
+      if (location && !coordinateMatch) {
+        console.log('Running address-specific search fallback...');
+        const addressResults = await searchRestaurantsByAddress(
           location,
-          searchRadius
-        );
-      } else {
-        // If no query, use nearby search
-        restaurants = await searchRestaurantsByCoordinates(
           latitude,
-          longitude,
-          searchRadius
+          longitude
+        );
+
+        // Combine results and deduplicate by googlePlaceId
+        const allRestaurantsMap = new Map();
+
+        // Add coordinate search results first
+        restaurants.forEach((restaurant) => {
+          if (restaurant.googlePlaceId) {
+            allRestaurantsMap.set(restaurant.googlePlaceId, restaurant);
+          }
+        });
+
+        // Add address search results that aren't already included
+        addressResults.forEach((restaurant) => {
+          if (
+            restaurant.googlePlaceId &&
+            !allRestaurantsMap.has(restaurant.googlePlaceId)
+          ) {
+            allRestaurantsMap.set(restaurant.googlePlaceId, restaurant);
+            console.log(
+              `Added from address search: ${restaurant.name} at ${restaurant.address}`
+            );
+          }
+        });
+
+        restaurants = Array.from(allRestaurantsMap.values());
+        console.log(
+          `Combined results: ${restaurants.length} total (${restaurants.length - addressResults.length} from coordinate search, ${addressResults.length} from address search)`
         );
       }
 
-      // Apply filters to the results
-      const filteredRestaurants = restaurants.filter((restaurant) => {
-        if (
-          filters.cuisine &&
-          !restaurant.cuisine
-            .toLowerCase()
-            .includes(filters.cuisine.toLowerCase())
-        ) {
-          return false;
-        }
-        if (filters.minRating && restaurant.rating < filters.minRating) {
-          return false;
-        }
-        if (filters.minPrice || filters.maxPrice) {
-          const priceLevel = restaurant.priceRange
-            ? restaurant.priceRange === '$'
-              ? 1
-              : restaurant.priceRange === '$$'
-                ? 2
-                : restaurant.priceRange === '$$$'
-                  ? 3
-                  : 4
-            : 0;
-
-          if (filters.minPrice && priceLevel < filters.minPrice) {
-            return false;
-          }
-          if (filters.maxPrice && priceLevel > filters.maxPrice) {
-            return false;
-          }
-        }
-        return true;
-      });
-
-      // Calculate distances and sort by distance, then by rating
-      const restaurantsWithDistance = filteredRestaurants.map((restaurant) => {
-        const distance = calculateDistance(
-          latitude,
-          longitude,
-          restaurant.coordinates.lat,
-          restaurant.coordinates.lng
+      console.log('Total Results:', restaurants.length);
+      console.log('Returned Restaurants:');
+      restaurants.forEach((restaurant, index) => {
+        console.log(
+          `  ${index + 1}. ${restaurant.name} - ${restaurant.address} (${restaurant.distance?.toFixed(2)} miles)`
         );
-        return {
-          ...restaurant,
-          distance,
-        };
+      });
+      console.log('=== END SEARCH DEBUG ===\n');
+
+      logger.info('Restaurant search results:', {
+        count: restaurants.length,
+        hasQuery: !!query,
       });
 
-      // Sort by distance first, then by rating (descending)
-      const sortedRestaurants = restaurantsWithDistance.sort((a, b) => {
-        // First sort by distance
-        if (Math.abs(a.distance - b.distance) > 0.1) {
-          return a.distance - b.distance;
-        }
-        // If distances are very close, sort by rating
-        return b.rating - a.rating;
-      });
-
+      // Return ALL restaurants with distances already calculated
+      // Client-side will handle filtering by radius, cuisine, rating, price, etc.
       return NextResponse.json({
         success: true,
-        restaurants: sortedRestaurants,
-        count: sortedRestaurants.length,
+        restaurants: restaurants,
+        count: restaurants.length,
+        searchCoordinates: { lat: latitude, lng: longitude },
       });
     }
 

@@ -168,10 +168,10 @@ export default function PWAExplorerPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4">
+    <div className="min-h-screen bg-surface dark:bg-background p-4">
       <div className="max-w-4xl mx-auto">
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+        <div className="bg-white dark:bg-background rounded-lg shadow-lg p-6">
+          <h1 className="text-2xl font-bold text-text dark:text-white mb-4">
             PWA Feature Explorer for iOS
           </h1>
 
@@ -188,16 +188,16 @@ export default function PWAExplorerPage() {
             {Object.entries(results).map(([test, result]) => (
               <div
                 key={test}
-                className="border border-gray-200 dark:border-gray-700 rounded-lg p-4"
+                className="border border-border dark:border-border rounded-lg p-4"
               >
                 <div className="flex items-center justify-between mb-2">
-                  <h3 className="font-semibold text-gray-900 dark:text-white">
+                  <h3 className="font-semibold text-text dark:text-white">
                     {getStatusIcon(result)} {test}
                   </h3>
                 </div>
 
-                <div className="bg-gray-50 dark:bg-gray-900 rounded p-3 overflow-auto">
-                  <pre className="text-xs text-gray-700 dark:text-gray-300">
+                <div className="bg-surface dark:bg-background rounded p-3 overflow-auto">
+                  <pre className="text-xs text-text dark:text-text-light">
                     {JSON.stringify(result, null, 2)}
                   </pre>
                 </div>
@@ -206,13 +206,13 @@ export default function PWAExplorerPage() {
           </div>
 
           {testResults.length === 0 && (
-            <div className="text-center text-gray-500 py-8">
+            <div className="text-center text-text-light py-8">
               Running tests...
             </div>
           )}
         </div>
 
-        <div className="mt-6 bg-blue-50 dark:bg-blue-900 rounded-lg p-4">
+        <div className="mt-6 bg-primary/10 dark:bg-primary/20 rounded-lg p-4">
           <h2 className="font-semibold text-blue-900 dark:text-blue-100 mb-2">
             📱 iOS PWA Installation Instructions
           </h2>

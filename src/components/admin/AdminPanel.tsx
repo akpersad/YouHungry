@@ -50,24 +50,30 @@ export function AdminPanel() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen" style={{ background: 'var(--bg-primary)' }}>
+      <div
+        className="shadow-subtle border-b"
+        style={{
+          background: 'var(--bg-secondary)',
+          borderColor: 'var(--bg-quaternary)',
+        }}
+      >
+        <div className="max-w-7xl mx-auto lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Admin Panel</h1>
-              <p className="text-sm text-gray-600">
+              <h1 className="text-2xl font-bold text-text">Admin Panel</h1>
+              <p className="text-sm text-text-light">
                 System administration and monitoring
               </p>
             </div>
-            <div className="text-sm text-gray-500">
+            <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
               You Hungry? Admin Dashboard
             </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="max-w-7xl mx-auto lg:px-8 py-6">
         <AdminNav
           activeTab={activeTab}
           onTabChange={(tab) => setActiveTab(tab as AdminTab)}

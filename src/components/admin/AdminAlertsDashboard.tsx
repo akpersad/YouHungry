@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { logger } from '@/lib/logger';
+import { Modal } from '@/components/ui/Modal';
+import { Button } from '@/components/ui/Button';
 
 interface Alert {
   id: string;
@@ -53,6 +55,8 @@ export function AdminAlertsDashboard() {
   const [emailTestLoading, setEmailTestLoading] = useState(false);
   const [emailTestResult, setEmailTestResult] = useState<string | null>(null);
   const [testEmail, setTestEmail] = useState('akpersad@gmail.com');
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [alertToDelete, setAlertToDelete] = useState<string | null>(null);
 
   const fetchAlerts = async (filter: string = 'all') => {
     try {
@@ -168,13 +172,16 @@ export function AdminAlertsDashboard() {
     }
   };
 
-  const deleteAlert = async (alertId: string) => {
-    if (!confirm('Are you sure you want to delete this alert?')) {
-      return;
-    }
+  const deleteAlert = (alertId: string) => {
+    setAlertToDelete(alertId);
+    setShowDeleteConfirmation(true);
+  };
+
+  const confirmDeleteAlert = async () => {
+    if (!alertToDelete) return;
 
     try {
-      const response = await fetch(`/api/admin/alerts?id=${alertId}`, {
+      const response = await fetch(`/api/admin/alerts?id=${alertToDelete}`, {
         method: 'DELETE',
       });
 
@@ -183,12 +190,15 @@ export function AdminAlertsDashboard() {
       }
 
       // Update local state
-      setAlerts((prev) => prev.filter((alert) => alert.id !== alertId));
+      setAlerts((prev) => prev.filter((alert) => alert.id !== alertToDelete));
       setSelectedAlert(null);
 
-      logger.info('Admin: Alert deleted', { alertId });
+      logger.info('Admin: Alert deleted', { alertId: alertToDelete });
     } catch (err) {
-      logger.error('Admin: Error deleting alert', { error: err, alertId });
+      logger.error('Admin: Error deleting alert', {
+        error: err,
+        alertId: alertToDelete,
+      });
     }
   };
 
@@ -241,15 +251,15 @@ export function AdminAlertsDashboard() {
   const getSeverityColor = (severity: string) => {
     switch (severity) {
       case 'critical':
-        return 'text-red-600 bg-red-100';
+        return 'text-destructive bg-destructive/10';
       case 'high':
         return 'text-orange-600 bg-orange-100';
       case 'medium':
         return 'text-yellow-600 bg-yellow-100';
       case 'low':
-        return 'text-blue-600 bg-blue-100';
+        return 'text-primary bg-primary/10';
       default:
-        return 'text-gray-600 bg-gray-100';
+        return 'text-text-light bg-surface';
     }
   };
 
@@ -276,11 +286,11 @@ export function AdminAlertsDashboard() {
     return (
       <div className="p-6">
         <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded w-1/4 mb-6"></div>
+          <div className="h-8 bg-surface rounded w-1/4 mb-6"></div>
           <div className="space-y-4">
-            <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-            <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-            <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+            <div className="h-4 bg-surface rounded w-3/4"></div>
+            <div className="h-4 bg-surface rounded w-1/2"></div>
+            <div className="h-4 bg-surface rounded w-2/3"></div>
           </div>
         </div>
       </div>
@@ -290,11 +300,11 @@ export function AdminAlertsDashboard() {
   if (error) {
     return (
       <div className="p-6">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+        <div className="bg-destructive/10 border border-destructive rounded-lg p-4">
           <div className="flex">
             <div className="flex-shrink-0">
               <svg
-                className="h-5 w-5 text-red-400"
+                className="h-5 w-5 text-destructive"
                 viewBox="0 0 20 20"
                 fill="currentColor"
               >
@@ -313,7 +323,7 @@ export function AdminAlertsDashboard() {
               <div className="mt-4">
                 <button
                   onClick={() => fetchAlerts(activeFilter)}
-                  className="bg-red-100 px-3 py-2 rounded-md text-sm font-medium text-red-800 hover:bg-red-200"
+                  className="bg-destructive/10 px-3 py-2 rounded-md text-sm font-medium text-red-800 hover:bg-destructive/10"
                 >
                   Retry
                 </button>
@@ -329,15 +339,15 @@ export function AdminAlertsDashboard() {
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Admin Alerts</h2>
-          <p className="text-sm text-gray-600">
+          <h2 className="text-2xl font-bold text-text">Admin Alerts</h2>
+          <p className="text-sm text-text-light">
             Monitor system alerts and notifications
           </p>
         </div>
         <div className="flex space-x-3">
           <button
             onClick={validateEmailConfig}
-            className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+            className="px-4 py-2 border border-border rounded-md text-sm font-medium text-text hover:bg-surface"
           >
             Validate Email Config
           </button>
@@ -351,18 +361,18 @@ export function AdminAlertsDashboard() {
       </div>
 
       {/* Email Test Section */}
-      <div className="mb-6 bg-gray-50 rounded-lg p-4">
-        <h3 className="text-lg font-medium text-gray-900 mb-3">Email Test</h3>
+      <div className="mb-6 bg-surface rounded-lg p-4">
+        <h3 className="text-lg font-medium text-text mb-3">Email Test</h3>
         <div className="flex space-x-3 items-end">
           <div className="flex-1">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-text mb-1">
               Test Email Address
             </label>
             <input
               type="email"
               value={testEmail}
               onChange={(e) => setTestEmail(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-primary focus:border-primary"
               placeholder="akpersad@gmail.com"
             />
           </div>
@@ -379,8 +389,8 @@ export function AdminAlertsDashboard() {
             className={`mt-3 p-3 rounded-md text-sm ${
               emailTestResult.includes('successfully') ||
               emailTestResult.includes('valid')
-                ? 'bg-green-100 text-green-800'
-                : 'bg-red-100 text-red-800'
+                ? 'bg-success/10 text-green-800'
+                : 'bg-destructive/10 text-red-800'
             }`}
           >
             {emailTestResult}
@@ -391,45 +401,122 @@ export function AdminAlertsDashboard() {
       {/* Statistics */}
       {stats && (
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 mb-6">
-          <div className="bg-white rounded-lg shadow p-4">
-            <div className="text-2xl font-bold text-gray-900">
+          <div
+            className="rounded-lg shadow-subtle p-4"
+            style={{
+              background: 'var(--bg-secondary)',
+              borderColor: 'var(--bg-quaternary)',
+              border: '1px solid',
+            }}
+          >
+            <div
+              className="text-2xl font-bold"
+              style={{ color: 'var(--text-primary)' }}
+            >
               {stats.total}
             </div>
-            <div className="text-sm text-gray-600">Total</div>
+            <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+              Total
+            </div>
           </div>
-          <div className="bg-white rounded-lg shadow p-4">
-            <div className="text-2xl font-bold text-red-600">
+          <div
+            className="rounded-lg shadow-subtle p-4"
+            style={{
+              background: 'var(--bg-secondary)',
+              borderColor: 'var(--bg-quaternary)',
+              border: '1px solid',
+            }}
+          >
+            <div
+              className="text-2xl font-bold"
+              style={{ color: 'var(--color-error)' }}
+            >
               {stats.critical}
             </div>
-            <div className="text-sm text-gray-600">Critical</div>
+            <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+              Critical
+            </div>
           </div>
-          <div className="bg-white rounded-lg shadow p-4">
-            <div className="text-2xl font-bold text-orange-600">
+          <div
+            className="rounded-lg shadow-subtle p-4"
+            style={{
+              background: 'var(--bg-secondary)',
+              borderColor: 'var(--bg-quaternary)',
+              border: '1px solid',
+            }}
+          >
+            <div className="text-2xl font-bold" style={{ color: '#ea580c' }}>
               {stats.high}
             </div>
-            <div className="text-sm text-gray-600">High</div>
+            <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+              High
+            </div>
           </div>
-          <div className="bg-white rounded-lg shadow p-4">
-            <div className="text-2xl font-bold text-yellow-600">
+          <div
+            className="rounded-lg shadow-subtle p-4"
+            style={{
+              background: 'var(--bg-secondary)',
+              borderColor: 'var(--bg-quaternary)',
+              border: '1px solid',
+            }}
+          >
+            <div
+              className="text-2xl font-bold"
+              style={{ color: 'var(--color-warning)' }}
+            >
               {stats.medium}
             </div>
-            <div className="text-sm text-gray-600">Medium</div>
+            <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+              Medium
+            </div>
           </div>
-          <div className="bg-white rounded-lg shadow p-4">
-            <div className="text-2xl font-bold text-blue-600">{stats.low}</div>
-            <div className="text-sm text-gray-600">Low</div>
+          <div
+            className="rounded-lg shadow-subtle p-4"
+            style={{
+              background: 'var(--bg-secondary)',
+              borderColor: 'var(--bg-quaternary)',
+              border: '1px solid',
+            }}
+          >
+            <div
+              className="text-2xl font-bold"
+              style={{ color: 'var(--accent-primary)' }}
+            >
+              {stats.low}
+            </div>
+            <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+              Low
+            </div>
           </div>
-          <div className="bg-white rounded-lg shadow p-4">
-            <div className="text-2xl font-bold text-purple-600">
+          <div
+            className="rounded-lg shadow-subtle p-4"
+            style={{
+              background: 'var(--bg-secondary)',
+              borderColor: 'var(--bg-quaternary)',
+              border: '1px solid',
+            }}
+          >
+            <div className="text-2xl font-bold" style={{ color: '#9333ea' }}>
               {stats.unacknowledged}
             </div>
-            <div className="text-sm text-gray-600">Unacknowledged</div>
+            <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+              Unacknowledged
+            </div>
           </div>
-          <div className="bg-white rounded-lg shadow p-4">
-            <div className="text-2xl font-bold text-indigo-600">
+          <div
+            className="rounded-lg shadow-subtle p-4"
+            style={{
+              background: 'var(--bg-secondary)',
+              borderColor: 'var(--bg-quaternary)',
+              border: '1px solid',
+            }}
+          >
+            <div className="text-2xl font-bold" style={{ color: '#4f46e5' }}>
               {stats.unresolved}
             </div>
-            <div className="text-sm text-gray-600">Unresolved</div>
+            <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+              Unresolved
+            </div>
           </div>
         </div>
       )}
@@ -449,11 +536,27 @@ export function AdminAlertsDashboard() {
             <button
               key={filter.key}
               onClick={() => setActiveFilter(filter.key)}
-              className={`px-3 py-2 rounded-md text-sm font-medium ${
-                activeFilter === filter.key
-                  ? 'bg-blue-100 text-blue-700'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
+              className="px-3 py-2 rounded-md text-sm font-medium"
+              style={{
+                background:
+                  activeFilter === filter.key
+                    ? 'rgba(255, 51, 102, 0.1)'
+                    : 'var(--bg-tertiary)',
+                color:
+                  activeFilter === filter.key
+                    ? 'var(--accent-primary)'
+                    : 'var(--text-primary)',
+              }}
+              onMouseEnter={(e) => {
+                if (activeFilter !== filter.key) {
+                  e.currentTarget.style.background = 'var(--bg-quaternary)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (activeFilter !== filter.key) {
+                  e.currentTarget.style.background = 'var(--bg-tertiary)';
+                }
+              }}
             >
               {filter.label}
             </button>
@@ -462,12 +565,20 @@ export function AdminAlertsDashboard() {
       </div>
 
       {/* Alerts List */}
-      <div className="bg-white rounded-lg shadow">
+      <div
+        className="rounded-lg shadow-subtle"
+        style={{
+          background: 'var(--bg-secondary)',
+          borderColor: 'var(--bg-quaternary)',
+          border: '1px solid',
+        }}
+      >
         {!alerts || alerts.length === 0 ? (
           <div className="p-8 text-center">
-            <div className="text-gray-500">
+            <div>
               <svg
-                className="mx-auto h-12 w-12 text-gray-400"
+                className="mx-auto h-12 w-12"
+                style={{ color: 'var(--text-secondary)' }}
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -479,10 +590,16 @@ export function AdminAlertsDashboard() {
                   d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                 />
               </svg>
-              <h3 className="mt-2 text-sm font-medium text-gray-900">
+              <h3
+                className="mt-2 text-sm font-medium"
+                style={{ color: 'var(--text-primary)' }}
+              >
                 No alerts
               </h3>
-              <p className="mt-1 text-sm text-gray-500">
+              <p
+                className="mt-1 text-sm"
+                style={{ color: 'var(--text-secondary)' }}
+              >
                 {activeFilter === 'all'
                   ? 'No alerts have been generated yet.'
                   : `No ${activeFilter} alerts found.`}
@@ -490,14 +607,31 @@ export function AdminAlertsDashboard() {
             </div>
           </div>
         ) : (
-          <div className="divide-y divide-gray-200">
+          <div
+            className="divide-y"
+            style={{ borderColor: 'var(--bg-quaternary)' }}
+          >
             {alerts.map((alert) => (
               <div
                 key={alert.id}
-                className={`p-4 hover:bg-gray-50 cursor-pointer ${
-                  selectedAlert?.id === alert.id ? 'bg-blue-50' : ''
-                }`}
+                className="p-4 cursor-pointer"
+                style={{
+                  background:
+                    selectedAlert?.id === alert.id
+                      ? 'rgba(255, 51, 102, 0.1)'
+                      : 'transparent',
+                }}
                 onClick={() => setSelectedAlert(alert)}
+                onMouseEnter={(e) => {
+                  if (selectedAlert?.id !== alert.id) {
+                    e.currentTarget.style.background = 'var(--bg-tertiary)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (selectedAlert?.id !== alert.id) {
+                    e.currentTarget.style.background = 'transparent';
+                  }
+                }}
               >
                 <div className="flex items-start justify-between">
                   <div className="flex items-start space-x-3">
@@ -506,7 +640,10 @@ export function AdminAlertsDashboard() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center space-x-2">
-                        <h3 className="text-sm font-medium text-gray-900 truncate">
+                        <h3
+                          className="text-sm font-medium truncate"
+                          style={{ color: 'var(--text-primary)' }}
+                        >
                           {alert.title}
                         </h3>
                         <span
@@ -515,20 +652,38 @@ export function AdminAlertsDashboard() {
                           {alert.severity}
                         </span>
                         {!alert.acknowledged && (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                          <span
+                            className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                            style={{
+                              background: 'rgba(147, 51, 234, 0.1)',
+                              color: '#9333ea',
+                            }}
+                          >
                             Unacknowledged
                           </span>
                         )}
                         {!alert.resolved && (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                          <span
+                            className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                            style={{
+                              background: 'rgba(79, 70, 229, 0.1)',
+                              color: '#4f46e5',
+                            }}
+                          >
                             Unresolved
                           </span>
                         )}
                       </div>
-                      <p className="mt-1 text-sm text-gray-600 line-clamp-2">
+                      <p
+                        className="mt-1 text-sm line-clamp-2"
+                        style={{ color: 'var(--text-secondary)' }}
+                      >
                         {alert.message}
                       </p>
-                      <div className="mt-2 flex items-center space-x-4 text-xs text-gray-500">
+                      <div
+                        className="mt-2 flex items-center space-x-4 text-xs"
+                        style={{ color: 'var(--text-secondary)' }}
+                      >
                         <span>
                           {new Date(alert.timestamp).toLocaleString()}
                         </span>
@@ -548,7 +703,15 @@ export function AdminAlertsDashboard() {
                           e.stopPropagation();
                           acknowledgeAlert(alert.id);
                         }}
-                        className="px-3 py-1 text-xs font-medium text-blue-600 hover:text-blue-800"
+                        className="px-3 py-1 text-xs font-medium"
+                        style={{ color: 'var(--accent-primary)' }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.color =
+                            'var(--accent-primary-dark)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.color = 'var(--accent-primary)';
+                        }}
                       >
                         Acknowledge
                       </button>
@@ -559,7 +722,14 @@ export function AdminAlertsDashboard() {
                           e.stopPropagation();
                           resolveAlert(alert.id);
                         }}
-                        className="px-3 py-1 text-xs font-medium text-green-600 hover:text-green-800"
+                        className="px-3 py-1 text-xs font-medium"
+                        style={{ color: 'var(--color-success)' }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.color = '#15803d';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.color = 'var(--color-success)';
+                        }}
                       >
                         Resolve
                       </button>
@@ -569,7 +739,14 @@ export function AdminAlertsDashboard() {
                         e.stopPropagation();
                         deleteAlert(alert.id);
                       }}
-                      className="px-3 py-1 text-xs font-medium text-red-600 hover:text-red-800"
+                      className="px-3 py-1 text-xs font-medium"
+                      style={{ color: 'var(--color-error)' }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.color = '#dc2626';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.color = 'var(--color-error)';
+                      }}
                     >
                       Delete
                     </button>
@@ -583,15 +760,13 @@ export function AdminAlertsDashboard() {
 
       {/* Alert Details Modal */}
       {selectedAlert && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div className="fixed inset-0 bg-surface bg-opacity-50 overflow-y-auto h-full w-full z-50">
           <div className="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-medium text-gray-900">
-                Alert Details
-              </h3>
+              <h3 className="text-lg font-medium text-text">Alert Details</h3>
               <button
                 onClick={() => setSelectedAlert(null)}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-text-light hover:text-text-light"
               >
                 <svg
                   className="h-6 w-6"
@@ -615,7 +790,7 @@ export function AdminAlertsDashboard() {
                   <span className="text-2xl">
                     {getSeverityIcon(selectedAlert.severity)}
                   </span>
-                  <h4 className="text-lg font-medium text-gray-900">
+                  <h4 className="text-lg font-medium text-text">
                     {selectedAlert.title}
                   </h4>
                   <span
@@ -624,31 +799,31 @@ export function AdminAlertsDashboard() {
                     {selectedAlert.severity}
                   </span>
                 </div>
-                <p className="text-sm text-gray-600">{selectedAlert.message}</p>
+                <p className="text-sm text-text-light">
+                  {selectedAlert.message}
+                </p>
               </div>
 
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <span className="font-medium text-gray-700">Timestamp:</span>
-                  <p className="text-gray-600">
+                  <span className="font-medium text-text">Timestamp:</span>
+                  <p className="text-text-light">
                     {new Date(selectedAlert.timestamp).toLocaleString()}
                   </p>
                 </div>
                 <div>
-                  <span className="font-medium text-gray-700">Type:</span>
-                  <p className="text-gray-600">{selectedAlert.type}</p>
+                  <span className="font-medium text-text">Type:</span>
+                  <p className="text-text-light">{selectedAlert.type}</p>
                 </div>
                 <div>
-                  <span className="font-medium text-gray-700">
-                    Acknowledged:
-                  </span>
-                  <p className="text-gray-600">
+                  <span className="font-medium text-text">Acknowledged:</span>
+                  <p className="text-text-light">
                     {selectedAlert.acknowledged ? 'Yes' : 'No'}
                   </p>
                 </div>
                 <div>
-                  <span className="font-medium text-gray-700">Resolved:</span>
-                  <p className="text-gray-600">
+                  <span className="font-medium text-text">Resolved:</span>
+                  <p className="text-text-light">
                     {selectedAlert.resolved ? 'Yes' : 'No'}
                   </p>
                 </div>
@@ -657,10 +832,10 @@ export function AdminAlertsDashboard() {
               {selectedAlert.affectedServices &&
                 selectedAlert.affectedServices.length > 0 && (
                   <div>
-                    <span className="font-medium text-gray-700">
+                    <span className="font-medium text-text">
                       Affected Services:
                     </span>
-                    <ul className="mt-1 text-sm text-gray-600">
+                    <ul className="mt-1 text-sm text-text-light">
                       {selectedAlert.affectedServices.map((service, index) => (
                         <li key={index}>• {service}</li>
                       ))}
@@ -671,10 +846,10 @@ export function AdminAlertsDashboard() {
               {selectedAlert.metadata &&
                 Object.keys(selectedAlert.metadata).length > 0 && (
                   <div>
-                    <span className="font-medium text-gray-700">
+                    <span className="font-medium text-text">
                       Additional Information:
                     </span>
-                    <div className="mt-1 text-sm text-gray-600">
+                    <div className="mt-1 text-sm text-text-light">
                       {Object.entries(selectedAlert.metadata).map(
                         ([key, value]) => (
                           <div key={key}>
@@ -689,10 +864,10 @@ export function AdminAlertsDashboard() {
               {selectedAlert.recommendedActions &&
                 selectedAlert.recommendedActions.length > 0 && (
                   <div>
-                    <span className="font-medium text-gray-700">
+                    <span className="font-medium text-text">
                       Recommended Actions:
                     </span>
-                    <ul className="mt-1 text-sm text-gray-600">
+                    <ul className="mt-1 text-sm text-text-light">
                       {selectedAlert.recommendedActions.map((action, index) => (
                         <li key={index}>• {action}</li>
                       ))}
@@ -737,6 +912,44 @@ export function AdminAlertsDashboard() {
           </div>
         </div>
       )}
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        isOpen={showDeleteConfirmation}
+        onClose={() => {
+          setShowDeleteConfirmation(false);
+          setAlertToDelete(null);
+        }}
+        title="Delete Alert?"
+      >
+        <div className="space-y-4">
+          <p className="text-text">
+            Are you sure you want to delete this alert? This action cannot be
+            undone.
+          </p>
+          <div className="flex justify-end space-x-2">
+            <Button
+              onClick={() => {
+                setShowDeleteConfirmation(false);
+                setAlertToDelete(null);
+              }}
+              variant="outline"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                confirmDeleteAlert();
+                setShowDeleteConfirmation(false);
+                setAlertToDelete(null);
+              }}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Delete
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

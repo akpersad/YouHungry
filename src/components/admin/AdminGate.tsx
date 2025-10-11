@@ -92,10 +92,10 @@ export function AdminGate({ children }: AdminGateProps) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-red-600 mb-4">
+          <h1 className="text-2xl font-bold text-destructive mb-4">
             Access Denied
           </h1>
-          <p className="text-gray-600">
+          <p className="text-text-light">
             You don&apos;t have permission to access this area.
           </p>
           <button

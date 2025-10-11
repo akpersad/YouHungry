@@ -125,36 +125,36 @@ export default function PushTestPage() {
   };
 
   const getStatusColor = (value: boolean) => {
-    return value ? 'text-green-600' : 'text-red-600';
+    return value ? 'text-success' : 'text-destructive';
   };
 
   const getPermissionColor = (permission: NotificationPermission) => {
     switch (permission) {
       case 'granted':
-        return 'text-green-600';
+        return 'text-success';
       case 'denied':
-        return 'text-red-600';
+        return 'text-destructive';
       default:
         return 'text-yellow-600';
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4">
+    <div className="min-h-screen bg-surface dark:bg-background p-4">
       <div className="max-w-4xl mx-auto">
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+        <div className="bg-white dark:bg-background rounded-lg shadow-lg p-6">
+          <h1 className="text-2xl font-bold text-text dark:text-white mb-4">
             Push Notifications Test
           </h1>
 
           {/* Status Section */}
-          <div className="mb-6 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
-            <h2 className="font-semibold text-lg mb-3 text-gray-900 dark:text-white">
+          <div className="mb-6 p-4 bg-surface dark:bg-background rounded-lg">
+            <h2 className="font-semibold text-lg mb-3 text-text dark:text-white">
               Status
             </h2>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span className="text-gray-600 dark:text-gray-400">
+                <span className="text-text-light dark:text-text-light">
                   Supported:
                 </span>
                 <span
@@ -164,7 +164,7 @@ export default function PushTestPage() {
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600 dark:text-gray-400">
+                <span className="text-text-light dark:text-text-light">
                   Permission:
                 </span>
                 <span
@@ -174,7 +174,7 @@ export default function PushTestPage() {
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600 dark:text-gray-400">
+                <span className="text-text-light dark:text-text-light">
                   Subscribed:
                 </span>
                 <span
@@ -184,7 +184,7 @@ export default function PushTestPage() {
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600 dark:text-gray-400">
+                <span className="text-text-light dark:text-text-light">
                   iOS Device:
                 </span>
                 <span
@@ -195,7 +195,7 @@ export default function PushTestPage() {
               </div>
               {status.isIOS && (
                 <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">
+                  <span className="text-text-light dark:text-text-light">
                     iOS Push Support:
                   </span>
                   <span
@@ -223,7 +223,7 @@ export default function PushTestPage() {
 
           {/* iOS Requirements */}
           {status.isIOS && status.hasIOSSupport && (
-            <div className="mb-6 p-4 bg-green-50 dark:bg-green-900 rounded-lg border border-green-200 dark:border-green-700">
+            <div className="mb-6 p-4 bg-success/10 dark:bg-green-900 rounded-lg border border-green-200 dark:border-green-700">
               <h3 className="font-semibold text-green-900 dark:text-green-100 mb-2">
                 ✅ iOS Push Notifications Supported!
               </h3>
@@ -273,7 +273,7 @@ export default function PushTestPage() {
               </div>
 
               {!('serviceWorker' in navigator) && (
-                <div className="mt-2 p-2 bg-blue-100 dark:bg-blue-800 rounded text-blue-900 dark:text-blue-100">
+                <div className="mt-2 p-2 bg-primary/10 dark:bg-blue-800 rounded text-blue-900 dark:text-blue-100">
                   <div className="font-semibold text-xs">
                     ℹ️ Local Development Limitation
                   </div>
@@ -303,7 +303,7 @@ export default function PushTestPage() {
           )}
 
           {!status.supported && mounted && !('Notification' in window) && (
-            <div className="mb-4 p-4 bg-red-50 dark:bg-red-900 rounded-lg border border-red-200 dark:border-red-700">
+            <div className="mb-4 p-4 bg-destructive/10 dark:bg-destructive/20 rounded-lg border border-destructive dark:border-red-700">
               <h3 className="font-semibold text-red-900 dark:text-red-100 mb-2">
                 ❌ Notifications Not Available
               </h3>
@@ -334,7 +334,7 @@ export default function PushTestPage() {
               <button
                 onClick={handleSubscribe}
                 disabled={loading || !status.supported}
-                className="w-full bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed font-medium"
+                className="w-full bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 disabled:bg-surface disabled:cursor-not-allowed font-medium"
                 style={{
                   minHeight: '56px',
                   touchAction: 'manipulation',
@@ -350,14 +350,14 @@ export default function PushTestPage() {
                 <button
                   onClick={handleTestNotification}
                   disabled={loading}
-                  className="w-full bg-green-600 text-white px-4 py-3 rounded-lg hover:bg-green-700 disabled:bg-gray-400 font-medium"
+                  className="w-full bg-green-600 text-white px-4 py-3 rounded-lg hover:bg-green-700 disabled:bg-surface font-medium"
                 >
                   {loading ? 'Sending...' : '📬 Send Test Notification'}
                 </button>
                 <button
                   onClick={handleUnsubscribe}
                   disabled={loading}
-                  className="w-full bg-red-600 text-white px-4 py-3 rounded-lg hover:bg-red-700 disabled:bg-gray-400 font-medium"
+                  className="w-full bg-red-600 text-white px-4 py-3 rounded-lg hover:bg-red-700 disabled:bg-surface font-medium"
                 >
                   {loading ? 'Processing...' : '🔕 Unsubscribe'}
                 </button>
@@ -367,13 +367,13 @@ export default function PushTestPage() {
 
           {/* Messages */}
           {error && (
-            <div className="mb-4 p-4 bg-red-50 dark:bg-red-900 rounded-lg border border-red-200 dark:border-red-700">
+            <div className="mb-4 p-4 bg-destructive/10 dark:bg-destructive/20 rounded-lg border border-destructive dark:border-red-700">
               <p className="text-sm text-red-800 dark:text-red-200">{error}</p>
             </div>
           )}
 
           {success && (
-            <div className="mb-4 p-4 bg-green-50 dark:bg-green-900 rounded-lg border border-green-200 dark:border-green-700">
+            <div className="mb-4 p-4 bg-success/10 dark:bg-green-900 rounded-lg border border-green-200 dark:border-green-700">
               <p className="text-sm text-green-800 dark:text-green-200">
                 {success}
               </p>
@@ -381,11 +381,11 @@ export default function PushTestPage() {
           )}
 
           {/* Instructions */}
-          <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
-            <h3 className="font-semibold text-gray-900 dark:text-white mb-3">
+          <div className="mt-6 p-4 bg-surface dark:bg-background rounded-lg">
+            <h3 className="font-semibold text-text dark:text-white mb-3">
               How to Test:
             </h3>
-            <ol className="list-decimal list-inside space-y-2 text-sm text-gray-700 dark:text-gray-300">
+            <ol className="list-decimal list-inside space-y-2 text-sm text-text dark:text-text-light">
               <li>Click &quot;Subscribe to Notifications&quot;</li>
               <li>Allow notifications when prompted</li>
               <li>Click &quot;Send Test Notification&quot;</li>
@@ -394,7 +394,7 @@ export default function PushTestPage() {
           </div>
 
           {/* Platform Information */}
-          <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900 rounded-lg">
+          <div className="mt-6 p-4 bg-primary/10 dark:bg-primary/20 rounded-lg">
             <h3 className="font-semibold text-blue-900 dark:text-blue-100 mb-3">
               Platform Support:
             </h3>

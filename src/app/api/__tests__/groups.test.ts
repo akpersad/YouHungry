@@ -75,10 +75,9 @@ describe('Groups API Routes', () => {
   describe('GET /api/groups', () => {
     it('should return user groups', async () => {
       const { getGroupsByUserId } = groupsLib;
-      getGroupsByUserId.mockResolvedValue([mockGroup]);
+      (getGroupsByUserId as jest.Mock).mockResolvedValue([mockGroup]);
 
-      const request = new NextRequest('http://localhost:3000/api/groups');
-      const response = await GET(request);
+      const response = await GET();
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -94,10 +93,11 @@ describe('Groups API Routes', () => {
 
     it('should handle errors', async () => {
       const { getGroupsByUserId } = groupsLib;
-      getGroupsByUserId.mockRejectedValue(new Error('Database error'));
+      (getGroupsByUserId as jest.Mock).mockRejectedValue(
+        new Error('Database error')
+      );
 
-      const request = new NextRequest('http://localhost:3000/api/groups');
-      const response = await GET(request);
+      const response = await GET();
       const data = await response.json();
 
       expect(response.status).toBe(500);
@@ -110,11 +110,11 @@ describe('Groups API Routes', () => {
       const { createGroup } = groupsLib;
       const { validateData } = validationLib;
 
-      validateData.mockReturnValue({
+      (validateData as jest.Mock).mockReturnValue({
         success: true,
         data: { name: 'Test Group', description: 'A test group' },
       });
-      createGroup.mockResolvedValue(mockGroup);
+      (createGroup as jest.Mock).mockResolvedValue(mockGroup);
 
       const request = new NextRequest('http://localhost:3000/api/groups', {
         method: 'POST',
@@ -144,7 +144,7 @@ describe('Groups API Routes', () => {
     it('should handle validation errors', async () => {
       const { validateData } = validationLib;
 
-      validateData.mockReturnValue({
+      (validateData as jest.Mock).mockReturnValue({
         success: false,
         error: 'Name is required',
       });
@@ -169,11 +169,11 @@ describe('Groups API Routes', () => {
       const { createGroup } = groupsLib;
       const { validateData } = validationLib;
 
-      validateData.mockReturnValue({
+      (validateData as jest.Mock).mockReturnValue({
         success: true,
         data: { name: 'Test Group', description: 'A test group' },
       });
-      createGroup.mockRejectedValue(new Error('Database error'));
+      (createGroup as jest.Mock).mockRejectedValue(new Error('Database error'));
 
       const request = new NextRequest('http://localhost:3000/api/groups', {
         method: 'POST',
@@ -196,15 +196,15 @@ describe('Groups API Routes', () => {
     it('should return group with members', async () => {
       const { getGroupById, getGroupMembers } = groupsLib;
 
-      getGroupById.mockResolvedValue(mockGroup);
-      getGroupMembers.mockResolvedValue(mockMembers);
+      (getGroupById as jest.Mock).mockResolvedValue(mockGroup);
+      (getGroupMembers as jest.Mock).mockResolvedValue(mockMembers);
 
       const request = new NextRequest(
         'http://localhost:3000/api/groups/507f1f77bcf86cd799439012'
       );
       const response = await GET_BY_ID(request, {
         params: { id: '507f1f77bcf86cd799439012' },
-      });
+      } as any);
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -219,14 +219,14 @@ describe('Groups API Routes', () => {
     it('should return 404 if group not found', async () => {
       const { getGroupById } = groupsLib;
 
-      getGroupById.mockResolvedValue(null);
+      (getGroupById as jest.Mock).mockResolvedValue(null);
 
       const request = new NextRequest(
         'http://localhost:3000/api/groups/507f1f77bcf86cd799439012'
       );
       const response = await GET_BY_ID(request, {
         params: { id: '507f1f77bcf86cd799439012' },
-      });
+      } as any);
       const data = await response.json();
 
       expect(response.status).toBe(404);
@@ -239,11 +239,14 @@ describe('Groups API Routes', () => {
       const { updateGroup } = groupsLib;
       const { validateData } = validationLib;
 
-      validateData.mockReturnValue({
+      (validateData as jest.Mock).mockReturnValue({
         success: true,
         data: { name: 'Updated Group', description: 'Updated description' },
       });
-      updateGroup.mockResolvedValue({ ...mockGroup, name: 'Updated Group' });
+      (updateGroup as jest.Mock).mockResolvedValue({
+        ...mockGroup,
+        name: 'Updated Group',
+      });
 
       const request = new NextRequest(
         'http://localhost:3000/api/groups/507f1f77bcf86cd799439012',
@@ -259,7 +262,7 @@ describe('Groups API Routes', () => {
 
       const response = await PUT(request, {
         params: { id: '507f1f77bcf86cd799439012' },
-      });
+      } as any);
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -270,11 +273,11 @@ describe('Groups API Routes', () => {
       const { updateGroup } = groupsLib;
       const { validateData } = validationLib;
 
-      validateData.mockReturnValue({
+      (validateData as jest.Mock).mockReturnValue({
         success: true,
         data: { name: 'Updated Group' },
       });
-      updateGroup.mockRejectedValue(
+      (updateGroup as jest.Mock).mockRejectedValue(
         new Error('Group not found or user is not an admin')
       );
 
@@ -291,7 +294,7 @@ describe('Groups API Routes', () => {
 
       const response = await PUT(request, {
         params: { id: '507f1f77bcf86cd799439012' },
-      });
+      } as any);
       const data = await response.json();
 
       expect(response.status).toBe(403);
@@ -303,7 +306,7 @@ describe('Groups API Routes', () => {
     it('should delete group if user is admin', async () => {
       const { deleteGroup } = groupsLib;
 
-      deleteGroup.mockResolvedValue(true);
+      (deleteGroup as jest.Mock).mockResolvedValue(true);
 
       const request = new NextRequest(
         'http://localhost:3000/api/groups/507f1f77bcf86cd799439012',
@@ -314,7 +317,7 @@ describe('Groups API Routes', () => {
 
       const response = await DELETE(request, {
         params: { id: '507f1f77bcf86cd799439012' },
-      });
+      } as any);
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -324,7 +327,7 @@ describe('Groups API Routes', () => {
     it('should return 403 if user is not admin', async () => {
       const { deleteGroup } = groupsLib;
 
-      deleteGroup.mockRejectedValue(
+      (deleteGroup as jest.Mock).mockRejectedValue(
         new Error('Group not found or user is not an admin')
       );
 
@@ -337,7 +340,7 @@ describe('Groups API Routes', () => {
 
       const response = await DELETE(request, {
         params: { id: '507f1f77bcf86cd799439012' },
-      });
+      } as any);
       const data = await response.json();
 
       expect(response.status).toBe(403);
@@ -359,8 +362,8 @@ describe('Groups API Routes', () => {
           }),
         }),
       };
-      connectToDatabase.mockResolvedValue(mockDb);
-      inviteUserToGroup.mockResolvedValue(true);
+      (connectToDatabase as jest.Mock).mockResolvedValue(mockDb);
+      (inviteUserToGroup as jest.Mock).mockResolvedValue(true);
 
       const request = new NextRequest(
         'http://localhost:3000/api/groups/507f1f77bcf86cd799439012/invite',
@@ -375,7 +378,7 @@ describe('Groups API Routes', () => {
 
       const response = await INVITE(request, {
         params: { id: '507f1f77bcf86cd799439012' },
-      });
+      } as any);
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -391,7 +394,7 @@ describe('Groups API Routes', () => {
           findOne: jest.fn().mockResolvedValue(null),
         }),
       };
-      connectToDatabase.mockResolvedValue(mockDb);
+      (connectToDatabase as jest.Mock).mockResolvedValue(mockDb);
 
       const request = new NextRequest(
         'http://localhost:3000/api/groups/507f1f77bcf86cd799439012/invite',
@@ -406,7 +409,7 @@ describe('Groups API Routes', () => {
 
       const response = await INVITE(request, {
         params: { id: '507f1f77bcf86cd799439012' },
-      });
+      } as any);
       const data = await response.json();
 
       expect(response.status).toBe(404);
@@ -418,7 +421,7 @@ describe('Groups API Routes', () => {
     it('should allow user to leave group', async () => {
       const { leaveGroup } = groupsLib;
 
-      leaveGroup.mockResolvedValue(true);
+      (leaveGroup as jest.Mock).mockResolvedValue(true);
 
       const request = new NextRequest(
         'http://localhost:3000/api/groups/507f1f77bcf86cd799439012/leave',
@@ -429,7 +432,7 @@ describe('Groups API Routes', () => {
 
       const response = await LEAVE(request, {
         params: { id: '507f1f77bcf86cd799439012' },
-      });
+      } as any);
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -440,7 +443,7 @@ describe('Groups API Routes', () => {
     it('should handle last admin error', async () => {
       const { leaveGroup } = groupsLib;
 
-      leaveGroup.mockRejectedValue(
+      (leaveGroup as jest.Mock).mockRejectedValue(
         new Error('Cannot leave group as the last admin')
       );
 
@@ -453,7 +456,7 @@ describe('Groups API Routes', () => {
 
       const response = await LEAVE(request, {
         params: { id: '507f1f77bcf86cd799439012' },
-      });
+      } as any);
       const data = await response.json();
 
       expect(response.status).toBe(400);

@@ -34,7 +34,7 @@ describe('/api/admin/analytics/usage', () => {
       clerkId: 'clerk123',
       email: 'admin@example.com',
       name: 'Admin User',
-    } as { _id: string; clerkId: string; email: string; name: string });
+    } as any);
   });
 
   it('returns usage analytics for 7-day period', async () => {

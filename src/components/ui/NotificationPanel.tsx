@@ -117,9 +117,9 @@ export function NotificationPanel({
       {/* Panel */}
       <div className="absolute right-0 top-0 h-full w-full max-w-md bg-white shadow-xl">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-gray-200 p-4">
+        <div className="flex items-center justify-between border-b border-border p-4">
           <div className="flex items-center gap-2">
-            <Bell className="h-5 w-5 text-gray-600" />
+            <Bell className="h-5 w-5 text-text-light" />
             <h2 className="text-lg font-semibold">Notifications</h2>
             {stats.unreadCount > 0 && (
               <span className="rounded-full bg-red-500 px-2 py-1 text-xs text-white">
@@ -133,7 +133,7 @@ export function NotificationPanel({
               <button
                 onClick={markAllAsRead}
                 disabled={isMarkingAllAsRead}
-                className="rounded-full p-1.5 text-gray-500 hover:bg-gray-100 hover:text-gray-700 disabled:opacity-50"
+                className="rounded-full p-1.5 text-text-light hover:bg-surface hover:text-text disabled:opacity-50"
                 title="Mark all as read"
               >
                 <CheckCheck className="h-4 w-4" />
@@ -142,7 +142,7 @@ export function NotificationPanel({
 
             <button
               onClick={onClose}
-              className="rounded-full p-1.5 text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+              className="rounded-full p-1.5 text-text-light hover:bg-surface hover:text-text"
             >
               <X className="h-4 w-4" />
             </button>
@@ -150,15 +150,15 @@ export function NotificationPanel({
         </div>
 
         {/* Tabs */}
-        <div className="border-b border-gray-200">
+        <div className="border-b border-border">
           <div className="flex">
             <button
               onClick={() => setSelectedTab('all')}
               className={cn(
                 'flex-1 px-4 py-2 text-sm font-medium transition-colors',
                 selectedTab === 'all'
-                  ? 'border-b-2 border-red-500 text-red-600'
-                  : 'text-gray-500 hover:text-gray-700'
+                  ? 'border-b-2 border-destructive text-destructive'
+                  : 'text-text-light hover:text-text'
               )}
             >
               All ({stats.total})
@@ -168,8 +168,8 @@ export function NotificationPanel({
               className={cn(
                 'flex-1 px-4 py-2 text-sm font-medium transition-colors',
                 selectedTab === 'unread'
-                  ? 'border-b-2 border-red-500 text-red-600'
-                  : 'text-gray-500 hover:text-gray-700'
+                  ? 'border-b-2 border-destructive text-destructive'
+                  : 'text-text-light hover:text-text'
               )}
             >
               Unread ({stats.unreadCount})
@@ -181,12 +181,12 @@ export function NotificationPanel({
         <div className="flex-1 overflow-y-auto">
           {isLoading ? (
             <div className="flex items-center justify-center p-8">
-              <div className="h-6 w-6 animate-spin rounded-full border-2 border-gray-300 border-t-red-500" />
+              <div className="h-6 w-6 animate-spin rounded-full border-2 border-border border-t-red-500" />
             </div>
           ) : filteredNotifications.length === 0 ? (
             <div className="flex flex-col items-center justify-center p-8 text-center">
-              <BellOff className="h-12 w-12 text-gray-300" />
-              <p className="mt-2 text-gray-500">
+              <BellOff className="h-12 w-12 text-text-light" />
+              <p className="mt-2 text-text-light">
                 {selectedTab === 'unread'
                   ? 'No unread notifications'
                   : 'No notifications yet'}
@@ -199,8 +199,8 @@ export function NotificationPanel({
                   key={notification._id.toString()}
                   onClick={() => handleNotificationClick(notification)}
                   className={cn(
-                    'w-full p-4 text-left transition-colors hover:bg-gray-50',
-                    !notification.read && 'bg-blue-50'
+                    'w-full p-4 text-left transition-colors hover:bg-surface',
+                    !notification.read && 'bg-primary/10'
                   )}
                 >
                   <div className="flex items-start gap-3">
@@ -213,9 +213,7 @@ export function NotificationPanel({
                         <h3
                           className={cn(
                             'text-sm font-medium',
-                            !notification.read
-                              ? 'text-gray-900'
-                              : 'text-gray-700'
+                            !notification.read ? 'text-text' : 'text-text'
                           )}
                         >
                           {notification.title}
@@ -226,17 +224,17 @@ export function NotificationPanel({
                         )}
                       </div>
 
-                      <p className="mt-1 text-sm text-gray-600 line-clamp-2">
+                      <p className="mt-1 text-sm text-text-light line-clamp-2">
                         {notification.message}
                       </p>
 
-                      <p className="mt-2 text-xs text-gray-400">
+                      <p className="mt-2 text-xs text-text-light">
                         {getNotificationTimeAgo(notification.createdAt)}
                       </p>
                     </div>
 
                     {notification.read && (
-                      <Check className="h-4 w-4 text-gray-400" />
+                      <Check className="h-4 w-4 text-text-light" />
                     )}
                   </div>
                 </button>

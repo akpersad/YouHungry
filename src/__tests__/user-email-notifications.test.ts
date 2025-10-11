@@ -305,7 +305,7 @@ describe('UserEmailNotificationService', () => {
         await userEmailNotificationService.validateConfiguration();
       } catch (error) {
         expect(error).toBeInstanceOf(Error);
-        expect(error.message).toBe('Network error');
+        expect((error as Error).message).toBe('Network error');
       }
     });
   });

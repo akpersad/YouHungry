@@ -39,7 +39,8 @@ global.PerformanceObserver = jest.fn().mockImplementation((callback) => ({
   observe: jest.fn(),
   disconnect: jest.fn(),
   takeRecords: jest.fn(() => []),
-}));
+})) as any;
+(global.PerformanceObserver as any).supportedEntryTypes = [];
 
 // Mock fetch
 global.fetch = jest.fn().mockResolvedValue({
@@ -125,6 +126,7 @@ describe('Performance Tests', () => {
 
   describe('Memory Usage Tests', () => {
     it('should not leak memory during component lifecycle', () => {
+      // @ts-expect-error - memory is Chrome-specific property
       const initialMemory = performance.memory?.usedJSHeapSize || 0;
 
       const { unmount } = render(
@@ -140,6 +142,7 @@ describe('Performance Tests', () => {
         global.gc();
       }
 
+      // @ts-expect-error - memory is Chrome-specific property
       const finalMemory = performance.memory?.usedJSHeapSize || 0;
       const memoryIncrease = finalMemory - initialMemory;
 
@@ -175,7 +178,8 @@ describe('Performance Tests', () => {
       const originalPerformanceObserver = global.PerformanceObserver;
       global.PerformanceObserver = jest.fn().mockImplementation(() => {
         throw new Error('PerformanceObserver not supported');
-      });
+      }) as any;
+      (global.PerformanceObserver as any).supportedEntryTypes = [];
 
       expect(() => {
         render(
@@ -330,7 +334,7 @@ describe('Performance Tests', () => {
       } as Response);
 
       const TestComponent = () => {
-        const [data, setData] = useState(null);
+        const [data, setData] = useState<any>(null);
 
         useEffect(() => {
           fetch('/api/test')

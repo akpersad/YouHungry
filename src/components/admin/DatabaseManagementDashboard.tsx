@@ -93,9 +93,9 @@ export function DatabaseManagementDashboard() {
   const getConnectionStatusIcon = (status: string) => {
     switch (status) {
       case 'connected':
-        return <CheckCircle className="h-5 w-5 text-green-500" />;
+        return <CheckCircle className="h-5 w-5 text-success" />;
       case 'disconnected':
-        return <XCircle className="h-5 w-5 text-red-500" />;
+        return <XCircle className="h-5 w-5 text-destructive" />;
       default:
         return <AlertTriangle className="h-5 w-5 text-yellow-500" />;
     }
@@ -106,9 +106,9 @@ export function DatabaseManagementDashboard() {
       case 'warning':
         return <AlertTriangle className="h-4 w-4 text-yellow-500" />;
       case 'error':
-        return <XCircle className="h-4 w-4 text-red-500" />;
+        return <XCircle className="h-4 w-4 text-destructive" />;
       default:
-        return <CheckCircle className="h-4 w-4 text-blue-500" />;
+        return <CheckCircle className="h-4 w-4 text-primary" />;
     }
   };
 
@@ -128,10 +128,13 @@ export function DatabaseManagementDashboard() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">
+          <h2
+            className="text-2xl font-bold"
+            style={{ color: 'var(--text-primary)' }}
+          >
             Database Management
           </h2>
-          <p className="text-gray-600">
+          <p style={{ color: 'var(--text-secondary)' }}>
             Monitor database performance and health
           </p>
         </div>
@@ -149,7 +152,7 @@ export function DatabaseManagementDashboard() {
               {getConnectionStatusIcon(stats.connection.status)}
               <div className="ml-3">
                 <h3 className="text-lg font-semibold">Database Connection</h3>
-                <p className="text-gray-600">
+                <p className="text-text-light">
                   Status:{' '}
                   <span className="capitalize font-medium">
                     {stats.connection.status}
@@ -158,7 +161,7 @@ export function DatabaseManagementDashboard() {
               </div>
             </div>
             <div className="text-right">
-              <p className="text-sm text-gray-600">Response Time</p>
+              <p className="text-sm text-text-light">Response Time</p>
               <p className="text-lg font-semibold">
                 {stats.connection.latency}ms
               </p>
@@ -172,12 +175,14 @@ export function DatabaseManagementDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <Card className="p-6">
             <div className="flex items-center">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <Database className="h-6 w-6 text-blue-600" />
+              <div className="p-2 bg-primary/10 rounded-lg">
+                <Database className="h-6 w-6 text-primary" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Collections</p>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-sm font-medium text-text-light">
+                  Collections
+                </p>
+                <p className="text-2xl font-bold text-text">
                   {stats.overview.totalCollections}
                 </p>
               </div>
@@ -186,14 +191,14 @@ export function DatabaseManagementDashboard() {
 
           <Card className="p-6">
             <div className="flex items-center">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <BarChart3 className="h-6 w-6 text-green-600" />
+              <div className="p-2 bg-success/10 rounded-lg">
+                <BarChart3 className="h-6 w-6 text-success" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">
+                <p className="text-sm font-medium text-text-light">
                   Total Documents
                 </p>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-2xl font-bold text-text">
                   {stats.overview.totalDocuments.toLocaleString()}
                 </p>
               </div>
@@ -206,10 +211,10 @@ export function DatabaseManagementDashboard() {
                 <HardDrive className="h-6 w-6 text-purple-600" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">
+                <p className="text-sm font-medium text-text-light">
                   Storage Size
                 </p>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-2xl font-bold text-text">
                   {formatBytes(stats.overview.totalStorageSize)}
                 </p>
               </div>
@@ -222,8 +227,10 @@ export function DatabaseManagementDashboard() {
                 <Activity className="h-6 w-6 text-yellow-600" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Index Size</p>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-sm font-medium text-text-light">
+                  Index Size
+                </p>
+                <p className="text-2xl font-bold text-text">
                   {formatBytes(stats.overview.totalIndexSize)}
                 </p>
               </div>
@@ -237,54 +244,117 @@ export function DatabaseManagementDashboard() {
         <Card className="p-6">
           <h3 className="text-lg font-semibold mb-4">Collection Statistics</h3>
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+            <table
+              className="min-w-full divide-y"
+              style={{ borderColor: 'var(--bg-quaternary)' }}
+            >
+              <thead style={{ background: 'var(--bg-tertiary)' }}>
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th
+                    className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
+                    style={{ color: 'var(--text-secondary)' }}
+                  >
                     Collection
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th
+                    className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
+                    style={{ color: 'var(--text-secondary)' }}
+                  >
                     Documents
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th
+                    className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
+                    style={{ color: 'var(--text-secondary)' }}
+                  >
                     Storage Size
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th
+                    className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
+                    style={{ color: 'var(--text-secondary)' }}
+                  >
                     Index Size
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th
+                    className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
+                    style={{ color: 'var(--text-secondary)' }}
+                  >
                     Indexes
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th
+                    className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
+                    style={{ color: 'var(--text-secondary)' }}
+                  >
                     Status
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody
+                className="divide-y"
+                style={{
+                  background: 'var(--bg-secondary)',
+                  borderColor: 'var(--bg-quaternary)',
+                }}
+              >
                 {stats.collections.map((collection) => (
-                  <tr key={collection.name} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                  <tr
+                    key={collection.name}
+                    style={{ background: 'var(--bg-secondary)' }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = 'var(--bg-tertiary)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = 'var(--bg-secondary)';
+                    }}
+                  >
+                    <td
+                      className="px-6 py-4 whitespace-nowrap text-sm font-medium"
+                      style={{ color: 'var(--text-primary)' }}
+                    >
                       {collection.name}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td
+                      className="px-6 py-4 whitespace-nowrap text-sm"
+                      style={{ color: 'var(--text-primary)' }}
+                    >
                       {collection.count.toLocaleString()}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td
+                      className="px-6 py-4 whitespace-nowrap text-sm"
+                      style={{ color: 'var(--text-primary)' }}
+                    >
                       {formatBytes(collection.storageSize)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td
+                      className="px-6 py-4 whitespace-nowrap text-sm"
+                      style={{ color: 'var(--text-primary)' }}
+                    >
                       {formatBytes(collection.indexSize)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td
+                      className="px-6 py-4 whitespace-nowrap text-sm"
+                      style={{ color: 'var(--text-primary)' }}
+                    >
                       {collection.indexes}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       {collection.error ? (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                        <span
+                          className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                          style={{
+                            background: 'rgba(239, 68, 68, 0.1)',
+                            color: 'var(--color-error)',
+                          }}
+                        >
                           Error
                         </span>
                       ) : (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        <span
+                          className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                          style={{
+                            background: 'rgba(34, 197, 94, 0.1)',
+                            color: 'var(--color-success)',
+                          }}
+                        >
                           Healthy
                         </span>
                       )}
@@ -304,7 +374,7 @@ export function DatabaseManagementDashboard() {
             <h3 className="text-lg font-semibold mb-4">Performance Metrics</h3>
             <div className="space-y-4">
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">
+                <span className="text-sm text-text-light">
                   Average Response Time
                 </span>
                 <span className="font-semibold">
@@ -312,13 +382,13 @@ export function DatabaseManagementDashboard() {
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Slow Queries</span>
+                <span className="text-sm text-text-light">Slow Queries</span>
                 <span className="font-semibold">
                   {stats.performance.slowQueries}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Total Queries</span>
+                <span className="text-sm text-text-light">Total Queries</span>
                 <span className="font-semibold">
                   {stats.performance.totalQueries.toLocaleString()}
                 </span>
@@ -332,25 +402,25 @@ export function DatabaseManagementDashboard() {
             </h3>
             <div className="space-y-4">
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">New Users</span>
+                <span className="text-sm text-text-light">New Users</span>
                 <span className="font-semibold">
                   {stats.performance.recentActivity.newUsers}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">New Collections</span>
+                <span className="text-sm text-text-light">New Collections</span>
                 <span className="font-semibold">
                   {stats.performance.recentActivity.newCollections}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">New Groups</span>
+                <span className="text-sm text-text-light">New Groups</span>
                 <span className="font-semibold">
                   {stats.performance.recentActivity.newGroups}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">New Decisions</span>
+                <span className="text-sm text-text-light">New Decisions</span>
                 <span className="font-semibold">
                   {stats.performance.recentActivity.newDecisions}
                 </span>
@@ -368,7 +438,7 @@ export function DatabaseManagementDashboard() {
             {stats.recommendations.map((recommendation, index) => (
               <div
                 key={index}
-                className="flex items-start p-3 bg-gray-50 rounded-lg"
+                className="flex items-start p-3 bg-surface rounded-lg"
               >
                 <div className="flex-shrink-0 mt-0.5">
                   {getRecommendationIcon(recommendation.type)}

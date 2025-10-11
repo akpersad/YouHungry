@@ -114,7 +114,7 @@ const mockGroups = [
     createdAt: new Date('2025-01-14'),
     updatedAt: new Date('2025-01-14'),
   },
-];
+] as any;
 
 describe('GroupsPage', () => {
   beforeEach(() => {
@@ -139,34 +139,34 @@ describe('GroupsPage', () => {
       userId: 'user1',
       isSignedIn: true,
       isLoaded: true,
-    });
+    } as any);
 
     mockUseGroups.mockReturnValue({
       data: mockGroups,
       isLoading: false,
       error: null,
-    });
+    } as any);
 
     mockUseCreateGroup.mockReturnValue({
       mutateAsync: jest.fn(),
       isPending: false,
-    });
+    } as any);
 
     mockUseGroupInvitations.mockReturnValue({
       data: [],
       isLoading: false,
       error: null,
-    });
+    } as any);
 
     mockUseAcceptGroupInvitation.mockReturnValue({
       mutateAsync: jest.fn(),
       isPending: false,
-    });
+    } as any);
 
     mockUseDeclineGroupInvitation.mockReturnValue({
       mutateAsync: jest.fn(),
       isPending: false,
-    });
+    } as any);
   });
 
   it('renders groups page with correct title', () => {
@@ -231,7 +231,7 @@ describe('GroupsPage', () => {
     mockUseCreateGroup.mockReturnValue({
       mutateAsync: mockMutateAsync,
       isPending: false,
-    });
+    } as any);
 
     // Mock fetch for friend invitations
     global.fetch = jest.fn().mockResolvedValue({
@@ -274,7 +274,7 @@ describe('GroupsPage', () => {
       data: undefined,
       isLoading: true,
       error: null,
-    });
+    } as any);
 
     render(<GroupsPage />, { wrapper: TestWrapper });
 
@@ -288,7 +288,7 @@ describe('GroupsPage', () => {
       data: undefined,
       isLoading: false,
       error: new Error('Failed to load groups'),
-    });
+    } as any);
 
     render(<GroupsPage />, { wrapper: TestWrapper });
 
@@ -346,7 +346,7 @@ describe('GroupsPage', () => {
       data: [mockGroups[0]], // Only one group now
       isLoading: false,
       error: null,
-    });
+    } as any);
 
     rerender(<GroupsPage />);
 
@@ -358,7 +358,7 @@ describe('GroupsPage', () => {
       data: [],
       isLoading: false,
       error: null,
-    });
+    } as any);
 
     render(<GroupsPage />, { wrapper: TestWrapper });
 
@@ -370,7 +370,7 @@ describe('GroupsPage', () => {
       data: [],
       isLoading: false,
       error: null,
-    });
+    } as any);
 
     render(<GroupsPage />, { wrapper: TestWrapper });
 
@@ -384,7 +384,7 @@ describe('GroupsPage', () => {
     mockUseCreateGroup.mockReturnValue({
       mutateAsync: mockMutateAsync,
       isPending: false,
-    });
+    } as any);
 
     render(<GroupsPage />, { wrapper: TestWrapper });
 
@@ -414,7 +414,7 @@ describe('GroupsPage', () => {
     mockUseCreateGroup.mockReturnValue({
       mutateAsync: mockMutateAsync,
       isPending: false,
-    });
+    } as any);
 
     render(<GroupsPage />, { wrapper: TestWrapper });
 
@@ -444,7 +444,7 @@ describe('GroupsPage', () => {
     mockUseCreateGroup.mockReturnValue({
       mutateAsync: mockMutateAsync,
       isPending: false,
-    });
+    } as any);
 
     // Mock successful friend invitations
     global.fetch = jest.fn().mockResolvedValue({

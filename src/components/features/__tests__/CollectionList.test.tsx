@@ -1,6 +1,7 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { CollectionList } from '../CollectionList';
 import { TestQueryProvider } from '@/test-utils/testQueryClient';
+import { ObjectId } from 'mongodb';
 
 // Mock the useUser hook
 jest.mock('@clerk/nextjs', () => ({
@@ -51,21 +52,21 @@ const mockUseCreateCollection = useCreateCollection as jest.MockedFunction<
 
 const mockCollections = [
   {
-    _id: { toString: () => 'collection-1' },
+    _id: new ObjectId('507f1f77bcf86cd799439011'),
     name: 'Favorite Pizza Places',
     description: 'My go-to pizza spots',
     type: 'personal' as const,
-    ownerId: { toString: () => 'test-user-id' },
+    ownerId: new ObjectId('507f1f77bcf86cd799439010'),
     restaurantIds: [],
     createdAt: new Date(),
     updatedAt: new Date(),
   },
   {
-    _id: { toString: () => 'collection-2' },
+    _id: new ObjectId('507f1f77bcf86cd799439012'),
     name: 'Coffee Shops',
     description: 'Best coffee in town',
     type: 'personal' as const,
-    ownerId: { toString: () => 'test-user-id' },
+    ownerId: new ObjectId('507f1f77bcf86cd799439010'),
     restaurantIds: [],
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -82,17 +83,17 @@ describe('CollectionList', () => {
       isLoading: false,
       error: null,
       refetch: jest.fn(),
-    });
+    } as any);
 
     mockUseDeleteCollection.mockReturnValue({
       mutateAsync: jest.fn(),
       isPending: false,
-    });
+    } as any);
 
     mockUseCreateCollection.mockReturnValue({
       mutateAsync: jest.fn(),
       isPending: false,
-    });
+    } as any);
   });
 
   it('renders loading state initially', () => {
@@ -101,7 +102,7 @@ describe('CollectionList', () => {
       isLoading: true,
       error: null,
       refetch: jest.fn(),
-    });
+    } as any);
 
     render(
       <TestQueryProvider>
@@ -118,7 +119,7 @@ describe('CollectionList', () => {
       isLoading: false,
       error: null,
       refetch: jest.fn(),
-    });
+    } as any);
 
     render(
       <TestQueryProvider>
@@ -140,7 +141,7 @@ describe('CollectionList', () => {
       isLoading: false,
       error: null,
       refetch: jest.fn(),
-    });
+    } as any);
 
     render(
       <TestQueryProvider>
@@ -160,7 +161,7 @@ describe('CollectionList', () => {
       isLoading: false,
       error: null,
       refetch: jest.fn(),
-    });
+    } as any);
 
     render(
       <TestQueryProvider>
@@ -185,15 +186,12 @@ describe('CollectionList', () => {
       isLoading: false,
       error: null,
       refetch: jest.fn(),
-    });
+    } as any);
 
     mockUseDeleteCollection.mockReturnValue({
       mutateAsync: mockMutateAsync,
       isPending: false,
-    });
-
-    // Mock window.confirm
-    window.confirm = jest.fn(() => true);
+    } as any);
 
     render(
       <TestQueryProvider>
@@ -211,11 +209,25 @@ describe('CollectionList', () => {
 
     fireEvent.click(deleteButtons[0]);
 
-    expect(window.confirm).toHaveBeenCalledWith(
-      'Are you sure you want to delete this collection? This action cannot be undone.'
-    );
+    // Wait for the confirmation modal to appear
+    await waitFor(() => {
+      expect(screen.getByText('Delete Collection?')).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          'Are you sure you want to delete this collection? This action cannot be undone.'
+        )
+      ).toBeInTheDocument();
+    });
 
-    expect(mockMutateAsync).toHaveBeenCalledWith('collection-1');
+    // Click the confirm delete button in the modal
+    const confirmButton = screen.getByRole('button', {
+      name: /delete collection/i,
+    });
+    fireEvent.click(confirmButton);
+
+    await waitFor(() => {
+      expect(mockMutateAsync).toHaveBeenCalledWith('507f1f77bcf86cd799439011');
+    });
   });
 
   it('handles fetch error', () => {
@@ -226,7 +238,7 @@ describe('CollectionList', () => {
       isLoading: false,
       error: new Error('Network error'),
       refetch: mockRefetch,
-    });
+    } as any);
 
     render(
       <TestQueryProvider>

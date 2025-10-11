@@ -16,7 +16,7 @@ export function Header({ children }: HeaderProps) {
 
   return (
     <header
-      className="border-b shadow-neumorphic-light bg-secondary"
+      className="hidden md:block border-b shadow-neumorphic-light bg-secondary"
       style={{
         borderColor: 'var(--bg-quaternary)',
       }}
@@ -48,6 +48,18 @@ export function Header({ children }: HeaderProps) {
                   className="text-sm font-medium hover:opacity-80 transition-opacity text-primary"
                 >
                   Groups
+                </Link>
+                <Link
+                  href="/friends"
+                  className="text-sm font-medium hover:opacity-80 transition-opacity text-primary"
+                >
+                  Friends
+                </Link>
+                <Link
+                  href="/history"
+                  className="text-sm font-medium hover:opacity-80 transition-opacity text-primary"
+                >
+                  History
                 </Link>
               </nav>
             )}

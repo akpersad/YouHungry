@@ -85,10 +85,10 @@ export function ThemeProvider({
       root.style.setProperty('--bg-secondary', '#1a1a1a');
       root.style.setProperty('--bg-tertiary', '#2d2d2d');
       root.style.setProperty('--bg-quaternary', '#404040');
-      root.style.setProperty('--bg-quinary', '#666666');
+      root.style.setProperty('--bg-quinary', '#ababab');
       root.style.setProperty('--text-primary', '#ffffff');
       root.style.setProperty('--text-secondary', '#d1d1d1');
-      root.style.setProperty('--text-tertiary', '#8a8a8a');
+      root.style.setProperty('--text-tertiary', '#b8b8b8');
       root.style.setProperty('--text-inverse', '#1a1a1a');
       root.style.setProperty('--shadow-subtle', '0 2px 8px rgba(0, 0, 0, 0.4)');
       root.style.setProperty(
@@ -131,7 +131,7 @@ export function ThemeProvider({
       root.style.setProperty('--bg-quinary', '#d1d1d1');
       root.style.setProperty('--text-primary', '#1a1a1a');
       root.style.setProperty('--text-secondary', '#4a4a4a');
-      root.style.setProperty('--text-tertiary', '#8a8a8a');
+      root.style.setProperty('--text-tertiary', '#6b6b6b');
       root.style.setProperty('--text-inverse', '#ffffff');
       root.style.setProperty(
         '--shadow-subtle',

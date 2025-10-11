@@ -40,10 +40,23 @@ const searchRestaurants = async (
     ...(filters.distance && { distance: filters.distance.toString() }),
   });
 
+  logger.info('searchRestaurants API call:', {
+    url: `/api/restaurants/search?${params}`,
+    filters,
+  });
+
   const response = await fetch(`/api/restaurants/search?${params}`);
   const data = await response.json();
 
+  logger.info('searchRestaurants API response:', {
+    ok: response.ok,
+    status: response.status,
+    dataKeys: Object.keys(data),
+    restaurantsCount: data.restaurants?.length || 0,
+  });
+
   if (!response.ok) {
+    logger.error('searchRestaurants API error:', data);
     throw new Error(data.error || 'Failed to search restaurants');
   }
 
@@ -114,11 +127,20 @@ const removeRestaurantFromCollection = async ({
 
 // React Query hooks
 export function useRestaurantSearch(filters: SearchFilters, enabled = true) {
+  logger.info('useRestaurantSearch called:', {
+    filters,
+    enabled,
+    shouldEnable: enabled && !!filters.location,
+  });
+
   return useQuery({
     queryKey: restaurantKeys.searchQuery(
       filters as unknown as Record<string, unknown>
     ),
-    queryFn: () => searchRestaurants(filters),
+    queryFn: () => {
+      logger.info('useRestaurantSearch queryFn executing, calling API...');
+      return searchRestaurants(filters);
+    },
     enabled: enabled && !!filters.location,
     staleTime: 10 * 60 * 1000, // 10 minutes for search results
     gcTime: 30 * 60 * 1000, // 30 minutes cache time for search results

@@ -110,14 +110,16 @@ describe('/api/friends/requests', () => {
               name: 'Jane Smith',
               profilePicture: 'pic2.jpg',
             },
-            status: 'pending',
+            status: 'pending' as const,
             createdAt: '2025-09-28T21:31:59.423Z',
             updatedAt: '2025-09-28T21:31:59.423Z',
           },
         ],
       };
 
-      mockFriendsLib.getFriendRequests.mockResolvedValue(mockRequests);
+      (mockFriendsLib.getFriendRequests as jest.Mock).mockResolvedValue(
+        mockRequests
+      );
 
       const request = new NextRequest(
         'http://localhost:3000/api/friends/requests?userId=user1'
@@ -294,7 +296,7 @@ describe('/api/friends/requests/[id]', () => {
     );
     const response = await updateFriendRequest(request, {
       params: { id: '507f1f77bcf86cd799439013' },
-    });
+    } as any);
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -334,7 +336,7 @@ describe('/api/friends/requests/[id]', () => {
     );
     const response = await updateFriendRequest(request, {
       params: { id: '507f1f77bcf86cd799439013' },
-    });
+    } as any);
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -359,7 +361,7 @@ describe('/api/friends/requests/[id]', () => {
     );
     const response = await updateFriendRequest(request, {
       params: { id: '507f1f77bcf86cd799439013' },
-    });
+    } as any);
     const data = await response.json();
 
     expect(response.status).toBe(400);
@@ -379,7 +381,7 @@ describe('/api/friends/requests/[id]', () => {
     );
     const response = await updateFriendRequest(request, {
       params: { id: '507f1f77bcf86cd799439013' },
-    });
+    } as any);
     const data = await response.json();
 
     expect(response.status).toBe(400);

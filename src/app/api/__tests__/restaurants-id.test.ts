@@ -44,7 +44,7 @@ describe('/api/restaurants/[id]', () => {
 
   describe('GET', () => {
     it('should get restaurant details successfully', async () => {
-      mockGetRestaurantDetails.mockResolvedValue(mockRestaurant);
+      mockGetRestaurantDetails.mockResolvedValue(mockRestaurant as any);
 
       const request = new NextRequest(
         'http://localhost:3000/api/restaurants/507f1f77bcf86cd799439013'
@@ -112,7 +112,7 @@ describe('/api/restaurants/[id]', () => {
         priceRange: '$$$' as const,
         timeToPickUp: 30,
       };
-      mockUpdateRestaurant.mockResolvedValue(updatedRestaurant);
+      mockUpdateRestaurant.mockResolvedValue(updatedRestaurant as any);
 
       const request = new NextRequest(
         'http://localhost:3000/api/restaurants/507f1f77bcf86cd799439013',

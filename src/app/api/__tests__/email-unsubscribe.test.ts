@@ -52,7 +52,7 @@ describe('/api/email/unsubscribe', () => {
         collection: jest.fn().mockReturnValue(mockCollection),
       };
 
-      mockConnectToDatabase.mockResolvedValue(mockDb);
+      mockConnectToDatabase.mockResolvedValue(mockDb as any);
 
       const request = new NextRequest(
         'http://localhost:3000/api/email/unsubscribe?email=test@example.com'
@@ -90,7 +90,7 @@ describe('/api/email/unsubscribe', () => {
         collection: jest.fn().mockReturnValue(mockCollection),
       };
 
-      mockConnectToDatabase.mockResolvedValue(mockDb);
+      mockConnectToDatabase.mockResolvedValue(mockDb as any);
 
       const request = new NextRequest(
         'http://localhost:3000/api/email/unsubscribe?email=nonexistent@example.com'
@@ -172,7 +172,7 @@ describe('/api/email/unsubscribe', () => {
         collection: jest.fn().mockReturnValue(mockCollection),
       };
 
-      mockConnectToDatabase.mockResolvedValue(mockDb);
+      mockConnectToDatabase.mockResolvedValue(mockDb as any);
 
       const request = new NextRequest(
         'http://localhost:3000/api/email/unsubscribe?email=test@example.com'
@@ -206,7 +206,7 @@ describe('/api/email/unsubscribe', () => {
         collection: jest.fn().mockReturnValue(mockCollection),
       };
 
-      mockConnectToDatabase.mockResolvedValue(mockDb);
+      mockConnectToDatabase.mockResolvedValue(mockDb as any);
 
       const request = new NextRequest(
         'http://localhost:3000/api/email/unsubscribe?email=test@example.com'

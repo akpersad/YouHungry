@@ -1,18 +1,26 @@
 import { HTMLAttributes, forwardRef } from 'react';
 import { cn } from '@/lib/utils';
 
-interface CardProps extends HTMLAttributes<HTMLDivElement> {
+interface CardProps extends HTMLAttributes<HTMLElement> {
   variant?: 'default' | 'elevated';
   padding?: 'sm' | 'md' | 'lg';
+  as?: 'article' | 'section' | 'div';
 }
 
-const Card = forwardRef<HTMLDivElement, CardProps>(
+const Card = forwardRef<HTMLElement, CardProps>(
   (
-    { className, variant = 'default', padding = 'md', children, ...props },
+    {
+      className,
+      variant = 'default',
+      padding = 'md',
+      as: Component = 'div',
+      children,
+      ...props
+    },
     ref
   ) => {
     return (
-      <div
+      <Component
         className={cn(
           'card-base',
           {
@@ -23,11 +31,11 @@ const Card = forwardRef<HTMLDivElement, CardProps>(
           },
           className
         )}
-        ref={ref}
+        ref={ref as unknown as React.Ref<HTMLDivElement>}
         {...props}
       >
         {children}
-      </div>
+      </Component>
     );
   }
 );

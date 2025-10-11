@@ -1,10 +1,11 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { RestaurantSearchResults } from '../RestaurantSearchResults';
 import { Restaurant } from '@/types/database';
+import { ObjectId } from 'mongodb';
 
 const mockRestaurants: Restaurant[] = [
   {
-    _id: '507f1f77bcf86cd799439011' as unknown as string,
+    _id: new ObjectId('507f1f77bcf86cd799439011'),
     googlePlaceId: 'ChIJN1t_tDeuEmsRUsoyG83frY4',
     name: 'Test Restaurant 1',
     address: '123 Test Street, Test City, TC 12345',
@@ -23,7 +24,7 @@ const mockRestaurants: Restaurant[] = [
     lastUpdated: new Date('2024-01-01'),
   },
   {
-    _id: '507f1f77bcf86cd799439012' as unknown as string,
+    _id: new ObjectId('507f1f77bcf86cd799439012'),
     googlePlaceId: 'ChIJN1t_tDeuEmsRUsoyG83frY5',
     name: 'Test Restaurant 2',
     address: '456 Test Avenue, Test City, TC 12345',
@@ -113,11 +114,12 @@ describe('RestaurantSearchResults', () => {
         onAddToCollection={mockOnAddToCollection}
         onViewDetails={mockOnViewDetails}
         searchQuery="test"
+        totalResults={2}
       />
     );
 
     expect(screen.getByText('Results for "test"')).toBeInTheDocument();
-    expect(screen.getByText('2 restaurants found')).toBeInTheDocument();
+    expect(screen.getByText('2 restaurants')).toBeInTheDocument();
     expect(screen.getByText('Test Restaurant 1')).toBeInTheDocument();
     expect(screen.getByText('Test Restaurant 2')).toBeInTheDocument();
   });
@@ -129,11 +131,12 @@ describe('RestaurantSearchResults', () => {
         isLoading={false}
         onAddToCollection={mockOnAddToCollection}
         onViewDetails={mockOnViewDetails}
+        totalResults={2}
       />
     );
 
     expect(screen.getByText('Restaurants')).toBeInTheDocument();
-    expect(screen.getByText('2 restaurants found')).toBeInTheDocument();
+    expect(screen.getByText('2 restaurants')).toBeInTheDocument();
   });
 
   it('calls onAddToCollection when Add to Collection is clicked', () => {
@@ -243,9 +246,10 @@ describe('RestaurantSearchResults', () => {
         isLoading={false}
         onAddToCollection={mockOnAddToCollection}
         onViewDetails={mockOnViewDetails}
+        totalResults={1}
       />
     );
 
-    expect(screen.getByText('1 restaurant found')).toBeInTheDocument();
+    expect(screen.getByText('1 restaurant')).toBeInTheDocument();
   });
 });

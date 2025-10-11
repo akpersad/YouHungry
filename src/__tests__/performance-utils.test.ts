@@ -237,26 +237,25 @@ describe('Performance Utils', () => {
       expect(factory).toHaveBeenCalledTimes(2);
     });
 
-    it('should use custom equality function', () => {
+    it('should use built-in equality function', () => {
       const factory = jest.fn(() => ({ value: 'test' }));
-      const isEqual = (a: any, b: any) => a.value === b.value;
 
       const { result, rerender } = renderHook(
-        ({ deps }) => useStableMemo(factory, deps, isEqual),
+        ({ deps }) => useStableMemo(factory, deps),
         { initialProps: { deps: [1, 2] } }
       );
 
       expect(factory).toHaveBeenCalledTimes(1);
 
-      // Rerender with same deps but different object
+      // Rerender with same deps
       rerender({ deps: [1, 2] });
-      expect(factory).toHaveBeenCalledTimes(1); // Should not call again due to custom equality
+      expect(factory).toHaveBeenCalledTimes(1); // Should not call again
     });
   });
 
   describe('useIntersectionObserver', () => {
     it('should observe intersection changes', () => {
-      let observerCallback: (entries: any[]) => void;
+      let observerCallback: ((entries: any[]) => void) | undefined;
       const mockObserver = {
         observe: jest.fn(),
         unobserve: jest.fn(),
@@ -277,7 +276,7 @@ describe('Performance Utils', () => {
       // Simulate intersection change
       if (observerCallback) {
         act(() => {
-          observerCallback([{ isIntersecting: true }]);
+          observerCallback!([{ isIntersecting: true }]);
         });
 
         expect(result.current.isIntersecting).toBe(true);
@@ -472,9 +471,9 @@ describe('Performance Utils', () => {
 
   describe('preloadImage', () => {
     it('should preload image and return promise', async () => {
-      const mockImage = {
-        onload: null,
-        onerror: null,
+      const mockImage: any = {
+        onload: null as (() => void) | null,
+        onerror: null as (() => void) | null,
         src: '',
       };
 
@@ -495,9 +494,9 @@ describe('Performance Utils', () => {
     });
 
     it('should reject on image load error', async () => {
-      const mockImage = {
-        onload: null,
-        onerror: null,
+      const mockImage: any = {
+        onload: null as (() => void) | null,
+        onerror: null as (() => void) | null,
         src: '',
       };
 

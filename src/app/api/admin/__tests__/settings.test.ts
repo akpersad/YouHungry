@@ -20,7 +20,7 @@ describe('/api/admin/settings', () => {
       const request = new NextRequest(
         'http://localhost:3000/api/admin/settings'
       );
-      const response = await GET(request);
+      const response = await GET();
       const data = await response.json();
 
       expect(response.status).toBe(200);

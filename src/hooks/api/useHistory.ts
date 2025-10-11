@@ -50,7 +50,6 @@ export interface DecisionHistoryResponse {
 }
 
 export interface ManualDecisionInput {
-  collectionId: string;
   restaurantId: string;
   visitDate: string;
   type?: 'personal' | 'group';

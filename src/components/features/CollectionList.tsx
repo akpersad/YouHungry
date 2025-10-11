@@ -23,6 +23,7 @@ interface CollectionListProps {
   isLoading?: boolean;
   onCreateCollection?: () => void;
   showType?: boolean;
+  showHeader?: boolean;
 }
 
 function CollectionList({
@@ -31,10 +32,15 @@ function CollectionList({
   isLoading: propIsLoading,
   onCreateCollection: propOnCreateCollection,
   showType = true, // eslint-disable-line @typescript-eslint/no-unused-vars
+  showHeader = true,
 }: CollectionListProps) {
   const { user } = useUser();
   const router = useRouter();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [collectionToDelete, setCollectionToDelete] = useState<string | null>(
+    null
+  );
 
   // Use TanStack Query hooks
   const {
@@ -57,20 +63,22 @@ function CollectionList({
     // The mutation will automatically invalidate and refetch the collections
   };
 
-  const handleDeleteCollection = async (collectionId: string) => {
-    if (
-      !confirm(
-        'Are you sure you want to delete this collection? This action cannot be undone.'
-      )
-    ) {
-      return;
-    }
+  const handleDeleteCollection = (collectionId: string) => {
+    setCollectionToDelete(collectionId);
+    setShowDeleteConfirmation(true);
+  };
+
+  const confirmDeleteCollection = async () => {
+    if (!collectionToDelete) return;
 
     try {
-      await deleteCollectionMutation.mutateAsync(collectionId);
+      await deleteCollectionMutation.mutateAsync(collectionToDelete);
     } catch (error) {
       // Error is handled by the mutation's onError callback
       logger.error('Failed to delete collection:', error);
+    } finally {
+      setShowDeleteConfirmation(false);
+      setCollectionToDelete(null);
     }
   };
 
@@ -108,22 +116,24 @@ function CollectionList({
   return (
     <div className="space-y-6">
       {/* Header - Mobile optimized */}
-      <div className="space-y-4 md:space-y-0 md:flex md:items-center md:justify-between">
-        <div className="space-y-1">
-          <h2 className="text-xl md:text-2xl font-bold text-primary">
-            My Collections
-          </h2>
-          <p className="text-secondary text-sm md:text-base">
-            Manage your personal restaurant collections
-          </p>
+      {showHeader && (
+        <div className="space-y-4 md:space-y-0 md:flex md:items-center md:justify-between">
+          <div className="space-y-1">
+            <h2 className="text-xl md:text-2xl font-bold text-primary">
+              My Collections
+            </h2>
+            <p className="text-secondary text-sm md:text-base">
+              Manage your personal restaurant collections
+            </p>
+          </div>
+          <Button
+            onClick={onCreateCollection}
+            className="w-full md:w-auto touch-target"
+          >
+            Create Collection
+          </Button>
         </div>
-        <Button
-          onClick={onCreateCollection}
-          className="w-full md:w-auto touch-target"
-        >
-          Create Collection
-        </Button>
-      </div>
+      )}
 
       {collections.length === 0 ? (
         <Card className="p-6">
@@ -262,6 +272,39 @@ function CollectionList({
           onSuccess={handleCollectionCreated}
           onCancel={() => setIsCreateModalOpen(false)}
         />
+      </Modal>
+
+      <Modal
+        isOpen={showDeleteConfirmation}
+        onClose={() => {
+          setShowDeleteConfirmation(false);
+          setCollectionToDelete(null);
+        }}
+        title="Delete Collection?"
+      >
+        <div className="space-y-4">
+          <p className="text-text">
+            Are you sure you want to delete this collection? This action cannot
+            be undone.
+          </p>
+          <div className="flex justify-end space-x-2">
+            <Button
+              onClick={() => {
+                setShowDeleteConfirmation(false);
+                setCollectionToDelete(null);
+              }}
+              variant="outline"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={confirmDeleteCollection}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Delete Collection
+            </Button>
+          </div>
+        </div>
       </Modal>
     </div>
   );

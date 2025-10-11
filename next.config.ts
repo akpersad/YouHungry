@@ -26,6 +26,11 @@ const nextConfig: NextConfig = {
       'framer-motion',
       'react-hot-toast',
     ],
+    // Server Actions configuration to prevent ID mismatch errors
+    serverActions: {
+      bodySizeLimit: '2mb',
+      allowedOrigins: ['localhost:3000'],
+    },
   },
 
   // Compiler optimizations

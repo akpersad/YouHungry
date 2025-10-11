@@ -2,6 +2,7 @@ import { logger } from '@/lib/logger';
 import { NextResponse } from 'next/server';
 import { getAPIUsageStats } from '@/lib/api-usage-tracker';
 import { getCacheStats } from '@/lib/optimized-google-places';
+import { getLocationCacheStats } from '@/lib/google-places';
 
 interface APICostMetrics {
   googlePlaces: {
@@ -18,6 +19,15 @@ interface APICostMetrics {
     hitRate: number;
     totalHits: number;
     memoryEntries: number;
+  };
+  locationCache: {
+    totalEntries: number;
+    locationOnlyEntries: number;
+    locationQueryEntries: number;
+    averageRestaurantsPerEntry: number;
+    estimatedSizeKB: number;
+    oldestEntry?: string;
+    newestEntry?: string;
   };
   estimatedCosts: {
     daily: number;
@@ -38,11 +48,13 @@ export async function GET() {
     const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
 
     // Get actual API usage statistics
-    const [dailyStats, monthlyStats, cacheStats] = await Promise.all([
-      getAPIUsageStats(startOfDay, today),
-      getAPIUsageStats(startOfMonth, today),
-      getCacheStats(),
-    ]);
+    const [dailyStats, monthlyStats, cacheStats, locationCacheStats] =
+      await Promise.all([
+        getAPIUsageStats(startOfDay, today),
+        getAPIUsageStats(startOfMonth, today),
+        getCacheStats(),
+        getLocationCacheStats(),
+      ]);
 
     // Extract call counts by type
     const dailyUsage = {
@@ -95,6 +107,16 @@ export async function GET() {
         totalHits: cacheStats.totalHits,
         memoryEntries: cacheStats.memoryEntries,
       },
+      locationCache: {
+        totalEntries: locationCacheStats.totalEntries,
+        locationOnlyEntries: locationCacheStats.locationOnlyEntries,
+        locationQueryEntries: locationCacheStats.locationQueryEntries,
+        averageRestaurantsPerEntry:
+          locationCacheStats.averageRestaurantsPerEntry,
+        estimatedSizeKB: locationCacheStats.estimatedSizeKB,
+        oldestEntry: locationCacheStats.oldestEntry?.toISOString(),
+        newestEntry: locationCacheStats.newestEntry?.toISOString(),
+      },
       estimatedCosts: {
         daily: dailyTotal,
         monthly: monthlyTotal,
@@ -106,6 +128,7 @@ export async function GET() {
       dailyUsage,
       monthlyUsage,
       cacheStats,
+      locationCacheStats,
       dailyTotal,
       monthlyTotal,
       monthlySavings,
@@ -155,6 +178,28 @@ function generateCostRecommendations(metrics: APICostMetrics): string[] {
   if (metrics.cache.memoryEntries > 500) {
     recommendations.push(
       'High memory cache usage. Consider implementing cache eviction policies or increasing database cache usage.'
+    );
+  }
+
+  // Location cache recommendations
+  if (metrics.locationCache.totalEntries > 100) {
+    recommendations.push(
+      `Location cache has ${metrics.locationCache.totalEntries} entries (~${metrics.locationCache.estimatedSizeKB}KB). Consider running cleanup to remove expired entries.`
+    );
+  }
+
+  if (metrics.locationCache.estimatedSizeKB > 5000) {
+    recommendations.push(
+      'Location cache size is over 5MB. Consider implementing more aggressive eviction policies or reducing cache TTL.'
+    );
+  }
+
+  if (
+    metrics.locationCache.locationQueryEntries >
+    metrics.locationCache.locationOnlyEntries * 2
+  ) {
+    recommendations.push(
+      'High number of location+query cache entries. Consider consolidating similar queries to improve cache hit rates.'
     );
   }
 

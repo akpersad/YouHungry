@@ -89,14 +89,14 @@ export interface Decision {
   collectionId: ObjectId;
   groupId?: ObjectId;
   participants: string[]; // User IDs (Clerk user IDs as strings)
-  method: 'tiered' | 'random';
+  method: 'tiered' | 'random' | 'manual'; // 'manual' for user-entered past decisions
   status: 'active' | 'completed' | 'expired';
   deadline: Date;
-  visitDate: Date;
+  visitDate: Date; // When user actually visited (for manual entries) or when they will visit (for decisions)
   result?: {
     restaurantId: ObjectId;
     selectedAt: Date;
-    reasoning: string;
+    reasoning: string; // For manual decisions, stores optional user notes
     weights?: { [restaurantId: string]: number };
   };
   votes?: {
@@ -107,6 +107,13 @@ export interface Decision {
   createdAt: Date;
   updatedAt: Date;
 }
+
+/**
+ * Decision Method Types:
+ * - 'tiered': Group voting with weighted rankings (1st = 3 points, 2nd = 2 points, 3rd = 1 point)
+ * - 'random': Weighted random selection using 30-day rolling history to ensure variety
+ * - 'manual': User-entered past restaurant visit for history tracking and weight system integration
+ */
 
 export interface Friendship {
   _id: ObjectId;

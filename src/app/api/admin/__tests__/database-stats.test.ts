@@ -34,7 +34,7 @@ describe('/api/admin/database/stats', () => {
       clerkId: 'clerk123',
       email: 'admin@example.com',
       name: 'Admin User',
-    } as { _id: string; clerkId: string; email: string; name: string });
+    } as any);
   });
 
   it('returns database statistics successfully', async () => {
@@ -42,47 +42,53 @@ describe('/api/admin/database/stats', () => {
       ping: jest.fn().mockResolvedValue(undefined),
     };
 
+    const mockCollection = {
+      countDocuments: jest.fn().mockResolvedValue(150),
+      indexes: jest
+        .fn()
+        .mockResolvedValue([
+          { name: '_id_' },
+          { name: 'email_1' },
+          { name: 'createdAt_1' },
+        ]),
+    };
+
     const mockDb = {
       admin: jest.fn().mockReturnValue(mockAdminDb),
-      collection: jest.fn().mockReturnThis(),
-      countDocuments: jest.fn(),
-      stats: jest.fn(),
-      indexes: jest.fn(),
+      collection: jest.fn().mockReturnValue(mockCollection),
+      command: jest.fn().mockImplementation((cmd) => {
+        if (cmd.collStats) {
+          return Promise.resolve({
+            storageSize: 1048576, // 1MB
+            totalIndexSize: 262144, // 256KB
+          });
+        }
+        return Promise.resolve({});
+      }),
     };
 
     mockConnectToDatabase.mockResolvedValue(
       mockDb as unknown as ReturnType<typeof connectToDatabase>
     );
 
-    // Mock collection stats
-    mockDb.countDocuments.mockResolvedValue(150);
-    mockDb.stats.mockResolvedValue({
-      storageSize: 1048576, // 1MB
-      totalIndexSize: 262144, // 256KB
-    });
-    mockDb.indexes.mockResolvedValue([
-      { name: '_id_' },
-      { name: 'email_1' },
-      { name: 'createdAt_1' },
-    ]);
-
     const request = new NextRequest(
       'http://localhost:3000/api/admin/database/stats'
     );
-    const response = await GET(request);
+    const response = await GET();
     const data = await response.json();
 
     expect(response.status).toBe(200);
     expect(data.success).toBe(true);
     expect(data.data.connection.status).toBe('connected');
     expect(data.data.connection.latency).toBeGreaterThanOrEqual(0);
-    expect(data.data.overview.totalCollections).toBe(7); // 7 collections
-    expect(data.data.collections).toHaveLength(7);
+    expect(data.data.overview.totalCollections).toBe(15); // 15 collections
+    expect(data.data.collections).toHaveLength(15);
+    // Collections are sorted alphabetically, so api_cache comes first
     expect(data.data.collections[0]).toMatchObject({
-      name: 'users',
+      name: 'api_cache',
       count: 150,
-      storageSize: 0, // Placeholder value since stats() method doesn't exist on Collection type
-      indexSize: 0, // Placeholder value since stats() method doesn't exist on Collection type
+      storageSize: 1048576, // 1MB from mock
+      indexSize: 262144, // 256KB from mock
       indexes: 3,
     });
   });
@@ -96,7 +102,9 @@ describe('/api/admin/database/stats', () => {
       admin: jest.fn().mockReturnValue(mockAdminDb),
       collection: jest.fn().mockReturnThis(),
       countDocuments: jest.fn().mockResolvedValue(0),
-      stats: jest.fn().mockResolvedValue({ storageSize: 0, totalIndexSize: 0 }),
+      runCommand: jest
+        .fn()
+        .mockResolvedValue({ storageSize: 0, totalIndexSize: 0 }),
       indexes: jest.fn().mockResolvedValue([]),
     };
 
@@ -107,7 +115,7 @@ describe('/api/admin/database/stats', () => {
     const request = new NextRequest(
       'http://localhost:3000/api/admin/database/stats'
     );
-    const response = await GET(request);
+    const response = await GET();
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -127,7 +135,7 @@ describe('/api/admin/database/stats', () => {
         }
         return {
           countDocuments: jest.fn().mockResolvedValue(100),
-          stats: jest.fn().mockResolvedValue({
+          runCommand: jest.fn().mockResolvedValue({
             storageSize: 1048576,
             totalIndexSize: 262144,
           }),
@@ -145,7 +153,7 @@ describe('/api/admin/database/stats', () => {
     const request = new NextRequest(
       'http://localhost:3000/api/admin/database/stats'
     );
-    const response = await GET(request);
+    const response = await GET();
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -168,7 +176,7 @@ describe('/api/admin/database/stats', () => {
       admin: jest.fn().mockReturnValue(mockAdminDb),
       collection: jest.fn().mockReturnThis(),
       countDocuments: jest.fn().mockResolvedValue(15000), // Large collection
-      stats: jest.fn().mockResolvedValue({
+      runCommand: jest.fn().mockResolvedValue({
         storageSize: 1048576,
         totalIndexSize: 524288, // High index size
       }),
@@ -191,7 +199,7 @@ describe('/api/admin/database/stats', () => {
     const request = new NextRequest(
       'http://localhost:3000/api/admin/database/stats'
     );
-    const response = await GET(request);
+    const response = await GET();
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -205,7 +213,7 @@ describe('/api/admin/database/stats', () => {
     const request = new NextRequest(
       'http://localhost:3000/api/admin/database/stats'
     );
-    const response = await GET(request);
+    const response = await GET();
     const data = await response.json();
 
     expect(response.status).toBe(500);
@@ -220,7 +228,7 @@ describe('/api/admin/database/stats', () => {
     const request = new NextRequest(
       'http://localhost:3000/api/admin/database/stats'
     );
-    const response = await GET(request);
+    const response = await GET();
     const data = await response.json();
 
     expect(response.status).toBe(500);
@@ -236,7 +244,9 @@ describe('/api/admin/database/stats', () => {
       admin: jest.fn().mockReturnValue(mockAdminDb),
       collection: jest.fn().mockReturnThis(),
       countDocuments: jest.fn().mockResolvedValue(0),
-      stats: jest.fn().mockResolvedValue({ storageSize: 0, totalIndexSize: 0 }),
+      runCommand: jest
+        .fn()
+        .mockResolvedValue({ storageSize: 0, totalIndexSize: 0 }),
       indexes: jest.fn().mockResolvedValue([]),
     };
 
@@ -247,7 +257,7 @@ describe('/api/admin/database/stats', () => {
     const request = new NextRequest(
       'http://localhost:3000/api/admin/database/stats'
     );
-    const response = await GET(request);
+    const response = await GET();
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -269,9 +279,14 @@ describe('/api/admin/database/stats', () => {
       admin: jest.fn().mockReturnValue(mockAdminDb),
       collection: jest.fn().mockReturnThis(),
       countDocuments: jest.fn().mockResolvedValue(150),
-      stats: jest.fn().mockResolvedValue({
-        storageSize: 1048576, // 1MB
-        totalIndexSize: 262144, // 256KB
+      command: jest.fn().mockImplementation((cmd) => {
+        if (cmd.collStats) {
+          return Promise.resolve({
+            storageSize: 1048576, // 1MB
+            totalIndexSize: 262144, // 256KB
+          });
+        }
+        return Promise.resolve({});
       }),
       indexes: jest
         .fn()
@@ -285,7 +300,7 @@ describe('/api/admin/database/stats', () => {
     const request = new NextRequest(
       'http://localhost:3000/api/admin/database/stats'
     );
-    const response = await GET(request);
+    const response = await GET();
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -301,8 +316,8 @@ describe('/api/admin/database/stats', () => {
     );
     expect(usersCollection).toBeDefined();
     expect(usersCollection.count).toBe(150);
-    expect(usersCollection.storageSize).toBe(0); // Placeholder value since stats() method doesn't exist on Collection type
-    expect(usersCollection.indexSize).toBe(0); // Placeholder value since stats() method doesn't exist on Collection type
+    expect(usersCollection.storageSize).toBe(1048576); // 1MB from mock
+    expect(usersCollection.indexSize).toBe(262144); // 256KB from mock
     expect(usersCollection.indexes).toBe(2);
   });
 });

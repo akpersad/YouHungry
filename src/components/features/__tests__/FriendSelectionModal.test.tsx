@@ -59,13 +59,13 @@ describe('FriendSelectionModal', () => {
       userId: 'user1',
       isSignedIn: true,
       isLoaded: true,
-    });
+    } as any);
     mockUseFriends.mockReturnValue({
       data: mockFriends,
       isLoading: false,
       error: null,
       refetch: jest.fn(),
-    });
+    } as any);
   });
 
   it('renders modal when open', () => {
@@ -166,7 +166,7 @@ describe('FriendSelectionModal', () => {
       isLoading: false,
       error: null,
       refetch: jest.fn(),
-    });
+    } as any);
 
     render(<FriendSelectionModal {...defaultProps} />);
 
@@ -191,7 +191,7 @@ describe('FriendSelectionModal', () => {
       isLoading: false,
       error: null,
       refetch: jest.fn(),
-    });
+    } as any);
 
     render(<FriendSelectionModal {...defaultProps} />);
 
@@ -258,7 +258,7 @@ describe('FriendSelectionModal', () => {
       isLoading: true,
       error: null,
       refetch: jest.fn(),
-    });
+    } as any);
 
     render(<FriendSelectionModal {...defaultProps} />);
 
@@ -272,7 +272,7 @@ describe('FriendSelectionModal', () => {
       isLoading: false,
       error: new Error('Failed to load'),
       refetch: mockRefetch,
-    });
+    } as any);
 
     render(<FriendSelectionModal {...defaultProps} />);
 
@@ -316,7 +316,7 @@ describe('FriendSelectionModal', () => {
   it('calls onClose when close button is clicked', () => {
     render(<FriendSelectionModal {...defaultProps} />);
 
-    const closeButton = screen.getByRole('button', { name: '×' });
+    const closeButton = screen.getByRole('button', { name: 'Close dialog' });
     fireEvent.click(closeButton);
 
     expect(defaultProps.onClose).toHaveBeenCalled();
@@ -345,7 +345,7 @@ describe('FriendSelectionModal', () => {
       isLoading: false,
       error: null,
       refetch: jest.fn(),
-    });
+    } as any);
 
     render(
       <FriendSelectionModal
@@ -379,7 +379,7 @@ describe('FriendSelectionModal', () => {
     fireEvent.click(inviteButtons[0]);
 
     // Try to close modal
-    const closeButton = screen.getByRole('button', { name: '×' });
+    const closeButton = screen.getByRole('button', { name: 'Close dialog' });
     fireEvent.click(closeButton);
 
     // Modal should still be open

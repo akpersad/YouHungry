@@ -16,6 +16,7 @@ interface ButtonProps
     | 'outline-accent';
   size?: 'sm' | 'md' | 'lg';
   isLoading?: boolean;
+  loadingText?: string;
   children: ReactNode;
 }
 
@@ -26,11 +27,15 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       variant = 'primary',
       size = 'md',
       isLoading,
+      loadingText = 'Loading...',
       children,
+      'aria-label': ariaLabel,
       ...props
     },
     ref
   ) => {
+    const isDisabled = isLoading || props.disabled;
+
     return (
       <motion.button
         className={cn(
@@ -50,11 +55,14 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           className
         )}
         ref={ref}
-        disabled={isLoading || props.disabled}
+        disabled={isDisabled}
+        aria-disabled={isDisabled}
+        aria-busy={isLoading}
+        aria-label={ariaLabel || (isLoading ? loadingText : undefined)}
         variants={buttonVariants}
         initial="rest"
-        whileHover="hover"
-        whileTap="tap"
+        whileHover={isDisabled ? undefined : 'hover'}
+        whileTap={isDisabled ? undefined : 'tap'}
         {...props}
       >
         {isLoading && (
@@ -63,6 +71,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
+            aria-hidden="true"
           >
             <circle
               className="opacity-25"
@@ -79,6 +88,9 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
             />
           </svg>
         )}
+        {isLoading && loadingText ? (
+          <span className="sr-only">{loadingText}</span>
+        ) : null}
         {children}
       </motion.button>
     );

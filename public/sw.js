@@ -1,8 +1,9 @@
 // Service Worker for You Hungry? PWA
-const CACHE_NAME = 'you-hungry-v2';
-const STATIC_CACHE_NAME = 'you-hungry-static-v2';
-const DYNAMIC_CACHE_NAME = 'you-hungry-dynamic-v2';
-const API_CACHE_NAME = 'you-hungry-api-v2';
+// Bump version to force cache invalidation
+const CACHE_NAME = 'you-hungry-v3';
+const STATIC_CACHE_NAME = 'you-hungry-static-v3';
+const DYNAMIC_CACHE_NAME = 'you-hungry-dynamic-v3';
+const API_CACHE_NAME = 'you-hungry-api-v3';
 
 // Assets to cache immediately
 const STATIC_ASSETS = [
@@ -115,27 +116,27 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Handle page requests with cache-first strategy
+  // Handle page requests with network-first strategy (to avoid stale Server Actions)
   if (request.headers.get('accept').includes('text/html')) {
     event.respondWith(
-      caches.match(request).then((response) => {
-        if (response) {
+      fetch(request)
+        .then((response) => {
+          // Cache successful page responses
+          if (response.status === 200) {
+            const responseClone = response.clone();
+            caches.open(DYNAMIC_CACHE_NAME).then((cache) => {
+              cache.put(request, responseClone);
+            });
+          }
           return response;
-        }
-
-        return fetch(request)
-          .then((response) => {
-            // Cache successful page responses
-            if (response.status === 200) {
-              const responseClone = response.clone();
-              caches.open(DYNAMIC_CACHE_NAME).then((cache) => {
-                cache.put(request, responseClone);
-              });
+        })
+        .catch(() => {
+          // Fallback to cache only when offline
+          return caches.match(request).then((response) => {
+            if (response) {
+              return response;
             }
-            return response;
-          })
-          .catch(() => {
-            // Return offline page
+            // Return offline page as last resort
             return caches.match('/').then((response) => {
               if (response) {
                 return response;
@@ -184,7 +185,7 @@ self.addEventListener('fetch', (event) => {
               );
             });
           });
-      })
+        })
     );
     return;
   }

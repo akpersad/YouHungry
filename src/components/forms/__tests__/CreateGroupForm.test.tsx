@@ -101,7 +101,7 @@ describe('CreateGroupForm', () => {
     const nameInput = screen.getByLabelText('Group Name *');
     const longName = 'a'.repeat(101); // Exceeds 100 character limit
 
-    await user.type(nameInput, longName);
+    fireEvent.change(nameInput, { target: { value: longName } });
 
     const submitButton = screen.getByRole('button', { name: 'Create Group' });
     await user.click(submitButton);
@@ -128,8 +128,8 @@ describe('CreateGroupForm', () => {
     const descriptionInput = screen.getByLabelText('Description (Optional)');
     const longDescription = 'a'.repeat(501); // Exceeds 500 character limit
 
-    await user.type(nameInput, 'Test Group');
-    await user.type(descriptionInput, longDescription);
+    fireEvent.change(nameInput, { target: { value: 'Test Group' } });
+    fireEvent.change(descriptionInput, { target: { value: longDescription } });
 
     const submitButton = screen.getByRole('button', { name: 'Create Group' });
     await user.click(submitButton);
@@ -155,8 +155,10 @@ describe('CreateGroupForm', () => {
     const nameInput = screen.getByLabelText('Group Name *');
     const descriptionInput = screen.getByLabelText('Description (Optional)');
 
-    await user.type(nameInput, 'Test Group');
-    await user.type(descriptionInput, 'A test group description');
+    fireEvent.change(nameInput, { target: { value: 'Test Group' } });
+    fireEvent.change(descriptionInput, {
+      target: { value: 'A test group description' },
+    });
 
     const submitButton = screen.getByRole('button', { name: 'Create Group' });
 
@@ -186,7 +188,7 @@ describe('CreateGroupForm', () => {
 
     const nameInput = screen.getByLabelText('Group Name *');
 
-    await user.type(nameInput, 'Test Group');
+    fireEvent.change(nameInput, { target: { value: 'Test Group' } });
 
     const submitButton = screen.getByRole('button', { name: 'Create Group' });
 
@@ -217,8 +219,10 @@ describe('CreateGroupForm', () => {
     const nameInput = screen.getByLabelText('Group Name *');
     const descriptionInput = screen.getByLabelText('Description (Optional)');
 
-    await user.type(nameInput, '  Test Group  ');
-    await user.type(descriptionInput, '  A test group description  ');
+    fireEvent.change(nameInput, { target: { value: '  Test Group  ' } });
+    fireEvent.change(descriptionInput, {
+      target: { value: '  A test group description  ' },
+    });
 
     const submitButton = screen.getByRole('button', { name: 'Create Group' });
 
@@ -288,7 +292,7 @@ describe('CreateGroupForm', () => {
     const nameInput = screen.getByLabelText('Group Name *');
     const submitButton = screen.getByRole('button', { name: 'Create Group' });
 
-    await user.type(nameInput, 'Test Group');
+    fireEvent.change(nameInput, { target: { value: 'Test Group' } });
     await user.click(submitButton);
 
     // Form should be disabled during submission
@@ -311,15 +315,13 @@ describe('CreateGroupForm', () => {
     );
 
     const nameInput = screen.getByLabelText('Group Name *');
-    const submitButton = screen.getByRole('button', { name: 'Create Group' });
+    const submitButton = screen.getByRole('button', { name: /Loading/i });
 
     expect(nameInput).toBeDisabled();
     expect(submitButton).toBeDisabled();
   });
 
   it('should clear errors when user starts typing', async () => {
-    const user = userEvent.setup();
-
     render(
       <CreateGroupForm
         isOpen={true}
@@ -339,7 +341,7 @@ describe('CreateGroupForm', () => {
 
     // Start typing in name field
     const nameInput = screen.getByLabelText('Group Name *');
-    await user.type(nameInput, 'T');
+    fireEvent.change(nameInput, { target: { value: 'T' } });
 
     // Error should be cleared
     expect(
@@ -348,8 +350,6 @@ describe('CreateGroupForm', () => {
   });
 
   it('should show character count for description', async () => {
-    const user = userEvent.setup();
-
     render(
       <CreateGroupForm
         isOpen={true}
@@ -363,7 +363,9 @@ describe('CreateGroupForm', () => {
 
     expect(screen.getByText('0/500 characters')).toBeInTheDocument();
 
-    await user.type(descriptionInput, 'Test description');
+    fireEvent.change(descriptionInput, {
+      target: { value: 'Test description' },
+    });
 
     expect(screen.getByText('16/500 characters')).toBeInTheDocument();
   });
@@ -383,8 +385,10 @@ describe('CreateGroupForm', () => {
     const nameInput = screen.getByLabelText('Group Name *');
     const descriptionInput = screen.getByLabelText('Description (Optional)');
 
-    await user.type(nameInput, 'Test Group');
-    await user.type(descriptionInput, 'Test description');
+    fireEvent.change(nameInput, { target: { value: 'Test Group' } });
+    fireEvent.change(descriptionInput, {
+      target: { value: 'Test description' },
+    });
 
     const cancelButton = screen.getByRole('button', { name: 'Cancel' });
     await user.click(cancelButton);
@@ -419,7 +423,7 @@ describe('CreateGroupForm', () => {
     const emailInput = screen.getByPlaceholderText('Enter email address');
     const addButton = screen.getByText('Add');
 
-    await user.type(emailInput, 'test@example.com');
+    fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
     await user.click(addButton);
 
     expect(screen.getByText('test@example.com')).toBeInTheDocument();
@@ -442,7 +446,7 @@ describe('CreateGroupForm', () => {
     const emailInput = screen.getByPlaceholderText('Enter email address');
     const addButton = screen.getByText('Add');
 
-    await user.type(emailInput, 'invalid-email');
+    fireEvent.change(emailInput, { target: { value: 'invalid-email' } });
     await user.click(addButton);
 
     expect(
@@ -467,11 +471,11 @@ describe('CreateGroupForm', () => {
     const addButton = screen.getByText('Add');
 
     // Add first email
-    await user.type(emailInput, 'test@example.com');
+    fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
     await user.click(addButton);
 
     // Try to add same email again
-    await user.type(emailInput, 'test@example.com');
+    fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
     await user.click(addButton);
 
     expect(screen.getByText('This email is already added')).toBeInTheDocument();
@@ -494,7 +498,7 @@ describe('CreateGroupForm', () => {
     const addButton = screen.getByText('Add');
 
     // Add email
-    await user.type(emailInput, 'test@example.com');
+    fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
     await user.click(addButton);
 
     expect(screen.getByText('test@example.com')).toBeInTheDocument();
@@ -507,8 +511,6 @@ describe('CreateGroupForm', () => {
   });
 
   it('should add email when Enter key is pressed', async () => {
-    const user = userEvent.setup();
-
     render(
       <CreateGroupForm
         isOpen={true}
@@ -520,8 +522,8 @@ describe('CreateGroupForm', () => {
 
     const emailInput = screen.getByPlaceholderText('Enter email address');
 
-    await user.type(emailInput, 'test@example.com');
-    await user.keyboard('{Enter}');
+    fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
+    fireEvent.keyDown(emailInput, { key: 'Enter', code: 'Enter' });
 
     expect(screen.getByText('test@example.com')).toBeInTheDocument();
   });
@@ -542,8 +544,8 @@ describe('CreateGroupForm', () => {
     const emailInput = screen.getByPlaceholderText('Enter email address');
     const addButton = screen.getByText('Add');
 
-    await user.type(nameInput, 'Test Group');
-    await user.type(emailInput, 'test@example.com');
+    fireEvent.change(nameInput, { target: { value: 'Test Group' } });
+    fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
     await user.click(addButton);
 
     const submitButton = screen.getByRole('button', { name: 'Create Group' });
@@ -575,7 +577,7 @@ describe('CreateGroupForm', () => {
 
     const nameInput = screen.getByLabelText('Group Name *');
 
-    await user.type(nameInput, 'Test Group');
+    fireEvent.change(nameInput, { target: { value: 'Test Group' } });
 
     const submitButton = screen.getByRole('button', { name: 'Create Group' });
 
@@ -610,7 +612,7 @@ describe('CreateGroupForm', () => {
     const emailInput = screen.getByPlaceholderText('Enter email address');
     const addButton = screen.getByText('Add');
 
-    await user.type(emailInput, 'test@example.com');
+    fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
     await user.click(addButton);
 
     // Should now show invited members section
@@ -633,8 +635,6 @@ describe('CreateGroupForm', () => {
   });
 
   it('should enable add button when valid email is entered', async () => {
-    const user = userEvent.setup();
-
     render(
       <CreateGroupForm
         isOpen={true}
@@ -649,7 +649,7 @@ describe('CreateGroupForm', () => {
 
     expect(addButton).toBeDisabled();
 
-    await user.type(emailInput, 'test@example.com');
+    fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
 
     expect(addButton).not.toBeDisabled();
   });
@@ -670,7 +670,7 @@ describe('CreateGroupForm', () => {
     const addButton = screen.getByText('Add');
 
     // Try to add invalid email
-    await user.type(emailInput, 'invalid');
+    fireEvent.change(emailInput, { target: { value: 'invalid' } });
     await user.click(addButton);
 
     expect(
@@ -679,7 +679,7 @@ describe('CreateGroupForm', () => {
 
     // Start typing valid email
     await user.clear(emailInput);
-    await user.type(emailInput, 'test@example.com');
+    fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
 
     // Error should be cleared
     expect(
@@ -703,7 +703,7 @@ describe('CreateGroupForm', () => {
     const addButton = screen.getByText('Add');
 
     // Add email
-    await user.type(emailInput, 'test@example.com');
+    fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
     await user.click(addButton);
 
     expect(screen.getByText('test@example.com')).toBeInTheDocument();

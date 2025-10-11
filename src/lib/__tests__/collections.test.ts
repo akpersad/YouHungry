@@ -172,6 +172,7 @@ describe('Collections API Functions', () => {
         description: 'A new collection',
         type: 'personal' as const,
         ownerId: new ObjectId('507f1f77bcf86cd799439012'),
+        restaurantIds: [],
       };
 
       const mockDbInstance = {
@@ -202,6 +203,7 @@ describe('Collections API Functions', () => {
         description: 'A new collection',
         type: 'personal' as const,
         ownerId: 'invalid-objectid',
+        restaurantIds: [],
       };
 
       const mockDbInstance = {
@@ -215,7 +217,7 @@ describe('Collections API Functions', () => {
         mockDbInstance as unknown as ReturnType<typeof db.connectToDatabase>
       );
 
-      const result = await createCollection(collectionData);
+      const result = await createCollection(collectionData as any);
 
       expect(result.ownerId.toString()).toBe('invalid-objectid');
     });

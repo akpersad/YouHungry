@@ -35,10 +35,10 @@ export function FriendRequests({ userId }: FriendRequestsProps) {
   if (isLoading) {
     return (
       <div className="space-y-4">
-        <h2 className="text-xl font-semibold text-gray-900">Friend Requests</h2>
+        <h2 className="text-xl font-semibold text-text">Friend Requests</h2>
         <div className="text-center py-8">
-          <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-          <p className="text-sm text-gray-500 mt-2">Loading requests...</p>
+          <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+          <p className="text-sm text-text-light mt-2">Loading requests...</p>
         </div>
       </div>
     );
@@ -47,9 +47,9 @@ export function FriendRequests({ userId }: FriendRequestsProps) {
   if (error) {
     return (
       <div className="space-y-4">
-        <h2 className="text-xl font-semibold text-gray-900">Friend Requests</h2>
+        <h2 className="text-xl font-semibold text-text">Friend Requests</h2>
         <div className="text-center py-8">
-          <p className="text-sm text-red-600">
+          <p className="text-sm text-destructive">
             {error instanceof Error
               ? error.message
               : 'Failed to load friend requests'}
@@ -66,15 +66,15 @@ export function FriendRequests({ userId }: FriendRequestsProps) {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-gray-900">Friend Requests</h2>
-        <span className="text-sm text-gray-500">
+        <h2 className="text-xl font-semibold text-text">Friend Requests</h2>
+        <span className="text-sm text-text-light">
           {totalRequests} request{totalRequests !== 1 ? 's' : ''}
         </span>
       </div>
 
       {totalRequests === 0 ? (
         <div className="text-center py-8">
-          <div className="text-gray-400 mb-2">
+          <div className="text-text-light mb-2">
             <svg
               className="mx-auto h-12 w-12"
               fill="none"
@@ -89,14 +89,14 @@ export function FriendRequests({ userId }: FriendRequestsProps) {
               />
             </svg>
           </div>
-          <p className="text-sm text-gray-500">No pending friend requests</p>
+          <p className="text-sm text-text-light">No pending friend requests</p>
         </div>
       ) : (
         <div className="space-y-6">
           {/* Received Requests */}
           {receivedRequests.length > 0 && (
             <div className="space-y-3">
-              <h3 className="text-sm font-medium text-gray-700">
+              <h3 className="text-sm font-medium text-text">
                 Received Requests ({receivedRequests.length})
               </h3>
               <div className="space-y-2">
@@ -112,13 +112,13 @@ export function FriendRequests({ userId }: FriendRequestsProps) {
                           />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-gray-900 truncate">
+                          <p className="text-sm font-medium text-text truncate">
                             {request.requester.name}
                           </p>
-                          <p className="text-sm text-gray-500 truncate">
+                          <p className="text-sm text-text-light truncate">
                             {request.requester.email}
                           </p>
-                          <p className="text-xs text-gray-400">
+                          <p className="text-xs text-text-light">
                             Sent{' '}
                             {new Date(request.createdAt).toLocaleDateString()}
                           </p>
@@ -142,7 +142,7 @@ export function FriendRequests({ userId }: FriendRequestsProps) {
                             handleRequestAction(request._id, 'decline')
                           }
                           disabled={updateRequestMutation.isPending}
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                          className="text-destructive hover:text-red-700 hover:bg-destructive/10"
                         >
                           Decline
                         </Button>
@@ -157,7 +157,7 @@ export function FriendRequests({ userId }: FriendRequestsProps) {
           {/* Sent Requests */}
           {sentRequests.length > 0 && (
             <div className="space-y-3">
-              <h3 className="text-sm font-medium text-gray-700">
+              <h3 className="text-sm font-medium text-text">
                 Sent Requests ({sentRequests.length})
               </h3>
               <div className="space-y-2">
@@ -173,13 +173,13 @@ export function FriendRequests({ userId }: FriendRequestsProps) {
                           />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-gray-900 truncate">
+                          <p className="text-sm font-medium text-text truncate">
                             {request.addressee.name}
                           </p>
-                          <p className="text-sm text-gray-500 truncate">
+                          <p className="text-sm text-text-light truncate">
                             {request.addressee.email}
                           </p>
-                          <p className="text-xs text-gray-400">
+                          <p className="text-xs text-text-light">
                             Sent{' '}
                             {new Date(request.createdAt).toLocaleDateString()}
                           </p>

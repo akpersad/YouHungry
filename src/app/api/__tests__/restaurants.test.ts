@@ -49,10 +49,14 @@ describe('/api/restaurants POST', () => {
     _id: '507f1f77bcf86cd799439011',
     name: 'Test Collection',
     restaurantIds: ['507f1f77bcf86cd799439013'],
-  };
+    type: 'personal' as const,
+    ownerId: '507f1f77bcf86cd799439010',
+    createdAt: new Date('2024-01-01T00:00:00.000Z'),
+    updatedAt: new Date('2024-01-01T00:00:00.000Z'),
+  } as any;
 
   it('should add existing restaurant to collection', async () => {
-    mockGetRestaurantDetails.mockResolvedValue(mockRestaurant);
+    mockGetRestaurantDetails.mockResolvedValue(mockRestaurant as any);
     mockAddRestaurantToCollection.mockResolvedValue({
       collection: mockCollection,
       wasAdded: true,
@@ -72,7 +76,11 @@ describe('/api/restaurants POST', () => {
     expect(response.status).toBe(200);
     expect(data.success).toBe(true);
     expect(data.restaurant).toEqual(mockRestaurant);
-    expect(data.collection).toEqual(mockCollection);
+    expect(data.collection).toEqual({
+      ...mockCollection,
+      createdAt: mockCollection.createdAt.toISOString(),
+      updatedAt: mockCollection.updatedAt.toISOString(),
+    });
     expect(mockGetRestaurantDetails).toHaveBeenCalledWith(
       mockRestaurantData.googlePlaceId
     );
@@ -86,7 +94,7 @@ describe('/api/restaurants POST', () => {
 
   it('should create new restaurant and add to collection', async () => {
     mockGetRestaurantDetails.mockResolvedValue(null);
-    mockCreateRestaurant.mockResolvedValue(mockRestaurant);
+    mockCreateRestaurant.mockResolvedValue(mockRestaurant as any);
     mockAddRestaurantToCollection.mockResolvedValue({
       collection: mockCollection,
       wasAdded: true,
@@ -188,7 +196,7 @@ describe('/api/restaurants POST', () => {
 
   it('should return 500 when restaurant creation returns null', async () => {
     mockGetRestaurantDetails.mockResolvedValue(null);
-    mockCreateRestaurant.mockResolvedValue(null);
+    mockCreateRestaurant.mockResolvedValue(null as any);
 
     const request = new NextRequest('http://localhost:3000/api/restaurants', {
       method: 'POST',
@@ -207,7 +215,7 @@ describe('/api/restaurants POST', () => {
   });
 
   it('should return 500 when add to collection fails', async () => {
-    mockGetRestaurantDetails.mockResolvedValue(mockRestaurant);
+    mockGetRestaurantDetails.mockResolvedValue(mockRestaurant as any);
     mockAddRestaurantToCollection.mockResolvedValue({
       collection: null,
       wasAdded: false,
@@ -230,7 +238,7 @@ describe('/api/restaurants POST', () => {
   });
 
   it('should return 409 when restaurant already exists in collection', async () => {
-    mockGetRestaurantDetails.mockResolvedValue(mockRestaurant);
+    mockGetRestaurantDetails.mockResolvedValue(mockRestaurant as any);
     mockAddRestaurantToCollection.mockResolvedValue({
       collection: mockCollection,
       wasAdded: false,

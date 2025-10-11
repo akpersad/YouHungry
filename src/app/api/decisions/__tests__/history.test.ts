@@ -13,7 +13,7 @@ const mockConnectToDatabase = connectToDatabase as jest.MockedFunction<
 >;
 
 describe('GET /api/decisions/history', () => {
-  let mockDb: Partial<Db>;
+  let mockDb: any;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -28,7 +28,7 @@ describe('GET /api/decisions/history', () => {
       toArray: jest.fn(),
     };
 
-    mockConnectToDatabase.mockResolvedValue(mockDb);
+    mockConnectToDatabase.mockResolvedValue(mockDb as any);
   });
 
   it('should return unauthorized if user is not authenticated', async () => {
@@ -42,7 +42,7 @@ describe('GET /api/decisions/history', () => {
       orgPermissions: null,
       actor: null,
       factorVerificationAge: null,
-    });
+    } as any);
 
     const request = new NextRequest(
       'http://localhost:3000/api/decisions/history'
@@ -65,7 +65,7 @@ describe('GET /api/decisions/history', () => {
       orgPermissions: null,
       actor: null,
       factorVerificationAge: null,
-    });
+    } as any);
 
     const mockDecisions = [
       {
@@ -133,7 +133,7 @@ describe('GET /api/decisions/history', () => {
       orgPermissions: null,
       actor: null,
       factorVerificationAge: null,
-    });
+    } as any);
 
     mockDb.countDocuments.mockResolvedValue(0);
     mockDb.toArray
@@ -168,7 +168,7 @@ describe('GET /api/decisions/history', () => {
       orgPermissions: null,
       actor: null,
       factorVerificationAge: null,
-    });
+    } as any);
 
     mockDb.countDocuments.mockResolvedValue(0);
     mockDb.toArray
@@ -207,7 +207,7 @@ describe('GET /api/decisions/history', () => {
       orgPermissions: null,
       actor: null,
       factorVerificationAge: null,
-    });
+    } as any);
 
     const mockDecisions = [
       {
@@ -269,7 +269,7 @@ describe('GET /api/decisions/history', () => {
       orgPermissions: null,
       actor: null,
       factorVerificationAge: null,
-    });
+    } as any);
 
     mockDb.countDocuments.mockResolvedValue(150);
     mockDb.toArray
@@ -303,7 +303,7 @@ describe('GET /api/decisions/history', () => {
       orgPermissions: null,
       actor: null,
       factorVerificationAge: null,
-    });
+    } as any);
 
     const request = new NextRequest(
       'http://localhost:3000/api/decisions/history?limit=1000'

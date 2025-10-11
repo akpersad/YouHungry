@@ -311,14 +311,14 @@ export function EnhancedPerformanceMonitor() {
 
       {/* Monitor Panel */}
       {isVisible && (
-        <div className="absolute bottom-16 right-0 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 p-4 max-h-96 overflow-y-auto">
+        <div className="absolute bottom-16 right-0 w-80 bg-white dark:bg-background rounded-lg shadow-xl border border-border dark:border-border p-4 max-h-96 overflow-y-auto">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            <h3 className="text-lg font-semibold text-text dark:text-white">
               Performance Monitor
             </h3>
             <button
               onClick={() => setIsVisible(false)}
-              className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              className="text-text-light hover:text-text dark:text-text-light dark:hover:text-text-light"
             >
               ✕
             </button>
@@ -327,7 +327,7 @@ export function EnhancedPerformanceMonitor() {
           {/* Alerts */}
           {alerts.length > 0 && (
             <div className="mb-4">
-              <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <h4 className="text-sm font-medium text-text dark:text-text-light mb-2">
                 Alerts ({alerts.length})
               </h4>
               <div className="space-y-2">
@@ -336,10 +336,10 @@ export function EnhancedPerformanceMonitor() {
                     key={index}
                     className={`p-2 rounded text-xs ${
                       alert.type === 'error'
-                        ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                        ? 'bg-destructive/10 text-red-800 dark:bg-destructive/20 dark:text-red-200'
                         : alert.type === 'warning'
                           ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
-                          : 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
+                          : 'bg-primary/10 text-blue-800 dark:bg-primary/20 dark:text-blue-200'
                     }`}
                   >
                     {alert.message}
@@ -351,7 +351,7 @@ export function EnhancedPerformanceMonitor() {
 
           {/* Metrics */}
           <div className="space-y-2">
-            <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            <h4 className="text-sm font-medium text-text dark:text-text-light">
               Current Metrics
             </h4>
 
@@ -361,8 +361,8 @@ export function EnhancedPerformanceMonitor() {
                 <span
                   className={
                     metrics.fcp > alertThresholds.fcp
-                      ? 'text-red-600'
-                      : 'text-green-600'
+                      ? 'text-destructive'
+                      : 'text-success'
                   }
                 >
                   {(metrics.fcp / 1000).toFixed(1)}s
@@ -376,8 +376,8 @@ export function EnhancedPerformanceMonitor() {
                 <span
                   className={
                     metrics.lcp > alertThresholds.lcp
-                      ? 'text-red-600'
-                      : 'text-green-600'
+                      ? 'text-destructive'
+                      : 'text-success'
                   }
                 >
                   {(metrics.lcp / 1000).toFixed(1)}s
@@ -391,8 +391,8 @@ export function EnhancedPerformanceMonitor() {
                 <span
                   className={
                     metrics.fid > alertThresholds.fid
-                      ? 'text-red-600'
-                      : 'text-green-600'
+                      ? 'text-destructive'
+                      : 'text-success'
                   }
                 >
                   {metrics.fid.toFixed(0)}ms
@@ -406,8 +406,8 @@ export function EnhancedPerformanceMonitor() {
                 <span
                   className={
                     metrics.cls > alertThresholds.cls
-                      ? 'text-red-600'
-                      : 'text-green-600'
+                      ? 'text-destructive'
+                      : 'text-success'
                   }
                 >
                   {metrics.cls.toFixed(3)}
@@ -421,8 +421,8 @@ export function EnhancedPerformanceMonitor() {
                 <span
                   className={
                     metrics.bundleSize > alertThresholds.bundleSize
-                      ? 'text-red-600'
-                      : 'text-green-600'
+                      ? 'text-destructive'
+                      : 'text-success'
                   }
                 >
                   {(metrics.bundleSize / 1024).toFixed(0)}KB
@@ -437,8 +437,8 @@ export function EnhancedPerformanceMonitor() {
                   className={
                     metrics.memoryUsed / metrics.memoryLimit >
                     alertThresholds.memoryUsage
-                      ? 'text-red-600'
-                      : 'text-green-600'
+                      ? 'text-destructive'
+                      : 'text-success'
                   }
                 >
                   {((metrics.memoryUsed / metrics.memoryLimit) * 100).toFixed(
@@ -451,12 +451,12 @@ export function EnhancedPerformanceMonitor() {
 
             <div className="flex justify-between text-xs">
               <span>Renders:</span>
-              <span className="text-gray-600">{renderCount}</span>
+              <span className="text-text-light">{renderCount}</span>
             </div>
           </div>
 
           {/* Actions */}
-          <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+          <div className="mt-4 pt-4 border-t border-border dark:border-border">
             <button
               onClick={collectMetrics}
               disabled={isCollecting}

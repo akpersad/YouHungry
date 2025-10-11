@@ -313,7 +313,7 @@ export function AddressInput({
         onBlur={handleBlur}
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
-        className={`w-full ${validationError ? 'border-red-500' : isValid ? 'border-green-500' : ''}`}
+        className={`w-full ${validationError ? 'border-destructive' : isValid ? 'border-success' : ''}`}
         required={required}
         disabled={disabled}
         autoComplete="off"
@@ -322,7 +322,7 @@ export function AddressInput({
       {/* Loading indicator */}
       {isLoading && (
         <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
         </div>
       )}
 
@@ -330,9 +330,9 @@ export function AddressInput({
       {value && !isLoading && (
         <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
           {isValid ? (
-            <span className="text-green-500 text-sm">✓</span>
+            <span className="text-success text-sm">✓</span>
           ) : validationError ? (
-            <span className="text-red-500 text-sm">⚠</span>
+            <span className="text-destructive text-sm">⚠</span>
           ) : null}
         </div>
       )}
@@ -341,25 +341,25 @@ export function AddressInput({
       {showSuggestions && suggestions.length > 0 && (
         <div
           ref={suggestionsRef}
-          className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto"
+          className="absolute z-[60] w-full mt-1 bg-white dark:bg-gray-800 border border-border rounded-md shadow-xl max-h-60 overflow-y-auto"
         >
           {suggestions.map((suggestion) => (
             <button
               key={suggestion.placeId}
               type="button"
               data-suggestion
-              className="w-full px-4 py-2 text-left hover:bg-gray-100 focus:bg-gray-100 focus:outline-none"
+              className="w-full px-4 py-2 text-left hover:bg-surface focus:bg-surface focus:outline-none"
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 handleSuggestionSelect(suggestion);
               }}
             >
-              <div className="text-sm text-gray-900">
+              <div className="text-sm text-text">
                 {suggestion.formattedAddress}
               </div>
               {suggestion.confidence < 0.8 && (
-                <div className="text-xs text-gray-500">
+                <div className="text-xs text-text-light">
                   Confidence: {Math.round(suggestion.confidence * 100)}%
                 </div>
               )}
@@ -370,7 +370,7 @@ export function AddressInput({
 
       {/* Validation error message */}
       {validationError && (
-        <div className="mt-1 text-sm text-red-600">{validationError}</div>
+        <div className="mt-1 text-sm text-destructive">{validationError}</div>
       )}
     </div>
   );

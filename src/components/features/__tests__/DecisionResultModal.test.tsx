@@ -152,7 +152,7 @@ describe('DecisionResultModal', () => {
       const { unmount } = render(
         <DecisionResultModal
           {...defaultProps}
-          selectedRestaurant={restaurant}
+          selectedRestaurant={restaurant as any}
         />
       );
 

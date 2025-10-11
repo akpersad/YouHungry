@@ -284,14 +284,14 @@ interface Decision {
   collectionId: ObjectId;
   groupId?: ObjectId;
   participants: ObjectId[]; // User IDs
-  method: 'tiered' | 'random';
+  method: 'tiered' | 'random' | 'manual'; // 'manual' for user-entered past decisions
   status: 'active' | 'completed' | 'expired' | 'closed';
   deadline: Date;
   visitDate: Date;
   result?: {
     restaurantId: ObjectId;
     selectedAt: Date;
-    reasoning: string;
+    reasoning: string; // For manual decisions, stores optional user notes
     weights?: Record<string, number>; // Restaurant weights for tiered decisions
   };
   votes?: {
@@ -302,6 +302,13 @@ interface Decision {
   createdAt: Date;
   updatedAt: Date;
 }
+
+/**
+ * Decision Method Types:
+ * - 'tiered': Group voting with weighted rankings (1st = 3 points, 2nd = 2 points, 3rd = 1 point)
+ * - 'random': Weighted random selection using 30-day rolling history
+ * - 'manual': User-entered past restaurant visit for history tracking
+ */
 ```
 
 #### Friendships Collection
@@ -449,6 +456,7 @@ type Decision {
 
 - `POST /api/decisions` - Start decision process
 - `POST /api/decisions/[id]/vote` - Submit vote
+- `POST /api/decisions/manual` - Create manual decision entry for past visits
 
 ### Current REST API Routes
 
@@ -488,6 +496,8 @@ type Decision {
 - `POST /api/decisions` - Start decision process
 - `POST /api/decisions/[id]/vote` - Submit vote
 - `GET /api/decisions/[id]` - Get decision details
+- `POST /api/decisions/manual` - Create manual decision entry for past visits
+- `GET /api/decisions/history` - Get decision history with filtering and pagination
 
 ##### Group Decision Routes (Advanced Operations)
 

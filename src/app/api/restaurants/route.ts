@@ -2,6 +2,41 @@ import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { createRestaurant, getRestaurantDetails } from '@/lib/restaurants';
 import { addRestaurantToCollection } from '@/lib/collections';
+import { connectToDatabase } from '@/lib/db';
+import { ObjectId } from 'mongodb';
+
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const restaurantIds = searchParams.get('restaurantIds');
+
+    if (!restaurantIds) {
+      return NextResponse.json(
+        { success: false, error: 'Restaurant IDs are required' },
+        { status: 400 }
+      );
+    }
+
+    const db = await connectToDatabase();
+    const ids = restaurantIds.split(',').map((id) => new ObjectId(id.trim()));
+
+    const restaurants = await db
+      .collection('restaurants')
+      .find({ _id: { $in: ids } })
+      .toArray();
+
+    return NextResponse.json({
+      success: true,
+      restaurants,
+    });
+  } catch (error) {
+    logger.error('Get restaurants by IDs error:', error);
+    return NextResponse.json(
+      { success: false, error: 'Failed to fetch restaurants' },
+      { status: 500 }
+    );
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {

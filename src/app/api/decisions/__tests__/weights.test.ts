@@ -1,7 +1,11 @@
 import { GET, POST } from '../weights/route';
 import { auth } from '@clerk/nextjs/server';
 import { connectToDatabase } from '@/lib/db';
-import { getDecisionHistory } from '@/lib/decisions';
+import {
+  getDecisionHistory,
+  getUserDecisionHistory,
+  getGroupDecisionHistory,
+} from '@/lib/decisions';
 import { NextRequest } from 'next/server';
 import { Db } from 'mongodb';
 import { Decision } from '@/types/database';
@@ -17,9 +21,15 @@ const mockConnectToDatabase = connectToDatabase as jest.MockedFunction<
 const mockGetDecisionHistory = getDecisionHistory as jest.MockedFunction<
   typeof getDecisionHistory
 >;
+const mockGetUserDecisionHistory =
+  getUserDecisionHistory as jest.MockedFunction<typeof getUserDecisionHistory>;
+const mockGetGroupDecisionHistory =
+  getGroupDecisionHistory as jest.MockedFunction<
+    typeof getGroupDecisionHistory
+  >;
 
 describe('GET /api/decisions/weights', () => {
-  let mockDb: Partial<Db>;
+  let mockDb: any;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -31,7 +41,7 @@ describe('GET /api/decisions/weights', () => {
       toArray: jest.fn(),
     };
 
-    mockConnectToDatabase.mockResolvedValue(mockDb);
+    mockConnectToDatabase.mockResolvedValue(mockDb as any);
   });
 
   it('should return unauthorized if user is not authenticated', async () => {
@@ -45,7 +55,7 @@ describe('GET /api/decisions/weights', () => {
       orgPermissions: null,
       actor: null,
       factorVerificationAge: null,
-    });
+    } as any);
 
     const request = new NextRequest(
       'http://localhost:3000/api/decisions/weights?collectionId=collection1'
@@ -66,11 +76,12 @@ describe('GET /api/decisions/weights', () => {
       orgPermissions: null,
       actor: null,
       factorVerificationAge: null,
-    });
+    } as any);
 
     const mockCollection = {
       _id: { toString: () => 'collection1' },
       restaurantIds: [{ toString: () => 'restaurant1' }],
+      type: 'personal',
     };
 
     const mockDecisions = [
@@ -92,7 +103,7 @@ describe('GET /api/decisions/weights', () => {
 
     mockDb.findOne.mockResolvedValue(mockCollection);
     mockDb.toArray.mockResolvedValue(mockRestaurants);
-    mockGetDecisionHistory.mockResolvedValue(mockDecisions as Decision[]);
+    mockGetUserDecisionHistory.mockResolvedValue(mockDecisions as Decision[]);
 
     const request = new NextRequest(
       'http://localhost:3000/api/decisions/weights?collectionId=collection1'
@@ -119,7 +130,7 @@ describe('GET /api/decisions/weights', () => {
       orgPermissions: null,
       actor: null,
       factorVerificationAge: null,
-    });
+    } as any);
     mockDb.findOne.mockResolvedValue(null);
 
     const request = new NextRequest(
@@ -132,7 +143,7 @@ describe('GET /api/decisions/weights', () => {
 });
 
 describe('POST /api/decisions/weights', () => {
-  let mockDb: Partial<Db>;
+  let mockDb: any;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -143,7 +154,7 @@ describe('POST /api/decisions/weights', () => {
       deleteMany: jest.fn(),
     };
 
-    mockConnectToDatabase.mockResolvedValue(mockDb);
+    mockConnectToDatabase.mockResolvedValue(mockDb as any);
   });
 
   it('should reset all weights for a collection', async () => {
@@ -157,7 +168,7 @@ describe('POST /api/decisions/weights', () => {
       orgPermissions: null,
       actor: null,
       factorVerificationAge: null,
-    });
+    } as any);
 
     const mockCollection = {
       _id: { toString: () => 'collection1' },
@@ -198,7 +209,7 @@ describe('POST /api/decisions/weights', () => {
       orgPermissions: null,
       actor: null,
       factorVerificationAge: null,
-    });
+    } as any);
 
     const mockCollection = {
       _id: { toString: () => 'collection1' },

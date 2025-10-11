@@ -50,7 +50,7 @@ const mockCollection = {
 describe('Group Decision Functions', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockConnectToDatabase.mockResolvedValue(mockDb as unknown);
+    mockConnectToDatabase.mockResolvedValue(mockDb as any);
     mockDb.collection.mockReturnValue(mockCollection as unknown);
 
     // Set up default mocks for getRestaurantsByCollection

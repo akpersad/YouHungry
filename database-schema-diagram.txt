@@ -53,7 +53,7 @@
 │ • description   │              │ • collectionId  │
 │ • adminIds      │              │ • groupId (FK)  │
 │ • memberIds     │              │ • participants  │
-│ • collectionIds │              │ • method        │
+│ • collectionIds │              │ • method*       │
 │ • createdAt     │              │ • status        │
 │ • updatedAt     │              │ • deadline      │
 │                 │              │ • visitDate     │
@@ -161,6 +161,7 @@
 8. DECISIONS ↔ RESTAURANTS (N:1)
    - Completed decisions result in one selected restaurant
    - Multiple decisions can select the same restaurant
+   - Decision method field: 'tiered' (voting), 'random' (weighted), 'manual' (user-entered)
 
 9. FRIENDSHIPS ↔ USERS (N:1 each direction)
    - Friendships connect two users (requester and addressee)
@@ -192,6 +193,8 @@ FRIENDSHIPS:
 
 DECISIONS:
 - status + deadline (compound)
+- method (for filtering by decision type: tiered/random/manual)
+- type + visitDate (for history queries)
 
 COLLECTIONS:
 - ownerId + type (compound)
@@ -200,6 +203,11 @@ GROUP_INVITATIONS:
 - groupId + inviteeId (compound)
 - status (for filtering pending invitations)
 - inviteeId (for user's invitations lookup)
+
+*DECISIONS.method Field Values:
+  - 'tiered': Group voting with weighted rankings
+  - 'random': Weighted random selection using 30-day rolling history
+  - 'manual': User-entered past restaurant visit for history tracking
 
 OFFLINE_STORAGE (IndexedDB):
 - restaurants: lastUpdated
