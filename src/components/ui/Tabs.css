@@ -1,0 +1,74 @@
+/* Tabs Component Styles */
+
+.tabs-container {
+  width: 100%;
+}
+
+.tabs-header {
+  border-bottom: 0.0625rem solid var(--border);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.tabs-list {
+  display: flex;
+  gap: 0.25rem;
+  min-width: max-content;
+}
+
+.tab-button {
+  position: relative;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  white-space: nowrap;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  border-bottom: 0.125rem solid transparent;
+}
+
+.tab-button:hover {
+  color: var(--text);
+}
+
+.tab-button[aria-selected='true'] {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+}
+
+.tab-button:not([aria-selected='true']) {
+  color: var(--text-muted);
+}
+
+.tab-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.5rem;
+  font-size: 0.75rem;
+  border-radius: 9999px;
+  margin-left: 0.5rem;
+}
+
+.tab-button[aria-selected='true'] .tab-badge {
+  background-color: rgba(var(--primary-rgb), 0.1);
+  color: var(--primary);
+}
+
+.tab-button:not([aria-selected='true']) .tab-badge {
+  background-color: var(--background-secondary);
+  color: var(--text-muted);
+}
+
+.tab-content {
+  margin-top: 1.5rem;
+}
+
+.tab-panel {
+  display: none;
+}
+
+.tab-panel[aria-hidden='false'] {
+  display: block;
+}
