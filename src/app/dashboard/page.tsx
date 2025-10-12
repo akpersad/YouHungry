@@ -35,7 +35,7 @@ export default function DashboardPage() {
         <CollectionList />
 
         {/* Hidden on mobile - actions are available via bottom navigation */}
-        <div className="hidden md:block mt-8 grid md:grid-cols-2 gap-6">
+        <div className="hidden md:grid mt-8 md:grid-cols-2 gap-6">
           <Card>
             <CardHeader>
               <CardTitle>Find Restaurants</CardTitle>
