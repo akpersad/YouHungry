@@ -23,6 +23,9 @@ export interface UserEmailData {
   inviterId?: string;
   restaurantName?: string;
   restaurantId?: string;
+  collectionName?: string;
+  collectionUrl?: string;
+  createdByName?: string;
   unsubscribeToken?: string;
 }
 
@@ -41,12 +44,17 @@ export const USER_EMAIL_TEMPLATES = {
     template: (data: UserEmailData) => `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; padding: 30px; margin-bottom: 20px; text-align: center;">
-          <h1 style="color: white; margin: 0 0 10px 0; font-size: 28px;">🍽️ You Hungry?</h1>
+          <h1 style="color: white; margin: 0 0 10px 0; font-size: 28px;">🍽️ ForkInTheRoad</h1>
           <p style="color: #f0f0f0; margin: 0; font-size: 18px;">Time to decide where to eat!</p>
         </div>
         
         <div style="background: #f9fafb; border-radius: 8px; padding: 25px; margin-bottom: 20px;">
-          <h2 style="margin-top: 0; color: #374151; font-size: 24px;">${data.groupName} Decision</h2>
+          <h2 style="margin-top: 0; color: #374151; font-size: 24px;">${data.groupName} Decision${data.collectionName ? ` - ${data.collectionName}` : ''}</h2>
+          ${
+            data.createdByName
+              ? `<p style="color: #9ca3af; font-size: 14px; margin-top: 0;">Started by ${data.createdByName}</p>`
+              : ''
+          }
           <p style="color: #6b7280; font-size: 16px; line-height: 1.6;">
             ${
               data.decisionType === 'tiered'
@@ -60,7 +68,7 @@ export const USER_EMAIL_TEMPLATES = {
               ? `
             <div style="background: #dbeafe; border: 1px solid #93c5fd; border-radius: 6px; padding: 15px; margin: 20px 0;">
               <p style="margin: 0; color: #1e40af; font-weight: 600;">
-                ⏰ Deadline: ${data.deadline.toLocaleString()}
+                ⏰ Decision needed by: ${data.deadline.toLocaleString()}
               </p>
             </div>
           `
@@ -68,7 +76,7 @@ export const USER_EMAIL_TEMPLATES = {
           }
           
           <div style="text-align: center; margin: 25px 0;">
-            <a href="${process.env.NEXT_PUBLIC_APP_URL}/groups/${data.groupId}/decisions/${data.decisionId}" 
+            <a href="${data.collectionUrl || `${process.env.NEXT_PUBLIC_APP_URL}/groups/${data.groupId}/decisions/${data.decisionId}`}" 
                style="background: #667eea; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-block;">
               ${data.decisionType === 'tiered' ? 'Vote Now' : 'View Decision'}
             </a>
@@ -76,7 +84,7 @@ export const USER_EMAIL_TEMPLATES = {
         </div>
         
         <div style="margin-top: 20px; padding: 15px; background: #f3f4f6; border-radius: 8px; font-size: 14px; color: #6b7280;">
-          <p style="margin: 0;">This notification was sent by You Hungry? - Your group decision app.</p>
+          <p style="margin: 0;">This notification was sent by ForkInTheRoad - Your group decision app.</p>
           ${
             data.unsubscribeToken
               ? `
@@ -96,18 +104,18 @@ export const USER_EMAIL_TEMPLATES = {
 
   friend_request: {
     subject: (requesterName: string) =>
-      `${requesterName} wants to be friends on You Hungry?`,
+      `${requesterName} wants to be friends on ForkInTheRoad`,
     template: (data: UserEmailData) => `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; padding: 30px; margin-bottom: 20px; text-align: center;">
-          <h1 style="color: white; margin: 0 0 10px 0; font-size: 28px;">🍽️ You Hungry?</h1>
+          <h1 style="color: white; margin: 0 0 10px 0; font-size: 28px;">🍽️ ForkInTheRoad</h1>
           <p style="color: #f0f0f0; margin: 0; font-size: 18px;">New friend request!</p>
         </div>
         
         <div style="background: #f9fafb; border-radius: 8px; padding: 25px; margin-bottom: 20px;">
           <h2 style="margin-top: 0; color: #374151; font-size: 24px;">Friend Request</h2>
           <p style="color: #6b7280; font-size: 16px; line-height: 1.6;">
-            <strong>${data.requesterName}</strong> wants to be friends with you on You Hungry? 
+            <strong>${data.requesterName}</strong> wants to be friends with you on ForkInTheRoad 
             Accept their request to start making food decisions together!
           </p>
           
@@ -120,7 +128,7 @@ export const USER_EMAIL_TEMPLATES = {
         </div>
         
         <div style="margin-top: 20px; padding: 15px; background: #f3f4f6; border-radius: 8px; font-size: 14px; color: #6b7280;">
-          <p style="margin: 0;">This notification was sent by You Hungry? - Your group decision app.</p>
+          <p style="margin: 0;">This notification was sent by ForkInTheRoad - Your group decision app.</p>
           ${
             data.unsubscribeToken
               ? `
@@ -144,7 +152,7 @@ export const USER_EMAIL_TEMPLATES = {
     template: (data: UserEmailData) => `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; padding: 30px; margin-bottom: 20px; text-align: center;">
-          <h1 style="color: white; margin: 0 0 10px 0; font-size: 28px;">🍽️ You Hungry?</h1>
+          <h1 style="color: white; margin: 0 0 10px 0; font-size: 28px;">🍽️ ForkInTheRoad</h1>
           <p style="color: #f0f0f0; margin: 0; font-size: 18px;">You're invited to a group!</p>
         </div>
         
@@ -152,7 +160,7 @@ export const USER_EMAIL_TEMPLATES = {
           <h2 style="margin-top: 0; color: #374151; font-size: 24px;">Group Invitation</h2>
           <p style="color: #6b7280; font-size: 16px; line-height: 1.6;">
             <strong>${data.inviterName}</strong> has invited you to join the group 
-            <strong>"${data.groupName}"</strong> on You Hungry?. 
+            <strong>"${data.groupName}"</strong> on ForkInTheRoad. 
             Join to start making food decisions together!
           </p>
           
@@ -165,7 +173,7 @@ export const USER_EMAIL_TEMPLATES = {
         </div>
         
         <div style="margin-top: 20px; padding: 15px; background: #f3f4f6; border-radius: 8px; font-size: 14px; color: #6b7280;">
-          <p style="margin: 0;">This notification was sent by You Hungry? - Your group decision app.</p>
+          <p style="margin: 0;">This notification was sent by ForkInTheRoad - Your group decision app.</p>
           ${
             data.unsubscribeToken
               ? `
@@ -189,31 +197,35 @@ export const USER_EMAIL_TEMPLATES = {
     template: (data: UserEmailData) => `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 8px; padding: 30px; margin-bottom: 20px; text-align: center;">
-          <h1 style="color: white; margin: 0 0 10px 0; font-size: 28px;">🍽️ You Hungry?</h1>
+          <h1 style="color: white; margin: 0 0 10px 0; font-size: 28px;">🍽️ ForkInTheRoad</h1>
           <p style="color: #f0f0f0; margin: 0; font-size: 18px;">Decision made!</p>
         </div>
         
         <div style="background: #f9fafb; border-radius: 8px; padding: 25px; margin-bottom: 20px;">
-          <h2 style="margin-top: 0; color: #374151; font-size: 24px;">Decision Result</h2>
+          <h2 style="margin-top: 0; color: #374151; font-size: 24px;">Decision Result${data.collectionName ? ` - ${data.collectionName}` : ''}</h2>
           <p style="color: #6b7280; font-size: 16px; line-height: 1.6;">
-            Your group <strong>"${data.groupName}"</strong> has decided on a restaurant!
+            Your group <strong>"${data.groupName}"</strong> has decided on a restaurant${
+              data.decisionType
+                ? ` using ${data.decisionType === 'random' ? 'random selection' : 'group voting'}`
+                : ''
+            }!
           </p>
           
           <div style="background: #d1fae5; border: 1px solid #34d399; border-radius: 6px; padding: 20px; margin: 20px 0; text-align: center;">
-            <h3 style="margin: 0 0 10px 0; color: #059669; font-size: 20px;">🎉 ${data.restaurantName}</h3>
+            <h3 style="margin: 0 0 10px 0; color: #059669; font-size: 20px;">${data.decisionType === 'random' ? '🎲' : '🎉'} ${data.restaurantName}</h3>
             <p style="margin: 0; color: #047857;">This is where you'll be eating!</p>
           </div>
           
           <div style="text-align: center; margin: 25px 0;">
-            <a href="${process.env.NEXT_PUBLIC_APP_URL}/groups/${data.groupId}/decisions/${data.decisionId}" 
+            <a href="${data.collectionUrl || `${process.env.NEXT_PUBLIC_APP_URL}/groups/${data.groupId}/decisions/${data.decisionId}`}" 
                style="background: #10b981; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-block;">
-              View Decision Details
+              View Details
             </a>
           </div>
         </div>
         
         <div style="margin-top: 20px; padding: 15px; background: #f3f4f6; border-radius: 8px; font-size: 14px; color: #6b7280;">
-          <p style="margin: 0;">This notification was sent by You Hungry? - Your group decision app.</p>
+          <p style="margin: 0;">This notification was sent by ForkInTheRoad - Your group decision app.</p>
           ${
             data.unsubscribeToken
               ? `
@@ -318,7 +330,7 @@ export class UserEmailNotificationService {
           );
           break;
         default:
-          subject = 'You Hungry? Notification';
+          subject = 'ForkInTheRoad Notification';
       }
 
       const emailData = {
@@ -358,6 +370,17 @@ export class UserEmailNotificationService {
         recipient: data.recipientEmail,
         emailId: result.id,
       });
+
+      // Track API usage for cost monitoring
+      try {
+        const { trackAPIUsage } = await import('./api-usage-tracker');
+        await trackAPIUsage('resend_email_sent', false, {
+          type: data.type,
+          recipient: data.recipientEmail,
+        });
+      } catch (error) {
+        logger.error('Failed to track email API usage:', error);
+      }
 
       return {
         success: true,

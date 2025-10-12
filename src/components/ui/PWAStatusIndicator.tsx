@@ -143,7 +143,7 @@ export function PWAInstallPrompt({
 
         <div className="flex-1 min-w-0">
           <h3 className="text-sm font-medium text-text dark:text-white">
-            Install You Hungry?
+            Install ForkInTheRoad
           </h3>
           <p className="text-xs text-text-light dark:text-text-light mt-1">
             Install this app on your device for a better experience and offline

@@ -168,7 +168,8 @@ export async function createGroupDecision(
   participants: string[], // Array of user IDs
   method: 'random' | 'tiered' = 'tiered',
   visitDate: Date,
-  deadlineHours: number = 24
+  deadlineHours: number = 24,
+  createdBy?: string // User ID of the person who started the decision
 ): Promise<Decision> {
   const db = await connectToDatabase();
   const now = new Date();
@@ -177,6 +178,7 @@ export async function createGroupDecision(
     type: 'group',
     collectionId: new ObjectId(collectionId),
     groupId: new ObjectId(groupId),
+    createdBy: createdBy ? new ObjectId(createdBy) : undefined,
     participants, // Store user IDs as strings
     method,
     status: 'active',
@@ -744,7 +746,8 @@ export async function performGroupRandomSelection(
   collectionId: string,
   groupId: string,
   participants: string[],
-  visitDate: Date
+  visitDate: Date,
+  createdBy?: string // User ID of the person who started the decision
 ): Promise<DecisionResult> {
   const db = await connectToDatabase();
 
@@ -817,7 +820,9 @@ export async function performGroupRandomSelection(
     groupId,
     participants,
     'random',
-    visitDate
+    visitDate,
+    24, // deadline hours (default)
+    createdBy
   );
 
   // Update the decision with the result

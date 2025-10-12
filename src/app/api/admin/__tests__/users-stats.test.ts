@@ -5,7 +5,6 @@
  */
 
 import { GET } from '../users/stats/route';
-import { NextRequest } from 'next/server';
 
 // Mock the database and auth modules
 jest.mock('@/lib/db', () => ({
@@ -82,6 +81,11 @@ describe('/api/admin/users/stats', () => {
         { _id: 'user2' },
       ])
       .mockResolvedValueOnce([
+        // usersWithDecisions
+        { _id: 'user1' },
+        { _id: 'user2' },
+      ])
+      .mockResolvedValueOnce([
         // topActiveUsers
         {
           _id: 'user1',
@@ -93,9 +97,6 @@ describe('/api/admin/users/stats', () => {
         },
       ]);
 
-    const request = new NextRequest(
-      'http://localhost:3000/api/admin/users/stats'
-    );
     const response = await GET();
     const data = await response.json();
 
@@ -115,9 +116,6 @@ describe('/api/admin/users/stats', () => {
   it('returns error when authentication fails', async () => {
     mockRequireAuth.mockRejectedValue(new Error('Unauthorized'));
 
-    const request = new NextRequest(
-      'http://localhost:3000/api/admin/users/stats'
-    );
     const response = await GET();
     const data = await response.json();
 
@@ -130,9 +128,6 @@ describe('/api/admin/users/stats', () => {
       new Error('Database connection failed')
     );
 
-    const request = new NextRequest(
-      'http://localhost:3000/api/admin/users/stats'
-    );
     const response = await GET();
     const data = await response.json();
 
@@ -153,9 +148,6 @@ describe('/api/admin/users/stats', () => {
       mockDb as unknown as ReturnType<typeof connectToDatabase>
     );
 
-    const request = new NextRequest(
-      'http://localhost:3000/api/admin/users/stats'
-    );
     const response = await GET();
     const data = await response.json();
 
@@ -168,29 +160,42 @@ describe('/api/admin/users/stats', () => {
   it('calculates daily registrations correctly', async () => {
     const mockDb = {
       collection: jest.fn().mockReturnThis(),
-      countDocuments: jest.fn().mockResolvedValue(0),
+      countDocuments: jest.fn(),
       aggregate: jest.fn().mockReturnThis(),
       toArray: jest.fn(),
-      distinct: jest.fn().mockResolvedValue([]),
+      distinct: jest.fn(),
     };
 
     mockConnectToDatabase.mockResolvedValue(
       mockDb as unknown as ReturnType<typeof connectToDatabase>
     );
 
-    // Mock daily registrations
+    // Mock countDocuments calls (all 7 of them)
+    mockDb.countDocuments
+      .mockResolvedValueOnce(100) // totalUsers
+      .mockResolvedValueOnce(10) // recentUsers
+      .mockResolvedValueOnce(5) // weeklyUsers
+      .mockResolvedValueOnce(50) // totalFriendRequests
+      .mockResolvedValueOnce(10) // pendingFriendRequests
+      .mockResolvedValueOnce(20) // totalGroupInvitations
+      .mockResolvedValueOnce(5); // pendingGroupInvitations
+
+    // Mock distinct calls
+    mockDb.distinct
+      .mockResolvedValueOnce(['user1', 'user2']) // usersWithCollections
+      .mockResolvedValueOnce(['user3']); // For distinct in decisions
+
+    // Mock toArray calls in correct order
     mockDb.toArray.mockResolvedValueOnce([
       { _id: '2024-01-01', count: 5 },
       { _id: '2024-01-02', count: 3 },
       { _id: '2024-01-03', count: 7 },
-    ]);
+    ]); // dailyRegistrations
 
     mockDb.toArray.mockResolvedValueOnce([]); // usersWithGroups
+    mockDb.toArray.mockResolvedValueOnce([]); // usersWithDecisions
     mockDb.toArray.mockResolvedValueOnce([]); // topActiveUsers
 
-    const request = new NextRequest(
-      'http://localhost:3000/api/admin/users/stats'
-    );
     const response = await GET();
     const data = await response.json();
 
@@ -205,18 +210,35 @@ describe('/api/admin/users/stats', () => {
   it('formats top active users correctly', async () => {
     const mockDb = {
       collection: jest.fn().mockReturnThis(),
-      countDocuments: jest.fn().mockResolvedValue(0),
+      countDocuments: jest.fn(),
       aggregate: jest.fn().mockReturnThis(),
       toArray: jest.fn(),
-      distinct: jest.fn().mockResolvedValue([]),
+      distinct: jest.fn(),
     };
 
     mockConnectToDatabase.mockResolvedValue(
       mockDb as unknown as ReturnType<typeof connectToDatabase>
     );
 
+    // Mock countDocuments calls
+    mockDb.countDocuments
+      .mockResolvedValueOnce(100) // totalUsers
+      .mockResolvedValueOnce(10) // recentUsers
+      .mockResolvedValueOnce(5) // weeklyUsers
+      .mockResolvedValueOnce(50) // totalFriendRequests
+      .mockResolvedValueOnce(10) // pendingFriendRequests
+      .mockResolvedValueOnce(20) // totalGroupInvitations
+      .mockResolvedValueOnce(5); // pendingGroupInvitations
+
+    // Mock distinct calls
+    mockDb.distinct
+      .mockResolvedValueOnce(['user1', 'user2']) // usersWithCollections
+      .mockResolvedValueOnce(['user3']); // For distinct in decisions
+
+    // Mock toArray calls in order
     mockDb.toArray.mockResolvedValueOnce([]); // dailyRegistrations
     mockDb.toArray.mockResolvedValueOnce([]); // usersWithGroups
+    mockDb.toArray.mockResolvedValueOnce([]); // usersWithDecisions
 
     // Mock top active users
     mockDb.toArray.mockResolvedValueOnce([
@@ -238,9 +260,6 @@ describe('/api/admin/users/stats', () => {
       },
     ]);
 
-    const request = new NextRequest(
-      'http://localhost:3000/api/admin/users/stats'
-    );
     const response = await GET();
     const data = await response.json();
 

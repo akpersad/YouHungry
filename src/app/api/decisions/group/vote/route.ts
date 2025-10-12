@@ -5,7 +5,9 @@ import {
   submitGroupVote,
   completeTieredGroupDecision,
   closeGroupDecision,
+  getGroupDecision,
 } from '@/lib/decisions';
+import { sendDecisionCompletedNotifications } from '@/lib/decision-notifications';
 
 export async function POST(request: NextRequest) {
   try {
@@ -66,6 +68,23 @@ export async function PUT(request: NextRequest) {
     }
 
     const result = await completeTieredGroupDecision(decisionId);
+
+    // Get the decision details to send notifications
+    const decision = await getGroupDecision(decisionId);
+    if (decision && decision.groupId && decision.collectionId) {
+      try {
+        await sendDecisionCompletedNotifications(
+          decision.groupId.toString(),
+          decision.collectionId.toString(),
+          decisionId,
+          result.restaurantId.toString(),
+          'tiered'
+        );
+      } catch (error) {
+        // Log error but don't fail the request
+        logger.error('Failed to send decision completed notifications:', error);
+      }
+    }
 
     return NextResponse.json({
       success: true,

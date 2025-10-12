@@ -88,7 +88,10 @@ export async function POST(req: NextRequest) {
             timezone: undefined,
           },
           notificationSettings: {
-            groupDecisions: true,
+            groupDecisions: {
+              started: true, // Default to true
+              completed: true, // Default to true
+            },
             friendRequests: true,
             groupInvites: true,
             smsEnabled: false, // Default to false

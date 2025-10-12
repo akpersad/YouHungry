@@ -47,6 +47,18 @@ export async function POST(request: NextRequest) {
       contentType: file.type,
     });
 
+    // Track API usage for cost monitoring
+    try {
+      const { trackAPIUsage } = await import('@/lib/api-usage-tracker');
+      await trackAPIUsage('vercel_blob_put', false, {
+        filename,
+        size: file.size,
+        contentType: file.type,
+      });
+    } catch (error) {
+      logger.error('Failed to track Blob API usage:', error);
+    }
+
     // Update user profile with new picture URL
     const updatedUser = await updateUser(user._id.toString(), {
       profilePicture: blob.url,

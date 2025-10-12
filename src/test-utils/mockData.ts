@@ -91,7 +91,10 @@ export const mockUser: User = {
       timezone: 'America/New_York',
     },
     notificationSettings: {
-      groupDecisions: true,
+      groupDecisions: {
+        started: true,
+        completed: true,
+      },
       friendRequests: true,
       groupInvites: true,
       smsEnabled: false,
@@ -119,7 +122,10 @@ export const mockUser2: User = {
       timezone: 'America/Los_Angeles',
     },
     notificationSettings: {
-      groupDecisions: false,
+      groupDecisions: {
+        started: false,
+        completed: false,
+      },
       friendRequests: true,
       groupInvites: false,
       smsEnabled: true,

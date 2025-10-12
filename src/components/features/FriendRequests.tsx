@@ -8,6 +8,7 @@ import {
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { UserAvatar } from '@/components/ui/UserAvatar';
+import { DropdownMenu, DropdownMenuItem } from '@/components/ui/DropdownMenu';
 
 interface FriendRequestsProps {
   userId: string;
@@ -101,7 +102,7 @@ export function FriendRequests({ userId }: FriendRequestsProps) {
               </h3>
               <div className="space-y-2">
                 {receivedRequests.map((request) => (
-                  <Card key={request._id} className="p-4">
+                  <Card key={request._id} className="p-4 !overflow-visible">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
                         <div className="flex-shrink-0">
@@ -124,7 +125,9 @@ export function FriendRequests({ userId }: FriendRequestsProps) {
                           </p>
                         </div>
                       </div>
-                      <div className="flex-shrink-0 space-x-2">
+
+                      {/* Desktop: Show buttons directly */}
+                      <div className="hidden md:flex flex-shrink-0 space-x-2">
                         <Button
                           size="sm"
                           onClick={() =>
@@ -146,6 +149,77 @@ export function FriendRequests({ userId }: FriendRequestsProps) {
                         >
                           Decline
                         </Button>
+                      </div>
+
+                      {/* Mobile: Show dropdown menu */}
+                      <div className="flex md:hidden flex-shrink-0">
+                        <DropdownMenu
+                          trigger={
+                            <button
+                              className="p-2 hover:bg-tertiary rounded-lg transition-colors"
+                              aria-label="Request actions"
+                            >
+                              <svg
+                                className="w-5 h-5 text-primary"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
+                                />
+                              </svg>
+                            </button>
+                          }
+                          align="right"
+                        >
+                          <DropdownMenuItem
+                            onClick={() =>
+                              handleRequestAction(request._id, 'accept')
+                            }
+                            disabled={updateRequestMutation.isPending}
+                          >
+                            <svg
+                              className="w-4 h-4"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M5 13l4 4L19 7"
+                              />
+                            </svg>
+                            Accept Request
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() =>
+                              handleRequestAction(request._id, 'decline')
+                            }
+                            variant="destructive"
+                            disabled={updateRequestMutation.isPending}
+                          >
+                            <svg
+                              className="w-4 h-4"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M6 18L18 6M6 6l12 12"
+                              />
+                            </svg>
+                            Decline Request
+                          </DropdownMenuItem>
+                        </DropdownMenu>
                       </div>
                     </div>
                   </Card>

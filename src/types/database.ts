@@ -21,7 +21,10 @@ export interface User {
       timezone?: string;
     };
     notificationSettings: {
-      groupDecisions: boolean;
+      groupDecisions: {
+        started: boolean; // Notify when a decision is started
+        completed: boolean; // Notify when a decision is finalized
+      };
       friendRequests: boolean;
       groupInvites: boolean;
       smsEnabled: boolean;
@@ -88,6 +91,7 @@ export interface Decision {
   type: 'personal' | 'group';
   collectionId: ObjectId;
   groupId?: ObjectId;
+  createdBy?: ObjectId; // User ID of the person who started the decision
   participants: string[]; // User IDs (Clerk user IDs as strings)
   method: 'tiered' | 'random' | 'manual'; // 'manual' for user-entered past decisions
   status: 'active' | 'completed' | 'expired';

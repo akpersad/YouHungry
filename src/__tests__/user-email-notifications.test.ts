@@ -322,7 +322,7 @@ describe('UserEmailNotificationService', () => {
       const template = require('@/lib/user-email-notifications')
         .USER_EMAIL_TEMPLATES.friend_request;
       const subject = template.subject('John Doe');
-      expect(subject).toBe('John Doe wants to be friends on You Hungry?');
+      expect(subject).toBe('John Doe wants to be friends on ForkInTheRoad');
     });
 
     it('should generate correct subject for group invitation', () => {

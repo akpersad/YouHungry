@@ -1,6 +1,6 @@
 {
-  "name": "You Hungry? - Restaurant Discovery",
-  "short_name": "You Hungry?",
+  "name": "ForkInTheRoad - Restaurant Discovery",
+  "short_name": "ForkInTheRoad",
   "description": "Discover and decide on restaurants with friends",
   "start_url": "/",
   "display": "standalone",

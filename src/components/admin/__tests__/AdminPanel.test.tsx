@@ -7,6 +7,25 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { AdminPanel } from '../AdminPanel';
 
+// Mock Next.js router
+const mockPush = jest.fn();
+const mockGet = jest.fn();
+
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: mockPush,
+    back: jest.fn(),
+    forward: jest.fn(),
+    refresh: jest.fn(),
+    replace: jest.fn(),
+    prefetch: jest.fn(),
+  }),
+  useSearchParams: () => ({
+    get: mockGet,
+    toString: () => '',
+  }),
+}));
+
 // Mock the AdminNav component to avoid interference with other tests
 jest.mock('../AdminNav', () => ({
   AdminNav: ({
@@ -89,6 +108,11 @@ jest.mock('../PerformanceDashboard', () => ({
 }));
 
 describe('AdminPanel', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockGet.mockReturnValue(null); // No URL params by default
+  });
+
   it('should render admin panel with header', () => {
     render(<AdminPanel />);
 
@@ -96,7 +120,9 @@ describe('AdminPanel', () => {
     expect(
       screen.getByText('System administration and monitoring')
     ).toBeInTheDocument();
-    expect(screen.getByText('You Hungry? Admin Dashboard')).toBeInTheDocument();
+    expect(
+      screen.getByText('ForkInTheRoad Admin Dashboard')
+    ).toBeInTheDocument();
   });
 
   it('should render admin navigation', () => {

@@ -82,18 +82,19 @@ export async function GET() {
     // Get user engagement metrics
     const usersWithCollections = await db
       .collection('collections')
-      .distinct('userId');
+      .distinct('ownerId');
     const usersWithGroups = await db
       .collection('groups')
-      .aggregate([
-        { $unwind: '$members' },
-        { $group: { _id: '$members.userId' } },
-      ])
+      .aggregate([{ $unwind: '$memberIds' }, { $group: { _id: '$memberIds' } }])
       .toArray();
 
     const usersWithDecisions = await db
       .collection('decisions')
-      .distinct('userId');
+      .aggregate([
+        { $unwind: '$participants' },
+        { $group: { _id: '$participants' } },
+      ])
+      .toArray();
 
     // Get top active users (by number of collections)
     const topActiveUsers = await db
@@ -103,7 +104,7 @@ export async function GET() {
           $lookup: {
             from: 'collections',
             localField: '_id',
-            foreignField: 'userId',
+            foreignField: 'ownerId',
             as: 'collections',
           },
         },
@@ -111,7 +112,7 @@ export async function GET() {
           $lookup: {
             from: 'groups',
             localField: '_id',
-            foreignField: 'members.userId',
+            foreignField: 'memberIds',
             as: 'groups',
           },
         },

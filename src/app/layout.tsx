@@ -24,32 +24,32 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'You Hungry? - Restaurant Discovery',
+  title: 'ForkInTheRoad - Restaurant Discovery',
   description: 'Discover and decide on restaurants with friends',
   keywords: ['restaurants', 'food', 'discovery', 'decision making', 'groups'],
-  authors: [{ name: 'You Hungry Team' }],
-  creator: 'You Hungry Team',
-  publisher: 'You Hungry Team',
+  authors: [{ name: 'Andrew Persad' }],
+  creator: 'Andrew Persad',
+  publisher: 'Andrew Persad',
   formatDetection: {
     email: false,
     address: false,
     telephone: false,
   },
-  metadataBase: new URL('https://you-hungry.app'),
+  metadataBase: new URL('https://forkintheroad.app'),
   alternates: {
     canonical: '/',
   },
   openGraph: {
-    title: 'You Hungry? - Restaurant Discovery',
+    title: 'ForkInTheRoad - Restaurant Discovery',
     description: 'Discover and decide on restaurants with friends',
-    url: 'https://you-hungry.app',
-    siteName: 'You Hungry?',
+    url: 'https://forkintheroad.app',
+    siteName: 'ForkInTheRoad',
     images: [
       {
         url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'You Hungry? - Restaurant Discovery App',
+        alt: 'ForkInTheRoad - Restaurant Discovery App',
       },
     ],
     locale: 'en_US',
@@ -57,7 +57,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'You Hungry? - Restaurant Discovery',
+    title: 'ForkInTheRoad - Restaurant Discovery',
     description: 'Discover and decide on restaurants with friends',
     images: ['/og-image.png'],
   },
@@ -76,7 +76,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'You Hungry?',
+    title: 'ForkInTheRoad',
   },
   other: {
     'mobile-web-app-capable': 'yes',

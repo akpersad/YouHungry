@@ -1,7 +1,7 @@
 'use client';
 
 import { logger } from '@/lib/logger';
-import { useState } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@clerk/nextjs';
 import { Restaurant } from '@/types/database';
@@ -10,6 +10,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
+import { Tabs, TabItem } from '@/components/ui/Tabs';
 import { RestaurantSearchPage } from './RestaurantSearchPage';
 import { CollectionRestaurantsList } from './CollectionRestaurantsList';
 import { RestaurantManagementModal } from './RestaurantManagementModal';
@@ -38,6 +39,7 @@ export function CollectionView({ collectionId }: CollectionViewProps) {
     visitDate: Date;
   } | null>(null);
   const [decisionError, setDecisionError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState('restaurants');
 
   // Use TanStack Query hooks
   const {
@@ -162,7 +164,7 @@ export function CollectionView({ collectionId }: CollectionViewProps) {
     }
   };
 
-  const handleRandomDecision = async () => {
+  const handleRandomDecision = useCallback(async () => {
     if (!collection || collection.restaurantIds.length === 0) {
       setDecisionError('No restaurants in this collection to choose from!');
       return;
@@ -203,7 +205,7 @@ export function CollectionView({ collectionId }: CollectionViewProps) {
         `Failed to make decision: ${error instanceof Error ? error.message : 'Unknown error'}`
       );
     }
-  };
+  }, [collection, collectionId, randomDecisionMutation]);
 
   const handleConfirmVisit = async () => {
     // Here you could add logic to confirm the visit, send notifications, etc.
@@ -217,6 +219,185 @@ export function CollectionView({ collectionId }: CollectionViewProps) {
     setDecisionResult(null);
     handleRandomDecision();
   };
+
+  const handleStartGroupDecision = () => {
+    // Switch to decisions tab
+    setActiveTab('decisions');
+    // Wait for tab to render, then trigger the start decision modal
+    setTimeout(() => {
+      const startButton = document.querySelector(
+        '[data-start-decision]'
+      ) as HTMLButtonElement;
+      if (startButton) {
+        startButton.click();
+      }
+    }, 100);
+  };
+
+  // Define tab content
+  const tabItems = useMemo((): TabItem[] => {
+    const isGroupCollection = collection?.type === 'group';
+
+    const tabs: TabItem[] = [
+      {
+        id: 'restaurants',
+        label: 'Restaurants',
+        badge: collection?.restaurantIds.length || 0,
+        content: (
+          <>
+            {/* Action Buttons */}
+            <div className="mb-6 flex flex-wrap gap-3">
+              <Button onClick={() => setShowAddRestaurant(true)}>
+                Add Restaurant
+              </Button>
+              {collection && collection.restaurantIds.length > 0 && (
+                <>
+                  {!isGroupCollection && (
+                    <Button
+                      onClick={handleRandomDecision}
+                      variant="outline"
+                      disabled={randomDecisionMutation.isPending}
+                    >
+                      {randomDecisionMutation.isPending
+                        ? 'Making Decision...'
+                        : 'Decide for Me'}
+                    </Button>
+                  )}
+                  <Button
+                    onClick={() => setIsStatisticsOpen(true)}
+                    variant="outline"
+                  >
+                    View Statistics
+                  </Button>
+                </>
+              )}
+            </div>
+
+            {/* Decision Error Display */}
+            {decisionError && (
+              <div className="mb-6">
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="text-destructive">⚠️</div>
+                        <div>
+                          <p className="font-medium text-red-900">
+                            Decision Error
+                          </p>
+                          <p className="text-red-700 text-sm">
+                            {decisionError}
+                          </p>
+                        </div>
+                      </div>
+                      <Button
+                        onClick={() => setDecisionError(null)}
+                        variant="outline"
+                        size="sm"
+                      >
+                        Dismiss
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+
+            {/* Restaurants List */}
+            {collection && (
+              <CollectionRestaurantsList
+                collection={collection}
+                onRestaurantUpdate={handleRestaurantUpdate}
+                onViewDetails={handleViewDetails}
+                onManageRestaurant={handleManageRestaurant}
+              />
+            )}
+          </>
+        ),
+      },
+    ];
+
+    // Add Decisions tab only for group collections
+    if (isGroupCollection && !groupLoading) {
+      tabs.push({
+        id: 'decisions',
+        label: 'Decisions',
+        content: (
+          <>
+            {/* Decision Action Buttons */}
+            {collection && collection.restaurantIds.length > 0 && (
+              <div className="mb-6 flex flex-wrap gap-3">
+                <Button
+                  onClick={handleRandomDecision}
+                  variant="outline"
+                  disabled={randomDecisionMutation.isPending}
+                >
+                  {randomDecisionMutation.isPending
+                    ? 'Making Decision...'
+                    : 'Decide for Me'}
+                </Button>
+                {isCurrentUserAdmin && (
+                  <Button
+                    onClick={handleStartGroupDecision}
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    Start Group Decision
+                  </Button>
+                )}
+              </div>
+            )}
+
+            {/* Decision Error Display */}
+            {decisionError && (
+              <div className="mb-6">
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="text-destructive">⚠️</div>
+                        <div>
+                          <p className="font-medium text-red-900">
+                            Decision Error
+                          </p>
+                          <p className="text-red-700 text-sm">
+                            {decisionError}
+                          </p>
+                        </div>
+                      </div>
+                      <Button
+                        onClick={() => setDecisionError(null)}
+                        variant="outline"
+                        size="sm"
+                      >
+                        Dismiss
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+
+            {/* Group Decision Making */}
+            <GroupDecisionMaking
+              groupId={collection.ownerId.toString()}
+              collectionId={collectionId}
+              isAdmin={isCurrentUserAdmin}
+            />
+          </>
+        ),
+      });
+    }
+
+    return tabs;
+  }, [
+    collection,
+    groupLoading,
+    isCurrentUserAdmin,
+    randomDecisionMutation.isPending,
+    decisionError,
+    collectionId,
+    handleRandomDecision,
+  ]);
 
   if (isLoading) {
     return (
@@ -304,97 +485,16 @@ export function CollectionView({ collectionId }: CollectionViewProps) {
         </div>
       </div>
 
-      {/* Action Buttons */}
-      <div className="mb-6 flex flex-wrap gap-3">
-        <Button onClick={() => setShowAddRestaurant(true)}>
-          Add Restaurant
-        </Button>
-        {collection.restaurantIds.length > 0 && (
-          <>
-            <Button
-              onClick={handleRandomDecision}
-              variant="outline"
-              disabled={randomDecisionMutation.isPending}
-            >
-              {randomDecisionMutation.isPending
-                ? 'Making Decision...'
-                : 'Decide for Me'}
-            </Button>
-            {collection.type === 'group' && isCurrentUserAdmin && (
-              <Button
-                onClick={() => {
-                  // Scroll to group decision section and trigger start decision
-                  const groupDecisionSection = document.getElementById(
-                    'group-decision-section'
-                  );
-                  if (groupDecisionSection) {
-                    groupDecisionSection.scrollIntoView({ behavior: 'smooth' });
-                    // Trigger the start decision modal after scrolling
-                    setTimeout(() => {
-                      const startButton = groupDecisionSection.querySelector(
-                        '[data-start-decision]'
-                      ) as HTMLButtonElement;
-                      if (startButton) {
-                        startButton.click();
-                      }
-                    }, 800);
-                  }
-                }}
-                className="bg-blue-600 hover:bg-blue-700 text-white"
-              >
-                Start Group Decision
-              </Button>
-            )}
-            <Button onClick={() => setIsStatisticsOpen(true)} variant="outline">
-              View Statistics
-            </Button>
-          </>
-        )}
-      </div>
-
-      {/* Decision Error Display */}
-      {decisionError && (
-        <div className="mb-6">
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="text-destructive">⚠️</div>
-                  <div>
-                    <p className="font-medium text-red-900">Decision Error</p>
-                    <p className="text-red-700 text-sm">{decisionError}</p>
-                  </div>
-                </div>
-                <Button
-                  onClick={() => setDecisionError(null)}
-                  variant="outline"
-                  size="sm"
-                >
-                  Dismiss
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
-
-      {/* Restaurants List */}
-      <CollectionRestaurantsList
-        collection={collection}
-        onRestaurantUpdate={handleRestaurantUpdate}
-        onViewDetails={handleViewDetails}
-        onManageRestaurant={handleManageRestaurant}
-      />
-
-      {/* Group Decision Making - Only show for group collections */}
-      {collection.type === 'group' && !groupLoading && (
-        <div id="group-decision-section" className="mt-8">
-          <GroupDecisionMaking
-            groupId={collection.ownerId.toString()}
-            collectionId={collectionId}
-            isAdmin={isCurrentUserAdmin}
-          />
-        </div>
+      {/* Tabs or Direct Content */}
+      {collection.type === 'group' && !groupLoading ? (
+        <Tabs
+          tabs={tabItems}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+        />
+      ) : (
+        // For personal collections, show content directly without tabs
+        tabItems[0].content
       )}
 
       {/* Add Restaurant Modal */}

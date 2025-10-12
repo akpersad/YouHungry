@@ -1,8 +1,9 @@
 import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAuth } from '@/lib/auth';
+import { requireAuth, getCurrentUser } from '@/lib/auth';
 import { createGroupDecision, getActiveGroupDecisions } from '@/lib/decisions';
 import { getGroupById } from '@/lib/groups';
+import { sendDecisionStartedNotifications } from '@/lib/decision-notifications';
 import { z } from 'zod';
 
 const createGroupDecisionSchema = z.object({
@@ -16,6 +17,12 @@ const createGroupDecisionSchema = z.object({
 export async function POST(request: NextRequest) {
   try {
     await requireAuth();
+
+    // Get current user for createdBy field
+    const currentUser = await getCurrentUser();
+    if (!currentUser) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
 
     const body = await request.json();
     const { collectionId, groupId, method, visitDate, deadlineHours } =
@@ -40,8 +47,24 @@ export async function POST(request: NextRequest) {
       participants,
       method,
       new Date(visitDate),
-      deadlineHours
+      deadlineHours,
+      currentUser._id.toString() // Pass createdBy
     );
+
+    // Send decision started notifications to all group members
+    try {
+      await sendDecisionStartedNotifications(
+        groupId,
+        collectionId,
+        decision._id.toString(),
+        method,
+        decision.deadline,
+        currentUser._id.toString()
+      );
+    } catch (error) {
+      // Log error but don't fail the request
+      logger.error('Failed to send decision started notifications:', error);
+    }
 
     return NextResponse.json({
       success: true,

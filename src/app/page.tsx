@@ -25,7 +25,7 @@ export default async function Home() {
           className="text-4xl md:text-6xl font-bold mb-6"
           style={{ color: 'var(--color-text)' }}
         >
-          You Hungry?
+          ForkInTheRoad
         </h1>
         <p
           className="text-xl mb-8 mx-auto"

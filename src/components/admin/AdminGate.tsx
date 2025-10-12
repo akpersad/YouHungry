@@ -4,13 +4,11 @@ import { useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { logger } from '@/lib/logger';
+import { ADMIN_USER_IDS } from '@/constants/admin';
 
 interface AdminGateProps {
   children: React.ReactNode;
 }
-
-// List of authorized admin MongoDB user IDs
-const ADMIN_USER_IDS = ['68d9b010a25dec569c34c111', '68d9ae3528a9bab6c334d9f9'];
 
 export function AdminGate({ children }: AdminGateProps) {
   const { user, isLoaded } = useUser();

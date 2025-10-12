@@ -1,7 +1,7 @@
 'use client';
 
 import { logger } from '@/lib/logger';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Restaurant, Collection } from '@/types/database';
 import { RestaurantCard } from './RestaurantCard';
 import { RestaurantCardCompact } from './RestaurantCardCompact';
@@ -9,6 +9,8 @@ import { RestaurantManagementModal } from './RestaurantManagementModal';
 import { LazyMapView } from './LazyMapView';
 import { ViewToggle, ViewType } from '@/components/ui/ViewToggle';
 import { Button } from '@/components/ui/Button';
+
+type SortOption = 'rating-desc' | 'name-asc' | 'name-desc';
 
 interface CollectionRestaurantsListProps {
   collection: Collection;
@@ -32,6 +34,9 @@ export function CollectionRestaurantsList({
   const [viewType, setViewType] = useState<ViewType>('list');
   const [mapSelectedRestaurant, setMapSelectedRestaurant] =
     useState<Restaurant | null>(null);
+  const [sortBy, setSortBy] = useState<SortOption>('rating-desc');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   // Load view type from localStorage on mount
   useEffect(() => {
@@ -168,6 +173,48 @@ export function CollectionRestaurantsList({
     }
   };
 
+  // Sort and paginate restaurants
+  const sortedRestaurants = useMemo(() => {
+    const sorted = [...restaurants];
+
+    switch (sortBy) {
+      case 'rating-desc':
+        sorted.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+        break;
+      case 'name-asc':
+        sorted.sort((a, b) => a.name.localeCompare(b.name));
+        break;
+      case 'name-desc':
+        sorted.sort((a, b) => b.name.localeCompare(a.name));
+        break;
+    }
+
+    return sorted;
+  }, [restaurants, sortBy]);
+
+  const paginatedRestaurants = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return sortedRestaurants.slice(startIndex, endIndex);
+  }, [sortedRestaurants, currentPage, itemsPerPage]);
+
+  const totalPages = Math.ceil(sortedRestaurants.length / itemsPerPage);
+
+  // Reset to page 1 when sort changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [sortBy]);
+
+  const handleSortChange = (newSort: SortOption) => {
+    setSortBy(newSort);
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    // Scroll to top of list
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -226,25 +273,47 @@ export function CollectionRestaurantsList({
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4">
-          <h3
-            className="text-lg font-semibold text-primary"
-            style={{ color: 'var(--text-primary)' }}
-          >
-            Restaurants in {collection.name}
-          </h3>
-          <span
-            className="text-sm text-secondary"
-            style={{ color: 'var(--text-secondary)' }}
-          >
-            {restaurants.length} restaurant{restaurants.length !== 1 ? 's' : ''}
-          </span>
+      <div className="flex flex-col gap-3">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4">
+            <h3
+              className="text-lg font-semibold text-primary"
+              style={{ color: 'var(--text-primary)' }}
+            >
+              Restaurants in {collection.name}
+            </h3>
+            <span
+              className="text-sm text-secondary"
+              style={{ color: 'var(--text-secondary)' }}
+            >
+              {restaurants.length} restaurant
+              {restaurants.length !== 1 ? 's' : ''}
+            </span>
+          </div>
+          {/* View Toggle - Show on mobile and desktop */}
+          <div className="flex justify-end">
+            <ViewToggle
+              currentView={viewType}
+              onToggle={handleViewTypeChange}
+            />
+          </div>
         </div>
-        {/* View Toggle - Show on mobile and desktop */}
-        <div className="flex justify-end">
-          <ViewToggle currentView={viewType} onToggle={handleViewTypeChange} />
-        </div>
+
+        {/* Sort Controls */}
+        {restaurants.length > 0 && (
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-sm text-text-muted">Sort by:</span>
+            <select
+              value={sortBy}
+              onChange={(e) => handleSortChange(e.target.value as SortOption)}
+              className="px-3 py-1.5 rounded-md border border-border bg-background text-text text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+            >
+              <option value="rating-desc">Rating (Highest First)</option>
+              <option value="name-asc">Name (A-Z)</option>
+              <option value="name-desc">Name (Z-A)</option>
+            </select>
+          </div>
+        )}
       </div>
 
       {restaurants.length === 0 ? (
@@ -262,7 +331,7 @@ export function CollectionRestaurantsList({
           {/* List View */}
           {viewType === 'list' && (
             <div className="space-y-4 md:grid md:grid-cols-3 md:gap-4 md:space-y-0">
-              {restaurants.map((restaurant) => (
+              {paginatedRestaurants.map((restaurant) => (
                 <div key={restaurant._id.toString()} className="relative group">
                   <RestaurantCard
                     restaurant={restaurant}
@@ -303,7 +372,7 @@ export function CollectionRestaurantsList({
           {/* Grid View */}
           {viewType === 'grid' && (
             <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
-              {restaurants.map((restaurant) => (
+              {paginatedRestaurants.map((restaurant) => (
                 <RestaurantCardCompact
                   key={restaurant._id.toString()}
                   restaurant={restaurant}
@@ -316,11 +385,11 @@ export function CollectionRestaurantsList({
             </div>
           )}
 
-          {/* Map View */}
+          {/* Map View - Show all restaurants on map */}
           {viewType === 'map' && (
             <div className="space-y-4">
               <LazyMapView
-                restaurants={restaurants}
+                restaurants={sortedRestaurants}
                 onRestaurantSelect={handleMapRestaurantSelect}
                 onRestaurantDetails={handleMapRestaurantDetails}
                 selectedRestaurant={mapSelectedRestaurant}
@@ -361,6 +430,67 @@ export function CollectionRestaurantsList({
                   </div>
                 </div>
               )}
+            </div>
+          )}
+
+          {/* Pagination Controls */}
+          {totalPages > 1 && viewType !== 'map' && (
+            <div className="flex items-center justify-center gap-2 mt-6">
+              <Button
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+                variant="outline"
+                size="sm"
+              >
+                Previous
+              </Button>
+
+              <div className="flex items-center gap-1">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                  (page) => {
+                    // Show first page, last page, current page, and pages around current
+                    const showPage =
+                      page === 1 ||
+                      page === totalPages ||
+                      Math.abs(page - currentPage) <= 1;
+
+                    const showEllipsis =
+                      (page === 2 && currentPage > 3) ||
+                      (page === totalPages - 1 && currentPage < totalPages - 2);
+
+                    if (showEllipsis) {
+                      return (
+                        <span key={page} className="px-2 text-text-muted">
+                          ...
+                        </span>
+                      );
+                    }
+
+                    if (!showPage) return null;
+
+                    return (
+                      <Button
+                        key={page}
+                        onClick={() => handlePageChange(page)}
+                        variant={currentPage === page ? 'primary' : 'outline'}
+                        size="sm"
+                        className="min-w-[2.5rem]"
+                      >
+                        {page}
+                      </Button>
+                    );
+                  }
+                )}
+              </div>
+
+              <Button
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                variant="outline"
+                size="sm"
+              >
+                Next
+              </Button>
             </div>
           )}
         </>

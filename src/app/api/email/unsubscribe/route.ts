@@ -12,11 +12,11 @@ export async function GET(request: NextRequest) {
       return new NextResponse(
         `
         <html>
-          <head><title>Unsubscribe - You Hungry?</title></head>
+          <head><title>Unsubscribe - ForkInTheRoad</title></head>
           <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 50px auto; padding: 20px;">
-            <h1>Unsubscribe from You Hungry? Notifications</h1>
+            <h1>Unsubscribe from ForkInTheRoad Notifications</h1>
             <p>Invalid unsubscribe link. Please contact support if you need assistance.</p>
-            <p><a href="${process.env.NEXT_PUBLIC_APP_URL}">Return to You Hungry?</a></p>
+            <p><a href="${process.env.NEXT_PUBLIC_APP_URL}">Return to ForkInTheRoad</a></p>
           </body>
         </html>
       `,
@@ -42,11 +42,11 @@ export async function GET(request: NextRequest) {
       return new NextResponse(
         `
         <html>
-          <head><title>Unsubscribe - You Hungry?</title></head>
+          <head><title>Unsubscribe - ForkInTheRoad</title></head>
           <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 50px auto; padding: 20px;">
-            <h1>Unsubscribe from You Hungry? Notifications</h1>
+            <h1>Unsubscribe from ForkInTheRoad Notifications</h1>
             <p>Token-based unsubscribe is not yet implemented. Please use the email-based link or contact support.</p>
-            <p><a href="${process.env.NEXT_PUBLIC_APP_URL}">Return to You Hungry?</a></p>
+            <p><a href="${process.env.NEXT_PUBLIC_APP_URL}">Return to ForkInTheRoad</a></p>
           </body>
         </html>
       `,
@@ -61,11 +61,11 @@ export async function GET(request: NextRequest) {
       return new NextResponse(
         `
         <html>
-          <head><title>Unsubscribe - You Hungry?</title></head>
+          <head><title>Unsubscribe - ForkInTheRoad</title></head>
           <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 50px auto; padding: 20px;">
-            <h1>Unsubscribe from You Hungry? Notifications</h1>
+            <h1>Unsubscribe from ForkInTheRoad Notifications</h1>
             <p>User not found. You may have already unsubscribed or the link is invalid.</p>
-            <p><a href="${process.env.NEXT_PUBLIC_APP_URL}">Return to You Hungry?</a></p>
+            <p><a href="${process.env.NEXT_PUBLIC_APP_URL}">Return to ForkInTheRoad</a></p>
           </body>
         </html>
       `,
@@ -95,11 +95,11 @@ export async function GET(request: NextRequest) {
     return new NextResponse(
       `
       <html>
-        <head><title>Unsubscribed - You Hungry?</title></head>
+        <head><title>Unsubscribed - ForkInTheRoad</title></head>
         <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 50px auto; padding: 20px;">
           <div style="background: #d1fae5; border: 1px solid #34d399; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
             <h1 style="color: #059669; margin-top: 0;">✅ Successfully Unsubscribed</h1>
-            <p style="color: #047857; margin-bottom: 0;">You have been unsubscribed from You Hungry? email notifications.</p>
+            <p style="color: #047857; margin-bottom: 0;">You have been unsubscribed from ForkInTheRoad email notifications.</p>
           </div>
           
           <div style="background: #f9fafb; border-radius: 8px; padding: 20px;">
@@ -117,7 +117,7 @@ export async function GET(request: NextRequest) {
           <div style="text-align: center; margin-top: 30px;">
             <a href="${process.env.NEXT_PUBLIC_APP_URL}" 
                style="background: #667eea; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-block;">
-              Return to You Hungry?
+              Return to ForkInTheRoad
             </a>
           </div>
         </body>
@@ -132,11 +132,11 @@ export async function GET(request: NextRequest) {
     return new NextResponse(
       `
       <html>
-        <head><title>Error - You Hungry?</title></head>
+        <head><title>Error - ForkInTheRoad</title></head>
         <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 50px auto; padding: 20px;">
           <h1>Error</h1>
           <p>An error occurred while processing your unsubscribe request. Please try again or contact support.</p>
-          <p><a href="${process.env.NEXT_PUBLIC_APP_URL}">Return to You Hungry?</a></p>
+          <p><a href="${process.env.NEXT_PUBLIC_APP_URL}">Return to ForkInTheRoad</a></p>
         </body>
       </html>
     `,

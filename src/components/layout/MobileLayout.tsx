@@ -25,7 +25,7 @@ export function MobileLayout({ children, className }: MobileLayoutProps) {
       {/* Mobile Header - hidden since we use bottom navigation */}
       {/* <div className="md:hidden bg-secondary border-b border-quaternary px-4 py-3">
         <div className="flex items-center justify-between">
-          <h1 className="text-lg font-bold text-accent">You Hungry?</h1>
+          <h1 className="text-lg font-bold text-accent">ForkInTheRoad</h1>
           {isLoaded && (
             <div className="flex items-center gap-2">
               {isSignedIn ? (
@@ -64,8 +64,8 @@ export function MobileLayout({ children, className }: MobileLayoutProps) {
         <div className="max-w-7xl mx-auto px-6 py-6">
           <div className="text-center text-sm text-tertiary">
             <p>
-              © {new Date().getFullYear()} You Hungry? - Making food decisions
-              easier
+              © {new Date().getFullYear()} ForkInTheRoad - Making food
+              decisions easier
             </p>
           </div>
         </div>

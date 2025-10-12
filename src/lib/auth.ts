@@ -30,7 +30,10 @@ export async function getCurrentUser(): Promise<User | null> {
             timezone: undefined,
           },
           notificationSettings: {
-            groupDecisions: true,
+            groupDecisions: {
+              started: true,
+              completed: true,
+            },
             friendRequests: true,
             groupInvites: true,
             smsEnabled: false,

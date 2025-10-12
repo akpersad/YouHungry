@@ -1,7 +1,7 @@
 /**
  * Performance Testing Suite
  *
- * This file contains comprehensive performance tests for the You Hungry? application,
+ * This file contains comprehensive performance tests for the ForkInTheRoad application,
  * including bundle size tests, render performance tests, and memory usage tests.
  */
 

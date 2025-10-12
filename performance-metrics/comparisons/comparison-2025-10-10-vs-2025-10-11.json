@@ -1,0 +1,101 @@
+{
+  "comparison": {
+    "date1": "2025-10-10",
+    "date2": "2025-10-11",
+    "generatedAt": "2025-10-11T17:27:26.325Z"
+  },
+  "summary": {
+    "totalComparisons": 4,
+    "improvements": 6,
+    "degradations": 2,
+    "neutral": 5
+  },
+  "details": {
+    "bundle": {
+      "firstLoadJS": {
+        "old": 102,
+        "new": 102,
+        "change": 0,
+        "trend": "decrease"
+      },
+      "totalBundleSize": {
+        "old": 1341,
+        "new": 1347,
+        "change": 0.44742729306487694,
+        "trend": "increase"
+      },
+      "fileCount": {
+        "old": 34,
+        "new": 34,
+        "change": 0,
+        "trend": "decrease"
+      }
+    },
+    "buildTime": {
+      "buildTime": {
+        "old": 17063,
+        "new": 18413,
+        "change": 7.911856062825998,
+        "trend": "increase"
+      }
+    },
+    "webVitals": {
+      "fcp": {
+        "old": 2567.296327675988,
+        "new": 1116.1220886192846,
+        "change": -56.5253891190021,
+        "trend": "improvement"
+      },
+      "lcp": {
+        "old": 2411.25065706708,
+        "new": 2501.769731084949,
+        "change": 3.754030040492423,
+        "trend": "degradation"
+      },
+      "fid": {
+        "old": 149.11494818007026,
+        "new": 90.78704359944211,
+        "change": -39.1160680351052,
+        "trend": "improvement"
+      },
+      "cls": {
+        "old": 0.0635451921650726,
+        "new": 0.018663299961005953,
+        "change": -70.62987879157888,
+        "trend": "improvement"
+      },
+      "ttfb": {
+        "old": 516.2299988323714,
+        "new": 415.9745193139663,
+        "change": -19.420700026183432,
+        "trend": "improvement"
+      }
+    },
+    "api": {
+      "averageResponseTime": {
+        "old": 221.38318047901944,
+        "new": 154.02138274749117,
+        "change": -30.427694455276004,
+        "trend": "improvement"
+      },
+      "successRate": {
+        "old": 96.96587346044194,
+        "new": 98.16328080898843,
+        "change": 1.2348750192354878,
+        "trend": "improvement"
+      },
+      "errorRate": {
+        "old": 0.5866460101043316,
+        "new": 1.9792247056291985,
+        "change": 237.3797267072872,
+        "trend": "degradation"
+      },
+      "totalRequests": {
+        "old": 1204,
+        "new": 1470,
+        "change": 22.093023255813954,
+        "trend": "increase"
+      }
+    }
+  }
+}

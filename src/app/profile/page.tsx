@@ -52,7 +52,8 @@ export default function ProfilePage() {
     smsOptIn: false,
     smsPhoneNumber: '',
     defaultLocation: '',
-    groupDecisions: true,
+    groupDecisionsStarted: true,
+    groupDecisionsCompleted: true,
     friendRequests: true,
     groupInvites: true,
     smsEnabled: false,
@@ -130,8 +131,12 @@ export default function ProfilePage() {
           ? formatPhoneNumber(profile.smsPhoneNumber)
           : '',
         defaultLocation: profile.preferences?.defaultLocation || '',
-        groupDecisions:
-          profile.preferences?.notificationSettings?.groupDecisions ?? true,
+        groupDecisionsStarted:
+          profile.preferences?.notificationSettings?.groupDecisions?.started ??
+          true,
+        groupDecisionsCompleted:
+          profile.preferences?.notificationSettings?.groupDecisions
+            ?.completed ?? true,
         friendRequests:
           profile.preferences?.notificationSettings?.friendRequests ?? true,
         groupInvites:
@@ -139,6 +144,7 @@ export default function ProfilePage() {
         smsEnabled:
           profile.preferences?.notificationSettings?.smsEnabled ?? false,
         emailEnabled:
+          // Email is enabled by default but disabled when no verified phone number
           profile.preferences?.notificationSettings?.emailEnabled ?? true,
         pushEnabled:
           profile.preferences?.notificationSettings?.pushEnabled ?? true,
@@ -149,6 +155,35 @@ export default function ProfilePage() {
   const handleInputChange = (field: string, value: string | boolean) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
+
+  // Handle notification channel changes with validation
+  const handleNotificationChannelChange = (
+    channel: 'emailEnabled' | 'smsEnabled',
+    checked: boolean
+  ) => {
+    // If trying to uncheck, ensure at least one channel remains checked
+    if (!checked) {
+      const otherChannel =
+        channel === 'emailEnabled' ? 'smsEnabled' : 'emailEnabled';
+      if (!formData[otherChannel]) {
+        toast.error(
+          'At least one notification method (Email or SMS) must be enabled'
+        );
+        return;
+      }
+    }
+
+    setFormData((prev) => ({ ...prev, [channel]: checked }));
+  };
+
+  // Show notification when phone number is verified
+  useEffect(() => {
+    if (formData.phoneNumber) {
+      toast.success(
+        'Phone verified! You can now toggle between SMS and Email notifications.'
+      );
+    }
+  }, [formData.phoneNumber]);
 
   // Handle city/state selection from the combined input
   const handleCityStateChange = (city: string, state: string) => {
@@ -329,7 +364,10 @@ export default function ProfilePage() {
             state: formData.state || undefined,
           },
           notificationSettings: {
-            groupDecisions: formData.groupDecisions,
+            groupDecisions: {
+              started: formData.groupDecisionsStarted,
+              completed: formData.groupDecisionsCompleted,
+            },
             friendRequests: formData.friendRequests,
             groupInvites: formData.groupInvites,
             smsEnabled: formData.smsEnabled,
@@ -909,18 +947,23 @@ export default function ProfilePage() {
                 </h4>
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <div>
+                    <div className="flex-1">
                       <Label htmlFor="emailEnabled">Email Notifications</Label>
                       <p className="text-sm text-tertiary">
-                        Receive notifications via email
+                        {formData.phoneNumber
+                          ? 'Receive notifications via email'
+                          : 'Verify a phone number to disable email notifications'}
                       </p>
                     </div>
                     <Switch
                       id="emailEnabled"
-                      checked={formData.emailEnabled}
-                      onCheckedChange={(checked) =>
-                        handleInputChange('emailEnabled', checked)
+                      checked={
+                        formData.phoneNumber ? formData.emailEnabled : true
                       }
+                      onCheckedChange={(checked) =>
+                        handleNotificationChannelChange('emailEnabled', checked)
+                      }
+                      disabled={!formData.phoneNumber}
                     />
                   </div>
                   <div className="flex items-center justify-between">
@@ -949,7 +992,7 @@ export default function ProfilePage() {
                       id="smsEnabled"
                       checked={formData.smsEnabled}
                       onCheckedChange={(checked) =>
-                        handleInputChange('smsEnabled', checked)
+                        handleNotificationChannelChange('smsEnabled', checked)
                       }
                     />
                   </div>
@@ -962,17 +1005,36 @@ export default function ProfilePage() {
                 </h4>
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <div>
-                      <Label htmlFor="groupDecisions">Group Decisions</Label>
+                    <div className="flex-1">
+                      <Label htmlFor="groupDecisionsStarted">
+                        Decision Started
+                      </Label>
                       <p className="text-sm text-tertiary">
-                        Notifications about group decision making
+                        Get notified when a group decision is started
                       </p>
                     </div>
                     <Switch
-                      id="groupDecisions"
-                      checked={formData.groupDecisions}
+                      id="groupDecisionsStarted"
+                      checked={formData.groupDecisionsStarted}
                       onCheckedChange={(checked) =>
-                        handleInputChange('groupDecisions', checked)
+                        handleInputChange('groupDecisionsStarted', checked)
+                      }
+                    />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <Label htmlFor="groupDecisionsCompleted">
+                        Decision Completed
+                      </Label>
+                      <p className="text-sm text-tertiary">
+                        Get notified when a group decision is finalized
+                      </p>
+                    </div>
+                    <Switch
+                      id="groupDecisionsCompleted"
+                      checked={formData.groupDecisionsCompleted}
+                      onCheckedChange={(checked) =>
+                        handleInputChange('groupDecisionsCompleted', checked)
                       }
                     />
                   </div>

@@ -23,6 +23,10 @@ export interface GroupDecisionNotificationData {
   decisionId: ObjectId | string;
   decisionType: 'tiered' | 'random';
   deadline: Date;
+  collectionName?: string;
+  collectionUrl?: string;
+  shortUrl?: string;
+  createdByName?: string;
 }
 
 export interface FriendRequestNotificationData {
@@ -43,6 +47,10 @@ export interface DecisionResultNotificationData {
   decisionId: ObjectId | string;
   restaurantName: string;
   restaurantId: ObjectId | string;
+  collectionName?: string;
+  collectionUrl?: string;
+  shortUrl?: string;
+  decisionType?: 'tiered' | 'random';
 }
 
 export class NotificationService {
@@ -90,13 +98,22 @@ export class NotificationService {
 
       // Send SMS notification
       if (shouldSendSMS && user?.smsPhoneNumber) {
+        // Determine phone number based on environment
+        const phoneNumber =
+          process.env.NODE_ENV === 'development' &&
+          process.env.TWILIO_TO_PHONE_NUMBER
+            ? process.env.TWILIO_TO_PHONE_NUMBER
+            : user.smsPhoneNumber;
+
         promises.push(
           smsNotifications
             .sendGroupDecisionNotification(
-              user.smsPhoneNumber,
+              phoneNumber,
               data.groupName,
               data.decisionType,
-              data.deadline
+              data.deadline,
+              data.groupId?.toString(),
+              data.shortUrl
             )
             .catch((error) => {
               logger.error(
@@ -123,6 +140,9 @@ export class NotificationService {
               decisionId: data.decisionId.toString(),
               decisionType: data.decisionType,
               deadline: data.deadline,
+              collectionName: data.collectionName,
+              collectionUrl: data.collectionUrl,
+              createdByName: data.createdByName,
             })
             .catch((error) => {
               logger.error(
@@ -442,6 +462,7 @@ export class NotificationService {
     const {
       userId,
       user,
+      smsEnabled,
       emailEnabled,
       pushEnabled,
       inAppEnabled,
@@ -449,6 +470,8 @@ export class NotificationService {
     } = options;
 
     try {
+      const shouldSendSMS =
+        smsEnabled && user?.smsOptIn && user?.smsPhoneNumber;
       const shouldSendEmail =
         emailEnabled &&
         user?.preferences?.notificationSettings?.emailEnabled &&
@@ -458,6 +481,36 @@ export class NotificationService {
       const shouldSendToast = toastEnabled !== false;
 
       const promises: Promise<unknown>[] = [];
+
+      // Send SMS notification
+      if (shouldSendSMS && user?.smsPhoneNumber) {
+        // Determine phone number based on environment
+        const phoneNumber =
+          process.env.NODE_ENV === 'development' &&
+          process.env.TWILIO_TO_PHONE_NUMBER
+            ? process.env.TWILIO_TO_PHONE_NUMBER
+            : user.smsPhoneNumber;
+
+        promises.push(
+          smsNotifications
+            .sendDecisionResultNotification(
+              phoneNumber,
+              data.groupName,
+              data.restaurantName,
+              data.decisionType || 'tiered',
+              data.shortUrl
+            )
+            .catch((error) => {
+              logger.error(
+                'Failed to send SMS decision result notification:',
+                error
+              );
+              if (shouldSendToast && typeof window !== 'undefined') {
+                ToastNotificationService.smsNotificationFailed(error);
+              }
+            })
+        );
+      }
 
       // Send email notification
       if (shouldSendEmail && user?.email) {
@@ -472,6 +525,9 @@ export class NotificationService {
               decisionId: data.decisionId.toString(),
               restaurantName: data.restaurantName,
               restaurantId: data.restaurantId.toString(),
+              collectionName: data.collectionName,
+              collectionUrl: data.collectionUrl,
+              decisionType: data.decisionType,
             })
             .catch((error) => {
               logger.error(

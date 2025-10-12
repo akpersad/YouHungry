@@ -64,7 +64,7 @@ describe('/api/email/unsubscribe', () => {
       expect(response.status).toBe(200);
       expect(html).toContain('Successfully Unsubscribed');
       expect(html).toContain(
-        'You have been unsubscribed from You Hungry? email notifications'
+        'You have been unsubscribed from ForkInTheRoad email notifications'
       );
 
       expect(mockCollection.findOne).toHaveBeenCalledWith({
@@ -218,9 +218,9 @@ describe('/api/email/unsubscribe', () => {
       expect(response.headers.get('Content-Type')).toBe('text/html');
       expect(html).toContain('<html>');
       expect(html).toContain('<head>');
-      expect(html).toContain('<title>Unsubscribed - You Hungry?</title>');
+      expect(html).toContain('<title>Unsubscribed - ForkInTheRoad</title>');
       expect(html).toContain('<body style=');
-      expect(html).toContain('Return to You Hungry?');
+      expect(html).toContain('Return to ForkInTheRoad');
       expect(html).toContain('http://localhost:3000');
     });
   });
