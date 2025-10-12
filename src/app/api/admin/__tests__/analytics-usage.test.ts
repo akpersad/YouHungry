@@ -73,6 +73,8 @@ describe('/api/admin/analytics/usage', () => {
       .mockResolvedValueOnce(85) // collection creation
       .mockResolvedValueOnce(25) // group creation
       .mockResolvedValueOnce(60) // friend requests
+      .mockResolvedValueOnce(100) // errorLogs in period
+      .mockResolvedValueOnce(15) // errorGroups in period
       .mockResolvedValueOnce(150) // total users
       .mockResolvedValueOnce(570) // all decisions in period
       .mockResolvedValueOnce(85) // collections in period
@@ -216,6 +218,8 @@ describe('/api/admin/analytics/usage', () => {
       .mockResolvedValueOnce(0) // collections
       .mockResolvedValueOnce(0) // groups
       .mockResolvedValueOnce(0) // friendships
+      .mockResolvedValueOnce(0) // errorLogs in period
+      .mockResolvedValueOnce(0) // errorGroups in period
       .mockResolvedValueOnce(100) // total users
       .mockResolvedValueOnce(0) // all decisions in period
       .mockResolvedValueOnce(0) // collections in period

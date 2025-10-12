@@ -163,6 +163,16 @@ export async function GET(request: NextRequest) {
       db.collection('friendships').countDocuments({
         createdAt: { $gte: startDate, $lte: endDate },
       }),
+
+      // Error tracking - total errors logged
+      db.collection('errorLogs').countDocuments({
+        createdAt: { $gte: startDate, $lte: endDate },
+      }),
+
+      // Error tracking - unique error groups
+      db.collection('errorGroups').countDocuments({
+        createdAt: { $gte: startDate, $lte: endDate },
+      }),
     ]);
 
     // Get user behavior analytics
@@ -296,6 +306,7 @@ export async function GET(request: NextRequest) {
       { name: 'Collection Management', usage: featureUsage[2], trend: '+15%' },
       { name: 'Group Creation', usage: featureUsage[3], trend: '+5%' },
       { name: 'Friend Management', usage: featureUsage[4], trend: '+3%' },
+      { name: 'Error Reports', usage: featureUsage[5], trend: '-5%' }, // Negative trend is good for errors
     ].sort((a, b) => b.usage - a.usage);
 
     // Get capacity planning data
@@ -326,6 +337,8 @@ export async function GET(request: NextRequest) {
           collectionCreation: featureUsage[2],
           groupCreation: featureUsage[3],
           friendRequests: featureUsage[4],
+          errorReports: featureUsage[5],
+          errorGroups: featureUsage[6],
         },
         userBehavior: {
           ...engagement,

@@ -46,6 +46,8 @@ interface UsageAnalytics {
     collectionCreation: number;
     groupCreation: number;
     friendRequests: number;
+    errorReports: number;
+    errorGroups: number;
   };
   userBehavior: {
     totalUsers: number;
