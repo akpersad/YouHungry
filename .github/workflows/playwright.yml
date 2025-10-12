@@ -1,0 +1,152 @@
+name: Playwright E2E Tests
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  # Smoke tests - run on every PR (fast, critical paths only)
+  smoke-tests:
+    name: Smoke Tests
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+      
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps chromium
+      
+      - name: Run smoke tests
+        run: npm run test:e2e:smoke
+        env:
+          CI: true
+      
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: smoke-test-results
+          path: playwright-report/
+          retention-days: 7
+
+  # Full test suite - run on main branch and nightly
+  full-e2e-tests:
+    name: Full E2E Test Suite
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.event_name == 'schedule'
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+      
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+      
+      - name: Run Playwright tests
+        run: npx playwright test --shard=${{ matrix.shard }}/4
+        env:
+          CI: true
+      
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report-${{ matrix.shard }}
+          path: playwright-report/
+          retention-days: 30
+  
+  # Accessibility tests - run on every PR
+  accessibility-tests:
+    name: Accessibility Tests
+    timeout-minutes: 20
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+      
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps chromium
+      
+      - name: Run accessibility tests
+        run: npm run test:accessibility
+        env:
+          CI: true
+      
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: accessibility-report
+          path: playwright-report/
+          retention-days: 30
+
+  # Lighthouse CI - run on main branch
+  lighthouse:
+    name: Lighthouse Performance Tests
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+      
+      - name: Build application
+        run: npm run build
+        env:
+          CI: true
+      
+      - name: Run Lighthouse CI
+        run: npm run lighthouse
+        env:
+          CI: true
+      
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lighthouse-reports
+          path: lighthouse-reports/
+          retention-days: 30
+
+# Nightly full test run
+on:
+  schedule:
+    - cron: '0 2 * * *' # 2 AM daily
+
