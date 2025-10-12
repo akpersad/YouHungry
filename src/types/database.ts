@@ -170,3 +170,74 @@ export interface ShortUrl {
   expiresAt?: Date;
   clickCount: number;
 }
+
+export interface ErrorLog {
+  _id: ObjectId;
+  // Error fingerprint for grouping similar errors
+  fingerprint: string;
+  // Error details
+  message: string;
+  stack?: string;
+  componentStack?: string;
+  // User context
+  userId?: ObjectId;
+  userEmail?: string;
+  userName?: string;
+  // Environment context
+  url: string;
+  userAgent?: string;
+  browser?: string;
+  device?: string;
+  screenSize?: string;
+  // Breadcrumbs (user actions leading to error)
+  breadcrumbs?: {
+    timestamp: Date;
+    action: string;
+    data?: Record<string, unknown>;
+  }[];
+  // Classification
+  severity: 'critical' | 'error' | 'warning' | 'info';
+  category: 'client' | 'server' | 'network' | 'api';
+  // Additional context
+  additionalData?: Record<string, unknown>;
+  // User report
+  userReport?: {
+    description: string;
+    reportedAt: Date;
+  };
+  // Status tracking
+  resolved: boolean;
+  resolvedAt?: Date;
+  resolvedBy?: ObjectId;
+  notes?: string;
+  // Metadata
+  occurrenceCount: number; // How many times this specific error occurred
+  firstSeenAt: Date;
+  lastSeenAt: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface ErrorGroup {
+  _id: ObjectId;
+  fingerprint: string; // Unique identifier for this error type
+  message: string;
+  stack?: string;
+  // Aggregated statistics
+  totalOccurrences: number;
+  affectedUsers: number;
+  affectedUserIds: ObjectId[];
+  // Classification
+  severity: 'critical' | 'error' | 'warning' | 'info';
+  category: 'client' | 'server' | 'network' | 'api';
+  // Status
+  status: 'open' | 'investigating' | 'resolved' | 'ignored';
+  resolvedAt?: Date;
+  resolvedBy?: ObjectId;
+  notes?: string;
+  // Metadata
+  firstSeenAt: Date;
+  lastSeenAt: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}

@@ -2,6 +2,7 @@ import { logger } from '@/lib/logger';
 import { auth } from '@clerk/nextjs/server';
 import { getUserByClerkId, createUser } from './users';
 import { User } from '@/types/database';
+import { ADMIN_USER_IDS } from '@/constants/admin';
 
 export async function getCurrentUser(): Promise<User | null> {
   const { userId } = await auth();
@@ -56,6 +57,17 @@ export async function requireAuth(): Promise<User> {
 
   if (!user) {
     throw new Error('Authentication required');
+  }
+
+  return user;
+}
+
+export async function requireAdminAuth(): Promise<User> {
+  const user = await requireAuth();
+
+  const userIdString = user._id.toString();
+  if (!ADMIN_USER_IDS.includes(userIdString)) {
+    throw new Error('Admin access required');
   }
 
   return user;

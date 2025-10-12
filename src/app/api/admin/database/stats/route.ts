@@ -34,6 +34,8 @@ export async function GET() {
       'api_usage',
       'collections',
       'decisions',
+      'errorGroups',
+      'errorLogs',
       'friendships',
       'groupInvitations',
       'groups',
@@ -143,6 +145,24 @@ export async function GET() {
           return 0;
         }
       })(),
+      (async () => {
+        try {
+          return await db
+            .collection('errorLogs')
+            .countDocuments({ createdAt: { $gte: sevenDaysAgo } });
+        } catch {
+          return 0;
+        }
+      })(),
+      (async () => {
+        try {
+          return await db
+            .collection('errorGroups')
+            .countDocuments({ createdAt: { $gte: sevenDaysAgo } });
+        } catch {
+          return 0;
+        }
+      })(),
     ]).then((results) =>
       results.map((result) =>
         result.status === 'fulfilled' ? result.value : 0
@@ -205,6 +225,8 @@ export async function GET() {
             newCollections: recentActivity[1],
             newGroups: recentActivity[2],
             newDecisions: recentActivity[3],
+            newErrors: recentActivity[4],
+            newErrorGroups: recentActivity[5],
           },
         },
         recommendations: storageRecommendations,

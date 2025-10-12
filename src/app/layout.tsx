@@ -9,6 +9,7 @@ import {
   PWAInstallPrompt,
   PWAOfflineBanner,
 } from '@/components/ui/PWAStatusIndicator';
+import { ErrorBoundary } from '@/components/errors/ErrorBoundary';
 import { Toaster } from 'sonner';
 import Script from 'next/script';
 import './globals.css';
@@ -109,22 +110,24 @@ export default function RootLayout({
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
-          <ThemeProvider>
-            <QueryProvider>
-              <PageTransition>
-                <AppLayout>{children}</AppLayout>
-              </PageTransition>
-              <PWAInstallPrompt />
-              <PWAOfflineBanner />
-              <Toaster
-                position="top-center"
-                expand={false}
-                richColors
-                closeButton
-                duration={4000}
-              />
-            </QueryProvider>
-          </ThemeProvider>
+          <ErrorBoundary level="root">
+            <ThemeProvider>
+              <QueryProvider>
+                <PageTransition>
+                  <AppLayout>{children}</AppLayout>
+                </PageTransition>
+                <PWAInstallPrompt />
+                <PWAOfflineBanner />
+                <Toaster
+                  position="top-center"
+                  expand={false}
+                  richColors
+                  closeButton
+                  duration={4000}
+                />
+              </QueryProvider>
+            </ThemeProvider>
+          </ErrorBoundary>
 
           {/* Service Worker Registration */}
           <Script

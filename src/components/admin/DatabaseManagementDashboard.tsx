@@ -45,6 +45,8 @@ interface DatabaseStats {
       newCollections: number;
       newGroups: number;
       newDecisions: number;
+      newErrors: number;
+      newErrorGroups: number;
     };
   };
   recommendations: Array<{
@@ -423,6 +425,20 @@ export function DatabaseManagementDashboard() {
                 <span className="text-sm text-text-light">New Decisions</span>
                 <span className="font-semibold">
                   {stats.performance.recentActivity.newDecisions}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-text-light">New Errors</span>
+                <span className="font-semibold">
+                  {stats.performance.recentActivity.newErrors}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-text-light">
+                  New Error Groups
+                </span>
+                <span className="font-semibold">
+                  {stats.performance.recentActivity.newErrorGroups}
                 </span>
               </div>
             </div>

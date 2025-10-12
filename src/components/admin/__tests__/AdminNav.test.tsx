@@ -19,6 +19,7 @@ describe('AdminNav', () => {
 
     expect(screen.getByText('Performance')).toBeInTheDocument();
     expect(screen.getByText('Analytics')).toBeInTheDocument();
+    expect(screen.getByText('Errors')).toBeInTheDocument();
     expect(screen.getByText('Cost Monitoring')).toBeInTheDocument();
     expect(screen.getByText('Users')).toBeInTheDocument();
     expect(screen.getByText('Database')).toBeInTheDocument();
@@ -31,7 +32,7 @@ describe('AdminNav', () => {
 
     // Icons are rendered as SVG elements, we can check for their presence
     const buttons = screen.getAllByRole('button');
-    expect(buttons).toHaveLength(7); // 7 navigation tabs (Performance, Analytics, Cost Monitoring, Users, Database, Settings, Alerts)
+    expect(buttons).toHaveLength(8); // 8 navigation tabs (Performance, Analytics, Errors, Cost Monitoring, Users, Database, Settings, Alerts)
   });
 
   it('should highlight active tab', () => {
@@ -72,6 +73,9 @@ describe('AdminNav', () => {
 
     fireEvent.click(screen.getByText('Analytics'));
     expect(mockOnTabChange).toHaveBeenCalledWith('analytics');
+
+    fireEvent.click(screen.getByText('Errors'));
+    expect(mockOnTabChange).toHaveBeenCalledWith('errors');
 
     fireEvent.click(screen.getByText('Cost Monitoring'));
     expect(mockOnTabChange).toHaveBeenCalledWith('costs');
