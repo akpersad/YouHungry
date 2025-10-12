@@ -10,10 +10,12 @@ import { DatabaseManagementDashboard } from './DatabaseManagementDashboard';
 import { UsageAnalyticsDashboard } from './UsageAnalyticsDashboard';
 import { SystemSettingsDashboard } from './SystemSettingsDashboard';
 import { AdminAlertsDashboard } from './AdminAlertsDashboard';
+import { AdminErrorsDashboard } from './AdminErrorsDashboard';
 
 type AdminTab =
   | 'performance'
   | 'analytics'
+  | 'errors'
   | 'costs'
   | 'users'
   | 'database'
@@ -23,6 +25,7 @@ type AdminTab =
 const VALID_TABS: AdminTab[] = [
   'performance',
   'analytics',
+  'errors',
   'costs',
   'users',
   'database',
@@ -70,6 +73,8 @@ export function AdminPanel() {
         return <PerformanceDashboard />;
       case 'analytics':
         return <UsageAnalyticsDashboard />;
+      case 'errors':
+        return <AdminErrorsDashboard />;
       case 'costs':
         return <CostMonitoringDashboard />;
       case 'users':

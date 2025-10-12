@@ -10,6 +10,7 @@ import {
   ExternalLink,
   AlertTriangle,
   Activity,
+  Bug,
 } from 'lucide-react';
 
 interface AdminNavProps {
@@ -29,6 +30,12 @@ const adminNavItems = [
     title: 'Analytics',
     icon: BarChart3,
     description: 'Monitor app usage analytics',
+  },
+  {
+    id: 'errors',
+    title: 'Errors',
+    icon: Bug,
+    description: 'Error tracking and monitoring',
   },
   {
     id: 'costs',
