@@ -1,7 +1,7 @@
 'use client';
 
 // PWA Status Indicator Component
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { usePWA } from '@/hooks/usePWA';
 import { Button } from './Button';
 import { Modal } from './Modal';
@@ -115,37 +115,74 @@ interface PWAInstallPromptProps {
   onInstall?: () => void;
 }
 
+const PWA_DISMISS_KEY = 'pwa-install-dismissed';
+const DISMISS_DURATION = 72 * 60 * 60 * 1000; // 72 hours in milliseconds
+
 export function PWAInstallPrompt({
   onDismiss,
   onInstall,
 }: PWAInstallPromptProps) {
   const { status, installApp, canInstall } = usePWA();
+  const [isDismissed, setIsDismissed] = useState(false);
 
-  if (!canInstall || status.isInstalled) {
+  // Check if banner was dismissed within the last 72 hours
+  useEffect(() => {
+    const dismissedTime = localStorage.getItem(PWA_DISMISS_KEY);
+    if (dismissedTime) {
+      const elapsed = Date.now() - parseInt(dismissedTime, 10);
+      if (elapsed < DISMISS_DURATION) {
+        setIsDismissed(true);
+      } else {
+        // Clear expired dismissal
+        localStorage.removeItem(PWA_DISMISS_KEY);
+      }
+    }
+  }, []);
+
+  if (!canInstall || status.isInstalled || isDismissed) {
     return null;
   }
 
+  const handleDismiss = () => {
+    // Store current timestamp
+    localStorage.setItem(PWA_DISMISS_KEY, Date.now().toString());
+    setIsDismissed(true);
+    if (onDismiss) {
+      onDismiss();
+    }
+  };
+
   const handleInstall = async () => {
     const success = await installApp();
-    if (success && onInstall) {
-      onInstall();
+    if (success) {
+      // Clear any dismissal on successful install
+      localStorage.removeItem(PWA_DISMISS_KEY);
+      if (onInstall) {
+        onInstall();
+      }
     }
   };
 
   return (
-    <div className="fixed bottom-4 left-4 right-4 z-50 bg-white dark:bg-background border border-border dark:border-border rounded-lg shadow-lg p-4">
+    <div
+      className="fixed bottom-4 left-4 right-4 z-50 bg-secondary rounded-lg p-4"
+      style={{
+        boxShadow: 'var(--shadow-strong)',
+        border: '1px solid var(--bg-quaternary)',
+      }}
+    >
       <div className="flex items-start gap-3">
         <div className="flex-shrink-0">
-          <div className="w-8 h-8 bg-red-500 rounded-lg flex items-center justify-center">
+          <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center">
             <span className="text-white text-lg">🍽️</span>
           </div>
         </div>
 
         <div className="flex-1 min-w-0">
-          <h3 className="text-sm font-medium text-text dark:text-white">
+          <h3 className="text-sm font-medium text-primary">
             Install ForkInTheRoad
           </h3>
-          <p className="text-xs text-text-light dark:text-text-light mt-1">
+          <p className="text-xs text-secondary mt-1">
             Install this app on your device for a better experience and offline
             access.
           </p>
@@ -155,7 +192,7 @@ export function PWAInstallPrompt({
           <Button
             size="sm"
             variant="outline"
-            onClick={onDismiss}
+            onClick={handleDismiss}
             className="text-xs"
           >
             Not now
