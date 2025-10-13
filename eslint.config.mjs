@@ -20,6 +20,7 @@ const eslintConfig = [
       'next-env.d.ts',
       'scripts/**',
       'performance-metrics/**',
+      'coverage/**',
       'src/__tests__/**',
       '**/__tests__/**',
       '**/*.test.ts',
