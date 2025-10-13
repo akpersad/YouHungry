@@ -85,9 +85,8 @@ test.describe('Friend Management', () => {
     await expect(page.locator('[data-testid="friends-list"]')).toBeVisible();
 
     // Should show list of friends
-    await expect(page.locator('[data-testid="friend-card"]')).toHaveCount({
-      gte: 0,
-    });
+    const count = await page.locator('[data-testid="friend-card"]').count();
+    expect(count).toBeGreaterThanOrEqual(0);
   });
 
   test('Remove friend', async ({ page }) => {

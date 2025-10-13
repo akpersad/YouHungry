@@ -53,9 +53,8 @@ test.describe('Restaurant Search and Add to Collection', () => {
     await waitForNetworkIdle(page);
 
     // Verify pizza restaurants appear
-    await expect(page.locator('[data-testid="restaurant-card"]')).toHaveCount({
-      gte: 1,
-    });
+    const count = await page.locator('[data-testid="restaurant-card"]').count();
+    expect(count).toBeGreaterThanOrEqual(1);
   });
 
   test('View restaurant details', async ({ page }) => {
@@ -260,8 +259,9 @@ test.describe('Restaurant Search and Add to Collection', () => {
     });
 
     // Verify suggestions appear
-    await expect(
-      page.locator('[data-testid="address-suggestion"]')
-    ).toHaveCount({ gte: 1 });
+    const count = await page
+      .locator('[data-testid="address-suggestion"]')
+      .count();
+    expect(count).toBeGreaterThanOrEqual(1);
   });
 });

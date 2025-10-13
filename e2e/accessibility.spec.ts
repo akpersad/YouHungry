@@ -300,7 +300,7 @@ test.describe('Accessibility Tests - Keyboard Navigation', () => {
       // Verify focus is on an interactive element
       const interactiveTags = ['BUTTON', 'A', 'INPUT', 'SELECT', 'TEXTAREA'];
       const isInteractive =
-        interactiveTags.includes(focusedElement.tag) ||
+        (focusedElement.tag && interactiveTags.includes(focusedElement.tag)) ||
         focusedElement.role === 'button' ||
         focusedElement.role === 'link';
 
@@ -333,7 +333,7 @@ test.describe('Accessibility Tests - Keyboard Navigation', () => {
     await expect(modal).toBeVisible();
 
     // Tab should stay within modal
-    let lastFocused: string | null = null;
+    let lastFocused: string | null | undefined = null;
     let cycleCount = 0;
 
     while (cycleCount < 10) {
@@ -409,7 +409,8 @@ test.describe('Accessibility Tests - Screen Reader Support', () => {
     await page.goto('/dashboard');
 
     const nav = page.locator('nav, [role="navigation"]');
-    await expect(nav).toHaveCount({ gte: 1 });
+    const count = await nav.count();
+    expect(count).toBeGreaterThanOrEqual(1);
   });
 
   test('Form fields have associated labels', async ({ page }) => {

@@ -153,9 +153,8 @@ test.describe('Group Collaboration', () => {
     await expect(page.locator('[data-testid="group-members"]')).toBeVisible();
 
     // At least the creator should be listed
-    await expect(page.locator('[data-testid="member-card"]')).toHaveCount({
-      gte: 1,
-    });
+    const count = await page.locator('[data-testid="member-card"]').count();
+    expect(count).toBeGreaterThanOrEqual(1);
   });
 
   test('Promote member to admin', async ({ page }) => {
