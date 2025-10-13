@@ -438,19 +438,30 @@ Comprehensive UI/UX polish implementation focusing on accessibility, color contr
 
 ### Epic 7 Stories 1 & 1a Completed: Custom Authentication Pages with Phone Registration & SMS Opt-in
 
-- [x] **Custom Registration Page** - Complete multi-step registration flow explaining app benefits ✅ COMPLETED
+- [x] **Fully Custom Registration Flow** - Complete custom registration with Clerk client-side SDK integration ✅ COMPLETED
+  - [x] **Custom Registration Form** - Custom-built form component using Clerk's `useSignUp` hook (`CustomRegistrationForm.tsx`) ✅ COMPLETED
+  - [x] **In-line Email Verification** - 6-digit verification code flow within the registration form (no page redirect) ✅ COMPLETED
+  - [x] **Username Availability API** - `/api/auth/check-username` endpoint validates username availability in real-time ✅ COMPLETED
+  - [x] **Real-time Field Validation** - On-blur validation with visual success indicators (✓ checkmarks) ✅ COMPLETED
   - [x] **Sign-up Page** - Custom sign-up page at /sign-up route with app benefits explanation ✅ COMPLETED
-  - [x] **Benefits Section** - Clear explanation of app features and value proposition ✅ COMPLETED
+  - [x] **Benefits Section** - Clear explanation of app features (collections, group decisions, recommendations) ✅ COMPLETED
   - [x] **SMS Benefits Info** - Highlighted SMS notification benefits with opt-in explanation ✅ COMPLETED
   - [x] **Mobile Responsive Design** - Fully responsive design optimized for mobile devices ✅ COMPLETED
-  - [x] **Clerk Integration** - Seamless integration with Clerk SignUp component ✅ COMPLETED
+  - [x] **Clerk SDK Integration** - Uses Clerk's `useSignUp` hook for client-side user creation ✅ COMPLETED
+  - [x] **Form Fields** - Email, username, password, first/last name, phone (optional), SMS opt-in, city/state (optional) ✅ COMPLETED
+  - [x] **Client-side Validation** - Password strength (10-72 chars), email format, username format (4-64 chars), phone format validation ✅ COMPLETED
+  - [x] **MongoDB User Creation** - Webhook-based user creation in MongoDB with all custom fields from `unsafeMetadata` ✅ COMPLETED
+  - [x] **Verification Code Resend** - Resend verification code with 60-second cooldown timer ✅ COMPLETED
+  - [x] **Country Code Selection** - Phone number input with country code dropdown (default +1) ✅ COMPLETED
 
-- [x] **Custom Login Page** - Dedicated sign-in page replacing Clerk modal ✅ COMPLETED
-  - [x] **Sign-in Page** - Custom sign-in page at /sign-in route with consistent branding ✅ COMPLETED
-  - [x] **Navigation Integration** - Updated SignInButton to redirect to custom pages ✅ COMPLETED
-  - [x] **Home Page Updates** - Updated home page to link to custom auth pages ✅ COMPLETED
-  - [x] **Back Navigation** - Back to home navigation from auth pages ✅ COMPLETED
-  - [x] **Consistent Styling** - Clerk appearance configured to match app design system ✅ COMPLETED
+- [x] **Custom Login Page** - Dedicated sign-in page with styled Clerk component ✅ COMPLETED
+  - [x] **Sign-in Page** - Custom sign-in page at /sign-in route using Clerk's `<SignIn />` component ✅ COMPLETED
+  - [x] **Clerk Component Styling** - Extensive appearance customization for Clerk's sign-in component ✅ COMPLETED
+  - [x] **Registration Success Banner** - Shows success message when redirected from registration ✅ COMPLETED
+  - [x] **Navigation Integration** - Updated AuthButtons to link to custom pages ✅ COMPLETED
+  - [x] **Back Navigation** - Back to home button on auth pages ✅ COMPLETED
+  - [x] **Theme Integration** - CSS custom properties for consistent design (--color-primary, --color-background, etc.) ✅ COMPLETED
+  - [x] **Suspense Loading** - Proper loading state handling with Suspense boundary ✅ COMPLETED
 
 - [x] **Enhanced Database Schema** - Updated user schema for new authentication features ✅ COMPLETED
   - [x] **Location Preferences** - Added city, state, and location settings fields ✅ COMPLETED
