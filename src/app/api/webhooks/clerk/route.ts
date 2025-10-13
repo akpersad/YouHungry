@@ -70,7 +70,20 @@ export async function POST(req: NextRequest) {
       last_name,
       image_url,
       phone_numbers,
+      public_metadata,
     } = evt.data;
+
+    // Extract custom fields from metadata
+    const metadata = public_metadata as Record<string, unknown> | undefined;
+    const city = typeof metadata?.city === 'string' ? metadata.city : undefined;
+    const state =
+      typeof metadata?.state === 'string' ? metadata.state : undefined;
+    const smsOptIn =
+      typeof metadata?.smsOptIn === 'boolean' ? metadata.smsOptIn : false;
+    const phoneNumber =
+      (typeof metadata?.phoneNumber === 'string'
+        ? metadata.phoneNumber
+        : undefined) || phone_numbers?.[0]?.phone_number;
 
     try {
       await createUser({
@@ -78,30 +91,38 @@ export async function POST(req: NextRequest) {
         email: email_addresses[0]?.email_address || '',
         name: `${first_name || ''} ${last_name || ''}`.trim() || 'User',
         profilePicture: image_url,
-        phoneNumber: phone_numbers?.[0]?.phone_number,
-        smsOptIn: false, // Default to false, user can opt-in during registration
+        phoneNumber,
+        phoneVerified: false,
+        smsOptIn,
+        city,
+        state,
         preferences: {
           locationSettings: {
-            city: undefined,
-            state: undefined,
-            country: undefined,
-            timezone: undefined,
+            city,
+            state,
+            country: 'US',
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
           },
           notificationSettings: {
             groupDecisions: {
-              started: true, // Default to true
-              completed: true, // Default to true
+              started: true,
+              completed: true,
             },
             friendRequests: true,
             groupInvites: true,
-            smsEnabled: false, // Default to false
-            emailEnabled: true, // Default to true
-            pushEnabled: true, // Default to true
+            smsEnabled: smsOptIn,
+            emailEnabled: true,
+            pushEnabled: true,
           },
         },
       });
 
-      logger.debug(`User created: ${id}`);
+      logger.debug(`User created via webhook: ${id}`, {
+        city,
+        state,
+        smsOptIn,
+        hasPhone: !!phoneNumber,
+      });
     } catch (error) {
       logger.error('Error creating user:', error);
       return new Response('Error creating user', { status: 500 });
@@ -116,7 +137,20 @@ export async function POST(req: NextRequest) {
       last_name,
       image_url,
       phone_numbers,
+      public_metadata,
     } = evt.data;
+
+    // Extract custom fields from metadata
+    const metadata = public_metadata as Record<string, unknown> | undefined;
+    const city = typeof metadata?.city === 'string' ? metadata.city : undefined;
+    const state =
+      typeof metadata?.state === 'string' ? metadata.state : undefined;
+    const smsOptIn =
+      typeof metadata?.smsOptIn === 'boolean' ? metadata.smsOptIn : undefined;
+    const phoneNumber =
+      (typeof metadata?.phoneNumber === 'string'
+        ? metadata.phoneNumber
+        : undefined) || phone_numbers?.[0]?.phone_number;
 
     try {
       const user = await getUserByClerkId(id);
@@ -125,10 +159,13 @@ export async function POST(req: NextRequest) {
           email: email_addresses[0]?.email_address || user.email,
           name: `${first_name || ''} ${last_name || ''}`.trim() || user.name,
           profilePicture: image_url || user.profilePicture,
-          phoneNumber: phone_numbers?.[0]?.phone_number || user.phoneNumber,
+          phoneNumber: phoneNumber || user.phoneNumber,
+          city: city || user.city,
+          state: state || user.state,
+          smsOptIn: smsOptIn !== undefined ? smsOptIn : user.smsOptIn,
         });
 
-        logger.debug(`User updated: ${id}`);
+        logger.debug(`User updated via webhook: ${id}`);
       }
     } catch (error) {
       logger.error('Error updating user:', error);

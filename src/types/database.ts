@@ -12,6 +12,7 @@ export interface User {
   smsOptIn: boolean;
   smsPhoneNumber?: string;
   phoneNumber?: string; // Clerk phone number
+  phoneVerified?: boolean; // Whether the phone number has been verified
   preferences: {
     defaultLocation?: string;
     locationSettings: {

@@ -1,6 +1,6 @@
 'use client';
 
-import { SignUp } from '@clerk/nextjs';
+import { CustomRegistrationForm } from '@/components/forms/CustomRegistrationForm';
 import { Button } from '@/components/ui/Button';
 import { useRouter } from 'next/navigation';
 
@@ -8,8 +8,8 @@ export default function SignUpPage() {
   const router = useRouter();
 
   return (
-    <div className="min-h-screen flex items-center justify-center py-12 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
+    <div className="min-h-screen flex items-center justify-center py-12 px-4 lg:px-8">
+      <div className="max-w-md w-full space-y-6">
         {/* Header */}
         <div className="text-center">
           <h1
@@ -59,58 +59,26 @@ export default function SignUpPage() {
           <Button
             variant="outline"
             onClick={() => router.push('/')}
-            className="mb-6"
+            className="mb-2"
           >
             ← Back to Home
           </Button>
         </div>
 
-        {/* Clerk Sign Up Component */}
-        <div className="flex justify-center">
-          <SignUp
-            appearance={{
-              elements: {
-                rootBox: 'w-full',
-                card: 'shadow-none border-0 bg-transparent',
-                headerTitle: 'hidden',
-                headerSubtitle: 'hidden',
-                socialButtonsBlockButton: 'btn-base btn-outline',
-                socialButtonsBlockButtonText: 'text-sm',
-                formButtonPrimary: 'btn-base btn-primary',
-                footerActionLink: 'text-primary hover:text-primary/80',
-                identityPreviewText: 'text-sm',
-                formFieldInput: 'input-base',
-                formFieldLabel: 'text-sm font-medium',
-                dividerLine: 'bg-border',
-                dividerText: 'text-sm text-muted-foreground',
-                formFieldErrorText: 'text-sm text-destructive',
-                footerActionText: 'text-sm text-muted-foreground',
-                formFieldSuccessText: 'text-sm text-success',
-              },
-              variables: {
-                colorPrimary: 'var(--color-primary)',
-                colorBackground: 'var(--color-background)',
-                colorInputBackground: 'var(--color-surface)',
-                colorInputText: 'var(--color-text)',
-                colorText: 'var(--color-text)',
-                colorTextSecondary: 'var(--color-text-light)',
-                borderRadius: '0.5rem',
-              },
-            }}
-            fallbackRedirectUrl="/dashboard"
-            signInUrl="/sign-in"
-          />
+        {/* Custom Registration Form */}
+        <div className="bg-surface rounded-lg p-6 border border-border">
+          <CustomRegistrationForm />
         </div>
 
         {/* SMS Benefits Info */}
-        <div className="bg-primary/10 dark:bg-primary/20/20 rounded-lg p-4 border border-primary dark:border-primary">
+        <div className="bg-primary/10 dark:bg-primary/20 rounded-lg p-4 border border-primary dark:border-primary">
           <h4 className="font-medium mb-2 text-blue-900 dark:text-blue-100">
             📱 SMS Notifications (Optional)
           </h4>
           <p className="text-sm text-blue-800 dark:text-blue-200">
             Enable SMS to get notified about group decisions, friend requests,
-            and group invites. You can always change this later in your profile
-            settings.
+            and group invites. You can verify your phone number later in your
+            profile settings.
           </p>
         </div>
 
