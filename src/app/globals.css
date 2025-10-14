@@ -18,8 +18,8 @@
     --bg-quinary: #d1d1d1; /* Stronger borders - dark gray */
 
     /* Strategic Accent Colors - Infrared */
-    --accent-primary: #ff3366; /* Vibrant infrared - primary actions */
-    --accent-primary-light: #ff6699; /* Light infrared - hover states */
+    --accent-primary: #e3005a; /* Infrared - primary actions (WCAG AA compliant: 4.51:1 contrast with #fafafa) */
+    --accent-primary-light: #ff3366; /* Light infrared - hover states */
     --accent-primary-dark: #cc1144; /* Dark infrared - pressed states */
     --accent-primary-muted: #ff4477; /* Muted infrared - subtle highlights */
 
@@ -94,9 +94,9 @@
     --bg-quaternary: #404040; /* Secondary surfaces - medium dark gray */
     --bg-quinary: #ababab; /* Borders, dividers - light dark gray (WCAG AA 4.5:1 on all backgrounds) */
 
-    /* Strategic Accent Colors - Infrared (Dark Mode maintains original for better contrast) */
-    --accent-primary: #ff3366; /* Vibrant infrared - primary actions */
-    --accent-primary-light: #ff6699; /* Light infrared - hover states */
+    /* Strategic Accent Colors - Infrared (Dark Mode) */
+    --accent-primary: #e3005a; /* Infrared - primary actions (WCAG AA compliant) */
+    --accent-primary-light: #ff3366; /* Light infrared - hover states */
     --accent-primary-dark: #cc1144; /* Dark infrared - pressed states */
     --accent-primary-muted: #ff4477; /* Muted infrared - subtle highlights */
 
