@@ -2,8 +2,15 @@ import { defineConfig, devices } from '@playwright/test';
 import dotenv from 'dotenv';
 import path from 'path';
 
-// Load environment variables from .env.local
-dotenv.config({ path: path.resolve(__dirname, '.env.local') });
+// Determine which browsers to run based on environment
+const isCI = !!process.env.CI;
+const runAllBrowsers = process.env.RUN_ALL_BROWSERS === 'true';
+
+// Load environment variables from .env.local (local development only)
+// In CI, environment variables are already set by GitHub Actions
+if (!isCI) {
+  dotenv.config({ path: path.resolve(__dirname, '.env.local') });
+}
 
 /**
  * Playwright E2E Testing Configuration - SMART PARALLELIZATION
@@ -11,10 +18,6 @@ dotenv.config({ path: path.resolve(__dirname, '.env.local') });
  * Local/PR: Chromium + Mobile Chrome only (fast feedback)
  * Main/Nightly: All 5 browsers (comprehensive coverage)
  */
-
-// Determine which browsers to run based on environment
-const runAllBrowsers = process.env.RUN_ALL_BROWSERS === 'true';
-const isCI = !!process.env.CI;
 
 export default defineConfig({
   testDir: './e2e',
