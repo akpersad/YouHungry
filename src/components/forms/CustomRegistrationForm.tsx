@@ -927,9 +927,11 @@ export function CustomRegistrationForm() {
         <div className="flex gap-2">
           {/* Country Code Dropdown */}
           <select
+            id="countryCode"
             value={formData.countryCode}
             onChange={(e) => handleInputChange('countryCode', e.target.value)}
             disabled={isSubmitting}
+            aria-label="Country code for phone number"
             className="px-3 py-2 rounded-lg border text-sm"
             style={{
               backgroundColor: 'var(--color-surface)',
