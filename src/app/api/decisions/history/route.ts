@@ -140,6 +140,7 @@ export async function GET(request: NextRequest) {
         : undefined,
       method: decision.method,
       visitDate: decision.visitDate.toISOString(),
+      amountSpent: decision.amountSpent,
       result: decision.result
         ? {
             restaurantId: decision.result.restaurantId.toString(),

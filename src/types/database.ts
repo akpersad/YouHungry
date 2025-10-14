@@ -98,6 +98,7 @@ export interface Decision {
   status: 'active' | 'completed' | 'expired';
   deadline: Date;
   visitDate: Date; // When user actually visited (for manual entries) or when they will visit (for decisions)
+  amountSpent?: number; // Amount spent on the visit in USD (only for completed decisions)
   result?: {
     restaurantId: ObjectId;
     selectedAt: Date;

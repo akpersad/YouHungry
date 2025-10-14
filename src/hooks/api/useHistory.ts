@@ -23,6 +23,7 @@ export interface DecisionHistoryItem {
   groupName?: string;
   method: string;
   visitDate: string;
+  amountSpent?: number;
   result: {
     restaurantId: string;
     restaurant: {
@@ -134,6 +135,73 @@ export function useManualDecision() {
     },
     onError: (error: Error) => {
       logger.error('Failed to create manual decision:', error);
+    },
+  });
+}
+
+// Update amount spent for a decision
+async function updateDecisionAmountSpent(data: {
+  decisionId: string;
+  amountSpent: number;
+}): Promise<{ success: boolean }> {
+  const response = await fetch(`/api/decisions/history/${data.decisionId}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ amountSpent: data.amountSpent }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to update amount spent');
+  }
+
+  return response.json();
+}
+
+// Delete a decision
+async function deleteDecision(
+  decisionId: string
+): Promise<{ success: boolean }> {
+  const response = await fetch(`/api/decisions/history/${decisionId}`, {
+    method: 'DELETE',
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to delete decision');
+  }
+
+  return response.json();
+}
+
+export function useUpdateAmountSpent() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: updateDecisionAmountSpent,
+    onSuccess: () => {
+      // Invalidate decision history queries to refetch updated data
+      queryClient.invalidateQueries({ queryKey: historyKeys.all });
+      logger.info('Amount spent updated successfully');
+    },
+    onError: (error: Error) => {
+      logger.error('Failed to update amount spent:', error);
+    },
+  });
+}
+
+export function useDeleteDecision() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: deleteDecision,
+    onSuccess: () => {
+      // Invalidate decision history queries
+      queryClient.invalidateQueries({ queryKey: historyKeys.all });
+      logger.info('Decision deleted successfully');
+    },
+    onError: (error: Error) => {
+      logger.error('Failed to delete decision:', error);
     },
   });
 }
