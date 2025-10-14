@@ -575,6 +575,125 @@ npm run test:coverage
 
 ---
 
+---
+
+## Mobile Testing Checklist
+
+### Device Testing Matrix
+
+**iOS Devices:**
+
+- iPhone SE (375px): Portrait orientation, touch targets, navigation, forms
+- iPhone 12/13 (390px): Full feature testing
+- iPhone 12/13 Pro Max (428px): Large screen optimization
+- iPad (768px): Tablet layout, landscape orientation
+
+**Android Devices:**
+
+- Samsung Galaxy S21 (360px): Narrow screen testing
+- Google Pixel 6 (411px): Standard Android testing
+
+**Key Test Areas:**
+
+- Touch targets (minimum 44px verified)
+- Bottom navigation accessibility
+- Swipe gestures (decision interface, navigation)
+- Form input without zoom trigger (16px font minimum)
+- Bottom sheets (drag gestures, snap points)
+- Performance (smooth scrolling, 60fps animations)
+
+### Browser Testing
+
+- iOS Safari 14.0+: Touch events, viewport, keyboard, performance
+- Chrome Mobile 90.0+: Full compatibility
+- Firefox Mobile 88.0+: Alternative browser support
+- Samsung Internet 13.0+: Android default browser
+
+### Mobile Component Testing
+
+**Restaurant Cards:**
+
+- Mobile-optimized variant: Large photo (192px), distance badge, clear hierarchy
+- Compact variant: Small photo (48px), condensed info
+- Touch feedback and 44px minimum touch area
+
+**Bottom Navigation:**
+
+- Fixed positioning with proper z-index
+- 60px touch targets with active state feedback
+- ARIA labels and keyboard navigation
+- Responsive adaptation
+
+**Bottom Sheets:**
+
+- Drag down to close, snap points
+- Backdrop click-to-close
+- Body scroll lock when open
+- Keyboard support (Escape to close)
+
+**View Toggle:**
+
+- Button-only and labeled variants
+- Fixed/inline positioning options
+- Proper touch target sizing
+- Accessibility labels
+
+### Performance Testing
+
+**Mobile Performance:**
+
+- Loading: Fast initial load and navigation
+- Animation: 60fps smooth animations
+- Memory: Efficient management, no leaks
+- Battery: Optimized for mobile battery life
+
+**Core Web Vitals (Mobile):**
+
+- LCP: < 2.5s, FID: < 100ms, CLS: < 0.1
+- FCP: < 1.8s, TTI: < 3.8s
+
+### Accessibility Testing (Mobile)
+
+**Touch Accessibility:**
+
+- Touch targets: 44px minimum, adequate spacing
+- Visual feedback: Clear on touch
+- Error prevention: Prevent accidental touches
+
+**Keyboard Accessibility:**
+
+- Tab navigation: All elements reachable
+- Focus indicators: Clear visibility
+- Escape key: Closes modals/sheets
+
+**Screen Reader Support:**
+
+- ARIA labels on all components
+- Correct roles and descriptions
+- Logical reading order
+
+### Edge Cases
+
+**Network Conditions:**
+
+- Offline: Graceful handling
+- Slow connection: Works on 3G
+- Intermittent: Handles connectivity issues
+
+**Device Conditions:**
+
+- Low memory: Works on constrained devices
+- Battery saver mode: Reduced functionality
+- Orientation changes: Proper handling
+
+**Testing Tools:**
+
+- Physical devices (primary)
+- Browser dev tools (secondary)
+- Automated tests (regression)
+
+---
+
 ## Summary
 
 This testing strategy ensures:
@@ -584,6 +703,7 @@ This testing strategy ensures:
 - ✅ **Automated quality gates** in CI/CD
 - ✅ **Accessibility compliance**
 - ✅ **Performance monitoring**
+- ✅ **Mobile optimization** across devices
 - ✅ **Cost-effective** test execution
 - ✅ **Maintainable** test suite
 

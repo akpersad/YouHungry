@@ -865,6 +865,137 @@ export function useRestaurants({
 }
 ```
 
+### Phase 3: Animation & Polish with Framer Motion (Pending Implementation)
+
+**Objective**: Add sophisticated animations, micro-interactions, and final polish for premium mobile experience.
+
+**Key Implementation Patterns:**
+
+```typescript
+// lib/animations.ts - Animation configuration
+import { Variants } from 'framer-motion';
+
+// Page transitions
+export const pageVariants: Variants = {
+  initial: { opacity: 0, y: 20 },
+  in: { opacity: 1, y: 0 },
+  out: { opacity: 0, y: -20 },
+};
+
+// Card animations
+export const cardVariants: Variants = {
+  hidden: { opacity: 0, scale: 0.8 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: { duration: 0.3 }
+  },
+  hover: {
+    scale: 1.02,
+    transition: { duration: 0.2 }
+  },
+  tap: { scale: 0.98 }
+};
+
+// Staggered list animations
+export const listVariants: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+};
+
+// Usage in components
+import { motion } from 'framer-motion';
+import { cardVariants, listVariants } from '@/lib/animations';
+
+function RestaurantList({ restaurants }) {
+  return (
+    <motion.div variants={listVariants} initial="hidden" animate="visible">
+      {restaurants.map(restaurant => (
+        <motion.div
+          key={restaurant.id}
+          variants={cardVariants}
+          whileHover="hover"
+          whileTap="tap"
+        >
+          <RestaurantCard restaurant={restaurant} />
+        </motion.div>
+      ))}
+    </motion.div>
+  );
+}
+
+// Touch gestures
+export const swipeGesture = {
+  onSwipeLeft: (callback) => ({ x: -100 }),
+  onSwipeRight: (callback) => ({ x: 100 }),
+  onSwipeUp: (callback) => ({ y: -100 }),
+};
+
+// Skeleton loading animations
+function SkeletonCard() {
+  return (
+    <motion.div
+      animate={{ opacity: [0.5, 1, 0.5] }}
+      transition={{ duration: 1.5, repeat: Infinity }}
+      className="skeleton-card"
+    />
+  );
+}
+
+// Reduced motion support
+const shouldReduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+export const getAnimationDuration = (normalDuration: number) =>
+  shouldReduceMotion ? 0.01 : normalDuration;
+```
+
+**Animation Guidelines:**
+
+- Keep animations subtle (< 500ms duration)
+- Use GPU-accelerated properties (transform, opacity)
+- Always respect `prefers-reduced-motion`
+- Test on mobile devices for 60fps performance
+- Use `will-change` hints for animated elements
+
+**PWA Implementation (Epic 5 Story 2):**
+
+```typescript
+// Service worker caching strategy
+const CACHE_NAME = 'you-hungry-v1';
+const CACHE_URLS = ['/', '/restaurants', '/collections'];
+
+// App manifest configuration
+{
+  "name": "You Hungry",
+  "short_name": "YouHungry",
+  "display": "standalone",
+  "theme_color": "#ff3366",
+  "background_color": "#fafafa",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192" },
+    { "src": "/icon-512.png", "sizes": "512x512" }
+  ]
+}
+
+// Push notification manager
+class PushNotificationManager {
+  async subscribe() {
+    const registration = await navigator.serviceWorker.ready;
+    return await registration.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: VAPID_PUBLIC_KEY
+    });
+  }
+}
+```
+
+---
+
 ### Drag & Drop Implementation with @dnd-kit (Future Implementation)
 
 ```typescript

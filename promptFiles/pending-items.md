@@ -93,14 +93,29 @@ This document tracks all planned items that are not yet started, organized by ca
 
 ### Mobile & PWA
 
-- [ ] Optimize UI for mobile-first experience with Framer Motion animations
-- [ ] Implement PWA capabilities and service workers
+- [x] Mobile-first responsive design with neumorphic system ✅ COMPLETED (Epic 5 Phase 1 & 2)
+- [x] Bottom navigation and touch-optimized components ✅ COMPLETED (Epic 5 Phase 2)
 - [x] Add offline functionality and caching with TanStack Query ✅ COMPLETED
-- [ ] Create mobile-specific navigation patterns with bottom navigation
+- [ ] **Epic 5 Story 1b - Phase 3: Animation & Polish** (NEXT PRIORITY)
+  - [ ] Framer Motion setup and configuration
+  - [ ] Page transition animations (route changes, modals, loading states)
+  - [ ] Component entrance/exit animations (staggered lists, cards, forms)
+  - [ ] Micro-interactions (button press, hover, touch feedback)
+  - [ ] Gesture-based interactions (swipe, pull-to-refresh, long-press, drag-and-drop)
+  - [ ] Loading state animations (skeleton screens, progress indicators)
+  - [ ] Performance optimization (adaptive animation quality, will-change hints)
+  - [ ] **WCAG 2.2 AA Accessibility Upgrade** (from current WCAG 2.1 AA)
+    - Enhanced focus management with visible outlines (2.4.7)
+    - Touch target optimization - 44px minimum (2.5.5)
+    - Motion sensitivity - prefers-reduced-motion support (3.2.5)
+    - Error identification with recovery instructions (3.3.3)
+    - Non-text contrast for UI components (1.4.11)
+    - Focus visible indicators (2.4.7)
+    - Target size compliance (2.5.5)
+- [ ] PWA capabilities and service workers (Epic 5 Story 2)
 - [ ] Implement GraphQL query caching for offline support
 - [ ] Add GraphQL subscription optimization for mobile
 - [ ] Create mobile-optimized GraphQL queries
-- [ ] Implement touch-friendly drag-and-drop interactions
 
 ## 🔮 Low Priority (Future Sprints)
 
