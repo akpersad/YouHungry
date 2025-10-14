@@ -108,7 +108,7 @@ function VerifyEmailContent() {
 
         {/* Phone Verification Info (if SMS opt-in) */}
         {phoneVerification === 'sent' && (
-          <div className="bg-green-50 dark:bg-green-950/30 rounded-lg p-4 border border-green-200 dark:border-green-800">
+          <div className="bg-success/10 dark:bg-green-950/30 rounded-lg p-4 border border-green-200 dark:border-green-800">
             <h3 className="font-semibold text-green-900 dark:text-green-100 mb-2">
               📱 Phone Verification Sent
             </h3>
@@ -121,7 +121,7 @@ function VerifyEmailContent() {
         )}
 
         {/* Info Box */}
-        <div className="bg-blue-50 dark:bg-blue-950/30 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
+        <div className="bg-primary/10 dark:bg-blue-950/30 rounded-lg p-4 border border-primary dark:border-primary">
           <p className="text-sm text-blue-900 dark:text-blue-100">
             <strong>💡 Tip:</strong> The verification link will expire after 24
             hours. If you need a new one, try signing in and we&apos;ll send

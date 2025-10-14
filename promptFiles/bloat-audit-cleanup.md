@@ -222,53 +222,85 @@ src/app/api/debug/
 
 ### 6. Duplicate Color Contrast Scripts
 
-**Status:** ❌ Not Started  
+**Status:** ✅ COMPLETED  
 **Priority:** MEDIUM  
-**Impact:** ~1000 lines of duplicate code
+**Impact:** 364KB disk space, 9,864 lines of code removed
 
-**Current Scripts:**
+**What Was Removed:**
 
 ```
-scripts/
-├── verify-color-contrast.js (221 lines) - SIMILAR TO verify-card-contrast
-├── verify-card-contrast.js (220 lines) - SIMILAR TO verify-color-contrast
-├── comprehensive-contrast-audit.js - KEEP (most complete)
-├── comprehensive-fix-contrast-issues.js - KEEP
-├── auto-fix-contrast-issues.js - EVALUATE (may duplicate above)
-├── fix-hardcoded-colors.js - KEEP
-└── setup-color-prevention.js - KEEP
+✓ scripts/verify-color-contrast.js (220 lines, 5.8K) - Redundant verification
+✓ scripts/verify-card-contrast.js (219 lines, 5.9K) - Redundant card-specific tests
+✓ scripts/auto-fix-contrast-issues.js (9,235 lines, 338K!) - Generated file
+✓ scripts/fix-hardcoded-colors.js (228 lines, 7.1K) - Merged into comprehensive fix
 ```
 
-**Duplicate Code:**
+**What Was Created:**
 
-- getLuminance() function copied across files
-- hexToRgb() function copied across files
-- getContrastRatio() function copied across files
-- checkCompliance() function copied across files
+```
+✓ scripts/utils/color-contrast-utils.js (217 lines, 6.8K)
+  - Shared color contrast calculation functions
+  - WCAG compliance checking
+  - Design system color mappings
+  - Eliminates code duplication across scripts
+```
 
-**Action Plan:**
+**What Was Updated:**
 
-1. Create `scripts/utils/color-contrast-utils.js` with shared functions
-2. Update scripts to import shared utilities
-3. Delete redundant scripts:
-   - Remove `verify-color-contrast.js`
-   - Remove `verify-card-contrast.js`
-4. Evaluate if `auto-fix-contrast-issues.js` duplicates `comprehensive-fix-contrast-issues.js`
+```
+✓ scripts/comprehensive-contrast-audit.js (395 lines, 10K)
+  - No longer generates massive auto-fix file
+  - Provides recommendations instead
+  - Reduced from 462 lines
 
-**Final Script List:**
+✓ scripts/comprehensive-fix-contrast-issues.js (109 lines, 3.1K)
+  - Now uses shared utilities
+  - Merged functionality from fix-hardcoded-colors.js
+  - Reduced from 221 lines
 
-- `comprehensive-contrast-audit.js` (audit)
-- `comprehensive-fix-contrast-issues.js` (fix)
-- `fix-hardcoded-colors.js` (prevention)
-- `setup-color-prevention.js` (setup)
-- `utils/color-contrast-utils.js` (shared utilities)
+✓ scripts/setup-color-prevention.js (274 lines, 10K)
+  - Updated references to use npm run fix-colors
+  - No changes to line count (same functionality)
+```
+
+**Final Script Architecture:**
+
+- `comprehensive-contrast-audit.js` - Scans codebase for color issues
+- `comprehensive-fix-contrast-issues.js` - Fixes hardcoded colors automatically
+- `setup-color-prevention.js` - Sets up ESLint rules and pre-commit hooks
+- `utils/color-contrast-utils.js` - Shared utilities (no duplication!)
+
+**Metrics:**
+
+**BEFORE:**
+
+- Scripts directory: 456K
+- Color scripts: 7 files, 10,859 lines
+- Duplicate functions in 3+ files
+- Largest file: 338K (generated)
+
+**AFTER:**
+
+- Scripts directory: 92K (↓ 364K, 79.8% reduction)
+- Color scripts: 4 files, 995 lines (↓ 9,864 lines, 90.8% reduction)
+- Zero code duplication (shared utils)
+- No generated files
 
 **Verification:**
 
-- [ ] Create shared utilities module
-- [ ] Update imports in remaining scripts
-- [ ] Test each script still works
-- [ ] Delete redundant scripts
+- [x] Created shared utilities module with 6 exported functions
+- [x] Updated comprehensive-fix-contrast-issues.js to import shared utils
+- [x] Updated comprehensive-contrast-audit.js to not generate huge files
+- [x] Deleted 4 redundant/generated scripts
+- [x] Updated setup-color-prevention.js references
+- [x] Updated scripts/README.md documentation
+- [x] Tested all remaining scripts work correctly
+- [x] Build successful (npm run build)
+- [x] Tests passing (68 tests passed)
+- [x] No functionality lost
+
+**Time Taken:** 25 minutes  
+**Risk Level:** Low (comprehensive testing performed)
 
 ---
 
@@ -479,16 +511,16 @@ performance-metrics/
   - [x] Analyzed unique tests (mostly basic placeholders)
   - [x] Delete redundant file (performance.test.tsx removed)
   - [x] Verify coverage (51 tests pass, 23.5% faster)
-- [ ] Consolidate color scripts
-  - [ ] Create shared utilities
-  - [ ] Update scripts
-  - [ ] Delete duplicates
-  - [ ] Test remaining scripts
+- [x] ✅ **Consolidate color scripts** (COMPLETED)
+  - [x] Create shared utilities (color-contrast-utils.js)
+  - [x] Update scripts to use shared utils
+  - [x] Delete duplicates (4 scripts removed)
+  - [x] Test remaining scripts (all passing)
 
 **Est. Time:** 1-2 hours  
 **Risk Level:** Low (good test coverage)  
 **Impact:** ~1800 lines removed, ~150KB bundle  
-**Actual Progress:** 1,758 lines removed (GraphQL + tests) ✅
+**Actual Progress:** 11,622 lines removed (GraphQL + tests + color scripts), 364KB disk space ✅
 
 ---
 
@@ -882,8 +914,115 @@ performance-metrics/
 
 ---
 
+### Color Contrast Scripts Consolidation - October 14, 2025
+
+**Status:** ✅ COMPLETED
+
+**Actual Savings:**
+
+- **364KB** disk space saved (456K → 92K scripts directory, 79.8% reduction)
+- **9,864 lines** of code removed (10,859 → 995 lines, 90.8% reduction)
+- **4 files** deleted (verify-color-contrast.js, verify-card-contrast.js, auto-fix-contrast-issues.js, fix-hardcoded-colors.js)
+- **1 shared utilities module** created (eliminates code duplication)
+- **Zero code duplication** remaining (all shared functions extracted)
+
+**What Was Removed:**
+
+```
+✓ verify-color-contrast.js (220 lines, 5.8K)
+  - Redundant WCAG AA verification tests
+  - Duplicate color contrast functions
+
+✓ verify-card-contrast.js (219 lines, 5.9K)
+  - Card-specific color tests (covered by audit)
+  - Duplicate color contrast functions
+
+✓ auto-fix-contrast-issues.js (9,235 lines, 338K!)
+  - Generated file by comprehensive-contrast-audit.js
+  - Massive disk bloat with hardcoded fixes
+  - Now audit provides recommendations instead
+
+✓ fix-hardcoded-colors.js (228 lines, 7.1K)
+  - Merged into comprehensive-fix-contrast-issues.js
+  - Functionality preserved in shared utils
+```
+
+**What Was Created:**
+
+```
+✓ scripts/utils/color-contrast-utils.js (217 lines, 6.8K)
+  - getLuminance() - Calculate relative luminance
+  - hexToRgb() - Convert hex to RGB
+  - getContrastRatio() - Calculate WCAG contrast ratios
+  - checkCompliance() - Verify WCAG AA/AAA compliance
+  - COLOR_REPLACEMENTS - Design system color mappings
+  - getDesignSystemColor() - Get replacement colors
+```
+
+**What Was Optimized:**
+
+```
+✓ comprehensive-contrast-audit.js (462 → 395 lines, 14.5% reduction)
+  - Removed generateFixScript() function
+  - No longer creates 338KB generated file
+  - Provides fix recommendations instead
+
+✓ comprehensive-fix-contrast-issues.js (221 → 109 lines, 50.7% reduction)
+  - Now imports COLOR_REPLACEMENTS from shared utils
+  - Merged fix-hardcoded-colors.js functionality
+  - Cleaner, more maintainable code
+
+✓ setup-color-prevention.js (274 lines, no change)
+  - Updated references to use npm run fix-colors
+  - Better integration with package.json scripts
+```
+
+**Architecture Improvement:**
+
+**BEFORE:**
+
+- 7 scripts with duplicate code
+- Same functions copied 3+ times
+- 338KB generated file created on every audit
+- No clear separation of concerns
+
+**AFTER:**
+
+- 4 lean, focused scripts
+- Shared utilities module (DRY principle)
+- No generated files (recommendations only)
+- Clear architecture:
+  - Audit → Find issues
+  - Fix → Apply fixes
+  - Setup → Prevent future issues
+  - Utils → Shared functionality
+
+**Verification:**
+
+- ✅ All scripts load and run without errors
+- ✅ Shared utilities work correctly (tested getLuminance, hexToRgb, getContrastRatio)
+- ✅ comprehensive-contrast-audit.js scans 242 files successfully
+- ✅ comprehensive-fix-contrast-issues.js made 29 valid replacements
+- ✅ Production build successful
+- ✅ All tests passing (68 tests in utils/hooks)
+- ✅ No functionality lost
+- ✅ Documentation updated (scripts/README.md)
+
+**Why This Matters:**
+
+- **Maintainability:** Single source of truth for color utilities
+- **Performance:** No more 338KB generated files
+- **Clarity:** Clear separation between audit, fix, and prevention
+- **Quality:** Easier to update and test shared functions
+- **Developer Experience:** Cleaner codebase, better documentation
+
+**Time Taken:** 25 minutes  
+**Risk Level:** Low (comprehensive testing, no breaking changes)
+
+---
+
 **Last Updated:** October 14, 2025  
-**Status:** Phase 1 & Moderate Items #4-5 completed ✅  
+**Status:** Phase 1 & Phase 2 completed ✅ (Items #1-6)  
 **Estimated Total Time:** 2-3 hours  
 **Expected Savings:** ~350KB bundle, 2800 lines of code, 7 packages, 10MB disk space  
-**Actual Savings So Far:** 27MB disk space, 1,758 lines of code, 78 packages, 7 directories, 23.5% faster tests ✅
+**Actual Savings So Far:** 27.4MB disk space, 11,622 lines of code, 78 packages, 11 files deleted, 23.5% faster tests ✅

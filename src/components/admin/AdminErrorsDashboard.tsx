@@ -176,26 +176,26 @@ export function AdminErrorsDashboard() {
   const getSeverityIcon = (severity: string) => {
     switch (severity) {
       case 'critical':
-        return <AlertOctagon className="h-4 w-4 text-red-500" />;
+        return <AlertOctagon className="h-4 w-4 text-destructive" />;
       case 'error':
         return <AlertTriangle className="h-4 w-4 text-orange-500" />;
       case 'warning':
         return <AlertCircle className="h-4 w-4 text-yellow-500" />;
       default:
-        return <Info className="h-4 w-4 text-blue-500" />;
+        return <Info className="h-4 w-4 text-primary" />;
     }
   };
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
       case 'critical':
-        return 'bg-red-100 text-red-800 border-red-200';
+        return 'bg-destructive/10 text-red-800 border-destructive';
       case 'error':
         return 'bg-orange-100 text-orange-800 border-orange-200';
       case 'warning':
         return 'bg-yellow-100 text-yellow-800 border-yellow-200';
       default:
-        return 'bg-blue-100 text-blue-800 border-blue-200';
+        return 'bg-primary/10 text-blue-800 border-primary';
     }
   };
 
@@ -668,8 +668,8 @@ interface StatCardProps {
 function StatCard({ title, value, icon, color }: StatCardProps) {
   const colorClasses = {
     orange: 'bg-orange-100 text-orange-600',
-    red: 'bg-red-100 text-red-600',
-    blue: 'bg-blue-100 text-blue-600',
+    red: 'bg-destructive/10 text-destructive',
+    blue: 'bg-primary/10 text-primary',
     purple: 'bg-purple-100 text-purple-600',
   };
 
