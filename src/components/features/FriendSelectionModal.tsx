@@ -9,7 +9,7 @@ import { Modal } from '@/components/ui/Modal';
 // import { Card } from '@/components/ui/Card';
 import { UserAvatar } from '@/components/ui/UserAvatar';
 import { useFriends } from '@/hooks/api/useFriends';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 
 interface Friend {
   _id: string;

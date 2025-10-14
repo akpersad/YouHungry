@@ -7,12 +7,12 @@ import {
   act,
 } from '@testing-library/react';
 import { GroupView } from '../GroupView';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { createTestQueryClient } from '@/test-utils/testQueryClient';
 
 // Mock dependencies
-jest.mock('react-hot-toast');
+jest.mock('sonner');
 jest.mock('next/link', () => {
   const MockLink = ({
     children,

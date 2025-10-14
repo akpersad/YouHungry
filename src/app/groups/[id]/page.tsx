@@ -16,7 +16,7 @@ import {
   useLeaveGroup,
   useDeleteGroup,
 } from '@/hooks/api/useGroups';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 
 interface GroupPageProps {

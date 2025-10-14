@@ -5,7 +5,7 @@ import { RestaurantSearchPage } from '@/components/features/RestaurantSearchPage
 import { Button } from '@/components/ui/Button';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { useState } from 'react';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
 
 export default function RestaurantsPage() {

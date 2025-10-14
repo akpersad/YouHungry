@@ -3,12 +3,12 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { FriendSelectionModal } from '../FriendSelectionModal';
 import { useFriends } from '@/hooks/api/useFriends';
 import { useAuth } from '@clerk/nextjs';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 
 // Mock dependencies
 jest.mock('@/hooks/api/useFriends');
 jest.mock('@clerk/nextjs');
-jest.mock('react-hot-toast');
+jest.mock('sonner');
 
 const mockUseFriends = useFriends as jest.MockedFunction<typeof useFriends>;
 const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>;

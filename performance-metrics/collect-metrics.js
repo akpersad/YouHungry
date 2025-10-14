@@ -17,9 +17,6 @@ const fs = require('fs');
 const path = require('path');
 const { execSync, spawn } = require('child_process');
 
-// Will be loaded dynamically
-let fetch;
-
 // Configuration
 const config = {
   env: process.env.NODE_ENV || 'development',
@@ -481,18 +478,9 @@ async function waitForServer(maxAttempts = 10) {
   throw new Error('Server did not become responsive in time');
 }
 
-// Initialize fetch (node-fetch is ESM, need dynamic import)
-async function initializeFetch() {
-  if (!fetch) {
-    const nodeFetch = await import('node-fetch');
-    fetch = nodeFetch.default;
-  }
-}
-
 // Main execution
 async function main() {
-  // Load fetch first (node-fetch v3 is ESM-only)
-  await initializeFetch();
+  // Using Node.js built-in fetch (available in Node 18+)
 
   console.log('🚀 Starting performance metrics collection...');
   console.log(`📅 Date: ${getCurrentDate()}`);
@@ -593,5 +581,4 @@ module.exports = {
   startServer,
   stopServer,
   waitForServer,
-  initializeFetch,
 };

@@ -24,7 +24,7 @@ const nextConfig: NextConfig = {
     optimizePackageImports: [
       '@tanstack/react-query',
       'framer-motion',
-      'react-hot-toast',
+      'sonner',
     ],
     // Server Actions configuration to prevent ID mismatch errors
     serverActions: {
