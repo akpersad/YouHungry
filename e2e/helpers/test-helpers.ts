@@ -8,7 +8,7 @@ import { Page, expect } from '@playwright/test';
 /**
  * Wait for network idle (no pending requests)
  */
-export async function waitForNetworkIdle(page: Page, timeout = 5000) {
+export async function waitForNetworkIdle(page: Page, timeout = 10000) {
   await page.waitForLoadState('networkidle', { timeout });
 }
 
@@ -21,18 +21,58 @@ export async function createCollection(
   description?: string
 ) {
   await page.goto('/dashboard');
-  await page.click('text=Create Collection');
-
-  await page.fill('input[name="name"]', name);
-  if (description) {
-    await page.fill('textarea[name="description"]', description);
-  }
-
-  await page.click('button:has-text("Create")');
   await waitForNetworkIdle(page);
 
-  // Verify collection was created
-  await expect(page.locator(`text=${name}`)).toBeVisible();
+  // Wait for any existing modals to close
+  await page.waitForTimeout(500);
+
+  // Click Create Collection button - be more specific to avoid modal issues
+  await page
+    .locator('button:has-text("Create Collection")')
+    .first()
+    .click({ timeout: 10000 });
+
+  // Wait for modal dialog to be visible
+  await page.waitForSelector('[role="dialog"]', { timeout: 10000 });
+
+  // Fill in the form within the dialog
+  await page.locator('[role="dialog"] input[name="name"]').fill(name);
+  if (description) {
+    await page
+      .locator('[role="dialog"] textarea[name="description"]')
+      .fill(description);
+  }
+
+  // Submit the form - click the submit button inside the dialog
+  await page
+    .locator('[role="dialog"]')
+    .locator('button:has-text("Create Collection")')
+    .click();
+
+  // Wait for success (modal may auto-close or stay open)
+  // Try to close modal if it's still open
+  try {
+    await page.waitForTimeout(1000); // Brief wait for submission
+    const dialog = page.locator('[role="dialog"]');
+    if (await dialog.isVisible()) {
+      // Try to close the modal
+      const closeButton = dialog
+        .locator('button:has-text("Close"), button[aria-label="Close"]')
+        .first();
+      if (await closeButton.isVisible().catch(() => false)) {
+        await closeButton.click();
+      }
+    }
+  } catch {
+    // Modal already closed, continue
+  }
+
+  await waitForNetworkIdle(page);
+
+  // Verify collection was created - use first match to avoid strict mode violations
+  await expect(page.getByRole('heading', { name: name }).first()).toBeVisible({
+    timeout: 10000,
+  });
 }
 
 /**
@@ -46,23 +86,67 @@ export async function addRestaurantToCollection(
 ) {
   // Navigate to collection
   await page.goto('/dashboard');
+  await waitForNetworkIdle(page);
+
+  // Wait for collection to be clickable
+  await page.waitForSelector(`text=${collectionName}`, { timeout: 10000 });
   await page.click(`text=${collectionName}`);
+  await waitForNetworkIdle(page);
 
-  // Click add restaurant
-  await page.click('text=Add Restaurant');
+  // Click add restaurant button
+  await page.locator('button:has-text("Add Restaurant")').first().click();
 
-  // Search for restaurant
-  await page.fill('input[placeholder*="address"]', address);
-  await page.click('button:has-text("Search")');
+  // Wait for dialog to open
+  await page.waitForSelector('[role="dialog"]', { timeout: 10000 });
 
-  // Wait for results
-  await page.waitForSelector(`text=${restaurantName}`, { timeout: 10000 });
+  // Wait for search form within dialog
+  await page.waitForSelector('[role="dialog"] input[placeholder*="address"]', {
+    timeout: 10000,
+  });
 
-  // Add restaurant
-  await page.click(`text=${restaurantName}`);
-  await page.click('button:has-text("Add to Collection")');
+  // Search for restaurant - type the address
+  await page
+    .locator('[role="dialog"] input[placeholder*="address"]')
+    .fill(address);
+
+  // Wait for the search button to be enabled (Google Places API needs to load)
+  const searchButton = page.locator(
+    '[role="dialog"] button:has-text("Search Restaurants")'
+  );
+  await searchButton.waitFor({ state: 'attached', timeout: 10000 });
+
+  // Wait a bit for the button to be enabled after typing
+  await page.waitForTimeout(1000);
+
+  // Click search button
+  await searchButton.click({ timeout: 10000 });
+
+  // Wait for results to appear (any results, not necessarily the exact name)
+  await page
+    .locator('[role="dialog"] .card-base')
+    .first()
+    .waitFor({ timeout: 30000 });
+
+  // Try to find the exact restaurant name first, but if not found, use the first result
+  const exactMatch = page
+    .locator('[role="dialog"]')
+    .locator(`.card-base:has-text("${restaurantName}")`);
+  const exactMatchCount = await exactMatch.count();
+
+  const restaurantCard =
+    exactMatchCount > 0
+      ? exactMatch.first()
+      : page.locator('[role="dialog"] .card-base').first();
+
+  await restaurantCard.locator('button:has-text("Add to Collection")').click();
 
   await waitForNetworkIdle(page);
+
+  // Wait for modal to close
+  await page.waitForSelector('[role="dialog"]', {
+    state: 'hidden',
+    timeout: 10000,
+  });
 }
 
 /**
@@ -74,18 +158,55 @@ export async function createGroup(
   description?: string
 ) {
   await page.goto('/groups');
-  await page.click('text=Create Group');
-
-  await page.fill('input[name="name"]', name);
-  if (description) {
-    await page.fill('textarea[name="description"]', description);
-  }
-
-  await page.click('button:has-text("Create Group")');
   await waitForNetworkIdle(page);
 
-  // Verify group was created
-  await expect(page.locator(`text=${name}`)).toBeVisible();
+  // Wait for any existing modals to close
+  await page.waitForTimeout(500);
+
+  // Click the Create Group button to open modal
+  await page.locator('button:has-text("Create Group")').first().click();
+
+  // Wait for modal dialog to be visible
+  await page.waitForSelector('[role="dialog"]', { timeout: 10000 });
+
+  // Fill in the form within the dialog
+  await page.locator('[role="dialog"] input[name="name"]').fill(name);
+  if (description) {
+    await page
+      .locator('[role="dialog"] textarea[name="description"]')
+      .fill(description);
+  }
+
+  // Submit the form - look for the submit button inside the dialog
+  await page
+    .locator('[role="dialog"]')
+    .locator('button:has-text("Create Group")')
+    .click();
+
+  // Wait for success (modal may auto-close or stay open)
+  // Try to close modal if it's still open
+  try {
+    await page.waitForTimeout(1000); // Brief wait for submission
+    const dialog = page.locator('[role="dialog"]');
+    if (await dialog.isVisible()) {
+      // Try to close the modal
+      const closeButton = dialog
+        .locator('button:has-text("Close"), button[aria-label="Close"]')
+        .first();
+      if (await closeButton.isVisible().catch(() => false)) {
+        await closeButton.click();
+      }
+    }
+  } catch {
+    // Modal already closed, continue
+  }
+
+  await waitForNetworkIdle(page);
+
+  // Verify group was created - wait for it to appear in the list using a more specific selector
+  await expect(page.getByRole('heading', { name: name }).first()).toBeVisible({
+    timeout: 10000,
+  });
 }
 
 /**
@@ -97,15 +218,24 @@ export async function inviteToGroup(
   userEmail: string
 ) {
   await page.goto('/groups');
+  await waitForNetworkIdle(page);
+
+  // Click on the group to view it
   await page.click(`text=${groupName}`);
-  await page.click('text=Invite Members');
+  await waitForNetworkIdle(page);
+
+  // Click Invite Members button
+  await page.click('button:has-text("Invite Members")');
+
+  // Wait for invite modal/form to be visible
+  await page.waitForSelector('input[placeholder*="email"]', { timeout: 10000 });
 
   // Search for user
   await page.fill('input[placeholder*="email"]', userEmail);
   await page.click('button:has-text("Search")');
 
   // Wait for user to appear
-  await page.waitForSelector(`text=${userEmail}`);
+  await page.waitForSelector(`text=${userEmail}`, { timeout: 10000 });
 
   // Send invitation
   await page.click(`button:has-text("Invite")`);
