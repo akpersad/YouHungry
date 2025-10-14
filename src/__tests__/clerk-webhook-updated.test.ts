@@ -110,13 +110,16 @@ describe('Clerk Webhook (Updated)', () => {
         name: 'John Doe',
         profilePicture: 'https://example.com/avatar.jpg',
         phoneNumber: '+1234567890',
+        phoneVerified: false,
+        city: undefined,
+        state: undefined,
         smsOptIn: false,
         preferences: {
           locationSettings: {
             city: undefined,
             state: undefined,
-            country: undefined,
-            timezone: undefined,
+            country: 'US',
+            timezone: 'America/New_York',
           },
           notificationSettings: {
             groupDecisions: {
@@ -247,6 +250,9 @@ describe('Clerk Webhook (Updated)', () => {
         name: 'John Doe',
         profilePicture: 'https://example.com/new-avatar.jpg',
         phoneNumber: '+1987654321',
+        city: undefined,
+        state: undefined,
+        smsOptIn: false,
       });
     });
 

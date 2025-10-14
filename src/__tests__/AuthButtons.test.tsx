@@ -45,19 +45,16 @@ describe('AuthButtons', () => {
     });
   });
 
-  it('renders Clerk modals in development mode', () => {
+  it('renders sign-up and sign-in links', () => {
     render(<AuthButtons />);
 
-    expect(screen.getByTestId('clerk-signup')).toBeInTheDocument();
-    expect(screen.getByTestId('clerk-signin')).toBeInTheDocument();
-    expect(screen.getByTestId('clerk-signup')).toHaveAttribute(
-      'data-mode',
-      'modal'
-    );
-    expect(screen.getByTestId('clerk-signin')).toHaveAttribute(
-      'data-mode',
-      'modal'
-    );
+    const signUpButton = screen.getByRole('link', { name: /get started/i });
+    const signInButton = screen.getByRole('link', { name: /sign in/i });
+
+    expect(signUpButton).toBeInTheDocument();
+    expect(signInButton).toBeInTheDocument();
+    expect(signUpButton).toHaveAttribute('href', '/sign-up');
+    expect(signInButton).toHaveAttribute('href', '/sign-in');
   });
 
   it('renders default buttons in development mode', () => {
@@ -69,22 +66,23 @@ describe('AuthButtons', () => {
     expect(screen.getByTestId('button-outline-lg')).toBeInTheDocument();
   });
 
-  it('wraps children in Clerk SignUpButton in development mode', () => {
+  it('wraps children in sign-up link', () => {
     render(
       <AuthButtons>
         <button>Custom Button</button>
       </AuthButtons>
     );
 
-    expect(screen.getByTestId('clerk-signup')).toBeInTheDocument();
+    const link = screen.getByRole('link');
+    expect(link).toHaveAttribute('href', '/sign-up');
     expect(screen.getByText('Custom Button')).toBeInTheDocument();
   });
 
   it('applies custom className', () => {
-    render(<AuthButtons className="custom-class" />);
+    const { container } = render(<AuthButtons className="custom-class" />);
 
-    const container = screen.getByTestId('clerk-signup').parentElement;
-    expect(container).toHaveClass('custom-class');
+    const divWithClass = container.querySelector('.custom-class');
+    expect(divWithClass).toBeInTheDocument();
   });
 });
 
