@@ -17,9 +17,8 @@ test.describe('Restaurant Search and Add to Collection', () => {
     );
   });
 
-  test('Search for restaurant by address @smoke @critical', async ({
-    page,
-  }) => {
+  test.skip('Search for restaurant by address @critical', async ({ page }) => {
+    // SKIPPED: Requires live Google Places API
     await page.goto('/restaurants');
 
     // Fill in address
@@ -40,7 +39,8 @@ test.describe('Restaurant Search and Add to Collection', () => {
     ).toBeVisible();
   });
 
-  test('Search with query for specific restaurant', async ({ page }) => {
+  test.skip('Search with query for specific restaurant', async ({ page }) => {
+    // SKIPPED: Requires live Google Places API (costs money)
     await page.goto('/restaurants');
 
     // Fill in query and address
@@ -57,7 +57,8 @@ test.describe('Restaurant Search and Add to Collection', () => {
     expect(count).toBeGreaterThanOrEqual(1);
   });
 
-  test('View restaurant details', async ({ page }) => {
+  test.skip('View restaurant details', async ({ page }) => {
+    // SKIPPED: Requires live Google Places API (costs money)
     await page.goto('/restaurants');
     await page.fill(
       'input[placeholder*="address"]',
@@ -84,7 +85,8 @@ test.describe('Restaurant Search and Add to Collection', () => {
     ).toContainText(testRestaurants.pizza1.address);
   });
 
-  test('Add restaurant to collection', async ({ page }) => {
+  test.skip('Add restaurant to collection', async ({ page }) => {
+    // SKIPPED: Requires live Google Places API (costs money)
     await page.goto('/restaurants');
     await page.fill(
       'input[placeholder*="address"]',
@@ -114,7 +116,10 @@ test.describe('Restaurant Search and Add to Collection', () => {
     await expect(page.locator('text=added to collection')).toBeVisible();
   });
 
-  test('Restaurant appears in collection after adding', async ({ page }) => {
+  test.skip('Restaurant appears in collection after adding', async ({
+    page,
+  }) => {
+    // SKIPPED: Requires live Google Places API (costs money)
     // Add restaurant
     await page.goto('/restaurants');
     await page.fill(
@@ -144,7 +149,8 @@ test.describe('Restaurant Search and Add to Collection', () => {
     ).toBeVisible();
   });
 
-  test('Set custom fields when adding restaurant', async ({ page }) => {
+  test.skip('Set custom fields when adding restaurant', async ({ page }) => {
+    // SKIPPED: Requires live Google Places API (costs money)
     await page.goto('/restaurants');
     await page.fill(
       'input[placeholder*="address"]',
@@ -185,7 +191,8 @@ test.describe('Restaurant Search and Add to Collection', () => {
     );
   });
 
-  test('Remove restaurant from collection', async ({ page }) => {
+  test.skip('Remove restaurant from collection', async ({ page }) => {
+    // SKIPPED: Requires live Google Places API (costs money)
     // First add a restaurant
     await page.goto('/restaurants');
     await page.fill(
@@ -227,7 +234,10 @@ test.describe('Restaurant Search and Add to Collection', () => {
     ).not.toBeVisible();
   });
 
-  test('Address validation catches invalid addresses', async ({ page }) => {
+  test.skip('Address validation catches invalid addresses', async ({
+    page,
+  }) => {
+    // SKIPPED: Requires live Google Places API (costs money)
     await page.goto('/restaurants');
 
     // Enter invalid address
@@ -245,7 +255,8 @@ test.describe('Restaurant Search and Add to Collection', () => {
     );
   });
 
-  test('Address autocomplete provides suggestions', async ({ page }) => {
+  test.skip('Address autocomplete provides suggestions', async ({ page }) => {
+    // SKIPPED: Requires live Google Places API (costs money)
     await page.goto('/restaurants');
 
     const addressInput = page.locator('input[placeholder*="address"]');
