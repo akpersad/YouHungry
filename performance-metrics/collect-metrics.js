@@ -16,6 +16,7 @@
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
+const fetch = require('node-fetch');
 
 // Configuration
 const config = {
@@ -145,35 +146,101 @@ function collectSystemMetrics() {
   return systemInfo;
 }
 
-// Collect web vitals from browser (simulated)
-function collectWebVitalsMetrics() {
+// Collect web vitals from Lighthouse (actual metrics)
+async function collectWebVitalsMetrics() {
   console.log('🌐 Collecting web vitals metrics...');
 
-  // In a real implementation, this would collect actual web vitals from the browser
-  // For now, we'll simulate some baseline metrics
-  return {
-    fcp: Math.random() * 2000 + 1000, // First Contentful Paint (ms)
-    lcp: Math.random() * 3000 + 1500, // Largest Contentful Paint (ms)
-    fid: Math.random() * 100 + 50, // First Input Delay (ms)
-    cls: Math.random() * 0.1, // Cumulative Layout Shift
-    ttfb: Math.random() * 500 + 200, // Time to First Byte (ms)
-    timestamp: Date.now(),
-  };
+  let chrome;
+  try {
+    // Run Lighthouse to collect real web vitals
+    const lighthouse = require('lighthouse');
+    const chromeLauncher = require('chrome-launcher');
+
+    chrome = await chromeLauncher.launch({ chromeFlags: ['--headless'] });
+    const options = {
+      logLevel: 'error',
+      output: 'json',
+      onlyCategories: ['performance'],
+      port: chrome.port,
+    };
+
+    const runnerResult = await lighthouse('http://localhost:3000', options);
+
+    // Extract metrics from Lighthouse results
+    const audits = runnerResult.lhr.audits;
+
+    return {
+      fcp: audits['first-contentful-paint']?.numericValue || 0,
+      lcp: audits['largest-contentful-paint']?.numericValue || 0,
+      fid: audits['max-potential-fid']?.numericValue || 0,
+      cls: audits['cumulative-layout-shift']?.numericValue || 0,
+      ttfb: audits['server-response-time']?.numericValue || 0,
+      timestamp: Date.now(),
+    };
+  } catch (error) {
+    console.warn(
+      '⚠️ Could not collect real web vitals, using fallback:',
+      error.message
+    );
+    // Fallback: Return null to indicate metrics weren't collected
+    return null;
+  } finally {
+    // Ensure Chrome is always killed, even if there's an error
+    if (chrome) {
+      await chrome.kill();
+    }
+  }
 }
 
-// Collect API performance metrics
-function collectAPIMetrics() {
+// Collect API performance metrics from database
+async function collectAPIMetrics() {
   console.log('🔌 Collecting API performance metrics...');
 
-  // In a real implementation, this would collect actual API metrics
-  // For now, we'll simulate some baseline metrics
-  return {
-    averageResponseTime: Math.random() * 200 + 100, // ms
-    successRate: 95 + Math.random() * 5, // percentage
-    errorRate: Math.random() * 2, // percentage
-    totalRequests: Math.floor(Math.random() * 1000) + 500,
-    timestamp: Date.now(),
-  };
+  try {
+    // Fetch real API metrics from the cost monitoring endpoint
+    const response = await fetch(
+      'http://localhost:3000/api/admin/cost-monitoring'
+    );
+
+    if (!response.ok) {
+      throw new Error(`API returned ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    if (!data.success || !data.metrics) {
+      throw new Error('Invalid API response');
+    }
+
+    // Calculate total API requests from all tracked services
+    const googlePlaces = data.metrics.googlePlaces;
+    const totalGoogleRequests =
+      googlePlaces.textSearch +
+      googlePlaces.nearbySearch +
+      googlePlaces.placeDetails +
+      googlePlaces.geocoding +
+      googlePlaces.addressValidation;
+
+    // Get cache statistics
+    const cache = data.metrics.cache;
+
+    return {
+      totalRequests: totalGoogleRequests,
+      cacheHitRate: cache.hitRate,
+      totalCacheHits: cache.totalHits,
+      memoryEntries: cache.memoryEntries,
+      dailyCost: data.metrics.estimatedCosts.daily,
+      monthlyCost: data.metrics.estimatedCosts.monthly,
+      timestamp: Date.now(),
+    };
+  } catch (error) {
+    console.warn(
+      '⚠️ Could not collect real API metrics, using fallback:',
+      error.message
+    );
+    // Fallback: Return null to indicate metrics weren't collected
+    return null;
+  }
 }
 
 // Save metrics to dated file
@@ -239,10 +306,12 @@ function generateReport(metrics) {
       : null,
     api: metrics.apiPerformance
       ? {
-          avgResponseTime: `${metrics.apiPerformance.averageResponseTime.toFixed(0)}ms`,
-          successRate: `${metrics.apiPerformance.successRate.toFixed(1)}%`,
-          errorRate: `${metrics.apiPerformance.errorRate.toFixed(2)}%`,
           totalRequests: metrics.apiPerformance.totalRequests,
+          cacheHitRate: `${metrics.apiPerformance.cacheHitRate.toFixed(1)}%`,
+          totalCacheHits: metrics.apiPerformance.totalCacheHits,
+          memoryEntries: metrics.apiPerformance.memoryEntries,
+          dailyCost: `$${metrics.apiPerformance.dailyCost.toFixed(4)}`,
+          monthlyCost: `$${metrics.apiPerformance.monthlyCost.toFixed(4)}`,
         }
       : null,
     system: metrics.system
@@ -306,7 +375,7 @@ async function main() {
   }
 
   if (config.metrics.webVitals) {
-    metrics.webVitals = collectWebVitalsMetrics();
+    metrics.webVitals = await collectWebVitalsMetrics();
   }
 
   if (config.metrics.memoryUsage || config.metrics.networkPerformance) {
@@ -314,7 +383,7 @@ async function main() {
   }
 
   if (config.metrics.apiPerformance) {
-    metrics.apiPerformance = collectAPIMetrics();
+    metrics.apiPerformance = await collectAPIMetrics();
   }
 
   // Save metrics
@@ -330,6 +399,9 @@ async function main() {
 
   console.log('\n✅ Performance metrics collection completed!');
   console.log(`📄 Metrics saved to: ${savedFile}`);
+
+  // Explicitly exit to ensure script doesn't hang
+  process.exit(0);
 }
 
 // Run the script

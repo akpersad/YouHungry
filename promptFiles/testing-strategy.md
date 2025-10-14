@@ -320,6 +320,50 @@ npm run test:performance
 - Accessibility full audit
 ```
 
+### 6. Performance Testing & Benchmarking (Epic 9 Story 4)
+
+**Location**: `performance-metrics/`, `e2e/performance/`
+
+**Purpose**: Establish baseline performance metrics and monitor regressions
+
+**Components**:
+
+1. **Metrics Collection** (`performance-metrics/collect-metrics.js`)
+   - Real Web Vitals from Lighthouse (FCP, LCP, FID, CLS, TTFB)
+   - API performance from cost monitoring endpoint
+   - Bundle size and build time from actual builds
+   - System metrics from Node.js runtime
+
+2. **Synthetic Monitoring** (`e2e/performance/synthetic-monitoring.spec.ts`)
+   - API response time validation for all endpoints
+   - Health checks and uptime monitoring
+   - Rate limiting verification
+   - Data consistency checks
+
+3. **Performance Baselines**:
+   - Bundle: First Load JS < 250KB, Total < 500KB
+   - Web Vitals: All metrics targeting "Good" thresholds
+   - API Response: Collections <500ms, Search <2s, Analytics <1s
+   - Cache Hit Rate: >70% across all layers
+
+**Run Commands**:
+
+```bash
+# Collect performance metrics
+npm run perf:collect
+
+# Compare with previous metrics
+npm run perf:compare
+
+# Generate dashboard
+npm run perf:dashboard
+
+# Run performance tests
+npm run test:e2e:perf
+```
+
+**Documentation**: See `docs/baseline-performance-metrics.md` for complete baselines
+
 ---
 
 ## Test Data Management

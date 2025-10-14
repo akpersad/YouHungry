@@ -1,0 +1,29 @@
+{
+  "bundleSize": {
+    "firstLoadJS": 102,
+    "totalBundleSize": 1370,
+    "fileCount": 37,
+    "timestamp": 1760450337275
+  },
+  "buildTime": {
+    "buildTime": 20415,
+    "timestamp": 1760450357690
+  },
+  "webVitals": null,
+  "system": {
+    "platform": "darwin",
+    "arch": "arm64",
+    "nodeVersion": "v22.18.0",
+    "memoryUsage": {
+      "rss": 167329792,
+      "heapTotal": 79134720,
+      "heapUsed": 52652456,
+      "external": 3870020,
+      "arrayBuffers": 246923
+    },
+    "uptime": 54.165093375,
+    "timestamp": 1760450359435
+  },
+  "apiPerformance": null,
+  "lastUpdated": "2025-10-14T13:59:19.435Z"
+}

@@ -1,0 +1,43 @@
+{
+  "comparison": {
+    "date1": "2025-10-13",
+    "date2": "2025-10-14",
+    "generatedAt": "2025-10-14T13:59:20.182Z"
+  },
+  "summary": {
+    "totalComparisons": 2,
+    "improvements": 0,
+    "degradations": 0,
+    "neutral": 4
+  },
+  "details": {
+    "bundle": {
+      "firstLoadJS": {
+        "old": 102,
+        "new": 102,
+        "change": 0,
+        "trend": "decrease"
+      },
+      "totalBundleSize": {
+        "old": 1370,
+        "new": 1370,
+        "change": 0,
+        "trend": "decrease"
+      },
+      "fileCount": {
+        "old": 37,
+        "new": 37,
+        "change": 0,
+        "trend": "decrease"
+      }
+    },
+    "buildTime": {
+      "buildTime": {
+        "old": 21142,
+        "new": 20415,
+        "change": -3.438652918361555,
+        "trend": "decrease"
+      }
+    }
+  }
+}

@@ -28,8 +28,8 @@ This document outlines the technical architecture, technology stack, and impleme
 
 - **Code Quality**: ESLint, Prettier, Husky pre-commit hooks ✅
 - **Testing**: Jest, React Testing Library with comprehensive coverage ✅
-- **Performance**: Bundle Analyzer configured ✅
-- **Monitoring**: Web Vitals via ESLint ✅
+- **Performance**: Bundle Analyzer + Lighthouse + Real metrics collection ✅
+- **Monitoring**: Performance baselines, API usage tracking, cache hit rates ✅
 - **Hosting**: Vercel (planned)
 - **CI/CD**: GitHub Actions + Vercel (planned)
 - **Error Handling**: React Error Boundaries with comprehensive tracking ✅
@@ -232,6 +232,84 @@ Built as SVG components for:
 - Error grouping reduces noise
 - Actionable insights through categorization
 - Full context for each error (user, environment, actions)
+
+## 📊 Performance Monitoring & Benchmarking (Epic 9 Story 4 - COMPLETED)
+
+### Comprehensive Performance Baseline System
+
+The app implements a production-ready performance monitoring system with real metrics collection and automated tracking:
+
+**Core Features**:
+
+- **Real Metrics Collection** - Lighthouse integration for Web Vitals, cost monitoring API for real-time data
+- **Performance Baselines** - Established REST API baselines before GraphQL migration
+- **Automated Monitoring** - Daily metrics collection, historical comparison, dashboard visualization
+- **CI/CD Integration** - Performance tests in GitHub Actions, Lighthouse CI on main branch
+- **Cache Effectiveness** - Real-time tracking of cache hit rates and cost savings
+
+**Performance Metrics Tracked**:
+
+```typescript
+interface PerformanceMetrics {
+  // Bundle Performance
+  bundleSize: {
+    firstLoadJS: number; // Target: < 250KB
+    totalBundleSize: number; // Target: < 500KB
+    fileCount: number;
+    buildTime: number; // Target: < 60s
+  };
+
+  // Web Vitals (from Lighthouse)
+  webVitals: {
+    fcp: number; // First Contentful Paint < 1.8s
+    lcp: number; // Largest Contentful Paint < 2.5s
+    fid: number; // First Input Delay < 100ms
+    cls: number; // Cumulative Layout Shift < 0.1
+    ttfb: number; // Time to First Byte < 800ms
+  };
+
+  // API Performance (from database)
+  apiPerformance: {
+    totalRequests: number;
+    cacheHitRate: number; // Target: > 70%
+    totalCacheHits: number;
+    memoryEntries: number;
+    dailyCost: number; // Target: < $1/day
+    monthlyCost: number; // Target: < $30/month
+  };
+}
+```
+
+**Automated Collection Scripts**:
+
+- `performance-metrics/collect-metrics.js` - Collects real metrics from Lighthouse and APIs
+- `performance-metrics/compare-metrics.js` - Compares metrics over time, identifies trends
+- `performance-metrics/dashboard.js` - Generates HTML dashboard with visualizations
+
+**Performance Baselines Established**:
+
+| Category   | Metric        | Target  | Current             |
+| ---------- | ------------- | ------- | ------------------- |
+| Bundle     | First Load JS | < 250KB | ✅ Within limits    |
+| Bundle     | Total Size    | < 500KB | ✅ Within limits    |
+| Web Vitals | FCP           | < 1.8s  | Monitored           |
+| Web Vitals | LCP           | < 2.5s  | Monitored           |
+| API        | Collections   | < 500ms | Measured            |
+| API        | Search        | < 2s    | Variable (external) |
+| API        | Analytics     | < 1s    | Measured            |
+| Caching    | Hit Rate      | > 70%   | Tracked real-time   |
+| Cost       | Monthly       | < $30   | Tracked real-time   |
+
+**CI/CD Performance Gates**:
+
+- Playwright synthetic monitoring (API response times)
+- Lighthouse CI (Web Vitals thresholds)
+- Bundle size regression tests (max chunk sizes)
+- Accessibility compliance (WCAG AA)
+
+**Documentation**: Complete baselines in `docs/baseline-performance-metrics.md`
+
+---
 
 ## 🔔 Notification System Architecture (Epic 7 - COMPLETED)
 

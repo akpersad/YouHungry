@@ -19,12 +19,23 @@ performance-metrics/
 
 ## 🚀 Quick Start
 
+### Prerequisites
+
+Before collecting metrics, ensure:
+
+- The development server is running (`npm run dev`)
+- You have sufficient permissions to access the admin API endpoints
+- Chrome/Chromium is installed (for Lighthouse web vitals collection)
+
 ### 1. Collect Performance Metrics
 
 Run the metrics collection script to gather current performance data:
 
 ```bash
-# Collect metrics for current environment
+# Start the development server first
+npm run dev
+
+# In a new terminal, collect metrics for current environment
 node performance-metrics/collect-metrics.js
 
 # Collect metrics for specific environment
@@ -33,6 +44,13 @@ node performance-metrics/collect-metrics.js --env=production
 # Specify custom output directory
 node performance-metrics/collect-metrics.js --output=./custom-metrics/
 ```
+
+**Note**: The script collects real metrics from:
+
+- **Web Vitals**: Lighthouse analysis of the running application
+- **API Performance**: Real-time data from the cost monitoring API
+- **Bundle Size**: Actual build output analysis
+- **Build Time**: Measured compilation time
 
 ### 2. Compare Performance Over Time
 
@@ -86,10 +104,12 @@ node performance-metrics/dashboard.js --output=dashboard.html
 
 ### API Performance
 
-- **Average Response Time**: Mean API response time
-- **Success Rate**: Percentage of successful API calls
-- **Error Rate**: Percentage of failed API calls
-- **Total Requests**: Number of API requests made
+- **Total Requests**: Number of API requests made (from database)
+- **Cache Hit Rate**: Percentage of requests served from cache
+- **Total Cache Hits**: Number of successful cache hits
+- **Memory Entries**: Number of cached entries in memory
+- **Daily Cost**: Estimated daily API cost
+- **Monthly Cost**: Estimated monthly API cost
 
 ### System Metrics
 
@@ -173,6 +193,13 @@ node performance-metrics/dashboard.js --output=dashboard.html
 
 - Ensure you've run `collect-metrics.js` at least once
 - Check that the output directory exists and is writable
+
+**"Could not collect real web vitals" or "Could not collect real API metrics"**
+
+- Ensure the development server is running on `http://localhost:3000`
+- Check that you have admin access to the cost monitoring API
+- Verify that Chrome/Chromium is installed for Lighthouse
+- The script will continue with partial metrics if some collection fails
 
 **"Failed to load metrics file"**
 
