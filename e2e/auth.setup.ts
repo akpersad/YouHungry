@@ -17,23 +17,40 @@ setup('authenticate', async ({ page }) => {
 
   await page.goto('/sign-in', { waitUntil: 'domcontentloaded' });
 
-  // Wait for the email input to be visible (this means Clerk loaded)
+  // Step 1: Wait for the email input to be visible (this means Clerk loaded)
   await page.waitForSelector('input[name="identifier"]', { timeout: 15000 });
 
-  // Fill in credentials
+  // Step 2: Fill in email
   await page
     .locator('input[name="identifier"]')
     .first()
     .fill(testUsers.user1.email);
+
+  // Step 3: Click Continue to proceed to password step (if needed)
+  // Check if password field is already visible or if we need to proceed
+  const passwordVisible = await page
+    .locator('input[name="password"]')
+    .isVisible()
+    .catch(() => false);
+
+  if (!passwordVisible) {
+    // Password field not visible yet, need to click Continue first
+    await page.locator('button:has-text("Continue")').first().click();
+    // Wait for password field to appear
+    await page.waitForSelector('input[name="password"]', { timeout: 10000 });
+  }
+
+  // Step 4: Fill in password
   await page
     .locator('input[name="password"]')
     .first()
     .fill(testUsers.user1.password);
 
-  // Click Continue button and wait for navigation
+  // Step 5: Submit the form and wait for navigation to dashboard
+  // Use a more specific selector - look for the submit button in the password step
   await Promise.all([
     page.waitForURL(/dashboard/, { timeout: 30000 }),
-    page.locator('button:has-text("Continue")').first().click(),
+    page.locator('button[type="submit"]').first().click(),
   ]);
 
   // Verify we're signed in
