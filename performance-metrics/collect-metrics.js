@@ -15,8 +15,10 @@
 
 const fs = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
-const fetch = require('node-fetch');
+const { execSync, spawn } = require('child_process');
+
+// Will be loaded dynamically
+let fetch;
 
 // Configuration
 const config = {
@@ -153,7 +155,9 @@ async function collectWebVitalsMetrics() {
   let chrome;
   try {
     // Run Lighthouse to collect real web vitals
-    const lighthouse = require('lighthouse');
+    // Lighthouse v12+ is ESM-only, use dynamic import
+    const lighthouseModule = await import('lighthouse');
+    const lighthouse = lighthouseModule.default;
     const chromeLauncher = require('chrome-launcher');
 
     chrome = await chromeLauncher.launch({ chromeFlags: ['--headless'] });
@@ -353,8 +357,143 @@ function cleanupOldMetrics() {
   }
 }
 
+// Start the Next.js server
+async function startServer(skipBuild = false) {
+  console.log('🚀 Starting Next.js server...');
+
+  return new Promise((resolve, reject) => {
+    // Build the app if not skipped
+    if (!skipBuild) {
+      try {
+        console.log('🔨 Building Next.js app...');
+        execSync('npm run build:webpack', {
+          encoding: 'utf8',
+          stdio: 'pipe',
+          env: { ...process.env, ESLINT_NO_DEV_ERRORS: 'true' },
+        });
+      } catch (error) {
+        console.error('❌ Error building app:', error.message);
+        return reject(error);
+      }
+    } else {
+      console.log('⏭️ Skipping build (using existing build)...');
+    }
+
+    // Start the production server
+    const serverProcess = spawn('npm', ['run', 'start'], {
+      stdio: 'pipe',
+      env: { ...process.env, PORT: '3000' },
+    });
+
+    let serverReady = false;
+    const timeout = setTimeout(() => {
+      if (!serverReady) {
+        serverProcess.kill();
+        reject(new Error('Server failed to start within timeout'));
+      }
+    }, 60000); // 60 second timeout
+
+    serverProcess.stdout.on('data', (data) => {
+      const output = data.toString();
+      console.log(`[Server] ${output}`);
+
+      // Check if server is ready
+      if (output.includes('Ready') || output.includes('started server')) {
+        serverReady = true;
+        clearTimeout(timeout);
+        console.log('✅ Server is ready!');
+        // Give the server a moment to fully initialize before resolving
+        setTimeout(() => resolve(serverProcess), 2000);
+      }
+    });
+
+    serverProcess.stderr.on('data', (data) => {
+      console.error(`[Server Error] ${data.toString()}`);
+    });
+
+    serverProcess.on('error', (error) => {
+      clearTimeout(timeout);
+      reject(error);
+    });
+
+    serverProcess.on('exit', (code) => {
+      clearTimeout(timeout);
+      if (!serverReady) {
+        reject(new Error(`Server exited with code ${code}`));
+      }
+    });
+  });
+}
+
+// Stop the server
+async function stopServer(serverProcess) {
+  if (!serverProcess) return;
+
+  console.log('🛑 Stopping server...');
+  return new Promise((resolve) => {
+    serverProcess.on('exit', () => {
+      console.log('✅ Server stopped');
+      resolve();
+    });
+
+    serverProcess.kill('SIGTERM');
+
+    // Force kill after 5 seconds if graceful shutdown fails
+    setTimeout(() => {
+      if (!serverProcess.killed) {
+        serverProcess.kill('SIGKILL');
+      }
+      resolve();
+    }, 5000);
+  });
+}
+
+// Wait for server to be responsive
+async function waitForServer(maxAttempts = 10) {
+  console.log('⏳ Waiting for server to be responsive...');
+
+  for (let i = 0; i < maxAttempts; i++) {
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 3000);
+
+      const response = await fetch('http://localhost:3000', {
+        signal: controller.signal,
+        redirect: 'manual', // Don't follow redirects
+      });
+
+      clearTimeout(timeout);
+
+      // Consider any response from the server as "ready"
+      // This includes: 200 OK, 307 Redirect, 401 Unauthorized, etc.
+      // The key is that the server is responding
+      if (response.status >= 200 && response.status < 600) {
+        console.log(`✅ Server is responsive! (Status: ${response.status})`);
+        return true;
+      }
+    } catch (error) {
+      // Server not ready yet (connection refused or timeout)
+      console.log(`  Attempt ${i + 1}/${maxAttempts}: ${error.message}`);
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+    }
+  }
+
+  throw new Error('Server did not become responsive in time');
+}
+
+// Initialize fetch (node-fetch is ESM, need dynamic import)
+async function initializeFetch() {
+  if (!fetch) {
+    const nodeFetch = await import('node-fetch');
+    fetch = nodeFetch.default;
+  }
+}
+
 // Main execution
 async function main() {
+  // Load fetch first (node-fetch v3 is ESM-only)
+  await initializeFetch();
+
   console.log('🚀 Starting performance metrics collection...');
   console.log(`📅 Date: ${getCurrentDate()}`);
   console.log(`🌍 Environment: ${config.env}`);
@@ -364,44 +503,75 @@ async function main() {
   ensureOutputDir();
 
   const metrics = {};
+  let serverProcess = null;
 
-  // Collect different types of metrics
-  if (config.metrics.bundleSize) {
-    metrics.bundleSize = collectBundleSizeMetrics();
+  try {
+    // Collect different types of metrics
+    if (config.metrics.bundleSize) {
+      metrics.bundleSize = collectBundleSizeMetrics();
+    }
+
+    if (config.metrics.buildTime) {
+      metrics.buildTime = collectBuildTimeMetrics();
+    }
+
+    // Start server for metrics that require it (webVitals, apiPerformance)
+    const needsServer =
+      config.metrics.webVitals || config.metrics.apiPerformance;
+    if (needsServer) {
+      // Skip build since we already built above
+      const alreadyBuilt =
+        config.metrics.bundleSize || config.metrics.buildTime;
+      serverProcess = await startServer(alreadyBuilt);
+
+      // Wait for server to be fully responsive
+      await waitForServer();
+    }
+
+    if (config.metrics.webVitals) {
+      metrics.webVitals = await collectWebVitalsMetrics();
+    }
+
+    if (config.metrics.apiPerformance) {
+      metrics.apiPerformance = await collectAPIMetrics();
+    }
+
+    // Stop server if it was started
+    if (serverProcess) {
+      await stopServer(serverProcess);
+      serverProcess = null;
+    }
+
+    if (config.metrics.memoryUsage || config.metrics.networkPerformance) {
+      metrics.system = collectSystemMetrics();
+    }
+
+    // Save metrics
+    const savedFile = saveMetrics(metrics);
+
+    // Generate and display report
+    const report = generateReport(metrics);
+    console.log('\n📊 Performance Report:');
+    console.log(JSON.stringify(report, null, 2));
+
+    // Clean up old files
+    cleanupOldMetrics();
+
+    console.log('\n✅ Performance metrics collection completed!');
+    console.log(`📄 Metrics saved to: ${savedFile}`);
+  } catch (error) {
+    console.error('❌ Error during metrics collection:', error);
+
+    // Ensure server is stopped even if there's an error
+    if (serverProcess) {
+      await stopServer(serverProcess);
+    }
+
+    throw error;
+  } finally {
+    // Explicitly exit to ensure script doesn't hang
+    process.exit(0);
   }
-
-  if (config.metrics.buildTime) {
-    metrics.buildTime = collectBuildTimeMetrics();
-  }
-
-  if (config.metrics.webVitals) {
-    metrics.webVitals = await collectWebVitalsMetrics();
-  }
-
-  if (config.metrics.memoryUsage || config.metrics.networkPerformance) {
-    metrics.system = collectSystemMetrics();
-  }
-
-  if (config.metrics.apiPerformance) {
-    metrics.apiPerformance = await collectAPIMetrics();
-  }
-
-  // Save metrics
-  const savedFile = saveMetrics(metrics);
-
-  // Generate and display report
-  const report = generateReport(metrics);
-  console.log('\n📊 Performance Report:');
-  console.log(JSON.stringify(report, null, 2));
-
-  // Clean up old files
-  cleanupOldMetrics();
-
-  console.log('\n✅ Performance metrics collection completed!');
-  console.log(`📄 Metrics saved to: ${savedFile}`);
-
-  // Explicitly exit to ensure script doesn't hang
-  process.exit(0);
 }
 
 // Run the script
@@ -420,4 +590,8 @@ module.exports = {
   collectAPIMetrics,
   saveMetrics,
   generateReport,
+  startServer,
+  stopServer,
+  waitForServer,
+  initializeFetch,
 };
