@@ -5,6 +5,9 @@ import SignInPage from '@/app/sign-in/[[...rest]]/page';
 // Mock Next.js router
 jest.mock('next/navigation', () => ({
   useRouter: jest.fn(),
+  useSearchParams: jest.fn(() => ({
+    get: jest.fn(() => null),
+  })),
 }));
 
 // Mock Clerk components

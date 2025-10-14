@@ -57,6 +57,8 @@ This document captures all questions asked during development and the decisions 
 
 **A**: No onboarding flow for the web version. We can have something guided in the iOS version. SMS opt-in can be offered on the registration page and toggled on their profile page.
 
+**Implementation Status**: ✅ COMPLETED - Custom registration page implemented with SMS opt-in checkbox and phone number field. Users can also set city/state during registration. Full custom form at `/sign-up` with email verification flow.
+
 ### Q: For batching Google Places API calls, what delay would be acceptable?
 
 **A**: Very acceptable. The delay would be minimal (under 100ms) as we'd batch requests within a short time window (200-500ms).
@@ -140,6 +142,8 @@ This document captures all questions asked during development and the decisions 
 ### Q: Should we have an onboarding flow for new registrations?
 
 **A**: Na, I'm thinking no onboarding flow for the web version. We can have something guided like what you described in the iOS version. The SMS opt-in can first be offered on the registration page. And toggled on their profile page.
+
+**Implementation Status**: ✅ COMPLETED - Custom registration form at `/sign-up` includes SMS opt-in checkbox and optional phone number field. Users redirected to `/sign-up/verify` after registration for email verification. Profile page at `/profile` allows toggling SMS preferences and phone verification.
 
 ## 📝 Implementation Decisions
 

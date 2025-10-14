@@ -1,20 +1,22 @@
 'use client';
 
 import { UserButton } from '@clerk/nextjs';
-import { Card, CardContent } from '@/components/ui/Card';
 
 export function UserProfile() {
   return (
-    <Card className="w-fit">
-      <CardContent className="p-2">
-        <UserButton
-          appearance={{
-            elements: {
-              avatarBox: 'w-8 h-8',
-            },
-          }}
-        />
-      </CardContent>
-    </Card>
+    <div className="inline-flex items-center justify-center">
+      <UserButton
+        appearance={{
+          elements: {
+            userButtonAvatarBox: 'w-10 h-10',
+            userButtonTrigger:
+              'focus:outline-none focus:ring-2 focus:ring-offset-2 rounded-full transition-all duration-200 hover:scale-105 active:scale-95',
+          },
+          variables: {
+            colorPrimary: 'var(--accent-primary)',
+          },
+        }}
+      />
+    </div>
   );
 }

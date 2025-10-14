@@ -1,14 +1,25 @@
-# Temporary User Sync Process
+# User Sync Process
 
 ## Overview
 
-This document describes the temporary user synchronization process between Clerk and MongoDB that is in place until the custom registration flow is implemented.
+This document describes the user synchronization process between Clerk and MongoDB with the custom registration flow implementation.
 
-## Current Issue
+## Custom Registration Flow (✅ IMPLEMENTED)
 
-When users register through the out-of-the-box Clerk modal, their information is not automatically captured in our MongoDB `users` collection. This breaks the friend search functionality and other features that depend on user data.
+**Update:** The custom registration flow has been fully implemented! Users now register through a custom form that uses Clerk's client-side SDK (`useSignUp` hook) with in-line email verification.
 
-## Temporary Solution
+### How It Works:
+
+1. User fills out custom registration form at `/sign-up`
+2. Form uses Clerk's `useSignUp` hook to create user client-side
+3. User data stored in Clerk including custom fields in `unsafeMetadata`
+4. Clerk sends 6-digit verification code via email
+5. User enters code within the same form (no page redirect)
+6. On successful verification, Clerk activates session
+7. User automatically redirected to `/dashboard`
+8. Webhook creates MongoDB user record with custom fields from `unsafeMetadata`
+
+## Webhook Configuration (Still Active)
 
 ### 1. Webhook Configuration
 
@@ -64,41 +75,57 @@ To test the user sync:
    - Check if they appear in MongoDB
    - Verify they can be found in friend search
 
-## Migration to Custom Registration Flow
+## Custom Registration Implementation (✅ COMPLETED)
 
-### TODO: Update This Process
+### What Was Implemented:
 
-When the custom registration flow is implemented:
+1. **Custom Registration Form** (`src/components/forms/CustomRegistrationForm.tsx`)
+   - Fully custom form component using Clerk's `useSignUp` hook
+   - Collects: email, username, password, first/last name, phone (optional), SMS opt-in, city/state (optional)
+   - Real-time field validation on blur with visual success indicators
+   - In-line email verification with 6-digit code input
+   - Verification code resend with 60-second cooldown
+   - Client-side validation for password strength (10-72 chars), email format, username format (4-64 chars), phone format
 
-1. **Remove temporary files:**
-   - Delete `scripts/sync-clerk-users-api.js`
-   - Delete `docs/temporary-user-sync.md`
+2. **Username Availability API** (`src/app/api/auth/check-username/route.ts`)
+   - Checks username availability in Clerk user database
+   - Validates username format (4-64 characters, alphanumeric + \_ -)
+   - Returns availability status for real-time feedback
 
-2. **Update webhook handler:**
-   - Modify `src/app/api/webhooks/clerk/route.ts` to handle custom registration data
-   - Add additional fields like city, preferences, etc.
-   - **Capture city/state** from custom registration form
+3. **Email Verification (In-Form)**
+   - 6-digit verification code sent by Clerk
+   - User enters code within registration form
+   - Form transitions to verification state (no page redirect)
+   - Resend functionality with countdown timer
+   - On success, session activated and user redirected to dashboard
 
-3. **Update user creation:**
-   - Modify `src/lib/users.ts` to handle custom registration fields
-   - Update user interface in `src/types/database.ts`
-   - **Add city/state capture** as optional fields in registration form
-
-4. **Test thoroughly:**
-   - Ensure all existing users are properly migrated
-   - Verify new registration flow works end-to-end
-   - Test friend search and other user-dependent features
+4. **Webhook Handler** (`src/app/api/webhooks/clerk/route.ts`)
+   - Handles `user.created` events from Clerk
+   - Extracts custom fields from `unsafeMetadata` (phone, SMS opt-in, city, state)
+   - Creates MongoDB user with all custom fields
+   - Sets up default notification preferences
+   - Works in development mode without webhook secret
 
 ## Current Status
 
-- ✅ Webhook handler implemented
-- ✅ Manual sync script created
+- ✅ Custom registration flow fully implemented using Clerk's client-side SDK
+- ✅ In-line email verification within registration form (no page redirect)
+- ✅ Username availability checking with real-time validation
+- ✅ Webhook handler implemented for MongoDB user creation
+- ✅ Manual sync script available for legacy users
 - ✅ Existing users synced to MongoDB
-- ✅ Correct Clerk IDs obtained and updated
-- ⚠️ Webhook secret needs to be configured in Clerk Dashboard (requires live URL)
+- ✅ Custom fields (phone, SMS opt-in, city/state) stored in Clerk's `unsafeMetadata` and synced to MongoDB
+- ✅ 6-digit email verification code with resend functionality
+- ⚠️ Webhook secret should be configured in Clerk Dashboard for production (optional for dev)
 
-## Next Steps
+## Testing the Registration Flow
 
-1. Configure webhook in Clerk Dashboard (after deployment to live URL)
-2. Test new user registration
-3. Plan custom registration flow implementation
+1. Navigate to `http://localhost:3000/sign-up`
+2. Fill out the custom registration form with all required fields
+3. See real-time validation feedback on blur (✓ checkmarks for valid fields)
+4. Submit the form
+5. Form transitions to verification view (same page, no redirect)
+6. Check email for 6-digit verification code from Clerk
+7. Enter the 6-digit code in the verification input
+8. On successful verification, automatically redirected to `/dashboard`
+9. MongoDB user created automatically via webhook with all custom fields

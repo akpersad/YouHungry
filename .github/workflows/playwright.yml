@@ -1,0 +1,206 @@
+name: Playwright E2E Tests
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  schedule:
+    # Nightly comprehensive test run at 2 AM UTC
+    - cron: '0 2 * * *'
+
+jobs:
+  # PR Tests - Fast feedback (Chromium + Mobile Chrome only)
+  pr-tests:
+    name: PR Tests (Chromium + Mobile Chrome)
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    # Run on PRs and pushes to main/develop
+    if: github.event_name == 'pull_request' || github.event_name == 'push'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run E2E tests (Chromium + Mobile Chrome)
+        run: npm run test:e2e
+        env:
+          CI: true
+          # This will run chromium-fast, chromium-slow, and mobile-chrome-fast
+          # RUN_ALL_BROWSERS is NOT set, so other browsers are skipped
+          # Test user credentials
+          E2E_TEST_USER_EMAIL: ${{ secrets.E2E_TEST_USER_EMAIL }}
+          E2E_TEST_USER_USERNAME: ${{ secrets.E2E_TEST_USER_USERNAME }}
+          E2E_TEST_USER_PASSWORD: ${{ secrets.E2E_TEST_USER_PASSWORD }}
+          # Database
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
+          MONGODB_DATABASE: ${{ secrets.MONGODB_DATABASE }}
+          # Authentication (Clerk)
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
+          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+          # Google APIs
+          GOOGLE_PLACES_API_KEY: ${{ secrets.GOOGLE_PLACES_API_KEY }}
+          NEXT_PUBLIC_GOOGLE_PLACES_API_KEY: ${{ secrets.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY }}
+          # App Configuration
+          NEXT_PUBLIC_APP_URL: http://localhost:3000
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pr-test-results
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
+
+  # Nightly Comprehensive Tests - All 5 browsers
+  nightly-comprehensive:
+    name: Nightly Tests (All Browsers)
+    timeout-minutes: 90
+    runs-on: ubuntu-latest
+    # Only run on schedule (nightly)
+    if: github.event_name == 'schedule'
+
+    strategy:
+      fail-fast: false
+      matrix:
+        # Shard across multiple runners for speed
+        shard: [1, 2, 3, 4]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Install ALL Playwright Browsers
+        run: npx playwright install --with-deps
+
+      - name: Run comprehensive E2E tests (All 5 browsers)
+        run: npx playwright test --shard=${{ matrix.shard }}/4
+        env:
+          CI: true
+          RUN_ALL_BROWSERS: true
+          # This enables all 5 browsers: chromium, mobile chrome, mobile safari, firefox, webkit
+          # Test user credentials
+          E2E_TEST_USER_EMAIL: ${{ secrets.E2E_TEST_USER_EMAIL }}
+          E2E_TEST_USER_USERNAME: ${{ secrets.E2E_TEST_USER_USERNAME }}
+          E2E_TEST_USER_PASSWORD: ${{ secrets.E2E_TEST_USER_PASSWORD }}
+          # Database
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
+          MONGODB_DATABASE: ${{ secrets.MONGODB_DATABASE }}
+          # Authentication (Clerk)
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
+          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+          # Google APIs
+          GOOGLE_PLACES_API_KEY: ${{ secrets.GOOGLE_PLACES_API_KEY }}
+          NEXT_PUBLIC_GOOGLE_PLACES_API_KEY: ${{ secrets.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY }}
+          # App Configuration
+          NEXT_PUBLIC_APP_URL: http://localhost:3000
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: nightly-test-results-shard-${{ matrix.shard }}
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 30
+
+  # Accessibility Tests - Run on every PR (fast and critical)
+  accessibility-tests:
+    name: Accessibility Tests
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' || github.event_name == 'push'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run accessibility tests
+        run: npm run test:accessibility
+        env:
+          CI: true
+          # Test user credentials
+          E2E_TEST_USER_EMAIL: ${{ secrets.E2E_TEST_USER_EMAIL }}
+          E2E_TEST_USER_USERNAME: ${{ secrets.E2E_TEST_USER_USERNAME }}
+          E2E_TEST_USER_PASSWORD: ${{ secrets.E2E_TEST_USER_PASSWORD }}
+          # Database
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
+          MONGODB_DATABASE: ${{ secrets.MONGODB_DATABASE }}
+          # Authentication (Clerk)
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
+          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+          # Google APIs
+          GOOGLE_PLACES_API_KEY: ${{ secrets.GOOGLE_PLACES_API_KEY }}
+          NEXT_PUBLIC_GOOGLE_PLACES_API_KEY: ${{ secrets.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY }}
+          # App Configuration
+          NEXT_PUBLIC_APP_URL: http://localhost:3000
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: accessibility-report
+          path: playwright-report/
+          retention-days: 30
+
+  # Lighthouse Performance - Run on main branch only
+  lighthouse:
+    name: Lighthouse Performance
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Build application
+        run: npm run build
+        env:
+          CI: true
+
+      - name: Run Lighthouse CI
+        run: npm run lighthouse
+        env:
+          CI: true
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lighthouse-reports
+          path: lighthouse-reports/
+          retention-days: 30

@@ -12,6 +12,7 @@ export interface User {
   smsOptIn: boolean;
   smsPhoneNumber?: string;
   phoneNumber?: string; // Clerk phone number
+  phoneVerified?: boolean; // Whether the phone number has been verified
   preferences: {
     defaultLocation?: string;
     locationSettings: {
@@ -97,6 +98,7 @@ export interface Decision {
   status: 'active' | 'completed' | 'expired';
   deadline: Date;
   visitDate: Date; // When user actually visited (for manual entries) or when they will visit (for decisions)
+  amountSpent?: number; // Amount spent on the visit in USD (only for completed decisions)
   result?: {
     restaurantId: ObjectId;
     selectedAt: Date;

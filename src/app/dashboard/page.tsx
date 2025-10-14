@@ -35,32 +35,37 @@ export default function DashboardPage() {
         <CollectionList />
 
         {/* Hidden on mobile - actions are available via bottom navigation */}
-        <div className="hidden md:block mt-8 grid md:grid-cols-2 gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Find Restaurants</CardTitle>
-              <CardDescription>
-                Search and discover new restaurants
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Link href="/restaurants">
-                <Button className="w-full">Search Restaurants</Button>
-              </Link>
-            </CardContent>
-          </Card>
+        <div className="hidden md:block mt-8">
+          <h2 className="text-2xl font-semibold text-text mb-4">
+            Quick Actions
+          </h2>
+          <div className="grid md:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Find Restaurants</CardTitle>
+                <CardDescription>
+                  Search and discover new restaurants
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Link href="/restaurants">
+                  <Button className="w-full">Search Restaurants</Button>
+                </Link>
+              </CardContent>
+            </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Groups</CardTitle>
-              <CardDescription>
-                Create and manage groups with friends
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button className="w-full">Manage Groups</Button>
-            </CardContent>
-          </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>Groups</CardTitle>
+                <CardDescription>
+                  Create and manage groups with friends
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button className="w-full">Manage Groups</Button>
+              </CardContent>
+            </Card>
+          </div>
         </div>
 
         {/* Hidden on mobile - not essential for mobile experience */}

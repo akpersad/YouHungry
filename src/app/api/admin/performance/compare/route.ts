@@ -102,8 +102,9 @@ export async function GET(request: NextRequest) {
       );
       const uniqueDates = [...new Set(sortedFiles.map((f) => f.date))];
       const currentIndex = uniqueDates.indexOf(file2.date!);
-      if (currentIndex > 0) {
-        const previousDate = uniqueDates[currentIndex - 1];
+      // Since array is sorted descending (newest first), we need the next index for an older date
+      if (currentIndex >= 0 && currentIndex < uniqueDates.length - 1) {
+        const previousDate = uniqueDates[currentIndex + 1];
         file1 = files.find((f) => f.date === previousDate);
       } else {
         return NextResponse.json(

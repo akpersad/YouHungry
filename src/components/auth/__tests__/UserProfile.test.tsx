@@ -29,28 +29,19 @@ describe('UserProfile', () => {
       userButton.getAttribute('data-appearance') || '{}'
     );
 
-    expect(appearance.elements?.avatarBox).toBe('w-8 h-8');
+    expect(appearance.elements?.userButtonAvatarBox).toBe('w-10 h-10');
+    expect(appearance.variables?.colorPrimary).toBe('var(--accent-primary)');
   });
 
-  it('renders within a Card component', () => {
+  it('renders within a container with proper styling', () => {
     render(<UserProfile />);
 
-    // Check if the UserButton is wrapped in a Card
-    const card = screen.getByTestId('clerk-user-button').closest('.card-base');
-    expect(card).toBeInTheDocument();
-  });
-
-  it('has proper card styling', () => {
-    render(<UserProfile />);
-
-    const card = screen.getByTestId('clerk-user-button').closest('.card-base');
-    expect(card).toHaveClass('w-fit');
-  });
-
-  it('has proper card content styling', () => {
-    render(<UserProfile />);
-
-    const cardContent = screen.getByTestId('clerk-user-button').closest('.p-2');
-    expect(cardContent).toBeInTheDocument();
+    const userButton = screen.getByTestId('clerk-user-button');
+    const container = userButton.parentElement;
+    expect(container).toHaveClass(
+      'inline-flex',
+      'items-center',
+      'justify-center'
+    );
   });
 });

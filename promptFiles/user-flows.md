@@ -4,44 +4,109 @@ This document outlines the major user journeys and flows for the You Hungry? app
 
 ## 1. Registration & Onboarding Flow
 
-### 1.1 New User Registration (UPDATED ✅ IMPLEMENTED)
+### 1.1 New User Registration (UPDATED ✅ FULLY CUSTOM FLOW IMPLEMENTED)
 
 1. **Landing Page** → User clicks "Sign Up"
-2. **Custom Registration Page** → User sees app benefits explanation and registration form
-3. **App Benefits Display** → Clear explanation of features and value proposition
-4. **SMS Benefits Info** → Highlighted SMS notification benefits with opt-in explanation
-5. **Clerk Registration** → User enters email, password, name, and phone number
-6. **SMS Opt-in Toggle** → User can toggle SMS notifications (default: off)
-7. **Location Preferences** → User can set city, state, and location settings
-8. **Redirect to Dashboard** → User sees empty state with "Create Your First Collection" CTA
+2. **Custom Registration Page** → User sees app benefits explanation and custom registration form at `/sign-up`
+3. **App Benefits Display** → Clear explanation of features (collections, group decisions, recommendations, etc.)
+4. **Custom Registration Form** → User enters:
+   - First name (required)
+   - Last name (required)
+   - Email address (required)
+   - Username (required - 4-64 characters, validated for availability)
+   - Password (required - 10-72 characters)
+   - Confirm password (required - must match)
+   - City (optional)
+   - State (optional)
+   - Phone number (optional - formatted as (XXX) XXX-XXXX)
+   - Country code (default +1 for US)
+   - SMS opt-in checkbox (optional)
+5. **Real-time Validation** → Form validates fields on blur:
+   - Email format validation
+   - Username availability check via `/api/auth/check-username`
+   - Password strength validation (10-72 characters)
+   - Phone number format validation (10 digits)
+   - Visual success indicators (✓ checkmarks) for valid fields
+6. **Form Submission** → Uses Clerk's client-side SDK (`useSignUp` hook):
+   - Creates user in Clerk with all profile information
+   - Stores custom fields (phone, SMS opt-in, location) in `unsafeMetadata`
+   - Triggers email verification code sending
+7. **In-Form Email Verification** → User stays on same form:
+   - Form transitions to verification state
+   - Shows email icon and "Check Your Email" heading
+   - Displays 6-digit code input field
+   - User enters verification code from email
+   - Can resend code after 60-second cooldown
+8. **Verification Completion** → On successful verification:
+   - Clerk activates the session
+   - User automatically redirected to `/dashboard`
+9. **Webhook Sync** → Clerk webhook creates MongoDB user record:
+   - Captures all profile data including phone and SMS preferences
+   - Sets up default notification settings
+   - Creates user preferences structure
 
 **Key Features Implemented**:
 
-- Custom sign-up page at `/sign-up` route with app benefits explanation
-- SMS notification benefits highlighted with opt-in explanation
-- Mobile responsive design optimized for mobile devices
-- Seamless Clerk integration with custom appearance
-- Enhanced user schema with phone number and location preferences
+- Fully custom registration form using Clerk's client-side SDK (`useSignUp` hook)
+- In-line email verification within the form (no page redirect)
+- Real-time field validation with visual feedback
+- Username availability checking with API endpoint `/api/auth/check-username`
+- Phone number formatting with country code selection
+- SMS opt-in with clear benefits explanation
+- Location preferences (city/state) collected during registration
+- Clerk webhook (`/api/webhooks/clerk`) creates MongoDB user with custom fields
+- Phone number stored in MongoDB via webhook (in `unsafeMetadata`)
+- 6-digit verification code with resend functionality
+- Client-side form validation with comprehensive error messages
+- Mobile responsive design optimized for all devices
 
-Notes: ✅ COMPLETED - Custom registration flow with phone support and SMS opt-in
+**Technical Implementation**:
+
+- Form component: `src/components/forms/CustomRegistrationForm.tsx` (uses Clerk's `useSignUp` hook)
+- Username check API: `src/app/api/auth/check-username/route.ts`
+- Webhook handler: `src/app/api/webhooks/clerk/route.ts` (creates MongoDB user)
+- Verification fallback page: `src/app/sign-up/verify/page.tsx` (for external verification)
+- Sign-up page: `src/app/sign-up/[[...rest]]/page.tsx`
+
+Notes: ✅ COMPLETED - Fully custom registration form with Clerk client-side SDK integration and in-line email verification
 
 ### 1.2 Returning User Login (UPDATED ✅ IMPLEMENTED)
 
 1. **Landing Page** → User clicks "Sign In"
-2. **Custom Login Page** → User sees consistent branding and sign-in form
-3. **Clerk Sign-in** → User enters credentials with configured appearance
-4. **Back Navigation** → User can navigate back to home page
-5. **Redirect to Dashboard** → User sees their collections and recent activity
+2. **Custom Login Page** → User sees custom sign-in page at `/sign-in` with consistent branding
+3. **Registration Success Message** → If redirected with `?registered=true`, shows success banner
+4. **Page Header** → Displays "Welcome Back" and "Sign in to continue to ForkInTheRoad"
+5. **Back to Home Button** → User can navigate back to home page
+6. **Clerk Sign-in Component** → Clerk's `<SignIn />` component with custom styling:
+   - Transparent background to match app theme
+   - Custom color variables for primary, background, text colors
+   - Hidden default header/subtitle (using custom header instead)
+   - Styled form inputs, buttons, and validation messages
+   - Social login buttons styled to match design system
+7. **Authentication** → User enters credentials (email/username and password)
+8. **Redirect to Dashboard** → After successful sign-in, redirected to `/dashboard`
+9. **Additional Info** → Terms of Service and Privacy Policy notice
 
 **Key Features Implemented**:
 
-- Custom sign-in page at `/sign-in` route with consistent branding
-- Updated SignInButton to redirect to custom pages instead of modal
-- Clerk appearance configured to match app design system
-- Back to home navigation from auth pages
-- Mobile responsive design
+- Custom sign-in page at `/sign-in` route with wrapped Clerk component
+- Success message displayed when coming from registration (`?registered=true` query param)
+- Clerk `<SignIn />` component with extensive appearance customization
+- CSS custom properties for theming (--color-primary, --color-background, etc.)
+- Back to home navigation button
+- Mobile responsive design with centered layout
+- Suspense boundary for loading state
+- Consistent design system integration
 
-Notes: ✅ COMPLETED - Custom login page replacing Clerk modal
+**Technical Implementation**:
+
+- Sign-in page: `src/app/sign-in/[[...rest]]/page.tsx`
+- Uses Clerk's `<SignIn />` component with appearance configuration
+- AuthButtons component: `src/components/auth/AuthButtons.tsx` (links to custom pages)
+- Fallback redirect: `/dashboard`
+- Sign-up link: `/sign-up` (integrated in Clerk component)
+
+Notes: ✅ COMPLETED - Custom sign-in page with Clerk component and extensive styling customization
 
 ## 2. Personal Collection Management
 

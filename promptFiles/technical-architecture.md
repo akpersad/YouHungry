@@ -594,6 +594,7 @@ type Decision {
 
 ##### Authentication Routes (UPDATED ✅ IMPLEMENTED)
 
+- `GET /api/auth/check-username` - Check username availability in Clerk (NEW ✅)
 - `POST /api/webhooks/clerk` - Clerk webhook for user creation/updates with phone number handling
 - `GET /api/user/current` - Get current user's MongoDB ObjectId
 - `GET /api/user/profile` - Get user profile (via Clerk)
@@ -608,10 +609,19 @@ type Decision {
 
 **Key Authentication Updates Implemented**:
 
-- Enhanced Clerk webhook to capture phone numbers from registration
-- User creation with new fields and proper defaults
+- **Custom Registration Flow** - Fully custom registration form with Clerk client-side SDK integration (NEW ✅)
+  - Custom form component (`CustomRegistrationForm.tsx`) uses Clerk's `useSignUp` hook
+  - In-line email verification within the form (no page redirect required)
+  - Username availability checking via `/api/auth/check-username` endpoint
+  - Real-time field validation with visual success indicators
+  - Phone number stored in Clerk's `unsafeMetadata` (synced to MongoDB via webhook)
+  - Collects: email, username, password, first/last name, phone (optional), SMS opt-in, city/state (optional)
+  - 6-digit email verification code with resend functionality
+- **Custom Sign-in Page** - Custom page at `/sign-in` using Clerk's `<SignIn />` component with extensive appearance customization
+- Enhanced Clerk webhook to capture phone numbers and custom fields from `unsafeMetadata`
+- User creation via webhook with new fields and proper defaults
 - User update handling includes phone number changes
-- Comprehensive error handling for webhook operations
+- Comprehensive error handling for webhook and form operations
 - Middleware updates to handle new auth routes (`/sign-in`, `/sign-up`)
 
 ##### Collections Routes (CRUD Operations)

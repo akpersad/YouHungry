@@ -1,391 +1,349 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Performance Dashboard - ForkInTheRoad</title>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Performance Dashboard - You Hungry?</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-      body {
-        font-family:
-          -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        margin: 0;
-        padding: 20px;
-        background-color: #f5f5f5;
-      }
-      .container {
-        max-width: 1200px;
-        margin: 0 auto;
-      }
-      .header {
-        text-align: center;
-        margin-bottom: 30px;
-      }
-      .header h1 {
-        color: #333;
-        margin-bottom: 10px;
-      }
-      .header p {
-        color: #666;
-        margin: 0;
-      }
-      .grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
-        gap: 20px;
-        margin-bottom: 30px;
-      }
-      .card {
-        background: white;
-        border-radius: 8px;
-        padding: 20px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      }
-      .card h3 {
-        margin-top: 0;
-        color: #333;
-        border-bottom: 2px solid #e0e0e0;
-        padding-bottom: 10px;
-      }
-      .chart-container {
-        position: relative;
-        height: 300px;
-      }
-      .summary {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 15px;
-        margin-bottom: 30px;
-      }
-      .summary-item {
-        background: white;
-        border-radius: 8px;
-        padding: 15px;
-        text-align: center;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      }
-      .summary-item h4 {
-        margin: 0 0 10px 0;
-        color: #666;
-        font-size: 14px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-      }
-      .summary-item .value {
-        font-size: 24px;
-        font-weight: bold;
-        color: #333;
-      }
-      .summary-item .trend {
-        font-size: 12px;
-        margin-top: 5px;
-      }
-      .trend.up {
-        color: #4caf50;
-      }
-      .trend.down {
-        color: #f44336;
-      }
-      .trend.neutral {
-        color: #666;
-      }
-      .footer {
-        text-align: center;
-        color: #666;
-        font-size: 12px;
-        margin-top: 30px;
-      }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .header p {
+            color: #666;
+            margin: 0;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .card h3 {
+            margin-top: 0;
+            color: #333;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 10px;
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .summary-item {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .summary-item h4 {
+            margin: 0 0 10px 0;
+            color: #666;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .summary-item .value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+        .summary-item .trend {
+            font-size: 12px;
+            margin-top: 5px;
+        }
+        .trend.up { color: #4caf50; }
+        .trend.down { color: #f44336; }
+        .trend.neutral { color: #666; }
+        .footer {
+            text-align: center;
+            color: #666;
+            font-size: 12px;
+            margin-top: 30px;
+        }
     </style>
-  </head>
-  <body>
+</head>
+<body>
     <div class="container">
-      <div class="header">
-        <h1>🚀 Performance Dashboard</h1>
-        <p>ForkInTheRoad App - Last 7 days</p>
-      </div>
+        <div class="header">
+            <h1>🚀 Performance Dashboard</h1>
+            <p>You Hungry? App - Last 7 days</p>
+        </div>
 
-      <div class="summary">
-        <div class="summary-item">
-          <h4>Bundle Size</h4>
-          <div class="value">1347 KB</div>
-          <div class="trend up">↗ 4.0%</div>
+        <div class="summary">
+            <div class="summary-item">
+                <h4>Bundle Size</h4>
+                <div class="value">1370 KB</div>
+                <div class="trend up">
+                    ↗ 6.0%
+                </div>
+            </div>
+            <div class="summary-item">
+                <h4>Build Time</h4>
+                <div class="value">21.1s</div>
+                <div class="trend up">
+                    ↗ 37.2%
+                </div>
+            </div>
+            <div class="summary-item">
+                <h4>First Contentful Paint</h4>
+                <div class="value">1979ms</div>
+                <div class="trend up">
+                    ↗ 50.0%
+                </div>
+            </div>
+            <div class="summary-item">
+                <h4>API Response Time</h4>
+                <div class="value">142ms</div>
+                <div class="trend up">
+                    ↗ 9.2%
+                </div>
+            </div>
         </div>
-        <div class="summary-item">
-          <h4>Build Time</h4>
-          <div class="value">18.4s</div>
-          <div class="trend up">↗ 24.5%</div>
-        </div>
-        <div class="summary-item">
-          <h4>First Contentful Paint</h4>
-          <div class="value">1116ms</div>
-          <div class="trend down">↘ 62.4%</div>
-        </div>
-        <div class="summary-item">
-          <h4>API Response Time</h4>
-          <div class="value">154ms</div>
-          <div class="trend down">↘ 30.5%</div>
-        </div>
-      </div>
 
-      <div class="grid">
-        <div class="card">
-          <h3>📦 Bundle Size Over Time</h3>
-          <div class="chart-container">
-            <canvas id="bundleChart"></canvas>
-          </div>
+        <div class="grid">
+            <div class="card">
+                <h3>📦 Bundle Size Over Time</h3>
+                <div class="chart-container">
+                    <canvas id="bundleChart"></canvas>
+                </div>
+            </div>
+            <div class="card">
+                <h3>⏱️ Build Time Over Time</h3>
+                <div class="chart-container">
+                    <canvas id="buildChart"></canvas>
+                </div>
+            </div>
+            <div class="card">
+                <h3>🌐 Core Web Vitals</h3>
+                <div class="chart-container">
+                    <canvas id="webVitalsChart"></canvas>
+                </div>
+            </div>
+            <div class="card">
+                <h3>🔌 API Performance</h3>
+                <div class="chart-container">
+                    <canvas id="apiChart"></canvas>
+                </div>
+            </div>
         </div>
-        <div class="card">
-          <h3>⏱️ Build Time Over Time</h3>
-          <div class="chart-container">
-            <canvas id="buildChart"></canvas>
-          </div>
-        </div>
-        <div class="card">
-          <h3>🌐 Core Web Vitals</h3>
-          <div class="chart-container">
-            <canvas id="webVitalsChart"></canvas>
-          </div>
-        </div>
-        <div class="card">
-          <h3>🔌 API Performance</h3>
-          <div class="chart-container">
-            <canvas id="apiChart"></canvas>
-          </div>
-        </div>
-      </div>
 
-      <div class="footer">
-        <p>Generated on 10/11/2025, 1:27:26 PM | Data from 7 days</p>
-      </div>
+        <div class="footer">
+            <p>Generated on 10/13/2025, 9:33:32 AM | Data from 7 days</p>
+        </div>
     </div>
 
     <script>
-      // Chart.js configuration
-      Chart.defaults.font.family =
-        '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-      Chart.defaults.color = '#666';
+        // Chart.js configuration
+        Chart.defaults.font.family = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+        Chart.defaults.color = '#666';
 
-      const dates = [
-        '2025-10-05',
-        '2025-10-06',
-        '2025-10-07',
-        '2025-10-08',
-        '2025-10-09',
-        '2025-10-10',
-        '2025-10-11',
-      ];
-      const bundleSizes = [1295, 1295, 1293, 1352, 1351, 1341, 1347];
-      const buildTimes = [
-        14.786, 15.62, 15.409, 17.694, 16.349, 17.063, 18.413,
-      ];
-      const fcpValues = [
-        2967.4229520837353, 1913.0307266561392, 1319.5289378338416,
-        2421.010781499643, 1517.730865699558, 2567.296327675988,
-        1116.1220886192846,
-      ];
-      const lcpValues = [
-        4207.014597434718, 3787.1022174119526, 2695.8927074317753,
-        3119.234904036948, 2627.6240657746534, 2411.25065706708,
-        2501.769731084949,
-      ];
-      const fidValues = [
-        77.71150301453898, 115.14574369375876, 137.5948152892277,
-        98.96910500600367, 143.2884311619568, 149.11494818007026,
-        90.78704359944211,
-      ];
-      const clsValues = [
-        0.004558952695004704, 0.017539981428190844, 0.018245073060071993,
-        0.08515570380532336, 0.09446933862054221, 0.0635451921650726,
-        0.018663299961005953,
-      ];
-      const ttfbValues = [
-        232.5151304707274, 565.346800808836, 325.70956694828203,
-        396.30359116350326, 370.2709962074788, 516.2299988323714,
-        415.9745193139663,
-      ];
-      const apiResponseTimes = [
-        221.6834188261251, 106.49227198685489, 129.83630381964377,
-        252.2324680953112, 203.2138380134274, 221.38318047901944,
-        154.02138274749117,
-      ];
-      const successRates = [
-        98.00261084659255, 99.5579584551122, 97.67446215849552,
-        95.34955663547895, 98.67569412805756, 96.96587346044194,
-        98.16328080898843,
-      ];
+        const dates = ["2025-10-07","2025-10-08","2025-10-09","2025-10-10","2025-10-11","2025-10-12","2025-10-13"];
+        const bundleSizes = [1293,1352,1351,1341,1347,1367,1370];
+        const buildTimes = [15.409,17.694,16.349,17.063,18.413,17.685,21.142];
+        const fcpValues = [1319.5289378338416,2421.010781499643,1517.730865699558,2567.296327675988,1116.1220886192846,2603.543560926437,1978.8999782788799];
+        const lcpValues = [2695.8927074317753,3119.234904036948,2627.6240657746534,2411.25065706708,2501.769731084949,2062.257282567324,3735.5002339222538];
+        const fidValues = [137.5948152892277,98.96910500600367,143.2884311619568,149.11494818007026,90.78704359944211,101.6635823514828,122.35432242558079];
+        const clsValues = [0.018245073060071993,0.08515570380532336,0.09446933862054221,0.0635451921650726,0.018663299961005953,0.0943870109552571,0.052081412201561705];
+        const ttfbValues = [325.70956694828203,396.30359116350326,370.2709962074788,516.2299988323714,415.9745193139663,204.25365376482156,556.5864290542995];
+        const apiResponseTimes = [129.83630381964377,252.2324680953112,203.2138380134274,221.38318047901944,154.02138274749117,225.31369513972552,141.81232510723845];
+        const successRates = [97.67446215849552,95.34955663547895,98.67569412805756,96.96587346044194,98.16328080898843,98.1527459694257,98.38986288429349];
 
-      // Bundle Size Chart
-      new Chart(document.getElementById('bundleChart'), {
-        type: 'line',
-        data: {
-          labels: dates,
-          datasets: [
-            {
-              label: 'Total Bundle Size (KB)',
-              data: bundleSizes,
-              borderColor: '#2196f3',
-              backgroundColor: 'rgba(33, 150, 243, 0.1)',
-              tension: 0.4,
-              fill: true,
+        // Bundle Size Chart
+        new Chart(document.getElementById('bundleChart'), {
+            type: 'line',
+            data: {
+                labels: dates,
+                datasets: [{
+                    label: 'Total Bundle Size (KB)',
+                    data: bundleSizes,
+                    borderColor: '#2196f3',
+                    backgroundColor: 'rgba(33, 150, 243, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
             },
-          ],
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            y: {
-              beginAtZero: true,
-              title: {
-                display: true,
-                text: 'Size (KB)',
-              },
-            },
-          },
-        },
-      });
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Size (KB)'
+                        }
+                    }
+                }
+            }
+        });
 
-      // Build Time Chart
-      new Chart(document.getElementById('buildChart'), {
-        type: 'line',
-        data: {
-          labels: dates,
-          datasets: [
-            {
-              label: 'Build Time (seconds)',
-              data: buildTimes,
-              borderColor: '#ff9800',
-              backgroundColor: 'rgba(255, 152, 0, 0.1)',
-              tension: 0.4,
-              fill: true,
+        // Build Time Chart
+        new Chart(document.getElementById('buildChart'), {
+            type: 'line',
+            data: {
+                labels: dates,
+                datasets: [{
+                    label: 'Build Time (seconds)',
+                    data: buildTimes,
+                    borderColor: '#ff9800',
+                    backgroundColor: 'rgba(255, 152, 0, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
             },
-          ],
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            y: {
-              beginAtZero: true,
-              title: {
-                display: true,
-                text: 'Time (seconds)',
-              },
-            },
-          },
-        },
-      });
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Time (seconds)'
+                        }
+                    }
+                }
+            }
+        });
 
-      // Web Vitals Chart
-      new Chart(document.getElementById('webVitalsChart'), {
-        type: 'line',
-        data: {
-          labels: dates,
-          datasets: [
-            {
-              label: 'FCP (ms)',
-              data: fcpValues,
-              borderColor: '#4caf50',
-              backgroundColor: 'rgba(76, 175, 80, 0.1)',
-              tension: 0.4,
+        // Web Vitals Chart
+        new Chart(document.getElementById('webVitalsChart'), {
+            type: 'line',
+            data: {
+                labels: dates,
+                datasets: [
+                    {
+                        label: 'FCP (ms)',
+                        data: fcpValues,
+                        borderColor: '#4caf50',
+                        backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                        tension: 0.4
+                    },
+                    {
+                        label: 'LCP (ms)',
+                        data: lcpValues,
+                        borderColor: '#2196f3',
+                        backgroundColor: 'rgba(33, 150, 243, 0.1)',
+                        tension: 0.4
+                    },
+                    {
+                        label: 'FID (ms)',
+                        data: fidValues,
+                        borderColor: '#ff9800',
+                        backgroundColor: 'rgba(255, 152, 0, 0.1)',
+                        tension: 0.4
+                    },
+                    {
+                        label: 'CLS',
+                        data: clsValues,
+                        borderColor: '#f44336',
+                        backgroundColor: 'rgba(244, 67, 54, 0.1)',
+                        tension: 0.4
+                    },
+                    {
+                        label: 'TTFB (ms)',
+                        data: ttfbValues,
+                        borderColor: '#9c27b0',
+                        backgroundColor: 'rgba(156, 39, 176, 0.1)',
+                        tension: 0.4
+                    }
+                ]
             },
-            {
-              label: 'LCP (ms)',
-              data: lcpValues,
-              borderColor: '#2196f3',
-              backgroundColor: 'rgba(33, 150, 243, 0.1)',
-              tension: 0.4,
-            },
-            {
-              label: 'FID (ms)',
-              data: fidValues,
-              borderColor: '#ff9800',
-              backgroundColor: 'rgba(255, 152, 0, 0.1)',
-              tension: 0.4,
-            },
-            {
-              label: 'CLS',
-              data: clsValues,
-              borderColor: '#f44336',
-              backgroundColor: 'rgba(244, 67, 54, 0.1)',
-              tension: 0.4,
-            },
-            {
-              label: 'TTFB (ms)',
-              data: ttfbValues,
-              borderColor: '#9c27b0',
-              backgroundColor: 'rgba(156, 39, 176, 0.1)',
-              tension: 0.4,
-            },
-          ],
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            y: {
-              beginAtZero: true,
-              title: {
-                display: true,
-                text: 'Time (ms) / Score',
-              },
-            },
-          },
-        },
-      });
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Time (ms) / Score'
+                        }
+                    }
+                }
+            }
+        });
 
-      // API Performance Chart
-      new Chart(document.getElementById('apiChart'), {
-        type: 'line',
-        data: {
-          labels: dates,
-          datasets: [
-            {
-              label: 'Response Time (ms)',
-              data: apiResponseTimes,
-              borderColor: '#2196f3',
-              backgroundColor: 'rgba(33, 150, 243, 0.1)',
-              tension: 0.4,
-              yAxisID: 'y',
+        // API Performance Chart
+        new Chart(document.getElementById('apiChart'), {
+            type: 'line',
+            data: {
+                labels: dates,
+                datasets: [
+                    {
+                        label: 'Response Time (ms)',
+                        data: apiResponseTimes,
+                        borderColor: '#2196f3',
+                        backgroundColor: 'rgba(33, 150, 243, 0.1)',
+                        tension: 0.4,
+                        yAxisID: 'y'
+                    },
+                    {
+                        label: 'Success Rate (%)',
+                        data: successRates,
+                        borderColor: '#4caf50',
+                        backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                        tension: 0.4,
+                        yAxisID: 'y1'
+                    }
+                ]
             },
-            {
-              label: 'Success Rate (%)',
-              data: successRates,
-              borderColor: '#4caf50',
-              backgroundColor: 'rgba(76, 175, 80, 0.1)',
-              tension: 0.4,
-              yAxisID: 'y1',
-            },
-          ],
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            y: {
-              type: 'linear',
-              display: true,
-              position: 'left',
-              title: {
-                display: true,
-                text: 'Response Time (ms)',
-              },
-            },
-            y1: {
-              type: 'linear',
-              display: true,
-              position: 'right',
-              title: {
-                display: true,
-                text: 'Success Rate (%)',
-              },
-              grid: {
-                drawOnChartArea: false,
-              },
-            },
-          },
-        },
-      });
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        title: {
+                            display: true,
+                            text: 'Response Time (ms)'
+                        }
+                    },
+                    y1: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        title: {
+                            display: true,
+                            text: 'Success Rate (%)'
+                        },
+                        grid: {
+                            drawOnChartArea: false,
+                        },
+                    }
+                }
+            }
+        });
     </script>
-  </body>
+</body>
 </html>

@@ -130,6 +130,7 @@ function CreateCollectionForm({
         <div className="w-full">
           <Input
             id="name"
+            name="name"
             label="Collection Name"
             type="text"
             value={name}
@@ -150,6 +151,7 @@ function CreateCollectionForm({
           </label>
           <textarea
             id="description"
+            name="description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Describe your collection..."

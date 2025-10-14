@@ -5,6 +5,9 @@ import SignUpPage from '@/app/sign-up/[[...rest]]/page';
 // Mock Next.js router
 jest.mock('next/navigation', () => ({
   useRouter: jest.fn(),
+  useSearchParams: jest.fn(() => ({
+    get: jest.fn(() => null),
+  })),
 }));
 
 // Mock Clerk components
@@ -16,6 +19,15 @@ jest.mock('@clerk/nextjs', () => ({
       <div data-testid="appearance-config">{JSON.stringify(appearance)}</div>
     </div>
   ),
+  useSignUp: jest.fn(() => ({
+    isLoaded: true,
+    signUp: {
+      create: jest.fn(),
+      prepareEmailAddressVerification: jest.fn(),
+      attemptEmailAddressVerification: jest.fn(),
+    },
+    setActive: jest.fn(),
+  })),
 }));
 
 // Mock Button component
@@ -67,14 +79,14 @@ describe('SignUpPage', () => {
     ).toBeInTheDocument();
   });
 
-  it('renders the Clerk SignUp component with correct configuration', () => {
+  it('renders the custom registration form', () => {
     render(<SignUpPage />);
 
-    const clerkSignUp = screen.getByTestId('clerk-signup');
-    expect(clerkSignUp).toBeInTheDocument();
-
-    expect(screen.getByTestId('redirect-url')).toHaveTextContent('/dashboard');
-    expect(screen.getByTestId('signin-url')).toHaveTextContent('/sign-in');
+    // Check for form fields
+    expect(screen.getByLabelText(/first name/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/last name/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/email address/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/^username/i)).toBeInTheDocument();
   });
 
   it('has a back to home button that navigates correctly', () => {
@@ -108,23 +120,19 @@ describe('SignUpPage', () => {
     ).toBeInTheDocument();
   });
 
-  it('configures Clerk appearance with correct styling', () => {
+  it('renders custom registration form with proper styling', () => {
     render(<SignUpPage />);
 
-    const appearanceConfig = screen.getByTestId('appearance-config');
-    const config = JSON.parse(appearanceConfig.textContent || '{}');
-
-    expect(config.elements).toBeDefined();
-    expect(config.elements.formButtonPrimary).toBe('btn-base btn-primary');
-    expect(config.elements.socialButtonsBlockButton).toBe(
-      'btn-base btn-outline'
+    // Check for form container
+    const formContainer = screen
+      .getByLabelText(/first name/i)
+      .closest('.bg-surface');
+    expect(formContainer).toHaveClass(
+      'bg-surface',
+      'rounded-lg',
+      'border',
+      'border-border'
     );
-    expect(config.elements.formFieldInput).toBe('input-base');
-    expect(config.elements.formFieldSuccessText).toBe('text-sm text-success');
-
-    expect(config.variables).toBeDefined();
-    expect(config.variables.colorPrimary).toBe('var(--color-primary)');
-    expect(config.variables.colorBackground).toBe('var(--color-background)');
   });
 
   it('displays benefits in a visually appealing format', () => {
@@ -146,14 +154,6 @@ describe('SignUpPage', () => {
     const smsInfo = screen
       .getByText('📱 SMS Notifications (Optional)')
       .closest('div');
-    expect(smsInfo).toHaveClass(
-      'bg-primary/10',
-      'dark:bg-primary/20/20',
-      'rounded-lg',
-      'p-4',
-      'border',
-      'border-primary',
-      'dark:border-primary'
-    );
+    expect(smsInfo).toHaveClass('rounded-lg', 'p-4', 'border');
   });
 });

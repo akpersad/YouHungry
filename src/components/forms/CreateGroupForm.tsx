@@ -153,6 +153,7 @@ export function CreateGroupForm({
           </label>
           <Input
             id="group-name"
+            name="name"
             type="text"
             value={formData.name}
             onChange={(e) => handleInputChange('name', e.target.value)}
@@ -172,6 +173,7 @@ export function CreateGroupForm({
           </label>
           <textarea
             id="group-description"
+            name="description"
             value={formData.description}
             onChange={(e) => handleInputChange('description', e.target.value)}
             placeholder="Describe your group..."

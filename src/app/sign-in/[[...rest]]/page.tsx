@@ -2,14 +2,34 @@
 
 import { SignIn } from '@clerk/nextjs';
 import { Button } from '@/components/ui/Button';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
 
-export default function SignInPage() {
+function SignInContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const registered = searchParams.get('registered');
 
   return (
     <div className="min-h-screen flex items-center justify-center py-12 lg:px-8">
       <div className="max-w-md w-full space-y-8">
+        {/* Registration Success Message */}
+        {registered && (
+          <div
+            className="p-4 rounded-lg border"
+            style={{
+              backgroundColor: 'var(--color-success-light)',
+              borderColor: 'var(--color-success)',
+              color: 'var(--color-success)',
+            }}
+          >
+            <p className="text-sm font-medium">
+              ✓ Account created successfully! Please sign in with your new
+              credentials.
+            </p>
+          </div>
+        )}
+
         {/* Header */}
         <div className="text-center">
           <h1
@@ -78,5 +98,19 @@ export default function SignInPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SignInPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <p>Loading...</p>
+        </div>
+      }
+    >
+      <SignInContent />
+    </Suspense>
   );
 }
