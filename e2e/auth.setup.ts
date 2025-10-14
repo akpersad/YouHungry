@@ -47,11 +47,12 @@ setup('authenticate', async ({ page }) => {
     .fill(testUsers.user1.password);
 
   // Step 5: Submit the form and wait for navigation to dashboard
-  // Use a more specific selector - look for the submit button in the password step
-  await Promise.all([
-    page.waitForURL(/dashboard/, { timeout: 30000 }),
-    page.locator('button[type="submit"]').first().click(),
-  ]);
+  // Click the Continue button after password is filled
+  const continueButton = page.locator('button:has-text("Continue")').first();
+  await continueButton.click();
+
+  // Wait for navigation to dashboard
+  await page.waitForURL(/dashboard/, { timeout: 30000 });
 
   // Verify we're signed in
   await expect(page).toHaveURL(/dashboard/);
