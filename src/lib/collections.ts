@@ -344,6 +344,11 @@ export async function addRestaurantToCollection(
 ): Promise<{ collection: Collection | null; wasAdded: boolean }> {
   const db = await connectToDatabase();
 
+  // Validate inputs
+  if (!restaurantId) {
+    throw new Error('Restaurant ID is required');
+  }
+
   // Check if restaurant already exists in collection
   const alreadyExists = await isRestaurantInCollection(
     collectionId,
@@ -360,7 +365,7 @@ export async function addRestaurantToCollection(
   // Store both database ID and Google Place ID for flexible matching
   let restaurantDataToStore;
 
-  if (restaurantId.startsWith('ChIJ')) {
+  if (restaurantId && restaurantId.startsWith('ChIJ')) {
     // This is a Google Place ID, we need to find the database restaurant
     const restaurant = await db.collection('restaurants').findOne({
       googlePlaceId: restaurantId,
