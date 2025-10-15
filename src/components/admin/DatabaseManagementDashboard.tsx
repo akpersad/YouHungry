@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import { useState, useEffect } from 'react';
 import {
   Database,
@@ -67,7 +68,7 @@ export function DatabaseManagementDashboard() {
         setStats(data.data);
       }
     } catch (error) {
-      console.error('Error fetching database stats:', error);
+      logger.error('Error fetching database stats:', error);
     }
   };
 

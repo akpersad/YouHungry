@@ -4,6 +4,7 @@
  * GET /api/admin/errors - Retrieve error groups and statistics
  */
 
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/db';
 import { getErrorStats } from '@/lib/error-tracking';
@@ -96,7 +97,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 
-    console.error('Error fetching errors:', error);
+    logger.error('Error fetching errors:', error);
     return NextResponse.json(
       { error: 'Failed to fetch errors' },
       { status: 500 }

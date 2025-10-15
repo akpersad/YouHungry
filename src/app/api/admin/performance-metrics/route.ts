@@ -5,6 +5,7 @@
  * GET /api/admin/performance-metrics?period=1day|1week|2weeks|1month - Get recent metrics
  */
 
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import {
   savePerformanceMetrics,
@@ -63,7 +64,7 @@ export async function GET(request: NextRequest) {
     const metrics = await getRecentPerformanceMetrics(days);
     return NextResponse.json(metrics);
   } catch (error) {
-    console.error('Error fetching performance metrics:', error);
+    logger.error('Error fetching performance metrics:', error);
     return NextResponse.json(
       { error: 'Failed to fetch performance metrics' },
       { status: 500 }
@@ -101,7 +102,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, date: metrics.date });
   } catch (error) {
-    console.error('Error saving performance metrics:', error);
+    logger.error('Error saving performance metrics:', error);
     return NextResponse.json(
       { error: 'Failed to save performance metrics' },
       { status: 500 }

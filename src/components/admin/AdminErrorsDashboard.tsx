@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 /**
  * Admin Errors Dashboard
  *
@@ -104,7 +105,7 @@ export function AdminErrorsDashboard() {
       const data = await response.json();
 
       if (!response.ok) {
-        console.error('Failed to fetch errors:', data.error || 'Unknown error');
+        logger.error('Failed to fetch errors:', data.error || 'Unknown error');
         setErrorGroups([]);
         setErrorStats(null);
         return;
@@ -113,7 +114,7 @@ export function AdminErrorsDashboard() {
       setErrorGroups(data.groups || []);
       setErrorStats(data.stats || null);
     } catch (error) {
-      console.error('Failed to fetch errors:', error);
+      logger.error('Failed to fetch errors:', error);
       setErrorGroups([]);
       setErrorStats(null);
     } finally {
@@ -130,7 +131,7 @@ export function AdminErrorsDashboard() {
       setSelectedGroup(data.group);
       setErrorLogs(data.logs);
     } catch (error) {
-      console.error('Failed to fetch group details:', error);
+      logger.error('Failed to fetch group details:', error);
     }
   };
 
@@ -151,7 +152,7 @@ export function AdminErrorsDashboard() {
         await fetchGroupDetails(fingerprint);
       }
     } catch (error) {
-      console.error('Failed to update error status:', error);
+      logger.error('Failed to update error status:', error);
     }
   };
 
@@ -169,7 +170,7 @@ export function AdminErrorsDashboard() {
         setErrorLogs([]);
       }
     } catch (error) {
-      console.error('Failed to delete error group:', error);
+      logger.error('Failed to delete error group:', error);
     }
   };
 
