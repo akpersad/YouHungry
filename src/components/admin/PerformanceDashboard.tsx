@@ -80,6 +80,8 @@ export function PerformanceDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedDays, setSelectedDays] = useState(1); // Fixed: was 7, now 1 - v2
+  const [collecting, setCollecting] = useState(false);
+  const [collectSuccess, setCollectSuccess] = useState<string | null>(null);
 
   const loadMetrics = async () => {
     try {
@@ -138,6 +140,46 @@ export function PerformanceDashboard() {
   };
 
   // Transform the API response to match the dashboard's expected format
+  const collectMetricsNow = async () => {
+    try {
+      setCollecting(true);
+      setCollectSuccess(null);
+      setError(null);
+
+      logger.info('Manually triggering metrics collection');
+
+      const response = await fetch('/api/admin/performance/collect', {
+        method: 'POST',
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to collect metrics');
+      }
+
+      logger.info('Metrics collection completed', data);
+
+      setCollectSuccess(
+        `Metrics collected successfully! Duration: ${data.duration}`
+      );
+
+      // Reload metrics and comparison data
+      await loadMetrics();
+      await loadComparison(selectedDays);
+
+      // Clear success message after 5 seconds
+      setTimeout(() => setCollectSuccess(null), 5000);
+    } catch (err) {
+      logger.error('Failed to collect metrics:', err);
+      setError(
+        err instanceof Error ? err.message : 'Failed to collect metrics'
+      );
+    } finally {
+      setCollecting(false);
+    }
+  };
+
   const transformComparisonData = (apiData: {
     metrics1: PerformanceMetrics | null;
     metrics2: PerformanceMetrics | null;
@@ -449,31 +491,67 @@ export function PerformanceDashboard() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <label htmlFor="days" className="text-sm font-medium">
-                Compare with:
-              </label>
-              <select
-                id="days"
-                value={selectedDays}
-                onChange={(e) => setSelectedDays(Number(e.target.value))}
-                className="px-3 py-1 border rounded-md text-sm input-base"
+          <div className="space-y-4">
+            {/* Success message */}
+            {collectSuccess && (
+              <div
+                className="p-3 rounded-md text-sm"
+                style={{
+                  background: 'rgba(34, 197, 94, 0.1)',
+                  color: 'var(--color-success)',
+                  border: '1px solid var(--color-success)',
+                }}
               >
-                <option value={1}>Yesterday</option>
-                <option value={7}>1 week ago</option>
-                <option value={14}>2 weeks ago</option>
-                <option value={30}>1 month ago</option>
-              </select>
+                {collectSuccess}
+              </div>
+            )}
+
+            <div className="flex items-center gap-4 flex-wrap">
+              <div className="flex items-center gap-2">
+                <label htmlFor="days" className="text-sm font-medium">
+                  Compare with:
+                </label>
+                <select
+                  id="days"
+                  value={selectedDays}
+                  onChange={(e) => setSelectedDays(Number(e.target.value))}
+                  className="px-3 py-1 border rounded-md text-sm input-base"
+                >
+                  <option value={1}>Yesterday</option>
+                  <option value={7}>1 Week</option>
+                  <option value={14}>2 Weeks</option>
+                  <option value={30}>1 Month</option>
+                </select>
+              </div>
+              <Button
+                onClick={() => loadComparison(selectedDays)}
+                variant="outline"
+                size="sm"
+                disabled={collecting}
+              >
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Refresh Comparison
+              </Button>
+              <Button
+                onClick={collectMetricsNow}
+                variant="primary"
+                size="sm"
+                disabled={collecting}
+                style={{
+                  backgroundColor: collecting
+                    ? 'var(--bg-tertiary)'
+                    : 'var(--accent-primary)',
+                  color: collecting
+                    ? 'var(--text-secondary)'
+                    : 'var(--text-inverse)',
+                }}
+              >
+                <RefreshCw
+                  className={`h-4 w-4 mr-2 ${collecting ? 'animate-spin' : ''}`}
+                />
+                {collecting ? 'Collecting...' : 'Collect Metrics Now'}
+              </Button>
             </div>
-            <Button
-              onClick={() => loadComparison(selectedDays)}
-              variant="outline"
-              size="sm"
-            >
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Refresh Comparison
-            </Button>
           </div>
         </CardContent>
       </Card>
