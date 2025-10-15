@@ -261,30 +261,37 @@ export function RestaurantSearchResults({
 
       {/* Pagination Controls */}
       {onPageChange && totalPages > 1 && restaurants.length > 0 && (
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-border">
-          <div className="text-sm text-text-light">
+        <div className="flex flex-col gap-4 pt-6 border-t border-border">
+          <div className="text-sm text-text-light text-center">
             Page {currentPage} of {totalPages}
           </div>
-          <div className="flex gap-2">
-            <Button
-              onClick={() => onPageChange(1)}
-              disabled={currentPage === 1}
-              variant="outline"
-              size="sm"
-            >
-              First
-            </Button>
-            <Button
-              onClick={() => onPageChange(currentPage - 1)}
-              disabled={currentPage === 1}
-              variant="outline"
-              size="sm"
-            >
-              Previous
-            </Button>
+
+          {/* Mobile-first pagination */}
+          <div className="flex flex-wrap justify-center gap-1 sm:gap-2 max-w-full overflow-x-auto">
+            {/* First and Previous buttons - hidden on very small screens */}
+            <div className="hidden sm:flex gap-1 sm:gap-2">
+              <Button
+                onClick={() => onPageChange(1)}
+                disabled={currentPage === 1}
+                variant="outline"
+                size="sm"
+                className="text-xs sm:text-sm px-2 sm:px-3"
+              >
+                First
+              </Button>
+              <Button
+                onClick={() => onPageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+                variant="outline"
+                size="sm"
+                className="text-xs sm:text-sm px-2 sm:px-3"
+              >
+                Previous
+              </Button>
+            </div>
 
             {/* Page Numbers */}
-            <div className="flex gap-1">
+            <div className="flex gap-1 items-center">
               {[...Array(totalPages)].map((_, i) => {
                 const pageNum = i + 1;
                 // Show first page, last page, current page, and pages around current
@@ -299,8 +306,10 @@ export function RestaurantSearchResults({
                       onClick={() => onPageChange(pageNum)}
                       variant={currentPage === pageNum ? 'primary' : 'outline'}
                       size="sm"
-                      className={`min-w-[2.5rem] ${
-                        currentPage === pageNum ? 'bg-primary text-white' : ''
+                      className={`min-w-[2rem] sm:min-w-[2.5rem] text-xs sm:text-sm px-2 sm:px-3 ${
+                        currentPage === pageNum
+                          ? 'bg-primary !text-white border-accent'
+                          : 'bg-transparent text-text hover:bg-primary hover:text-white hover:border-accent'
                       }`}
                     >
                       {pageNum}
@@ -311,7 +320,10 @@ export function RestaurantSearchResults({
                   (pageNum === currentPage + 2 && currentPage < totalPages - 2)
                 ) {
                   return (
-                    <span key={pageNum} className="px-2 py-1">
+                    <span
+                      key={pageNum}
+                      className="px-1 sm:px-2 py-1 text-xs sm:text-sm text-text-light"
+                    >
                       ...
                     </span>
                   );
@@ -320,21 +332,50 @@ export function RestaurantSearchResults({
               })}
             </div>
 
+            {/* Next and Last buttons - hidden on very small screens */}
+            <div className="hidden sm:flex gap-1 sm:gap-2">
+              <Button
+                onClick={() => onPageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                variant="outline"
+                size="sm"
+                className="text-xs sm:text-sm px-2 sm:px-3"
+              >
+                Next
+              </Button>
+              <Button
+                onClick={() => onPageChange(totalPages)}
+                disabled={currentPage === totalPages}
+                variant="outline"
+                size="sm"
+                className="text-xs sm:text-sm px-2 sm:px-3"
+              >
+                Last
+              </Button>
+            </div>
+          </div>
+
+          {/* Mobile navigation buttons for very small screens */}
+          <div className="flex justify-between sm:hidden gap-2">
             <Button
-              onClick={() => onPageChange(currentPage + 1)}
-              disabled={currentPage === totalPages}
+              onClick={() => onPageChange(Math.max(1, currentPage - 1))}
+              disabled={currentPage === 1}
               variant="outline"
               size="sm"
+              className="flex-1 text-xs"
             >
-              Next
+              ← Previous
             </Button>
             <Button
-              onClick={() => onPageChange(totalPages)}
+              onClick={() =>
+                onPageChange(Math.min(totalPages, currentPage + 1))
+              }
               disabled={currentPage === totalPages}
               variant="outline"
               size="sm"
+              className="flex-1 text-xs"
             >
-              Last
+              Next →
             </Button>
           </div>
         </div>
