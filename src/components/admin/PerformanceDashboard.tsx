@@ -86,14 +86,16 @@ export function PerformanceDashboard() {
       setLoading(true);
       setError(null);
 
-      // In a real implementation, you'd fetch from your API
-      // For now, we'll simulate loading the data
-      const response = await fetch('/api/admin/performance/metrics');
+      // Fetch performance metrics from MongoDB
+      const response = await fetch(
+        '/api/admin/performance-metrics?period=1month'
+      );
       if (!response.ok) {
         throw new Error('Failed to load performance metrics');
       }
       const data = await response.json();
-      setMetrics(data.metrics || []);
+      // API returns array directly, not wrapped in metrics object
+      setMetrics(Array.isArray(data) ? data : []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load metrics');
     } finally {
@@ -104,32 +106,196 @@ export function PerformanceDashboard() {
   const loadComparison = async (days: number = 1) => {
     try {
       logger.debug('Loading comparison for days:', days);
+
+      // Map days to period parameter
+      let period = '1day';
+      if (days === 7) period = '1week';
+      else if (days === 14) period = '2weeks';
+      else if (days === 30) period = '1month';
+
       const response = await fetch(
-        `/api/admin/performance/compare?days=${days}`
+        `/api/admin/performance-metrics/compare?period=${period}`
       );
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         logger.error('Failed to load comparison data:', {
           status: response.status,
           error: errorData.error || 'Unknown error',
-          availableDates: errorData.availableDates || [],
         });
         // Don't throw error, just log it and continue without comparison data
         setComparison(null);
         return;
       }
-      const data = await response.json();
-      setComparison(data);
+      const comparisonData = await response.json();
+
+      // Transform the new API response to match the expected format
+      const transformedData = transformComparisonData(comparisonData);
+      setComparison(transformedData);
     } catch (err) {
       logger.error('Failed to load comparison:', err);
       setComparison(null);
     }
   };
 
+  // Transform the API response to match the dashboard's expected format
+  const transformComparisonData = (apiData: {
+    metrics1: PerformanceMetrics | null;
+    metrics2: PerformanceMetrics | null;
+    date1: string;
+    date2: string;
+    comparison: Record<string, unknown>;
+  }): ComparisonData | null => {
+    if (!apiData || !apiData.metrics1 || !apiData.metrics2) {
+      return null;
+    }
+
+    const comparison = apiData.comparison as Record<
+      string,
+      Record<string, unknown>
+    >;
+
+    // Count improvements, degradations, and neutral changes
+    let improvements = 0;
+    let degradations = 0;
+    let neutral = 0;
+
+    const details: Record<string, Record<string, unknown>> = {};
+
+    // Process bundle size comparisons
+    if (comparison.bundleSize) {
+      details.bundle = {};
+      Object.entries(comparison.bundleSize as Record<string, unknown>).forEach(
+        ([key, value]) => {
+          if (value && typeof value === 'object' && 'changePercent' in value) {
+            const valueObj = value as {
+              changePercent?: number;
+              value1?: number;
+              value2?: number;
+            };
+            const changePercent = valueObj.changePercent || 0;
+            let trend = 'neutral';
+            if (changePercent < -1) {
+              trend = 'improvement';
+              improvements++;
+            } else if (changePercent > 1) {
+              trend = 'degradation';
+              degradations++;
+            } else {
+              neutral++;
+            }
+            details.bundle[key] = {
+              trend,
+              change: changePercent,
+              old: valueObj.value1,
+              new: valueObj.value2,
+            };
+          }
+        }
+      );
+    }
+
+    // Process web vitals comparisons
+    if (comparison.webVitals) {
+      details.webVitals = {};
+      Object.entries(comparison.webVitals as Record<string, unknown>).forEach(
+        ([key, value]) => {
+          if (value && typeof value === 'object' && 'changePercent' in value) {
+            const valueObj = value as {
+              changePercent?: number;
+              value1?: number;
+              value2?: number;
+            };
+            const changePercent = valueObj.changePercent || 0;
+            let trend = 'neutral';
+            // For web vitals, lower is better
+            if (changePercent < -1) {
+              trend = 'improvement';
+              improvements++;
+            } else if (changePercent > 1) {
+              trend = 'degradation';
+              degradations++;
+            } else {
+              neutral++;
+            }
+            details.webVitals[key] = {
+              trend,
+              change: changePercent,
+              old: valueObj.value1,
+              new: valueObj.value2,
+            };
+          }
+        }
+      );
+    }
+
+    // Process API performance comparisons
+    if (comparison.apiPerformance) {
+      details.api = {};
+      Object.entries(
+        comparison.apiPerformance as Record<string, unknown>
+      ).forEach(([key, value]) => {
+        if (value && typeof value === 'object' && 'changePercent' in value) {
+          const valueObj = value as {
+            changePercent?: number;
+            value1?: number;
+            value2?: number;
+          };
+          const changePercent = valueObj.changePercent || 0;
+          let trend = 'neutral';
+          // For cache hit rate, higher is better; for others, context-dependent
+          const higherIsBetter = key === 'cacheHitRate';
+          if (higherIsBetter) {
+            if (changePercent > 1) {
+              trend = 'improvement';
+              improvements++;
+            } else if (changePercent < -1) {
+              trend = 'degradation';
+              degradations++;
+            } else {
+              neutral++;
+            }
+          } else {
+            if (changePercent < -1) {
+              trend = 'improvement';
+              improvements++;
+            } else if (changePercent > 1) {
+              trend = 'degradation';
+              degradations++;
+            } else {
+              neutral++;
+            }
+          }
+          details.api[key] = {
+            trend,
+            change: changePercent,
+            old: valueObj.value1,
+            new: valueObj.value2,
+          };
+        }
+      });
+    }
+
+    return {
+      comparison: {
+        date1: apiData.date1,
+        date2: apiData.date2,
+        generatedAt: new Date().toISOString(),
+      },
+      summary: {
+        totalComparisons: improvements + degradations + neutral,
+        improvements,
+        degradations,
+        neutral,
+      },
+      details,
+    };
+  };
+
   useEffect(() => {
     logger.debug('useEffect triggered with selectedDays:', selectedDays, 'v2');
     loadMetrics();
     loadComparison(selectedDays);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedDays]);
 
   const formatValue = (value: number, type: string) => {
@@ -295,8 +461,8 @@ export function PerformanceDashboard() {
                 className="px-3 py-1 border rounded-md text-sm input-base"
               >
                 <option value={1}>Yesterday</option>
-                <option value={2}>2 days ago</option>
                 <option value={7}>1 week ago</option>
+                <option value={14}>2 weeks ago</option>
                 <option value={30}>1 month ago</option>
               </select>
             </div>
