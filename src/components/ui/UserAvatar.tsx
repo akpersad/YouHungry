@@ -1,4 +1,4 @@
-import React from 'react';
+import { memo, useEffect, useState } from 'react';
 import Image from 'next/image';
 
 interface UserAvatarProps {
@@ -14,14 +14,20 @@ const sizeClasses = {
   lg: 'w-12 h-12 text-base',
 };
 
-export function UserAvatar({
+export const UserAvatar = memo(function UserAvatar({
   name,
   profilePicture,
   size = 'md',
   className = '',
 }: UserAvatarProps) {
-  const [imageError, setImageError] = React.useState(false);
-  const [imageLoaded, setImageLoaded] = React.useState(false);
+  const [imageError, setImageError] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
+
+  // Reset states when profilePicture changes
+  useEffect(() => {
+    setImageError(false);
+    setImageLoaded(false);
+  }, [profilePicture]);
 
   // Generate initials from name
   const getInitials = (name: string) => {
@@ -61,8 +67,30 @@ export function UserAvatar({
     return colors[Math.abs(hash) % colors.length];
   };
 
-  const shouldShowImage = profilePicture && !imageError && imageLoaded;
-  const shouldShowPlaceholder = !profilePicture || imageError || !imageLoaded;
+  const shouldShowImage = !imageError && imageLoaded;
+  const shouldShowPlaceholder = imageError || !imageLoaded;
+
+  // If no profilePicture, always show placeholder
+  if (!profilePicture) {
+    return (
+      <div
+        className={`
+          ${sizeClasses[size]}
+          rounded-full
+          flex
+          items-center
+          justify-center
+          font-medium
+          text-white
+          overflow-hidden
+          ${getBackgroundColor(name)}
+          ${className}
+        `}
+      >
+        <span className="select-none">{getInitials(name)}</span>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -75,24 +103,29 @@ export function UserAvatar({
         font-medium
         text-white
         overflow-hidden
+        relative
         ${shouldShowPlaceholder ? getBackgroundColor(name) : ''}
         ${className}
       `}
     >
-      {shouldShowImage && (
-        <Image
-          src={profilePicture}
-          alt={`${name}'s profile`}
-          fill
-          className="object-cover"
-          onLoad={() => setImageLoaded(true)}
-          onError={() => setImageError(true)}
-        />
-      )}
+      {/* Always render the Image so onLoad can fire, but hide it until loaded */}
+      <Image
+        src={profilePicture}
+        alt={`${name}'s profile`}
+        fill
+        className={`object-cover transition-opacity duration-200 ${
+          shouldShowImage ? 'opacity-100' : 'opacity-0'
+        }`}
+        onLoad={() => setImageLoaded(true)}
+        onError={() => setImageError(true)}
+      />
 
+      {/* Show placeholder while loading or on error */}
       {shouldShowPlaceholder && (
-        <span className="select-none">{getInitials(name)}</span>
+        <span className="select-none absolute inset-0 flex items-center justify-center">
+          {getInitials(name)}
+        </span>
       )}
     </div>
   );
-}
+});

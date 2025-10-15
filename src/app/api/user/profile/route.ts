@@ -6,12 +6,7 @@ import { z } from 'zod';
 
 // Validation schema for profile updates
 const profileUpdateSchema = z.object({
-  name: z
-    .string()
-    .min(1, 'Name is required')
-    .max(100, 'Name too long')
-    .transform((val) => (val === '' ? undefined : val))
-    .optional(),
+  // Note: name is managed by Clerk and should not be updated via this endpoint
   username: z
     .string()
     .min(3, 'Username must be at least 3 characters')
@@ -176,7 +171,7 @@ export async function PUT(request: NextRequest) {
     // Prepare update object
     const updateData: Record<string, unknown> = {};
 
-    if (updates.name !== undefined) updateData.name = updates.name;
+    // Note: name is managed by Clerk and synced via webhook
     if (updates.username !== undefined) updateData.username = updates.username;
     if (updates.city !== undefined) updateData.city = updates.city;
     if (updates.state !== undefined) updateData.state = updates.state;

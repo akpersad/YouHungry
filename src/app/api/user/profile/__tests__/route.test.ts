@@ -141,7 +141,6 @@ describe('/api/user/profile', () => {
         {
           method: 'PUT',
           body: JSON.stringify({
-            name: 'Updated Name',
             city: 'Updated City',
           }),
         }
@@ -152,10 +151,8 @@ describe('/api/user/profile', () => {
 
       expect(response.status).toBe(200);
       expect(data.success).toBe(true);
-      expect(data.user.name).toBe('Updated Name');
       expect(data.user.city).toBe('Updated City');
       expect(mockUpdateUser).toHaveBeenCalledWith('user123', {
-        name: 'Updated Name',
         city: 'Updated City',
       });
     });
@@ -201,7 +198,6 @@ describe('/api/user/profile', () => {
         {
           method: 'PUT',
           body: JSON.stringify({
-            name: '', // Invalid: empty name
             username: 'ab', // Invalid: too short
             smsPhoneNumber: 'invalid-phone', // Invalid: wrong format
           }),
@@ -213,10 +209,9 @@ describe('/api/user/profile', () => {
 
       expect(response.status).toBe(400);
       expect(data.error).toBe('Invalid profile data');
-      expect(data.details).toHaveLength(3);
-      expect(data.details[0].field).toBe('name');
-      expect(data.details[1].field).toBe('username');
-      expect(data.details[2].field).toBe('smsPhoneNumber');
+      expect(data.details).toHaveLength(2);
+      expect(data.details[0].field).toBe('username');
+      expect(data.details[1].field).toBe('smsPhoneNumber');
     });
 
     it('should handle update errors', async () => {
@@ -261,7 +256,7 @@ describe('/api/user/profile', () => {
         {
           method: 'PUT',
           body: JSON.stringify({
-            name: 'Updated Name',
+            city: 'Updated City',
           }),
         }
       );

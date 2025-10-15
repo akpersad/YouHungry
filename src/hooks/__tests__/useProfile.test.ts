@@ -114,6 +114,8 @@ describe('useProfile', () => {
     expect(result.current.profile).toEqual(mockProfile);
     expect(result.current.isLoading).toBe(false);
     expect(result.current.error).toBe(null);
+    expect(result.current.updateProfile).toBeDefined();
+    expect(result.current.isUpdating).toBe(false);
   });
 
   it('should handle profile update mutation', async () => {
@@ -142,17 +144,6 @@ describe('useProfile', () => {
       mutateAsync: mockMutateAsync,
       isPending: false,
     } as any);
-
-    // Mock the other two mutations: uploadPicture, removePicture
-    mockUseMutation
-      .mockReturnValueOnce({
-        mutateAsync: jest.fn(),
-        isPending: false,
-      } as any)
-      .mockReturnValueOnce({
-        mutateAsync: jest.fn(),
-        isPending: false,
-      } as any);
 
     mockUseQueryClient.mockReturnValue({
       invalidateQueries: mockInvalidateQueries,
@@ -211,19 +202,10 @@ describe('useProfile', () => {
       }
     });
 
-    mockUseMutation
-      .mockReturnValueOnce({
-        mutateAsync: mockMutateAsync,
-        isPending: false,
-      } as any)
-      .mockReturnValueOnce({
-        mutateAsync: jest.fn(),
-        isPending: false,
-      } as any)
-      .mockReturnValueOnce({
-        mutateAsync: jest.fn(),
-        isPending: false,
-      } as any);
+    mockUseMutation.mockReturnValueOnce({
+      mutateAsync: mockMutateAsync,
+      isPending: false,
+    } as any);
 
     mockUseQueryClient.mockReturnValue({
       invalidateQueries: jest.fn(),
@@ -240,7 +222,7 @@ describe('useProfile', () => {
     const { result } = renderHook(() => useProfile(), { wrapper });
 
     const updateData = {
-      name: 'Updated Name',
+      city: 'Updated City',
     };
 
     try {
@@ -253,132 +235,6 @@ describe('useProfile', () => {
       title: 'Update Failed',
       description: 'Update failed',
       variant: 'destructive',
-    });
-  });
-
-  it('should handle profile picture upload', async () => {
-    const mockUploadPicture = jest.fn().mockResolvedValue({ success: true });
-    const mockInvalidateQueries = jest.fn();
-
-    mockUseQuery.mockReturnValue({
-      data: null,
-      isLoading: false,
-      error: null,
-    } as any);
-
-    // Mock the uploadPicture mutation to simulate the onSuccess callback
-    const mockUploadMutateAsync = jest.fn().mockImplementation(async (file) => {
-      const result = await mockUploadPicture(file);
-      // Simulate the onSuccess callback being called
-      mockInvalidateQueries({ queryKey: ['user-profile'] });
-      mockToast.toast({
-        title: 'Picture Updated',
-        description: 'Your profile picture has been updated successfully.',
-      });
-      return result;
-    });
-
-    mockUseMutation
-      .mockReturnValueOnce({
-        mutateAsync: jest.fn(),
-        isPending: false,
-      } as any)
-      .mockReturnValueOnce({
-        mutateAsync: mockUploadMutateAsync,
-        isPending: false,
-      } as any)
-      .mockReturnValueOnce({
-        mutateAsync: jest.fn(),
-        isPending: false,
-      } as any);
-
-    mockUseQueryClient.mockReturnValue({
-      invalidateQueries: mockInvalidateQueries,
-    } as any);
-
-    const wrapper = ({ children }: { children: React.ReactNode }) => {
-      return React.createElement(
-        QueryClientProvider,
-        { client: queryClient },
-        children
-      );
-    };
-
-    const { result } = renderHook(() => useProfile(), { wrapper });
-
-    const file = new File(['test'], 'test.jpg', { type: 'image/jpeg' });
-
-    await result.current.uploadPicture(file);
-
-    expect(mockUploadPicture).toHaveBeenCalledWith(file);
-    expect(mockInvalidateQueries).toHaveBeenCalledWith({
-      queryKey: ['user-profile'],
-    });
-    expect(mockToast.toast).toHaveBeenCalledWith({
-      title: 'Picture Updated',
-      description: 'Your profile picture has been updated successfully.',
-    });
-  });
-
-  it('should handle profile picture removal', async () => {
-    const mockRemovePicture = jest.fn().mockResolvedValue({ success: true });
-    const mockInvalidateQueries = jest.fn();
-
-    mockUseQuery.mockReturnValue({
-      data: null,
-      isLoading: false,
-      error: null,
-    } as any);
-
-    // Mock the removePicture mutation to simulate the onSuccess callback
-    const mockRemoveMutateAsync = jest.fn().mockImplementation(async () => {
-      const result = await mockRemovePicture();
-      // Simulate the onSuccess callback being called
-      mockInvalidateQueries({ queryKey: ['user-profile'] });
-      mockToast.toast({
-        title: 'Picture Removed',
-        description: 'Your profile picture has been removed successfully.',
-      });
-      return result;
-    });
-
-    mockUseMutation
-      .mockReturnValueOnce({
-        mutateAsync: jest.fn(),
-        isPending: false,
-      } as any)
-      .mockReturnValueOnce({
-        mutateAsync: jest.fn(),
-        isPending: false,
-      } as any)
-      .mockReturnValueOnce({
-        mutateAsync: mockRemoveMutateAsync,
-        isPending: false,
-      } as any);
-
-    mockUseQueryClient.mockReturnValue({
-      invalidateQueries: mockInvalidateQueries,
-    } as any);
-
-    const wrapper = ({ children }: { children: React.ReactNode }) => {
-      return React.createElement(
-        QueryClientProvider,
-        { client: queryClient },
-        children
-      );
-    };
-
-    const { result } = renderHook(() => useProfile(), { wrapper });
-
-    await result.current.removePicture();
-
-    expect(mockRemovePicture).toHaveBeenCalled();
-    expect(mockInvalidateQueries).toHaveBeenCalledWith({
-      queryKey: ['user-profile'],
-    });
-    expect(mockToast.toast).toHaveBeenCalledWith({
-      title: 'Picture Removed',
-      description: 'Your profile picture has been removed successfully.',
     });
   });
 
@@ -406,7 +262,5 @@ describe('useProfile', () => {
 
     expect(result.current.isLoading).toBe(true);
     expect(result.current.isUpdating).toBe(true);
-    expect(result.current.isUploading).toBe(true);
-    expect(result.current.isRemoving).toBe(true);
   });
 });
