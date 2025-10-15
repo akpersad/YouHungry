@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -359,7 +360,7 @@ export function CustomRegistrationForm() {
           });
         } catch {
           // Don't fail registration if phone verification fails
-          console.warn('Phone verification failed to send');
+          logger.warn('Phone verification failed to send');
         }
       }
 
@@ -381,7 +382,7 @@ export function CustomRegistrationForm() {
         });
       }, 1000);
     } catch (err: unknown) {
-      console.error('Registration error:', err);
+      logger.error('Registration error:', err);
       // Handle Clerk errors
       if (
         err &&
@@ -436,11 +437,11 @@ export function CustomRegistrationForm() {
         router.push('/dashboard');
       } else {
         // If not complete, there may be additional steps required
-        console.error('Sign-up not complete:', completeSignUp.status);
+        logger.error('Sign-up not complete:', completeSignUp.status);
         setErrors({ general: 'Verification incomplete. Please try again.' });
       }
     } catch (err: unknown) {
-      console.error('Verification error:', err);
+      logger.error('Verification error:', err);
       // Handle Clerk errors
       if (
         err &&
@@ -496,7 +497,7 @@ export function CustomRegistrationForm() {
         });
       }, 1000);
     } catch (err: unknown) {
-      console.error('Resend error:', err);
+      logger.error('Resend error:', err);
       if (
         err &&
         typeof err === 'object' &&
