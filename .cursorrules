@@ -1,0 +1,19 @@
+# Custom Cursor Rules and Slash Commands
+
+## /stage-commit
+
+Please stage and commit all unstaged files. Group commits into logical groupings; not one big commit.
+
+Instructions:
+
+1. First, check the git status to see what files have been modified
+2. Analyze the changes and group them by:
+   - Feature/functionality (e.g., all changes related to a specific feature)
+   - File type/area (e.g., documentation, tests, components, utilities)
+   - Purpose (e.g., bug fixes, new features, refactoring, styling)
+3. For each logical group:
+   - Stage only those files using `git add`
+   - Create a clear, descriptive commit message following conventional commit format
+   - Commit the group
+4. Continue until all changes are committed
+5. Provide a summary of all commits made

@@ -52,15 +52,25 @@ Replaces console.log statements with the logger utility.
 
 ### `comprehensive-contrast-audit.js`
 
-Audits the application for color contrast accessibility issues.
+Audits the application for color contrast accessibility issues. Scans the entire codebase for hardcoded colors and generates a detailed report.
+
+**Usage:** `npm run check-colors`
 
 ### `comprehensive-fix-contrast-issues.js`
 
-Automatically fixes color contrast issues found in the audit.
+Automatically fixes color contrast issues by replacing hardcoded color classes with design system colors. Uses shared utilities from `utils/color-contrast-utils.js`.
 
-### `auto-fix-contrast-issues.js`
+**Usage:** `npm run fix-colors`
 
-Alternative contrast issue fixing script.
+### `setup-color-prevention.js`
+
+Sets up ESLint rules and pre-commit hooks to prevent hardcoded colors from being introduced.
+
+**Usage:** `node scripts/setup-color-prevention.js`
+
+### `utils/color-contrast-utils.js`
+
+Shared utilities for color contrast calculations and WCAG compliance checking. Used by multiple color-related scripts to avoid code duplication.
 
 ---
 

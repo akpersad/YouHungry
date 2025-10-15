@@ -5,7 +5,7 @@ import React, { useState } from 'react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { UserAvatar } from '@/components/ui/UserAvatar';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 
 interface GroupInvitation {
   _id: string;

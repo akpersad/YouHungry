@@ -4,25 +4,30 @@
  * Performance Metrics Collection Script
  *
  * This script collects performance metrics from the application and saves them
- * to dated JSON files for historical analysis and comparison.
+ * to MongoDB for historical analysis and comparison.
  *
  * Usage:
- *   node collect-metrics.js [--env=production|development] [--output=path]
+ *   node collect-metrics.js [--env=production|development]
  *
  * Example:
- *   node collect-metrics.js --env=production --output=./performance-metrics/
+ *   node collect-metrics.js --env=production
  */
 
 const fs = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
+const { execSync, spawn } = require('child_process');
+const { MongoClient } = require('mongodb');
+
+require('dotenv').config({ path: path.resolve(__dirname, '../.env.local') });
 
 // Configuration
 const config = {
   env: process.env.NODE_ENV || 'development',
-  outputDir: './performance-metrics/daily-metrics',
   dateFormat: 'YYYY-MM-DD',
   maxHistoryDays: 30,
+  saveToMongoDB: true,
+  mongoUri: process.env.MONGODB_URI,
+  mongoDatabase: process.env.MONGODB_DATABASE,
   metrics: {
     bundleSize: true,
     buildTime: true,
@@ -39,8 +44,6 @@ function parseArgs() {
   args.forEach((arg) => {
     if (arg.startsWith('--env=')) {
       config.env = arg.split('=')[1];
-    } else if (arg.startsWith('--output=')) {
-      config.outputDir = arg.split('=')[1];
     }
   });
 }
@@ -50,10 +53,43 @@ function getCurrentDate() {
   return new Date().toISOString().split('T')[0];
 }
 
-// Ensure output directory exists
-function ensureOutputDir() {
-  if (!fs.existsSync(config.outputDir)) {
-    fs.mkdirSync(config.outputDir, { recursive: true });
+// Connect to MongoDB
+async function connectToMongoDB() {
+  if (!config.mongoUri || !config.mongoDatabase) {
+    throw new Error('MongoDB URI or database name not configured');
+  }
+
+  const client = new MongoClient(config.mongoUri);
+  await client.connect();
+  const db = client.db(config.mongoDatabase);
+  return { client, db };
+}
+
+// Save metrics to MongoDB
+async function saveMetricsToMongoDB(metrics) {
+  console.log('💾 Saving metrics to MongoDB...');
+
+  try {
+    const { client, db } = await connectToMongoDB();
+    const collection = db.collection('performanceMetrics');
+
+    const date = getCurrentDate();
+    const document = {
+      date,
+      ...metrics,
+      lastUpdated: new Date().toISOString(),
+      createdAt: new Date(),
+    };
+
+    // Upsert based on date (one entry per day)
+    await collection.updateOne({ date }, { $set: document }, { upsert: true });
+
+    await client.close();
+    console.log('✅ Metrics saved to MongoDB');
+    return true;
+  } catch (error) {
+    console.error('❌ Error saving metrics to MongoDB:', error.message);
+    return false;
   }
 }
 
@@ -145,67 +181,116 @@ function collectSystemMetrics() {
   return systemInfo;
 }
 
-// Collect web vitals from browser (simulated)
-function collectWebVitalsMetrics() {
+// Collect web vitals from Lighthouse (actual metrics)
+async function collectWebVitalsMetrics() {
   console.log('🌐 Collecting web vitals metrics...');
 
-  // In a real implementation, this would collect actual web vitals from the browser
-  // For now, we'll simulate some baseline metrics
-  return {
-    fcp: Math.random() * 2000 + 1000, // First Contentful Paint (ms)
-    lcp: Math.random() * 3000 + 1500, // Largest Contentful Paint (ms)
-    fid: Math.random() * 100 + 50, // First Input Delay (ms)
-    cls: Math.random() * 0.1, // Cumulative Layout Shift
-    ttfb: Math.random() * 500 + 200, // Time to First Byte (ms)
-    timestamp: Date.now(),
-  };
-}
+  let chrome;
+  try {
+    // Run Lighthouse to collect real web vitals
+    // Lighthouse v12+ is ESM-only, use dynamic import
+    const lighthouseModule = await import('lighthouse');
+    const lighthouse = lighthouseModule.default;
+    const chromeLauncher = require('chrome-launcher');
 
-// Collect API performance metrics
-function collectAPIMetrics() {
-  console.log('🔌 Collecting API performance metrics...');
+    chrome = await chromeLauncher.launch({ chromeFlags: ['--headless'] });
+    const options = {
+      logLevel: 'error',
+      output: 'json',
+      onlyCategories: ['performance'],
+      port: chrome.port,
+    };
 
-  // In a real implementation, this would collect actual API metrics
-  // For now, we'll simulate some baseline metrics
-  return {
-    averageResponseTime: Math.random() * 200 + 100, // ms
-    successRate: 95 + Math.random() * 5, // percentage
-    errorRate: Math.random() * 2, // percentage
-    totalRequests: Math.floor(Math.random() * 1000) + 500,
-    timestamp: Date.now(),
-  };
-}
+    const runnerResult = await lighthouse('http://localhost:3000', options);
 
-// Save metrics to dated file
-function saveMetrics(metrics) {
-  const date = getCurrentDate();
-  const filename = `metrics-${date}.json`;
-  const filepath = path.join(config.outputDir, filename);
+    // Extract metrics from Lighthouse results
+    const audits = runnerResult.lhr.audits;
 
-  // Load existing metrics if file exists
-  let existingMetrics = {};
-  if (fs.existsSync(filepath)) {
-    try {
-      existingMetrics = JSON.parse(fs.readFileSync(filepath, 'utf8'));
-    } catch (error) {
-      console.warn(
-        '⚠️ Could not parse existing metrics file, creating new one'
-      );
+    return {
+      fcp: audits['first-contentful-paint']?.numericValue || 0,
+      lcp: audits['largest-contentful-paint']?.numericValue || 0,
+      fid: audits['max-potential-fid']?.numericValue || 0,
+      cls: audits['cumulative-layout-shift']?.numericValue || 0,
+      ttfb: audits['server-response-time']?.numericValue || 0,
+      timestamp: Date.now(),
+    };
+  } catch (error) {
+    console.warn(
+      '⚠️ Could not collect real web vitals, using fallback:',
+      error.message
+    );
+    // Fallback: Return null to indicate metrics weren't collected
+    return null;
+  } finally {
+    // Ensure Chrome is always killed, even if there's an error
+    if (chrome) {
+      await chrome.kill();
     }
   }
+}
 
-  // Merge new metrics with existing ones
-  const updatedMetrics = {
-    ...existingMetrics,
-    ...metrics,
-    lastUpdated: new Date().toISOString(),
-  };
+// Collect API performance metrics from database
+async function collectAPIMetrics() {
+  console.log('🔌 Collecting API performance metrics...');
 
-  // Save to file
-  fs.writeFileSync(filepath, JSON.stringify(updatedMetrics, null, 2));
-  console.log(`✅ Metrics saved to ${filepath}`);
+  try {
+    // Fetch real API metrics from the cost monitoring endpoint
+    const response = await fetch(
+      'http://localhost:3000/api/admin/cost-monitoring'
+    );
 
-  return filepath;
+    if (!response.ok) {
+      throw new Error(`API returned ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    if (!data.success || !data.metrics) {
+      throw new Error('Invalid API response');
+    }
+
+    // Calculate total API requests from all tracked services
+    const googlePlaces = data.metrics.googlePlaces;
+    const totalGoogleRequests =
+      googlePlaces.textSearch +
+      googlePlaces.nearbySearch +
+      googlePlaces.placeDetails +
+      googlePlaces.geocoding +
+      googlePlaces.addressValidation;
+
+    // Get cache statistics
+    const cache = data.metrics.cache;
+
+    return {
+      totalRequests: totalGoogleRequests,
+      cacheHitRate: cache.hitRate,
+      totalCacheHits: cache.totalHits,
+      memoryEntries: cache.memoryEntries,
+      dailyCost: data.metrics.estimatedCosts.daily,
+      monthlyCost: data.metrics.estimatedCosts.monthly,
+      timestamp: Date.now(),
+    };
+  } catch (error) {
+    console.warn(
+      '⚠️ Could not collect real API metrics, using fallback:',
+      error.message
+    );
+    // Fallback: Return null to indicate metrics weren't collected
+    return null;
+  }
+}
+
+// Save metrics (to MongoDB)
+async function saveMetrics(metrics) {
+  if (config.saveToMongoDB) {
+    const saved = await saveMetricsToMongoDB(metrics);
+    if (!saved) {
+      throw new Error('Failed to save metrics to MongoDB');
+    }
+    return 'MongoDB';
+  }
+
+  throw new Error('No storage method configured');
 }
 
 // Generate performance report
@@ -239,10 +324,12 @@ function generateReport(metrics) {
       : null,
     api: metrics.apiPerformance
       ? {
-          avgResponseTime: `${metrics.apiPerformance.averageResponseTime.toFixed(0)}ms`,
-          successRate: `${metrics.apiPerformance.successRate.toFixed(1)}%`,
-          errorRate: `${metrics.apiPerformance.errorRate.toFixed(2)}%`,
           totalRequests: metrics.apiPerformance.totalRequests,
+          cacheHitRate: `${metrics.apiPerformance.cacheHitRate.toFixed(1)}%`,
+          totalCacheHits: metrics.apiPerformance.totalCacheHits,
+          memoryEntries: metrics.apiPerformance.memoryEntries,
+          dailyCost: `$${metrics.apiPerformance.dailyCost.toFixed(4)}`,
+          monthlyCost: `$${metrics.apiPerformance.monthlyCost.toFixed(4)}`,
         }
       : null,
     system: metrics.system
@@ -258,78 +345,239 @@ function generateReport(metrics) {
   return report;
 }
 
-// Clean up old metrics files
-function cleanupOldMetrics() {
-  console.log('🧹 Cleaning up old metrics files...');
+// Clean up old metrics from MongoDB
+async function cleanupOldMetrics() {
+  console.log('🧹 Cleaning up old metrics from MongoDB...');
 
   try {
-    const files = fs.readdirSync(config.outputDir);
-    const now = new Date();
-    const maxAge = config.maxHistoryDays * 24 * 60 * 60 * 1000; // Convert days to ms
+    const { client, db } = await connectToMongoDB();
+    const collection = db.collection('performanceMetrics');
 
-    files.forEach((file) => {
-      if (file.startsWith('metrics-') && file.endsWith('.json')) {
-        const filepath = path.join(config.outputDir, file);
-        const stats = fs.statSync(filepath);
-        const age = now.getTime() - stats.mtime.getTime();
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - config.maxHistoryDays);
+    const cutoffDateStr = cutoffDate.toISOString().split('T')[0];
 
-        if (age > maxAge) {
-          fs.unlinkSync(filepath);
-          console.log(`🗑️ Removed old metrics file: ${file}`);
-        }
-      }
+    const result = await collection.deleteMany({
+      date: { $lt: cutoffDateStr },
     });
+
+    await client.close();
+
+    if (result.deletedCount > 0) {
+      console.log(`🗑️ Removed ${result.deletedCount} old metrics records`);
+    } else {
+      console.log('✅ No old metrics to remove');
+    }
   } catch (error) {
     console.error('❌ Error cleaning up old metrics:', error.message);
   }
 }
 
+// Start the Next.js server
+async function startServer(skipBuild = false) {
+  console.log('🚀 Starting Next.js server...');
+
+  return new Promise((resolve, reject) => {
+    // Build the app if not skipped
+    if (!skipBuild) {
+      try {
+        console.log('🔨 Building Next.js app...');
+        execSync('npm run build:webpack', {
+          encoding: 'utf8',
+          stdio: 'pipe',
+          env: { ...process.env, ESLINT_NO_DEV_ERRORS: 'true' },
+        });
+      } catch (error) {
+        console.error('❌ Error building app:', error.message);
+        return reject(error);
+      }
+    } else {
+      console.log('⏭️ Skipping build (using existing build)...');
+    }
+
+    // Start the production server
+    const serverProcess = spawn('npm', ['run', 'start'], {
+      stdio: 'pipe',
+      env: { ...process.env, PORT: '3000' },
+    });
+
+    let serverReady = false;
+    const timeout = setTimeout(() => {
+      if (!serverReady) {
+        serverProcess.kill();
+        reject(new Error('Server failed to start within timeout'));
+      }
+    }, 60000); // 60 second timeout
+
+    serverProcess.stdout.on('data', (data) => {
+      const output = data.toString();
+      console.log(`[Server] ${output}`);
+
+      // Check if server is ready
+      if (output.includes('Ready') || output.includes('started server')) {
+        serverReady = true;
+        clearTimeout(timeout);
+        console.log('✅ Server is ready!');
+        // Give the server a moment to fully initialize before resolving
+        setTimeout(() => resolve(serverProcess), 2000);
+      }
+    });
+
+    serverProcess.stderr.on('data', (data) => {
+      console.error(`[Server Error] ${data.toString()}`);
+    });
+
+    serverProcess.on('error', (error) => {
+      clearTimeout(timeout);
+      reject(error);
+    });
+
+    serverProcess.on('exit', (code) => {
+      clearTimeout(timeout);
+      if (!serverReady) {
+        reject(new Error(`Server exited with code ${code}`));
+      }
+    });
+  });
+}
+
+// Stop the server
+async function stopServer(serverProcess) {
+  if (!serverProcess) return;
+
+  console.log('🛑 Stopping server...');
+  return new Promise((resolve) => {
+    serverProcess.on('exit', () => {
+      console.log('✅ Server stopped');
+      resolve();
+    });
+
+    serverProcess.kill('SIGTERM');
+
+    // Force kill after 5 seconds if graceful shutdown fails
+    setTimeout(() => {
+      if (!serverProcess.killed) {
+        serverProcess.kill('SIGKILL');
+      }
+      resolve();
+    }, 5000);
+  });
+}
+
+// Wait for server to be responsive
+async function waitForServer(maxAttempts = 10) {
+  console.log('⏳ Waiting for server to be responsive...');
+
+  for (let i = 0; i < maxAttempts; i++) {
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 3000);
+
+      const response = await fetch('http://localhost:3000', {
+        signal: controller.signal,
+        redirect: 'manual', // Don't follow redirects
+      });
+
+      clearTimeout(timeout);
+
+      // Consider any response from the server as "ready"
+      // This includes: 200 OK, 307 Redirect, 401 Unauthorized, etc.
+      // The key is that the server is responding
+      if (response.status >= 200 && response.status < 600) {
+        console.log(`✅ Server is responsive! (Status: ${response.status})`);
+        return true;
+      }
+    } catch (error) {
+      // Server not ready yet (connection refused or timeout)
+      console.log(`  Attempt ${i + 1}/${maxAttempts}: ${error.message}`);
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+    }
+  }
+
+  throw new Error('Server did not become responsive in time');
+}
+
 // Main execution
 async function main() {
+  // Using Node.js built-in fetch (available in Node 18+)
+
   console.log('🚀 Starting performance metrics collection...');
   console.log(`📅 Date: ${getCurrentDate()}`);
   console.log(`🌍 Environment: ${config.env}`);
-  console.log(`📁 Output directory: ${config.outputDir}`);
+  console.log(`💾 Storage: MongoDB`);
 
   parseArgs();
-  ensureOutputDir();
 
   const metrics = {};
+  let serverProcess = null;
 
-  // Collect different types of metrics
-  if (config.metrics.bundleSize) {
-    metrics.bundleSize = collectBundleSizeMetrics();
+  try {
+    // Collect different types of metrics
+    if (config.metrics.bundleSize) {
+      metrics.bundleSize = collectBundleSizeMetrics();
+    }
+
+    if (config.metrics.buildTime) {
+      metrics.buildTime = collectBuildTimeMetrics();
+    }
+
+    // Start server for metrics that require it (webVitals, apiPerformance)
+    const needsServer =
+      config.metrics.webVitals || config.metrics.apiPerformance;
+    if (needsServer) {
+      // Skip build since we already built above
+      const alreadyBuilt =
+        config.metrics.bundleSize || config.metrics.buildTime;
+      serverProcess = await startServer(alreadyBuilt);
+
+      // Wait for server to be fully responsive
+      await waitForServer();
+    }
+
+    if (config.metrics.webVitals) {
+      metrics.webVitals = await collectWebVitalsMetrics();
+    }
+
+    if (config.metrics.apiPerformance) {
+      metrics.apiPerformance = await collectAPIMetrics();
+    }
+
+    // Stop server if it was started
+    if (serverProcess) {
+      await stopServer(serverProcess);
+      serverProcess = null;
+    }
+
+    if (config.metrics.memoryUsage || config.metrics.networkPerformance) {
+      metrics.system = collectSystemMetrics();
+    }
+
+    // Save metrics
+    const savedLocation = await saveMetrics(metrics);
+
+    // Generate and display report
+    const report = generateReport(metrics);
+    console.log('\n📊 Performance Report:');
+    console.log(JSON.stringify(report, null, 2));
+
+    // Clean up old metrics
+    await cleanupOldMetrics();
+
+    console.log('\n✅ Performance metrics collection completed!');
+    console.log(`📄 Metrics saved to: ${savedLocation}`);
+  } catch (error) {
+    console.error('❌ Error during metrics collection:', error);
+
+    // Ensure server is stopped even if there's an error
+    if (serverProcess) {
+      await stopServer(serverProcess);
+    }
+
+    throw error;
+  } finally {
+    // Explicitly exit to ensure script doesn't hang
+    process.exit(0);
   }
-
-  if (config.metrics.buildTime) {
-    metrics.buildTime = collectBuildTimeMetrics();
-  }
-
-  if (config.metrics.webVitals) {
-    metrics.webVitals = collectWebVitalsMetrics();
-  }
-
-  if (config.metrics.memoryUsage || config.metrics.networkPerformance) {
-    metrics.system = collectSystemMetrics();
-  }
-
-  if (config.metrics.apiPerformance) {
-    metrics.apiPerformance = collectAPIMetrics();
-  }
-
-  // Save metrics
-  const savedFile = saveMetrics(metrics);
-
-  // Generate and display report
-  const report = generateReport(metrics);
-  console.log('\n📊 Performance Report:');
-  console.log(JSON.stringify(report, null, 2));
-
-  // Clean up old files
-  cleanupOldMetrics();
-
-  console.log('\n✅ Performance metrics collection completed!');
-  console.log(`📄 Metrics saved to: ${savedFile}`);
 }
 
 // Run the script
@@ -348,4 +596,7 @@ module.exports = {
   collectAPIMetrics,
   saveMetrics,
   generateReport,
+  startServer,
+  stopServer,
+  waitForServer,
 };

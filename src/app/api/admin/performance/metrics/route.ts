@@ -1,67 +1,31 @@
 import { logger } from '@/lib/logger';
 import { NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
+import { getRecentPerformanceMetrics } from '@/lib/performance-metrics';
 
 export async function GET() {
   try {
-    const metricsDir = path.join(
-      process.cwd(),
-      'performance-metrics',
-      'daily-metrics'
-    );
+    // Get all metrics from MongoDB (limit to 90 days)
+    const metrics = await getRecentPerformanceMetrics(90);
 
-    // Check if directory exists
-    if (!fs.existsSync(metricsDir)) {
+    if (!metrics || metrics.length === 0) {
       return NextResponse.json({
         metrics: [],
-        message: 'No metrics directory found',
+        message: 'No metrics found in database',
       });
     }
 
-    // Read all metrics files
-    const files = fs
-      .readdirSync(metricsDir)
-      .filter((file) => file.startsWith('metrics-') && file.endsWith('.json'))
-      .map((file) => {
-        const dateMatch = file.match(/metrics-(\d{4}-\d{2}-\d{2})\.json/);
-        return {
-          filename: file,
-          date: dateMatch ? dateMatch[1] : null,
-        };
-      })
-      .filter((item) => item.date)
-      .sort(
-        (a, b) => new Date(a.date!).getTime() - new Date(b.date!).getTime()
-      );
-
-    // Load metrics data
-    const metrics = files
-      .map((file) => {
-        try {
-          const filepath = path.join(metricsDir, file.filename);
-          const data = JSON.parse(fs.readFileSync(filepath, 'utf8'));
-          return {
-            date: file.date,
-            ...data,
-          };
-        } catch (error) {
-          logger.error(`Error loading metrics file ${file.filename}:`, error);
-          return null;
-        }
-      })
-      .filter(Boolean);
+    // Sort by date ascending
+    const sortedMetrics = metrics.sort(
+      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+    );
 
     return NextResponse.json({
-      metrics,
-      totalFiles: files.length,
-      dateRange:
-        files.length > 0
-          ? {
-              from: files[0].date,
-              to: files[files.length - 1].date,
-            }
-          : null,
+      metrics: sortedMetrics,
+      totalFiles: sortedMetrics.length,
+      dateRange: {
+        from: sortedMetrics[0].date,
+        to: sortedMetrics[sortedMetrics.length - 1].date,
+      },
     });
   } catch (error) {
     logger.error('Error loading performance metrics:', error);

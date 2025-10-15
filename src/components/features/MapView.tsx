@@ -98,7 +98,7 @@ class RestaurantMarker {
             onerror="this.src='/icons/icon-96x96.svg'"
           />
           <div class="flex-1 min-w-0">
-            <h3 class="font-semibold text-gray-900 dark:text-gray-100 text-sm leading-tight mb-1">
+            <h3 class="font-semibold text-text dark:text-text-light text-sm leading-tight mb-1">
               ${restaurant.name}
             </h3>
             <div class="flex items-center gap-2 mb-2">
@@ -106,11 +106,11 @@ class RestaurantMarker {
                 <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                 </svg>
-                <span class="text-sm text-gray-600 dark:text-gray-300 ml-1">${rating.toFixed(1)}</span>
+                <span class="text-sm text-text-light dark:text-text-light ml-1">${rating.toFixed(1)}</span>
               </div>
-              <span class="text-sm text-gray-600 dark:text-gray-300">${priceText}</span>
+              <span class="text-sm text-text-light dark:text-text-light">${priceText}</span>
             </div>
-            <p class="text-xs text-gray-600 dark:text-gray-300 mb-2 line-clamp-2">
+            <p class="text-xs text-text-light dark:text-text-light mb-2 line-clamp-2">
               ${restaurant.address || 'Address not available'}
             </p>
             <div class="flex gap-1">
@@ -122,7 +122,7 @@ class RestaurantMarker {
               </button>
               <button 
                 onclick="window.viewRestaurantDetails('${restaurant._id}')"
-                class="px-2 py-1 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 text-xs rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+                class="px-2 py-1 bg-surface dark:bg-surface text-text dark:text-text-light text-xs rounded hover:bg-surface dark:hover:bg-surface transition-colors"
               >
                 Details
               </button>

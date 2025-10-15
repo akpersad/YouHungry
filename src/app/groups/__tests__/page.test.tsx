@@ -9,14 +9,14 @@ import {
   useAcceptGroupInvitation,
   useDeclineGroupInvitation,
 } from '@/hooks/api/useGroups';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 import { ThemeProvider } from '@/components/providers/ThemeProvider';
 import { TestQueryProvider } from '@/test-utils/testQueryClient';
 
 // Mock dependencies
 jest.mock('@clerk/nextjs');
 jest.mock('@/hooks/api/useGroups');
-jest.mock('react-hot-toast');
+jest.mock('sonner');
 
 // Mock window.matchMedia
 Object.defineProperty(window, 'matchMedia', {

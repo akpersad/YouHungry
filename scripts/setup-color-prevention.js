@@ -183,7 +183,7 @@ if [ "$HIGH_SEVERITY_COUNT" -gt 0 ]; then
   echo ""
   node scripts/comprehensive-contrast-audit.js | grep -A 5 "HIGH SEVERITY ISSUES" | head -20
   echo ""
-  echo "Run 'node scripts/comprehensive-fix-contrast-issues.js' to auto-fix many issues."
+  echo "Run 'npm run fix-colors' to auto-fix many issues."
   exit 1
 else
   echo "✅ No high severity color contrast issues found!"

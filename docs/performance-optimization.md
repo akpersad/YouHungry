@@ -103,7 +103,7 @@ experimental: {
   optimizePackageImports: [
     '@tanstack/react-query',
     'framer-motion',
-    'react-hot-toast'
+    'sonner'
   ],
 }
 ```

@@ -27,7 +27,7 @@ import {
   useAcceptGroupInvitation,
   useDeclineGroupInvitation,
 } from '@/hooks/api/useGroups';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 
 export default function GroupsPage() {

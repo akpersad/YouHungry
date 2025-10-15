@@ -1,10 +1,10 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { GroupInvitations } from '../GroupInvitations';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 
 // Mock dependencies
-jest.mock('react-hot-toast');
+jest.mock('sonner');
 
 const mockToast = toast as jest.Mocked<typeof toast>;
 

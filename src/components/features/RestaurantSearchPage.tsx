@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/Button';
 import { useRestaurantSearch, useAddRestaurantToCollection } from '@/hooks/api';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMemo } from 'react';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 import { useSearchParams, useRouter } from 'next/navigation';
 
 interface RestaurantSearchPageProps {
