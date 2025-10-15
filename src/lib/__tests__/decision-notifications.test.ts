@@ -147,6 +147,9 @@ describe('Decision Notifications', () => {
     });
 
     it.skip('should send notifications to all group members except creator', async () => {
+      // SKIP REASON: Test setup has mocking issues with database collection routing
+      // Similar functionality is tested in sendDecisionCompletedNotifications tests which pass
+      // RECOMMENDATION: Refactor test setup to match working pattern in sendDecisionCompletedNotifications
       await sendDecisionStartedNotifications(
         groupId,
         collectionId,
@@ -195,6 +198,9 @@ describe('Decision Notifications', () => {
     });
 
     it.skip('should include shortened URL in notification data', async () => {
+      // SKIP REASON: Same mocking issue as previous test
+      // URL shortening is tested in sendDecisionCompletedNotifications (line 408-429) which passes
+      // RECOMMENDATION: Refactor to use working test pattern
       await sendDecisionStartedNotifications(
         groupId,
         collectionId,
@@ -258,6 +264,9 @@ describe('Decision Notifications', () => {
     });
 
     it.skip('should handle random decision type', async () => {
+      // SKIP REASON: Same mocking issue as previous tests
+      // Random decision type is tested in sendDecisionCompletedNotifications (line 389-406) which passes
+      // RECOMMENDATION: Consolidate with working tests or fix mocking
       await sendDecisionStartedNotifications(
         groupId,
         collectionId,

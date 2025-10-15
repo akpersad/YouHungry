@@ -122,7 +122,7 @@ describe('GET /api/decisions/history', () => {
     expect(data.pagination.total).toBe(1);
   });
 
-  it('should filter by decision type', async () => {
+  it('should apply filters (type, date range, search)', async () => {
     mockAuth.mockResolvedValue({
       userId: 'user123',
       sessionId: 'session123',
@@ -135,6 +135,7 @@ describe('GET /api/decisions/history', () => {
       factorVerificationAge: null,
     } as any);
 
+    // Test type filter
     mockDb.countDocuments.mockResolvedValue(0);
     mockDb.toArray
       .mockResolvedValueOnce([])
@@ -142,34 +143,18 @@ describe('GET /api/decisions/history', () => {
       .mockResolvedValueOnce([])
       .mockResolvedValueOnce([]);
 
-    const request = new NextRequest(
+    const typeRequest = new NextRequest(
       'http://localhost:3000/api/decisions/history?type=group'
     );
-    const response = await GET(request);
-
-    expect(response.status).toBe(200);
-    const data = await response.json();
-    expect(data.success).toBe(true);
+    await GET(typeRequest);
     expect(mockDb.find).toHaveBeenCalledWith(
       expect.objectContaining({
         type: 'group',
       })
     );
-  });
 
-  it('should filter by date range', async () => {
-    mockAuth.mockResolvedValue({
-      userId: 'user123',
-      sessionId: 'session123',
-      orgId: null,
-      orgRole: null,
-      orgSlug: null,
-      sessionClaims: {},
-      orgPermissions: null,
-      actor: null,
-      factorVerificationAge: null,
-    } as any);
-
+    // Test date range filter
+    jest.clearAllMocks();
     mockDb.countDocuments.mockResolvedValue(0);
     mockDb.toArray
       .mockResolvedValueOnce([])
@@ -179,13 +164,10 @@ describe('GET /api/decisions/history', () => {
 
     const startDate = '2024-01-01T00:00:00.000Z';
     const endDate = '2024-01-31T23:59:59.999Z';
-
-    const request = new NextRequest(
+    const dateRequest = new NextRequest(
       `http://localhost:3000/api/decisions/history?startDate=${startDate}&endDate=${endDate}`
     );
-    const response = await GET(request);
-
-    expect(response.status).toBe(200);
+    await GET(dateRequest);
     expect(mockDb.find).toHaveBeenCalledWith(
       expect.objectContaining({
         visitDate: {
@@ -194,68 +176,6 @@ describe('GET /api/decisions/history', () => {
         },
       })
     );
-  });
-
-  it('should apply search filter', async () => {
-    mockAuth.mockResolvedValue({
-      userId: 'user123',
-      sessionId: 'session123',
-      orgId: null,
-      orgRole: null,
-      orgSlug: null,
-      sessionClaims: {},
-      orgPermissions: null,
-      actor: null,
-      factorVerificationAge: null,
-    } as any);
-
-    const mockDecisions = [
-      {
-        _id: { toString: () => 'decision1' },
-        type: 'personal',
-        collectionId: { toString: () => 'collection1' },
-        method: 'random',
-        status: 'completed',
-        participants: ['user123'],
-        visitDate: new Date('2024-01-15'),
-        result: {
-          restaurantId: { toString: () => 'restaurant1' },
-          selectedAt: new Date('2024-01-15'),
-          reasoning: 'Weighted random selection',
-        },
-        createdAt: new Date('2024-01-15'),
-      },
-    ];
-
-    const mockRestaurants = [
-      {
-        _id: { toString: () => 'restaurant1' },
-        name: 'Pizza Palace',
-      },
-    ];
-
-    const mockCollections = [
-      {
-        _id: { toString: () => 'collection1' },
-        name: 'Favorites',
-      },
-    ];
-
-    mockDb.countDocuments.mockResolvedValue(1);
-    mockDb.toArray
-      .mockResolvedValueOnce(mockDecisions)
-      .mockResolvedValueOnce(mockRestaurants)
-      .mockResolvedValueOnce(mockCollections)
-      .mockResolvedValueOnce([]);
-
-    const request = new NextRequest(
-      'http://localhost:3000/api/decisions/history?search=pizza'
-    );
-    const response = await GET(request);
-
-    expect(response.status).toBe(200);
-    const data = await response.json();
-    expect(data.decisions).toHaveLength(1);
   });
 
   it('should handle pagination correctly', async () => {

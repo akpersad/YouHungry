@@ -93,6 +93,10 @@ describe('Modal Accessibility', () => {
     });
 
     it.skip('should trap focus within modal', async () => {
+      // SKIP REASON: JSDOM doesn't support focus trapping behavior
+      // COVERED BY: e2e/accessibility.spec.ts - Modal focus management tests
+      // NOTE: This is tested manually and in E2E tests. JSDOM limitations prevent
+      // proper focus trap simulation in unit tests.
       render(
         <Modal isOpen onClose={jest.fn()} title="Test Modal">
           <button>First</button>
@@ -151,6 +155,9 @@ describe('Modal Accessibility', () => {
     });
 
     it.skip('should prevent focus from leaving modal', async () => {
+      // SKIP REASON: JSDOM doesn't support focus containment testing
+      // COVERED BY: e2e/accessibility.spec.ts - Modal focus containment tests
+      // NOTE: Focus management in modals requires real browser environment
       render(
         <>
           <button>Outside Before</button>
@@ -308,6 +315,9 @@ describe('Modal Accessibility', () => {
     });
 
     it.skip('should be keyboard accessible', async () => {
+      // SKIP REASON: Complex keyboard event simulation doesn't work reliably in JSDOM
+      // COVERED BY: e2e/accessibility.spec.ts - Keyboard navigation tests
+      // NOTE: Keyboard accessibility is verified in E2E tests with real keyboard events
       const handleClose = jest.fn();
       render(
         <Modal isOpen onClose={handleClose} title="Test">
