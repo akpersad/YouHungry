@@ -4,6 +4,7 @@
  * POST /api/errors - Log client-side errors
  */
 
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { logError } from '@/lib/error-tracking';
@@ -50,7 +51,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true }, { status: 201 });
   } catch (error) {
-    console.error('Error logging error:', error);
+    logger.error('Error logging error:', error);
     return NextResponse.json({ error: 'Failed to log error' }, { status: 500 });
   }
 }
