@@ -1968,7 +1968,9 @@ export async function searchRestaurants(
 
 ## 👤 User Profile Management Implementation ✅ IMPLEMENTED
 
-Epic 7 Story 6 has implemented a comprehensive user profile management system with Vercel Blob integration:
+Epic 7 Story 6 has implemented a comprehensive user profile management system:
+
+**Note**: Profile pictures, names, and emails are managed through Clerk and synced to MongoDB via webhook. The app displays these values but users must update them through their Clerk account.
 
 ```typescript
 // hooks/useProfile.ts - Profile management hook
@@ -1998,76 +2000,11 @@ export function useProfile() {
     },
   });
 
-  const uploadPicture = useMutation({
-    mutationFn: async (file: File) => {
-      const formData = new FormData();
-      formData.append('file', file);
-
-      const response = await fetch('/api/user/profile/picture', {
-        method: 'POST',
-        body: formData,
-      });
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['profile'] });
-      ToastNotificationService.success('Profile picture updated!');
-    },
-  });
-
-  return { profile, isLoading, updateProfile, uploadPicture };
+  return { profile, isLoading, updateProfile };
 }
 
-// app/api/user/profile/picture/route.ts - Vercel Blob integration
-import { put, del } from '@vercel/blob';
-
-export async function POST(request: NextRequest) {
-  const formData = await request.formData();
-  const file = formData.get('file') as File;
-
-  // Validate file
-  if (!file) {
-    return NextResponse.json({ error: 'No file provided' }, { status: 400 });
-  }
-
-  const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
-  if (!validTypes.includes(file.type)) {
-    return NextResponse.json({ error: 'Invalid file type' }, { status: 400 });
-  }
-
-  if (file.size > 5 * 1024 * 1024) {
-    // 5MB
-    return NextResponse.json({ error: 'File too large' }, { status: 400 });
-  }
-
-  // Upload to Vercel Blob
-  const blob = await put(
-    `profile-pictures/${userId}-${Date.now()}.${ext}`,
-    file,
-    {
-      access: 'public',
-      contentType: file.type,
-    }
-  );
-
-  // Update user profile with blob URL
-  await updateUserProfilePicture(userId, blob.url);
-
-  return NextResponse.json({ url: blob.url });
-}
-
-export async function DELETE(request: NextRequest) {
-  const user = await requireAuth();
-  const { url } = await request.json();
-
-  // Delete from Vercel Blob
-  await del(url);
-
-  // Update user profile to remove picture
-  await updateUserProfilePicture(user._id.toString(), null);
-
-  return NextResponse.json({ success: true });
-}
+// Profile pictures are synced from Clerk via webhook
+// See: /api/webhooks/clerk/route.ts for webhook handling
 ```
 
 ## 🚀 Deployment Guidelines
@@ -2098,9 +2035,6 @@ TWILIO_MESSAGING_SERVICE_SID=MG...  # Optional
 # Resend Email (Epic 7)
 RESEND_API_KEY=re_...
 FROM_EMAIL=noreply@yourdomain.com
-
-# Vercel Blob (Epic 7)
-BLOB_READ_WRITE_TOKEN=vercel_blob_rw_...
 
 # Application
 NEXT_PUBLIC_APP_URL=http://localhost:3000

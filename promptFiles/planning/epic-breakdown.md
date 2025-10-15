@@ -446,7 +446,7 @@ Epic 6 Work Group B has been **100% completed**, implementing comprehensive syst
 
 6. **User Profile Management**
    - Create comprehensive user profile page with editable fields
-   - Implement profile picture upload and management using Vercel Blob
+   - Display profile picture from Clerk (managed through Clerk account)
    - Add phone number management (add/remove/verify) with Clerk integration
    - Build SMS opt-in/opt-out toggle with clear explanation
    - Create per-group notification preferences interface
