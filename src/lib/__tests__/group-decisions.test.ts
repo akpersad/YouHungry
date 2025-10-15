@@ -732,14 +732,13 @@ describe('Group Decision Functions', () => {
       );
 
       expect(result).toBeDefined();
-      expect(result.type).toBe('group');
-      expect(result.method).toBe('random');
-      expect(result.status).toBe('completed');
-      expect(result.result).toBeDefined();
-      expect(result.result?.restaurantId).toBeDefined();
+      expect(result.restaurantId).toBeDefined();
       expect([restaurant1.toString(), restaurant2.toString()]).toContain(
-        result.result?.restaurantId.toString()
+        result.restaurantId.toString()
       );
+      expect(result.selectedAt).toBeDefined();
+      expect(result.reasoning).toBeDefined();
+      expect(result.weights).toBeDefined();
       expect(mockCollection.insertOne).toHaveBeenCalled();
     });
 
