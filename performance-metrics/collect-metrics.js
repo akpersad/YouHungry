@@ -4,25 +4,30 @@
  * Performance Metrics Collection Script
  *
  * This script collects performance metrics from the application and saves them
- * to dated JSON files for historical analysis and comparison.
+ * to MongoDB for historical analysis and comparison.
  *
  * Usage:
- *   node collect-metrics.js [--env=production|development] [--output=path]
+ *   node collect-metrics.js [--env=production|development]
  *
  * Example:
- *   node collect-metrics.js --env=production --output=./performance-metrics/
+ *   node collect-metrics.js --env=production
  */
 
 const fs = require('fs');
 const path = require('path');
 const { execSync, spawn } = require('child_process');
+const { MongoClient } = require('mongodb');
+
+require('dotenv').config({ path: path.resolve(__dirname, '../.env.local') });
 
 // Configuration
 const config = {
   env: process.env.NODE_ENV || 'development',
-  outputDir: './performance-metrics/daily-metrics',
   dateFormat: 'YYYY-MM-DD',
   maxHistoryDays: 30,
+  saveToMongoDB: true,
+  mongoUri: process.env.MONGODB_URI,
+  mongoDatabase: process.env.MONGODB_DATABASE,
   metrics: {
     bundleSize: true,
     buildTime: true,
@@ -39,8 +44,6 @@ function parseArgs() {
   args.forEach((arg) => {
     if (arg.startsWith('--env=')) {
       config.env = arg.split('=')[1];
-    } else if (arg.startsWith('--output=')) {
-      config.outputDir = arg.split('=')[1];
     }
   });
 }
@@ -50,10 +53,43 @@ function getCurrentDate() {
   return new Date().toISOString().split('T')[0];
 }
 
-// Ensure output directory exists
-function ensureOutputDir() {
-  if (!fs.existsSync(config.outputDir)) {
-    fs.mkdirSync(config.outputDir, { recursive: true });
+// Connect to MongoDB
+async function connectToMongoDB() {
+  if (!config.mongoUri || !config.mongoDatabase) {
+    throw new Error('MongoDB URI or database name not configured');
+  }
+
+  const client = new MongoClient(config.mongoUri);
+  await client.connect();
+  const db = client.db(config.mongoDatabase);
+  return { client, db };
+}
+
+// Save metrics to MongoDB
+async function saveMetricsToMongoDB(metrics) {
+  console.log('💾 Saving metrics to MongoDB...');
+
+  try {
+    const { client, db } = await connectToMongoDB();
+    const collection = db.collection('performanceMetrics');
+
+    const date = getCurrentDate();
+    const document = {
+      date,
+      ...metrics,
+      lastUpdated: new Date().toISOString(),
+      createdAt: new Date(),
+    };
+
+    // Upsert based on date (one entry per day)
+    await collection.updateOne({ date }, { $set: document }, { upsert: true });
+
+    await client.close();
+    console.log('✅ Metrics saved to MongoDB');
+    return true;
+  } catch (error) {
+    console.error('❌ Error saving metrics to MongoDB:', error.message);
+    return false;
   }
 }
 
@@ -244,36 +280,17 @@ async function collectAPIMetrics() {
   }
 }
 
-// Save metrics to dated file
-function saveMetrics(metrics) {
-  const date = getCurrentDate();
-  const filename = `metrics-${date}.json`;
-  const filepath = path.join(config.outputDir, filename);
-
-  // Load existing metrics if file exists
-  let existingMetrics = {};
-  if (fs.existsSync(filepath)) {
-    try {
-      existingMetrics = JSON.parse(fs.readFileSync(filepath, 'utf8'));
-    } catch (error) {
-      console.warn(
-        '⚠️ Could not parse existing metrics file, creating new one'
-      );
+// Save metrics (to MongoDB)
+async function saveMetrics(metrics) {
+  if (config.saveToMongoDB) {
+    const saved = await saveMetricsToMongoDB(metrics);
+    if (!saved) {
+      throw new Error('Failed to save metrics to MongoDB');
     }
+    return 'MongoDB';
   }
 
-  // Merge new metrics with existing ones
-  const updatedMetrics = {
-    ...existingMetrics,
-    ...metrics,
-    lastUpdated: new Date().toISOString(),
-  };
-
-  // Save to file
-  fs.writeFileSync(filepath, JSON.stringify(updatedMetrics, null, 2));
-  console.log(`✅ Metrics saved to ${filepath}`);
-
-  return filepath;
+  throw new Error('No storage method configured');
 }
 
 // Generate performance report
@@ -328,27 +345,29 @@ function generateReport(metrics) {
   return report;
 }
 
-// Clean up old metrics files
-function cleanupOldMetrics() {
-  console.log('🧹 Cleaning up old metrics files...');
+// Clean up old metrics from MongoDB
+async function cleanupOldMetrics() {
+  console.log('🧹 Cleaning up old metrics from MongoDB...');
 
   try {
-    const files = fs.readdirSync(config.outputDir);
-    const now = new Date();
-    const maxAge = config.maxHistoryDays * 24 * 60 * 60 * 1000; // Convert days to ms
+    const { client, db } = await connectToMongoDB();
+    const collection = db.collection('performanceMetrics');
 
-    files.forEach((file) => {
-      if (file.startsWith('metrics-') && file.endsWith('.json')) {
-        const filepath = path.join(config.outputDir, file);
-        const stats = fs.statSync(filepath);
-        const age = now.getTime() - stats.mtime.getTime();
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - config.maxHistoryDays);
+    const cutoffDateStr = cutoffDate.toISOString().split('T')[0];
 
-        if (age > maxAge) {
-          fs.unlinkSync(filepath);
-          console.log(`🗑️ Removed old metrics file: ${file}`);
-        }
-      }
+    const result = await collection.deleteMany({
+      date: { $lt: cutoffDateStr },
     });
+
+    await client.close();
+
+    if (result.deletedCount > 0) {
+      console.log(`🗑️ Removed ${result.deletedCount} old metrics records`);
+    } else {
+      console.log('✅ No old metrics to remove');
+    }
   } catch (error) {
     console.error('❌ Error cleaning up old metrics:', error.message);
   }
@@ -485,10 +504,9 @@ async function main() {
   console.log('🚀 Starting performance metrics collection...');
   console.log(`📅 Date: ${getCurrentDate()}`);
   console.log(`🌍 Environment: ${config.env}`);
-  console.log(`📁 Output directory: ${config.outputDir}`);
+  console.log(`💾 Storage: MongoDB`);
 
   parseArgs();
-  ensureOutputDir();
 
   const metrics = {};
   let serverProcess = null;
@@ -535,18 +553,18 @@ async function main() {
     }
 
     // Save metrics
-    const savedFile = saveMetrics(metrics);
+    const savedLocation = await saveMetrics(metrics);
 
     // Generate and display report
     const report = generateReport(metrics);
     console.log('\n📊 Performance Report:');
     console.log(JSON.stringify(report, null, 2));
 
-    // Clean up old files
-    cleanupOldMetrics();
+    // Clean up old metrics
+    await cleanupOldMetrics();
 
     console.log('\n✅ Performance metrics collection completed!');
-    console.log(`📄 Metrics saved to: ${savedFile}`);
+    console.log(`📄 Metrics saved to: ${savedLocation}`);
   } catch (error) {
     console.error('❌ Error during metrics collection:', error);
 
