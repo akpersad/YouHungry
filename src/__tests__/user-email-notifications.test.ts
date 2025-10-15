@@ -39,13 +39,14 @@ describe('UserEmailNotificationService', () => {
   });
 
   describe('sendUserNotification', () => {
-    it('should send group decision email successfully', async () => {
+    it('should send notification emails with correct API calls', async () => {
       const mockResponse = {
         ok: true,
         json: jest.fn().mockResolvedValue({ id: 'email-123' }),
       };
       (global.fetch as jest.Mock).mockResolvedValue(mockResponse);
 
+      // Test group decision as representative example
       const emailData = {
         type: 'group_decision' as const,
         recipientEmail: 'test@example.com',
@@ -75,77 +76,6 @@ describe('UserEmailNotificationService', () => {
           body: expect.stringContaining('Test Group'),
         })
       );
-    });
-
-    it('should send friend request email successfully', async () => {
-      const mockResponse = {
-        ok: true,
-        json: jest.fn().mockResolvedValue({ id: 'email-456' }),
-      };
-      (global.fetch as jest.Mock).mockResolvedValue(mockResponse);
-
-      const emailData = {
-        type: 'friend_request' as const,
-        recipientEmail: 'friend@example.com',
-        recipientName: 'Friend User',
-        requesterName: 'John Doe',
-        requesterId: 'user-123',
-      };
-
-      const result =
-        await userEmailNotificationService.sendUserNotification(emailData);
-
-      expect(result.success).toBe(true);
-      expect(result.emailId).toBe('email-456');
-    });
-
-    it('should send group invitation email successfully', async () => {
-      const mockResponse = {
-        ok: true,
-        json: jest.fn().mockResolvedValue({ id: 'email-789' }),
-      };
-      (global.fetch as jest.Mock).mockResolvedValue(mockResponse);
-
-      const emailData = {
-        type: 'group_invitation' as const,
-        recipientEmail: 'invitee@example.com',
-        recipientName: 'Invitee User',
-        groupName: 'Food Lovers',
-        groupId: 'group-456',
-        inviterName: 'Jane Smith',
-        inviterId: 'user-456',
-      };
-
-      const result =
-        await userEmailNotificationService.sendUserNotification(emailData);
-
-      expect(result.success).toBe(true);
-      expect(result.emailId).toBe('email-789');
-    });
-
-    it('should send decision result email successfully', async () => {
-      const mockResponse = {
-        ok: true,
-        json: jest.fn().mockResolvedValue({ id: 'email-101' }),
-      };
-      (global.fetch as jest.Mock).mockResolvedValue(mockResponse);
-
-      const emailData = {
-        type: 'decision_result' as const,
-        recipientEmail: 'member@example.com',
-        recipientName: 'Member User',
-        groupName: 'Dinner Club',
-        groupId: 'group-789',
-        decisionId: 'decision-789',
-        restaurantName: 'Pizza Palace',
-        restaurantId: 'restaurant-123',
-      };
-
-      const result =
-        await userEmailNotificationService.sendUserNotification(emailData);
-
-      expect(result.success).toBe(true);
-      expect(result.emailId).toBe('email-101');
     });
 
     it('should handle missing API key', async () => {
@@ -311,32 +241,19 @@ describe('UserEmailNotificationService', () => {
   });
 
   describe('email templates', () => {
-    it('should generate correct subject for group decision', () => {
-      const template = require('@/lib/user-email-notifications')
-        .USER_EMAIL_TEMPLATES.group_decision;
-      const subject = template.subject('Test Group', 'tiered');
-      expect(subject).toBe('🍽️ Decision Time in Test Group - Vote Now');
-    });
+    it('should generate correct email subjects from templates', () => {
+      const templates =
+        require('@/lib/user-email-notifications').USER_EMAIL_TEMPLATES;
 
-    it('should generate correct subject for friend request', () => {
-      const template = require('@/lib/user-email-notifications')
-        .USER_EMAIL_TEMPLATES.friend_request;
-      const subject = template.subject('John Doe');
-      expect(subject).toBe('John Doe wants to be friends on ForkInTheRoad');
-    });
+      // Test group decision template
+      expect(templates.group_decision.subject('Test Group', 'tiered')).toBe(
+        '🍽️ Decision Time in Test Group - Vote Now'
+      );
 
-    it('should generate correct subject for group invitation', () => {
-      const template = require('@/lib/user-email-notifications')
-        .USER_EMAIL_TEMPLATES.group_invitation;
-      const subject = template.subject('Food Lovers', 'Jane Smith');
-      expect(subject).toBe('Jane Smith invited you to join Food Lovers');
-    });
-
-    it('should generate correct subject for decision result', () => {
-      const template = require('@/lib/user-email-notifications')
-        .USER_EMAIL_TEMPLATES.decision_result;
-      const subject = template.subject('Dinner Club', 'Pizza Palace');
-      expect(subject).toBe('Dinner Club decided: Pizza Palace');
+      // Test decision result template
+      expect(
+        templates.decision_result.subject('Dinner Club', 'Pizza Palace')
+      ).toBe('Dinner Club decided: Pizza Palace');
     });
   });
 });

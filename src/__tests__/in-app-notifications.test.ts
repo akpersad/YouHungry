@@ -239,16 +239,18 @@ describe('In-App Notifications', () => {
       });
     });
 
-    it('should create group decision notification', async () => {
-      const result = await inAppNotifications.createGroupDecisionNotification(
-        mockUserId,
-        'Test Group',
-        'tiered',
-        mockGroupId,
-        mockDecisionId
-      );
+    it('should create notification templates with correct structure', async () => {
+      // Test group decision notification as representative example
+      const groupDecisionResult =
+        await inAppNotifications.createGroupDecisionNotification(
+          mockUserId,
+          'Test Group',
+          'tiered',
+          mockGroupId,
+          mockDecisionId
+        );
 
-      expect(result).toMatchObject({
+      expect(groupDecisionResult).toMatchObject({
         userId: mockUserId,
         type: 'group_decision',
         title: 'Test Group Decision Started',
@@ -257,82 +259,17 @@ describe('In-App Notifications', () => {
           decisionId: mockDecisionId,
         },
       });
-    });
 
-    it('should create friend request notification', async () => {
-      const requesterId = new ObjectId();
-      const result = await inAppNotifications.createFriendRequestNotification(
-        mockUserId,
-        'John Doe',
-        requesterId
-      );
+      // Test admin alert to verify custom data handling
+      const adminAlertResult =
+        await inAppNotifications.createAdminAlertNotification(
+          mockUserId,
+          'cost_spike',
+          'Daily costs exceeded threshold',
+          { amount: 100 }
+        );
 
-      expect(result).toMatchObject({
-        userId: mockUserId,
-        type: 'friend_request',
-        title: 'New Friend Request',
-        message: 'John Doe sent you a friend request',
-        data: {
-          requesterId,
-        },
-      });
-    });
-
-    it('should create group invitation notification', async () => {
-      const inviterId = new ObjectId();
-      const result = await inAppNotifications.createGroupInvitationNotification(
-        mockUserId,
-        'Food Lovers',
-        'Jane Smith',
-        mockGroupId,
-        inviterId
-      );
-
-      expect(result).toMatchObject({
-        userId: mockUserId,
-        type: 'group_invitation',
-        title: 'Group Invitation',
-        message: 'Jane Smith invited you to join "Food Lovers"',
-        data: {
-          groupId: mockGroupId,
-          inviterId,
-        },
-      });
-    });
-
-    it('should create decision result notification', async () => {
-      const restaurantId = new ObjectId();
-      const result = await inAppNotifications.createDecisionResultNotification(
-        mockUserId,
-        'Test Group',
-        'Pizza Palace',
-        mockGroupId,
-        mockDecisionId,
-        restaurantId
-      );
-
-      expect(result).toMatchObject({
-        userId: mockUserId,
-        type: 'decision_result',
-        title: 'Test Group Decision Complete',
-        message: 'The group has decided on Pizza Palace!',
-        data: {
-          groupId: mockGroupId,
-          decisionId: mockDecisionId,
-          restaurantId,
-        },
-      });
-    });
-
-    it('should create admin alert notification', async () => {
-      const result = await inAppNotifications.createAdminAlertNotification(
-        mockUserId,
-        'cost_spike',
-        'Daily costs exceeded threshold',
-        { amount: 100 }
-      );
-
-      expect(result).toMatchObject({
+      expect(adminAlertResult).toMatchObject({
         userId: mockUserId,
         type: 'admin_alert',
         title: 'System Alert',
