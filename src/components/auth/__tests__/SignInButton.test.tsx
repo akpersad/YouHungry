@@ -1,78 +1,111 @@
-import { render, screen } from '@testing-library/react';
-import { SignInButton } from '../SignInButton';
-
-// Mock the Clerk SignInButton
-jest.mock('@clerk/nextjs', () => ({
-  SignInButton: ({
-    children,
-    mode,
-  }: {
-    children: React.ReactNode;
-    mode: string;
-  }) => (
-    <div data-testid="clerk-signin-button" data-mode={mode}>
-      {children}
-    </div>
-  ),
-}));
+import { render, screen, fireEvent } from '@testing-library/react';
+import { useRouter } from 'next/navigation';
+import { SignInButton } from '@/components/auth/SignInButton';
 
 // Mock Next.js router
 jest.mock('next/navigation', () => ({
-  useRouter: () => ({
-    push: jest.fn(),
-    replace: jest.fn(),
-    back: jest.fn(),
-    forward: jest.fn(),
-    refresh: jest.fn(),
-    prefetch: jest.fn(),
-  }),
+  useRouter: jest.fn(),
 }));
 
-describe('SignInButton', () => {
+describe('SignInButton (Updated)', () => {
+  const mockPush = jest.fn();
+  const mockRouter = { push: mockPush };
+
+  beforeEach(() => {
+    (useRouter as jest.Mock).mockReturnValue(mockRouter);
+    mockPush.mockClear();
+  });
+
   it('renders with default text', () => {
     render(<SignInButton />);
 
     expect(screen.getByText('Sign In')).toBeInTheDocument();
-    expect(screen.getByTestId('clerk-signin-button')).toBeInTheDocument();
-    expect(screen.getByTestId('clerk-signin-button')).toHaveAttribute(
-      'data-mode',
-      'modal'
-    );
   });
 
   it('renders with custom children', () => {
-    render(<SignInButton>Custom Sign In</SignInButton>);
+    render(<SignInButton>Custom Sign In Text</SignInButton>);
 
-    expect(screen.getByText('Custom Sign In')).toBeInTheDocument();
+    expect(screen.getByText('Custom Sign In Text')).toBeInTheDocument();
+  });
+
+  it('applies default styling classes', () => {
+    render(<SignInButton />);
+
+    const button = screen.getByText('Sign In');
+    expect(button).toHaveClass('btn-base', 'btn-primary', 'btn-md');
+  });
+
+  it('applies custom variant styling', () => {
+    render(<SignInButton variant="outline" />);
+
+    const button = screen.getByText('Sign In');
+    expect(button).toHaveClass('btn-base', 'btn-outline', 'btn-md');
+  });
+
+  it('applies custom size styling', () => {
+    render(<SignInButton size="lg" />);
+
+    const button = screen.getByText('Sign In');
+    expect(button).toHaveClass('btn-base', 'btn-primary', 'btn-lg');
   });
 
   it('applies custom className', () => {
     render(<SignInButton className="custom-class" />);
 
-    // Check that the component renders without crashing
-    expect(screen.getByTestId('clerk-signin-button')).toBeInTheDocument();
-    expect(screen.getByText('Sign In')).toBeInTheDocument();
+    const button = screen.getByText('Sign In');
+    expect(button).toHaveClass(
+      'btn-base',
+      'btn-primary',
+      'btn-md',
+      'custom-class'
+    );
   });
 
-  it('applies different variants', () => {
-    const { rerender } = render(<SignInButton variant="primary" />);
-    expect(screen.getByTestId('clerk-signin-button')).toBeInTheDocument();
+  it('navigates to /sign-in when clicked', () => {
+    // Mock production environment
+    Object.defineProperty(window, 'location', {
+      value: { hostname: 'you-hungry.vercel.app' },
+      writable: true,
+    });
 
-    rerender(<SignInButton variant="secondary" />);
-    expect(screen.getByTestId('clerk-signin-button')).toBeInTheDocument();
+    render(<SignInButton />);
 
-    rerender(<SignInButton variant="outline" />);
-    expect(screen.getByTestId('clerk-signin-button')).toBeInTheDocument();
+    const button = screen.getByText('Sign In');
+    fireEvent.click(button);
+
+    expect(mockPush).toHaveBeenCalledWith('/sign-in');
   });
 
-  it('applies different sizes', () => {
-    const { rerender } = render(<SignInButton size="sm" />);
-    expect(screen.getByTestId('clerk-signin-button')).toBeInTheDocument();
+  it('handles all prop combinations correctly', () => {
+    // Mock production environment
+    Object.defineProperty(window, 'location', {
+      value: { hostname: 'you-hungry.vercel.app' },
+      writable: true,
+    });
 
-    rerender(<SignInButton size="md" />);
-    expect(screen.getByTestId('clerk-signin-button')).toBeInTheDocument();
+    render(
+      <SignInButton variant="secondary" size="sm" className="test-class">
+        Test Button
+      </SignInButton>
+    );
 
-    rerender(<SignInButton size="lg" />);
-    expect(screen.getByTestId('clerk-signin-button')).toBeInTheDocument();
+    const button = screen.getByText('Test Button');
+    expect(button).toHaveClass(
+      'btn-base',
+      'btn-secondary',
+      'btn-sm',
+      'test-class'
+    );
+
+    fireEvent.click(button);
+    expect(mockPush).toHaveBeenCalledWith('/sign-in');
+  });
+
+  it('is accessible with proper button role', () => {
+    render(<SignInButton />);
+
+    const button = screen.getByRole('button');
+    expect(button).toBeInTheDocument();
+    expect(button).toHaveTextContent('Sign In');
   });
 });
