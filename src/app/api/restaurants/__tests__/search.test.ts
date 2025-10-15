@@ -344,6 +344,8 @@ describe('GET /api/restaurants/search', () => {
 
   describe('Debug logging', () => {
     it('should log search details', async () => {
+      const { logger } = require('@/lib/logger');
+
       mockGeocodeAddressOptimized.mockResolvedValue({
         lat: 40.7128,
         lng: -74.006,
@@ -353,20 +355,18 @@ describe('GET /api/restaurants/search', () => {
       );
       mockSearchRestaurantsByAddress.mockResolvedValue([]);
 
-      const consoleSpy = jest.spyOn(console, 'log');
-
       const url =
         'http://localhost:3000/api/restaurants/search?location=New+York&q=pizza';
       const request = new NextRequest(url);
 
       await GET(request);
 
-      expect(consoleSpy).toHaveBeenCalledWith(
+      expect(logger.debug).toHaveBeenCalledWith(
         '\n=== RESTAURANT SEARCH DEBUG ==='
       );
-      expect(consoleSpy).toHaveBeenCalledWith('Search Address:', 'New York');
-      expect(consoleSpy).toHaveBeenCalledWith('Query:', 'pizza');
-      expect(consoleSpy).toHaveBeenCalledWith('Total Results:', 2);
+      expect(logger.debug).toHaveBeenCalledWith('Search Address:', 'New York');
+      expect(logger.debug).toHaveBeenCalledWith('Query:', 'pizza');
+      expect(logger.debug).toHaveBeenCalledWith('Total Results:', 2);
     });
   });
 });

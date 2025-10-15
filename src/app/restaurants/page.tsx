@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { RestaurantSearchPage } from '@/components/features/RestaurantSearchPage';
 import { Button } from '@/components/ui/Button';
@@ -34,7 +35,7 @@ export default function RestaurantsPage() {
         toast.error('Failed to clear cache');
       }
     } catch (error) {
-      console.error('Error clearing cache:', error);
+      logger.error('Error clearing cache:', error);
       toast.error('Error clearing cache');
     } finally {
       setIsRefreshing(false);

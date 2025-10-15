@@ -35,12 +35,14 @@ export function RestaurantCardCompact({
           >
             {restaurant.name}
           </h3>
-          <p
-            className="text-xs text-secondary break-words"
-            style={{ color: 'var(--text-secondary)' }}
-          >
-            {restaurant.address}
-          </p>
+          <div className="h-8">
+            <p
+              className="text-xs text-secondary line-clamp-2"
+              style={{ color: 'var(--text-secondary)' }}
+            >
+              {restaurant.address}
+            </p>
+          </div>
         </div>
 
         {/* Key Details */}
