@@ -97,6 +97,9 @@ describe('Button Accessibility', () => {
 
   describe('Focus Management', () => {
     it.skip('should have visible focus indicator', () => {
+      // SKIP REASON: JSDOM doesn't render CSS focus-visible states
+      // COVERED BY: e2e/accessibility.spec.ts - Visual focus indicator tests
+      // NOTE: Focus indicators require real browser rendering to verify
       render(<Button>Focus me</Button>);
       const button = screen.getByRole('button');
       button.focus();
@@ -107,6 +110,9 @@ describe('Button Accessibility', () => {
     });
 
     it.skip('should maintain focus order in document', () => {
+      // SKIP REASON: Tab key simulation doesn't work properly in JSDOM
+      // COVERED BY: e2e/accessibility.spec.ts - Tab order and focus management tests
+      // NOTE: Proper tab order testing requires real browser environment
       render(
         <>
           <Button>First</Button>
