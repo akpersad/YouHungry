@@ -124,8 +124,20 @@ describe('/api/decisions', () => {
   });
 
   describe('GET /api/decisions', () => {
-    it('should return decision history successfully', async () => {
+    it('should return decision history and validate required params', async () => {
       (auth as unknown as jest.Mock).mockResolvedValue({ userId: 'user123' });
+
+      // Test missing collectionId
+      const invalidRequest = new NextRequest(
+        'http://localhost:3000/api/decisions'
+      );
+      const invalidResponse = await GET(invalidRequest);
+      const invalidData = await invalidResponse.json();
+
+      expect(invalidResponse.status).toBe(400);
+      expect(invalidData.error).toBe('Collection ID is required');
+
+      // Test successful history retrieval
       (getDecisionHistory as jest.Mock).mockResolvedValue([
         {
           _id: 'decision123',
@@ -145,11 +157,10 @@ describe('/api/decisions', () => {
         },
       ]);
 
-      const request = new NextRequest(
+      const validRequest = new NextRequest(
         'http://localhost:3000/api/decisions?collectionId=collection123&limit=50'
       );
-
-      const response = await GET(request);
+      const response = await GET(validRequest);
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -168,18 +179,6 @@ describe('/api/decisions', () => {
         },
       });
       expect(getDecisionHistory).toHaveBeenCalledWith('collection123', 50);
-    });
-
-    it('should return 400 if collectionId missing', async () => {
-      (auth as unknown as jest.Mock).mockResolvedValue({ userId: 'user123' });
-
-      const request = new NextRequest('http://localhost:3000/api/decisions');
-
-      const response = await GET(request);
-      const data = await response.json();
-
-      expect(response.status).toBe(400);
-      expect(data.error).toBe('Collection ID is required');
     });
   });
 });
@@ -292,8 +291,20 @@ describe('/api/decisions/random-select', () => {
   });
 
   describe('GET /api/decisions/random-select', () => {
-    it('should return decision statistics successfully', async () => {
+    it('should return statistics and validate required params', async () => {
       (auth as unknown as jest.Mock).mockResolvedValue({ userId: 'user123' });
+
+      // Test missing collectionId
+      const invalidRequest = new NextRequest(
+        'http://localhost:3000/api/decisions/random-select'
+      );
+      const invalidResponse = await randomSelectGET(invalidRequest);
+      const invalidData = await invalidResponse.json();
+
+      expect(invalidResponse.status).toBe(400);
+      expect(invalidData.error).toBe('Collection ID is required');
+
+      // Test successful statistics retrieval
       (getDecisionStatistics as jest.Mock).mockResolvedValue({
         totalDecisions: 5,
         restaurantStats: [
@@ -314,11 +325,10 @@ describe('/api/decisions/random-select', () => {
         ],
       });
 
-      const request = new NextRequest(
+      const validRequest = new NextRequest(
         'http://localhost:3000/api/decisions/random-select?collectionId=collection123'
       );
-
-      const response = await randomSelectGET(request);
+      const response = await randomSelectGET(validRequest);
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -343,20 +353,6 @@ describe('/api/decisions/random-select', () => {
         ],
       });
       expect(getDecisionStatistics).toHaveBeenCalledWith('collection123');
-    });
-
-    it('should return 400 if collectionId missing', async () => {
-      (auth as unknown as jest.Mock).mockResolvedValue({ userId: 'user123' });
-
-      const request = new NextRequest(
-        'http://localhost:3000/api/decisions/random-select'
-      );
-
-      const response = await randomSelectGET(request);
-      const data = await response.json();
-
-      expect(response.status).toBe(400);
-      expect(data.error).toBe('Collection ID is required');
     });
   });
 });
