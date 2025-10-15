@@ -435,7 +435,7 @@ describe('AdminAlertsDashboard', () => {
     });
   });
 
-  it.skip('should show alert details modal', async () => {
+  it('should show alert details modal', async () => {
     // Clear any previous mocks
     (global.fetch as jest.Mock).mockClear();
 
@@ -473,7 +473,7 @@ describe('AdminAlertsDashboard', () => {
     });
   });
 
-  it.skip('should close alert details modal', async () => {
+  it('should close alert details modal', async () => {
     // Clear any previous mocks
     (global.fetch as jest.Mock).mockClear();
 
@@ -516,7 +516,7 @@ describe('AdminAlertsDashboard', () => {
     });
   });
 
-  it.skip('should handle empty alerts list', async () => {
+  it('should handle empty alerts list', async () => {
     // Clear any previous mocks
     (global.fetch as jest.Mock).mockClear();
 
@@ -549,7 +549,7 @@ describe('AdminAlertsDashboard', () => {
     });
   });
 
-  it.skip('should handle test email error', async () => {
+  it('should handle test email error', async () => {
     // Clear any previous mocks
     (global.fetch as jest.Mock).mockClear();
 

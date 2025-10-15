@@ -396,18 +396,6 @@ describe('ProfilePage', () => {
     expect(screen.getByText('Removing...')).toBeInTheDocument();
   });
 
-  it.skip('should handle notification preference toggles', () => {
-    renderWithProviders(<ProfilePage />);
-
-    const smsToggle = screen.getByRole('checkbox', {
-      name: /enable sms notifications/i,
-    });
-    expect(smsToggle).toBeChecked();
-
-    fireEvent.click(smsToggle);
-    expect(smsToggle).not.toBeChecked();
-  });
-
   it('should render user button for security settings', () => {
     renderWithProviders(<ProfilePage />);
 

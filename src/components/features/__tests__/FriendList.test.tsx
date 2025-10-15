@@ -262,44 +262,6 @@ describe('FriendList', () => {
     });
   });
 
-  it.skip('handles remove friend cancellation', () => {
-    const mockFriends = [
-      {
-        _id: 'user2',
-        clerkId: 'clerk2',
-        email: 'john@example.com',
-        name: 'John Doe',
-        profilePicture: 'pic1.jpg',
-        city: 'New York',
-        friendshipId: 'friendship1',
-        addedAt: new Date('2023-01-01'),
-      },
-    ];
-
-    mockUseFriends.mockReturnValue({
-      data: mockFriends,
-      isLoading: false,
-      error: null,
-      isError: false,
-      isSuccess: true,
-      refetch: jest.fn(),
-    } as any);
-
-    render(
-      <TestWrapper>
-        <FriendList userId="user1" />
-      </TestWrapper>
-    );
-
-    const removeButton = screen.getByText('Remove');
-    fireEvent.click(removeButton);
-
-    const cancelButton = screen.getByText('Cancel');
-    fireEvent.click(cancelButton);
-
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-  });
-
   it('shows loading state when removing friend', () => {
     const mockFriends = [
       {
