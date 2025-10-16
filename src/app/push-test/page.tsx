@@ -27,7 +27,7 @@ export default function PushTestPage() {
       const permission = await Notification.requestPermission();
 
       if (permission === 'granted') {
-        new Notification('ForkInTheRoad Test', {
+        new Notification('Fork In The Road Test', {
           body: 'This is a basic notification (no push/background support)',
           icon: '/icons/icon-192x192.svg',
           tag: 'test-notification',

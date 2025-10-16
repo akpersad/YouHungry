@@ -3,7 +3,7 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { PerformanceDashboard } from '@/components/admin/PerformanceDashboard';
 
 export const metadata = {
-  title: 'Performance Dashboard - ForkInTheRoad',
+  title: 'Performance Dashboard - Fork In The Road',
   description: 'Monitor application performance metrics and analytics',
   robots: {
     index: false, // Keep out of search engines

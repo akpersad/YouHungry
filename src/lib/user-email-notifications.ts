@@ -44,7 +44,7 @@ export const USER_EMAIL_TEMPLATES = {
     template: (data: UserEmailData) => `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; padding: 30px; margin-bottom: 20px; text-align: center;">
-          <h1 style="color: white; margin: 0 0 10px 0; font-size: 28px;">🍽️ ForkInTheRoad</h1>
+          <h1 style="color: white; margin: 0 0 10px 0; font-size: 28px;">🍽️ Fork In The Road</h1>
           <p style="color: #f0f0f0; margin: 0; font-size: 18px;">Time to decide where to eat!</p>
         </div>
         
@@ -84,7 +84,7 @@ export const USER_EMAIL_TEMPLATES = {
         </div>
         
         <div style="margin-top: 20px; padding: 15px; background: #f3f4f6; border-radius: 8px; font-size: 14px; color: #6b7280;">
-          <p style="margin: 0;">This notification was sent by ForkInTheRoad - Your group decision app.</p>
+          <p style="margin: 0;">This notification was sent by Fork In The Road - Your group decision app.</p>
           ${
             data.unsubscribeToken
               ? `
@@ -104,18 +104,18 @@ export const USER_EMAIL_TEMPLATES = {
 
   friend_request: {
     subject: (requesterName: string) =>
-      `${requesterName} wants to be friends on ForkInTheRoad`,
+      `${requesterName} wants to be friends on Fork In The Road`,
     template: (data: UserEmailData) => `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; padding: 30px; margin-bottom: 20px; text-align: center;">
-          <h1 style="color: white; margin: 0 0 10px 0; font-size: 28px;">🍽️ ForkInTheRoad</h1>
+          <h1 style="color: white; margin: 0 0 10px 0; font-size: 28px;">🍽️ Fork In The Road</h1>
           <p style="color: #f0f0f0; margin: 0; font-size: 18px;">New friend request!</p>
         </div>
         
         <div style="background: #f9fafb; border-radius: 8px; padding: 25px; margin-bottom: 20px;">
           <h2 style="margin-top: 0; color: #374151; font-size: 24px;">Friend Request</h2>
           <p style="color: #6b7280; font-size: 16px; line-height: 1.6;">
-            <strong>${data.requesterName}</strong> wants to be friends with you on ForkInTheRoad 
+            <strong>${data.requesterName}</strong> wants to be friends with you on Fork In The Road 
             Accept their request to start making food decisions together!
           </p>
           
@@ -128,7 +128,7 @@ export const USER_EMAIL_TEMPLATES = {
         </div>
         
         <div style="margin-top: 20px; padding: 15px; background: #f3f4f6; border-radius: 8px; font-size: 14px; color: #6b7280;">
-          <p style="margin: 0;">This notification was sent by ForkInTheRoad - Your group decision app.</p>
+          <p style="margin: 0;">This notification was sent by Fork In The Road - Your group decision app.</p>
           ${
             data.unsubscribeToken
               ? `
@@ -152,7 +152,7 @@ export const USER_EMAIL_TEMPLATES = {
     template: (data: UserEmailData) => `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; padding: 30px; margin-bottom: 20px; text-align: center;">
-          <h1 style="color: white; margin: 0 0 10px 0; font-size: 28px;">🍽️ ForkInTheRoad</h1>
+          <h1 style="color: white; margin: 0 0 10px 0; font-size: 28px;">🍽️ Fork In The Road</h1>
           <p style="color: #f0f0f0; margin: 0; font-size: 18px;">You're invited to a group!</p>
         </div>
         
@@ -160,7 +160,7 @@ export const USER_EMAIL_TEMPLATES = {
           <h2 style="margin-top: 0; color: #374151; font-size: 24px;">Group Invitation</h2>
           <p style="color: #6b7280; font-size: 16px; line-height: 1.6;">
             <strong>${data.inviterName}</strong> has invited you to join the group 
-            <strong>"${data.groupName}"</strong> on ForkInTheRoad. 
+            <strong>"${data.groupName}"</strong> on Fork In The Road. 
             Join to start making food decisions together!
           </p>
           
@@ -173,7 +173,7 @@ export const USER_EMAIL_TEMPLATES = {
         </div>
         
         <div style="margin-top: 20px; padding: 15px; background: #f3f4f6; border-radius: 8px; font-size: 14px; color: #6b7280;">
-          <p style="margin: 0;">This notification was sent by ForkInTheRoad - Your group decision app.</p>
+          <p style="margin: 0;">This notification was sent by Fork In The Road - Your group decision app.</p>
           ${
             data.unsubscribeToken
               ? `
@@ -197,7 +197,7 @@ export const USER_EMAIL_TEMPLATES = {
     template: (data: UserEmailData) => `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 8px; padding: 30px; margin-bottom: 20px; text-align: center;">
-          <h1 style="color: white; margin: 0 0 10px 0; font-size: 28px;">🍽️ ForkInTheRoad</h1>
+          <h1 style="color: white; margin: 0 0 10px 0; font-size: 28px;">🍽️ Fork In The Road</h1>
           <p style="color: #f0f0f0; margin: 0; font-size: 18px;">Decision made!</p>
         </div>
         
@@ -225,7 +225,7 @@ export const USER_EMAIL_TEMPLATES = {
         </div>
         
         <div style="margin-top: 20px; padding: 15px; background: #f3f4f6; border-radius: 8px; font-size: 14px; color: #6b7280;">
-          <p style="margin: 0;">This notification was sent by ForkInTheRoad - Your group decision app.</p>
+          <p style="margin: 0;">This notification was sent by Fork In The Road - Your group decision app.</p>
           ${
             data.unsubscribeToken
               ? `
@@ -330,7 +330,7 @@ export class UserEmailNotificationService {
           );
           break;
         default:
-          subject = 'ForkInTheRoad Notification';
+          subject = 'Fork In The Road Notification';
       }
 
       const emailData = {

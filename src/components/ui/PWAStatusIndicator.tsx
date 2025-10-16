@@ -180,7 +180,7 @@ export function PWAInstallPrompt({
 
         <div className="flex-1 min-w-0">
           <h3 className="text-sm font-medium text-primary">
-            Install ForkInTheRoad
+            Install Fork In The Road
           </h3>
           <p className="text-xs text-secondary mt-1">
             Install this app on your device for a better experience and offline
