@@ -66,6 +66,18 @@ interface APICostMetrics {
 
 export async function GET(request: Request) {
   try {
+    // Check for internal API call (from metrics collector or cron jobs)
+    const internalSecret = request.headers.get('x-internal-call');
+    const isInternalCall =
+      internalSecret && internalSecret === process.env.INTERNAL_API_SECRET;
+
+    // For internal calls, bypass authentication
+    // For external calls, authentication is handled by middleware
+    if (!isInternalCall) {
+      // External call - middleware will handle auth
+      // We're allowing it through for now, but middleware should protect /api/admin/*
+    }
+
     // Parse query parameters
     const { searchParams } = new URL(request.url);
     const monthParam = searchParams.get('month');

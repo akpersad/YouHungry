@@ -13,6 +13,7 @@ const isPublicRoute = createRouteMatcher([
   '/push-test',
   '/pwa-explorer',
   '/api/pwa-status',
+  '/api/cron(.*)', // Allow Vercel cron jobs (protected by CRON_SECRET)
 ]);
 
 export default clerkMiddleware((auth, req) => {
