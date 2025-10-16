@@ -13,7 +13,7 @@ Confirm these are complete before proceeding:
 - [ ] App deployed to Vercel successfully
 - [ ] Production domain configured and accessible
 - [ ] Pre-deployment environment variables already set
-- [ ] Live URL available (e.g., `https://your-app.vercel.app`)
+- [ ] Live URL available (e.g., `https://www.forkintheroad.app`)
 
 ---
 
@@ -25,7 +25,7 @@ Set these in your Vercel project dashboard under **Settings > Environment Variab
 
 ```bash
 # App Configuration (requires live URL)
-NEXT_PUBLIC_APP_URL=https://your-app.vercel.app
+NEXT_PUBLIC_APP_URL=https://www.forkintheroad.app
 
 # Clerk Production Keys (requires live URL for webhook)
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_live_...
@@ -57,7 +57,7 @@ NEXT_PUBLIC_GA_MEASUREMENT_ID=G-XXXXXXXXXX
 
 1. [ ] Navigate to **Webhooks** in left sidebar
 2. [ ] Click **"Add Endpoint"**
-3. [ ] Set endpoint URL: `https://your-app.vercel.app/api/webhooks/clerk`
+3. [ ] Set endpoint URL: `https://www.forkintheroad.app/api/webhooks/clerk`
 4. [ ] Subscribe to events:
    - [ ] `user.created`
    - [ ] `user.updated`
@@ -456,7 +456,7 @@ A2P (Application-to-Person) 10DLC (10-Digit Long Code) is required by US carrier
 
 1. [ ] Click **"Web"** to create web data stream
 2. [ ] **Stream Configuration**:
-   - [ ] Website URL: `https://your-app.vercel.app` (your production URL)
+   - [ ] Website URL: `https://www.forkintheroad.app` (your production URL)
    - [ ] Stream name: "You Hungry? Production"
 3. [ ] **Enhanced measurement**: Toggle **ON** (recommended)
    - [ ] Page views ✅
@@ -641,7 +641,7 @@ A2P (Application-to-Person) 10DLC (10-Digit Long Code) is required by US carrier
 4. [ ] **Test Manually** (optional)
 
    ```bash
-   curl -X GET "https://your-app.vercel.app/api/cron/performance-metrics" \
+   curl -X GET "https://www.forkintheroad.app/api/cron/performance-metrics" \
      -H "Authorization: Bearer YOUR_CRON_SECRET"
    ```
 
