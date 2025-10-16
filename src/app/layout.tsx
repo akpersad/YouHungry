@@ -10,6 +10,7 @@ import {
   PWAOfflineBanner,
 } from '@/components/ui/PWAStatusIndicator';
 import { ErrorBoundary } from '@/components/errors/ErrorBoundary';
+import { GoogleAnalytics } from '@/components/analytics/GoogleAnalytics';
 import { Toaster } from 'sonner';
 import Script from 'next/script';
 import './globals.css';
@@ -110,6 +111,7 @@ export default function RootLayout({
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
+          <GoogleAnalytics />
           <ErrorBoundary level="root">
             <ThemeProvider>
               <QueryProvider>
