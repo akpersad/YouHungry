@@ -29,7 +29,7 @@ Your app was generating **1.3k requests/hour** and you needed:
 
 **Automated Monitoring:**
 
-- **Cron job:** Runs every 6 hours (`0 */6 * * *`)
+- **Cron job:** Runs daily at midnight UTC (`0 0 * * *`)
 - **Checks:** Bandwidth, function execution, request volume
 - **Alerts:** Email/Slack notifications when approaching limits
 
@@ -72,11 +72,13 @@ The cron job is already configured in `vercel.json`:
   "crons": [
     {
       "path": "/api/cron/vercel-monitoring",
-      "schedule": "0 */6 * * *"
+      "schedule": "0 0 * * *"
     }
   ]
 }
 ```
+
+**Note:** For Vercel Hobby plan, cron jobs are limited to once per day. This runs at midnight UTC (8 PM EST / 5 PM PST).
 
 ### Step 3: Set Up Slack Alerts (Optional)
 
