@@ -1,6 +1,6 @@
 {
-  "name": "ForkInTheRoad - Restaurant Discovery",
-  "short_name": "ForkInTheRoad",
+  "name": "Fork In The Road - Restaurant Discovery",
+  "short_name": "Fork In The Road",
   "description": "Discover and decide on restaurants with friends",
   "start_url": "/",
   "display": "standalone",

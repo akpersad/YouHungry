@@ -1,4 +1,4 @@
-// Service Worker for ForkInTheRoad PWA
+// Service Worker for Fork In The Road PWA
 // Bump version to force cache invalidation
 const CACHE_NAME = 'forkintheroad-v3';
 const STATIC_CACHE_NAME = 'forkintheroad-static-v3';
@@ -147,7 +147,7 @@ self.addEventListener('fetch', (event) => {
                     <html>
                     <head>
                       <meta charset="UTF-8">
-                      <title>ForkInTheRoad - Offline</title>
+                      <title>Fork In The Road - Offline</title>
                       <meta name="viewport" content="width=device-width, initial-scale=1">
                       <style>
                         body { 
@@ -281,7 +281,7 @@ async function syncOfflineActions() {
 // IndexedDB helpers for offline actions
 async function getOfflineActions() {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open('ForkInTheRoadOfflineDB', 1);
+    const request = indexedDB.open('Fork In The RoadOfflineDB', 1);
 
     request.onsuccess = () => {
       const db = request.result;
@@ -306,7 +306,7 @@ async function getOfflineActions() {
 
 async function removeOfflineAction(id) {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open('ForkInTheRoadOfflineDB', 1);
+    const request = indexedDB.open('Fork In The RoadOfflineDB', 1);
 
     request.onsuccess = () => {
       const db = request.result;
@@ -331,7 +331,7 @@ async function removeOfflineAction(id) {
 
 async function updateOfflineAction(id, updates) {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open('ForkInTheRoadOfflineDB', 1);
+    const request = indexedDB.open('Fork In The RoadOfflineDB', 1);
 
     request.onsuccess = () => {
       const db = request.result;
@@ -395,7 +395,9 @@ self.addEventListener('push', (event) => {
     ],
   };
 
-  event.waitUntil(self.registration.showNotification('ForkInTheRoad', options));
+  event.waitUntil(
+    self.registration.showNotification('Fork In The Road', options)
+  );
 });
 
 // Notification click handling

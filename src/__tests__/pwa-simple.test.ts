@@ -9,8 +9,8 @@ describe('PWA Core Functionality', () => {
   describe('PWA Manifest', () => {
     it('should have correct manifest structure', () => {
       const manifest = {
-        name: 'ForkInTheRoad - Restaurant Discovery',
-        short_name: 'ForkInTheRoad',
+        name: 'Fork In The Road - Restaurant Discovery',
+        short_name: 'Fork In The Road',
         description: 'Discover and decide on restaurants with friends',
         start_url: '/',
         display: 'standalone',
@@ -23,8 +23,8 @@ describe('PWA Core Functionality', () => {
         scope: '/',
       };
 
-      expect(manifest.name).toBe('ForkInTheRoad - Restaurant Discovery');
-      expect(manifest.short_name).toBe('ForkInTheRoad');
+      expect(manifest.name).toBe('Fork In The Road - Restaurant Discovery');
+      expect(manifest.short_name).toBe('Fork In The Road');
       expect(manifest.display).toBe('standalone');
       expect(manifest.theme_color).toBe('#ff6b6b');
       expect(manifest.orientation).toBe('portrait-primary');
