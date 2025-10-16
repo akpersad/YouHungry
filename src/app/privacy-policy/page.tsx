@@ -45,16 +45,16 @@ export default function PrivacyPolicyPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-secondary">
-                Welcome to ForkInTheRoad! This application is a personal project
-                created and maintained by Andrew Persad. This Privacy Policy &
-                Terms of Service describes how we collect, use, and protect your
-                information when you use our restaurant discovery and group
-                decision platform.
+                Welcome to Fork In The Road! This application is a personal
+                project created and maintained by Andrew Persad. This Privacy
+                Policy & Terms of Service describes how we collect, use, and
+                protect your information when you use our restaurant discovery
+                and group decision platform.
               </p>
               <p className="text-secondary">
-                By creating an account and using ForkInTheRoad, you agree to the
-                terms outlined in this policy. If you do not agree with these
-                terms, please do not use our service.
+                By creating an account and using Fork In The Road, you agree to
+                the terms outlined in this policy. If you do not agree with
+                these terms, please do not use our service.
               </p>
             </CardContent>
           </Card>
@@ -74,8 +74,8 @@ export default function PrivacyPolicyPage() {
                 </h3>
                 <p className="text-secondary">
                   When you opt-in to SMS notifications, you consent to receive
-                  transactional text messages from ForkInTheRoad. These messages
-                  are sent via Twilio and include:
+                  transactional text messages from Fork In The Road. These
+                  messages are sent via Twilio and include:
                 </p>
                 <ul className="list-disc list-inside ml-4 mt-2 space-y-1 text-secondary">
                   <li>
@@ -107,13 +107,12 @@ export default function PrivacyPolicyPage() {
                 </h3>
                 <p className="text-secondary">
                   Consent to receive SMS messages is{' '}
-                  <strong>not required</strong> to create an account or use
-                  ForkInTheRoad. You can opt-in during registration or at any
-                  time in your profile settings. To opt-out of SMS
-                  notifications, simply disable the SMS notifications toggle in
-                  your Profile Settings. We do not currently support replying
-                  STOP to opt-out, but you can always disable SMS in your
-                  settings.
+                  <strong>not required</strong> to create an account or use Fork
+                  In The Road. You can opt-in during registration or at any time
+                  in your profile settings. To opt-out of SMS notifications,
+                  simply disable the SMS notifications toggle in your Profile
+                  Settings. We do not currently support replying STOP to
+                  opt-out, but you can always disable SMS in your settings.
                 </p>
               </div>
 
@@ -343,8 +342,8 @@ export default function PrivacyPolicyPage() {
             </CardHeader>
             <CardContent>
               <p className="text-secondary">
-                ForkInTheRoad is not intended for use by children under the age
-                of 13. We do not knowingly collect personal information from
+                Fork In The Road is not intended for use by children under the
+                age of 13. We do not knowingly collect personal information from
                 children under 13. If we become aware that we have collected
                 information from a child under 13, we will take steps to delete
                 that information promptly. If you believe we have collected
@@ -367,8 +366,8 @@ export default function PrivacyPolicyPage() {
                 will update the &quot;Last Updated&quot; date at the top of this
                 page. For significant changes, we will notify you via email or
                 through a prominent notice in the application. Your continued
-                use of ForkInTheRoad after changes are posted constitutes your
-                acceptance of the updated policy.
+                use of Fork In The Road after changes are posted constitutes
+                your acceptance of the updated policy.
               </p>
             </CardContent>
           </Card>
