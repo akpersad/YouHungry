@@ -1,4 +1,4 @@
-# Completed Items - ForkInTheRoad App
+# Completed Items - Fork In The Road App
 
 This document tracks all completed items, organized by completion date and category.
 

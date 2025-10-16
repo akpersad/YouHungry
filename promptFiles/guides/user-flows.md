@@ -75,7 +75,7 @@ Notes: ✅ COMPLETED - Fully custom registration form with Clerk client-side SDK
 1. **Landing Page** → User clicks "Sign In"
 2. **Custom Login Page** → User sees custom sign-in page at `/sign-in` with consistent branding
 3. **Registration Success Message** → If redirected with `?registered=true`, shows success banner
-4. **Page Header** → Displays "Welcome Back" and "Sign in to continue to ForkInTheRoad"
+4. **Page Header** → Displays "Welcome Back" and "Sign in to continue to Fork In The Road"
 5. **Back to Home Button** → User can navigate back to home page
 6. **Clerk Sign-in Component** → Clerk's `<SignIn />` component with custom styling:
    - Transparent background to match app theme

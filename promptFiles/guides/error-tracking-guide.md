@@ -2,7 +2,7 @@
 
 ## Overview
 
-The ForkInTheRoad app includes a comprehensive error tracking system designed to capture, analyze, and resolve errors during beta testing and production. This guide explains how to use the system effectively.
+The Fork In The Road app includes a comprehensive error tracking system designed to capture, analyze, and resolve errors during beta testing and production. This guide explains how to use the system effectively.
 
 ## For Developers
 

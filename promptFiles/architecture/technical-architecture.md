@@ -1,6 +1,6 @@
-# Technical Architecture - ForkInTheRoad App
+# Technical Architecture - Fork In The Road App
 
-This document outlines the technical architecture, technology stack, and implementation strategy for the ForkInTheRoad app.
+This document outlines the technical architecture, technology stack, and implementation strategy for the Fork In The Road app.
 
 ## 🏗️ Current Technology Stack (Implemented)
 
@@ -1084,7 +1084,7 @@ The following environment variables are configured and ready for use:
 
 ### App Manifest
 
-- **App Name**: "ForkInTheRoad"
+- **App Name**: "Fork In The Road"
 - **Icons**: Multiple sizes for different devices
 - **Theme Colors**: Match design system
 - **Display Mode**: Standalone for app-like experience

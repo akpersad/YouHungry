@@ -5,7 +5,7 @@
 
 ## Overview
 
-Implemented Twilio A2P 10DLC compliant SMS consent disclosures and created a comprehensive Privacy Policy & Terms of Service page for ForkInTheRoad.
+Implemented Twilio A2P 10DLC compliant SMS consent disclosures and created a comprehensive Privacy Policy & Terms of Service page for Fork In The Road.
 
 ## Changes Made
 
