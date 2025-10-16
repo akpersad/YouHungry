@@ -12,6 +12,9 @@ const mockRequireAuth = requireAuth as jest.MockedFunction<typeof requireAuth>;
 describe('/api/user/current', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+
+    // Mock environment variable for admin check
+    process.env.ADMIN_USER_IDS = '507f1f77bcf86cd799439011';
   });
 
   it('returns current user data successfully', async () => {
@@ -48,6 +51,7 @@ describe('/api/user/current', () => {
         name: 'Test User',
         profilePicture: 'https://example.com/avatar.jpg',
         city: 'New York',
+        isAdmin: true, // This user is in the admin list
       },
     });
   });

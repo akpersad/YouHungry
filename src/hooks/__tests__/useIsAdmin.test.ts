@@ -63,7 +63,8 @@ describe('useIsAdmin', () => {
       ok: true,
       json: async () => ({
         user: {
-          _id: '68d9b010a25dec569c34c111', // Admin ID
+          _id: '68d9b010a25dec569c34c111',
+          isAdmin: true, // Server determines admin status
         },
       }),
     });
@@ -93,7 +94,8 @@ describe('useIsAdmin', () => {
       ok: true,
       json: async () => ({
         user: {
-          _id: '507f1f77bcf86cd799439011', // Non-admin ID
+          _id: '507f1f77bcf86cd799439011',
+          isAdmin: false, // Server determines admin status
         },
       }),
     });
@@ -252,6 +254,7 @@ describe('useIsAdmin', () => {
       json: async () => ({
         user: {
           _id: '68d9b010a25dec569c34c111',
+          isAdmin: true, // Server determines admin status
         },
       }),
     });
