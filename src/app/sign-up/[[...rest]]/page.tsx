@@ -85,8 +85,15 @@ export default function SignUpPage() {
         {/* Additional Info */}
         <div className="text-center">
           <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
-            By creating an account, you agree to our Terms of Service and
-            Privacy Policy
+            By creating an account, you agree to our{' '}
+            <a
+              href="/privacy-policy"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline hover:opacity-80"
+            >
+              Privacy Policy & Terms
+            </a>
           </p>
         </div>
       </div>

@@ -974,23 +974,40 @@ export function CustomRegistrationForm() {
       </div>
 
       {/* SMS Opt-in Checkbox */}
-      <div className="flex items-start space-x-2">
-        <input
-          type="checkbox"
-          id="smsOptIn"
-          checked={formData.smsOptIn}
-          onChange={(e) => handleInputChange('smsOptIn', e.target.checked)}
-          disabled={isSubmitting}
-          className="mt-1"
-        />
-        <label
-          htmlFor="smsOptIn"
-          className="text-sm"
-          style={{ color: 'var(--color-text)' }}
+      <div className="space-y-2">
+        <div className="flex items-start space-x-2">
+          <input
+            type="checkbox"
+            id="smsOptIn"
+            checked={formData.smsOptIn}
+            onChange={(e) => handleInputChange('smsOptIn', e.target.checked)}
+            disabled={isSubmitting}
+            className="mt-1"
+          />
+          <label
+            htmlFor="smsOptIn"
+            className="text-sm"
+            style={{ color: 'var(--color-text)' }}
+          >
+            Enable SMS notifications for updates
+          </label>
+        </div>
+        <p
+          className="text-xs ml-6"
+          style={{ color: 'var(--color-text-muted)' }}
         >
-          Enable SMS notifications for group decisions, friend requests, and
-          invites. You can verify your phone number later in profile settings.
-        </label>
+          Receive texts about group decisions, friend requests & invites. Msg &
+          data rates may apply. Frequency varies by activity. Disable anytime in
+          settings.{' '}
+          <a
+            href="/privacy-policy"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-primary"
+          >
+            Privacy Policy & Terms
+          </a>
+        </p>
       </div>
 
       {/* Clerk CAPTCHA Widget - Required for bot protection */}

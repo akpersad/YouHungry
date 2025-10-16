@@ -898,10 +898,22 @@ export default function ProfilePage() {
                     />
                   </div>
                   <div className="flex items-center justify-between">
-                    <div>
+                    <div className="flex-1 mr-4">
                       <Label htmlFor="smsEnabled">SMS Notifications</Label>
                       <p className="text-sm text-tertiary">
                         Receive notifications via SMS
+                      </p>
+                      <p className="text-xs text-tertiary mt-1">
+                        By enabling, you consent to receive transactional
+                        messages. Msg & data rates may apply.{' '}
+                        <a
+                          href="/privacy-policy"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="underline hover:text-primary"
+                        >
+                          Privacy Policy & Terms
+                        </a>
                       </p>
                     </div>
                     <Switch
