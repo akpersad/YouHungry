@@ -167,8 +167,14 @@ export default function PrivacyPolicyPage() {
                     memberships, friend connections, preferences, and activity
                   </li>
                   <li>
-                    <strong>Usage Analytics:</strong> Anonymized user behavior
-                    data collected via Google Analytics
+                    <strong>Usage Analytics:</strong> Pseudonymized user
+                    behavior data collected via Google Analytics 4 (GA4) for
+                    understanding app usage patterns and improving user
+                    experience. We use cryptographically hashed user identifiers
+                    (SHA-256) to track user journeys while preserving privacy.
+                    This includes page views, feature interactions, search
+                    queries, decision-making patterns, and other in-app
+                    activities.
                   </li>
                   <li>
                     <strong>Error & Performance Data:</strong> Application
@@ -255,7 +261,66 @@ export default function PrivacyPolicyPage() {
                 </div>
 
                 <div>
-                  <h4 className="font-medium text-primary">Google Services</h4>
+                  <h4 className="font-medium text-primary">
+                    Google Analytics 4 (GA4)
+                  </h4>
+                  <p className="text-sm text-secondary mb-2">
+                    We use Google Analytics 4 to collect and analyze usage data
+                    to improve our application. GA4 collects information about
+                    how you interact with our app, including:
+                  </p>
+                  <ul className="list-disc list-inside ml-4 space-y-1 text-sm text-secondary">
+                    <li>
+                      Pages visited and features used (with timestamps and
+                      frequency)
+                    </li>
+                    <li>
+                      Search queries, filter selections, and restaurant
+                      interactions
+                    </li>
+                    <li>Collection and decision-making activities</li>
+                    <li>
+                      Social interactions (friend requests, group activities)
+                    </li>
+                    <li>Performance metrics and error occurrences</li>
+                  </ul>
+                  <p className="text-sm text-secondary mt-2">
+                    <strong>Privacy Protection:</strong> Your actual user ID is
+                    never sent to Google Analytics. Instead, we use a
+                    cryptographic hash (SHA-256) of your user ID, which allows
+                    us to track individual user journeys without exposing your
+                    identity. Additionally, we anonymize IP addresses and do not
+                    collect personally identifiable information (PII) through
+                    GA4.
+                  </p>
+                  <p className="text-sm text-secondary mt-2">
+                    <strong>Opting Out:</strong> You can opt out of Google
+                    Analytics tracking by installing the{' '}
+                    <a
+                      href="https://tools.google.com/dlpage/gaoptout"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary underline hover:opacity-80"
+                    >
+                      Google Analytics Opt-out Browser Add-on
+                    </a>
+                    . Learn more about how Google uses data in their{' '}
+                    <a
+                      href="https://policies.google.com/privacy"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary underline hover:opacity-80"
+                    >
+                      Privacy Policy
+                    </a>
+                    .
+                  </p>
+                </div>
+
+                <div>
+                  <h4 className="font-medium text-primary">
+                    Google Maps & Places API
+                  </h4>
                   <p className="text-sm text-secondary">
                     Google Analytics (anonymized usage analytics), Google Maps
                     API (location services), and Google Places API (restaurant
