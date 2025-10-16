@@ -3,18 +3,16 @@ import { requireAuth } from '@/lib/auth';
 import { smsNotifications } from '@/lib/sms-notifications';
 import { logger } from '@/lib/logger';
 
-// Admin user IDs that can send SMS
-const ADMIN_USER_IDS = [
-  'user_2rZQ8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8', // Andrew Persad
-  // Add more admin user IDs as needed
-];
+// Get admin user IDs from environment variable (MongoDB user IDs)
+const ADMIN_USER_IDS =
+  process.env.ADMIN_USER_IDS?.split(',').map((id) => id.trim()) || [];
 
 export async function POST(req: NextRequest) {
   try {
     const user = await requireAuth();
 
-    // Check if user is admin
-    if (!ADMIN_USER_IDS.includes(user.clerkId)) {
+    // Check if user is admin (using MongoDB user ID for consistency)
+    if (!ADMIN_USER_IDS.includes(user._id.toString())) {
       return NextResponse.json(
         { error: 'Admin access required' },
         { status: 403 }
@@ -101,8 +99,8 @@ export async function GET() {
   try {
     const user = await requireAuth();
 
-    // Check if user is admin
-    if (!ADMIN_USER_IDS.includes(user.clerkId)) {
+    // Check if user is admin (using MongoDB user ID for consistency)
+    if (!ADMIN_USER_IDS.includes(user._id.toString())) {
       return NextResponse.json(
         { error: 'Admin access required' },
         { status: 403 }

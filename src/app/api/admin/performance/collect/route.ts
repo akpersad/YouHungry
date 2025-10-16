@@ -13,8 +13,9 @@ import { getUserByClerkId } from '@/lib/users';
 import { collectAllMetrics } from '@/lib/metrics-collector';
 import { logger } from '@/lib/logger';
 
-// List of authorized admin MongoDB user IDs
-const ADMIN_USER_IDS = ['68d9b010a25dec569c34c111', '68d9ae3528a9bab6c334d9f9'];
+// Get admin user IDs from environment variable (MongoDB user IDs)
+const ADMIN_USER_IDS =
+  process.env.ADMIN_USER_IDS?.split(',').map((id) => id.trim()) || [];
 
 // Allow up to 5 minutes for metrics collection
 export const maxDuration = 300;

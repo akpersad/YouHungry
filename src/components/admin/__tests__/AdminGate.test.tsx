@@ -31,6 +31,7 @@ global.fetch = jest.fn();
 describe('AdminGate', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+
     mockUseRouter.mockReturnValue({
       push: mockPush,
       back: jest.fn(),
@@ -94,7 +95,7 @@ describe('AdminGate', () => {
     (global.fetch as jest.Mock).mockResolvedValueOnce({
       ok: true,
       json: async () => ({
-        user: { _id: 'unauthorized_user_id' },
+        user: { _id: 'unauthorized_user_id', isAdmin: false },
       }),
     });
 
@@ -130,7 +131,7 @@ describe('AdminGate', () => {
     (global.fetch as jest.Mock).mockResolvedValueOnce({
       ok: true,
       json: async () => ({
-        user: { _id: '68d9b010a25dec569c34c111' }, // Admin user ID from allowlist
+        user: { _id: '68d9b010a25dec569c34c111', isAdmin: true }, // Server determines admin status
       }),
     });
 
@@ -257,7 +258,7 @@ describe('AdminGate', () => {
     (global.fetch as jest.Mock).mockResolvedValueOnce({
       ok: true,
       json: async () => ({
-        user: { _id: '68d9ae3528a9bab6c334d9f9' }, // Second admin user ID from allowlist
+        user: { _id: '68d9ae3528a9bab6c334d9f9', isAdmin: true }, // Second admin user ID from allowlist
       }),
     });
 

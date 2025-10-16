@@ -29,6 +29,10 @@ const mockGetUserByClerkId = getUserByClerkId as jest.MockedFunction<
 describe('POST /api/admin/cache/clear-location', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+
+    // Mock environment variable for admin user IDs
+    process.env.ADMIN_USER_IDS =
+      '68d9b010a25dec569c34c111,68d9ae3528a9bab6c334d9f9';
   });
 
   it('should clear all location cache when no coordinates provided', async () => {

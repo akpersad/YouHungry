@@ -4,8 +4,10 @@ import { clearLocationCache } from '@/lib/google-places';
 import { auth } from '@clerk/nextjs/server';
 import { getUserByClerkId } from '@/lib/users';
 
-// List of authorized admin MongoDB user IDs
-const ADMIN_USER_IDS = ['68d9b010a25dec569c34c111', '68d9ae3528a9bab6c334d9f9'];
+// Get admin user IDs from environment variable (MongoDB user IDs)
+const getAdminUserIds = (): string[] => {
+  return process.env.ADMIN_USER_IDS?.split(',').map((id) => id.trim()) || [];
+};
 
 export async function POST(request: NextRequest) {
   try {
@@ -18,7 +20,8 @@ export async function POST(request: NextRequest) {
 
     // Check if user is admin by getting their MongoDB user ID
     const user = await getUserByClerkId(userId);
-    if (!user || !ADMIN_USER_IDS.includes(user._id.toString())) {
+    const adminUserIds = getAdminUserIds();
+    if (!user || !adminUserIds.includes(user._id.toString())) {
       return NextResponse.json(
         { error: 'Forbidden - Admin access required' },
         { status: 403 }

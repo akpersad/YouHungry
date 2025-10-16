@@ -15,8 +15,9 @@ import { ComparisonPeriod } from '@/types/performance-metrics';
 import { auth } from '@clerk/nextjs/server';
 import { getUserByClerkId } from '@/lib/users';
 
-// List of authorized admin MongoDB user IDs
-const ADMIN_USER_IDS = ['68d9b010a25dec569c34c111', '68d9ae3528a9bab6c334d9f9'];
+// Get admin user IDs from environment variable (MongoDB user IDs)
+const ADMIN_USER_IDS =
+  process.env.ADMIN_USER_IDS?.split(',').map((id) => id.trim()) || [];
 
 /**
  * GET - Compare performance metrics

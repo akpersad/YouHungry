@@ -5,8 +5,9 @@ import { getUserByClerkId } from '@/lib/users';
 import { apiCache } from '@/lib/api-cache';
 import { clearLocationCache } from '@/lib/google-places';
 
-// List of authorized admin MongoDB user IDs
-const ADMIN_USER_IDS = ['68d9b010a25dec569c34c111', '68d9ae3528a9bab6c334d9f9'];
+// Get admin user IDs from environment variable (MongoDB user IDs)
+const ADMIN_USER_IDS =
+  process.env.ADMIN_USER_IDS?.split(',').map((id) => id.trim()) || [];
 
 export async function POST(request: NextRequest) {
   try {

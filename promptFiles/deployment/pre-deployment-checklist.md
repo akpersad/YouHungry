@@ -209,7 +209,7 @@
   - [ ] Sign-out clears all data
 
 - [ ] **Admin panel security** (`/admin`)
-  - [ ] `ADMIN_USER_IDS` array configured in `AdminGate.tsx`
+  - [ ] `ADMIN_USER_IDS` environment variable configured in Vercel
   - [ ] Only authorized users can access admin panel
   - [ ] Admin endpoints protected
   - [ ] Test admin access restrictions
@@ -430,7 +430,7 @@ From the audit, verify these are resolved:
 
 ### Priority #4: Admin Panel Configuration
 
-- [ ] Add production user ID to `ADMIN_USER_IDS` in `AdminGate.tsx`
+- [ ] Add production user ID to `ADMIN_USER_IDS` environment variable in Vercel
 - [ ] Test admin panel access
 - [ ] Verify all admin features work
 

@@ -1,7 +1,6 @@
 import { useUser } from '@clerk/nextjs';
 import { useState, useEffect } from 'react';
 import { logger } from '@/lib/logger';
-import { ADMIN_USER_IDS } from '@/constants/admin';
 
 export function useIsAdmin() {
   const { user, isLoaded } = useUser();
@@ -25,9 +24,11 @@ export function useIsAdmin() {
         }
 
         const userData = await response.json();
-        const mongoUserId = userData.user?._id?.toString();
 
-        if (mongoUserId && ADMIN_USER_IDS.includes(mongoUserId)) {
+        // Server returns isAdmin status after checking env var server-side
+        const isAdminUser = userData.user?.isAdmin === true;
+
+        if (isAdminUser) {
           setIsAdmin(true);
           logger.debug(`Admin status confirmed for user: ${user.id}`);
         } else {

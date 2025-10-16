@@ -4,7 +4,6 @@ import { useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { logger } from '@/lib/logger';
-import { ADMIN_USER_IDS } from '@/constants/admin';
 
 interface AdminGateProps {
   children: React.ReactNode;
@@ -41,21 +40,18 @@ export function AdminGate({ children }: AdminGateProps) {
         const userData = await response.json();
         logger.debug('AdminGate: Raw user data:', userData);
 
-        const mongoUserId = userData.user?._id;
-        logger.debug('AdminGate: Extracted mongoUserId:', mongoUserId);
+        // Server returns isAdmin status after checking env var server-side
+        const isAdmin = userData.user?.isAdmin === true;
 
-        // Convert to string to ensure comparison works
-        const userIdString = mongoUserId?.toString();
-
-        if (userIdString && ADMIN_USER_IDS.includes(userIdString)) {
+        if (isAdmin) {
           setHasAccess(true);
           logger.info(
-            `Admin access granted to user: ${user.id} (MongoDB: ${mongoUserId})`
+            `Admin access granted to user: ${user.id} (MongoDB: ${userData.user?._id})`
           );
         } else {
           setHasAccess(false);
           logger.warn(
-            `Unauthorized admin access attempt by user: ${user.id} (MongoDB: ${mongoUserId})`
+            `Unauthorized admin access attempt by user: ${user.id} (MongoDB: ${userData.user?._id})`
           );
         }
       } catch (error) {
