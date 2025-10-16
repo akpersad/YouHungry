@@ -14,6 +14,16 @@ import { useUser } from '@clerk/nextjs';
 
 // Mock dependencies
 jest.mock('@/hooks/useProfile');
+jest.mock('next/navigation', () => ({
+  useRouter: jest.fn(() => ({
+    push: jest.fn(),
+    replace: jest.fn(),
+    refresh: jest.fn(),
+    back: jest.fn(),
+    forward: jest.fn(),
+    prefetch: jest.fn(),
+  })),
+}));
 jest.mock('@clerk/nextjs', () => ({
   useUser: jest.fn(),
   ClerkProvider: ({ children }: { children: React.ReactNode }) => (
@@ -200,7 +210,7 @@ describe('ProfilePage', () => {
     expect(screen.getByText('Try Again')).toBeInTheDocument();
   });
 
-  it('should show sign-in prompt when user is not authenticated', () => {
+  it('should show loading spinner when user is not authenticated (while redirecting)', () => {
     mockUseUser.mockReturnValue({
       user: null,
       isLoaded: true,
@@ -209,11 +219,10 @@ describe('ProfilePage', () => {
 
     renderWithProviders(<ProfilePage />);
 
-    expect(screen.getByText('Not Signed In')).toBeInTheDocument();
-    expect(
-      screen.getByText('Please sign in to view your profile.')
-    ).toBeInTheDocument();
-    expect(screen.getByText('Sign In')).toBeInTheDocument();
+    // When user is not authenticated, the component shows a loading spinner
+    // while it redirects to the sign-in page
+    const spinner = document.querySelector('.animate-spin');
+    expect(spinner).toBeInTheDocument();
   });
 
   it('should update form data when profile changes', () => {
