@@ -274,7 +274,7 @@ TWILIO_PHONE_NUMBER=+1...
 
 # Optional: Email Notifications (Resend)
 RESEND_API_KEY=re_...
-FROM_EMAIL=noreply@yourdomain.com
+FROM_EMAIL=noreply@forkintheroad.app
 ```
 
 4. **Set up MongoDB Collections**
