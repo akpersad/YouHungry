@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useUser, UserButton } from '@clerk/nextjs';
+import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -25,6 +26,7 @@ import {
 
 export default function ProfilePage() {
   const { user: clerkUser, isLoaded } = useUser();
+  const router = useRouter();
   const queryClient = useQueryClient();
   const { profile, isLoading, error, updateProfile, isUpdating } = useProfile();
 
@@ -329,6 +331,13 @@ export default function ProfilePage() {
     setPendingPhoneNumber(null);
   };
 
+  // Redirect to sign-in if not authenticated
+  useEffect(() => {
+    if (isLoaded && !clerkUser) {
+      router.push('/sign-in?redirect_url=' + encodeURIComponent('/profile'));
+    }
+  }, [isLoaded, clerkUser, router]);
+
   const handleSave = async () => {
     // Validate default location if it's provided
     if (formData.defaultLocation && !isDefaultLocationValid) {
@@ -397,17 +406,7 @@ export default function ProfilePage() {
   if (!clerkUser) {
     return (
       <div className="min-h-screen bg-primary flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-xl font-semibold text-primary mb-2">
-            Not Signed In
-          </h2>
-          <p className="text-secondary mb-4">
-            Please sign in to view your profile.
-          </p>
-          <Button onClick={() => (window.location.href = '/sign-in')}>
-            Sign In
-          </Button>
-        </div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     );
   }
