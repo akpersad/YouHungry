@@ -202,6 +202,7 @@ describe('useIsAdmin', () => {
       json: async () => ({
         user: {
           _id: '68d9ae3528a9bab6c334d9f9', // Second admin ID
+          isAdmin: true, // Server determines admin status
         },
       }),
     });

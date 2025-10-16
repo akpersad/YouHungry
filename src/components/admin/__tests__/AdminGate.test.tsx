@@ -258,7 +258,7 @@ describe('AdminGate', () => {
     (global.fetch as jest.Mock).mockResolvedValueOnce({
       ok: true,
       json: async () => ({
-        user: { _id: '68d9ae3528a9bab6c334d9f9' }, // Second admin user ID from allowlist
+        user: { _id: '68d9ae3528a9bab6c334d9f9', isAdmin: true }, // Second admin user ID from allowlist
       }),
     });
 
