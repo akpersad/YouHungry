@@ -5,7 +5,7 @@
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#ff6b6b",
+  "theme_color": "#e3005a",
   "orientation": "portrait-primary",
   "categories": ["food", "lifestyle", "social"],
   "lang": "en",

@@ -1,10 +1,26 @@
-<svg width="96" height="96" viewBox="0 0 96 96" xmlns="http://www.w3.org/2000/svg">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-label="Fork In The Road app icon">
   <defs>
-    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#ff6b6b;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#ff8e8e;stop-opacity:1" />
-    </linearGradient>
+    <mask id="fork-cutout-96">
+      <rect width="100%" height="100%" fill="white"/>
+      <g transform="translate(33.599999999999994, 20.16)">
+        <!-- Fork tines (negative space) -->
+        <rect x="0" y="0" width="4.032" height="18.240000000000002" rx="2.016" fill="black"/>
+        <rect x="7.007999999999999" y="0" width="4.032" height="18.240000000000002" rx="2.016" fill="black"/>
+        <rect x="14.015999999999998" y="0" width="4.032" height="18.240000000000002" rx="2.016" fill="black"/>
+        <rect x="21.024" y="0" width="4.032" height="18.240000000000002" rx="2.016" fill="black"/>
+        <!-- Fork handle (negative space) -->
+        <rect x="3.4559999999999995" y="20.16" width="17.951999999999998" height="4.032" rx="2.016" fill="black"/>
+      </g>
+    </mask>
   </defs>
-  <rect width="96" height="96" rx="19.200000000000003" fill="url(#bg)"/>
-  <text x="50%" y="50%" text-anchor="middle" dy="0.35em" fill="white" font-family="Arial, sans-serif" font-size="38.400000000000006" font-weight="bold">🍽️</text>
+  
+  <!-- Main map pin body -->
+  <path fill="#e3005a" mask="url(#fork-cutout-96)"
+        d="M48 7.968c-16.607999999999997 0-30.048000000000002 13.056000000000001-30.048000000000002 29.183999999999997 0 8.832 4.128 15.84 9.312000000000001 22.56 4.5120000000000005 6.048 9.792 11.712 14.687999999999999 18.816000000000003 2.496 3.5519999999999996 4.704000000000001 7.584 5.952 11.424 1.248-3.84 2.976-7.776 5.952-11.424 4.800000000000001-7.007999999999999 10.08-12.768 14.687999999999999-18.816000000000003 5.184-6.911999999999999 9.312000000000001-13.823999999999998 9.312000000000001-22.56C78.048 19.104 64.608 7.968 48 7.968z"/>
+  
+  <!-- Diverging roads at the base -->
+  <path fill="#e3005a" stroke="none"
+        d="M30.048000000000002 76.03200000000001 Q45.024 69.984 62.016000000000005 76.03200000000001 Q45.024 72 30.048000000000002 76.03200000000001"/>
+  <path fill="#e3005a" stroke="none"
+        d="M30.048000000000002 86.016 Q45.024 79.96799999999999 62.016000000000005 86.016 Q45.024 81.984 30.048000000000002 86.016"/>
 </svg>

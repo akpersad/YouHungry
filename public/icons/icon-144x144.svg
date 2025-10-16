@@ -1,10 +1,26 @@
-<svg width="144" height="144" viewBox="0 0 144 144" xmlns="http://www.w3.org/2000/svg">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 144 144" role="img" aria-label="Fork In The Road app icon">
   <defs>
-    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#ff6b6b;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#ff8e8e;stop-opacity:1" />
-    </linearGradient>
+    <mask id="fork-cutout-144">
+      <rect width="100%" height="100%" fill="white"/>
+      <g transform="translate(50.4, 30.24)">
+        <!-- Fork tines (negative space) -->
+        <rect x="0" y="0" width="6.048" height="27.36" rx="3.024" fill="black"/>
+        <rect x="10.511999999999999" y="0" width="6.048" height="27.36" rx="3.024" fill="black"/>
+        <rect x="21.023999999999997" y="0" width="6.048" height="27.36" rx="3.024" fill="black"/>
+        <rect x="31.536" y="0" width="6.048" height="27.36" rx="3.024" fill="black"/>
+        <!-- Fork handle (negative space) -->
+        <rect x="5.183999999999999" y="30.24" width="26.928" height="6.048" rx="3.024" fill="black"/>
+      </g>
+    </mask>
   </defs>
-  <rect width="144" height="144" rx="28.8" fill="url(#bg)"/>
-  <text x="50%" y="50%" text-anchor="middle" dy="0.35em" fill="white" font-family="Arial, sans-serif" font-size="57.6" font-weight="bold">🍽️</text>
+  
+  <!-- Main map pin body -->
+  <path fill="#e3005a" mask="url(#fork-cutout-144)"
+        d="M72 11.952c-24.912 0-45.072 19.584000000000003-45.072 43.775999999999996 0 13.248 6.191999999999999 23.76 13.968 33.839999999999996 6.768 9.072 14.687999999999999 17.567999999999998 22.032 28.224 3.7439999999999998 5.327999999999999 7.056 11.376 8.928 17.136 1.8719999999999999-5.76 4.464-11.664 8.928-17.136 7.2-10.511999999999999 15.12-19.152 22.032-28.224 7.776-10.367999999999999 13.968-20.735999999999997 13.968-33.839999999999996C117.07199999999999 28.656000000000002 96.912 11.952 72 11.952z"/>
+  
+  <!-- Diverging roads at the base -->
+  <path fill="#e3005a" stroke="none"
+        d="M45.072 114.048 Q67.536 104.976 93.024 114.048 Q67.536 108 45.072 114.048"/>
+  <path fill="#e3005a" stroke="none"
+        d="M45.072 129.024 Q67.536 119.952 93.024 129.024 Q67.536 122.976 45.072 129.024"/>
 </svg>
