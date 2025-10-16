@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/Input';
 import { Collection } from '@/types/database';
 import { useCreateCollection } from '@/hooks/api';
 import { useMutation } from '@tanstack/react-query';
+import { trackCollectionCreate } from '@/lib/analytics';
 
 interface CreateCollectionFormProps {
   onSuccess: (collection: Collection) => void;
@@ -90,6 +91,12 @@ function CreateCollectionForm({
           userId: user.id,
         });
       }
+
+      // Track collection creation
+      trackCollectionCreate({
+        collectionType: groupId ? 'group' : 'personal',
+        collectionName: name.trim(),
+      });
 
       onSuccess(newCollection);
       setName('');
