@@ -15,7 +15,7 @@ test.describe('Registration - Custom Sign-Up Form', () => {
   test('Sign-up page displays all custom elements @smoke', async ({ page }) => {
     // Header
     await expect(
-      page.locator('h1:has-text("Join ForkInTheRoad")')
+      page.locator('h1:has-text("Join Fork In The Road")')
     ).toBeVisible();
     await expect(
       page.locator('text=Create your account to start discovering')
@@ -269,7 +269,7 @@ test.describe('Registration - Mobile View', () => {
 
     // All key elements should still be visible on mobile
     await expect(
-      page.locator('h1:has-text("Join ForkInTheRoad")')
+      page.locator('h1:has-text("Join Fork In The Road")')
     ).toBeVisible();
     await expect(page.locator("text=What you'll get")).toBeVisible();
     await expect(page.locator('text=📱 SMS Notifications')).toBeVisible();

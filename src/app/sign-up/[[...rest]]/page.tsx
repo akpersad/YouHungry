@@ -16,7 +16,7 @@ export default function SignUpPage() {
             className="text-3xl font-bold mb-2"
             style={{ color: 'var(--color-text)' }}
           >
-            Join ForkInTheRoad
+            Join Fork In The Road
           </h1>
           <p className="text-sm" style={{ color: 'var(--color-text-light)' }}>
             Create your account to start discovering amazing restaurants

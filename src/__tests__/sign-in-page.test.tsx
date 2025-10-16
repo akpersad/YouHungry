@@ -48,7 +48,7 @@ describe('SignInPage', () => {
 
     expect(screen.getByText('Welcome Back')).toBeInTheDocument();
     expect(
-      screen.getByText('Sign in to continue to ForkInTheRoad')
+      screen.getByText('Sign in to continue to Fork In The Road')
     ).toBeInTheDocument();
   });
 

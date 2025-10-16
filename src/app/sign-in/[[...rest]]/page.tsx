@@ -41,7 +41,7 @@ function SignInContent() {
             Welcome Back
           </h1>
           <p className="text-sm" style={{ color: 'var(--color-text-light)' }}>
-            Sign in to continue to ForkInTheRoad
+            Sign in to continue to Fork In The Road
           </p>
         </div>
 

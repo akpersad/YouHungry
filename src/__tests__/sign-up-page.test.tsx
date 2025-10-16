@@ -55,7 +55,7 @@ describe('SignUpPage', () => {
   it('renders the sign-up page with correct title and description', () => {
     render(<SignUpPage />);
 
-    expect(screen.getByText('Join ForkInTheRoad')).toBeInTheDocument();
+    expect(screen.getByText('Join Fork In The Road')).toBeInTheDocument();
     expect(
       screen.getByText(
         'Create your account to start discovering amazing restaurants'
@@ -114,10 +114,10 @@ describe('SignUpPage', () => {
     render(<SignUpPage />);
 
     expect(
-      screen.getByText(
-        /By creating an account, you agree to our Terms of Service and Privacy Policy/
-      )
+      screen.getByText(/By creating an account, you agree to our/)
     ).toBeInTheDocument();
+    const privacyLinks = screen.getAllByText(/Privacy Policy & Terms/);
+    expect(privacyLinks.length).toBeGreaterThan(0);
   });
 
   it('renders custom registration form with proper styling', () => {
