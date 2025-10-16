@@ -1,6 +1,6 @@
-# Technical Architecture - ForkInTheRoad App
+# Technical Architecture - Fork In The Road App
 
-This document outlines the technical architecture, technology stack, and implementation strategy for the ForkInTheRoad app.
+This document outlines the technical architecture, technology stack, and implementation strategy for the Fork In The Road app.
 
 ## 🏗️ Current Technology Stack (Implemented)
 
@@ -22,7 +22,7 @@ This document outlines the technical architecture, technology stack, and impleme
 - **API Layer**: REST architecture + GraphQL ✅
 - **Data Models**: Complete TypeScript interfaces ✅
 - **API Integration**: Google Places API ✅, Google Address Validation API ✅, Twilio (planned)
-- **File Storage**: Vercel Blob for user profile picture uploads ✅
+- **Profile Management**: Clerk manages user profiles (name, email, profile picture) synced via webhook ✅
 
 ### Development & Deployment
 
@@ -61,7 +61,6 @@ This document outlines the technical architecture, technology stack, and impleme
 ### Advanced Features
 
 - **PWA**: Service Workers, App Manifest, Offline capabilities
-- **File Storage**: Vercel Blob for user uploads
 - **Real-time**: GraphQL subscriptions for group decision making
 - **Error Monitoring**: Comprehensive error tracking with reporting
 
@@ -388,7 +387,7 @@ interface User {
   // ... existing fields
   smsOptIn: boolean;
   smsPhoneNumber?: string;
-  profilePicture?: string; // Vercel Blob URL
+  profilePicture?: string; // Synced from Clerk image_url via webhook
   preferences: {
     notificationSettings: {
       groupDecisions: {
@@ -681,9 +680,7 @@ type Decision {
 ##### Profile Management Routes (UPDATED ✅ IMPLEMENTED)
 
 - `GET /api/user/profile` - Get user profile information
-- `PUT /api/user/profile` - Update user profile information
-- `POST /api/user/profile/picture` - Upload profile picture using Vercel Blob
-- `DELETE /api/user/profile/picture` - Remove profile picture
+- `PUT /api/user/profile` - Update user profile information (name/email/picture managed by Clerk)
 
 **Key Authentication Updates Implemented**:
 
@@ -1038,7 +1035,6 @@ The following environment variables are configured and ready for use:
 - **TWILIO_ACCOUNT_SID**: Twilio account SID for SMS notifications
 - **TWILIO_AUTH_TOKEN**: Twilio authentication token
 - **TWILIO_PHONE_NUMBER**: Twilio phone number for SMS sending
-- **BLOB_READ_WRITE_TOKEN**: Vercel Blob token for profile picture uploads
 
 #### Application Configuration
 
@@ -1088,7 +1084,7 @@ The following environment variables are configured and ready for use:
 
 ### App Manifest
 
-- **App Name**: "ForkInTheRoad"
+- **App Name**: "Fork In The Road"
 - **Icons**: Multiple sizes for different devices
 - **Theme Colors**: Match design system
 - **Display Mode**: Standalone for app-like experience

@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -29,13 +30,13 @@ export function ManualDecisionForm({ onSuccess }: ManualDecisionFormProps) {
     queryKey: ['all-collections', profile?.clerkId],
     queryFn: async () => {
       if (!profile?.clerkId) return [];
-      console.log('ManualDecisionForm: Profile Clerk ID:', profile.clerkId);
+      logger.debug('ManualDecisionForm: Profile Clerk ID:', profile.clerkId);
       const response = await fetch(
         `/api/collections?userId=${profile.clerkId}&type=all`
       );
       if (!response.ok) throw new Error('Failed to fetch collections');
       const data = await response.json();
-      console.log('ManualDecisionForm: Collections API response:', data);
+      logger.debug('ManualDecisionForm: Collections API response:', data);
 
       // Handle different response formats
       let allCollections = [];
@@ -53,8 +54,8 @@ export function ManualDecisionForm({ onSuccess }: ManualDecisionFormProps) {
         allCollections = data;
       }
 
-      console.log('ManualDecisionForm: Combined collections:', allCollections);
-      console.log(
+      logger.debug('ManualDecisionForm: Combined collections:', allCollections);
+      logger.debug(
         'ManualDecisionForm: Full collection data:',
         JSON.stringify(allCollections, null, 2)
       );
@@ -67,7 +68,7 @@ export function ManualDecisionForm({ onSuccess }: ManualDecisionFormProps) {
   const { data: restaurantsData, isLoading: isLoadingRestaurants } = useQuery({
     queryKey: ['all-restaurants', type, groupId, collectionsData],
     queryFn: async () => {
-      console.log('ManualDecisionForm: Fetching restaurants...', {
+      logger.debug('ManualDecisionForm: Fetching restaurants...', {
         type,
         groupId,
         collectionsDataLength: collectionsData?.length,
@@ -77,7 +78,7 @@ export function ManualDecisionForm({ onSuccess }: ManualDecisionFormProps) {
       // For personal decisions, get all restaurants from personal collections
       // For group decisions, get all restaurants from the selected group's collections
       if (type === 'group' && !groupId) {
-        console.log('ManualDecisionForm: Group type but no groupId');
+        logger.debug('ManualDecisionForm: Group type but no groupId');
         return [];
       }
 
@@ -90,17 +91,17 @@ export function ManualDecisionForm({ onSuccess }: ManualDecisionFormProps) {
           return c.type === 'personal';
         }) || [];
 
-      console.log('ManualDecisionForm: Filtered collections:', collections);
+      logger.debug('ManualDecisionForm: Filtered collections:', collections);
 
       if (collections.length === 0) {
-        console.log('ManualDecisionForm: No collections found');
+        logger.debug('ManualDecisionForm: No collections found');
         return [];
       }
 
       // Get all restaurant IDs from these collections
       const allRestaurantIds = new Set<string>();
       collections.forEach((collection: Collection) => {
-        console.log('ManualDecisionForm: Processing collection:', {
+        logger.debug('ManualDecisionForm: Processing collection:', {
           name: collection.name,
           restaurantIds: collection.restaurantIds,
           restaurantIdsLength: collection.restaurantIds?.length,
@@ -115,13 +116,13 @@ export function ManualDecisionForm({ onSuccess }: ManualDecisionFormProps) {
         });
       });
 
-      console.log(
+      logger.debug(
         'ManualDecisionForm: All restaurant IDs:',
         Array.from(allRestaurantIds)
       );
 
       if (allRestaurantIds.size === 0) {
-        console.log('ManualDecisionForm: No restaurant IDs found');
+        logger.debug('ManualDecisionForm: No restaurant IDs found');
         return [];
       }
 
@@ -131,7 +132,7 @@ export function ManualDecisionForm({ onSuccess }: ManualDecisionFormProps) {
       );
 
       if (!response.ok) {
-        console.error(
+        logger.error(
           'ManualDecisionForm: Failed to fetch restaurants:',
           response.status
         );
@@ -139,7 +140,10 @@ export function ManualDecisionForm({ onSuccess }: ManualDecisionFormProps) {
       }
 
       const data = await response.json();
-      console.log('ManualDecisionForm: Fetched restaurants:', data.restaurants);
+      logger.debug(
+        'ManualDecisionForm: Fetched restaurants:',
+        data.restaurants
+      );
       const restaurants = data.restaurants || [];
       // Sort restaurants alphabetically by name (A-Z)
       return restaurants.sort((a: Restaurant, b: Restaurant) =>

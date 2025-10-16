@@ -180,14 +180,14 @@ export class SMSNotificationService {
     if (urlToUse) {
       message =
         decisionType === 'tiered'
-          ? `🍽️ ForkInTheRoad - ${groupName} has started a group decision! Vote by ${deadline.toLocaleDateString()} at ${deadline.toLocaleTimeString()}. ${urlToUse}`
-          : `🎲 ForkInTheRoad - ${groupName} has started a random selection! Decision at ${deadline.toLocaleDateString()} at ${deadline.toLocaleTimeString()}. ${urlToUse}`;
+          ? `🍽️ ${groupName} has started a group decision! Vote by ${deadline.toLocaleDateString()} at ${deadline.toLocaleTimeString()}. ${urlToUse}`
+          : `🎲 ${groupName} has started a random selection! Decision at ${deadline.toLocaleDateString()} at ${deadline.toLocaleTimeString()}. ${urlToUse}`;
     } else {
       // Fallback to original message without URL
       message =
         decisionType === 'tiered'
-          ? `🍽️ ForkInTheRoad - ${groupName} has started a group decision! Vote for your top 3 restaurants by ${deadline.toLocaleDateString()} at ${deadline.toLocaleTimeString()}.`
-          : `🎲 ForkInTheRoad - ${groupName} has started a random selection! The decision will be made at ${deadline.toLocaleDateString()} at ${deadline.toLocaleTimeString()}.`;
+          ? `🍽️ ${groupName} has started a group decision! Vote for your top 3 restaurants by ${deadline.toLocaleDateString()} at ${deadline.toLocaleTimeString()}.`
+          : `🎲 ${groupName} has started a random selection! The decision will be made at ${deadline.toLocaleDateString()} at ${deadline.toLocaleTimeString()}.`;
     }
 
     return this.sendSMS({
@@ -208,8 +208,8 @@ export class SMSNotificationService {
   ): Promise<SMSDeliveryStatus> {
     const typeText = decisionType === 'random' ? 'random choice' : 'group vote';
     const message = shortUrl
-      ? `🎉 ForkInTheRoad - ${groupName} decision complete! You're going to ${restaurantName} (${typeText})! ${shortUrl}`
-      : `🎉 ForkInTheRoad - ${groupName} decision complete! You're going to ${restaurantName} (${typeText})!`;
+      ? `🎉 ${groupName} decision complete! You're going to ${restaurantName} (${typeText})! ${shortUrl}`
+      : `🎉 ${groupName} decision complete! You're going to ${restaurantName} (${typeText})!`;
 
     return this.sendSMS({
       to: phoneNumber,
@@ -224,7 +224,7 @@ export class SMSNotificationService {
     phoneNumber: string,
     requesterName: string
   ): Promise<SMSDeliveryStatus> {
-    const message = `👋 ForkInTheRoad - ${requesterName} sent you a friend request! Check the app to accept.`;
+    const message = `👋 ${requesterName} sent you a friend request! Check the app to accept.`;
 
     return this.sendSMS({
       to: phoneNumber,
@@ -240,7 +240,7 @@ export class SMSNotificationService {
     groupName: string,
     inviterName: string
   ): Promise<SMSDeliveryStatus> {
-    const message = `👥 ForkInTheRoad - ${inviterName} invited you to join "${groupName}"! Check the app to accept.`;
+    const message = `👥 ${inviterName} invited you to join "${groupName}"! Check the app to accept.`;
 
     return this.sendSMS({
       to: phoneNumber,
@@ -257,9 +257,9 @@ export class SMSNotificationService {
     details: string
   ): Promise<SMSDeliveryStatus> {
     const alertMessages = {
-      cost_spike: '🚨 ForkInTheRoad - Cost spike detected!',
-      system_failure: '🚨 ForkInTheRoad - System failure detected!',
-      circuit_breaker: '⚠️ ForkInTheRoad - Circuit breaker activated!',
+      cost_spike: '🚨 Cost spike detected!',
+      system_failure: '🚨 System failure detected!',
+      circuit_breaker: '⚠️ Circuit breaker activated!',
     };
 
     const message = `${alertMessages[alertType]} ${details}`;
@@ -274,7 +274,7 @@ export class SMSNotificationService {
    * Send test SMS (for development)
    */
   public async sendTestSMS(phoneNumber: string): Promise<SMSDeliveryStatus> {
-    const message = `🧪 ForkInTheRoad - This is a test SMS from the notification system.`;
+    const message = `🧪 This is a test SMS from the notification system.`;
 
     return this.sendSMS({
       to: phoneNumber,

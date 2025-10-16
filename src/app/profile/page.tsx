@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useUser, UserButton } from '@clerk/nextjs';
+import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -20,26 +21,14 @@ import {
   MapPin,
   Bell,
   Shield,
-  Upload,
-  X,
   Check,
 } from 'lucide-react';
 
 export default function ProfilePage() {
   const { user: clerkUser, isLoaded } = useUser();
+  const router = useRouter();
   const queryClient = useQueryClient();
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const {
-    profile,
-    isLoading,
-    error,
-    updateProfile,
-    isUpdating,
-    uploadPicture,
-    isUploading,
-    removePicture,
-    isRemoving,
-  } = useProfile();
+  const { profile, isLoading, error, updateProfile, isUpdating } = useProfile();
 
   // Local state for form fields
   const [formData, setFormData] = useState({
@@ -176,14 +165,14 @@ export default function ProfilePage() {
     setFormData((prev) => ({ ...prev, [channel]: checked }));
   };
 
-  // Show notification when phone number is verified
+  // Show notification when phone number is verified (only during verification process)
   useEffect(() => {
-    if (formData.phoneNumber) {
+    if (phoneValidationStatus === 'verified' && formData.phoneNumber) {
       toast.success(
         'Phone verified! You can now toggle between SMS and Email notifications.'
       );
     }
-  }, [formData.phoneNumber]);
+  }, [phoneValidationStatus, formData.phoneNumber]);
 
   // Handle city/state selection from the combined input
   const handleCityStateChange = (city: string, state: string) => {
@@ -342,6 +331,13 @@ export default function ProfilePage() {
     setPendingPhoneNumber(null);
   };
 
+  // Redirect to sign-in if not authenticated
+  useEffect(() => {
+    if (isLoaded && !clerkUser) {
+      router.push('/sign-in?redirect_url=' + encodeURIComponent('/profile'));
+    }
+  }, [isLoaded, clerkUser, router]);
+
   const handleSave = async () => {
     // Validate default location if it's provided
     if (formData.defaultLocation && !isDefaultLocationValid) {
@@ -351,8 +347,7 @@ export default function ProfilePage() {
 
     try {
       await updateProfile({
-        name: formData.name,
-        username: formData.username,
+        // Note: name and username are managed by Clerk and not sent in update
         city: formData.city,
         state: formData.state,
         smsOptIn: formData.smsOptIn,
@@ -376,27 +371,6 @@ export default function ProfilePage() {
           },
         },
       });
-    } catch {
-      // Error handling is done in the hook
-    }
-  };
-
-  const handleFileUpload = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    try {
-      await uploadPicture(file);
-    } catch {
-      // Error handling is done in the hook
-    }
-  };
-
-  const handleRemovePicture = async () => {
-    try {
-      await removePicture();
     } catch {
       // Error handling is done in the hook
     }
@@ -432,17 +406,7 @@ export default function ProfilePage() {
   if (!clerkUser) {
     return (
       <div className="min-h-screen bg-primary flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-xl font-semibold text-primary mb-2">
-            Not Signed In
-          </h2>
-          <p className="text-secondary mb-4">
-            Please sign in to view your profile.
-          </p>
-          <Button onClick={() => (window.location.href = '/sign-in')}>
-            Sign In
-          </Button>
-        </div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     );
   }
@@ -470,62 +434,15 @@ export default function ProfilePage() {
               <div className="flex items-center space-x-4">
                 <UserAvatar
                   name={profile?.name || 'User'}
-                  profilePicture={profile?.profilePicture}
+                  profilePicture={
+                    clerkUser?.imageUrl || profile?.profilePicture
+                  }
                   size="lg"
                 />
                 <div className="flex-1">
-                  <div className="space-y-2">
-                    <div className="flex space-x-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => fileInputRef.current?.click()}
-                        disabled={isUploading}
-                      >
-                        {isUploading ? (
-                          <>
-                            <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                            Uploading...
-                          </>
-                        ) : (
-                          <>
-                            <Upload className="h-4 w-4 mr-2" />
-                            Upload Picture
-                          </>
-                        )}
-                      </Button>
-                      {profile?.profilePicture && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={handleRemovePicture}
-                          disabled={isRemoving}
-                        >
-                          {isRemoving ? (
-                            <>
-                              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                              Removing...
-                            </>
-                          ) : (
-                            <>
-                              <X className="h-4 w-4 mr-2" />
-                              Remove
-                            </>
-                          )}
-                        </Button>
-                      )}
-                    </div>
-                    <p className="text-sm text-secondary">
-                      Upload a JPEG, PNG, or WebP image (max 5MB)
-                    </p>
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept="image/jpeg,image/jpg,image/png,image/webp"
-                      onChange={handleFileUpload}
-                      className="hidden"
-                    />
-                  </div>
+                  <p className="text-sm text-tertiary">
+                    Profile picture is managed through your Clerk account.
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -540,12 +457,10 @@ export default function ProfilePage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="name">Full Name</Label>
-                  <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) => handleInputChange('name', e.target.value)}
-                    placeholder="Enter your full name"
-                  />
+                  <Input id="name" value={formData.name} disabled />
+                  <p className="text-sm text-tertiary mt-1">
+                    Name is managed through your Clerk account.
+                  </p>
                 </div>
                 <div>
                   <Label htmlFor="username">Username</Label>
@@ -982,10 +897,22 @@ export default function ProfilePage() {
                     />
                   </div>
                   <div className="flex items-center justify-between">
-                    <div>
+                    <div className="flex-1 mr-4">
                       <Label htmlFor="smsEnabled">SMS Notifications</Label>
                       <p className="text-sm text-tertiary">
                         Receive notifications via SMS
+                      </p>
+                      <p className="text-xs text-tertiary mt-1">
+                        By enabling, you consent to receive transactional
+                        messages. Msg & data rates may apply.{' '}
+                        <a
+                          href="/privacy-policy"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="underline hover:text-primary"
+                        >
+                          Privacy Policy & Terms
+                        </a>
                       </p>
                     </div>
                     <Switch

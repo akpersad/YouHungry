@@ -72,7 +72,7 @@ interface Decision {
 - **Email**:
   - Subject: "🍽️ Decision Time in {GroupName} - Vote Now"
   - Includes: Group name, collection name, creator name, deadline, direct link to collection page
-- **SMS**: "🍽️ ForkInTheRoad - {GroupName} has started a group decision! Vote by {deadline}. {shortUrl}"
+- **SMS**: "🍽️ Fork In The Road - {GroupName} has started a group decision! Vote by {deadline}. {shortUrl}"
 - **Push**: "X Group has started a decision"
 - **In-App**: Notification stored in database with decision details
 
@@ -89,7 +89,7 @@ interface Decision {
 - **Email**:
   - Subject: "🎉 {GroupName} decided: {RestaurantName}"
   - Includes: Group name, collection name, restaurant name, indication it was random choice
-- **SMS**: "🎉 ForkInTheRoad - {GroupName} decision complete! You're going to {RestaurantName} (random choice)! {shortUrl}"
+- **SMS**: "🎉 Fork In The Road - {GroupName} decision complete! You're going to {RestaurantName} (random choice)! {shortUrl}"
 - **Push**: "{GroupName} decided on {RestaurantName}"
 - **In-App**: Notification with decision result
 
@@ -106,7 +106,7 @@ interface Decision {
 - **Email**:
   - Subject: "{GroupName} decided: {RestaurantName}"
   - Includes: Group name, collection name, restaurant name, voting method indication
-- **SMS**: "🎉 ForkInTheRoad - {GroupName} decision complete! You're going to {RestaurantName} (group vote)! {shortUrl}"
+- **SMS**: "🎉 Fork In The Road - {GroupName} decision complete! You're going to {RestaurantName} (group vote)! {shortUrl}"
 - **Push**: "{GroupName} decided on {RestaurantName}"
 - **In-App**: Notification with decision result
 
@@ -211,13 +211,13 @@ Features:
 **Decision Started**:
 
 ```
-🍽️ ForkInTheRoad - {GroupName} has started a group decision! Vote by {date} at {time}. {shortUrl}
+🍽️ Fork In The Road - {GroupName} has started a group decision! Vote by {date} at {time}. {shortUrl}
 ```
 
 **Decision Completed**:
 
 ```
-🎉 ForkInTheRoad - {GroupName} decision complete! You're going to {RestaurantName} ({type})! {shortUrl}
+🎉 Fork In The Road - {GroupName} decision complete! You're going to {RestaurantName} ({type})! {shortUrl}
 ```
 
 ## Testing

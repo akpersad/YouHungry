@@ -14,6 +14,16 @@ import { useUser } from '@clerk/nextjs';
 
 // Mock dependencies
 jest.mock('@/hooks/useProfile');
+jest.mock('next/navigation', () => ({
+  useRouter: jest.fn(() => ({
+    push: jest.fn(),
+    replace: jest.fn(),
+    refresh: jest.fn(),
+    back: jest.fn(),
+    forward: jest.fn(),
+    prefetch: jest.fn(),
+  })),
+}));
 jest.mock('@clerk/nextjs', () => ({
   useUser: jest.fn(),
   ClerkProvider: ({ children }: { children: React.ReactNode }) => (
@@ -135,10 +145,6 @@ describe('ProfilePage', () => {
       error: null,
       updateProfile: jest.fn(),
       isUpdating: false,
-      uploadPicture: jest.fn(),
-      isUploading: false,
-      removePicture: jest.fn(),
-      isRemoving: false,
     });
   });
 
@@ -179,10 +185,6 @@ describe('ProfilePage', () => {
       error: null,
       updateProfile: jest.fn(),
       isUpdating: false,
-      uploadPicture: jest.fn(),
-      isUploading: false,
-      removePicture: jest.fn(),
-      isRemoving: false,
     });
 
     renderWithProviders(<ProfilePage />);
@@ -197,10 +199,6 @@ describe('ProfilePage', () => {
       error: new Error('Failed to load'),
       updateProfile: jest.fn(),
       isUpdating: false,
-      uploadPicture: jest.fn(),
-      isUploading: false,
-      removePicture: jest.fn(),
-      isRemoving: false,
     });
 
     renderWithProviders(<ProfilePage />);
@@ -212,7 +210,7 @@ describe('ProfilePage', () => {
     expect(screen.getByText('Try Again')).toBeInTheDocument();
   });
 
-  it('should show sign-in prompt when user is not authenticated', () => {
+  it('should show loading spinner when user is not authenticated (while redirecting)', () => {
     mockUseUser.mockReturnValue({
       user: null,
       isLoaded: true,
@@ -221,11 +219,10 @@ describe('ProfilePage', () => {
 
     renderWithProviders(<ProfilePage />);
 
-    expect(screen.getByText('Not Signed In')).toBeInTheDocument();
-    expect(
-      screen.getByText('Please sign in to view your profile.')
-    ).toBeInTheDocument();
-    expect(screen.getByText('Sign In')).toBeInTheDocument();
+    // When user is not authenticated, the component shows a loading spinner
+    // while it redirects to the sign-in page
+    const spinner = document.querySelector('.animate-spin');
+    expect(spinner).toBeInTheDocument();
   });
 
   it('should update form data when profile changes', () => {
@@ -241,10 +238,6 @@ describe('ProfilePage', () => {
       error: null,
       updateProfile: jest.fn(),
       isUpdating: false,
-      uploadPicture: jest.fn(),
-      isUploading: false,
-      removePicture: jest.fn(),
-      isRemoving: false,
     });
 
     // Re-render with the same providers to avoid QueryClient issues
@@ -263,13 +256,12 @@ describe('ProfilePage', () => {
     expect(screen.getByDisplayValue('Updated Name')).toBeInTheDocument();
   });
 
-  it('should handle form input changes', () => {
+  it('should have disabled name field since it is managed by Clerk', () => {
     renderWithProviders(<ProfilePage />);
 
     const nameInput = screen.getByDisplayValue('Test User');
-    fireEvent.change(nameInput, { target: { value: 'New Name' } });
-
-    expect(nameInput).toHaveValue('New Name');
+    // Name field should be disabled since it's managed by Clerk
+    expect(nameInput).toBeDisabled();
   });
 
   it('should handle save button click', async () => {
@@ -280,10 +272,6 @@ describe('ProfilePage', () => {
       error: null,
       updateProfile: mockUpdateProfile,
       isUpdating: false,
-      uploadPicture: jest.fn(),
-      isUploading: false,
-      removePicture: jest.fn(),
-      isRemoving: false,
     });
 
     renderWithProviders(<ProfilePage />);
@@ -299,8 +287,7 @@ describe('ProfilePage', () => {
 
     await waitFor(() => {
       expect(mockUpdateProfile).toHaveBeenCalledWith({
-        name: 'Test User',
-        username: 'testuser',
+        // Note: name and username are managed by Clerk and not sent in update
         city: 'Test City',
         state: 'Test State',
         smsOptIn: true,
@@ -327,73 +314,18 @@ describe('ProfilePage', () => {
     });
   });
 
-  it('should handle profile picture upload', async () => {
-    const mockUploadPicture = jest.fn().mockResolvedValue({});
-    mockUseProfile.mockReturnValue({
-      profile: mockProfile,
-      isLoading: false,
-      error: null,
-      updateProfile: jest.fn(),
-      isUpdating: false,
-      uploadPicture: mockUploadPicture,
-      isUploading: false,
-      removePicture: jest.fn(),
-      isRemoving: false,
-    });
-
-    renderWithProviders(<ProfilePage />);
-
-    const fileInput = screen.getByRole('button', { name: /upload picture/i });
-
-    // Simulate file selection
-    fireEvent.click(fileInput);
-
-    // This would normally trigger the file input change event
-    // In a real test, you'd need to mock the file input properly
-  });
-
-  it('should handle profile picture removal', async () => {
-    const mockRemovePicture = jest.fn().mockResolvedValue({});
-    mockUseProfile.mockReturnValue({
-      profile: mockProfile,
-      isLoading: false,
-      error: null,
-      updateProfile: jest.fn(),
-      isUpdating: false,
-      uploadPicture: jest.fn(),
-      isUploading: false,
-      removePicture: mockRemovePicture,
-      isRemoving: false,
-    });
-
-    renderWithProviders(<ProfilePage />);
-
-    const removeButton = screen.getByText('Remove');
-    fireEvent.click(removeButton);
-
-    await waitFor(() => {
-      expect(mockRemovePicture).toHaveBeenCalled();
-    });
-  });
-
-  it('should show loading states for buttons', () => {
+  it('should show loading state for save button', () => {
     mockUseProfile.mockReturnValue({
       profile: mockProfile,
       isLoading: false,
       error: null,
       updateProfile: jest.fn(),
       isUpdating: true,
-      uploadPicture: jest.fn(),
-      isUploading: true,
-      removePicture: jest.fn(),
-      isRemoving: true,
     });
 
     renderWithProviders(<ProfilePage />);
 
     expect(screen.getByText('Saving...')).toBeInTheDocument();
-    expect(screen.getByText('Uploading...')).toBeInTheDocument();
-    expect(screen.getByText('Removing...')).toBeInTheDocument();
   });
 
   it('should render user button for security settings', () => {

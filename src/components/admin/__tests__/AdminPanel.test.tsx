@@ -121,7 +121,7 @@ describe('AdminPanel', () => {
       screen.getByText('System administration and monitoring')
     ).toBeInTheDocument();
     expect(
-      screen.getByText('ForkInTheRoad Admin Dashboard')
+      screen.getByText('Fork In The Road Admin Dashboard')
     ).toBeInTheDocument();
   });
 

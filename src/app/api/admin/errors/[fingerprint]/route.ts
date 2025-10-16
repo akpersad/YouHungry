@@ -5,6 +5,7 @@
  * DELETE /api/admin/errors/[fingerprint] - Delete error group
  */
 
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { connectToDatabase } from '@/lib/db';
@@ -59,7 +60,7 @@ export async function PATCH(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error updating error group:', error);
+    logger.error('Error updating error group:', error);
     return NextResponse.json(
       { error: 'Failed to update error group' },
       { status: 500 }
@@ -88,7 +89,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error deleting error group:', error);
+    logger.error('Error deleting error group:', error);
     return NextResponse.json(
       { error: 'Failed to delete error group' },
       { status: 500 }

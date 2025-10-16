@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 /**
  * Report Issue Modal
  *
@@ -38,7 +39,7 @@ export function ReportIssueModal({ error, onClose }: ReportIssueModalProps) {
         onClose();
       }, 2000);
     } catch (err) {
-      console.error('Failed to submit report:', err);
+      logger.error('Failed to submit report:', err);
       alert('Failed to submit report. Please try again.');
     } finally {
       setIsSubmitting(false);

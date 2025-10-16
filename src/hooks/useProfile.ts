@@ -40,7 +40,7 @@ interface UserProfile {
 }
 
 export interface ProfileUpdateData {
-  name?: string;
+  // Note: name is managed by Clerk and should not be updated via this hook
   username?: string;
   city?: string;
   state?: string;
@@ -118,69 +118,7 @@ export function useProfile() {
     },
   });
 
-  // Upload profile picture mutation
-  const uploadPictureMutation = useMutation({
-    mutationFn: async (file: File) => {
-      const formData = new FormData();
-      formData.append('file', file);
-
-      const response = await fetch('/api/user/profile/picture', {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to upload picture');
-      }
-
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['user-profile'] });
-      toast({
-        title: 'Picture Updated',
-        description: 'Your profile picture has been updated successfully.',
-      });
-    },
-    onError: (error: Error) => {
-      toast({
-        title: 'Upload Failed',
-        description: error.message,
-        variant: 'destructive',
-      });
-    },
-  });
-
-  // Remove profile picture mutation
-  const removePictureMutation = useMutation({
-    mutationFn: async () => {
-      const response = await fetch('/api/user/profile/picture', {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to remove picture');
-      }
-
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['user-profile'] });
-      toast({
-        title: 'Picture Removed',
-        description: 'Your profile picture has been removed successfully.',
-      });
-    },
-    onError: (error: Error) => {
-      toast({
-        title: 'Remove Failed',
-        description: error.message,
-        variant: 'destructive',
-      });
-    },
-  });
+  // Note: Profile picture is managed by Clerk and synced via webhook
 
   return {
     profile: profileQuery.data,
@@ -188,9 +126,5 @@ export function useProfile() {
     error: profileQuery.error,
     updateProfile: updateProfileMutation.mutateAsync,
     isUpdating: updateProfileMutation.isPending,
-    uploadPicture: uploadPictureMutation.mutateAsync,
-    isUploading: uploadPictureMutation.isPending,
-    removePicture: removePictureMutation.mutateAsync,
-    isRemoving: removePictureMutation.isPending,
   };
 }

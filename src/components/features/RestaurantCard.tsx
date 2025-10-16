@@ -57,7 +57,7 @@ export function RestaurantCard({
         whileTap="tap"
         layout
       >
-        <Card className="p-0 overflow-hidden touch-target hover:shadow-medium transition-all duration-200">
+        <Card className="p-0 overflow-hidden touch-target hover:shadow-medium transition-all duration-200 h-full flex flex-col">
           {/* 1. PHOTO - Large, prominent image */}
           <div className="relative w-full h-48 overflow-hidden">
             <RestaurantImage
@@ -74,18 +74,18 @@ export function RestaurantCard({
             )}
           </div>
 
-          {/* Content */}
-          <div className="p-4 space-y-3">
+          {/* Content - Use flex to ensure consistent height */}
+          <div className="p-4 flex flex-col flex-1">
             {/* 2. NAME - Clear, readable restaurant name */}
             <h3
-              className="text-lg font-semibold text-primary leading-tight"
+              className="text-lg font-semibold text-primary leading-tight mb-3"
               style={{ color: 'var(--text-primary)' }}
             >
               {restaurant.name}
             </h3>
 
             {/* 3. PRICE/RATING - Quick reference info */}
-            <div className="flex items-center justify-between text-sm">
+            <div className="flex items-center justify-between text-sm mb-3">
               <div className="flex items-center gap-3">
                 <span className="flex items-center gap-1 text-accent font-medium">
                   ⭐ {formatRating(restaurant.rating)}
@@ -101,15 +101,17 @@ export function RestaurantCard({
               )}
             </div>
 
-            {/* 4. ADDRESS - Always show address */}
-            {restaurant.address && (
-              <div className="text-sm text-tertiary">
-                📍 {restaurant.address}
-              </div>
-            )}
+            {/* 4. ADDRESS - Fixed height to prevent variation */}
+            <div className="h-10 mb-3">
+              {restaurant.address && (
+                <div className="text-sm text-tertiary line-clamp-2">
+                  📍 {restaurant.address}
+                </div>
+              )}
+            </div>
 
-            {/* 5. TAGS - Cuisine and additional info */}
-            <div className="flex flex-wrap gap-2">
+            {/* 5. TAGS - Fixed height to prevent variation */}
+            <div className="h-8 mb-3 flex flex-wrap gap-2 overflow-hidden">
               <span className="inline-flex items-center px-2 py-1 rounded-lg bg-tertiary text-secondary text-xs font-medium">
                 {restaurant.cuisine}
               </span>
@@ -125,7 +127,8 @@ export function RestaurantCard({
               )}
             </div>
 
-            {/* Action Buttons - Touch optimized */}
+            {/* Action Buttons - Touch optimized, pushed to bottom */}
+            <div className="flex-grow"></div>
             {(showAddButton || showDetailsButton) && (
               <div className="flex gap-2 pt-2">
                 {showAddButton && onAddToCollection && (

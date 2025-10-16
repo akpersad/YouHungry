@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import { useState, useEffect, useCallback } from 'react';
 import {
   Users,
@@ -91,7 +92,7 @@ export function UserManagementDashboard() {
         setStats(data.data);
       }
     } catch (error) {
-      console.error('Error fetching user stats:', error);
+      logger.error('Error fetching user stats:', error);
     }
   };
 
@@ -116,7 +117,7 @@ export function UserManagementDashboard() {
           setCurrentPage(page);
         }
       } catch (error) {
-        console.error('Error searching users:', error);
+        logger.error('Error searching users:', error);
       } finally {
         setSearchLoading(false);
       }

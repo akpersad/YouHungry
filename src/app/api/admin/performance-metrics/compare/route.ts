@@ -5,6 +5,7 @@
  * GET /api/admin/performance-metrics/compare?date1=YYYY-MM-DD&date2=YYYY-MM-DD
  */
 
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import {
   comparePerformanceMetrics,
@@ -65,7 +66,7 @@ export async function GET(request: NextRequest) {
       { status: 400 }
     );
   } catch (error) {
-    console.error('Error comparing performance metrics:', error);
+    logger.error('Error comparing performance metrics:', error);
     return NextResponse.json(
       { error: 'Failed to compare performance metrics' },
       { status: 500 }

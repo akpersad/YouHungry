@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import { useState, useEffect, useCallback } from 'react';
 import {
   BarChart3,
@@ -94,7 +95,7 @@ export function UsageAnalyticsDashboard() {
           setAnalytics(data.data);
         }
       } catch (error) {
-        console.error('Error fetching usage analytics:', error);
+        logger.error('Error fetching usage analytics:', error);
       }
     },
     [selectedPeriod]

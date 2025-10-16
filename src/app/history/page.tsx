@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -173,7 +174,7 @@ export default function HistoryPage() {
       handleCloseDeleteConfirm();
     } catch (error) {
       // Error is handled by the mutation hook
-      console.error('Failed to delete decision:', error);
+      logger.error('Failed to delete decision:', error);
     }
   }, [decisionToDelete, deleteDecisionMutation, handleCloseDeleteConfirm]);
 

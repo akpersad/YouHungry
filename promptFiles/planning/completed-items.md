@@ -1,4 +1,4 @@
-# Completed Items - ForkInTheRoad App
+# Completed Items - Fork In The Road App
 
 This document tracks all completed items, organized by completion date and category.
 
@@ -1514,7 +1514,7 @@ Comprehensive UI/UX polish implementation focusing on accessibility, color contr
 
 - [x] **Profile Page Route** - Complete profile page at `/profile` with comprehensive user settings ✅ COMPLETED
   - [x] **Profile Page Component** - Full-featured profile management interface with form validation ✅ COMPLETED
-  - [x] **Profile Picture Upload** - Vercel Blob integration for profile picture management ✅ COMPLETED
+  - [x] **Profile Picture Display** - Profile pictures managed by Clerk and synced via webhook ✅ COMPLETED
   - [x] **Phone Number Management** - Clerk integration for phone number verification ✅ COMPLETED
   - [x] **SMS Preferences** - SMS opt-in/opt-out toggle with clear explanations ✅ COMPLETED
   - [x] **Notification Preferences** - Per-group notification settings interface ✅ COMPLETED
@@ -1524,10 +1524,9 @@ Comprehensive UI/UX polish implementation focusing on accessibility, color contr
 
 - [x] **API Endpoints** - Complete profile management API with proper validation ✅ COMPLETED
   - [x] **Profile API** - `/api/user/profile` endpoint for GET and PUT operations ✅ COMPLETED
-  - [x] **Profile Picture API** - `/api/user/profile/picture` endpoint for upload/delete ✅ COMPLETED
+  - [x] **Clerk Webhook** - Profile data (name, email, picture) synced from Clerk via webhook ✅ COMPLETED
   - [x] **Input Validation** - Comprehensive validation with Zod schemas ✅ COMPLETED
   - [x] **Error Handling** - Proper error responses and user feedback ✅ COMPLETED
-  - [x] **File Upload Validation** - File type, size, and format validation ✅ COMPLETED
 
 - [x] **React Hook Integration** - Custom useProfile hook with TanStack Query ✅ COMPLETED
   - [x] **useProfile Hook** - Complete profile management hook with mutations ✅ COMPLETED
@@ -1539,21 +1538,21 @@ Comprehensive UI/UX polish implementation focusing on accessibility, color contr
   - [x] **Label Component** - Form label component with accessibility ✅ COMPLETED
   - [x] **Switch Component** - Toggle switch component for preferences ✅ COMPLETED
   - [x] **Profile Form** - Comprehensive profile editing form ✅ COMPLETED
-  - [x] **Picture Upload** - Drag-and-drop profile picture upload ✅ COMPLETED
+  - [x] **Picture Display** - Profile picture display (managed by Clerk) ✅ COMPLETED
   - [x] **Preference Toggles** - Notification and SMS preference toggles ✅ COMPLETED
 
 - [x] **Comprehensive Testing** - Full test coverage for profile functionality ✅ COMPLETED
-  - [x] **Profile Page Tests** - 12 comprehensive test cases for profile page component ✅ COMPLETED
-  - [x] **Profile Hook Tests** - 6 comprehensive test cases for useProfile hook ✅ COMPLETED
-  - [x] **API Endpoint Tests** - Profile and picture upload API endpoint tests ✅ COMPLETED
+  - [x] **Profile Page Tests** - Comprehensive test cases for profile page component ✅ COMPLETED
+  - [x] **Profile Hook Tests** - Comprehensive test cases for useProfile hook ✅ COMPLETED
+  - [x] **API Endpoint Tests** - Profile API endpoint tests ✅ COMPLETED
   - [x] **Component Tests** - Label and Switch component tests ✅ COMPLETED
   - [x] **Integration Tests** - End-to-end profile management workflow testing ✅ COMPLETED
 
-- [x] **Vercel Blob Integration** - Complete file upload system ✅ COMPLETED
-  - [x] **Blob Configuration** - Vercel Blob setup with proper environment variables ✅ COMPLETED
-  - [x] **File Upload Service** - Profile picture upload with validation ✅ COMPLETED
-  - [x] **File Management** - Upload, delete, and URL management ✅ COMPLETED
-  - [x] **Error Handling** - File upload error handling and user feedback ✅ COMPLETED
+- [x] **Clerk Integration** - Profile data synced from Clerk ✅ COMPLETED
+  - [x] **Webhook Configuration** - Clerk webhook setup for user data sync ✅ COMPLETED
+  - [x] **Profile Picture Sync** - Profile pictures synced from Clerk image_url ✅ COMPLETED
+  - [x] **Name & Email Sync** - User name and email synced from Clerk ✅ COMPLETED
+  - [x] **Error Handling** - Webhook error handling and data validation ✅ COMPLETED
 
 - [x] **Documentation Updates** - Complete profile management documentation ✅ COMPLETED
   - [x] **Implementation Summary** - Updated epic7-implementation-summary.md with Story 6 ✅ COMPLETED

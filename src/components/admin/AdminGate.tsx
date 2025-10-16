@@ -28,21 +28,21 @@ export function AdminGate({ children }: AdminGateProps) {
     // Check if user has admin access by fetching their MongoDB user data
     const checkAdminAccess = async () => {
       setIsCheckingAccess(true);
-      console.log('AdminGate: Starting admin access check...');
+      logger.debug('AdminGate: Starting admin access check...');
       try {
-        console.log('AdminGate: Fetching /api/user/current...');
+        logger.debug('AdminGate: Fetching /api/user/current...');
         const response = await fetch('/api/user/current');
-        console.log('AdminGate: Response status:', response.status);
+        logger.debug('AdminGate: Response status:', response.status);
 
         if (!response.ok) {
           throw new Error(`Failed to fetch user data: ${response.status}`);
         }
 
         const userData = await response.json();
-        console.log('AdminGate: Raw user data:', userData);
+        logger.debug('AdminGate: Raw user data:', userData);
 
         const mongoUserId = userData.user?._id;
-        console.log('AdminGate: Extracted mongoUserId:', mongoUserId);
+        logger.debug('AdminGate: Extracted mongoUserId:', mongoUserId);
 
         // Convert to string to ensure comparison works
         const userIdString = mongoUserId?.toString();
@@ -59,7 +59,7 @@ export function AdminGate({ children }: AdminGateProps) {
           );
         }
       } catch (error) {
-        console.log('AdminGate: Error occurred:', error);
+        logger.debug('AdminGate: Error occurred:', error);
         logger.error('Error checking admin access:', error);
         setHasAccess(false);
       } finally {

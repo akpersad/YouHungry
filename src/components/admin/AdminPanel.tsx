@@ -108,7 +108,7 @@ export function AdminPanel() {
               </p>
             </div>
             <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-              ForkInTheRoad Admin Dashboard
+              Fork In The Road Admin Dashboard
             </div>
           </div>
         </div>

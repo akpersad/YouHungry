@@ -113,10 +113,10 @@ export async function GET(request: NextRequest) {
         }
       }
 
-      console.log('\n=== RESTAURANT SEARCH DEBUG ===');
-      console.log('Search Address:', location);
-      console.log('Query:', query || 'none');
-      console.log('Coordinates:', { lat: latitude, lng: longitude });
+      logger.debug('\n=== RESTAURANT SEARCH DEBUG ===');
+      logger.debug('Search Address:', location);
+      logger.debug('Query:', query || 'none');
+      logger.debug('Coordinates:', { lat: latitude, lng: longitude });
 
       logger.info('Searching for restaurants:', {
         hasQuery: !!query,
@@ -136,7 +136,7 @@ export async function GET(request: NextRequest) {
       // HYBRID SEARCH: Also try address-specific search if we have a specific address
       // This catches restaurants that exist but are filtered out by Google's ranking algorithm
       if (location && !coordinateMatch) {
-        console.log('Running address-specific search fallback...');
+        logger.debug('Running address-specific search fallback...');
         const addressResults = await searchRestaurantsByAddress(
           location,
           latitude,
@@ -160,26 +160,26 @@ export async function GET(request: NextRequest) {
             !allRestaurantsMap.has(restaurant.googlePlaceId)
           ) {
             allRestaurantsMap.set(restaurant.googlePlaceId, restaurant);
-            console.log(
+            logger.debug(
               `Added from address search: ${restaurant.name} at ${restaurant.address}`
             );
           }
         });
 
         restaurants = Array.from(allRestaurantsMap.values());
-        console.log(
+        logger.debug(
           `Combined results: ${restaurants.length} total (${restaurants.length - addressResults.length} from coordinate search, ${addressResults.length} from address search)`
         );
       }
 
-      console.log('Total Results:', restaurants.length);
-      console.log('Returned Restaurants:');
+      logger.debug('Total Results:', restaurants.length);
+      logger.debug('Returned Restaurants:');
       restaurants.forEach((restaurant, index) => {
-        console.log(
+        logger.debug(
           `  ${index + 1}. ${restaurant.name} - ${restaurant.address} (${restaurant.distance?.toFixed(2)} miles)`
         );
       });
-      console.log('=== END SEARCH DEBUG ===\n');
+      logger.debug('=== END SEARCH DEBUG ===\n');
 
       logger.info('Restaurant search results:', {
         count: restaurants.length,

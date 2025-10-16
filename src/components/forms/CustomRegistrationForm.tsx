@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -359,7 +360,7 @@ export function CustomRegistrationForm() {
           });
         } catch {
           // Don't fail registration if phone verification fails
-          console.warn('Phone verification failed to send');
+          logger.warn('Phone verification failed to send');
         }
       }
 
@@ -381,7 +382,7 @@ export function CustomRegistrationForm() {
         });
       }, 1000);
     } catch (err: unknown) {
-      console.error('Registration error:', err);
+      logger.error('Registration error:', err);
       // Handle Clerk errors
       if (
         err &&
@@ -436,11 +437,11 @@ export function CustomRegistrationForm() {
         router.push('/dashboard');
       } else {
         // If not complete, there may be additional steps required
-        console.error('Sign-up not complete:', completeSignUp.status);
+        logger.error('Sign-up not complete:', completeSignUp.status);
         setErrors({ general: 'Verification incomplete. Please try again.' });
       }
     } catch (err: unknown) {
-      console.error('Verification error:', err);
+      logger.error('Verification error:', err);
       // Handle Clerk errors
       if (
         err &&
@@ -496,7 +497,7 @@ export function CustomRegistrationForm() {
         });
       }, 1000);
     } catch (err: unknown) {
-      console.error('Resend error:', err);
+      logger.error('Resend error:', err);
       if (
         err &&
         typeof err === 'object' &&
@@ -973,23 +974,32 @@ export function CustomRegistrationForm() {
       </div>
 
       {/* SMS Opt-in Checkbox */}
-      <div className="flex items-start space-x-2">
-        <input
-          type="checkbox"
-          id="smsOptIn"
-          checked={formData.smsOptIn}
-          onChange={(e) => handleInputChange('smsOptIn', e.target.checked)}
-          disabled={isSubmitting}
-          className="mt-1"
-        />
-        <label
-          htmlFor="smsOptIn"
-          className="text-sm"
-          style={{ color: 'var(--color-text)' }}
+      <div className="space-y-2">
+        <div className="flex items-start space-x-2">
+          <input
+            type="checkbox"
+            id="smsOptIn"
+            checked={formData.smsOptIn}
+            onChange={(e) => handleInputChange('smsOptIn', e.target.checked)}
+            disabled={isSubmitting}
+            className="mt-1"
+          />
+          <label
+            htmlFor="smsOptIn"
+            className="text-sm"
+            style={{ color: 'var(--color-text)' }}
+          >
+            Enable SMS notifications for updates
+          </label>
+        </div>
+        <p
+          className="text-xs ml-6"
+          style={{ color: 'var(--color-text-muted)' }}
         >
-          Enable SMS notifications for group decisions, friend requests, and
-          invites. You can verify your phone number later in profile settings.
-        </label>
+          Receive texts about group decisions, friend requests & invites. Msg &
+          data rates may apply. Frequency varies by activity. Disable anytime in
+          settings.
+        </p>
       </div>
 
       {/* Clerk CAPTCHA Widget - Required for bot protection */}

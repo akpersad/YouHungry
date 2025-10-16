@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/db';
 import { requireAuth } from '@/lib/auth';
@@ -356,7 +357,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Error fetching usage analytics:', error);
+    logger.error('Error fetching usage analytics:', error);
     return NextResponse.json(
       { error: 'Failed to fetch usage analytics' },
       { status: 500 }

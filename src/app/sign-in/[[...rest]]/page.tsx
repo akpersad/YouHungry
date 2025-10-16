@@ -9,6 +9,8 @@ function SignInContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const registered = searchParams.get('registered');
+  // Get the redirect URL from query params (Clerk passes this automatically)
+  const redirectUrl = searchParams.get('redirect_url') || '/dashboard';
 
   return (
     <div className="min-h-screen flex items-center justify-center py-12 lg:px-8">
@@ -39,7 +41,7 @@ function SignInContent() {
             Welcome Back
           </h1>
           <p className="text-sm" style={{ color: 'var(--color-text-light)' }}>
-            Sign in to continue to ForkInTheRoad
+            Sign in to continue to Fork In The Road
           </p>
         </div>
 
@@ -85,6 +87,7 @@ function SignInContent() {
                 borderRadius: '0.5rem',
               },
             }}
+            forceRedirectUrl={redirectUrl}
             fallbackRedirectUrl="/dashboard"
             signUpUrl="/sign-up"
           />

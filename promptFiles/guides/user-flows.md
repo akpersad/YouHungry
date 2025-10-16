@@ -75,7 +75,7 @@ Notes: ✅ COMPLETED - Fully custom registration form with Clerk client-side SDK
 1. **Landing Page** → User clicks "Sign In"
 2. **Custom Login Page** → User sees custom sign-in page at `/sign-in` with consistent branding
 3. **Registration Success Message** → If redirected with `?registered=true`, shows success banner
-4. **Page Header** → Displays "Welcome Back" and "Sign in to continue to ForkInTheRoad"
+4. **Page Header** → Displays "Welcome Back" and "Sign in to continue to Fork In The Road"
 5. **Back to Home Button** → User can navigate back to home page
 6. **Clerk Sign-in Component** → Clerk's `<SignIn />` component with custom styling:
    - Transparent background to match app theme
@@ -291,7 +291,7 @@ Notes: Love it
 
 1. **Profile Page** → User navigates to `/profile` to view comprehensive profile settings
 2. **Profile Information** → User can update name, username, city, and state
-3. **Profile Picture Management** → User can upload, view, and remove profile pictures using Vercel Blob
+3. **Profile Picture Management** → User can view profile picture (managed through Clerk account)
 4. **Phone Number Management** → User can manage phone number with verification flow
 5. **SMS Preferences** → User can toggle SMS notifications with clear explanations
 6. **Notification Preferences** → User can configure per-group notification settings
@@ -302,7 +302,7 @@ Notes: Love it
 **Key Features Implemented**:
 
 - Complete profile page at `/profile` route with comprehensive user settings
-- Vercel Blob integration for secure profile picture uploads and management
+- Clerk integration for profile picture display (synced from Clerk account)
 - Phone number verification flow with Twilio SMS integration
 - SMS opt-in/opt-out toggle with clear explanations and benefits
 - Per-group notification preferences interface
@@ -312,7 +312,7 @@ Notes: Love it
 - Real-time updates with TanStack Query integration
 - Mobile-responsive design with accessibility features
 
-Notes: ✅ COMPLETED - Complete user profile management system with picture uploads, preferences, and settings
+Notes: ✅ COMPLETED - Complete user profile management system with Clerk-managed pictures, preferences, and settings
 
 ### 6.2 Phone Number Verification Flow (IMPLEMENTED ✅)
 

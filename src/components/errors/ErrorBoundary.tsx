@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 /**
  * Error Boundary Component
  *
@@ -43,7 +44,7 @@ export class ErrorBoundary extends Component<
       errorBoundaryLevel: this.props.level || 'component',
     });
 
-    console.error('Error caught by boundary:', error, errorInfo);
+    logger.error('Error caught by boundary:', error, errorInfo);
   }
 
   handleReset = () => {

@@ -26,7 +26,7 @@ export function Header({ children }: HeaderProps) {
           <div className="flex items-center space-x-8">
             <Link href="/dashboard">
               <h1 className="text-xl font-bold hover:opacity-80 transition-opacity text-accent">
-                ForkInTheRoad
+                Fork In The Road
               </h1>
             </Link>
             {isLoaded && isSignedIn && (

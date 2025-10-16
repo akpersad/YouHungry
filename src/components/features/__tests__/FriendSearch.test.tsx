@@ -124,7 +124,7 @@ describe('FriendSearch', () => {
         clerkId: 'clerk2',
         email: 'john@example.com',
         name: 'John Doe',
-        profilePicture: 'pic1.jpg',
+        profilePicture: 'https://example.com/pic1.jpg',
         city: 'New York',
       },
       {
@@ -168,7 +168,7 @@ describe('FriendSearch', () => {
         clerkId: 'clerk2',
         email: 'john@example.com',
         name: 'John Doe',
-        profilePicture: 'pic1.jpg',
+        profilePicture: 'https://example.com/pic1.jpg',
         city: 'New York',
       },
     ];
@@ -208,7 +208,7 @@ describe('FriendSearch', () => {
         clerkId: 'clerk2',
         email: 'john@example.com',
         name: 'John Doe',
-        profilePicture: 'pic1.jpg',
+        profilePicture: 'https://example.com/pic1.jpg',
         city: 'New York',
       },
     ];

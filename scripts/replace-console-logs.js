@@ -17,6 +17,7 @@ const config = {
     'src/**/*.test.{ts,tsx,js,jsx}',
     'src/**/*.spec.{ts,tsx,js,jsx}',
     'src/__mocks__/**/*',
+    'src/lib/logger.ts', // Don't modify the logger implementation itself
     'node_modules/**/*',
     '.next/**/*',
   ],

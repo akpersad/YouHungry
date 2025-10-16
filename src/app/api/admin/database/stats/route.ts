@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/db';
 import { requireAuth } from '@/lib/auth';
@@ -233,7 +234,7 @@ export async function GET() {
       },
     });
   } catch (error) {
-    console.error('Error fetching database stats:', error);
+    logger.error('Error fetching database stats:', error);
     return NextResponse.json(
       { error: 'Failed to fetch database statistics' },
       { status: 500 }

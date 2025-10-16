@@ -42,6 +42,18 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'img.clerk.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
         protocol: 'https',
         hostname: 'maps.googleapis.com',
         port: '',

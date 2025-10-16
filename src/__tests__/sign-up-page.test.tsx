@@ -55,7 +55,7 @@ describe('SignUpPage', () => {
   it('renders the sign-up page with correct title and description', () => {
     render(<SignUpPage />);
 
-    expect(screen.getByText('Join ForkInTheRoad')).toBeInTheDocument();
+    expect(screen.getByText('Join Fork In The Road')).toBeInTheDocument();
     expect(
       screen.getByText(
         'Create your account to start discovering amazing restaurants'
@@ -66,7 +66,7 @@ describe('SignUpPage', () => {
   it('renders the benefits section with app features', () => {
     render(<SignUpPage />);
 
-    expect(screen.getByText("What you'll get:")).toBeInTheDocument();
+    expect(screen.getByText("What you'll get")).toBeInTheDocument();
     expect(
       screen.getByText('Create personal restaurant collections')
     ).toBeInTheDocument();
@@ -75,7 +75,7 @@ describe('SignUpPage', () => {
     ).toBeInTheDocument();
     expect(screen.getByText('Get smart recommendations')).toBeInTheDocument();
     expect(
-      screen.getByText('Never argue about where to eat again')
+      screen.getByText('Never argue about where to eat')
     ).toBeInTheDocument();
   });
 
@@ -102,9 +102,7 @@ describe('SignUpPage', () => {
   it('renders SMS benefits information', () => {
     render(<SignUpPage />);
 
-    expect(
-      screen.getByText('📱 SMS Notifications (Optional)')
-    ).toBeInTheDocument();
+    expect(screen.getByText('📱 SMS Notifications')).toBeInTheDocument();
     expect(
       screen.getByText(/Enable SMS to get notified about group decisions/)
     ).toBeInTheDocument();
@@ -114,10 +112,10 @@ describe('SignUpPage', () => {
     render(<SignUpPage />);
 
     expect(
-      screen.getByText(
-        /By creating an account, you agree to our Terms of Service and Privacy Policy/
-      )
+      screen.getByText(/By creating an account, you agree to our/)
     ).toBeInTheDocument();
+    expect(screen.getByText('Terms of Service')).toBeInTheDocument();
+    expect(screen.getByText('Privacy Policy')).toBeInTheDocument();
   });
 
   it('renders custom registration form with proper styling', () => {
@@ -138,7 +136,7 @@ describe('SignUpPage', () => {
   it('displays benefits in a visually appealing format', () => {
     render(<SignUpPage />);
 
-    const benefitsList = screen.getByText("What you'll get:").closest('div');
+    const benefitsList = screen.getByText("What you'll get").closest('div');
     expect(benefitsList).toHaveClass(
       'bg-surface',
       'rounded-lg',
@@ -151,9 +149,7 @@ describe('SignUpPage', () => {
   it('displays SMS info in a highlighted format', () => {
     render(<SignUpPage />);
 
-    const smsInfo = screen
-      .getByText('📱 SMS Notifications (Optional)')
-      .closest('div');
+    const smsInfo = screen.getByText('📱 SMS Notifications').closest('div');
     expect(smsInfo).toHaveClass('rounded-lg', 'p-4', 'border');
   });
 });

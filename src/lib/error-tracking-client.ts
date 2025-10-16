@@ -1,3 +1,5 @@
+import { logger } from '@/lib/logger';
+
 /**
  * Client-Side Error Tracking
  *
@@ -30,6 +32,6 @@ export async function logClientError(
       }),
     });
   } catch (err) {
-    console.error('Failed to log client error:', err);
+    logger.error('Failed to log client error:', err);
   }
 }

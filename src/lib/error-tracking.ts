@@ -6,6 +6,7 @@
  * for debugging and improving reliability.
  */
 
+import { logger } from '@/lib/logger';
 import { ObjectId } from 'mongodb';
 import { connectToDatabase } from './db';
 import { ErrorLog, ErrorGroup } from '@/types/database';
@@ -269,7 +270,7 @@ export async function logError(options: LogErrorOptions): Promise<void> {
     }
   } catch (err) {
     // Fail silently to avoid error logging loop
-    console.error('Failed to log error:', err);
+    logger.error('Failed to log error:', err);
   }
 }
 
@@ -299,7 +300,7 @@ async function triggerErrorAlert(
       }),
     });
   } catch (err) {
-    console.error('Failed to trigger error alert:', err);
+    logger.error('Failed to trigger error alert:', err);
   }
 }
 
