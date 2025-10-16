@@ -6,6 +6,7 @@ import { useInAppNotifications } from '@/hooks/useInAppNotifications';
 import { InAppNotification } from '@/types/database';
 import { cn } from '@/lib/utils';
 import { ToastNotificationService } from '@/lib/toast-notifications';
+import { trackNotificationClicked } from '@/lib/analytics';
 
 interface NotificationPanelProps {
   isOpen: boolean;
@@ -34,6 +35,12 @@ export function NotificationPanel({
   );
 
   const handleNotificationClick = (notification: InAppNotification) => {
+    // Track notification click
+    trackNotificationClicked({
+      notificationId: notification._id.toString(),
+      notificationType: notification.type,
+    });
+
     if (!notification.read) {
       markAsRead(notification._id.toString());
     }

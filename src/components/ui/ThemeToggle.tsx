@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useTheme } from '@/components/providers/ThemeProvider';
 import { cn } from '@/lib/utils';
+import { trackThemeToggle } from '@/lib/analytics';
 
 interface ThemeToggleProps {
   className?: string;
@@ -103,7 +104,11 @@ export function ThemeToggle({
   if (variant === 'button') {
     return (
       <button
-        onClick={toggleTheme}
+        onClick={() => {
+          const newTheme = resolvedTheme === 'dark' ? 'light' : 'dark';
+          toggleTheme();
+          trackThemeToggle(newTheme);
+        }}
         className={cn(
           'inline-flex items-center justify-center rounded-xl',
           'bg-secondary text-primary shadow-neumorphic-light',
@@ -134,7 +139,11 @@ export function ThemeToggle({
   if (variant === 'switch') {
     return (
       <button
-        onClick={toggleTheme}
+        onClick={() => {
+          const newTheme = resolvedTheme === 'dark' ? 'light' : 'dark';
+          toggleTheme();
+          trackThemeToggle(newTheme);
+        }}
         className={cn(
           'relative inline-flex items-center rounded-full transition-colors duration-200',
           'focus:outline-none focus:ring-2 focus:ring-offset-2',
@@ -230,6 +239,7 @@ export function ThemeToggle({
             <button
               onClick={() => {
                 setTheme('light');
+                trackThemeToggle('light');
                 setIsOpen(false);
               }}
               className={cn(
@@ -245,6 +255,7 @@ export function ThemeToggle({
             <button
               onClick={() => {
                 setTheme('dark');
+                trackThemeToggle('dark');
                 setIsOpen(false);
               }}
               className={cn(

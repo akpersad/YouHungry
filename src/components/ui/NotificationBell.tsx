@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Bell, BellRing } from 'lucide-react';
 import { useUnreadNotificationCount } from '@/hooks/useInAppNotifications';
 import { cn } from '@/lib/utils';
+import { trackNotificationBellClick } from '@/lib/analytics';
 
 interface NotificationBellProps {
   className?: string;
@@ -44,7 +45,10 @@ export function NotificationBell({
 
   return (
     <button
-      onClick={onClick}
+      onClick={() => {
+        trackNotificationBellClick();
+        onClick?.();
+      }}
       className={cn(
         'relative inline-flex items-center justify-center rounded-full p-1.5 transition-colors hover:bg-surface focus:outline-none focus:ring-2 focus:ring-destructive focus:ring-offset-2',
         className
