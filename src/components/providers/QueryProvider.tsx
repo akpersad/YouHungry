@@ -15,10 +15,10 @@ export function QueryProvider({ children }: QueryProviderProps) {
       new QueryClient({
         defaultOptions: {
           queries: {
-            // Time before data is considered stale (30 seconds for most data)
-            staleTime: 30 * 1000,
-            // Time before unused data is garbage collected (5 minutes)
-            gcTime: 5 * 60 * 1000,
+            // Time before data is considered stale (5 minutes for most data)
+            staleTime: 5 * 60 * 1000,
+            // Time before unused data is garbage collected (10 minutes)
+            gcTime: 10 * 60 * 1000,
             // Retry failed requests up to 3 times with exponential backoff
             retry: (failureCount, error) => {
               // Don't retry on 4xx errors (client errors)
@@ -40,6 +40,8 @@ export function QueryProvider({ children }: QueryProviderProps) {
             refetchOnWindowFocus: false,
             // Refetch on reconnect
             refetchOnReconnect: true,
+            // Don't refetch in background to reduce API calls
+            refetchIntervalInBackground: false,
           },
           mutations: {
             // Retry mutations once on failure

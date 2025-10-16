@@ -44,7 +44,8 @@ export function useInAppNotifications(filters: NotificationFilters = {}) {
 
       return response.json();
     },
-    refetchInterval: 30000, // Refetch every 30 seconds
+    refetchInterval: 300000, // Refetch every 5 minutes (reduced from 30s)
+    refetchIntervalInBackground: false, // Don't poll when tab is inactive
   });
 
   // Mark notification as read

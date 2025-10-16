@@ -255,11 +255,19 @@ export function EnhancedPerformanceMonitor() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
+    // Skip performance monitoring in production to reduce API calls
+    if (process.env.NODE_ENV === 'production') {
+      return;
+    }
+
     // Collect initial metrics
     const timer = setTimeout(collectMetrics, 2000);
 
-    // Set up periodic collection
-    const interval = setInterval(collectMetrics, 30000); // Every 30 seconds
+    // Set up periodic collection - reduced frequency for production
+    const interval = setInterval(
+      collectMetrics,
+      process.env.NODE_ENV === 'production' ? 300000 : 30000
+    ); // 5 min in prod, 30s in dev
 
     return () => {
       clearTimeout(timer);

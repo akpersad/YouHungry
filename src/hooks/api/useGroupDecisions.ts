@@ -55,7 +55,8 @@ export function useGroupDecisions(groupId: string) {
       const data = await response.json();
       return data.decisions;
     },
-    refetchInterval: 30000, // Refetch every 30 seconds for real-time updates
+    refetchInterval: 300000, // Refetch every 5 minutes (reduced from 30s)
+    refetchIntervalInBackground: false, // Don't poll when tab is inactive
   });
 
   // Create group decision mutation

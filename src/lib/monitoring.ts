@@ -127,12 +127,14 @@ export class RealTimeMonitoringService {
     logger.info('RealTimeMonitoringService: Starting real-time monitoring');
     this.isMonitoring = true;
 
-    // Monitor every 30 seconds
+    // Monitor every 5 minutes in production, 30 seconds in development
+    const monitoringInterval =
+      process.env.NODE_ENV === 'production' ? 300000 : 30000;
     this.monitoringInterval = setInterval(() => {
       this.collectMetrics();
       this.checkThresholds();
       this.updateCircuitBreakers();
-    }, 30000);
+    }, monitoringInterval);
 
     // Initial metrics collection
     this.collectMetrics();

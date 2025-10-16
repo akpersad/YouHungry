@@ -246,7 +246,7 @@ export function usePWA() {
 
     const interval = setInterval(() => {
       syncOfflineActions();
-    }, 30000); // Sync every 30 seconds
+    }, 300000); // Sync every 5 minutes (reduced from 30s)
 
     return () => clearInterval(interval);
   }, [status.isOnline, status.offlineActionsCount, syncOfflineActions]);
