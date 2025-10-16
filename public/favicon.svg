@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="Fork In The Road favicon">
+  <defs>
+    <mask id="favicon-fork-clear">
+      <rect width="100%" height="100%" fill="white"/>
+      <g transform="translate(10,8)">
+        <!-- Simplified fork for small size -->
+        <rect x="1" y="0" width="2" height="8" rx="1" fill="black"/>
+        <rect x="4" y="0" width="2" height="8" rx="1" fill="black"/>
+        <rect x="7" y="0" width="2" height="8" rx="1" fill="black"/>
+        <rect x="10" y="0" width="2" height="8" rx="1" fill="black"/>
+        <rect x="2" y="10" width="8" height="2" rx="1" fill="black"/>
+      </g>
+    </mask>
+  </defs>
+  
+  <!-- Map pin -->
+  <path fill="currentColor" mask="url(#favicon-fork-clear)"
+        d="M16 4c-7 0-12 5-12 12 0 4 2 7 4 10 2 3 4 5 5 7 1-2 2-4 3-6 1-2 3-4 5-6 2-3 4-6 4-10C28 9 23 4 16 4z"/>
+  
+  <!-- Roads -->
+  <path fill="currentColor" stroke="none"
+        d="M10 26 Q16 24 22 26 Q16 22 10 26"/>
+  <path fill="currentColor" stroke="none"
+        d="M10 28 Q16 26 22 28 Q16 24 10 28"/>
+</svg>

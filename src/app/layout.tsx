@@ -84,7 +84,7 @@ export const metadata: Metadata = {
     'mobile-web-app-capable': 'yes',
     'apple-mobile-web-app-capable': 'yes',
     'apple-mobile-web-app-status-bar-style': 'default',
-    'theme-color': '#ff6b6b',
+    'theme-color': '#e3005a',
   },
 };
 
@@ -104,9 +104,21 @@ export default function RootLayout({
       <html lang="en">
         <head>
           <link rel="manifest" href="/manifest.json" />
-          <link rel="icon" href="/favicon.ico" />
+          <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+          <link
+            rel="icon"
+            href="/favicon-16x16.svg"
+            sizes="16x16"
+            type="image/svg+xml"
+          />
+          <link
+            rel="icon"
+            href="/favicon-32x32.svg"
+            sizes="32x32"
+            type="image/svg+xml"
+          />
           <link rel="apple-touch-icon" href="/icons/icon-192x192.svg" />
-          <meta name="theme-color" content="#ff6b6b" />
+          <meta name="theme-color" content="#e3005a" />
         </head>
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
