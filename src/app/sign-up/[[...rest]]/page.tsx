@@ -29,7 +29,7 @@ export default function SignUpPage() {
             className="font-semibold mb-3"
             style={{ color: 'var(--color-text)' }}
           >
-            What you&apos;ll get:
+            What you&apos;ll get
           </h3>
           <ul
             className="space-y-2 text-sm"
@@ -49,7 +49,7 @@ export default function SignUpPage() {
             </li>
             <li className="flex items-start">
               <span className="text-primary mr-2">✓</span>
-              Never argue about where to eat again
+              Never argue about where to eat
             </li>
           </ul>
         </div>
@@ -73,7 +73,7 @@ export default function SignUpPage() {
         {/* SMS Benefits Info */}
         <div className="bg-primary/10 dark:bg-primary/20 rounded-lg p-4 border border-primary dark:border-primary">
           <h4 className="font-medium mb-2 text-blue-900 dark:text-blue-100">
-            📱 SMS Notifications (Optional)
+            📱 SMS Notifications
           </h4>
           <p className="text-sm text-blue-800 dark:text-blue-200">
             Enable SMS to get notified about group decisions, friend requests,
@@ -87,12 +87,21 @@ export default function SignUpPage() {
           <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
             By creating an account, you agree to our{' '}
             <a
+              href="/terms-of-service"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline hover:opacity-80"
+            >
+              Terms of Service
+            </a>
+            {' and '}
+            <a
               href="/privacy-policy"
               target="_blank"
               rel="noopener noreferrer"
               className="underline hover:opacity-80"
             >
-              Privacy Policy & Terms
+              Privacy Policy
             </a>
           </p>
         </div>

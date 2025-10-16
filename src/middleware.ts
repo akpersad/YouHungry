@@ -17,9 +17,11 @@ const isPublicRoute = createRouteMatcher([
 
 export default clerkMiddleware((auth, req) => {
   if (!isPublicRoute(req)) {
-    // Protect the route and Clerk will automatically redirect to sign-in
+    // Protect the route and redirect to our custom sign-in page
     // with the original URL as a redirect_url parameter
-    auth.protect();
+    auth.protect({
+      unauthenticatedUrl: '/sign-in',
+    });
   }
 });
 

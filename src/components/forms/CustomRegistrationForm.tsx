@@ -998,15 +998,7 @@ export function CustomRegistrationForm() {
         >
           Receive texts about group decisions, friend requests & invites. Msg &
           data rates may apply. Frequency varies by activity. Disable anytime in
-          settings.{' '}
-          <a
-            href="/privacy-policy"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline hover:text-primary"
-          >
-            Privacy Policy & Terms
-          </a>
+          settings.
         </p>
       </div>
 

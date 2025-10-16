@@ -319,15 +319,25 @@ test.describe('Authentication Flow', () => {
 
   test('Protected route requires authentication', async ({ page }) => {
     // This test uses no auth state (set at describe level)
-    // Try to access protected route
-    await page.goto('/dashboard', { waitUntil: 'domcontentloaded' });
+    // Try to access protected route - should redirect
+    const response = await page.goto('/dashboard', {
+      waitUntil: 'domcontentloaded',
+      timeout: 30000,
+    });
 
-    // Wait for page to fully load
-    await page.waitForLoadState('networkidle');
+    // Wait for any redirects to complete - but don't fail if networkidle times out
+    // as Next.js middleware redirects can prevent reaching networkidle state
+    try {
+      await page.waitForLoadState('networkidle', { timeout: 5000 });
+    } catch {
+      // Timeout is acceptable - redirects may prevent networkidle
+      // Just wait a bit for the page to settle
+      await page.waitForTimeout(1000);
+    }
 
     // Should either:
-    // 1. Redirect to sign-in page
-    // 2. Show "Sign In Required" message on dashboard
+    // 1. Redirect to sign-in page (middleware auth.protect())
+    // 2. Show "Sign In Required" message on dashboard (client-side protection)
     // 3. Show Clerk sign-in UI
     const currentUrl = page.url();
     const isRedirectedToSignIn =
@@ -340,7 +350,7 @@ test.describe('Authentication Flow', () => {
     try {
       hasSignInPrompt = await page
         .locator('text=Sign In Required')
-        .isVisible({ timeout: 3000 });
+        .isVisible({ timeout: 2000 });
       hasSignInButton = await page
         .locator('button:has-text("Sign In")')
         .first()
@@ -349,8 +359,20 @@ test.describe('Authentication Flow', () => {
       // Elements not found, that's okay if we redirected
     }
 
+    // Also check if we're seeing the sign-in page elements
+    let hasSignInPage = false;
+    try {
+      hasSignInPage = await page
+        .locator('text=Welcome Back')
+        .isVisible({ timeout: 3000 });
+    } catch {
+      // Not on sign-in page
+    }
+
     const isProtected =
-      isRedirectedToSignIn || (hasSignInPrompt && hasSignInButton);
+      isRedirectedToSignIn ||
+      hasSignInPage ||
+      (hasSignInPrompt && hasSignInButton);
 
     if (!isProtected) {
       // Take screenshot for debugging
@@ -359,7 +381,9 @@ test.describe('Authentication Flow', () => {
         fullPage: true,
       });
       console.log('Current URL:', currentUrl);
+      console.log('Response status:', response?.status());
       console.log('Is Redirected:', isRedirectedToSignIn);
+      console.log('Has Sign In Page:', hasSignInPage);
       console.log('Has Sign In Prompt:', hasSignInPrompt);
       console.log('Has Sign In Button:', hasSignInButton);
     }
