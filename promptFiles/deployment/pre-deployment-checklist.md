@@ -142,7 +142,7 @@
   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_live_...
   CLERK_SECRET_KEY=sk_live_...
   CLERK_WEBHOOK_SECRET=whsec_...
-  NEXT_PUBLIC_APP_URL=https://your-app.vercel.app
+  NEXT_PUBLIC_APP_URL=https://www.forkintheroad.app
   ```
 
   - [ ] Clerk production project created
@@ -416,7 +416,7 @@ From the audit, verify these are resolved:
 
 ### Priority #2: URL-Dependent Configuration
 
-- [ ] Set `NEXT_PUBLIC_APP_URL` with live URL
+- [ ] Set `NEXT_PUBLIC_APP_URL` with live URL (https://www.forkintheroad.app)
 - [ ] Configure Clerk webhook with live URL
 - [ ] Switch to Clerk production keys
 - [ ] Get `CLERK_WEBHOOK_SECRET` from webhook setup

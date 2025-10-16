@@ -73,7 +73,7 @@ Test the cron job manually before waiting for the scheduled time:
 
 ```bash
 # Replace with your actual values
-curl -X GET "https://your-app.vercel.app/api/cron/performance-metrics" \
+curl -X GET "https://www.forkintheroad.app/api/cron/performance-metrics" \
   -H "Authorization: Bearer YOUR_CRON_SECRET"
 ```
 
@@ -211,10 +211,12 @@ To run at a different time, edit `vercel.json`:
 
 Common schedules:
 
+- Daily at midnight UTC: `"0 0 * * *"`
 - Daily at 6 AM EST: `"0 11 * * *"`
 - Daily at 9 AM EST: `"0 14 * * *"`
-- Every 6 hours: `"0 */6 * * *"`
 - Weekly on Monday 6 AM EST: `"0 11 * * 1"`
+
+**Note:** Vercel Hobby plans are limited to daily cron jobs only. More frequent schedules (like `"0 */6 * * *"`) require a Pro plan.
 
 After changing, commit and deploy for changes to take effect.
 
@@ -229,7 +231,7 @@ After changing, commit and deploy for changes to take effect.
 
 View collected metrics in the admin dashboard:
 
-1. Go to `https://your-app.vercel.app/admin`
+1. Go to `https://www.forkintheroad.app/admin`
 2. Click **Performance** tab
 3. Select comparison period:
    - Yesterday

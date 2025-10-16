@@ -1,7 +1,7 @@
 'use client';
 
 import { logger } from '@/lib/logger';
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@clerk/nextjs';
 import { Restaurant } from '@/types/database';
@@ -18,6 +18,13 @@ import { RestaurantDetailsView } from './RestaurantDetailsView';
 import { DecisionResultModal } from './DecisionResultModal';
 import { DecisionStatistics } from './DecisionStatistics';
 import { GroupDecisionMaking } from './GroupDecisionMaking';
+import {
+  trackCollectionView,
+  trackDecisionRandomStart,
+  trackDecisionRandomComplete,
+  trackDecisionStatisticsViewed,
+  trackCollectionTabChanged,
+} from '@/lib/analytics';
 
 interface CollectionViewProps {
   collectionId: string;
@@ -85,6 +92,17 @@ export function CollectionView({ collectionId }: CollectionViewProps) {
     groupData?.adminIds?.map((id) => id.toString())
   );
   logger.debug('Is current user admin:', isCurrentUserAdmin);
+
+  // Track collection view
+  useEffect(() => {
+    if (collection) {
+      trackCollectionView({
+        collectionId,
+        collectionType: collection.type,
+        restaurantCount: collection.restaurantIds.length,
+      });
+    }
+  }, [collection, collectionId]);
 
   const handleRestaurantAdded = () => {
     // TanStack Query will automatically refetch the collection data
@@ -172,6 +190,12 @@ export function CollectionView({ collectionId }: CollectionViewProps) {
 
     setDecisionError(null);
 
+    // Track decision start
+    trackDecisionRandomStart({
+      collectionId,
+      restaurantCount: collection.restaurantIds.length,
+    });
+
     // Set visit date to tomorrow at 7 PM
     const visitDate = new Date();
     visitDate.setDate(visitDate.getDate() + 1);
@@ -199,6 +223,13 @@ export function CollectionView({ collectionId }: CollectionViewProps) {
         visitDate: visitDate,
       });
       setIsDecisionResultOpen(true);
+
+      // Track decision complete
+      trackDecisionRandomComplete({
+        collectionId,
+        selectedRestaurantId: result.result.restaurantId,
+        selectedRestaurantName: restaurantData.restaurant.name,
+      });
     } catch (error) {
       logger.error('Error making decision:', error);
       setDecisionError(
@@ -264,7 +295,10 @@ export function CollectionView({ collectionId }: CollectionViewProps) {
                     </Button>
                   )}
                   <Button
-                    onClick={() => setIsStatisticsOpen(true)}
+                    onClick={() => {
+                      setIsStatisticsOpen(true);
+                      trackDecisionStatisticsViewed(collectionId);
+                    }}
                     variant="outline"
                   >
                     View Statistics
@@ -490,7 +524,10 @@ export function CollectionView({ collectionId }: CollectionViewProps) {
         <Tabs
           tabs={tabItems}
           activeTab={activeTab}
-          onTabChange={setActiveTab}
+          onTabChange={(tab) => {
+            setActiveTab(tab);
+            trackCollectionTabChanged(tab, collectionId);
+          }}
         />
       ) : (
         // For personal collections, show content directly without tabs

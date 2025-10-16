@@ -11,6 +11,7 @@ import { logger } from '@/lib/logger';
 import { Component, ReactNode } from 'react';
 import { logClientError } from '@/lib/error-tracking-client';
 import { ErrorFallback } from './ErrorFallback';
+import { trackError } from '@/lib/analytics';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -45,6 +46,16 @@ export class ErrorBoundary extends Component<
     });
 
     logger.error('Error caught by boundary:', error, errorInfo);
+
+    // Track error in analytics
+    trackError({
+      errorType: error.name || 'UnknownError',
+      errorMessage: error.message,
+      component: errorInfo.componentStack?.split('\n')[1]?.trim(),
+      page:
+        typeof window !== 'undefined' ? window.location.pathname : undefined,
+      fatal: this.props.level === 'root',
+    });
   }
 
   handleReset = () => {

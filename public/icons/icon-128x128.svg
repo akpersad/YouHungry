@@ -1,10 +1,26 @@
-<svg width="128" height="128" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Fork In The Road app icon">
   <defs>
-    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#ff6b6b;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#ff8e8e;stop-opacity:1" />
-    </linearGradient>
+    <mask id="fork-cutout-128">
+      <rect width="100%" height="100%" fill="white"/>
+      <g transform="translate(44.8, 26.88)">
+        <!-- Fork tines (negative space) -->
+        <rect x="0" y="0" width="5.376" height="24.32" rx="2.688" fill="black"/>
+        <rect x="9.344" y="0" width="5.376" height="24.32" rx="2.688" fill="black"/>
+        <rect x="18.688" y="0" width="5.376" height="24.32" rx="2.688" fill="black"/>
+        <rect x="28.032" y="0" width="5.376" height="24.32" rx="2.688" fill="black"/>
+        <!-- Fork handle (negative space) -->
+        <rect x="4.608" y="26.88" width="23.936" height="5.376" rx="2.688" fill="black"/>
+      </g>
+    </mask>
   </defs>
-  <rect width="128" height="128" rx="25.6" fill="url(#bg)"/>
-  <text x="50%" y="50%" text-anchor="middle" dy="0.35em" fill="white" font-family="Arial, sans-serif" font-size="51.2" font-weight="bold">🍽️</text>
+  
+  <!-- Main map pin body -->
+  <path fill="#e3005a" mask="url(#fork-cutout-128)"
+        d="M64 10.624c-22.144 0-40.064 17.408-40.064 38.912 0 11.776 5.504 21.12 12.416 30.08 6.016 8.064 13.056 15.616 19.584 25.088 3.328 4.736 6.272 10.112 7.936 15.232 1.664-5.12 3.968-10.368 7.936-15.232 6.4-9.344 13.44-17.024 19.584-25.088 6.912-9.216 12.416-18.432 12.416-30.08C104.064 25.472 86.144 10.624 64 10.624z"/>
+  
+  <!-- Diverging roads at the base -->
+  <path fill="#e3005a" stroke="none"
+        d="M40.064 101.376 Q60.032 93.312 82.688 101.376 Q60.032 96 40.064 101.376"/>
+  <path fill="#e3005a" stroke="none"
+        d="M40.064 114.688 Q60.032 106.624 82.688 114.688 Q60.032 109.312 40.064 114.688"/>
 </svg>

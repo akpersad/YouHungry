@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { useRouter } from 'next/navigation';
 import { useSignUp } from '@clerk/nextjs';
+import { trackSignupComplete } from '@/lib/analytics';
 
 interface FormData {
   email: string;
@@ -432,6 +433,9 @@ export function CustomRegistrationForm() {
       if (completeSignUp.status === 'complete') {
         // Set the session as active
         await setActive({ session: completeSignUp.createdSessionId });
+
+        // Track successful signup
+        trackSignupComplete('email');
 
         // Redirect to dashboard
         router.push('/dashboard');

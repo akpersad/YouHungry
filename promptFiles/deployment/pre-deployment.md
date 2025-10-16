@@ -109,7 +109,7 @@ These require the live URL and must be set after deployment:
   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_live_...
   CLERK_SECRET_KEY=sk_live_...
   CLERK_WEBHOOK_SECRET=whsec_...
-  NEXT_PUBLIC_APP_URL=https://your-app.vercel.app
+  NEXT_PUBLIC_APP_URL=https://www.forkintheroad.app
   ```
 
 ## 🗄️ Database Preparation
@@ -364,7 +364,7 @@ These items require the live URL and must be completed after deployment:
 
 1. **Clerk Webhook**: Configure webhook with live URL
 2. **Clerk Production Keys**: Switch from test to live keys
-3. **App URL**: Set `NEXT_PUBLIC_APP_URL` with actual domain
+3. **App URL**: Set `NEXT_PUBLIC_APP_URL` with actual domain (https://www.forkintheroad.app)
 4. **Google API Restrictions**: Update API key restrictions with live domain
 5. **Final Testing**: Test all functionality with live URL
 

@@ -147,6 +147,29 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
         </div>
+
+        {/* PWA Developer Tools Section */}
+        <div className="mt-8 p-4 bg-surface rounded-lg border border-border">
+          <h3 className="text-sm font-semibold text-text mb-3">
+            🛠️ Developer Tools
+          </h3>
+          <div className="flex flex-wrap gap-2">
+            <Link href="/pwa-explorer">
+              <Button variant="outline" size="sm">
+                📱 PWA Explorer
+              </Button>
+            </Link>
+            <Link href="/push-test">
+              <Button variant="outline" size="sm">
+                🔔 Push Notifications Test
+              </Button>
+            </Link>
+          </div>
+          <p className="text-xs text-text-muted mt-3">
+            Test PWA features and push notifications on your device. Now works
+            with HTTPS! 🎉
+          </p>
+        </div>
       </div>
     </ProtectedRoute>
   );

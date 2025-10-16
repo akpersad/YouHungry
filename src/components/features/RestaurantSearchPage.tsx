@@ -13,6 +13,13 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { toast } from 'sonner';
 import { useSearchParams, useRouter } from 'next/navigation';
+import {
+  trackRestaurantSearch,
+  trackRestaurantView,
+  trackSearchFilterApplied,
+  trackSearchSortChanged,
+  trackRestaurantAddToCollection,
+} from '@/lib/analytics';
 
 interface RestaurantSearchPageProps {
   onAddToCollection?: (restaurant: Restaurant) => void;
@@ -344,18 +351,35 @@ export function RestaurantSearchPage({
     };
 
     setSearchFilters(searchParams);
+
+    // Track search event
+    trackRestaurantSearch({
+      location,
+      searchTerm: query,
+      filters: filters
+        ? {
+            cuisine: filters.cuisine,
+            minRating: filters.minRating,
+            maxPrice: filters.maxPrice,
+            minPrice: filters.minPrice,
+            distance: filters.distance,
+          }
+        : undefined,
+    });
   };
 
   // Handler for sort change
   const handleSortChange = (newSort: SortOption) => {
     setSortBy(newSort);
     setCurrentPage(1); // Reset to page 1 when sorting changes
+    trackSearchSortChanged(newSort);
   };
 
   // Handler for radius change (from re-search)
   const handleRadiusChange = (newRadius: number) => {
     setRadiusFilter(newRadius);
     setCurrentPage(1); // Reset to page 1 when radius changes
+    trackSearchFilterApplied('distance', newRadius.toString());
   };
 
   // Handler for page change
@@ -487,6 +511,15 @@ export function RestaurantSearchPage({
 
   const handleViewDetails = (restaurant: Restaurant) => {
     setSelectedRestaurant(restaurant);
+    trackRestaurantView({
+      restaurantId: restaurant._id?.toString() || restaurant.googlePlaceId,
+      restaurantName: restaurant.name,
+      cuisineType: restaurant.cuisine,
+      priceLevel: restaurant.priceRange
+        ? restaurant.priceRange.split('$').length - 1
+        : undefined,
+      rating: restaurant.rating,
+    });
   };
 
   const handleCollectionSelect = async (collectionId: string) => {
@@ -528,6 +561,13 @@ export function RestaurantSearchPage({
 
       // Show success message
       toast.success(`Added to ${collectionName}!`);
+
+      // Track restaurant added to collection
+      trackRestaurantAddToCollection({
+        restaurantId,
+        restaurantName: selectedRestaurant.name,
+        collectionId,
+      });
 
       // Invalidate collections cache to refresh the data
       queryClient.invalidateQueries({

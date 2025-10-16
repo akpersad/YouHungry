@@ -2034,7 +2034,7 @@ TWILIO_MESSAGING_SERVICE_SID=MG...  # Optional
 
 # Resend Email (Epic 7)
 RESEND_API_KEY=re_...
-FROM_EMAIL=noreply@yourdomain.com
+FROM_EMAIL=noreply@forkintheroad.app
 
 # Application
 NEXT_PUBLIC_APP_URL=http://localhost:3000

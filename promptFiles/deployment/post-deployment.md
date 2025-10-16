@@ -9,7 +9,7 @@ This document outlines the steps required to complete the production setup **aft
 - [ ] App deployed to Vercel
 - [ ] Production domain configured and accessible
 - [ ] Pre-deployment environment variables already set
-- [ ] Live URL available (e.g., `https://your-app.vercel.app`)
+- [ ] Live URL available (e.g., `https://www.forkintheroad.app`)
 
 ## 🔧 Post-Deployment Environment Variables
 
@@ -21,7 +21,7 @@ Set these in your Vercel project dashboard under Settings > Environment Variable
 
 ```bash
 # App Configuration (requires live URL)
-NEXT_PUBLIC_APP_URL=https://your-app.vercel.app
+NEXT_PUBLIC_APP_URL=https://www.forkintheroad.app
 
 # Clerk Production Keys (requires live URL for webhook)
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_live_...
@@ -56,7 +56,7 @@ NEXT_PUBLIC_GA_MEASUREMENT_ID=G-XXXXXXXXXX
 
 ### Step 3: Configure Webhook
 
-1. **Endpoint URL**: `https://your-app.vercel.app/api/webhooks/clerk`
+1. **Endpoint URL**: `https://www.forkintheroad.app/api/webhooks/clerk`
 2. **Events to Subscribe**:
    - `user.created`
    - `user.updated`
@@ -175,7 +175,7 @@ Now that you have a live URL, update your Google API key restrictions:
    - Navigate to **APIs & Services > Credentials**
    - Select your API key
    - **Update Application restrictions** to include your live domain:
-     - Add `https://your-app.vercel.app` to HTTP referrers (if needed)
+     - Add `https://www.forkintheroad.app` to HTTP referrers (if needed)
      - Or keep as "None" for server-side use
    - Ensure **Places API** is enabled
 
@@ -510,7 +510,7 @@ Google Analytics 4 provides comprehensive analytics for understanding user behav
    - Click **"Web"**
 
 2. **Stream Configuration**
-   - **Website URL**: `https://your-app.vercel.app` (your production URL)
+   - **Website URL**: `https://www.forkintheroad.app` (your production URL)
    - **Stream name**: "You Hungry? Production"
    - **Enhanced measurement**: Toggle ON (recommended)
      - Page views ✅

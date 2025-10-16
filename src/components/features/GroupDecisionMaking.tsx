@@ -4,6 +4,11 @@ import { logger } from '@/lib/logger';
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useUser } from '@clerk/nextjs';
+import {
+  trackDecisionGroupStart,
+  trackDecisionVoteSubmitted,
+  trackDecisionGroupComplete,
+} from '@/lib/analytics';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Modal } from '@/components/ui/Modal';
@@ -158,6 +163,16 @@ export function GroupDecisionMaking({
       queryClient.invalidateQueries({ queryKey: ['groupDecisions', groupId] });
       setShowCreateDecision(false);
 
+      // Track group decision start
+      if (data.decision) {
+        trackDecisionGroupStart({
+          groupId,
+          collectionId,
+          decisionType: data.decision.method,
+          restaurantCount: restaurants?.length || 0,
+        });
+      }
+
       // If it's a tiered decision, open the voting interface
       if (data.decision) {
         setSelectedDecision(data.decision);
@@ -179,6 +194,16 @@ export function GroupDecisionMaking({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['groupDecisions', groupId] });
+
+      // Track vote submission
+      if (selectedDecision) {
+        trackDecisionVoteSubmitted({
+          groupId,
+          decisionId: selectedDecision.id.toString(),
+          rankingPositions: rankings.length,
+        });
+      }
+
       setShowVotingInterface(false);
       setRankings([]);
     },
@@ -197,6 +222,18 @@ export function GroupDecisionMaking({
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['groupDecisions', groupId] });
+
+      // Track decision completion
+      if (data.result && data.decision) {
+        trackDecisionGroupComplete({
+          groupId,
+          decisionId: data.decision._id?.toString() || '',
+          decisionType: data.decision.method,
+          voteCount: data.decision.votes?.length || 0,
+          selectedRestaurantId: data.result.restaurantId?.toString(),
+        });
+      }
+
       if (data.result) {
         setDecisionResult({
           restaurant: data.result.restaurant,

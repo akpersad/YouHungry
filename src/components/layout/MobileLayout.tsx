@@ -52,10 +52,7 @@ export function MobileLayout({ children, className }: MobileLayoutProps) {
       </div> */}
 
       {/* Main content with padding matching bottom navigation */}
-      <main
-        className="flex-1 px-6 pb-32 md:pb-0"
-        style={{ paddingTop: '4rem' }} // 64px for proper status bar spacing
-      >
+      <main className="flex-1 px-6 pb-32 md:pb-0 pt-8 md:pt-16">
         {children}
       </main>
 

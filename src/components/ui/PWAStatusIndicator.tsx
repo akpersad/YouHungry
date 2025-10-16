@@ -7,6 +7,7 @@ import { Button } from './Button';
 import { Modal } from './Modal';
 import { logger } from '@/lib/logger';
 import { toast } from 'sonner';
+import { trackPWAInstallPromptShown, trackPWAInstalled } from '@/lib/analytics';
 
 interface PWAStatusIndicatorProps {
   className?: string;
@@ -139,6 +140,14 @@ export function PWAInstallPrompt({
     }
   }, []);
 
+  // Track prompt shown on first render (must be before early return)
+  useEffect(() => {
+    if (canInstall && !status.isInstalled && !isDismissed) {
+      trackPWAInstallPromptShown();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run once on mount
+
   if (!canInstall || status.isInstalled || isDismissed) {
     return null;
   }
@@ -155,6 +164,9 @@ export function PWAInstallPrompt({
   const handleInstall = async () => {
     const success = await installApp();
     if (success) {
+      // Track PWA installation
+      trackPWAInstalled();
+
       // Clear any dismissal on successful install
       localStorage.removeItem(PWA_DISMISS_KEY);
       if (onInstall) {

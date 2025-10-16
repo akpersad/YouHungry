@@ -302,11 +302,11 @@ TWILIO_ACCOUNT_SID=your_twilio_sid
 TWILIO_AUTH_TOKEN=your_twilio_token
 TWILIO_PHONE_NUMBER=your_twilio_number
 TWILIO_TO_PHONE_NUMBER=+1234567890  # Development only
-NEXT_PUBLIC_APP_URL=https://yourdomain.com
+NEXT_PUBLIC_APP_URL=https://www.forkintheroad.app
 
 # Optional
 TWILIO_MESSAGING_SERVICE_SID=your_messaging_service_sid
-FROM_EMAIL=noreply@yourdomain.com
+FROM_EMAIL=noreply@forkintheroad.app
 ```
 
 ## Future Enhancements
