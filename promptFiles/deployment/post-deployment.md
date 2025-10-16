@@ -1320,7 +1320,7 @@ Once push notifications are confirmed working:
 - [ ] CORS configuration tested
 - [ ] HTTPS enforced
 - [ ] **Admin Panel Security Configuration** (`/admin`)
-  - [ ] **CRITICAL**: Add your production user ID to `ADMIN_USER_IDS` array in `src/components/admin/AdminGate.tsx`
+  - [ ] **CRITICAL**: Add your production user ID to `ADMIN_USER_IDS` environment variable in Vercel (comma-separated list of MongoDB user IDs)
   - [ ] Test admin panel access with your production user account
   - [ ] Verify all admin tabs are accessible and functional
   - [ ] Ensure cost monitoring dashboard displays real data
