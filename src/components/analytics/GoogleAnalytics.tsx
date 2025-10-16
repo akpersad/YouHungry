@@ -1,13 +1,12 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, Suspense } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { usePathname, useSearchParams } from 'next/navigation';
 import Script from 'next/script';
 import { setAnalyticsUserId, trackPageView } from '@/lib/analytics';
 
-export function GoogleAnalytics() {
-  const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
+function GoogleAnalyticsInner() {
   const { user } = useUser();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -28,6 +27,12 @@ export function GoogleAnalytics() {
       trackPageView(url);
     }
   }, [pathname, searchParams]);
+
+  return null;
+}
+
+export function GoogleAnalytics() {
+  const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
 
   // Only render in production with valid measurement ID
   if (!GA_MEASUREMENT_ID || process.env.NODE_ENV !== 'production') {
@@ -70,6 +75,10 @@ export function GoogleAnalytics() {
           `,
         }}
       />
+      {/* Wrap in Suspense for useSearchParams */}
+      <Suspense fallback={null}>
+        <GoogleAnalyticsInner />
+      </Suspense>
     </>
   );
 }

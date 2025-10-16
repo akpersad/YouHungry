@@ -32,6 +32,9 @@ export interface SearchEventParams {
   filters?: string;
   results_count?: number;
   distance_miles?: number;
+  filter_type?: string;
+  filter_value?: string;
+  sort_by?: string;
 }
 
 export interface RestaurantEventParams {
@@ -55,7 +58,9 @@ export interface DecisionEventParams {
   collection_id?: string;
   restaurant_count?: number;
   selected_restaurant_id?: string;
+  selected_restaurant_name?: string;
   vote_count?: number;
+  decision_id?: string;
 }
 
 export interface SocialEventParams {
@@ -63,18 +68,28 @@ export interface SocialEventParams {
   friend_id?: string;
   member_count?: number;
   action_type?: string;
+  decision_id?: string;
+  ranking_positions?: number;
 }
 
 export interface NotificationEventParams {
   notification_type?: string;
   notification_id?: string;
   action?: 'clicked' | 'dismissed' | 'viewed';
+  channel?: string;
+  enabled?: string;
 }
 
 export interface UIEventParams {
   component?: string;
   location?: string;
   value?: string;
+  update_type?: string;
+  channel?: string;
+  link_type?: string;
+  destination?: string;
+  tab_name?: string;
+  theme?: string;
 }
 
 export interface ErrorEventParams {

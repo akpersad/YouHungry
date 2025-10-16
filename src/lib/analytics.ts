@@ -484,7 +484,7 @@ export function trackError(params: {
     error_message: params.errorMessage,
     component: params.component,
     page: params.page,
-    fatal: params.fatal?.toString(),
+    fatal: params.fatal,
   });
 }
 

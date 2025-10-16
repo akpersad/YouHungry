@@ -266,7 +266,9 @@ export function EnhancedPerformanceMonitor() {
     // Set up periodic collection - reduced frequency for production
     const interval = setInterval(
       collectMetrics,
-      process.env.NODE_ENV === 'production' ? 300000 : 30000
+      process.env.NODE_ENV !== 'development' && process.env.NODE_ENV !== 'test'
+        ? 300000
+        : 30000
     ); // 5 min in prod, 30s in dev
 
     return () => {

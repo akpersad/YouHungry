@@ -199,7 +199,7 @@ export function GroupDecisionMaking({
       if (selectedDecision) {
         trackDecisionVoteSubmitted({
           groupId,
-          decisionId: selectedDecision._id.toString(),
+          decisionId: selectedDecision.id.toString(),
           rankingPositions: rankings.length,
         });
       }
