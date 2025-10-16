@@ -40,7 +40,7 @@ interface SubmitVoteData {
 export function useGroupDecisions(groupId: string) {
   const queryClient = useQueryClient();
 
-  // Fetch active group decisions
+  // Fetch active group decisions with smart polling
   const {
     data: decisions,
     isLoading: decisionsLoading,
@@ -55,7 +55,19 @@ export function useGroupDecisions(groupId: string) {
       const data = await response.json();
       return data.decisions;
     },
-    refetchInterval: 300000, // Refetch every 5 minutes (reduced from 30s)
+    // Smart polling: 30s when active decisions exist, 5min when inactive
+    refetchInterval: (query) => {
+      const decisions = (query.state.data as GroupDecision[]) || [];
+      const hasActiveDecisions = decisions.some((d) => d.status === 'active');
+      const hasRecentActivity = decisions.some((d) => {
+        const updatedAt = new Date(d.updatedAt);
+        const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+        return updatedAt > fiveMinutesAgo;
+      });
+
+      // Poll every 30s if there are active decisions OR recent activity
+      return hasActiveDecisions || hasRecentActivity ? 30000 : 300000;
+    },
     refetchIntervalInBackground: false, // Don't poll when tab is inactive
   });
 

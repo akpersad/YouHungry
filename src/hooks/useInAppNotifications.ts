@@ -44,7 +44,12 @@ export function useInAppNotifications(filters: NotificationFilters = {}) {
 
       return response.json();
     },
-    refetchInterval: 300000, // Refetch every 5 minutes (reduced from 30s)
+    // Smart polling: 30s when unread notifications exist, 5min when all read
+    refetchInterval: (query) => {
+      const notificationData = query.state.data;
+      const hasUnreadNotifications = notificationData?.unreadCount > 0;
+      return hasUnreadNotifications ? 30000 : 300000; // 30s vs 5min
+    },
     refetchIntervalInBackground: false, // Don't poll when tab is inactive
   });
 
