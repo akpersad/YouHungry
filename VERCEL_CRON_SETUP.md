@@ -73,7 +73,7 @@ Test the cron job manually before waiting for the scheduled time:
 
 ```bash
 # Replace with your actual values
-curl -X GET "https://your-app.vercel.app/api/cron/performance-metrics" \
+curl -X GET "https://www.forkintheroad.app/api/cron/performance-metrics" \
   -H "Authorization: Bearer YOUR_CRON_SECRET"
 ```
 
@@ -229,7 +229,7 @@ After changing, commit and deploy for changes to take effect.
 
 View collected metrics in the admin dashboard:
 
-1. Go to `https://your-app.vercel.app/admin`
+1. Go to `https://www.forkintheroad.app/admin`
 2. Click **Performance** tab
 3. Select comparison period:
    - Yesterday
