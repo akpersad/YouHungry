@@ -180,7 +180,7 @@ export class PushNotificationManager {
     // Send a simple notification
     const registration = await navigator.serviceWorker.ready;
 
-    await registration.showNotification('ForkInTheRoad Test', {
+    await registration.showNotification('Fork In The Road Test', {
       body: 'This is a test notification from your PWA!',
       icon: '/icons/icon-192x192.svg',
       badge: '/icons/icon-72x72.svg',
