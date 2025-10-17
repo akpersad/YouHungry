@@ -59,6 +59,7 @@ function SignInContent() {
         {/* Clerk Sign In Component */}
         <div className="flex justify-center">
           <SignIn
+            path="/sign-in"
             appearance={{
               elements: {
                 rootBox: 'w-full',
