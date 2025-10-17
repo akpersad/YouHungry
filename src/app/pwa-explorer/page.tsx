@@ -168,17 +168,44 @@ export default function PWAExplorerPage() {
   };
 
   return (
-    <div className="min-h-screen bg-surface dark:bg-background p-4">
+    <div
+      className="min-h-screen p-4"
+      style={{ backgroundColor: 'var(--bg-primary)' }}
+    >
       <div className="max-w-4xl mx-auto">
-        <div className="bg-white dark:bg-background rounded-lg shadow-lg p-6">
-          <h1 className="text-2xl font-bold text-text dark:text-white mb-4">
+        <div
+          className="rounded-lg shadow-lg"
+          style={{
+            backgroundColor: 'var(--bg-secondary)',
+            border: '1px solid var(--bg-quaternary)',
+            boxShadow: 'var(--shadow-medium)',
+          }}
+        >
+          <h1
+            className="text-2xl font-bold mb-4"
+            style={{ color: 'var(--text-primary)' }}
+          >
             PWA Feature Explorer for iOS
           </h1>
 
           <div className="mb-6">
             <button
               onClick={runAllTests}
-              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+              className="px-4 py-2 rounded transition-colors"
+              style={{
+                backgroundColor: 'var(--accent-primary)',
+                color: 'var(--text-inverse)',
+                boxShadow: 'var(--shadow-neumorphic-elevated)',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor =
+                  'var(--accent-primary-light)';
+                e.currentTarget.style.transform = 'translateY(-1px)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'var(--accent-primary)';
+                e.currentTarget.style.transform = 'translateY(0)';
+              }}
             >
               🔄 Run All Tests Again
             </button>
@@ -188,16 +215,32 @@ export default function PWAExplorerPage() {
             {Object.entries(results).map(([test, result]) => (
               <div
                 key={test}
-                className="border border-border dark:border-border rounded-lg p-4"
+                className="rounded-lg p-4"
+                style={{
+                  border: '1px solid var(--bg-quaternary)',
+                  backgroundColor: 'var(--bg-secondary)',
+                }}
               >
                 <div className="flex items-center justify-between mb-2">
-                  <h3 className="font-semibold text-text dark:text-white">
+                  <h3
+                    className="font-semibold"
+                    style={{ color: 'var(--text-primary)' }}
+                  >
                     {getStatusIcon(result)} {test}
                   </h3>
                 </div>
 
-                <div className="bg-surface dark:bg-background rounded p-3 overflow-auto">
-                  <pre className="text-xs text-text dark:text-text-light">
+                <div
+                  className="rounded p-3 overflow-auto"
+                  style={{
+                    backgroundColor: 'var(--bg-tertiary)',
+                    border: '1px solid var(--bg-quaternary)',
+                  }}
+                >
+                  <pre
+                    className="text-xs font-mono"
+                    style={{ color: 'var(--text-primary)' }}
+                  >
                     {JSON.stringify(result, null, 2)}
                   </pre>
                 </div>
@@ -206,7 +249,10 @@ export default function PWAExplorerPage() {
           </div>
 
           {testResults.length === 0 && (
-            <div className="text-center text-text-light py-8">
+            <div
+              className="text-center py-8"
+              style={{ color: 'var(--text-tertiary)' }}
+            >
               Running tests...
             </div>
           )}
