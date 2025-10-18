@@ -1434,3 +1434,82 @@ body {
 .will-change-auto {
   will-change: auto;
 }
+
+/* ============================================================
+   Pull-to-Refresh Component Styles - Twitter Style
+   ============================================================ */
+
+.pull-to-refresh-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.pull-to-refresh-indicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: var(--bg-tertiary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: height, opacity;
+}
+
+.pull-to-refresh-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem;
+}
+
+.pull-to-refresh-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-tertiary);
+  transition: color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.pull-to-refresh-loading-spinner {
+  animation: pull-to-refresh-spin 1s linear infinite;
+}
+
+.pull-to-refresh-text {
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+  transition: color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.pull-to-refresh-content-wrapper {
+  position: relative;
+  width: 100%;
+  will-change: transform;
+}
+
+@keyframes pull-to-refresh-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+  .pull-to-refresh-indicator {
+    background: var(--bg-tertiary);
+  }
+
+  .pull-to-refresh-icon,
+  .pull-to-refresh-text {
+    color: var(--text-tertiary);
+  }
+}
