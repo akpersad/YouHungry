@@ -351,7 +351,7 @@ export function AdminErrorsDashboard() {
             ) : (
               errorGroups.map((group) => (
                 <div
-                  key={group.fingerprint}
+                  key={group._id}
                   className={cn(
                     'p-4 rounded-lg border cursor-pointer transition-all hover:shadow-md',
                     selectedGroup?.fingerprint === group.fingerprint &&

@@ -16,7 +16,7 @@ jest.mock('twilio', () => {
 // Mock dependencies
 jest.mock('@/lib/sms-notifications');
 jest.mock('@/lib/in-app-notifications');
-jest.mock('@/lib/push-notifications');
+jest.mock('@/lib/push-service');
 jest.mock('@/lib/toast-notifications');
 jest.mock('@/lib/logger');
 
@@ -29,6 +29,16 @@ describe('Notification Service', () => {
     name: 'Test User',
     smsOptIn: true,
     smsPhoneNumber: '+18777804236',
+    pushSubscriptions: [
+      {
+        endpoint: 'https://example.com/push',
+        keys: {
+          p256dh: 'test-p256dh-key',
+          auth: 'test-auth-key',
+        },
+        subscribedAt: new Date(),
+      },
+    ],
     preferences: {
       locationSettings: {
         city: 'Test City',
@@ -60,7 +70,7 @@ describe('Notification Service', () => {
     it('should send notifications through all enabled channels', async () => {
       const { smsNotifications } = require('@/lib/sms-notifications');
       const { inAppNotifications } = require('@/lib/in-app-notifications');
-      const { pushNotifications } = require('@/lib/push-notifications');
+      const { pushService } = require('@/lib/push-service');
       const { ToastNotificationService } = require('@/lib/toast-notifications');
 
       // Mock successful responses
@@ -68,9 +78,10 @@ describe('Notification Service', () => {
         success: true,
       });
       inAppNotifications.createGroupDecisionNotification.mockResolvedValue({});
-      pushNotifications.sendGroupDecisionNotification.mockResolvedValue(
-        undefined
-      );
+      pushService.sendGroupDecisionNotification.mockResolvedValue({
+        sent: 1,
+        failed: 0,
+      });
       ToastNotificationService.groupDecisionStarted = jest.fn();
 
       const data = {
@@ -113,9 +124,13 @@ describe('Notification Service', () => {
         data.decisionId
       );
 
-      expect(
-        pushNotifications.sendGroupDecisionNotification
-      ).toHaveBeenCalledWith(data.groupName, data.decisionType, data.deadline);
+      expect(pushService.sendGroupDecisionNotification).toHaveBeenCalledWith(
+        [mockUser.pushSubscriptions[0]],
+        data.groupName,
+        data.decisionType,
+        data.deadline,
+        undefined
+      );
 
       expect(
         ToastNotificationService.groupDecisionStarted
@@ -125,14 +140,15 @@ describe('Notification Service', () => {
     it('should skip SMS when user has not opted in', async () => {
       const { smsNotifications } = require('@/lib/sms-notifications');
       const { inAppNotifications } = require('@/lib/in-app-notifications');
-      const { pushNotifications } = require('@/lib/push-notifications');
+      const { pushService } = require('@/lib/push-service');
       const { ToastNotificationService } = require('@/lib/toast-notifications');
 
       // Mock successful responses
       inAppNotifications.createGroupDecisionNotification.mockResolvedValue({});
-      pushNotifications.sendGroupDecisionNotification.mockResolvedValue(
-        undefined
-      );
+      pushService.sendGroupDecisionNotification.mockResolvedValue({
+        sent: 1,
+        failed: 0,
+      });
       ToastNotificationService.groupDecisionStarted = jest.fn();
 
       const userWithoutSMS = {
@@ -165,16 +181,14 @@ describe('Notification Service', () => {
       expect(
         inAppNotifications.createGroupDecisionNotification
       ).toHaveBeenCalled();
-      expect(
-        pushNotifications.sendGroupDecisionNotification
-      ).toHaveBeenCalled();
+      expect(pushService.sendGroupDecisionNotification).toHaveBeenCalled();
       expect(ToastNotificationService.groupDecisionStarted).toHaveBeenCalled();
     });
 
     it('should handle errors gracefully', async () => {
       const { smsNotifications } = require('@/lib/sms-notifications');
       const { inAppNotifications } = require('@/lib/in-app-notifications');
-      const { pushNotifications } = require('@/lib/push-notifications');
+      const { pushService } = require('@/lib/push-service');
       const { ToastNotificationService } = require('@/lib/toast-notifications');
 
       // Mock SMS failure
@@ -182,9 +196,10 @@ describe('Notification Service', () => {
         new Error('SMS failed')
       );
       inAppNotifications.createGroupDecisionNotification.mockResolvedValue({});
-      pushNotifications.sendGroupDecisionNotification.mockResolvedValue(
-        undefined
-      );
+      pushService.sendGroupDecisionNotification.mockResolvedValue({
+        sent: 1,
+        failed: 0,
+      });
       ToastNotificationService.groupDecisionStarted = jest.fn();
       ToastNotificationService.smsNotificationFailed = jest.fn();
 
@@ -218,7 +233,7 @@ describe('Notification Service', () => {
     it('should send friend request notifications through all channels', async () => {
       const { smsNotifications } = require('@/lib/sms-notifications');
       const { inAppNotifications } = require('@/lib/in-app-notifications');
-      const { pushNotifications } = require('@/lib/push-notifications');
+      const { pushService } = require('@/lib/push-service');
       const { ToastNotificationService } = require('@/lib/toast-notifications');
 
       // Mock successful responses
@@ -226,9 +241,7 @@ describe('Notification Service', () => {
         success: true,
       });
       inAppNotifications.createFriendRequestNotification.mockResolvedValue({});
-      pushNotifications.sendFriendRequestNotification.mockResolvedValue(
-        undefined
-      );
+      pushService.sendFriendRequestNotification.mockResolvedValue(true);
       ToastNotificationService.friendRequestSent = jest.fn();
 
       const data = {
@@ -255,9 +268,10 @@ describe('Notification Service', () => {
         inAppNotifications.createFriendRequestNotification
       ).toHaveBeenCalledWith(mockUserId, data.requesterName, data.requesterId);
 
-      expect(
-        pushNotifications.sendFriendRequestNotification
-      ).toHaveBeenCalledWith(data.requesterName);
+      expect(pushService.sendFriendRequestNotification).toHaveBeenCalledWith(
+        mockUser.pushSubscriptions[0],
+        data.requesterName
+      );
 
       expect(ToastNotificationService.friendRequestSent).toHaveBeenCalledWith(
         data.requesterName
@@ -269,7 +283,7 @@ describe('Notification Service', () => {
     it('should send group invitation notifications through all channels', async () => {
       const { smsNotifications } = require('@/lib/sms-notifications');
       const { inAppNotifications } = require('@/lib/in-app-notifications');
-      const { pushNotifications } = require('@/lib/push-notifications');
+      const { pushService } = require('@/lib/push-service');
       const { ToastNotificationService } = require('@/lib/toast-notifications');
 
       // Mock successful responses
@@ -279,9 +293,7 @@ describe('Notification Service', () => {
       inAppNotifications.createGroupInvitationNotification.mockResolvedValue(
         {}
       );
-      pushNotifications.sendGroupInvitationNotification.mockResolvedValue(
-        undefined
-      );
+      pushService.sendGroupInvitationNotification.mockResolvedValue(true);
       ToastNotificationService.info = jest.fn();
 
       const data = {
@@ -320,9 +332,11 @@ describe('Notification Service', () => {
         data.inviterId
       );
 
-      expect(
-        pushNotifications.sendGroupInvitationNotification
-      ).toHaveBeenCalledWith(data.groupName, data.inviterName);
+      expect(pushService.sendGroupInvitationNotification).toHaveBeenCalledWith(
+        mockUser.pushSubscriptions[0],
+        data.groupName,
+        data.inviterName
+      );
 
       expect(ToastNotificationService.info).toHaveBeenCalledWith(
         'Group invitation sent',
@@ -336,14 +350,15 @@ describe('Notification Service', () => {
   describe('sendDecisionResultNotification', () => {
     it('should send decision result notifications through enabled channels', async () => {
       const { inAppNotifications } = require('@/lib/in-app-notifications');
-      const { pushNotifications } = require('@/lib/push-notifications');
+      const { pushService } = require('@/lib/push-service');
       const { ToastNotificationService } = require('@/lib/toast-notifications');
 
       // Mock successful responses
       inAppNotifications.createDecisionResultNotification.mockResolvedValue({});
-      pushNotifications.sendDecisionResultNotification.mockResolvedValue(
-        undefined
-      );
+      pushService.sendDecisionResultNotification.mockResolvedValue({
+        sent: 1,
+        failed: 0,
+      });
       ToastNotificationService.success = jest.fn();
 
       const data = {
@@ -372,9 +387,11 @@ describe('Notification Service', () => {
         data.restaurantId
       );
 
-      expect(
-        pushNotifications.sendDecisionResultNotification
-      ).toHaveBeenCalledWith(data.groupName, data.restaurantName);
+      expect(pushService.sendDecisionResultNotification).toHaveBeenCalledWith(
+        mockUser.pushSubscriptions,
+        data.groupName,
+        data.restaurantName
+      );
 
       expect(ToastNotificationService.success).toHaveBeenCalledWith(
         `${data.groupName} Decision Complete`,

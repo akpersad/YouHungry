@@ -1,5 +1,14 @@
 import { ObjectId } from 'mongodb';
 
+export interface PushSubscription {
+  endpoint: string;
+  keys: {
+    p256dh: string;
+    auth: string;
+  };
+  subscribedAt: Date;
+}
+
 export interface User {
   _id: ObjectId;
   clerkId: string;
@@ -13,6 +22,7 @@ export interface User {
   smsPhoneNumber?: string;
   phoneNumber?: string; // Clerk phone number
   phoneVerified?: boolean; // Whether the phone number has been verified
+  pushSubscriptions?: PushSubscription[]; // Web push notification subscriptions
   preferences: {
     defaultLocation?: string;
     locationSettings: {

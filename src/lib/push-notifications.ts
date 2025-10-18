@@ -101,12 +101,16 @@ export class PushNotificationManager {
       let subscription = await registration.pushManager.getSubscription();
 
       if (!subscription) {
-        // Subscribe to push notifications
-        // Note: You'll need to generate VAPID keys for production
-        // For now, we'll use the userVisibleOnly option
+        // Use the VAPID public key directly (from .env.local)
+        const vapidPublicKey =
+          'BN1bJK60HzLLlEzqNj4D07BHSSOtPGQgw5qjFCzgB_TxBHzulUCWXafHJO7grUDUWlL6jI3F4M1TBqHkjCMGtgI';
+
+        // Subscribe to push notifications with VAPID key
         subscription = await registration.pushManager.subscribe({
           userVisibleOnly: true,
-          // applicationServerKey: 'YOUR_VAPID_PUBLIC_KEY' // Add this for production
+          applicationServerKey: this.urlBase64ToUint8Array(
+            vapidPublicKey
+          ) as BufferSource,
         });
       }
 
@@ -201,6 +205,25 @@ export class PushNotificationManager {
       binary += String.fromCharCode(bytes[i]);
     }
     return btoa(binary);
+  }
+
+  /**
+   * Helper to convert URL-safe Base64 string to Uint8Array
+   * Required for VAPID applicationServerKey
+   */
+  private urlBase64ToUint8Array(base64String: string): Uint8Array {
+    const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+    const base64 = (base64String + padding)
+      .replace(/\-/g, '+')
+      .replace(/_/g, '/');
+
+    const rawData = atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+
+    for (let i = 0; i < rawData.length; ++i) {
+      outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
   }
 
   /**

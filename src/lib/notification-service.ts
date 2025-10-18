@@ -1,11 +1,11 @@
 import { ObjectId } from 'mongodb';
 import { smsNotifications } from '@/lib/sms-notifications';
 import { inAppNotifications } from '@/lib/in-app-notifications';
-import { pushNotifications } from '@/lib/push-notifications';
+import { pushService } from '@/lib/push-service';
 import { ToastNotificationService } from '@/lib/toast-notifications';
 import { userEmailNotificationService } from '@/lib/user-email-notifications';
 import { logger } from '@/lib/logger';
-import { User } from '@/types/database';
+import { User, PushSubscription } from '@/types/database';
 
 export interface NotificationOptions {
   userId: ObjectId | string;
@@ -173,22 +173,59 @@ export class NotificationService {
         );
       }
 
-      // Send push notification (if supported and subscribed)
-      if (shouldSendPush) {
+      // Send push notification (server-side, works when app is closed)
+      logger.info('🔔 Push notification check', {
+        shouldSendPush,
+        hasPushSubscriptions: !!user?.pushSubscriptions,
+        subscriptionCount: user?.pushSubscriptions?.length || 0,
+        userId: userId.toString(),
+      });
+
+      if (
+        shouldSendPush &&
+        user?.pushSubscriptions &&
+        user.pushSubscriptions.length > 0
+      ) {
+        logger.info('🚀 Sending push notification for group decision', {
+          groupName: data.groupName,
+          subscriptionCount: user.pushSubscriptions.length,
+          userId: userId.toString(),
+        });
+
         promises.push(
-          pushNotifications
+          pushService
             .sendGroupDecisionNotification(
+              user.pushSubscriptions as PushSubscription[],
               data.groupName,
               data.decisionType,
-              data.deadline
+              data.deadline,
+              data.collectionUrl
             )
+            .then(() => {
+              logger.info(
+                '✅ Push notification sent successfully for group decision',
+                {
+                  groupName: data.groupName,
+                  userId: userId.toString(),
+                }
+              );
+            })
             .catch((error) => {
               logger.error(
-                'Failed to send push group decision notification:',
+                '❌ Failed to send push group decision notification:',
                 error
               );
             })
         );
+      } else {
+        logger.warn('⚠️ Skipping push notification', {
+          reason: !shouldSendPush
+            ? 'Push disabled'
+            : !user?.pushSubscriptions
+              ? 'No push subscriptions'
+              : 'No subscriptions available',
+          userId: userId.toString(),
+        });
       }
 
       // Send toast notification (client-side only)
@@ -299,11 +336,18 @@ export class NotificationService {
         );
       }
 
-      // Send push notification
-      if (shouldSendPush) {
+      // Send push notification (server-side)
+      if (
+        shouldSendPush &&
+        user?.pushSubscriptions &&
+        user.pushSubscriptions.length > 0
+      ) {
         promises.push(
-          pushNotifications
-            .sendFriendRequestNotification(data.requesterName)
+          pushService
+            .sendFriendRequestNotification(
+              user.pushSubscriptions[0] as PushSubscription,
+              data.requesterName
+            )
             .catch((error) => {
               logger.error(
                 'Failed to send push friend request notification:',
@@ -422,11 +466,19 @@ export class NotificationService {
         );
       }
 
-      // Send push notification
-      if (shouldSendPush) {
+      // Send push notification (server-side)
+      if (
+        shouldSendPush &&
+        user?.pushSubscriptions &&
+        user.pushSubscriptions.length > 0
+      ) {
         promises.push(
-          pushNotifications
-            .sendGroupInvitationNotification(data.groupName, data.inviterName)
+          pushService
+            .sendGroupInvitationNotification(
+              user.pushSubscriptions[0] as PushSubscription,
+              data.groupName,
+              data.inviterName
+            )
             .catch((error) => {
               logger.error(
                 'Failed to send push group invitation notification:',
@@ -559,11 +611,19 @@ export class NotificationService {
         );
       }
 
-      // Send push notification
-      if (shouldSendPush) {
+      // Send push notification (server-side)
+      if (
+        shouldSendPush &&
+        user?.pushSubscriptions &&
+        user.pushSubscriptions.length > 0
+      ) {
         promises.push(
-          pushNotifications
-            .sendDecisionResultNotification(data.groupName, data.restaurantName)
+          pushService
+            .sendDecisionResultNotification(
+              user.pushSubscriptions as PushSubscription[],
+              data.groupName,
+              data.restaurantName
+            )
             .catch((error) => {
               logger.error(
                 'Failed to send push decision result notification:',

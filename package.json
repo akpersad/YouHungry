@@ -8,6 +8,7 @@
   },
   "scripts": {
     "dev": "node scripts/check-server.js 3000 && next dev --turbopack",
+    "dev:https": "next dev --turbopack --experimental-https --experimental-https-key ./public/cert-key.pem --experimental-https-cert ./public/cert.pem",
     "dev:force": "next dev --turbopack",
     "dev:fix": "node scripts/fix-server-actions.js && npm run dev",
     "dev:kill": "lsof -ti:3000 | xargs kill -9",
@@ -67,7 +68,9 @@
     "@hookform/resolvers": "^5.2.2",
     "@tanstack/react-query": "^5.90.2",
     "@tanstack/react-query-devtools": "^5.90.2",
+    "@vercel/analytics": "^1.5.0",
     "@vercel/blob": "^2.0.0",
+    "@vercel/speed-insights": "^1.2.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "critters": "^0.0.23",
@@ -82,6 +85,7 @@
     "svix": "^1.76.1",
     "tailwind-merge": "^3.3.1",
     "twilio": "^5.10.2",
+    "web-push": "^3.6.7",
     "zod": "^4.1.11"
   },
   "devDependencies": {
@@ -99,6 +103,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/web-push": "^3.6.4",
     "chrome-launcher": "^1.2.1",
     "dotenv": "^17.2.3",
     "eslint": "^9",

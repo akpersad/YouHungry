@@ -2,7 +2,7 @@
 
 import { logger } from '@/lib/logger';
 import { useState, useMemo, useCallback, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useUser } from '@clerk/nextjs';
 import { Restaurant } from '@/types/database';
 import { useCollection, useRandomDecision, useGroup } from '@/hooks/api';
@@ -32,6 +32,7 @@ interface CollectionViewProps {
 
 export function CollectionView({ collectionId }: CollectionViewProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user } = useUser();
   const [showAddRestaurant, setShowAddRestaurant] = useState(false);
   const [selectedRestaurant, setSelectedRestaurant] =
@@ -81,6 +82,45 @@ export function CollectionView({ collectionId }: CollectionViewProps) {
     groupData?.adminIds?.some(
       (adminId) => adminId.toString() === currentUserData?._id?.toString()
     ) || false;
+
+  // Get active decisions count for group collections
+  const { data: activeDecisionsCount } = useQuery({
+    queryKey: ['activeDecisionsCount', collection?.ownerId],
+    queryFn: async () => {
+      if (!collection || collection.type !== 'group') return 0;
+      const response = await fetch(
+        `/api/decisions/group?groupId=${collection.ownerId}&status=active`
+      );
+      if (!response.ok) return 0;
+      const data = await response.json();
+      return data.decisions?.length || 0;
+    },
+    enabled: !!collection && collection.type === 'group',
+  });
+
+  // Handle tab query parameter
+  useEffect(() => {
+    const tabParam = searchParams.get('tab');
+    if (tabParam && ['restaurants', 'decisions'].includes(tabParam)) {
+      setActiveTab(tabParam);
+    }
+  }, [searchParams]);
+
+  // Update URL when tab changes
+  const handleTabChange = useCallback(
+    (tabId: string) => {
+      setActiveTab(tabId);
+      const newSearchParams = new URLSearchParams(searchParams);
+      if (tabId === 'restaurants') {
+        newSearchParams.delete('tab');
+      } else {
+        newSearchParams.set('tab', tabId);
+      }
+      const newUrl = `${window.location.pathname}${newSearchParams.toString() ? `?${newSearchParams.toString()}` : ''}`;
+      router.replace(newUrl, { scroll: false });
+    },
+    [searchParams, router]
+  );
 
   // Debug logging
   logger.debug('Collection type:', collection?.type);
@@ -356,6 +396,7 @@ export function CollectionView({ collectionId }: CollectionViewProps) {
       tabs.push({
         id: 'decisions',
         label: 'Decisions',
+        badge: activeDecisionsCount || 0,
         content: (
           <>
             {/* Decision Action Buttons */}
@@ -431,6 +472,7 @@ export function CollectionView({ collectionId }: CollectionViewProps) {
     decisionError,
     collectionId,
     handleRandomDecision,
+    activeDecisionsCount,
   ]);
 
   if (isLoading) {
@@ -525,7 +567,7 @@ export function CollectionView({ collectionId }: CollectionViewProps) {
           tabs={tabItems}
           activeTab={activeTab}
           onTabChange={(tab) => {
-            setActiveTab(tab);
+            handleTabChange(tab);
             trackCollectionTabChanged(tab, collectionId);
           }}
         />
