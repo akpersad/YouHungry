@@ -485,8 +485,13 @@ export class RealTimeMonitoringService {
     }
 
     try {
+      // Construct absolute URL for server-side fetch
+      const baseUrl = process.env.VERCEL_URL
+        ? `https://${process.env.VERCEL_URL}`
+        : process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+
       // Send alert to admin API
-      const response = await fetch('/api/admin/alerts', {
+      const response = await fetch(`${baseUrl}/api/admin/alerts`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

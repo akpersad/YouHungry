@@ -25,8 +25,14 @@ export class PushNotificationManager {
 
   /**
    * Check if push notifications are supported
+   * Note: This checks browser capability, not device eligibility
+   * Push notifications work on iOS 16.4+ in Safari
    */
   isSupported(): boolean {
+    if (typeof window === 'undefined' || typeof navigator === 'undefined') {
+      return false;
+    }
+
     return (
       'serviceWorker' in navigator &&
       'PushManager' in window &&
@@ -70,14 +76,27 @@ export class PushNotificationManager {
    */
   async requestPermission(): Promise<NotificationPermission> {
     if (!this.isSupported()) {
+      logger.warn('Push notifications are not supported on this browser');
       throw new Error('Push notifications are not supported');
     }
 
-    if (this.isIOS() && !this.hasIOSPushSupport()) {
-      throw new Error('Push notifications require iOS 16.4 or later');
+    // Log iOS detection for debugging
+    if (this.isIOS()) {
+      logger.debug('iOS device detected', {
+        hasIOSSupport: this.hasIOSPushSupport(),
+        userAgent: navigator.userAgent,
+      });
+
+      if (!this.hasIOSPushSupport()) {
+        logger.warn(
+          'iOS version does not support push notifications (requires 16.4+)'
+        );
+        throw new Error('Push notifications require iOS 16.4 or later');
+      }
     }
 
     const permission = await Notification.requestPermission();
+    logger.debug('Notification permission result:', permission);
     return permission;
   }
 
@@ -86,21 +105,32 @@ export class PushNotificationManager {
    */
   async subscribe(): Promise<PushSubscriptionData | null> {
     try {
+      logger.debug('Starting push notification subscription process');
+
       // First, request permission
       const permission = await this.requestPermission();
 
       if (permission !== 'granted') {
-        logger.debug('Push notification permission denied');
+        logger.debug('Push notification permission not granted:', permission);
         return null;
       }
 
+      logger.debug(
+        'Push notification permission granted, getting service worker...'
+      );
+
       // Get service worker registration
       const registration = await navigator.serviceWorker.ready;
+      logger.debug('Service worker ready');
 
       // Check if already subscribed
       let subscription = await registration.pushManager.getSubscription();
 
-      if (!subscription) {
+      if (subscription) {
+        logger.debug('Already subscribed to push notifications');
+      } else {
+        logger.debug('Not subscribed yet, creating new subscription...');
+
         // Use the VAPID public key directly (from .env.local)
         const vapidPublicKey =
           'BN1bJK60HzLLlEzqNj4D07BHSSOtPGQgw5qjFCzgB_TxBHzulUCWXafHJO7grUDUWlL6jI3F4M1TBqHkjCMGtgI';
@@ -112,6 +142,8 @@ export class PushNotificationManager {
             vapidPublicKey
           ) as BufferSource,
         });
+
+        logger.debug('Push subscription created successfully');
       }
 
       // Convert subscription to a format we can store
@@ -122,6 +154,10 @@ export class PushNotificationManager {
           auth: this.arrayBufferToBase64(subscription.getKey('auth')),
         },
       };
+
+      logger.debug('Push subscription data prepared', {
+        endpoint: subscription.endpoint.substring(0, 50) + '...',
+      });
 
       return subscriptionData;
     } catch (error) {
@@ -404,15 +440,19 @@ export class PushNotificationManager {
    * Get notification capabilities info
    */
   getCapabilities() {
-    return {
+    const caps = {
       supported: this.isSupported(),
       permission: this.getPermissionStatus(),
       isIOS: this.isIOS(),
       hasIOSPushSupport: this.hasIOSPushSupport(),
-      serviceWorkerReady: 'serviceWorker' in navigator,
-      pushManager: 'PushManager' in window,
-      notifications: 'Notification' in window,
+      serviceWorkerReady:
+        typeof navigator !== 'undefined' && 'serviceWorker' in navigator,
+      pushManager: typeof window !== 'undefined' && 'PushManager' in window,
+      notifications: typeof window !== 'undefined' && 'Notification' in window,
     };
+
+    logger.debug('Push notification capabilities:', caps);
+    return caps;
   }
 }
 

@@ -381,6 +381,27 @@ function ProfilePageContent() {
   const handlePushToggle = async (checked: boolean) => {
     if (checked) {
       // User wants to enable push notifications
+
+      // Check if device/browser supports push notifications
+      if (!pushStatus.supported) {
+        // Device doesn't support push, but still save the preference for other devices
+        setFormData((prev) => ({ ...prev, pushEnabled: true }));
+
+        await updateProfile({
+          preferences: {
+            notificationSettings: {
+              pushEnabled: true,
+            },
+          },
+        });
+
+        toast.success(
+          "Push notification preference saved! Note: This device/browser doesn't support push notifications, but the setting will apply to other devices."
+        );
+        return;
+      }
+
+      // Device supports push, try to subscribe
       try {
         // This will trigger the native browser/OS permission prompt
         await subscribe();
@@ -410,7 +431,11 @@ function ProfilePageContent() {
     } else {
       // User wants to disable push notifications
       try {
-        await unsubscribe();
+        // Only try to unsubscribe if device supports it and might be subscribed
+        if (pushStatus.supported && pushStatus.subscribed) {
+          await unsubscribe();
+        }
+
         setFormData((prev) => ({ ...prev, pushEnabled: false }));
 
         // Save to profile
@@ -622,7 +647,8 @@ function ProfilePageContent() {
               {formData.phoneNumber ? (
                 <div>
                   <Label htmlFor="phoneNumber">Phone Number</Label>
-                  <div className="flex space-x-2">
+                  {/* Mobile: Stack vertically, Desktop: Horizontal layout */}
+                  <div className="flex flex-col space-y-2 md:flex-row md:space-y-0 md:space-x-2">
                     <Input
                       id="phoneNumber"
                       value={formData.phoneNumber}
@@ -653,7 +679,7 @@ function ProfilePageContent() {
                         if (isVerified) {
                           // Verified phone number
                           return (
-                            <div className="flex items-center text-success font-medium px-4 whitespace-nowrap">
+                            <div className="flex items-center text-success font-medium px-4 whitespace-nowrap md:whitespace-nowrap">
                               <Check className="h-5 w-5 mr-2" />
                               Verified
                             </div>
@@ -666,8 +692,8 @@ function ProfilePageContent() {
                               Pending
                             </div>
                           ) : (
-                            <div className="flex items-center gap-2">
-                              <div className="flex items-center text-amber-600 font-medium px-2 whitespace-nowrap">
+                            <div className="flex flex-col space-y-2 md:flex-row md:space-y-0 md:space-x-2 md:items-center">
+                              <div className="flex items-center text-amber-600 font-medium px-2">
                                 ⚠️ Unverified
                               </div>
                               <Button
@@ -678,6 +704,7 @@ function ProfilePageContent() {
                                 }
                                 variant="outline"
                                 size="sm"
+                                className="w-full md:w-auto"
                               >
                                 {phoneValidationStatus === 'validating' ? (
                                   <>
@@ -707,6 +734,7 @@ function ProfilePageContent() {
                               !formData.phoneNumber
                             }
                             variant="outline"
+                            className="w-full md:w-auto"
                           >
                             {phoneValidationStatus === 'validating' ? (
                               <>
@@ -729,7 +757,8 @@ function ProfilePageContent() {
                       <Label htmlFor="verificationCode">
                         Verification Code
                       </Label>
-                      <div className="flex space-x-2 mt-2">
+                      {/* Mobile: Stack vertically, Desktop: Horizontal layout */}
+                      <div className="flex flex-col space-y-2 mt-2 md:flex-row md:space-y-0 md:space-x-2">
                         <Input
                           id="verificationCode"
                           value={verificationCode}
@@ -747,33 +776,38 @@ function ProfilePageContent() {
                           autoFocus
                           disabled={phoneValidationStatus === 'verifying'}
                         />
-                        <Button
-                          type="button"
-                          onClick={handleVerifyCode}
-                          disabled={
-                            phoneValidationStatus === 'verifying' ||
-                            verificationCode.length !== 6
-                          }
-                        >
-                          {phoneValidationStatus === 'verifying' ? (
-                            <>
-                              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                              Verifying...
-                            </>
-                          ) : (
-                            'Submit'
-                          )}
-                        </Button>
-                        <Button
-                          type="button"
-                          onClick={handleCancelVerification}
-                          variant="outline"
-                          disabled={phoneValidationStatus === 'verifying'}
-                        >
-                          Cancel
-                        </Button>
+                        <div className="flex flex-col space-y-2 md:flex-row md:space-y-0 md:space-x-2">
+                          <Button
+                            type="button"
+                            onClick={handleVerifyCode}
+                            disabled={
+                              phoneValidationStatus === 'verifying' ||
+                              verificationCode.length !== 6
+                            }
+                            className="w-full md:w-auto"
+                          >
+                            {phoneValidationStatus === 'verifying' ? (
+                              <>
+                                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                Verifying...
+                              </>
+                            ) : (
+                              'Submit'
+                            )}
+                          </Button>
+                          <Button
+                            type="button"
+                            onClick={handleCancelVerification}
+                            variant="outline"
+                            disabled={phoneValidationStatus === 'verifying'}
+                            className="w-full md:w-auto"
+                          >
+                            Cancel
+                          </Button>
+                        </div>
                       </div>
-                      <div className="flex justify-between items-center mt-2">
+                      {/* Mobile: Stack vertically, Desktop: Horizontal layout */}
+                      <div className="flex flex-col space-y-2 mt-2 md:flex-row md:space-y-0 md:justify-between md:items-center">
                         <p className="text-sm text-primary">
                           Enter the 6-digit code sent to your phone.
                         </p>
@@ -785,6 +819,7 @@ function ProfilePageContent() {
                           disabled={['verifying', 'validating'].includes(
                             phoneValidationStatus
                           )}
+                          className="w-full md:w-auto"
                         >
                           Resend Code
                         </Button>
@@ -859,7 +894,8 @@ function ProfilePageContent() {
               {formData.smsOptIn && !formData.phoneNumber && (
                 <div>
                   <Label htmlFor="smsPhoneNumber">SMS Phone Number</Label>
-                  <div className="flex space-x-2">
+                  {/* Mobile: Stack vertically, Desktop: Horizontal layout */}
+                  <div className="flex flex-col space-y-2 md:flex-row md:space-y-0 md:space-x-2">
                     <Input
                       id="smsPhoneNumber"
                       value={formData.smsPhoneNumber}
@@ -898,6 +934,7 @@ function ProfilePageContent() {
                           !formData.smsPhoneNumber
                         }
                         variant="outline"
+                        className="w-full md:w-auto"
                       >
                         {phoneValidationStatus === 'validating' ? (
                           <>
@@ -918,7 +955,8 @@ function ProfilePageContent() {
                       <Label htmlFor="verificationCodeSMS">
                         Verification Code
                       </Label>
-                      <div className="flex space-x-2 mt-2">
+                      {/* Mobile: Stack vertically, Desktop: Horizontal layout */}
+                      <div className="flex flex-col space-y-2 mt-2 md:flex-row md:space-y-0 md:space-x-2">
                         <Input
                           id="verificationCodeSMS"
                           value={verificationCode}
@@ -936,33 +974,38 @@ function ProfilePageContent() {
                           autoFocus
                           disabled={phoneValidationStatus === 'verifying'}
                         />
-                        <Button
-                          type="button"
-                          onClick={handleVerifyCode}
-                          disabled={
-                            phoneValidationStatus === 'verifying' ||
-                            verificationCode.length !== 6
-                          }
-                        >
-                          {phoneValidationStatus === 'verifying' ? (
-                            <>
-                              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                              Verifying...
-                            </>
-                          ) : (
-                            'Submit'
-                          )}
-                        </Button>
-                        <Button
-                          type="button"
-                          onClick={handleCancelVerification}
-                          variant="outline"
-                          disabled={phoneValidationStatus === 'verifying'}
-                        >
-                          Cancel
-                        </Button>
+                        <div className="flex flex-col space-y-2 md:flex-row md:space-y-0 md:space-x-2">
+                          <Button
+                            type="button"
+                            onClick={handleVerifyCode}
+                            disabled={
+                              phoneValidationStatus === 'verifying' ||
+                              verificationCode.length !== 6
+                            }
+                            className="w-full md:w-auto"
+                          >
+                            {phoneValidationStatus === 'verifying' ? (
+                              <>
+                                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                Verifying...
+                              </>
+                            ) : (
+                              'Submit'
+                            )}
+                          </Button>
+                          <Button
+                            type="button"
+                            onClick={handleCancelVerification}
+                            variant="outline"
+                            disabled={phoneValidationStatus === 'verifying'}
+                            className="w-full md:w-auto"
+                          >
+                            Cancel
+                          </Button>
+                        </div>
                       </div>
-                      <div className="flex justify-between items-center mt-2">
+                      {/* Mobile: Stack vertically, Desktop: Horizontal layout */}
+                      <div className="flex flex-col space-y-2 mt-2 md:flex-row md:space-y-0 md:justify-between md:items-center">
                         <p className="text-sm text-primary">
                           Enter the 6-digit code sent to your phone.
                         </p>
@@ -974,6 +1017,7 @@ function ProfilePageContent() {
                           disabled={['verifying', 'validating'].includes(
                             phoneValidationStatus
                           )}
+                          className="w-full md:w-auto"
                         >
                           Resend Code
                         </Button>
@@ -1062,12 +1106,14 @@ function ProfilePageContent() {
                         </p>
                       </div>
                     )}
-                    {!pushStatus.supported && (
-                      <div className="mt-2 p-3 bg-tertiary/10 border border-tertiary/20 rounded-lg flex items-start gap-2">
-                        <AlertCircle className="h-4 w-4 text-tertiary mt-0.5 flex-shrink-0" />
-                        <p className="text-sm text-tertiary">
+                    {!pushStatus.supported && formData.pushEnabled && (
+                      <div className="mt-2 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg flex items-start gap-2">
+                        <AlertCircle className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                        <p className="text-sm text-blue-600">
                           Push notifications are not supported on this
-                          device/browser.
+                          device/browser, but your preference has been saved and
+                          will apply to other devices where you&apos;re logged
+                          in.
                         </p>
                       </div>
                     )}

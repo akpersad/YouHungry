@@ -9,6 +9,7 @@ import {
   PWAInstallPrompt,
   PWAOfflineBanner,
 } from '@/components/ui/PWAStatusIndicator';
+import { PullToRefresh } from '@/components/PullToRefresh';
 import { ErrorBoundary } from '@/components/errors/ErrorBoundary';
 import { GoogleAnalytics } from '@/components/analytics/GoogleAnalytics';
 import { Analytics } from '@vercel/analytics/react';
@@ -137,9 +138,11 @@ export default function RootLayout({
           <ErrorBoundary level="root">
             <ThemeProvider>
               <QueryProvider>
-                <PageTransition>
-                  <AppLayout>{children}</AppLayout>
-                </PageTransition>
+                <PullToRefresh>
+                  <PageTransition>
+                    <AppLayout>{children}</AppLayout>
+                  </PageTransition>
+                </PullToRefresh>
                 <PWAInstallPrompt />
                 <PWAOfflineBanner />
                 <Toaster
@@ -159,57 +162,36 @@ export default function RootLayout({
             strategy="afterInteractive"
             dangerouslySetInnerHTML={{
               __html: `
-                console.log('🔧 Service Worker: Starting registration check...');
-                
                 if ('serviceWorker' in navigator) {
-                  console.log('🔧 Service Worker: Navigator supports service workers');
-                  
-                  // Browser detection for iOS compatibility
                   const isSafari = /Safari/.test(navigator.userAgent) && !(/Chrome/.test(navigator.userAgent) || /CriOS/.test(navigator.userAgent));
-                  console.log('🔧 Service Worker: Browser detection - isSafari:', isSafari);
                   
                   if (isSafari) {
-                    console.log('🔧 Service Worker: Using Safari registration strategy');
-                    // Safari needs registration on load event
                     window.addEventListener('load', function() {
-                      console.log('🔧 Service Worker: Safari - attempting registration on load event');
                       navigator.serviceWorker.register('/sw.js', { scope: '/' })
                         .then(function(registration) {
-                          console.log('🔧 Service Worker: Safari registration successful!', registration);
                           window.dispatchEvent(new CustomEvent('sw-registered', { detail: registration }));
                         })
                         .catch(function(err) {
-                          console.error('🔧 Service Worker: Safari registration failed:', err);
                           window.dispatchEvent(new CustomEvent('sw-error', { detail: err }));
                         });
                     });
                   } else {
-                    console.log('🔧 Service Worker: Using standard registration strategy');
-                    // Standard registration for Chrome and other browsers
                     navigator.serviceWorker.register('/sw.js')
                       .then(function(registration) {
-                        console.log('🔧 Service Worker: Standard registration successful!', registration);
                         window.dispatchEvent(new CustomEvent('sw-registered', { detail: registration }));
                       })
                       .catch(function(err) {
-                        console.error('🔧 Service Worker: Standard registration failed, trying fallback:', err);
-                        // Fallback to load event if immediate registration fails
                         window.addEventListener('load', function() {
-                          console.log('🔧 Service Worker: Fallback - attempting registration on load event');
                           navigator.serviceWorker.register('/sw.js')
                             .then(function(registration) {
-                              console.log('🔧 Service Worker: Fallback registration successful!', registration);
                               window.dispatchEvent(new CustomEvent('sw-registered', { detail: registration }));
                             })
                             .catch(function(err) {
-                              console.error('🔧 Service Worker: Fallback registration failed:', err);
                               window.dispatchEvent(new CustomEvent('sw-error', { detail: err }));
                             });
                         });
                       });
                   }
-                } else {
-                  console.error('🔧 Service Worker: Navigator does NOT support service workers');
                 }
               `,
             }}

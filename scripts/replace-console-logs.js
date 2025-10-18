@@ -3,6 +3,14 @@
 /**
  * Script to automatically replace console.log statements with smart logger
  * This helps ensure debug logs don't run in production
+ *
+ * IMPORTANT: This script ONLY processes server-side files:
+ * - API routes in src/app/api/
+ * - Route handlers (route.ts files)
+ * - Middleware (src/middleware.ts)
+ *
+ * Client-side files (hooks, components, client utilities) use console directly
+ * because the logger module is server-side only and won't work in the browser.
  */
 
 const fs = require('fs');
@@ -10,14 +18,22 @@ const glob = require('glob');
 
 // Configuration
 const config = {
-  // Directories to search
-  srcDirs: ['src/**/*.{ts,tsx,js,jsx}'],
+  // Only target server-side directories
+  // API routes are always server-side, so safe to process
+  srcDirs: [
+    'src/app/api/**/*.{ts,tsx,js,jsx}', // API routes (server-side only)
+    'src/app/**/route.{ts,js}', // Route handlers (server-side only)
+    'src/middleware.{ts,js}', // Middleware (server-side only)
+  ],
   // Files to exclude
   exclude: [
     'src/**/*.test.{ts,tsx,js,jsx}',
     'src/**/*.spec.{ts,tsx,js,jsx}',
     'src/__mocks__/**/*',
     'src/lib/logger.ts', // Don't modify the logger implementation itself
+    'src/hooks/**/*', // Never process hooks (client-side)
+    'src/components/**/*', // Never process components (can be client-side)
+    'src/lib/**/*', // Never process lib utilities (can be client-side)
     'node_modules/**/*',
     '.next/**/*',
   ],
@@ -89,29 +105,18 @@ function addLoggerImport(content) {
     return content;
   }
 
-  // Determine if it's a client component
-  const isClientComponent = content.includes("'use client'");
-
-  if (isClientComponent) {
-    // Add after 'use client' directive
+  // Server-side files only - add at the beginning of imports
+  const importMatch = content.match(
+    /^import\s+.*?from\s+['"][^'"]+['"];?\s*\n/m
+  );
+  if (importMatch) {
     return content.replace(
-      /('use client';?\s*\n)/,
-      `$1${config.loggerImport}\n`
+      importMatch[0],
+      `${config.loggerImport}\n${importMatch[0]}`
     );
   } else {
-    // Add at the beginning of imports
-    const importMatch = content.match(
-      /^import\s+.*?from\s+['"][^'"]+['"];?\s*\n/m
-    );
-    if (importMatch) {
-      return content.replace(
-        importMatch[0],
-        `${config.loggerImport}\n${importMatch[0]}`
-      );
-    } else {
-      // No imports found, add at the top
-      return `${config.loggerImport}\n\n${content}`;
-    }
+    // No imports found, add at the top
+    return `${config.loggerImport}\n\n${content}`;
   }
 }
 
@@ -157,15 +162,16 @@ function processFile(filePath) {
 }
 
 function main() {
-  console.log('🔍 Finding files to process...');
+  console.log('🔍 Finding SERVER-SIDE files to process...');
+  console.log('   (API routes, route handlers, middleware only)');
   const files = findFiles();
 
   if (files.length === 0) {
-    console.log('No files found to process.');
+    console.log('No server-side files found to process.');
     return;
   }
 
-  console.log(`Found ${files.length} files to check:`);
+  console.log(`Found ${files.length} server-side files to check:`);
 
   let processedCount = 0;
   let updatedCount = 0;

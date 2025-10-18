@@ -115,6 +115,7 @@ export async function GET() {
       smsOptIn: user.smsOptIn,
       smsPhoneNumber: user.smsPhoneNumber,
       phoneNumber: user.phoneNumber,
+      phoneVerified: user.phoneVerified,
       preferences: user.preferences,
       createdAt: user.createdAt.toISOString(),
       updatedAt: user.updatedAt.toISOString(),

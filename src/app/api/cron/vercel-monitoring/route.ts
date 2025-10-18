@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 
 // This endpoint will be called by Vercel Cron Jobs
@@ -18,7 +19,7 @@ export async function GET(_request: NextRequest) {
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    console.error('Cron job failed:', error);
+    logger.error('Cron job failed:', error);
 
     return NextResponse.json(
       {

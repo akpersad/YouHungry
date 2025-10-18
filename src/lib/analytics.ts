@@ -58,7 +58,7 @@ export function trackEvent(eventName: string, params?: EventParams) {
   if (!isAnalyticsAvailable()) {
     // Log in development for debugging
     if (process.env.NODE_ENV === 'development') {
-      console.log('[Analytics]', eventName, params);
+      console.debug('[Analytics]', eventName, params);
     }
     return;
   }
