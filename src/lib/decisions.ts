@@ -860,6 +860,26 @@ export async function getGroupDecision(
 }
 
 /**
+ * Get all group decisions for a group (regardless of status)
+ */
+export async function getAllGroupDecisions(
+  groupId: string
+): Promise<Decision[]> {
+  const db = await connectToDatabase();
+  const decisions = await db
+    .collection('decisions')
+    .find({
+      groupId: new ObjectId(groupId),
+      type: 'group',
+      // Get all decisions regardless of status (active, completed, closed)
+    })
+    .sort({ createdAt: -1 })
+    .toArray();
+
+  return decisions as Decision[];
+}
+
+/**
  * Get active group decisions for a group
  */
 export async function getActiveGroupDecisions(
@@ -871,7 +891,7 @@ export async function getActiveGroupDecisions(
     .find({
       groupId: new ObjectId(groupId),
       type: 'group',
-      // Get all decisions regardless of status (active, completed, closed)
+      status: 'active', // Only get active decisions
     })
     .sort({ createdAt: -1 })
     .toArray();

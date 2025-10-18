@@ -1,7 +1,11 @@
 import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth, getCurrentUser } from '@/lib/auth';
-import { createGroupDecision, getActiveGroupDecisions } from '@/lib/decisions';
+import {
+  createGroupDecision,
+  getActiveGroupDecisions,
+  getAllGroupDecisions,
+} from '@/lib/decisions';
 import { getGroupById } from '@/lib/groups';
 import { sendDecisionStartedNotifications } from '@/lib/decision-notifications';
 import { z } from 'zod';
@@ -52,6 +56,14 @@ export async function POST(request: NextRequest) {
     );
 
     // Send decision started notifications to all group members
+    logger.info('🎯 Group decision created, sending notifications', {
+      groupId,
+      decisionId: decision._id.toString(),
+      method,
+      createdBy: currentUser._id.toString(),
+      participantCount: participants.length,
+    });
+
     try {
       await sendDecisionStartedNotifications(
         groupId,
@@ -61,9 +73,10 @@ export async function POST(request: NextRequest) {
         decision.deadline,
         currentUser._id.toString()
       );
+      logger.info('✅ Decision started notifications completed');
     } catch (error) {
       // Log error but don't fail the request
-      logger.error('Failed to send decision started notifications:', error);
+      logger.error('❌ Failed to send decision started notifications:', error);
     }
 
     return NextResponse.json({
@@ -105,6 +118,7 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const groupId = searchParams.get('groupId');
+    const status = searchParams.get('status');
 
     if (!groupId) {
       return NextResponse.json(
@@ -113,7 +127,14 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const decisions = await getActiveGroupDecisions(groupId);
+    // If status parameter is provided, use it to filter decisions
+    let decisions;
+    if (status === 'active') {
+      decisions = await getActiveGroupDecisions(groupId);
+    } else {
+      // For backward compatibility, get all decisions if no status specified
+      decisions = await getAllGroupDecisions(groupId);
+    }
 
     return NextResponse.json({
       success: true,
