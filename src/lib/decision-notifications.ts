@@ -71,6 +71,15 @@ export async function sendDecisionStartedNotifications(
     const shortUrl = await urlShortener.shortenUrl(collectionUrl, 30); // 30 days expiry
 
     // Send notifications to each member (except the creator)
+    logger.info('📣 Sending decision started notifications', {
+      groupName: group.name,
+      totalMembers: members.length,
+      filteredMembers: members.filter(
+        (m) => m._id.toString() !== createdByUserId
+      ).length,
+      createdByUserId,
+    });
+
     const notificationPromises = members
       .filter((member) => member._id.toString() !== createdByUserId)
       .map(async (member) => {
@@ -78,6 +87,14 @@ export async function sendDecisionStartedNotifications(
         const wantsNotification =
           member.preferences?.notificationSettings?.groupDecisions?.started ??
           true;
+
+        logger.info('👤 Processing member notification', {
+          memberId: member._id.toString(),
+          memberName: member.name,
+          wantsNotification,
+          hasPushSubscriptions: !!member.pushSubscriptions,
+          pushSubscriptionCount: member.pushSubscriptions?.length || 0,
+        });
 
         if (!wantsNotification) {
           logger.info(
