@@ -7,7 +7,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
 import { AuthButtons } from '@/components/auth/AuthButtons';
 
 export default async function Home() {
@@ -108,25 +107,6 @@ export default async function Home() {
         </p>
         <div className="text-center">
           <AuthButtons />
-        </div>
-      </div>
-
-      {/* Developer Tools Section */}
-      <div className="mt-8 p-4 bg-surface dark:bg-background rounded-lg border border-border dark:border-border">
-        <h3 className="text-sm font-semibold text-text dark:text-text-light mb-3">
-          🛠️ Developer Tools
-        </h3>
-        <div className="flex flex-wrap gap-2">
-          <a href="/pwa-explorer">
-            <Button variant="outline" size="sm">
-              📱 PWA Explorer
-            </Button>
-          </a>
-          <a href="/push-test">
-            <Button variant="outline" size="sm">
-              🔔 Push Notifications Test
-            </Button>
-          </a>
         </div>
       </div>
     </div>

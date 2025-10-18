@@ -147,38 +147,6 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
         </div>
-
-        {/* PWA Developer Tools Section */}
-        <div
-          className="mt-8 p-4 rounded-lg"
-          style={{
-            backgroundColor: 'var(--bg-secondary)',
-            border: '1px solid var(--bg-quaternary)',
-          }}
-        >
-          <h3
-            className="text-sm font-semibold mb-3"
-            style={{ color: 'var(--text-primary)' }}
-          >
-            🛠️ Developer Tools
-          </h3>
-          <div className="flex flex-wrap gap-2">
-            <Link href="/pwa-explorer">
-              <Button variant="outline" size="sm">
-                📱 PWA Explorer
-              </Button>
-            </Link>
-            <Link href="/push-test">
-              <Button variant="outline" size="sm">
-                🔔 Push Notifications Test
-              </Button>
-            </Link>
-          </div>
-          <p className="text-xs mt-3" style={{ color: 'var(--text-tertiary)' }}>
-            Test PWA features and push notifications on your device. Now works
-            with HTTPS! 🎉
-          </p>
-        </div>
       </div>
     </ProtectedRoute>
   );
