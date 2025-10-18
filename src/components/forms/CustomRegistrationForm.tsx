@@ -474,7 +474,8 @@ export function CustomRegistrationForm() {
         trackSignupComplete('email');
 
         // Redirect to profile so user can verify phone and set preferences
-        router.push('/profile');
+        // Add new_user query param to trigger push notification prompt
+        router.push('/profile?new_user=true');
       } else {
         // If not complete, there may be additional steps required
         logger.error('Sign-up not complete:', completeSignUp.status);
