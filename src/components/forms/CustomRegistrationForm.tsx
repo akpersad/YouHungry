@@ -297,6 +297,15 @@ export function CustomRegistrationForm() {
     (isValid) => isValid
   );
 
+  // TEMPORARY DEBUG - REMOVE AFTER TESTING
+  // logger.info('🔍 Form Validation Debug:', {
+  //   fieldValidation,
+  //   isFormValid,
+  //   isSubmitting,
+  //   isLoaded,
+  //   hasSignUp: !!signUp,
+  // });
+
   const handleInputChange = (
     field: keyof FormData,
     value: string | boolean
@@ -318,7 +327,22 @@ export function CustomRegistrationForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // TEMPORARY DEBUG - REMOVE AFTER TESTING
+    // logger.info('🚀 Form Submit Clicked!', {
+    //   validateForm: validateForm(),
+    //   isLoaded,
+    //   hasSignUp: !!signUp,
+    //   formData,
+    //   fieldValidation,
+    // });
+
     if (!validateForm() || !isLoaded || !signUp) {
+      // TEMPORARY DEBUG - REMOVE AFTER TESTING
+      // logger.warn('❌ Form submission blocked:', {
+      //   validateFormResult: validateForm(),
+      //   isLoaded,
+      //   hasSignUp: !!signUp,
+      // });
       return;
     }
 
@@ -351,19 +375,8 @@ export function CustomRegistrationForm() {
       // Prepare email verification - sends the code
       await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
 
-      // If SMS opt-in, also send phone verification via our API
-      if (formData.smsOptIn && fullPhoneNumber) {
-        try {
-          await fetch('/api/user/verify-phone', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ phoneNumber: fullPhoneNumber }),
-          });
-        } catch {
-          // Don't fail registration if phone verification fails
-          logger.warn('Phone verification failed to send');
-        }
-      }
+      // Note: Phone verification is skipped during registration since user isn't authenticated yet
+      // User can verify their phone number later on the profile page
 
       // Registration successful - transition to verification state
       setFormState('verification');
@@ -384,24 +397,47 @@ export function CustomRegistrationForm() {
       }, 1000);
     } catch (err: unknown) {
       logger.error('Registration error:', err);
-      // Handle Clerk errors
-      if (
-        err &&
-        typeof err === 'object' &&
-        'errors' in err &&
-        Array.isArray(err.errors) &&
-        err.errors[0] &&
-        typeof err.errors[0] === 'object' &&
-        'message' in err.errors[0]
-      ) {
-        const errorMessage =
-          (err.errors[0].message as string) || 'Registration failed';
-        setErrors({ general: errorMessage });
-      } else {
-        setErrors({
-          general: 'An unexpected error occurred. Please try again.',
-        });
+
+      // Handle different types of Clerk errors
+      if (err && typeof err === 'object') {
+        // Check for Clerk error format
+        if ('errors' in err && Array.isArray(err.errors) && err.errors[0]) {
+          const firstError = err.errors[0];
+          if (typeof firstError === 'object' && 'message' in firstError) {
+            const errorMessage = firstError.message as string;
+
+            // Handle specific password breach error
+            if (errorMessage.includes('data breach')) {
+              setErrors({
+                password:
+                  'This password has been found in an online data breach. Please choose a different, more secure password.',
+              });
+            } else {
+              setErrors({ general: errorMessage });
+            }
+            return;
+          }
+        }
+
+        // Check for direct error message (some Clerk errors might be in different format)
+        if ('message' in err) {
+          const errorMessage = err.message as string;
+          if (errorMessage.includes('data breach')) {
+            setErrors({
+              password:
+                'This password has been found in an online data breach. Please choose a different, more secure password.',
+            });
+          } else {
+            setErrors({ general: errorMessage });
+          }
+          return;
+        }
       }
+
+      // Fallback for unexpected errors
+      setErrors({
+        general: 'An unexpected error occurred. Please try again.',
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -437,8 +473,8 @@ export function CustomRegistrationForm() {
         // Track successful signup
         trackSignupComplete('email');
 
-        // Redirect to dashboard
-        router.push('/dashboard');
+        // Redirect to profile so user can verify phone and set preferences
+        router.push('/profile');
       } else {
         // If not complete, there may be additional steps required
         logger.error('Sign-up not complete:', completeSignUp.status);
@@ -1015,6 +1051,14 @@ export function CustomRegistrationForm() {
         variant="primary"
         disabled={isSubmitting || !isFormValid}
         className="w-full"
+        onClick={() => {
+          // TEMPORARY DEBUG - REMOVE AFTER TESTING
+          // logger.info('🎯 Button clicked!', {
+          //   isSubmitting,
+          //   isFormValid,
+          //   disabled: isSubmitting || !isFormValid,
+          // });
+        }}
       >
         {isSubmitting ? 'Creating Account...' : 'Create Account'}
       </Button>

@@ -550,41 +550,85 @@ export default function ProfilePage() {
                         phoneValidationStatus
                       )}
                     />
-                    {/* Show verify button if phone number has changed from verified number */}
-                    {normalizePhoneNumber(formData.phoneNumber) !==
-                    normalizePhoneNumber(profile?.phoneNumber || '') ? (
-                      phoneValidationStatus === 'pending' ? (
-                        <div className="flex items-center text-amber-600 font-medium px-4 whitespace-nowrap">
-                          <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-                          Pending
-                        </div>
-                      ) : (
-                        <Button
-                          type="button"
-                          onClick={handlePhoneValidation}
-                          disabled={
-                            phoneValidationStatus === 'validating' ||
-                            !formData.phoneNumber
-                          }
-                          variant="outline"
-                        >
-                          {phoneValidationStatus === 'validating' ? (
-                            <>
-                              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                              Sending...
-                            </>
+                    {/* Show verification status or verify button */}
+                    {(() => {
+                      const phoneMatches =
+                        normalizePhoneNumber(formData.phoneNumber) ===
+                        normalizePhoneNumber(profile?.phoneNumber || '');
+                      const isVerified = profile?.phoneVerified === true;
+
+                      // Phone exists in profile and matches, check verification status
+                      if (phoneMatches && formData.phoneNumber) {
+                        if (isVerified) {
+                          // Verified phone number
+                          return (
+                            <div className="flex items-center text-success font-medium px-4 whitespace-nowrap">
+                              <Check className="h-5 w-5 mr-2" />
+                              Verified
+                            </div>
+                          );
+                        } else {
+                          // Unverified phone number - show button to verify
+                          return phoneValidationStatus === 'pending' ? (
+                            <div className="flex items-center text-amber-600 font-medium px-4 whitespace-nowrap">
+                              <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                              Pending
+                            </div>
                           ) : (
-                            'Verify'
-                          )}
-                        </Button>
-                      )
-                    ) : (
-                      /* Show verified badge if number matches profile */
-                      <div className="flex items-center text-success font-medium px-4">
-                        <Check className="h-5 w-5 mr-2" />
-                        Verified
-                      </div>
-                    )}
+                            <div className="flex items-center gap-2">
+                              <div className="flex items-center text-amber-600 font-medium px-2 whitespace-nowrap">
+                                ⚠️ Unverified
+                              </div>
+                              <Button
+                                type="button"
+                                onClick={handlePhoneValidation}
+                                disabled={
+                                  phoneValidationStatus === 'validating'
+                                }
+                                variant="outline"
+                                size="sm"
+                              >
+                                {phoneValidationStatus === 'validating' ? (
+                                  <>
+                                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                    Sending...
+                                  </>
+                                ) : (
+                                  'Verify Now'
+                                )}
+                              </Button>
+                            </div>
+                          );
+                        }
+                      } else {
+                        // Phone number changed or is new - show verify button
+                        return phoneValidationStatus === 'pending' ? (
+                          <div className="flex items-center text-amber-600 font-medium px-4 whitespace-nowrap">
+                            <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                            Pending
+                          </div>
+                        ) : (
+                          <Button
+                            type="button"
+                            onClick={handlePhoneValidation}
+                            disabled={
+                              phoneValidationStatus === 'validating' ||
+                              !formData.phoneNumber
+                            }
+                            variant="outline"
+                          >
+                            {phoneValidationStatus === 'validating' ? (
+                              <>
+                                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                Sending...
+                              </>
+                            ) : (
+                              'Verify'
+                            )}
+                          </Button>
+                        );
+                      }
+                    })()}
                   </div>
 
                   {/* Show verification code input when pending or verifying */}
@@ -664,10 +708,22 @@ export default function ProfilePage() {
                   )}
                   {phoneValidationStatus !== 'pending' && (
                     <p className="text-sm text-tertiary mt-1">
-                      {normalizePhoneNumber(formData.phoneNumber) ===
-                      normalizePhoneNumber(profile?.phoneNumber || '')
-                        ? 'Verified phone number for SMS notifications. Edit to change and re-verify.'
-                        : 'Enter your phone number and click Verify to enable SMS notifications.'}
+                      {(() => {
+                        const phoneMatches =
+                          normalizePhoneNumber(formData.phoneNumber) ===
+                          normalizePhoneNumber(profile?.phoneNumber || '');
+                        const isVerified = profile?.phoneVerified === true;
+
+                        if (phoneMatches && formData.phoneNumber) {
+                          if (isVerified) {
+                            return 'Verified phone number for SMS notifications. Edit to change and re-verify.';
+                          } else {
+                            return 'Phone number needs verification. Click "Verify Now" to receive an SMS code.';
+                          }
+                        } else {
+                          return 'Enter your phone number and click Verify to enable SMS notifications.';
+                        }
+                      })()}
                     </p>
                   )}
                 </div>
@@ -688,15 +744,24 @@ export default function ProfilePage() {
                 </div>
               )}
 
-              <div className="flex items-center space-x-2">
-                <Switch
-                  id="smsOptIn"
-                  checked={formData.smsOptIn}
-                  onCheckedChange={(checked) =>
-                    handleInputChange('smsOptIn', checked)
-                  }
-                />
-                <Label htmlFor="smsOptIn">Enable SMS Notifications</Label>
+              <div className="space-y-2">
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="smsOptIn"
+                    checked={formData.smsOptIn}
+                    onCheckedChange={(checked) =>
+                      handleInputChange('smsOptIn', checked)
+                    }
+                    disabled={formData.smsOptIn && !profile?.phoneVerified}
+                  />
+                  <Label htmlFor="smsOptIn">Enable SMS Notifications</Label>
+                </div>
+                {formData.smsOptIn && !profile?.phoneVerified && (
+                  <p className="text-sm text-amber-600 ml-8">
+                    ⚠️ SMS notifications won&apos;t be sent until your phone
+                    number is verified.
+                  </p>
+                )}
               </div>
 
               {/* Show SMS Phone Number field only if no verified number and SMS is enabled */}
