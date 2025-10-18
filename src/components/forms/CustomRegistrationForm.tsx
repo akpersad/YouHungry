@@ -297,15 +297,6 @@ export function CustomRegistrationForm() {
     (isValid) => isValid
   );
 
-  // TEMPORARY DEBUG - REMOVE AFTER TESTING
-  // logger.info('🔍 Form Validation Debug:', {
-  //   fieldValidation,
-  //   isFormValid,
-  //   isSubmitting,
-  //   isLoaded,
-  //   hasSignUp: !!signUp,
-  // });
-
   const handleInputChange = (
     field: keyof FormData,
     value: string | boolean
@@ -327,22 +318,7 @@ export function CustomRegistrationForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // TEMPORARY DEBUG - REMOVE AFTER TESTING
-    // logger.info('🚀 Form Submit Clicked!', {
-    //   validateForm: validateForm(),
-    //   isLoaded,
-    //   hasSignUp: !!signUp,
-    //   formData,
-    //   fieldValidation,
-    // });
-
     if (!validateForm() || !isLoaded || !signUp) {
-      // TEMPORARY DEBUG - REMOVE AFTER TESTING
-      // logger.warn('❌ Form submission blocked:', {
-      //   validateFormResult: validateForm(),
-      //   isLoaded,
-      //   hasSignUp: !!signUp,
-      // });
       return;
     }
 
@@ -1052,14 +1028,6 @@ export function CustomRegistrationForm() {
         variant="primary"
         disabled={isSubmitting || !isFormValid}
         className="w-full"
-        onClick={() => {
-          // TEMPORARY DEBUG - REMOVE AFTER TESTING
-          // logger.info('🎯 Button clicked!', {
-          //   isSubmitting,
-          //   isFormValid,
-          //   disabled: isSubmitting || !isFormValid,
-          // });
-        }}
       >
         {isSubmitting ? 'Creating Account...' : 'Create Account'}
       </Button>
