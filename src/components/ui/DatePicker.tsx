@@ -182,8 +182,19 @@ export function DatePicker({
     'December',
   ];
 
-  // Check if we're on mobile
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+  // Check if we're on mobile (client-side only)
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   return (
     <div className={cn('relative', className)} ref={containerRef}>
@@ -255,13 +266,13 @@ export function DatePicker({
       )}
 
       {isOpen && !isMobile && (
-        <div className="absolute z-50 mt-1 w-full bg-white border border-border rounded-md shadow-lg">
+        <div className="absolute z-[9999] mt-1 w-full bg-secondary border border-border rounded-md shadow-lg">
           {/* Calendar Header */}
-          <div className="flex items-center justify-between p-3 border-b">
+          <div className="flex items-center justify-between p-3 border-b border-border">
             <button
               type="button"
               onClick={() => navigateMonth('prev')}
-              className="p-1 hover:bg-surface rounded"
+              className="p-1 hover:bg-tertiary rounded text-text"
             >
               <svg
                 className="w-4 h-4"
@@ -285,7 +296,7 @@ export function DatePicker({
             <button
               type="button"
               onClick={() => navigateMonth('next')}
-              className="p-1 hover:bg-surface rounded"
+              className="p-1 hover:bg-tertiary rounded text-text"
             >
               <svg
                 className="w-4 h-4"
@@ -310,7 +321,7 @@ export function DatePicker({
               {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map((day) => (
                 <div
                   key={day}
-                  className="text-xs text-text-light text-center py-1"
+                  className="text-xs text-text-tertiary text-center py-1"
                 >
                   {day}
                 </div>
@@ -326,12 +337,11 @@ export function DatePicker({
                   onClick={() => handleDateSelect(day.date)}
                   disabled={day.isPast}
                   className={cn(
-                    'text-xs py-2 px-1 rounded hover:bg-surface',
+                    'text-xs py-2 px-1 rounded hover:bg-tertiary',
                     'disabled:opacity-50 disabled:cursor-not-allowed',
-                    day.isCurrentMonth ? 'text-text' : 'text-text-light',
-                    day.isToday && 'bg-primary/10 text-blue-900 font-medium',
-                    day.isSelected &&
-                      'bg-blue-600 text-white hover:bg-blue-700',
+                    day.isCurrentMonth ? 'text-text' : 'text-text-tertiary',
+                    day.isToday && 'bg-accent/10 text-accent font-medium',
+                    day.isSelected && 'bg-accent text-white hover:bg-accent',
                     !day.isCurrentMonth && 'hover:bg-transparent'
                   )}
                 >
@@ -342,15 +352,15 @@ export function DatePicker({
           </div>
 
           {/* Time picker */}
-          <div className="p-3 border-t bg-surface">
+          <div className="p-3 border-t border-border bg-tertiary">
             <div className="flex items-center gap-2">
-              <Clock className="h-4 w-4 text-text-light" />
+              <Clock className="h-4 w-4 text-text-tertiary" />
               <label className="text-sm font-medium text-text">Time:</label>
               <input
                 type="time"
                 value={selectedTime}
                 onChange={(e) => handleTimeChange(e.target.value)}
-                className="px-2 py-1 text-sm border border-border rounded focus:outline-none focus:ring-1 focus:ring-primary"
+                className="px-2 py-1 text-sm border border-border rounded focus:outline-none focus:ring-1 focus:ring-accent bg-secondary text-text"
               />
             </div>
           </div>

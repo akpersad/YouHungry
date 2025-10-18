@@ -550,7 +550,6 @@ body {
   border: 1px solid var(--bg-quaternary);
   width: 90vw;
   max-height: 90vh;
-  overflow: auto;
   z-index: 1001;
 }
 
