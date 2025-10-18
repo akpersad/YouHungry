@@ -1,6 +1,8 @@
 // Service Worker for Fork In The Road PWA
 // Bump version to force cache invalidation
-const CACHE_NAME = 'forkintheroad-v3';
+const CACHE_NAME = 'forkintheroad-v7';
+
+console.log('🔔 Service Worker: Script loaded and running!');
 const STATIC_CACHE_NAME = 'forkintheroad-static-v3';
 const DYNAMIC_CACHE_NAME = 'forkintheroad-dynamic-v3';
 const API_CACHE_NAME = 'forkintheroad-api-v3';
@@ -16,8 +18,7 @@ const STATIC_ASSETS = [
   '/manifest.json',
   '/icons/icon-192x192.svg',
   '/icons/icon-512x512.svg',
-  '/_next/static/css/',
-  '/_next/static/js/',
+  // Note: _next/static assets are dynamic and will be cached on-demand
 ];
 
 // API endpoints to cache (currently disabled to prevent caching conflicts)
@@ -34,21 +35,33 @@ self.addEventListener('install', (event) => {
   console.log('Service Worker: Installing...');
 
   event.waitUntil(
-    Promise.all([
-      // Cache static assets
-      caches.open(STATIC_CACHE_NAME).then((cache) => {
+    caches
+      .open(STATIC_CACHE_NAME)
+      .then((cache) => {
         console.log('Service Worker: Caching static assets');
-        return cache.addAll(STATIC_ASSETS);
-      }),
-      // Skip API endpoint caching to prevent conflicts
-      Promise.resolve(),
-    ])
-      .then(() => {
-        console.log('Service Worker: All assets cached');
+        // Cache assets one by one to handle failures gracefully
+        return Promise.allSettled(
+          STATIC_ASSETS.map((asset) =>
+            cache.add(asset).catch((err) => {
+              console.warn(`Service Worker: Failed to cache ${asset}:`, err);
+              return null; // Continue with other assets
+            })
+          )
+        );
+      })
+      .then((results) => {
+        const successful = results.filter(
+          (r) => r.status === 'fulfilled'
+        ).length;
+        const failed = results.filter((r) => r.status === 'rejected').length;
+        console.log(
+          `Service Worker: Cached ${successful} assets, ${failed} failed`
+        );
         return self.skipWaiting();
       })
       .catch((error) => {
         console.error('Service Worker: Failed to cache assets', error);
+        return self.skipWaiting(); // Still activate even if caching fails
       })
   );
 });
@@ -370,50 +383,167 @@ async function updateOfflineAction(id, updates) {
 
 // Push notification handling
 self.addEventListener('push', (event) => {
-  console.log('Service Worker: Push notification received');
+  const timestamp = new Date().toISOString();
+  console.log(
+    `🔔 [${timestamp}] Service Worker: Push notification received!`,
+    event
+  );
+  console.log(`🔔 [${timestamp}] Service Worker: Event data:`, event.data);
+  console.log(
+    `🔔 [${timestamp}] Service Worker: Event data type:`,
+    typeof event.data
+  );
+  console.log(
+    `🔔 [${timestamp}] Service Worker: Event data methods:`,
+    event.data ? Object.getOwnPropertyNames(event.data) : 'null'
+  );
 
-  const options = {
-    body: 'New restaurant recommendations available!',
+  // Also log to help identify which push this is
+  if (event.data) {
+    try {
+      const rawData = event.data.text();
+      console.log(
+        `🔔 [${timestamp}] Service Worker: Raw data preview:`,
+        rawData.substring(0, 100)
+      );
+    } catch (e) {
+      console.log(`🔔 [${timestamp}] Service Worker: Could not read data:`, e);
+    }
+  }
+
+  // Simple test notification to verify push events are working
+  if (!event.data) {
+    console.log(
+      '🔔 Service Worker: No data in push event, showing test notification'
+    );
+    event.waitUntil(
+      self.registration.showNotification('Test Push', {
+        body: 'Service worker received push event!',
+        icon: '/icons/icon-192x192.svg',
+        tag: 'test-push',
+      })
+    );
+    return;
+  }
+
+  // Parse the push notification payload
+  let data = {
+    title: 'Fork In The Road',
+    body: 'New notification',
     icon: '/icons/icon-192x192.svg',
     badge: '/icons/icon-72x72.svg',
+  };
+
+  if (event.data) {
+    try {
+      // Try to get the data as text first to see what we're receiving
+      const rawData = event.data.text();
+      console.log('Service Worker: Raw push data:', rawData);
+
+      // Check if it looks like JSON (starts with { or [)
+      if (rawData.trim().startsWith('{') || rawData.trim().startsWith('[')) {
+        // Try to parse as JSON
+        data = JSON.parse(rawData);
+        console.log('Service Worker: Parsed push data:', data);
+      } else {
+        // It's plain text, use it as the notification body
+        console.log('Service Worker: Using raw text as notification body');
+        data.body = rawData;
+      }
+    } catch (error) {
+      console.error('Service Worker: Failed to parse push data', error);
+      // Fallback to using the raw text as body
+      data.body = event.data.text();
+    }
+  }
+
+  const title = data.title || 'Fork In The Road';
+  const options = {
+    body: data.body || 'New notification',
+    icon: data.icon || '/icons/icon-192x192.svg',
+    badge: data.badge || '/icons/icon-72x72.svg',
+    tag: data.tag || 'default',
+    requireInteraction: data.requireInteraction || false,
     vibrate: [200, 100, 200],
-    data: {
-      dateOfArrival: Date.now(),
-      primaryKey: 1,
-    },
-    actions: [
+    data: data.data || {},
+    actions: data.actions || [
       {
-        action: 'explore',
-        title: 'Explore',
-        icon: '/icons/explore.svg',
-      },
-      {
-        action: 'close',
-        title: 'Close',
-        icon: '/icons/close.svg',
+        action: 'view',
+        title: 'View',
       },
     ],
   };
 
+  console.log('Service Worker: About to show notification with:', {
+    title,
+    options,
+  });
+
   event.waitUntil(
-    self.registration.showNotification('Fork In The Road', options)
+    self.registration
+      .showNotification(title, options)
+      .then(() => {
+        console.log('Service Worker: Notification shown successfully');
+      })
+      .catch((error) => {
+        console.error('Service Worker: Failed to show notification', error);
+      })
   );
 });
 
 // Notification click handling
 self.addEventListener('notificationclick', (event) => {
-  console.log('Service Worker: Notification clicked');
+  console.log('Service Worker: Notification clicked', event.action);
 
   event.notification.close();
 
-  if (event.action === 'explore') {
-    event.waitUntil(clients.openWindow('/restaurants'));
+  // Get the URL from notification data or use default
+  const urlToOpen = event.notification.data?.url || '/';
+
+  // Handle specific actions
+  if (event.action === 'view') {
+    event.waitUntil(
+      clients
+        .matchAll({ type: 'window', includeUncontrolled: true })
+        .then((clientList) => {
+          // Check if there's already a window open
+          for (const client of clientList) {
+            if (client.url.includes(urlToOpen) && 'focus' in client) {
+              return client.focus();
+            }
+          }
+          // If not, open a new window
+          if (clients.openWindow) {
+            return clients.openWindow(urlToOpen);
+          }
+        })
+    );
   } else if (event.action === 'close') {
     // Just close the notification
     return;
   } else {
-    // Default action - open the app
-    event.waitUntil(clients.openWindow('/'));
+    // Default action - open the app at the specified URL
+    event.waitUntil(
+      clients
+        .matchAll({ type: 'window', includeUncontrolled: true })
+        .then((clientList) => {
+          // Check if there's already a window open
+          for (const client of clientList) {
+            if ('focus' in client) {
+              return client.focus().then(() => {
+                // Navigate to the URL
+                if (client.navigate) {
+                  return client.navigate(urlToOpen);
+                }
+              });
+            }
+          }
+          // If not, open a new window
+          if (clients.openWindow) {
+            return clients.openWindow(urlToOpen);
+          }
+        })
+    );
   }
 });
 

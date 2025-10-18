@@ -50,6 +50,20 @@ export function usePushNotifications() {
       setLoading(true);
       try {
         const subscription = await pushNotifications.subscribe();
+
+        // Save subscription to server
+        if (subscription) {
+          const response = await fetch('/api/push/subscribe', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ subscription }),
+          });
+
+          if (!response.ok) {
+            logger.warn('Failed to save subscription to server');
+          }
+        }
+
         await checkStatus();
         return subscription;
       } catch (error) {
@@ -64,7 +78,25 @@ export function usePushNotifications() {
   const unsubscribe = useCallback(async (): Promise<boolean> => {
     setLoading(true);
     try {
+      // Get current subscription to get endpoint
+      const registration = await navigator.serviceWorker.ready;
+      const subscription = await registration.pushManager.getSubscription();
+
       const success = await pushNotifications.unsubscribe();
+
+      // Remove subscription from server
+      if (success && subscription) {
+        const response = await fetch('/api/push/unsubscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ endpoint: subscription.endpoint }),
+        });
+
+        if (!response.ok) {
+          logger.warn('Failed to remove subscription from server');
+        }
+      }
+
       await checkStatus();
       return success;
     } catch (error) {
@@ -75,12 +107,44 @@ export function usePushNotifications() {
     }
   }, [checkStatus]);
 
-  // Send test notification
+  // Send test notification (client-side)
   const sendTestNotification = useCallback(async (): Promise<void> => {
     try {
       await pushNotifications.sendTestNotification();
     } catch (error) {
       logger.error('Failed to send test notification:', error);
+      throw error;
+    }
+  }, []);
+
+  // Send test notification from server (real push notification)
+  const sendServerTestNotification = useCallback(async (): Promise<void> => {
+    try {
+      // First, log the current subscription
+      const registration = await navigator.serviceWorker.ready;
+      const currentSubscription =
+        await registration.pushManager.getSubscription();
+
+      if (currentSubscription) {
+        logger.debug('Current browser subscription', {
+          endpoint: currentSubscription.endpoint.substring(0, 60) + '...',
+        });
+      } else {
+        logger.warn('No current browser subscription found!');
+      }
+
+      const response = await fetch('/api/push/test', {
+        method: 'POST',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to send server test notification');
+      }
+
+      const data = await response.json();
+      logger.info('Server test notification sent', data);
+    } catch (error) {
+      logger.error('Failed to send server test notification:', error);
       throw error;
     }
   }, []);
@@ -157,6 +221,7 @@ export function usePushNotifications() {
     subscribe,
     unsubscribe,
     sendTestNotification,
+    sendServerTestNotification,
     sendGroupDecisionNotification,
     sendFriendRequestNotification,
     sendGroupInvitationNotification,
