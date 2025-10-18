@@ -627,7 +627,7 @@ describe('CustomRegistrationForm', () => {
         expect(mockSetActive).toHaveBeenCalledWith({
           session: 'session123',
         });
-        expect(mockPush).toHaveBeenCalledWith('/dashboard');
+        expect(mockPush).toHaveBeenCalledWith('/profile');
       });
     });
 

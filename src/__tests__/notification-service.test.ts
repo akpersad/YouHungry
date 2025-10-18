@@ -29,6 +29,7 @@ describe('Notification Service', () => {
     name: 'Test User',
     smsOptIn: true,
     smsPhoneNumber: '+18777804236',
+    phoneVerified: true,
     pushSubscriptions: [
       {
         endpoint: 'https://example.com/push',
