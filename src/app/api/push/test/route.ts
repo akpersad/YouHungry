@@ -77,7 +77,8 @@ export async function POST() {
             pushSubscriptions: {
               endpoint: { $in: expiredEndpoints },
             },
-          },
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          } as any,
         }
       );
     }

@@ -57,7 +57,8 @@ export async function POST(request: Request) {
             },
             subscribedAt: new Date(),
           },
-        },
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } as any,
         $set: { updatedAt: new Date() },
       }
     );

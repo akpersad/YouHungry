@@ -34,7 +34,8 @@ export async function POST(request: Request) {
       {
         $pull: {
           pushSubscriptions: { endpoint },
-        },
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } as any,
         $set: { updatedAt: new Date() },
       }
     );

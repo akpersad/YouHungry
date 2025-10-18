@@ -191,7 +191,7 @@ class PushService {
   async sendFriendRequestNotification(
     subscription: PushSubscription,
     requesterName: string
-  ): Promise<boolean> {
+  ): Promise<boolean | 'expired'> {
     const payload: NotificationPayload = {
       title: 'New Friend Request',
       body: `${requesterName} sent you a friend request!`,
@@ -222,7 +222,7 @@ class PushService {
     subscription: PushSubscription,
     groupName: string,
     inviterName: string
-  ): Promise<boolean> {
+  ): Promise<boolean | 'expired'> {
     const payload: NotificationPayload = {
       title: 'Group Invitation',
       body: `${inviterName} invited you to join "${groupName}"!`,

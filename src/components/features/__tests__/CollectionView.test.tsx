@@ -24,10 +24,14 @@ const mockUseGroup = useGroup as jest.MockedFunction<typeof useGroup>;
 // Mock Next.js router
 const mockPush = jest.fn();
 const mockBack = jest.fn();
+const mockGet = jest.fn();
 jest.mock('next/navigation', () => ({
   useRouter: () => ({
     push: mockPush,
     back: mockBack,
+  }),
+  useSearchParams: () => ({
+    get: mockGet,
   }),
 }));
 

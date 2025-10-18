@@ -472,6 +472,7 @@ export function CollectionView({ collectionId }: CollectionViewProps) {
     decisionError,
     collectionId,
     handleRandomDecision,
+    activeDecisionsCount,
   ]);
 
   if (isLoading) {
