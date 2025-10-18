@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 
 interface VercelUsageData {
@@ -97,7 +98,7 @@ Requests/Hour: ${data.requests.averagePerHour}
 Time: ${new Date().toISOString()}
   `.trim();
 
-  console.log(`ALERT: ${message}`);
+  logger.debug(`ALERT: ${message}`);
 
   // In production, you would:
   // 1. Send email via SendGrid, AWS SES, etc.
@@ -119,7 +120,7 @@ Time: ${new Date().toISOString()}
         }),
       });
     } catch (error) {
-      console.error('Failed to send Slack alert:', error);
+      logger.error('Failed to send Slack alert:', error);
     }
   }
 }
@@ -190,14 +191,14 @@ export async function checkVercelUsage(): Promise<void> {
     }
 
     // Log current usage for monitoring
-    console.log('Vercel Usage Check:', {
+    logger.debug('Vercel Usage Check:', {
       bandwidth: `${data.bandwidth.percentage}%`,
       functionExecution: `${data.functionExecution.percentage}%`,
       requestsPerHour: data.requests.averagePerHour,
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    console.error('Failed to check Vercel usage:', error);
+    logger.error('Failed to check Vercel usage:', error);
   }
 }
 
