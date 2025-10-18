@@ -595,7 +595,7 @@ describe('Group Decision Functions', () => {
   });
 
   describe('getActiveGroupDecisions', () => {
-    it('fetches all group decisions for a group', async () => {
+    it('fetches only active group decisions for a group', async () => {
       const mockDecisions = [
         {
           _id: new ObjectId('decision_1'),
@@ -617,17 +617,11 @@ describe('Group Decision Functions', () => {
           collectionId: new ObjectId('collection_123'),
           groupId: new ObjectId('group_123'),
           method: 'random',
-          status: 'completed',
+          status: 'active',
           deadline: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours from now,
           visitDate: new Date(Date.now() + 2 * 60 * 60 * 1000), // 2 hours from now,
           participants: ['user_123'],
           votes: [],
-          result: {
-            restaurantId: new ObjectId('restaurant_123'),
-            selectedAt: new Date(),
-            reasoning: 'Random selection',
-            weights: {},
-          },
           createdAt: new Date(),
           updatedAt: new Date(),
         },
@@ -642,7 +636,12 @@ describe('Group Decision Functions', () => {
       const result = await getActiveGroupDecisions('group_123');
 
       expect(result).toEqual(mockDecisions);
-      expect(mockCollection.find).toHaveBeenCalled();
+      expect(mockCollection.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'group',
+          status: 'active',
+        })
+      );
     });
 
     it('returns empty array when no decisions exist', async () => {
