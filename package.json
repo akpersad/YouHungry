@@ -57,7 +57,9 @@
     "lint-colors": "npx eslint src --ext .ts,.tsx --rule \"no-hardcoded-colors: error\"",
     "prod": "node scripts/run-production.js all",
     "prod:build": "node scripts/run-production.js build",
-    "prod:start": "node scripts/run-production.js start"
+    "prod:start": "node scripts/run-production.js start",
+    "prod:https": "node scripts/run-production.js all https",
+    "prod:https:start": "node scripts/run-production.js start https"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.32.2",

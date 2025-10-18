@@ -119,6 +119,7 @@ function runCommand(command, args, env, options = {}) {
 
 async function main() {
   const command = process.argv[2] || 'all';
+  const useHttps = process.argv[3] === 'https' || process.argv[2] === 'https';
   const envFilePath = path.join(process.cwd(), '.env.prod');
 
   logSection('🚀 Production Simulation Mode');
@@ -126,7 +127,8 @@ async function main() {
   log('📋 Configuration:', colors.magenta);
   log(`   Environment File: .env.prod`, colors.reset);
   log(`   NODE_ENV: production`, colors.reset);
-  log(`   Command: ${command}`, colors.reset);
+  log(`   Command: ${command === 'https' ? 'all' : command}`, colors.reset);
+  log(`   HTTPS: ${useHttps ? 'enabled' : 'disabled'}`, colors.reset);
 
   // Load production environment variables
   const prodEnvVars = loadEnvFile(envFilePath);
@@ -161,27 +163,64 @@ async function main() {
     });
 
   try {
-    if (command === 'all' || command === 'build') {
+    const actualCommand = command === 'https' ? 'all' : command;
+
+    if (actualCommand === 'all' || actualCommand === 'build') {
       logSection('🔨 Building Production Bundle');
       await runCommand('npm', ['run', 'build'], env);
       log('✅ Build completed successfully!', colors.green);
     }
 
-    if (command === 'all' || command === 'start') {
-      if (command === 'all') {
+    if (actualCommand === 'all' || actualCommand === 'start') {
+      if (actualCommand === 'all') {
         // Small delay between build and start
         await new Promise((resolve) => setTimeout(resolve, 1000));
       }
 
       logSection('🚀 Starting Production Server');
-      log(
-        '📍 Server will start on the port specified in NEXT_PUBLIC_APP_URL',
-        colors.cyan
-      );
-      log('📍 Or default to http://localhost:3000', colors.cyan);
-      log('\n⚠️  Press Ctrl+C to stop the server', colors.yellow);
 
-      await runCommand('npm', ['run', 'start'], env);
+      if (useHttps) {
+        log('🔒 Starting with HTTPS enabled', colors.green);
+        log(
+          '📍 Server will start on https://forkintheroad.local:3000',
+          colors.cyan
+        );
+        log(
+          '⚠️  Using self-signed certificates (for local testing only)',
+          colors.yellow
+        );
+        log('\n⚠️  Press Ctrl+C to stop the server', colors.yellow);
+
+        // Check if certificates exist
+        const certPath = path.join(process.cwd(), 'public', 'cert.pem');
+        const keyPath = path.join(process.cwd(), 'public', 'cert-key.pem');
+
+        if (!fs.existsSync(certPath) || !fs.existsSync(keyPath)) {
+          log('\n❌ HTTPS certificates not found!', colors.red);
+          log('   Expected locations:', colors.yellow);
+          log(`   - ${certPath}`, colors.reset);
+          log(`   - ${keyPath}`, colors.reset);
+          log('\n   Generate certificates with:', colors.cyan);
+          log(
+            '   openssl req -x509 -newkey rsa:4096 -keyout public/cert-key.pem -out public/cert.pem -days 365 -nodes',
+            colors.reset
+          );
+          process.exit(1);
+        }
+
+        // Start HTTPS server using custom server script
+        const serverScript = path.join(__dirname, 'https-server.js');
+        await runCommand('node', [serverScript], env);
+      } else {
+        log(
+          '📍 Server will start on the port specified in NEXT_PUBLIC_APP_URL',
+          colors.cyan
+        );
+        log('📍 Or default to http://localhost:3000', colors.cyan);
+        log('\n⚠️  Press Ctrl+C to stop the server', colors.yellow);
+
+        await runCommand('npm', ['run', 'start'], env);
+      }
     }
   } catch (error) {
     log(`\n❌ Error: ${error.message}`, colors.red);
