@@ -17,7 +17,7 @@ export default async function Home() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
       {/* Hero Section */}
       <div className="text-center py-12">
         <h1
@@ -27,7 +27,7 @@ export default async function Home() {
           Fork In The Road
         </h1>
         <p
-          className="text-xl mb-8 mx-auto"
+          className="text-xl mb-8 mx-auto max-w-3xl px-4"
           style={{ color: 'var(--color-text-light)' }}
         >
           Stop the endless &ldquo;where should we eat?&rdquo; debate. Let our
@@ -89,7 +89,7 @@ export default async function Home() {
 
       {/* CTA Section */}
       <div
-        className="text-center py-12 rounded-xl border"
+        className="text-center py-12 px-6 rounded-xl border"
         style={{
           backgroundColor: 'var(--color-surface)',
           borderColor: 'var(--color-border)',

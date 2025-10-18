@@ -13,7 +13,7 @@ function SignInContent() {
   const redirectUrl = searchParams.get('redirect_url') || '/dashboard';
 
   return (
-    <div className="min-h-screen flex items-center justify-center py-12 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center py-12 px-4 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         {/* Registration Success Message */}
         {registered && (
