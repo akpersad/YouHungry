@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useUser, UserButton } from '@clerk/nextjs';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -13,6 +13,7 @@ import { UserAvatar } from '@/components/ui/UserAvatar';
 import { AddressInput } from '@/components/ui/AddressInput';
 import { CityStateInput } from '@/components/ui/CityStateInput';
 import { useProfile } from '@/hooks/useProfile';
+import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { toast } from 'sonner';
 import {
   Loader2,
@@ -22,13 +23,21 @@ import {
   Bell,
   Shield,
   Check,
+  AlertCircle,
 } from 'lucide-react';
 
 export default function ProfilePage() {
   const { user: clerkUser, isLoaded } = useUser();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const queryClient = useQueryClient();
   const { profile, isLoading, error, updateProfile, isUpdating } = useProfile();
+  const {
+    status: pushStatus,
+    loading: pushLoading,
+    subscribe,
+    unsubscribe,
+  } = usePushNotifications();
 
   // Local state for form fields
   const [formData, setFormData] = useState({
@@ -47,8 +56,12 @@ export default function ProfilePage() {
     groupInvites: true,
     smsEnabled: false,
     emailEnabled: true,
-    pushEnabled: true,
+    pushEnabled: false, // Default to false - requires permission
   });
+
+  // Push notification state
+  const [pushPermissionDenied, setPushPermissionDenied] = useState(false);
+  const [hasPromptedForPush, setHasPromptedForPush] = useState(false);
 
   // State for address validation
   const [isDefaultLocationValid, setIsDefaultLocationValid] = useState(false);
@@ -136,10 +149,36 @@ export default function ProfilePage() {
           // Email is enabled by default but disabled when no verified phone number
           profile.preferences?.notificationSettings?.emailEnabled ?? true,
         pushEnabled:
-          profile.preferences?.notificationSettings?.pushEnabled ?? true,
+          profile.preferences?.notificationSettings?.pushEnabled ?? false,
       });
     }
   }, [profile]);
+
+  // Check push permission status on mount and update state
+  useEffect(() => {
+    if (pushStatus.permission === 'denied') {
+      setPushPermissionDenied(true);
+    } else if (pushStatus.permission === 'granted' && pushStatus.subscribed) {
+      // User has already granted permission and is subscribed
+      setFormData((prev) => ({ ...prev, pushEnabled: true }));
+    }
+  }, [pushStatus]);
+
+  // Prompt for push notifications on first profile visit after registration
+  useEffect(() => {
+    const isNewUser = searchParams.get('new_user') === 'true';
+
+    if (
+      isNewUser &&
+      !hasPromptedForPush &&
+      pushStatus.permission === 'default'
+    ) {
+      // Only prompt if permission hasn't been asked yet
+      setHasPromptedForPush(true);
+      handlePushToggle(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, hasPromptedForPush, pushStatus.permission]);
 
   const handleInputChange = (field: string, value: string | boolean) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -337,6 +376,58 @@ export default function ProfilePage() {
       router.push('/sign-in?redirect_url=' + encodeURIComponent('/profile'));
     }
   }, [isLoaded, clerkUser, router]);
+
+  // Handle push notification toggle
+  const handlePushToggle = async (checked: boolean) => {
+    if (checked) {
+      // User wants to enable push notifications
+      try {
+        // This will trigger the native browser/OS permission prompt
+        await subscribe();
+
+        // If we get here, permission was granted
+        setFormData((prev) => ({ ...prev, pushEnabled: true }));
+        setPushPermissionDenied(false);
+
+        // Save to profile
+        await updateProfile({
+          preferences: {
+            notificationSettings: {
+              pushEnabled: true,
+            },
+          },
+        });
+
+        toast.success('Push notifications enabled!');
+      } catch {
+        // Permission was denied or error occurred
+        setFormData((prev) => ({ ...prev, pushEnabled: false }));
+        setPushPermissionDenied(true);
+        toast.error(
+          'Push notifications permission denied. Please enable in your browser settings.'
+        );
+      }
+    } else {
+      // User wants to disable push notifications
+      try {
+        await unsubscribe();
+        setFormData((prev) => ({ ...prev, pushEnabled: false }));
+
+        // Save to profile
+        await updateProfile({
+          preferences: {
+            notificationSettings: {
+              pushEnabled: false,
+            },
+          },
+        });
+
+        toast.success('Push notifications disabled');
+      } catch {
+        toast.error('Failed to disable push notifications');
+      }
+    }
+  };
 
   const handleSave = async () => {
     // Validate default location if it's provided
@@ -946,20 +1037,40 @@ export default function ProfilePage() {
                       disabled={!formData.phoneNumber}
                     />
                   </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label htmlFor="pushEnabled">Push Notifications</Label>
-                      <p className="text-sm text-tertiary">
-                        Receive push notifications on your device
-                      </p>
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <Label htmlFor="pushEnabled">Push Notifications</Label>
+                        <p className="text-sm text-tertiary">
+                          Receive push notifications on your device
+                        </p>
+                      </div>
+                      <Switch
+                        id="pushEnabled"
+                        checked={formData.pushEnabled}
+                        onCheckedChange={handlePushToggle}
+                        disabled={pushLoading}
+                      />
                     </div>
-                    <Switch
-                      id="pushEnabled"
-                      checked={formData.pushEnabled}
-                      onCheckedChange={(checked) =>
-                        handleInputChange('pushEnabled', checked)
-                      }
-                    />
+                    {pushPermissionDenied && !formData.pushEnabled && (
+                      <div className="mt-2 p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg flex items-start gap-2">
+                        <AlertCircle className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" />
+                        <p className="text-sm text-amber-600">
+                          Push notifications permission denied. To enable,
+                          please allow notifications in your browser settings
+                          and try again.
+                        </p>
+                      </div>
+                    )}
+                    {!pushStatus.supported && (
+                      <div className="mt-2 p-3 bg-tertiary/10 border border-tertiary/20 rounded-lg flex items-start gap-2">
+                        <AlertCircle className="h-4 w-4 text-tertiary mt-0.5 flex-shrink-0" />
+                        <p className="text-sm text-tertiary">
+                          Push notifications are not supported on this
+                          device/browser.
+                        </p>
+                      </div>
+                    )}
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex-1 mr-4">
