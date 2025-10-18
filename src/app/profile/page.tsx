@@ -622,7 +622,8 @@ function ProfilePageContent() {
               {formData.phoneNumber ? (
                 <div>
                   <Label htmlFor="phoneNumber">Phone Number</Label>
-                  <div className="flex space-x-2">
+                  {/* Mobile: Stack vertically, Desktop: Horizontal layout */}
+                  <div className="flex flex-col space-y-2 md:flex-row md:space-y-0 md:space-x-2">
                     <Input
                       id="phoneNumber"
                       value={formData.phoneNumber}
@@ -653,7 +654,7 @@ function ProfilePageContent() {
                         if (isVerified) {
                           // Verified phone number
                           return (
-                            <div className="flex items-center text-success font-medium px-4 whitespace-nowrap">
+                            <div className="flex items-center text-success font-medium px-4 whitespace-nowrap md:whitespace-nowrap">
                               <Check className="h-5 w-5 mr-2" />
                               Verified
                             </div>
@@ -666,8 +667,8 @@ function ProfilePageContent() {
                               Pending
                             </div>
                           ) : (
-                            <div className="flex items-center gap-2">
-                              <div className="flex items-center text-amber-600 font-medium px-2 whitespace-nowrap">
+                            <div className="flex flex-col space-y-2 md:flex-row md:space-y-0 md:space-x-2 md:items-center">
+                              <div className="flex items-center text-amber-600 font-medium px-2">
                                 ⚠️ Unverified
                               </div>
                               <Button
@@ -678,6 +679,7 @@ function ProfilePageContent() {
                                 }
                                 variant="outline"
                                 size="sm"
+                                className="w-full md:w-auto"
                               >
                                 {phoneValidationStatus === 'validating' ? (
                                   <>
@@ -707,6 +709,7 @@ function ProfilePageContent() {
                               !formData.phoneNumber
                             }
                             variant="outline"
+                            className="w-full md:w-auto"
                           >
                             {phoneValidationStatus === 'validating' ? (
                               <>
@@ -729,7 +732,8 @@ function ProfilePageContent() {
                       <Label htmlFor="verificationCode">
                         Verification Code
                       </Label>
-                      <div className="flex space-x-2 mt-2">
+                      {/* Mobile: Stack vertically, Desktop: Horizontal layout */}
+                      <div className="flex flex-col space-y-2 mt-2 md:flex-row md:space-y-0 md:space-x-2">
                         <Input
                           id="verificationCode"
                           value={verificationCode}
@@ -747,33 +751,38 @@ function ProfilePageContent() {
                           autoFocus
                           disabled={phoneValidationStatus === 'verifying'}
                         />
-                        <Button
-                          type="button"
-                          onClick={handleVerifyCode}
-                          disabled={
-                            phoneValidationStatus === 'verifying' ||
-                            verificationCode.length !== 6
-                          }
-                        >
-                          {phoneValidationStatus === 'verifying' ? (
-                            <>
-                              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                              Verifying...
-                            </>
-                          ) : (
-                            'Submit'
-                          )}
-                        </Button>
-                        <Button
-                          type="button"
-                          onClick={handleCancelVerification}
-                          variant="outline"
-                          disabled={phoneValidationStatus === 'verifying'}
-                        >
-                          Cancel
-                        </Button>
+                        <div className="flex flex-col space-y-2 md:flex-row md:space-y-0 md:space-x-2">
+                          <Button
+                            type="button"
+                            onClick={handleVerifyCode}
+                            disabled={
+                              phoneValidationStatus === 'verifying' ||
+                              verificationCode.length !== 6
+                            }
+                            className="w-full md:w-auto"
+                          >
+                            {phoneValidationStatus === 'verifying' ? (
+                              <>
+                                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                Verifying...
+                              </>
+                            ) : (
+                              'Submit'
+                            )}
+                          </Button>
+                          <Button
+                            type="button"
+                            onClick={handleCancelVerification}
+                            variant="outline"
+                            disabled={phoneValidationStatus === 'verifying'}
+                            className="w-full md:w-auto"
+                          >
+                            Cancel
+                          </Button>
+                        </div>
                       </div>
-                      <div className="flex justify-between items-center mt-2">
+                      {/* Mobile: Stack vertically, Desktop: Horizontal layout */}
+                      <div className="flex flex-col space-y-2 mt-2 md:flex-row md:space-y-0 md:justify-between md:items-center">
                         <p className="text-sm text-primary">
                           Enter the 6-digit code sent to your phone.
                         </p>
@@ -785,6 +794,7 @@ function ProfilePageContent() {
                           disabled={['verifying', 'validating'].includes(
                             phoneValidationStatus
                           )}
+                          className="w-full md:w-auto"
                         >
                           Resend Code
                         </Button>
@@ -859,7 +869,8 @@ function ProfilePageContent() {
               {formData.smsOptIn && !formData.phoneNumber && (
                 <div>
                   <Label htmlFor="smsPhoneNumber">SMS Phone Number</Label>
-                  <div className="flex space-x-2">
+                  {/* Mobile: Stack vertically, Desktop: Horizontal layout */}
+                  <div className="flex flex-col space-y-2 md:flex-row md:space-y-0 md:space-x-2">
                     <Input
                       id="smsPhoneNumber"
                       value={formData.smsPhoneNumber}
@@ -898,6 +909,7 @@ function ProfilePageContent() {
                           !formData.smsPhoneNumber
                         }
                         variant="outline"
+                        className="w-full md:w-auto"
                       >
                         {phoneValidationStatus === 'validating' ? (
                           <>
@@ -918,7 +930,8 @@ function ProfilePageContent() {
                       <Label htmlFor="verificationCodeSMS">
                         Verification Code
                       </Label>
-                      <div className="flex space-x-2 mt-2">
+                      {/* Mobile: Stack vertically, Desktop: Horizontal layout */}
+                      <div className="flex flex-col space-y-2 mt-2 md:flex-row md:space-y-0 md:space-x-2">
                         <Input
                           id="verificationCodeSMS"
                           value={verificationCode}
@@ -936,33 +949,38 @@ function ProfilePageContent() {
                           autoFocus
                           disabled={phoneValidationStatus === 'verifying'}
                         />
-                        <Button
-                          type="button"
-                          onClick={handleVerifyCode}
-                          disabled={
-                            phoneValidationStatus === 'verifying' ||
-                            verificationCode.length !== 6
-                          }
-                        >
-                          {phoneValidationStatus === 'verifying' ? (
-                            <>
-                              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                              Verifying...
-                            </>
-                          ) : (
-                            'Submit'
-                          )}
-                        </Button>
-                        <Button
-                          type="button"
-                          onClick={handleCancelVerification}
-                          variant="outline"
-                          disabled={phoneValidationStatus === 'verifying'}
-                        >
-                          Cancel
-                        </Button>
+                        <div className="flex flex-col space-y-2 md:flex-row md:space-y-0 md:space-x-2">
+                          <Button
+                            type="button"
+                            onClick={handleVerifyCode}
+                            disabled={
+                              phoneValidationStatus === 'verifying' ||
+                              verificationCode.length !== 6
+                            }
+                            className="w-full md:w-auto"
+                          >
+                            {phoneValidationStatus === 'verifying' ? (
+                              <>
+                                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                Verifying...
+                              </>
+                            ) : (
+                              'Submit'
+                            )}
+                          </Button>
+                          <Button
+                            type="button"
+                            onClick={handleCancelVerification}
+                            variant="outline"
+                            disabled={phoneValidationStatus === 'verifying'}
+                            className="w-full md:w-auto"
+                          >
+                            Cancel
+                          </Button>
+                        </div>
                       </div>
-                      <div className="flex justify-between items-center mt-2">
+                      {/* Mobile: Stack vertically, Desktop: Horizontal layout */}
+                      <div className="flex flex-col space-y-2 mt-2 md:flex-row md:space-y-0 md:justify-between md:items-center">
                         <p className="text-sm text-primary">
                           Enter the 6-digit code sent to your phone.
                         </p>
@@ -974,6 +992,7 @@ function ProfilePageContent() {
                           disabled={['verifying', 'validating'].includes(
                             phoneValidationStatus
                           )}
+                          className="w-full md:w-auto"
                         >
                           Resend Code
                         </Button>

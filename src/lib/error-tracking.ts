@@ -264,9 +264,18 @@ export async function logError(options: LogErrorOptions): Promise<void> {
       await db.collection('errorGroups').insertOne(errorGroup);
     }
 
-    // If critical error, trigger alert
+    // If critical error, trigger alert (but don't make HTTP calls from API routes)
     if (severity === 'critical') {
-      await triggerErrorAlert(errorMessage, fingerprint, options.url);
+      // Log the alert need instead of making HTTP call to avoid circular dependencies
+      logger.error('CRITICAL ERROR ALERT NEEDED:', {
+        message: errorMessage,
+        fingerprint,
+        url: options.url,
+        timestamp: new Date().toISOString(),
+      });
+
+      // TODO: Consider using a queue system or direct database insertion for alerts
+      // instead of making HTTP calls from within API routes
     }
   } catch (err) {
     // Fail silently to avoid error logging loop
@@ -276,32 +285,30 @@ export async function logError(options: LogErrorOptions): Promise<void> {
 
 /**
  * Trigger alert for critical errors
+ * Note: This function is kept for compatibility but no longer makes HTTP calls
+ * to avoid circular dependencies when called from API routes.
+ * Critical errors are logged instead and can be processed by external monitoring.
  */
-async function triggerErrorAlert(
+export async function triggerErrorAlert(
   errorMessage: string,
   fingerprint: string,
   url: string
 ): Promise<void> {
-  try {
-    // Call admin alerts API
-    await fetch('/api/admin/alerts', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        type: 'error',
-        severity: 'critical',
-        title: 'Critical Error Detected',
-        message: `Critical error occurred: ${errorMessage}`,
-        metadata: {
-          fingerprint,
-          url,
-          timestamp: new Date().toISOString(),
-        },
-      }),
-    });
-  } catch (err) {
-    logger.error('Failed to trigger error alert:', err);
-  }
+  // Log critical error instead of making HTTP call to avoid circular dependencies
+  logger.error('CRITICAL ERROR DETECTED - Alert would be triggered:', {
+    type: 'error',
+    severity: 'critical',
+    title: 'Critical Error Detected',
+    message: `Critical error occurred: ${errorMessage}`,
+    metadata: {
+      fingerprint,
+      url,
+      timestamp: new Date().toISOString(),
+    },
+  });
+
+  // TODO: Consider implementing a queue system or direct database insertion
+  // for alerts instead of making HTTP calls from within API routes
 }
 
 /**
