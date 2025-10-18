@@ -116,7 +116,7 @@ export async function POST(req: NextRequest) {
             groupInvites: true,
             smsEnabled: smsOptIn,
             emailEnabled: true,
-            pushEnabled: true,
+            pushEnabled: false, // Default to false - requires explicit permission
           },
         },
       });

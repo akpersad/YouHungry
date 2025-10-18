@@ -99,7 +99,7 @@ export const mockUser: User = {
       groupInvites: true,
       smsEnabled: false,
       emailEnabled: true,
-      pushEnabled: true,
+      pushEnabled: false, // Default to false - requires explicit permission
     },
   },
   createdAt: new Date('2024-01-01T00:00:00.000Z'),
