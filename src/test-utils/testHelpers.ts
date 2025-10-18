@@ -55,11 +55,14 @@ export const expectFetchCall = (
     body?: unknown;
   }
 ) => {
-  const expectedCall = options
-    ? [url, expect.objectContaining(options)]
-    : [url];
-
-  expect(mockFetch).toHaveBeenCalledWith(...expectedCall);
+  if (options) {
+    expect(mockFetch).toHaveBeenCalledWith(
+      url,
+      expect.objectContaining(options)
+    );
+  } else {
+    expect(mockFetch).toHaveBeenCalledWith(url);
+  }
 };
 
 /**

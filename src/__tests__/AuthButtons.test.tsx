@@ -39,10 +39,8 @@ describe('AuthButtons', () => {
   };
 
   beforeEach(() => {
-    Object.defineProperty(window, 'location', {
-      value: mockLocation,
-      writable: true,
-    });
+    delete (window as any).location;
+    (window as any).location = mockLocation;
   });
 
   it('renders sign-up and sign-in links', () => {
@@ -93,10 +91,8 @@ describe('AuthButtons Production Mode', () => {
   };
 
   beforeEach(() => {
-    Object.defineProperty(window, 'location', {
-      value: mockLocation,
-      writable: true,
-    });
+    delete (window as any).location;
+    (window as any).location = mockLocation;
   });
 
   it('renders custom auth pages in production mode', () => {
