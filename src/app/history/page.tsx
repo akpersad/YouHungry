@@ -85,6 +85,7 @@ export default function HistoryPage() {
         Cuisine: d.result?.restaurant?.cuisine || 'N/A',
         Rating: d.result?.restaurant?.rating || 'N/A',
         PriceRange: d.result?.restaurant?.priceRange || 'N/A',
+        Cost: d.amountSpent ? `$${d.amountSpent.toFixed(2)}` : 'N/A',
       }));
       exportToCSV(csvData, 'decision-history.csv');
     }
