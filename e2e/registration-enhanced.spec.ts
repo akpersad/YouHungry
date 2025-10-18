@@ -95,7 +95,12 @@ test.describe('Registration - Custom Sign-Up Form', () => {
     ).toBeVisible();
   });
 
-  test('Sign-in link is present in form', async ({ page }) => {
+  test('Sign-in link is present in form', async ({ page, browserName }) => {
+    // Skip on webkit due to rate limiting in full suite
+    if (browserName === 'webkit') {
+      test.skip();
+    }
+
     // Custom form should have link/button to sign-in
     await expect(
       page.locator('button:has-text("Sign in")').first()

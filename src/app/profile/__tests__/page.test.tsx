@@ -23,6 +23,9 @@ jest.mock('next/navigation', () => ({
     forward: jest.fn(),
     prefetch: jest.fn(),
   })),
+  useSearchParams: jest.fn(() => ({
+    get: jest.fn(() => null),
+  })),
 }));
 jest.mock('@clerk/nextjs', () => ({
   useUser: jest.fn(),

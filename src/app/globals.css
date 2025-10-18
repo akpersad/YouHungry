@@ -1,5 +1,8 @@
 @import 'tailwindcss';
 
+/* Tailwind v4 Dark Mode Configuration - Use system preference */
+@variant dark (@media (prefers-color-scheme: dark));
+
 /* Neumorphic Design System - Sophisticated Monochrome with Strategic Accents */
 
 /* Default to system preference */
@@ -640,6 +643,81 @@ body {
 
 .bg-accent {
   background: var(--accent-primary);
+}
+
+.bg-quaternary {
+  background: var(--bg-quaternary);
+}
+
+/* Additional Background Utilities - Aliases for Consistency */
+.bg-background {
+  background: var(--bg-primary);
+}
+
+.bg-surface {
+  background: var(--bg-secondary);
+}
+
+.bg-destructive {
+  background: var(--color-error);
+}
+
+/* Additional Text Color Utilities - Aliases for Consistency */
+.text-text {
+  color: var(--text-primary);
+}
+
+.text-text-light {
+  color: var(--text-secondary);
+}
+
+.text-muted {
+  color: var(--text-tertiary);
+}
+
+.text-destructive {
+  color: var(--color-error);
+}
+
+/* Foreground Text Colors for Component Libraries (e.g., Badge) */
+.text-foreground {
+  color: var(--text-primary);
+}
+
+.text-primary-foreground {
+  color: var(--text-inverse);
+}
+
+.text-secondary-foreground {
+  color: var(--text-primary);
+}
+
+.text-destructive-foreground {
+  color: var(--text-inverse);
+}
+
+.text-muted-foreground {
+  color: var(--text-tertiary);
+}
+
+/* Additional Border Color Utilities */
+.border-border {
+  border-color: var(--bg-quaternary);
+}
+
+.border-destructive {
+  border-color: var(--color-error);
+}
+
+/* Focus Ring Utilities */
+.focus\:ring-ring:focus {
+  --tw-ring-color: var(--accent-primary);
+  --tw-ring-opacity: 0.3;
+}
+
+/* Alias for background-secondary used in some components */
+.bg-background-secondary {
+  background: var(--bg-secondary);
 }
 
 /* Shadow Utilities */

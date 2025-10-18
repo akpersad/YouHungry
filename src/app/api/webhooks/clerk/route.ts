@@ -71,10 +71,14 @@ export async function POST(req: NextRequest) {
       image_url,
       phone_numbers,
       public_metadata,
+      unsafe_metadata,
     } = evt.data;
 
     // Extract custom fields from metadata
-    const metadata = public_metadata as Record<string, unknown> | undefined;
+    // Check unsafe_metadata first (client-side registration), then public_metadata (server-side)
+    const metadata =
+      (unsafe_metadata as Record<string, unknown> | undefined) ||
+      (public_metadata as Record<string, unknown> | undefined);
     const city = typeof metadata?.city === 'string' ? metadata.city : undefined;
     const state =
       typeof metadata?.state === 'string' ? metadata.state : undefined;
@@ -112,7 +116,7 @@ export async function POST(req: NextRequest) {
             groupInvites: true,
             smsEnabled: smsOptIn,
             emailEnabled: true,
-            pushEnabled: true,
+            pushEnabled: false, // Default to false - requires explicit permission
           },
         },
       });
@@ -138,10 +142,14 @@ export async function POST(req: NextRequest) {
       image_url,
       phone_numbers,
       public_metadata,
+      unsafe_metadata,
     } = evt.data;
 
     // Extract custom fields from metadata
-    const metadata = public_metadata as Record<string, unknown> | undefined;
+    // Check unsafe_metadata first (client-side updates), then public_metadata (server-side)
+    const metadata =
+      (unsafe_metadata as Record<string, unknown> | undefined) ||
+      (public_metadata as Record<string, unknown> | undefined);
     const city = typeof metadata?.city === 'string' ? metadata.city : undefined;
     const state =
       typeof metadata?.state === 'string' ? metadata.state : undefined;

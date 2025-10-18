@@ -7,7 +7,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
 import { AuthButtons } from '@/components/auth/AuthButtons';
 
 export default async function Home() {
@@ -18,7 +17,7 @@ export default async function Home() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
       {/* Hero Section */}
       <div className="text-center py-12">
         <h1
@@ -28,7 +27,7 @@ export default async function Home() {
           Fork In The Road
         </h1>
         <p
-          className="text-xl mb-8 mx-auto"
+          className="text-xl mb-8 mx-auto max-w-3xl px-4"
           style={{ color: 'var(--color-text-light)' }}
         >
           Stop the endless &ldquo;where should we eat?&rdquo; debate. Let our
@@ -90,7 +89,7 @@ export default async function Home() {
 
       {/* CTA Section */}
       <div
-        className="text-center py-12 rounded-xl border"
+        className="text-center py-12 px-6 rounded-xl border"
         style={{
           backgroundColor: 'var(--color-surface)',
           borderColor: 'var(--color-border)',
@@ -108,25 +107,6 @@ export default async function Home() {
         </p>
         <div className="text-center">
           <AuthButtons />
-        </div>
-      </div>
-
-      {/* Developer Tools Section */}
-      <div className="mt-8 p-4 bg-surface dark:bg-background rounded-lg border border-border dark:border-border">
-        <h3 className="text-sm font-semibold text-text dark:text-text-light mb-3">
-          🛠️ Developer Tools
-        </h3>
-        <div className="flex flex-wrap gap-2">
-          <a href="/pwa-explorer">
-            <Button variant="outline" size="sm">
-              📱 PWA Explorer
-            </Button>
-          </a>
-          <a href="/push-test">
-            <Button variant="outline" size="sm">
-              🔔 Push Notifications Test
-            </Button>
-          </a>
         </div>
       </div>
     </div>

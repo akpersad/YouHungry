@@ -85,7 +85,10 @@ export class NotificationService {
     try {
       // Determine which channels to use
       const shouldSendSMS =
-        smsEnabled && user?.smsOptIn && user?.smsPhoneNumber;
+        smsEnabled &&
+        user?.smsOptIn &&
+        user?.smsPhoneNumber &&
+        user?.phoneVerified;
       const shouldSendEmail =
         emailEnabled &&
         user?.preferences?.notificationSettings?.emailEnabled &&
@@ -267,7 +270,10 @@ export class NotificationService {
 
     try {
       const shouldSendSMS =
-        smsEnabled && user?.smsOptIn && user?.smsPhoneNumber;
+        smsEnabled &&
+        user?.smsOptIn &&
+        user?.smsPhoneNumber &&
+        user?.phoneVerified;
       const shouldSendEmail =
         emailEnabled &&
         user?.preferences?.notificationSettings?.emailEnabled &&
@@ -392,7 +398,10 @@ export class NotificationService {
 
     try {
       const shouldSendSMS =
-        smsEnabled && user?.smsOptIn && user?.smsPhoneNumber;
+        smsEnabled &&
+        user?.smsOptIn &&
+        user?.smsPhoneNumber &&
+        user?.phoneVerified;
       const shouldSendEmail =
         emailEnabled &&
         user?.preferences?.notificationSettings?.emailEnabled &&
@@ -523,7 +532,10 @@ export class NotificationService {
 
     try {
       const shouldSendSMS =
-        smsEnabled && user?.smsOptIn && user?.smsPhoneNumber;
+        smsEnabled &&
+        user?.smsOptIn &&
+        user?.smsPhoneNumber &&
+        user?.phoneVerified;
       const shouldSendEmail =
         emailEnabled &&
         user?.preferences?.notificationSettings?.emailEnabled &&

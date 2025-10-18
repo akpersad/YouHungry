@@ -603,7 +603,7 @@ describe('CustomRegistrationForm', () => {
       await waitFor(() => expect(verifyButton).toBeEnabled());
     });
 
-    it('verifies code and redirects to dashboard on success', async () => {
+    it('verifies code and redirects to profile with new_user param on success', async () => {
       const user = userEvent.setup();
       mockSignUp.attemptEmailAddressVerification.mockResolvedValue({
         status: 'complete',
@@ -627,7 +627,7 @@ describe('CustomRegistrationForm', () => {
         expect(mockSetActive).toHaveBeenCalledWith({
           session: 'session123',
         });
-        expect(mockPush).toHaveBeenCalledWith('/dashboard');
+        expect(mockPush).toHaveBeenCalledWith('/profile?new_user=true');
       });
     });
 

@@ -43,7 +43,7 @@ export async function getCurrentUser(): Promise<User | null> {
             groupInvites: true,
             smsEnabled: false,
             emailEnabled: true,
-            pushEnabled: true,
+            pushEnabled: false, // Default to false - requires explicit permission
           },
         },
       });

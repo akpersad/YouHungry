@@ -94,7 +94,7 @@ describe('Clerk Webhook (Updated)', () => {
             groupInvites: true,
             smsEnabled: false,
             emailEnabled: true,
-            pushEnabled: true,
+            pushEnabled: false, // Default to false - requires explicit permission
           },
         },
         createdAt: new Date(),
@@ -130,7 +130,7 @@ describe('Clerk Webhook (Updated)', () => {
             groupInvites: true,
             smsEnabled: false,
             emailEnabled: true,
-            pushEnabled: true,
+            pushEnabled: false, // Default to false - requires explicit permission
           },
         },
       });
