@@ -9,6 +9,7 @@ import {
   PWAInstallPrompt,
   PWAOfflineBanner,
 } from '@/components/ui/PWAStatusIndicator';
+import { PullToRefresh } from '@/components/PullToRefresh';
 import { ErrorBoundary } from '@/components/errors/ErrorBoundary';
 import { GoogleAnalytics } from '@/components/analytics/GoogleAnalytics';
 import { Analytics } from '@vercel/analytics/react';
@@ -137,9 +138,11 @@ export default function RootLayout({
           <ErrorBoundary level="root">
             <ThemeProvider>
               <QueryProvider>
-                <PageTransition>
-                  <AppLayout>{children}</AppLayout>
-                </PageTransition>
+                <PullToRefresh>
+                  <PageTransition>
+                    <AppLayout>{children}</AppLayout>
+                  </PageTransition>
+                </PullToRefresh>
                 <PWAInstallPrompt />
                 <PWAOfflineBanner />
                 <Toaster
