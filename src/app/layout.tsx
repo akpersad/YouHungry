@@ -5,6 +5,7 @@ import { QueryProvider } from '@/components/providers/QueryProvider';
 import { ThemeProvider } from '@/components/providers/ThemeProvider';
 import { PageTransition } from '@/components/ui/PageTransition';
 import { AppLayout } from '@/components/layout/AppLayout';
+import { RootNavigation } from '@/components/layout/RootNavigation';
 import {
   PWAInstallPrompt,
   PWAOfflineBanner,
@@ -95,6 +96,7 @@ export const viewport = {
   width: 'device-width',
   initialScale: 1,
   themeColor: '#527a51',
+  viewportFit: 'cover', // Enable safe area insets for notch/status bar
 };
 
 export default function RootLayout({
@@ -145,6 +147,7 @@ export default function RootLayout({
                 </PullToRefresh>
                 <PWAInstallPrompt />
                 <PWAOfflineBanner />
+                <RootNavigation />
                 <Toaster
                   position="top-center"
                   expand={false}
