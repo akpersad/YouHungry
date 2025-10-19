@@ -50,8 +50,8 @@ export function BottomNavigation({
   return (
     <nav
       className={cn(
-        'fixed bottom-0 left-0 right-0 z-50',
-        'px-6 pb-6 pt-4',
+        'bottom-nav-fixed',
+        'px-6 pt-4 pb-safe-bottom',
         'md:hidden', // Hide on desktop and tablet
         className
       )}
