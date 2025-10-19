@@ -8,6 +8,7 @@ import {
   validateAddress,
   isAddressValidForSearch,
 } from '@/lib/address-validation';
+import { Lock, Info, AlertTriangle } from 'lucide-react';
 
 interface AddressSuggestion {
   formattedAddress: string;
@@ -19,6 +20,16 @@ interface AddressSuggestion {
     languageCode: string;
   }>;
   confidence: number;
+}
+
+interface ValidationState {
+  isValid: boolean;
+  hasUnconfirmedComponents: boolean;
+  hasInferredComponents: boolean;
+  hasReplacedComponents: boolean;
+  missingComponents: string[];
+  unconfirmedComponents: string[];
+  unresolvedTokens: string[];
 }
 
 interface AddressInputProps {
@@ -47,7 +58,15 @@ export function AddressInput({
   const [suggestions, setSuggestions] = useState<AddressSuggestion[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [isValid, setIsValid] = useState(false);
+  const [validationState, setValidationState] = useState<ValidationState>({
+    isValid: false,
+    hasUnconfirmedComponents: false,
+    hasInferredComponents: false,
+    hasReplacedComponents: false,
+    missingComponents: [],
+    unconfirmedComponents: [],
+    unresolvedTokens: [],
+  });
   const [validationError, setValidationError] = useState<string | null>(null);
   const [justSelected, setJustSelected] = useState(false);
   const [sessionToken] = useState(() =>
@@ -90,7 +109,15 @@ export function AddressInput({
   const validateCurrentAddress = useCallback(
     async (address: string) => {
       if (!address.trim()) {
-        setIsValid(false);
+        setValidationState({
+          isValid: false,
+          hasUnconfirmedComponents: false,
+          hasInferredComponents: false,
+          hasReplacedComponents: false,
+          missingComponents: [],
+          unconfirmedComponents: [],
+          unresolvedTokens: [],
+        });
         setValidationError(null);
         onValidationChange?.(false);
         return;
@@ -98,7 +125,15 @@ export function AddressInput({
 
       // Skip validation for "Current Location" - it's handled separately
       if (address.trim() === 'Current Location') {
-        setIsValid(true);
+        setValidationState({
+          isValid: true,
+          hasUnconfirmedComponents: false,
+          hasInferredComponents: false,
+          hasReplacedComponents: false,
+          missingComponents: [],
+          unconfirmedComponents: [],
+          unresolvedTokens: [],
+        });
         setValidationError(null);
         onValidationChange?.(true);
         return;
@@ -108,17 +143,44 @@ export function AddressInput({
         const validationResult = await validateAddress(address);
         if (validationResult) {
           const valid = isAddressValidForSearch(validationResult);
-          setIsValid(valid);
+          setValidationState({
+            isValid: valid,
+            hasUnconfirmedComponents:
+              validationResult.verdict.hasUnconfirmedComponents,
+            hasInferredComponents:
+              validationResult.verdict.hasInferredComponents,
+            hasReplacedComponents:
+              validationResult.verdict.hasReplacedComponents,
+            missingComponents: validationResult.missingComponentTypes,
+            unconfirmedComponents: validationResult.unconfirmedComponentTypes,
+            unresolvedTokens: validationResult.unresolvedTokens,
+          });
           setValidationError(valid ? null : 'Address not found or incomplete');
           onValidationChange?.(valid);
         } else {
-          setIsValid(false);
+          setValidationState({
+            isValid: false,
+            hasUnconfirmedComponents: false,
+            hasInferredComponents: false,
+            hasReplacedComponents: false,
+            missingComponents: [],
+            unconfirmedComponents: [],
+            unresolvedTokens: [],
+          });
           setValidationError('Unable to validate address');
           onValidationChange?.(false);
         }
       } catch (error) {
         logger.error('Address validation error:', error);
-        setIsValid(false);
+        setValidationState({
+          isValid: false,
+          hasUnconfirmedComponents: false,
+          hasInferredComponents: false,
+          hasReplacedComponents: false,
+          missingComponents: [],
+          unconfirmedComponents: [],
+          unresolvedTokens: [],
+        });
         setValidationError('Address validation failed');
         onValidationChange?.(false);
       }
@@ -176,7 +238,15 @@ export function AddressInput({
     setSuggestions([]);
 
     // Since this came from a valid suggestion, mark it as valid immediately
-    setIsValid(true);
+    setValidationState({
+      isValid: true,
+      hasUnconfirmedComponents: false,
+      hasInferredComponents: false,
+      hasReplacedComponents: false,
+      missingComponents: [],
+      unconfirmedComponents: [],
+      unresolvedTokens: [],
+    });
     setValidationError(null);
     onValidationChange?.(true);
     onAddressSelect?.(suggestion.formattedAddress, suggestion.placeId);
@@ -313,7 +383,7 @@ export function AddressInput({
         onBlur={handleBlur}
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
-        className={`w-full ${validationError ? 'border-destructive' : isValid ? 'border-success' : ''}`}
+        className={`w-full ${validationError ? 'border-destructive' : validationState.isValid ? 'border-success' : ''}`}
         required={required}
         disabled={disabled}
         autoComplete="off"
@@ -321,19 +391,48 @@ export function AddressInput({
 
       {/* Loading indicator */}
       {isLoading && (
-        <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+        <div className="absolute right-3 top-1/2 transform -translate-y-1/2 z-10">
           <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
         </div>
       )}
 
       {/* Validation status */}
       {value && !isLoading && (
-        <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-          {isValid ? (
-            <span className="text-success text-sm">✓</span>
+        <div className="absolute right-3 top-1/2 transform -translate-y-1/2 z-10 flex flex-col gap-1">
+          {validationState.isValid ? (
+            <span
+              className="address-validation-icon success"
+              title="Address validated successfully"
+              aria-label="Address validated successfully"
+            >
+              ✓
+            </span>
           ) : validationError ? (
-            <span className="text-destructive text-sm">⚠</span>
+            <span
+              className="address-validation-icon error"
+              title="Address validation failed"
+              aria-label="Address validation failed"
+            >
+              ⚠
+            </span>
           ) : null}
+
+          {/* Additional validation indicators */}
+          {validationState.hasUnconfirmedComponents && (
+            <span title="Unconfirmed components">
+              <Lock className="h-3 w-3 text-gray-500 dark:text-gray-400" />
+            </span>
+          )}
+          {validationState.hasInferredComponents && (
+            <span title="Inferred components">
+              <Info className="h-3 w-3 text-blue-500 dark:text-blue-400" />
+            </span>
+          )}
+          {validationState.hasReplacedComponents && (
+            <span title="Replaced components">
+              <AlertTriangle className="h-3 w-3 text-yellow-500 dark:text-yellow-400" />
+            </span>
+          )}
         </div>
       )}
 
@@ -341,25 +440,25 @@ export function AddressInput({
       {showSuggestions && suggestions.length > 0 && (
         <div
           ref={suggestionsRef}
-          className="absolute z-[60] w-full mt-1 bg-white dark:bg-background border border-border rounded-md shadow-xl max-h-60 overflow-y-auto"
+          className="absolute z-[60] w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-md shadow-xl max-h-60 overflow-y-auto"
         >
           {suggestions.map((suggestion) => (
             <button
               key={suggestion.placeId}
               type="button"
               data-suggestion
-              className="w-full px-4 py-2 text-left hover:bg-surface focus:bg-surface focus:outline-none"
+              className="w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors"
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 handleSuggestionSelect(suggestion);
               }}
             >
-              <div className="text-sm text-text">
+              <div className="text-sm text-gray-900 dark:text-gray-100">
                 {suggestion.formattedAddress}
               </div>
               {suggestion.confidence < 0.8 && (
-                <div className="text-xs text-text-light">
+                <div className="text-xs text-gray-600 dark:text-gray-400">
                   Confidence: {Math.round(suggestion.confidence * 100)}%
                 </div>
               )}
@@ -370,7 +469,13 @@ export function AddressInput({
 
       {/* Validation error message */}
       {validationError && (
-        <div className="mt-1 text-sm text-destructive">{validationError}</div>
+        <div
+          className="mt-1 text-sm text-destructive font-medium"
+          role="alert"
+          aria-live="polite"
+        >
+          {validationError}
+        </div>
       )}
     </div>
   );

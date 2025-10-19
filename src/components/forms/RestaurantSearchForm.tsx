@@ -1,7 +1,7 @@
 'use client';
 
 import { logger } from '@/lib/logger';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { AddressInput } from '@/components/ui/AddressInput';
@@ -42,14 +42,20 @@ export function RestaurantSearchForm({
   const [showFilters, setShowFilters] = useState(false);
   const [isAddressValid, setIsAddressValid] = useState(false);
   const [error, setError] = useState('');
+  const hasInitializedLocationRef = useRef(false);
 
-  // Populate default location from profile
+  // Populate default location from profile only once on initial mount
   useEffect(() => {
-    if (profile?.preferences?.defaultLocation && !location) {
+    if (
+      profile?.preferences?.defaultLocation &&
+      !location &&
+      !hasInitializedLocationRef.current
+    ) {
       setLocation(profile.preferences.defaultLocation);
       setIsAddressValid(true); // Assume stored address is valid
+      hasInitializedLocationRef.current = true;
     }
-  }, [profile, location]);
+  }, [profile]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
