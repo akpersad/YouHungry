@@ -26,6 +26,8 @@ export function Modal({
 }: ModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
   const previousActiveElement = useRef<HTMLElement | null>(null);
+  const scrollPosition = useRef<number>(0);
+  const wasBodyLocked = useRef<boolean>(false);
   const titleId = useId();
   const descriptionId = useId();
 
@@ -35,8 +37,30 @@ export function Modal({
       // Store the element that was focused before the modal opened
       previousActiveElement.current = document.activeElement as HTMLElement;
 
-      // Prevent body scroll when modal is open
-      document.body.style.overflow = 'hidden';
+      // Check if body is already locked (nested modal scenario)
+      const isAlreadyLocked = document.body.style.overflow === 'hidden';
+      wasBodyLocked.current = isAlreadyLocked;
+
+      // Only lock body if not already locked (first modal)
+      if (!isAlreadyLocked) {
+        // Save current scroll position
+        scrollPosition.current = window.scrollY;
+
+        const isMobile = window.innerWidth <= 640;
+
+        if (isMobile) {
+          // Mobile/PWA: Add class to prevent scrolling
+          // This uses CSS rules that prevent body movement
+          document.body.classList.add('modal-open');
+          document.documentElement.classList.add('modal-open');
+        } else {
+          // Desktop: Use position fixed to prevent scroll
+          document.body.style.position = 'fixed';
+          document.body.style.top = `-${scrollPosition.current}px`;
+          document.body.style.width = '100%';
+          document.body.style.overflow = 'hidden';
+        }
+      }
 
       // Focus the modal container after it's mounted
       setTimeout(() => {
@@ -77,7 +101,27 @@ export function Modal({
       return () => {
         document.removeEventListener('keydown', handleEscape);
         document.removeEventListener('keydown', handleTab);
-        document.body.style.overflow = 'unset';
+
+        // Only restore body scroll if this modal was the one that locked it
+        if (!wasBodyLocked.current) {
+          const isMobile = window.innerWidth <= 640;
+
+          if (isMobile) {
+            // Mobile: Remove modal-open class
+            document.body.classList.remove('modal-open');
+            document.documentElement.classList.remove('modal-open');
+            // Don't scroll - keep user where they were
+          } else {
+            // Desktop: Restore body scroll and position
+            document.body.style.position = '';
+            document.body.style.top = '';
+            document.body.style.width = '';
+            document.body.style.overflow = '';
+
+            // Restore scroll position
+            window.scrollTo(0, scrollPosition.current);
+          }
+        }
 
         // Return focus to the element that opened the modal
         if (previousActiveElement.current) {
@@ -87,26 +131,28 @@ export function Modal({
     }
   }, [isOpen, onClose]);
 
+  const isMobile = typeof window !== 'undefined' && window.innerWidth <= 640;
+
   return (
     <AnimatePresence>
       {isOpen && (
         <motion.div
           className="modal-overlay"
           onClick={onClose}
-          variants={modalBackdropVariants}
-          initial="hidden"
-          animate="visible"
-          exit="exit"
+          variants={isMobile ? undefined : modalBackdropVariants}
+          initial={isMobile ? false : 'hidden'}
+          animate={isMobile ? false : 'visible'}
+          exit={isMobile ? false : 'exit'}
           role="presentation"
         >
           <motion.div
             ref={modalRef}
-            className={`modal-content p-lg ${className}`}
+            className={`modal-content ${className}`}
             onClick={(e) => e.stopPropagation()}
-            variants={modalVariants}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
+            variants={isMobile ? undefined : modalVariants}
+            initial={isMobile ? false : 'hidden'}
+            animate={isMobile ? false : 'visible'}
+            exit={isMobile ? false : 'exit'}
             role="dialog"
             aria-modal="true"
             aria-labelledby={title ? titleId : undefined}
@@ -116,7 +162,7 @@ export function Modal({
             {/* Header */}
             {(title || showCloseButton) && (
               <div
-                className="flex items-center justify-between mb-4 pb-4 border-b"
+                className="flex items-center justify-between p-lg pb-4 border-b flex-shrink-0"
                 style={{ borderColor: 'var(--bg-quaternary)' }}
               >
                 {title && (
@@ -148,8 +194,10 @@ export function Modal({
               </p>
             )}
 
-            {/* Content */}
-            <div className="text-primary">{children}</div>
+            {/* Content - Scrollable area */}
+            <div className="text-primary p-lg overflow-y-auto flex-1">
+              {children}
+            </div>
           </motion.div>
         </motion.div>
       )}
