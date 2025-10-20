@@ -66,7 +66,7 @@ export function PWAStatusIndicator({
       <div className="flex items-center gap-1">
         <div
           className={`w-2 h-2 rounded-full ${
-            status.isOnline ? 'bg-green-500' : 'bg-red-500'
+            status.isOnline ? 'bg-success' : 'bg-destructive'
           }`}
           title={status.isOnline ? 'Online' : 'Offline'}
         />
@@ -100,7 +100,7 @@ export function PWAStatusIndicator({
       {/* Installed Indicator */}
       {status.isInstalled && (
         <div className="flex items-center gap-1">
-          <div className="w-2 h-2 rounded-full bg-blue-500" />
+          <div className="w-2 h-2 rounded-full bg-accent" />
           <span className="text-xs text-text-light dark:text-text-light">
             Installed
           </span>
@@ -671,7 +671,7 @@ export function PWADebugPanel() {
         <button
           onClick={handleManualInstall}
           disabled={!canInstall}
-          className="w-full bg-blue-600 text-white px-2 py-2 rounded text-xs disabled:bg-surface"
+          className="w-full bg-accent text-white px-2 py-2 rounded text-xs disabled:bg-surface"
           style={{
             minHeight: '44px',
             fontSize: '12px',
@@ -683,7 +683,7 @@ export function PWADebugPanel() {
 
         <button
           onClick={checkPWARequirements}
-          className="w-full bg-green-600 text-white px-2 py-2 rounded text-xs"
+          className="w-full bg-success text-white px-2 py-2 rounded text-xs"
           style={{
             minHeight: '44px',
             fontSize: '12px',

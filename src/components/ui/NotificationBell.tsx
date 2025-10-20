@@ -70,7 +70,7 @@ export function NotificationBell({
       {unreadCount > 0 && (
         <span
           className={cn(
-            'absolute -top-1 -right-1 flex items-center justify-center rounded-full bg-red-500 text-white font-medium',
+            'absolute -top-1 -right-1 flex items-center justify-center rounded-full bg-destructive text-white font-medium',
             badgeSizeClasses[size],
             isAnimating && 'animate-bounce'
           )}

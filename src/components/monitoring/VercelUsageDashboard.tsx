@@ -131,8 +131,8 @@ export function VercelUsageDashboard() {
         </CardHeader>
         <CardContent>
           <div className="text-center py-8">
-            <AlertTriangle className="h-8 w-8 text-red-500 mx-auto mb-2" />
-            <p className="text-red-500 mb-4">{error}</p>
+            <AlertTriangle className="h-8 w-8 text-destructive mx-auto mb-2" />
+            <p className="text-destructive mb-4">{error}</p>
             <Button onClick={fetchUsageData} variant="outline">
               <RefreshCw className="h-4 w-4 mr-2" />
               Retry
@@ -184,16 +184,16 @@ export function VercelUsageDashboard() {
                 </span>
               </Badge>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
+            <div className="w-full bg-surface rounded-full h-2">
               <div
                 className={`h-2 rounded-full ${
                   usageData.bandwidth.percentage >=
                   thresholds.bandwidth.critical
-                    ? 'bg-red-500'
+                    ? 'bg-destructive'
                     : usageData.bandwidth.percentage >=
                         thresholds.bandwidth.warning
                       ? 'bg-yellow-500'
-                      : 'bg-green-500'
+                      : 'bg-success'
                 }`}
                 style={{
                   width: `${Math.min(usageData.bandwidth.percentage, 100)}%`,
@@ -225,16 +225,16 @@ export function VercelUsageDashboard() {
                 </span>
               </Badge>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
+            <div className="w-full bg-surface rounded-full h-2">
               <div
                 className={`h-2 rounded-full ${
                   usageData.functionExecution.percentage >=
                   thresholds.functionExecution.critical
-                    ? 'bg-red-500'
+                    ? 'bg-destructive'
                     : usageData.functionExecution.percentage >=
                         thresholds.functionExecution.warning
                       ? 'bg-yellow-500'
-                      : 'bg-green-500'
+                      : 'bg-success'
                 }`}
                 style={{
                   width: `${Math.min(usageData.functionExecution.percentage, 100)}%`,

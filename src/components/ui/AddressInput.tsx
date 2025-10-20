@@ -420,17 +420,17 @@ export function AddressInput({
           {/* Additional validation indicators */}
           {validationState.hasUnconfirmedComponents && (
             <span title="Unconfirmed components">
-              <Lock className="h-3 w-3 text-gray-500 dark:text-gray-400" />
+              <Lock className="h-3 w-3 text-text-light dark:text-text-light" />
             </span>
           )}
           {validationState.hasInferredComponents && (
             <span title="Inferred components">
-              <Info className="h-3 w-3 text-blue-500 dark:text-blue-400" />
+              <Info className="h-3 w-3 text-primary dark:text-primary" />
             </span>
           )}
           {validationState.hasReplacedComponents && (
             <span title="Replaced components">
-              <AlertTriangle className="h-3 w-3 text-yellow-500 dark:text-yellow-400" />
+              <AlertTriangle className="h-3 w-3 text-warning dark:text-warning" />
             </span>
           )}
         </div>
@@ -440,25 +440,25 @@ export function AddressInput({
       {showSuggestions && suggestions.length > 0 && (
         <div
           ref={suggestionsRef}
-          className="absolute z-[60] w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-md shadow-xl max-h-60 overflow-y-auto"
+          className="absolute z-[60] w-full mt-1 bg-white dark:bg-background border border-border dark:border-border rounded-md shadow-xl max-h-60 overflow-y-auto"
         >
           {suggestions.map((suggestion) => (
             <button
               key={suggestion.placeId}
               type="button"
               data-suggestion
-              className="w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors"
+              className="w-full px-4 py-2 text-left hover:bg-surface dark:hover:bg-surface focus:bg-surface dark:focus:bg-surface focus:outline-none transition-colors"
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 handleSuggestionSelect(suggestion);
               }}
             >
-              <div className="text-sm text-gray-900 dark:text-gray-100">
+              <div className="text-sm text-text dark:text-text-light">
                 {suggestion.formattedAddress}
               </div>
               {suggestion.confidence < 0.8 && (
-                <div className="text-xs text-gray-600 dark:text-gray-400">
+                <div className="text-xs text-text-light dark:text-text-light">
                   Confidence: {Math.round(suggestion.confidence * 100)}%
                 </div>
               )}
