@@ -131,6 +131,7 @@ Comprehensive Google Analytics 4 (GA4) tracking has been implemented throughout 
 
 - `src/components/ui/NotificationBell.tsx`
 - `src/components/ui/NotificationPanel.tsx`
+- `src/lib/push-service.ts` - Push notification delivery tracking
 
 **Events Tracked:**
 
@@ -138,12 +139,20 @@ Comprehensive Google Analytics 4 (GA4) tracking has been implemented throughout 
 - `notification_clicked` - Notification ID, type
 - `notification_viewed` - When panel opens (could be added)
 - `notification_dismissed` - When notifications are dismissed (could be added)
+- `push_notification_sent` - When a push notification is sent (single)
+- `push_notification_batch` - When push notifications are sent in batch
 
 **Data Captured:**
 
 - Notification types clicked (friend_request, group_invitation, group_decision, decision_result)
 - Notification engagement rates
 - Time to interaction
+- Push notification delivery metrics:
+  - Notification type
+  - Success/failure status
+  - Recipient counts
+  - Batch success rates
+  - Error messages for failed sends
 
 ### UI/UX Interactions
 

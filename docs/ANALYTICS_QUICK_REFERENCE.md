@@ -233,6 +233,20 @@ trackNotificationDismissed(params: {
   notificationId?: string;
   notificationType?: string;
 })
+
+trackPushNotificationSent(params: {
+  notificationType: string;
+  success: boolean;
+  recipientCount?: number;
+  error?: string;
+})
+
+trackPushNotificationBatch(params: {
+  notificationType: string;
+  totalRecipients: number;
+  sentCount: number;
+  failedCount: number;
+})
 ```
 
 ### UI/UX
