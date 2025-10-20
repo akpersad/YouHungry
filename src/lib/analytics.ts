@@ -449,6 +449,38 @@ export function trackNotificationDismissed(params: {
   });
 }
 
+export function trackPushNotificationSent(params: {
+  notificationType: string;
+  success: boolean;
+  recipientCount?: number;
+  error?: string;
+}) {
+  trackEvent('push_notification_sent', {
+    notification_type: params.notificationType,
+    success: params.success,
+    recipient_count: params.recipientCount,
+    error_message: params.error,
+  } as EventParams);
+}
+
+export function trackPushNotificationBatch(params: {
+  notificationType: string;
+  totalRecipients: number;
+  sentCount: number;
+  failedCount: number;
+}) {
+  trackEvent('push_notification_batch', {
+    notification_type: params.notificationType,
+    total_recipients: params.totalRecipients,
+    sent_count: params.sentCount,
+    failed_count: params.failedCount,
+    success_rate:
+      params.totalRecipients > 0
+        ? (params.sentCount / params.totalRecipients) * 100
+        : 0,
+  } as EventParams);
+}
+
 // ============================================================================
 // UI/UX Events
 // ============================================================================

@@ -1,5 +1,9 @@
 import webpush from 'web-push';
 import { logger } from '@/lib/logger';
+import {
+  trackPushNotificationSent,
+  trackPushNotificationBatch,
+} from '@/lib/analytics';
 
 // Push Service - Server-side push notification sending
 // Uses web-push library to send notifications to subscribed clients
@@ -96,6 +100,13 @@ class PushService {
         endpoint: subscription.endpoint.substring(0, 50) + '...',
       });
 
+      // Track successful push notification send
+      trackPushNotificationSent({
+        notificationType: (payload.data?.type as string) || 'unknown',
+        success: true,
+        recipientCount: 1,
+      });
+
       return true;
     } catch (error) {
       if (error && typeof error === 'object' && 'statusCode' in error) {
@@ -109,6 +120,15 @@ class PushService {
         }
       }
       logger.error('Failed to send push notification', { error });
+
+      // Track failed push notification send
+      trackPushNotificationSent({
+        notificationType: (payload.data?.type as string) || 'unknown',
+        success: false,
+        recipientCount: 1,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+
       return false;
     }
   }
@@ -133,6 +153,14 @@ class PushService {
       sent,
       failed,
       total: results.length,
+    });
+
+    // Track batch push notification send
+    trackPushNotificationBatch({
+      notificationType: (payload.data?.type as string) || 'unknown',
+      totalRecipients: subscriptions.length,
+      sentCount: sent,
+      failedCount: failed,
     });
 
     return { sent, failed };
@@ -182,7 +210,17 @@ class PushService {
       ],
     };
 
-    return this.sendNotificationToMany(subscriptions, payload);
+    const result = await this.sendNotificationToMany(subscriptions, payload);
+
+    // Additional tracking for group decision notifications
+    logger.info('Group decision push notification batch completed', {
+      groupName,
+      decisionType,
+      sent: result.sent,
+      failed: result.failed,
+    });
+
+    return result;
   }
 
   /**
@@ -276,7 +314,17 @@ class PushService {
       ],
     };
 
-    return this.sendNotificationToMany(subscriptions, payload);
+    const result = await this.sendNotificationToMany(subscriptions, payload);
+
+    // Additional tracking for decision result notifications
+    logger.info('Decision result push notification batch completed', {
+      groupName,
+      restaurantName,
+      sent: result.sent,
+      failed: result.failed,
+    });
+
+    return result;
   }
 }
 
