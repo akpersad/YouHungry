@@ -117,7 +117,35 @@ interface PWAInstallPromptProps {
 }
 
 const PWA_DISMISS_KEY = 'pwa-install-dismissed';
+const PWA_IOS_DISMISS_KEY = 'pwa-ios-install-dismissed';
 const DISMISS_DURATION = 72 * 60 * 60 * 1000; // 72 hours in milliseconds
+
+// Detect if device is iOS
+const isIOS = () => {
+  if (typeof window === 'undefined') return false;
+
+  return (
+    /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+  );
+};
+
+// Detect if device is Android
+const _isAndroid = () => {
+  if (typeof window === 'undefined') return false;
+
+  return /Android/.test(navigator.userAgent);
+};
+
+// Detect if device is in standalone mode (installed)
+const isInStandaloneMode = () => {
+  if (typeof window === 'undefined') return false;
+
+  return (
+    window.matchMedia('(display-mode: standalone)').matches ||
+    (window.navigator as unknown as Record<string, unknown>).standalone === true
+  );
+};
 
 export function PWAInstallPrompt({
   onDismiss,
@@ -125,41 +153,104 @@ export function PWAInstallPrompt({
 }: PWAInstallPromptProps) {
   const { status, installApp, canInstall } = usePWA();
   const [isDismissed, setIsDismissed] = useState(false);
+  const [isIOSDevice, setIsIOSDevice] = useState(false);
+  const [isIOSDismissed, setIsIOSDismissed] = useState(false);
+  const [countdown, setCountdown] = useState(30);
+  const [_isAutoClosing, setIsAutoClosing] = useState(false);
+  const [isHidden, setIsHidden] = useState(false);
 
-  // Check if banner was dismissed within the last 72 hours
+  // Check if device is iOS and dismissal state
   useEffect(() => {
+    const iOS = isIOS();
+    const standalone = isInStandaloneMode();
+    setIsIOSDevice(iOS && !standalone);
+
+    // Check Chrome/Edge dismissal
     const dismissedTime = localStorage.getItem(PWA_DISMISS_KEY);
     if (dismissedTime) {
       const elapsed = Date.now() - parseInt(dismissedTime, 10);
       if (elapsed < DISMISS_DURATION) {
         setIsDismissed(true);
       } else {
-        // Clear expired dismissal
         localStorage.removeItem(PWA_DISMISS_KEY);
       }
     }
+
+    // Check iOS dismissal
+    const iOSDismissedTime = localStorage.getItem(PWA_IOS_DISMISS_KEY);
+    if (iOSDismissedTime) {
+      const elapsed = Date.now() - parseInt(iOSDismissedTime, 10);
+      if (elapsed < DISMISS_DURATION) {
+        setIsIOSDismissed(true);
+      } else {
+        localStorage.removeItem(PWA_IOS_DISMISS_KEY);
+      }
+    }
   }, []);
+
+  // Show iOS banner if on iOS and not dismissed
+  const showIOSBanner = isIOSDevice && !isIOSDismissed && !status.isInstalled;
+
+  // Show Chrome/Edge banner if can install and not dismissed
+  const showStandardBanner = canInstall && !status.isInstalled && !isDismissed;
+
+  const handleDismiss = React.useCallback(
+    (isAutoClose = false) => {
+      // Only set dismissal in localStorage if manually dismissed (not auto-close)
+      if (!isAutoClose) {
+        if (showIOSBanner) {
+          localStorage.setItem(PWA_IOS_DISMISS_KEY, Date.now().toString());
+          setIsIOSDismissed(true);
+        } else {
+          localStorage.setItem(PWA_DISMISS_KEY, Date.now().toString());
+          setIsDismissed(true);
+        }
+      }
+      if (onDismiss) {
+        onDismiss();
+      }
+    },
+    [showIOSBanner, onDismiss]
+  );
 
   // Track prompt shown on first render (must be before early return)
   useEffect(() => {
     if (canInstall && !status.isInstalled && !isDismissed) {
       trackPWAInstallPromptShown();
+    } else if (isIOSDevice && !isIOSDismissed) {
+      trackPWAInstallPromptShown();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Only run once on mount
 
-  if (!canInstall || status.isInstalled || isDismissed) {
+  // Auto-close countdown timer
+  useEffect(() => {
+    if (isHidden) return; // Don't start timer if already hidden
+
+    const timer = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          setIsAutoClosing(true);
+          setIsHidden(true);
+          handleDismiss(true); // Pass true to indicate auto-close
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [handleDismiss, isHidden]);
+
+  // Don't show any banner if none of the conditions are met or if hidden
+  if (!showIOSBanner && !showStandardBanner) {
     return null;
   }
 
-  const handleDismiss = () => {
-    // Store current timestamp
-    localStorage.setItem(PWA_DISMISS_KEY, Date.now().toString());
-    setIsDismissed(true);
-    if (onDismiss) {
-      onDismiss();
-    }
-  };
+  // Don't show banner if auto-closed
+  if (isHidden) {
+    return null;
+  }
 
   const handleInstall = async () => {
     const success = await installApp();
@@ -175,46 +266,288 @@ export function PWAInstallPrompt({
     }
   };
 
-  return (
-    <div
-      className="fixed bottom-4 left-4 right-4 z-50 bg-secondary rounded-lg p-4"
-      style={{
-        boxShadow: 'var(--shadow-strong)',
-        border: '1px solid var(--bg-quaternary)',
-      }}
-    >
-      <div className="flex items-start gap-3">
-        <div className="flex-shrink-0">
-          <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center">
-            <span className="text-white text-lg">🍽️</span>
+  // iOS Install Banner (Manual Instructions)
+  if (showIOSBanner) {
+    return (
+      <>
+        {/* Blur/Glass Overlay - Mobile Only - Click to dismiss */}
+        <div
+          className="fixed inset-0 z-[100] sm:hidden backdrop-blur-md bg-black/30"
+          onClick={() => handleDismiss(false)}
+          role="presentation"
+        />
+
+        {/* Arrow pointing to top right - Mobile Only */}
+        <div className="fixed top-4 right-4 z-[102] sm:hidden">
+          <svg
+            width="80"
+            height="120"
+            viewBox="0 0 300 300"
+            className="text-accent dark:text-accent"
+            style={{
+              filter: 'drop-shadow(0 3px 6px rgba(0,0,0,0.4))',
+            }}
+          >
+            <g transform="translate(0,300) scale(0.100000,-0.100000)">
+              <path
+                d="M1666 2993 c-33 -9 -632 -230 -654 -242 -32 -17 -52 -52 -52 -89 0 -46 46 -92 93 -92 26 0 304 96 451 156 16 6 15 1 -8 -37 -64 -102 -208 -415 -254 -550 -164 -479 -175 -915 -32 -1341 77 -231 213 -467 378 -653 103 -116 133 -138 190 -138 59 0 92 34 92 95 0 38 -6 47 -59 97 -231 220 -405 543 -473 883 -31 152 -33 479 -4 633 28 151 79 329 136 472 48 120 208 443 220 443 3 0 41 -97 84 -216 84 -226 106 -264 161 -264 56 0 105 47 105 99 0 34 -256 702 -276 721 -21 20 -68 31 -98 23z m62 -46 c20 -22 256 -625 268 -687 5 -21 0 -32 -20 -48 -31 -24 -61 -19 -83 14 -8 13 -46 105 -84 206 -38 100 -77 190 -86 200 -40 44 -76 10 -162 -154 -194 -368 -291 -727 -291 -1076 0 -281 54 -510 181 -767 80 -163 169 -291 292 -421 48 -52 87 -102 87 -113 0 -11 -11 -32 -24 -48 -23 -26 -25 -27 -51 -13 -41 22 -186 181 -260 285 -165 231 -267 478 -322 775 -27 151 -25 476 6 645 51 284 148 551 315 865 51 96 54 110 27 134 -23 21 -13 24 -269 -70 -96 -35 -185 -64 -198 -64 -35 0 -60 43 -45 76 13 30 6 27 339 148 145 53 280 105 300 116 48 25 54 25 80 -3z"
+                fill="currentColor"
+                stroke="none"
+              />
+            </g>
+          </svg>
+        </div>
+
+        {/* Auto-close countdown - Mobile Only */}
+        <div className="fixed top-4 left-4 z-[102] sm:hidden">
+          <div className="bg-black/70 text-white px-3 py-2 rounded-lg text-sm font-medium backdrop-blur-sm">
+            Will automatically close in {countdown} seconds
           </div>
         </div>
 
-        <div className="flex-1 min-w-0">
-          <h3 className="text-sm font-medium text-primary">
-            Install Fork In The Road
-          </h3>
-          <p className="text-xs text-secondary mt-1">
-            Install this app on your device for a better experience and offline
-            access.
-          </p>
-        </div>
+        <div
+          className="fixed top-60 left-4 right-4 z-[101] bg-secondary rounded-lg p-4 md:left-auto md:right-4 md:max-w-md md:bottom-4 md:z-50"
+          style={{
+            boxShadow: 'var(--shadow-strong)',
+            border: '1px solid var(--bg-quaternary)',
+          }}
+        >
+          {/* Mobile Layout: Stacked */}
+          <div className="flex flex-col gap-3 sm:hidden">
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0">
+                <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center">
+                  <span className="text-white text-lg">🍽️</span>
+                </div>
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-sm font-medium text-primary">
+                  Install Fork In The Road
+                </h3>
+                <p className="text-xs text-secondary mt-1">
+                  Tap Share{' '}
+                  <span className="inline-flex items-center mx-1">
+                    {isIOS() ? (
+                      // iOS Share Icon
+                      <svg
+                        width="12"
+                        height="12"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        className="text-accent"
+                      >
+                        <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z" />
+                      </svg>
+                    ) : (
+                      // Android Share Icon
+                      <svg
+                        width="12"
+                        height="12"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        className="text-accent"
+                      >
+                        <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z" />
+                      </svg>
+                    )}
+                  </span>{' '}
+                  then &quot;Add to Home Screen&quot;
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-2 w-full">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => handleDismiss(false)}
+                className="text-xs flex-1"
+              >
+                Dismiss
+              </Button>
+              <Button
+                size="sm"
+                onClick={() => handleDismiss(false)}
+                className="text-xs flex-1"
+              >
+                Got it
+              </Button>
+            </div>
+          </div>
 
-        <div className="flex items-center gap-2">
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={handleDismiss}
-            className="text-xs"
-          >
-            Not now
-          </Button>
-          <Button size="sm" onClick={handleInstall} className="text-xs">
-            Install
-          </Button>
+          {/* Desktop/Tablet Layout: Horizontal */}
+          <div className="hidden sm:flex items-start gap-3">
+            <div className="flex-shrink-0">
+              <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center">
+                <span className="text-white text-lg">🍽️</span>
+              </div>
+            </div>
+
+            <div className="flex-1 min-w-0">
+              <h3 className="text-sm font-medium text-primary">
+                Install Fork In The Road
+              </h3>
+              <p className="text-xs text-secondary mt-1">
+                Tap Share{' '}
+                <span className="inline-flex items-center mx-1">
+                  {isIOS() ? (
+                    // iOS Share Icon
+                    <svg
+                      width="12"
+                      height="12"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      className="text-accent"
+                    >
+                      <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z" />
+                    </svg>
+                  ) : (
+                    // Android Share Icon
+                    <svg
+                      width="12"
+                      height="12"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      className="text-accent"
+                    >
+                      <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z" />
+                    </svg>
+                  )}
+                </span>{' '}
+                then &quot;Add to Home Screen&quot;
+              </p>
+            </div>
+
+            <div className="flex items-center">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => handleDismiss(false)}
+                className="text-xs"
+              >
+                Got it
+              </Button>
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  return (
+    <>
+      {/* Blur/Glass Overlay - Mobile Only - Click to dismiss */}
+      <div
+        className="fixed inset-0 z-[100] sm:hidden backdrop-blur-md bg-black/30"
+        onClick={() => handleDismiss(false)}
+        role="presentation"
+      />
+
+      {/* Arrow pointing to top right - Mobile Only */}
+      <div className="fixed top-4 right-4 z-[102] sm:hidden">
+        <svg
+          width="80"
+          height="120"
+          viewBox="0 0 300 300"
+          className="text-accent dark:text-accent"
+          style={{
+            filter: 'drop-shadow(0 3px 6px rgba(0,0,0,0.4))',
+          }}
+        >
+          <g transform="translate(0,300) scale(0.100000,-0.100000)">
+            <path
+              d="M1666 2993 c-33 -9 -632 -230 -654 -242 -32 -17 -52 -52 -52 -89 0 -46 46 -92 93 -92 26 0 304 96 451 156 16 6 15 1 -8 -37 -64 -102 -208 -415 -254 -550 -164 -479 -175 -915 -32 -1341 77 -231 213 -467 378 -653 103 -116 133 -138 190 -138 59 0 92 34 92 95 0 38 -6 47 -59 97 -231 220 -405 543 -473 883 -31 152 -33 479 -4 633 28 151 79 329 136 472 48 120 208 443 220 443 3 0 41 -97 84 -216 84 -226 106 -264 161 -264 56 0 105 47 105 99 0 34 -256 702 -276 721 -21 20 -68 31 -98 23z m62 -46 c20 -22 256 -625 268 -687 5 -21 0 -32 -20 -48 -31 -24 -61 -19 -83 14 -8 13 -46 105 -84 206 -38 100 -77 190 -86 200 -40 44 -76 10 -162 -154 -194 -368 -291 -727 -291 -1076 0 -281 54 -510 181 -767 80 -163 169 -291 292 -421 48 -52 87 -102 87 -113 0 -11 -11 -32 -24 -48 -23 -26 -25 -27 -51 -13 -41 22 -186 181 -260 285 -165 231 -267 478 -322 775 -27 151 -25 476 6 645 51 284 148 551 315 865 51 96 54 110 27 134 -23 21 -13 24 -269 -70 -96 -35 -185 -64 -198 -64 -35 0 -60 43 -45 76 13 30 6 27 339 148 145 53 280 105 300 116 48 25 54 25 80 -3z"
+              fill="currentColor"
+              stroke="none"
+            />
+          </g>
+        </svg>
+      </div>
+
+      {/* Auto-close countdown - Mobile Only */}
+      <div className="fixed top-4 left-4 z-[102] sm:hidden">
+        <div className="bg-black/70 text-white px-3 py-2 rounded-lg text-sm font-medium backdrop-blur-sm">
+          Will automatically close in {countdown} seconds
         </div>
       </div>
-    </div>
+
+      <div
+        className="fixed top-60 left-4 right-4 z-[101] bg-secondary rounded-lg p-4 md:left-auto md:right-4 md:max-w-md md:bottom-4 md:z-50"
+        style={{
+          boxShadow: 'var(--shadow-strong)',
+          border: '1px solid var(--bg-quaternary)',
+        }}
+      >
+        {/* Mobile Layout: Stacked */}
+        <div className="flex flex-col gap-3 sm:hidden">
+          <div className="flex items-start gap-3">
+            <div className="flex-shrink-0">
+              <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center">
+                <span className="text-white text-lg">🍽️</span>
+              </div>
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="text-sm font-medium text-primary">
+                Install Fork In The Road
+              </h3>
+              <p className="text-xs text-secondary mt-1">
+                Install this app on your device for a better experience and
+                offline access.
+              </p>
+            </div>
+          </div>
+          <div className="flex gap-2 w-full">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => handleDismiss(false)}
+              className="text-xs flex-1"
+            >
+              Dismiss
+            </Button>
+            <Button
+              size="sm"
+              onClick={handleInstall}
+              className="text-xs flex-1"
+            >
+              Install
+            </Button>
+          </div>
+        </div>
+
+        {/* Desktop/Tablet Layout: Horizontal */}
+        <div className="hidden sm:flex items-start gap-3">
+          <div className="flex-shrink-0">
+            <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center">
+              <span className="text-white text-lg">🍽️</span>
+            </div>
+          </div>
+
+          <div className="flex-1 min-w-0">
+            <h3 className="text-sm font-medium text-primary">
+              Install Fork In The Road
+            </h3>
+            <p className="text-xs text-secondary mt-1">
+              Install this app on your device for a better experience and
+              offline access.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => handleDismiss(false)}
+              className="text-xs"
+            >
+              Not now
+            </Button>
+            <Button size="sm" onClick={handleInstall} className="text-xs">
+              Install
+            </Button>
+          </div>
+        </div>
+      </div>
+    </>
   );
 }
 
