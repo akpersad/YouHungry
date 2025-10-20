@@ -78,7 +78,7 @@ export function PWAStatusIndicator({
       {/* Offline Actions Count */}
       {showOfflineActions && status.offlineActionsCount > 0 && (
         <div className="flex items-center gap-1">
-          <div className="w-2 h-2 rounded-full bg-yellow-500" />
+          <div className="w-2 h-2 rounded-full bg-warning" />
           <span className="text-xs text-text-light dark:text-text-light">
             {status.offlineActionsCount} pending
           </span>
@@ -560,9 +560,9 @@ export function PWAOfflineBanner() {
   }
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 bg-yellow-500 text-yellow-900 px-4 py-2 text-center text-sm font-medium">
+    <div className="fixed top-0 left-0 right-0 z-50 bg-warning text-white px-4 py-2 text-center text-sm font-medium">
       <div className="flex items-center justify-center gap-2">
-        <div className="w-2 h-2 rounded-full bg-yellow-700" />
+        <div className="w-2 h-2 rounded-full bg-white" />
         <span>You&apos;re offline. Some features may be limited.</span>
       </div>
     </div>
@@ -695,7 +695,7 @@ export function PWADebugPanel() {
 
         <button
           onClick={checkPWAServerStatus}
-          className="w-full bg-orange-600 text-white px-2 py-2 rounded text-xs"
+          className="w-full bg-warning text-white px-2 py-2 rounded text-xs"
           style={{
             minHeight: '44px',
             fontSize: '12px',
@@ -722,7 +722,7 @@ URL: ${location.href}`;
                 toast.error('Failed to copy to clipboard');
               });
           }}
-          className="w-full bg-purple-600 text-white px-2 py-2 rounded text-xs"
+          className="w-full bg-info text-white px-2 py-2 rounded text-xs"
           style={{
             minHeight: '44px',
             fontSize: '12px',

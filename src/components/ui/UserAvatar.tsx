@@ -47,12 +47,10 @@ export const UserAvatar = memo(function UserAvatar({
     const colors = [
       'bg-accent',
       'bg-success',
-      'bg-purple-500',
-      'bg-pink-500',
-      'bg-indigo-500',
-      'bg-yellow-500',
+      'bg-info',
+      'bg-warning',
       'bg-destructive',
-      'bg-teal-500',
+      'bg-primary',
     ];
 
     if (!name || typeof name !== 'string') {

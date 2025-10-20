@@ -138,7 +138,7 @@ export function FriendSearch({ userId, onClose }: FriendSearchProps) {
                         Request Sent
                       </span>
                     ) : user.relationshipStatus === 'pending_received' ? (
-                      <span className="text-sm text-orange-600 font-medium">
+                      <span className="text-sm text-warning font-medium">
                         Request Received
                       </span>
                     ) : user.relationshipStatus === 'declined' ? (

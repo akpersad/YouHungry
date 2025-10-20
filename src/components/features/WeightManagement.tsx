@@ -185,7 +185,7 @@ export function WeightManagement({
                           weight.currentWeight >= 0.8
                             ? 'bg-success'
                             : weight.currentWeight >= 0.5
-                              ? 'bg-yellow-500'
+                              ? 'bg-warning'
                               : 'bg-destructive'
                         }`}
                         style={{ width: `${weight.currentWeight * 100}%` }}
@@ -277,7 +277,7 @@ export function WeightManagement({
               <Button
                 variant="primary"
                 onClick={() => handleResetRestaurant(resetTarget)}
-                className="flex-1 bg-yellow-600 hover:bg-yellow-700"
+                className="flex-1 bg-warning hover:bg-warning/90"
                 disabled={resetMutation.isPending}
               >
                 {resetMutation.isPending ? 'Resetting...' : 'Reset Weight'}

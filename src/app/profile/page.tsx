@@ -687,13 +687,13 @@ function ProfilePageContent() {
                         } else {
                           // Unverified phone number - show button to verify
                           return phoneValidationStatus === 'pending' ? (
-                            <div className="flex items-center text-amber-600 font-medium px-4 whitespace-nowrap">
+                            <div className="flex items-center text-warning font-medium px-4 whitespace-nowrap">
                               <Loader2 className="h-5 w-5 mr-2 animate-spin" />
                               Pending
                             </div>
                           ) : (
                             <div className="flex flex-col space-y-2 md:flex-row md:space-y-0 md:space-x-2 md:items-center">
-                              <div className="flex items-center text-amber-600 font-medium px-2">
+                              <div className="flex items-center text-warning font-medium px-2">
                                 ⚠️ Unverified
                               </div>
                               <Button
@@ -721,7 +721,7 @@ function ProfilePageContent() {
                       } else {
                         // Phone number changed or is new - show verify button
                         return phoneValidationStatus === 'pending' ? (
-                          <div className="flex items-center text-amber-600 font-medium px-4 whitespace-nowrap">
+                          <div className="flex items-center text-warning font-medium px-4 whitespace-nowrap">
                             <Loader2 className="h-5 w-5 mr-2 animate-spin" />
                             Pending
                           </div>
@@ -883,7 +883,7 @@ function ProfilePageContent() {
                   <Label htmlFor="smsOptIn">Enable SMS Notifications</Label>
                 </div>
                 {formData.smsOptIn && !profile?.phoneVerified && (
-                  <p className="text-sm text-amber-600 ml-8">
+                  <p className="text-sm text-warning ml-8">
                     ⚠️ SMS notifications won&apos;t be sent until your phone
                     number is verified.
                   </p>
@@ -916,7 +916,7 @@ function ProfilePageContent() {
                       )}
                     />
                     {phoneValidationStatus === 'pending' ? (
-                      <div className="flex items-center text-amber-600 font-medium px-4 whitespace-nowrap">
+                      <div className="flex items-center text-warning font-medium px-4 whitespace-nowrap">
                         <Loader2 className="h-5 w-5 mr-2 animate-spin" />
                         Pending
                       </div>
@@ -1097,9 +1097,9 @@ function ProfilePageContent() {
                       />
                     </div>
                     {pushPermissionDenied && !formData.pushEnabled && (
-                      <div className="mt-2 p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg flex items-start gap-2">
-                        <AlertCircle className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" />
-                        <p className="text-sm text-amber-600">
+                      <div className="mt-2 p-3 bg-warning/10 border border-warning/20 rounded-lg flex items-start gap-2">
+                        <AlertCircle className="h-4 w-4 text-warning mt-0.5 flex-shrink-0" />
+                        <p className="text-sm text-warning">
                           Push notifications permission denied. To enable,
                           please allow notifications in your browser settings
                           and try again.
