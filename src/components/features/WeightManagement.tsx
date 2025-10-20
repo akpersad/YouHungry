@@ -50,7 +50,7 @@ export function WeightManagement({
 
   const getWeightColor = (weight: number) => {
     if (weight >= 0.8) return 'text-success bg-success/10';
-    if (weight >= 0.5) return 'text-yellow-600 bg-yellow-50';
+    if (weight >= 0.5) return 'text-warning bg-warning/10';
     return 'text-destructive bg-destructive/10';
   };
 
@@ -183,10 +183,10 @@ export function WeightManagement({
                       <div
                         className={`h-3 rounded-full ${
                           weight.currentWeight >= 0.8
-                            ? 'bg-green-500'
+                            ? 'bg-success'
                             : weight.currentWeight >= 0.5
                               ? 'bg-yellow-500'
-                              : 'bg-red-500'
+                              : 'bg-destructive'
                         }`}
                         style={{ width: `${weight.currentWeight * 100}%` }}
                       />
@@ -239,7 +239,7 @@ export function WeightManagement({
               <Button
                 variant="primary"
                 onClick={handleResetAll}
-                className="flex-1 bg-red-600 hover:bg-red-700"
+                className="flex-1 bg-destructive hover:bg-destructive"
                 disabled={resetMutation.isPending}
               >
                 {resetMutation.isPending ? 'Resetting...' : 'Reset All'}
@@ -254,7 +254,7 @@ export function WeightManagement({
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <Card className="p-6 max-w-md mx-4">
             <div className="flex items-center gap-3 mb-4">
-              <AlertTriangle className="w-6 h-6 text-yellow-600" />
+              <AlertTriangle className="w-6 h-6 text-warning" />
               <h3 className="text-xl font-bold text-text">
                 Reset Restaurant Weight?
               </h3>
