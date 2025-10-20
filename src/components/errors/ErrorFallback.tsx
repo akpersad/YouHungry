@@ -73,35 +73,23 @@ export function ErrorFallback({ error, level, onReset }: ErrorFallbackProps) {
           className="p-4 rounded-full"
           style={{ background: 'var(--bg-tertiary)' }}
         >
-          <AlertTriangle
-            className="h-12 w-12"
-            style={{ color: 'var(--accent-primary)' }}
-          />
+          <AlertTriangle className="h-12 w-12" />
         </div>
 
         <div className="space-y-2">
-          <h2
-            className="text-2xl font-bold"
-            style={{ color: 'var(--text-primary)' }}
-          >
-            {getTitle()}
-          </h2>
-          <p style={{ color: 'var(--text-secondary)' }}>{getMessage()}</p>
+          <h2 className="text-2xl font-bold">{getTitle()}</h2>
+          <p>{getMessage()}</p>
         </div>
 
         {process.env.NODE_ENV === 'development' && error && (
           <details className="w-full text-left">
-            <summary
-              className="cursor-pointer text-sm font-medium mb-2"
-              style={{ color: 'var(--text-secondary)' }}
-            >
+            <summary className="cursor-pointer text-sm font-medium mb-2">
               Error Details (Development Only)
             </summary>
             <pre
               className="text-xs p-3 rounded overflow-auto max-h-40"
               style={{
                 background: 'var(--bg-quaternary)',
-                color: 'var(--text-secondary)',
               }}
             >
               {error.message}
@@ -132,7 +120,6 @@ export function ErrorFallback({ error, level, onReset }: ErrorFallbackProps) {
         <button
           onClick={() => setShowReportModal(true)}
           className="text-sm transition-colors flex items-center gap-1 hover:text-accent-primary"
-          style={{ color: 'var(--text-light)' }}
         >
           <MessageSquare className="h-4 w-4" />
           Report this issue
