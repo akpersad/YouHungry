@@ -1,0 +1,50 @@
+# Fork In The Road - Robots.txt
+# Restaurant Discovery and Group Decision Making Platform
+
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /admin/
+Disallow: /push-test/
+Disallow: /pwa-explorer/
+Disallow: /notification-test/
+Disallow: /design-system-poc/
+Disallow: /s/
+
+# Allow search engines to crawl public pages
+Allow: /$
+Allow: /sign-in
+Allow: /sign-up
+Allow: /privacy-policy
+
+# Sitemap location
+Sitemap: https://forkintheroad.app/sitemap.xml
+
+# Crawl-delay for respectful crawling
+Crawl-delay: 1
+
+# Additional directives for specific bots
+User-agent: Googlebot
+Allow: /
+
+User-agent: Googlebot-Image
+Allow: /icons/
+Allow: /screenshots/
+
+# Block AI scrapers from content unless they respect robots.txt
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+# Allow other AI bots for GEO optimization
+User-agent: Claude-Web
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
