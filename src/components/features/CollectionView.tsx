@@ -359,7 +359,7 @@ export function CollectionView({ collectionId }: CollectionViewProps) {
                           <p className="font-medium text-red-900">
                             Decision Error
                           </p>
-                          <p className="text-red-700 text-sm">
+                          <p className="text-destructive text-sm">
                             {decisionError}
                           </p>
                         </div>
@@ -414,7 +414,7 @@ export function CollectionView({ collectionId }: CollectionViewProps) {
                 {isCurrentUserAdmin && (
                   <Button
                     onClick={handleStartGroupDecision}
-                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                    className="bg-accent hover:bg-accent text-white"
                   >
                     Start Group Decision
                   </Button>
@@ -434,7 +434,7 @@ export function CollectionView({ collectionId }: CollectionViewProps) {
                           <p className="font-medium text-red-900">
                             Decision Error
                           </p>
-                          <p className="text-red-700 text-sm">
+                          <p className="text-destructive text-sm">
                             {decisionError}
                           </p>
                         </div>
