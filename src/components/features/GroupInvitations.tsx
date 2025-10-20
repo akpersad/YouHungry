@@ -5,6 +5,7 @@ import React, { useState } from 'react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { UserAvatar } from '@/components/ui/UserAvatar';
+import { DropdownMenu, DropdownMenuItem } from '@/components/ui/DropdownMenu';
 import { toast } from 'sonner';
 
 interface GroupInvitation {
@@ -113,7 +114,8 @@ export function GroupInvitations({
                 {new Date(invitation.createdAt).toLocaleDateString()}
               </p>
             </div>
-            <div className="flex space-x-2">
+            {/* Desktop: Show buttons directly */}
+            <div className="hidden md:flex space-x-2">
               <Button
                 variant="secondary"
                 size="sm"
@@ -132,6 +134,47 @@ export function GroupInvitations({
               >
                 Accept
               </Button>
+            </div>
+
+            {/* Mobile: Show dropdown menu */}
+            <div className="flex md:hidden flex-shrink-0">
+              <DropdownMenu
+                trigger={
+                  <button
+                    className="p-2 hover:bg-tertiary rounded-lg transition-colors"
+                    aria-label="Invitation actions"
+                  >
+                    <svg
+                      className="w-5 h-5 text-primary"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
+                      />
+                    </svg>
+                  </button>
+                }
+                align="right"
+              >
+                <DropdownMenuItem
+                  onClick={() => handleAccept(invitation._id)}
+                  disabled={processingInvitations.has(invitation._id)}
+                >
+                  Accept
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => handleDecline(invitation._id)}
+                  disabled={processingInvitations.has(invitation._id)}
+                  variant="destructive"
+                >
+                  Decline
+                </DropdownMenuItem>
+              </DropdownMenu>
             </div>
           </div>
         </Card>
