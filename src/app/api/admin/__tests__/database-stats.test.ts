@@ -81,8 +81,8 @@ describe('/api/admin/database/stats', () => {
     expect(data.success).toBe(true);
     expect(data.data.connection.status).toBe('connected');
     expect(data.data.connection.latency).toBeGreaterThanOrEqual(0);
-    expect(data.data.overview.totalCollections).toBe(17); // 17 collections (including errorGroups and errorLogs)
-    expect(data.data.collections).toHaveLength(17);
+    expect(data.data.overview.totalCollections).toBe(16); // 16 collections (including errorGroups and errorLogs)
+    expect(data.data.collections).toHaveLength(16);
     // Collections are sorted alphabetically, so api_cache comes first
     expect(data.data.collections[0]).toMatchObject({
       name: 'api_cache',

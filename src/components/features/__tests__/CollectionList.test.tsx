@@ -201,13 +201,19 @@ describe('CollectionList', () => {
 
     expect(screen.getByText('Favorite Pizza Places')).toBeInTheDocument();
 
-    const deleteButtons = screen
-      .getAllByRole('button')
-      .filter(
-        (button) => button.textContent === '' && button.querySelector('svg')
-      );
+    // Find and click the menu button (three dots icon) for the first collection
+    const menuButtons = screen.getAllByRole('button', {
+      name: 'Collection actions',
+    });
+    fireEvent.click(menuButtons[0]);
 
-    fireEvent.click(deleteButtons[0]);
+    // Wait for dropdown menu and click "Delete Collection"
+    await waitFor(() => {
+      expect(screen.getByText('Delete Collection')).toBeInTheDocument();
+    });
+
+    const deleteButton = screen.getByText('Delete Collection');
+    fireEvent.click(deleteButton);
 
     // Wait for the confirmation modal to appear
     await waitFor(() => {
