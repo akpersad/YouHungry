@@ -128,11 +128,11 @@
       inset 4px 4px 8px rgba(0, 0, 0, 0.4),
       inset -4px -4px 8px rgba(255, 255, 255, 0.05);
 
-    /* Status Colors */
-    --color-success: #22c55e;
-    --color-warning: #f59e0b;
-    --color-error: #ef4444;
-    --color-info: #3b82f6;
+    /* Status Colors - Enhanced for dark mode contrast */
+    --color-success: #34d399; /* Brighter green for better dark mode contrast */
+    --color-warning: #fbbf24; /* Brighter yellow for better dark mode contrast */
+    --color-error: #f87171; /* Brighter red for better dark mode contrast */
+    --color-info: #60a5fa; /* Brighter blue for better dark mode contrast */
 
     /* Spacing Scale */
     --spacing-xs: 0.25rem;
@@ -227,7 +227,7 @@ body {
 /* Primary Button - Neumorphic */
 .btn-primary {
   background: var(--accent-primary);
-  color: var(--text-inverse);
+  color: #ffffff;
   box-shadow: var(--shadow-neumorphic-elevated);
   border-radius: var(--radius-xl);
   padding: 12px 24px;
@@ -284,7 +284,7 @@ body {
 /* Accent Button - Neumorphic */
 .btn-accent {
   background: var(--accent-primary);
-  color: var(--text-inverse);
+  color: #ffffff;
   box-shadow: var(--shadow-neumorphic-elevated);
   border-radius: var(--radius-xl);
   padding: 12px 24px;
@@ -339,8 +339,8 @@ body {
 
 /* Outline Button - Neumorphic */
 .btn-outline {
-  background: transparent;
-  color: var(--accent-primary);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
   border: 2px solid var(--accent-primary);
   box-shadow: var(--shadow-neumorphic-light);
   border-radius: var(--radius-xl);
@@ -351,7 +351,7 @@ body {
 
 .btn-outline:hover {
   background: var(--accent-primary);
-  color: var(--text-inverse);
+  color: #ffffff;
   box-shadow: var(--shadow-neumorphic-elevated);
   transform: translateY(-1px);
 }
@@ -368,8 +368,8 @@ body {
 
 /* Outline Accent Button - Neumorphic */
 .btn-outline-accent {
-  background: transparent;
-  color: var(--accent-primary);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
   border: 2px solid var(--accent-primary);
   box-shadow: var(--shadow-neumorphic-light);
   border-radius: var(--radius-xl);
@@ -380,7 +380,7 @@ body {
 
 .btn-outline-accent:hover {
   background: var(--accent-primary);
-  color: var(--text-inverse);
+  color: #ffffff;
   box-shadow: var(--shadow-neumorphic-elevated);
   transform: translateY(-1px);
 }
@@ -533,17 +533,19 @@ body {
 
 /* Neumorphic Modal System */
 .modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
   background-color: rgba(0, 0, 0, 0.5);
   z-index: 1000;
   display: flex;
   align-items: center;
   justify-content: center;
   backdrop-filter: blur(4px);
+  padding: var(--spacing-md);
+  overflow: hidden; /* Changed from overflow-y: auto */
 }
 
 .modal-content {
@@ -552,8 +554,13 @@ body {
   box-shadow: var(--shadow-layered);
   border: 1px solid var(--bg-quaternary);
   width: 90vw;
-  max-height: 90vh;
+  max-width: 600px;
+  max-height: 85vh;
   z-index: 1001;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  /* Removed position: relative - will be set specifically for mobile */
 }
 
 /* Clerk Modal Overrides - Neumorphic */
@@ -713,6 +720,42 @@ body {
 .focus\:ring-ring:focus {
   --tw-ring-color: var(--accent-primary);
   --tw-ring-opacity: 0.3;
+}
+
+/* Address Input Validation Icons */
+.address-validation-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  font-weight: 600;
+  line-height: 1;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.address-validation-icon.success {
+  background-color: rgba(52, 211, 153, 0.1);
+  color: var(--color-success);
+}
+
+.address-validation-icon.error {
+  background-color: rgba(248, 113, 113, 0.1);
+  color: var(--color-error);
+}
+
+/* Dark mode specific adjustments for validation icons */
+@media (prefers-color-scheme: dark) {
+  .address-validation-icon.success {
+    background-color: rgba(52, 211, 153, 0.2);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  }
+
+  .address-validation-icon.error {
+    background-color: rgba(248, 113, 113, 0.2);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  }
 }
 
 /* Alias for background-secondary used in some components */
@@ -1070,14 +1113,100 @@ body {
   min-width: 48px;
 }
 
+/* Prevent body scroll when modal is open on mobile */
+@media (max-width: 640px) {
+  body.modal-open {
+    overflow: hidden !important;
+    touch-action: none !important;
+    /* Don't use position: fixed to avoid scroll jump */
+    /* The body stays where it is, just can't scroll */
+  }
+
+  html.modal-open {
+    overflow: hidden !important;
+  }
+}
+
+/* Safe area utilities */
+.pb-safe-bottom {
+  padding-bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px));
+}
+
+/* Ensure bottom navigation is always fixed to viewport */
+.bottom-nav-fixed {
+  position: fixed !important;
+  bottom: 30px !important;
+  left: 12px !important;
+  right: 12px !important;
+  z-index: 9999 !important;
+  /* Force it to be relative to viewport, not document */
+  transform: translate3d(0, 0, 0) !important;
+  will-change: transform !important;
+  /* Prevent any parent transforms from affecting it */
+  isolation: isolate !important;
+  /* Ensure it's always visible */
+  pointer-events: auto !important;
+  /* Force it to be above everything */
+  position: fixed !important;
+  /* Override any parent positioning */
+  position: fixed !important;
+}
+
+/* Nuclear option for PWA - force positioning */
+@media (max-width: 640px) {
+  .bottom-nav-fixed {
+    position: fixed !important;
+    bottom: 30px !important;
+    left: 12px !important;
+    right: 12px !important;
+    top: auto !important;
+    width: auto !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    /* Force it to be relative to viewport */
+    transform: translate3d(0, 0, 0) !important;
+    /* Ensure it's above everything */
+    z-index: 9999 !important;
+    /* Prevent any interference */
+    isolation: isolate !important;
+    contain: layout style paint !important;
+  }
+}
+
 /* Mobile-specific component adjustments */
 @media (max-width: 640px) {
-  /* Modal adjustments for mobile */
+  /* Modal adjustments for mobile - Full screen with safe areas */
+  .modal-overlay {
+    padding: 0 !important;
+    align-items: stretch !important;
+    justify-content: stretch !important;
+    overflow: hidden !important;
+    touch-action: none !important;
+    backdrop-filter: none !important; /* Remove blur that breaks positioning */
+    transform: none !important;
+  }
+
   .modal-content {
-    max-width: 95vw;
-    max-height: 90vh;
-    margin: var(--spacing-sm);
-    border-radius: var(--radius-2xl);
+    position: fixed !important;
+    top: env(safe-area-inset-top, 0px) !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    height: calc(
+      100vh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)
+    ) !important;
+    max-height: calc(
+      100vh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)
+    ) !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    overflow: hidden !important;
+    transform: none !important;
+    display: flex !important;
+    flex-direction: column !important;
   }
 
   /* Button adjustments for mobile */

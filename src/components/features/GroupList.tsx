@@ -40,7 +40,7 @@ export function GroupList({
   if (groups.length === 0) {
     return (
       <div className="text-center py-8">
-        <div className="text-tertiary mb-4">
+        <div className="text-secondary mb-4">
           <svg
             className="mx-auto h-12 w-12 text-text-light"
             fill="none"
@@ -56,7 +56,7 @@ export function GroupList({
           </svg>
         </div>
         <h3 className="text-lg font-medium text-primary mb-2">No groups yet</h3>
-        <p className="text-tertiary mb-4">
+        <p className="text-secondary mb-4">
           Create your first group to start collaborating with friends on
           restaurant decisions.
         </p>
@@ -95,12 +95,12 @@ export function GroupList({
               )}
 
               <div className="flex items-center space-x-2 mb-3">
-                <span className="text-sm text-tertiary">
+                <span className="text-sm text-secondary">
                   {group.collectionIds.length} collection
                   {group.collectionIds.length !== 1 ? 's' : ''}
                 </span>
                 <span className="text-text-light">•</span>
-                <span className="text-sm text-tertiary">
+                <span className="text-sm text-secondary">
                   Created {new Date(group.createdAt).toLocaleDateString()}
                 </span>
               </div>

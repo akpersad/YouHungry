@@ -222,7 +222,7 @@ export function RestaurantManagementModal({
             </Button>
             <Button
               onClick={confirmRemove}
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-destructive hover:bg-destructive"
               disabled={isLoading}
             >
               Remove

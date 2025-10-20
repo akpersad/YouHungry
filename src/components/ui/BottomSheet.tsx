@@ -134,7 +134,7 @@ export function BottomSheet({
         <>
           {/* Backdrop */}
           <motion.div
-            className="fixed inset-0 bg-black/50 z-40 backdrop-blur-sm"
+            className="fixed inset-0 bg-black/50 z-[10000] backdrop-blur-sm"
             onClick={onClose}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -146,7 +146,7 @@ export function BottomSheet({
           <motion.div
             ref={sheetRef}
             className={cn(
-              'fixed bottom-0 left-0 right-0 z-50',
+              'fixed bottom-0 left-0 right-0 z-[10001]',
               'bg-secondary border-t border-quaternary',
               'rounded-t-3xl shadow-neumorphic-elevated',
               className

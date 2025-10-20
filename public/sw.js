@@ -1,11 +1,11 @@
 // Service Worker for Fork In The Road PWA
 // Bump version to force cache invalidation
-const CACHE_NAME = 'forkintheroad-v7';
+const CACHE_NAME = 'forkintheroad-v26';
 
 console.log('🔔 Service Worker: Script loaded and running!');
-const STATIC_CACHE_NAME = 'forkintheroad-static-v3';
-const DYNAMIC_CACHE_NAME = 'forkintheroad-dynamic-v3';
-const API_CACHE_NAME = 'forkintheroad-api-v3';
+const STATIC_CACHE_NAME = 'forkintheroad-static-v13';
+const DYNAMIC_CACHE_NAME = 'forkintheroad-dynamic-v13';
+const API_CACHE_NAME = 'forkintheroad-api-v13';
 
 // Assets to cache immediately
 const STATIC_ASSETS = [
@@ -199,6 +199,52 @@ self.addEventListener('fetch', (event) => {
             });
           });
         })
+    );
+    return;
+  }
+
+  // Handle Next.js static assets (content-hashed) with cache-first strategy
+  // These have hashes in their filenames, so cache-first is safe and efficient
+  if (url.pathname.startsWith('/_next/static/')) {
+    event.respondWith(
+      caches.match(request).then((response) => {
+        if (response) {
+          return response;
+        }
+        return fetch(request).then((response) => {
+          if (response.status === 200) {
+            const responseClone = response.clone();
+            caches.open(STATIC_CACHE_NAME).then((cache) => {
+              cache.put(request, responseClone);
+            });
+          }
+          return response;
+        });
+      })
+    );
+    return;
+  }
+
+  // Handle other CSS files with stale-while-revalidate strategy
+  // Shows cached version immediately, then updates cache in background
+  if (request.destination === 'style' || url.pathname.endsWith('.css')) {
+    event.respondWith(
+      caches.match(request).then((cachedResponse) => {
+        const fetchPromise = fetch(request)
+          .then((response) => {
+            if (response.status === 200) {
+              const responseClone = response.clone();
+              caches.open(STATIC_CACHE_NAME).then((cache) => {
+                cache.put(request, responseClone);
+              });
+            }
+            return response;
+          })
+          .catch(() => cachedResponse);
+
+        // Return cached response immediately, but update cache in background
+        return cachedResponse || fetchPromise;
+      })
     );
     return;
   }

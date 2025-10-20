@@ -475,7 +475,7 @@ export function GroupDecisionMaking({
           <h2 className="text-2xl font-bold text-text">Group Decisions</h2>
           <div className="flex items-center space-x-2 mt-1">
             <div
-              className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}
+              className={`w-2 h-2 rounded-full ${isConnected ? 'bg-success' : 'bg-destructive'}`}
             ></div>
             <span className={`text-sm ${connectionColor}`}>
               {connectionStatus}
@@ -730,14 +730,14 @@ export function GroupDecisionMaking({
             <div className="space-y-2">
               <Button
                 onClick={() => handleCreateDecision('tiered')}
-                className="w-full bg-green-600 hover:bg-green-700"
+                className="w-full bg-success hover:bg-success"
                 disabled={createDecisionMutation.isPending}
               >
                 Tiered Choice (Voting)
               </Button>
               <Button
                 onClick={() => handleCreateDecision('random')}
-                className="w-full bg-blue-600 hover:bg-blue-700"
+                className="w-full bg-accent hover:bg-accent"
                 disabled={randomSelectMutation.isPending}
               >
                 Random Selection
@@ -755,11 +755,11 @@ export function GroupDecisionMaking({
       >
         <div className="space-y-4">
           {selectedDecision && hasUserVoted(selectedDecision) && (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+            <div className="bg-warning/10 border border-warning rounded-lg p-4">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
                   <svg
-                    className="h-5 w-5 text-yellow-400"
+                    className="h-5 w-5 text-warning"
                     viewBox="0 0 20 20"
                     fill="currentColor"
                   >
@@ -771,7 +771,7 @@ export function GroupDecisionMaking({
                   </svg>
                 </div>
                 <div className="ml-3">
-                  <p className="text-sm font-medium text-yellow-800">
+                  <p className="text-sm font-medium text-warning">
                     You&apos;ve already voted in this decision. Your new vote
                     will replace your previous vote.
                   </p>
@@ -914,7 +914,7 @@ export function GroupDecisionMaking({
             <Button
               onClick={handleVote}
               disabled={rankings.length === 0 || submitVoteMutation.isPending}
-              className="bg-green-600 hover:bg-green-700"
+              className="bg-success hover:bg-success"
             >
               {selectedDecision && hasUserVoted(selectedDecision)
                 ? 'Update Vote'
@@ -963,7 +963,7 @@ export function GroupDecisionMaking({
             </Button>
             <Button
               onClick={confirmCloseDecision}
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-destructive hover:bg-destructive"
             >
               Close Decision
             </Button>

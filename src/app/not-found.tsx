@@ -25,19 +25,9 @@ export default function NotFound() {
 
         {/* Error Message */}
         <div className="space-y-3">
-          <h1
-            className="text-6xl font-bold"
-            style={{ color: 'var(--text-primary)' }}
-          >
-            404
-          </h1>
-          <h2
-            className="text-3xl font-semibold"
-            style={{ color: 'var(--text-primary)' }}
-          >
-            Page Not Found
-          </h2>
-          <p className="text-lg" style={{ color: 'var(--text-secondary)' }}>
+          <h1 className="text-6xl font-bold">404</h1>
+          <h2 className="text-3xl font-semibold">Page Not Found</h2>
+          <p className="text-lg">
             Looks like Nibbles couldn&apos;t find what you&apos;re looking for.
             <br />
             This page might have been moved or doesn&apos;t exist.
@@ -65,7 +55,6 @@ export default function NotFound() {
         <button
           onClick={() => window.history.back()}
           className="inline-flex items-center gap-2 text-sm transition-colors hover:text-accent-primary"
-          style={{ color: 'var(--text-light)' }}
         >
           <ArrowLeft className="h-4 w-4" />
           Go back to previous page
@@ -76,7 +65,7 @@ export default function NotFound() {
           className="mt-8 p-4 rounded-lg"
           style={{ background: 'var(--bg-secondary)' }}
         >
-          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+          <p className="text-sm">
             💡 <strong>Fun fact:</strong> The 404 error has been around since
             the early days of the web. Some say it originated from room 404 at
             CERN where the first web server was located!

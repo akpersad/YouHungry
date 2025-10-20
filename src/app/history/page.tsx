@@ -369,7 +369,7 @@ export default function HistoryPage() {
         {/* Content */}
         {isLoading ? (
           <Card className="p-8">
-            <div className="text-center text-tertiary">Loading history...</div>
+            <div className="text-center text-secondary">Loading history...</div>
           </Card>
         ) : error ? (
           <Card className="p-8">
@@ -379,7 +379,7 @@ export default function HistoryPage() {
           </Card>
         ) : !data?.decisions?.length ? (
           <Card className="p-8">
-            <div className="text-center text-tertiary">
+            <div className="text-center text-secondary">
               <Calendar className="w-16 h-16 mx-auto mb-4 text-text-light" />
               <p className="text-lg font-medium mb-2">No decisions found</p>
               <p className="text-sm">
@@ -460,12 +460,12 @@ export default function HistoryPage() {
                               {decision.result.restaurant.cuisine}
                             </span>
                             {decision.result.restaurant.rating && (
-                              <span className="px-2 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs">
+                              <span className="px-2 py-1 bg-warning/20 text-warning rounded-full text-xs">
                                 ⭐ {decision.result.restaurant.rating}
                               </span>
                             )}
                             {decision.result.restaurant.priceRange && (
-                              <span className="px-2 py-1 bg-success/10 text-green-700 rounded-full text-xs">
+                              <span className="px-2 py-1 bg-success/10 text-success rounded-full text-xs">
                                 {decision.result.restaurant.priceRange}
                               </span>
                             )}
@@ -473,7 +473,7 @@ export default function HistoryPage() {
                         )}
 
                         {decision.method && (
-                          <div className="text-xs text-tertiary">
+                          <div className="text-xs text-secondary">
                             Method:{' '}
                             {decision.method === 'random'
                               ? 'Random Selection'
@@ -591,7 +591,7 @@ export default function HistoryPage() {
           </div>
         ) : (
           <Card className="p-8">
-            <div className="text-center text-tertiary">
+            <div className="text-center text-secondary">
               Calendar view coming soon
             </div>
           </Card>

@@ -494,13 +494,11 @@ export default function NotificationTestPage() {
             </Button>
 
             {shortenedUrl && (
-              <div className="p-3 bg-success/10 border border-green-200 rounded-md">
+              <div className="p-3 bg-success/10 border border-success rounded-md">
                 <p className="text-sm text-green-800">
                   <strong>Shortened URL:</strong>
                 </p>
-                <p className="text-sm text-green-700 break-all">
-                  {shortenedUrl}
-                </p>
+                <p className="text-sm text-success break-all">{shortenedUrl}</p>
               </div>
             )}
 
@@ -550,7 +548,7 @@ export default function NotificationTestPage() {
             </div>
 
             {testEmail.isSuccess && (
-              <div className="p-3 bg-success/10 border border-green-200 rounded-md">
+              <div className="p-3 bg-success/10 border border-success rounded-md">
                 <p className="text-sm text-green-800">
                   <strong>Success:</strong> {testEmail.data?.message}
                 </p>
@@ -651,7 +649,7 @@ export default function NotificationTestPage() {
           <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
             <Button
               onClick={handleToastSuccess}
-              className="w-full bg-green-600 hover:bg-green-700"
+              className="w-full bg-success hover:bg-success"
             >
               Success Toast
             </Button>
@@ -692,7 +690,7 @@ export default function NotificationTestPage() {
           <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
             <Button
               onClick={handleTestGroupDecision}
-              className="w-full bg-blue-600 hover:bg-blue-700"
+              className="w-full bg-accent hover:bg-accent"
             >
               Group Decision (All Channels)
             </Button>
@@ -713,7 +711,7 @@ export default function NotificationTestPage() {
 
             <Button
               onClick={handleTestDecisionResult}
-              className="w-full bg-green-600 hover:bg-green-700"
+              className="w-full bg-success hover:bg-success"
             >
               Decision Result (All Channels)
             </Button>
@@ -762,11 +760,11 @@ export default function NotificationTestPage() {
         )}
 
         {/* Development Notes */}
-        <Card className="p-6 bg-yellow-50 border-yellow-200">
-          <h2 className="mb-4 text-xl font-semibold text-yellow-800">
+        <Card className="p-6 bg-warning/10 border-warning">
+          <h2 className="mb-4 text-xl font-semibold text-warning">
             Development Notes
           </h2>
-          <div className="space-y-2 text-sm text-yellow-700">
+          <div className="space-y-2 text-sm text-warning">
             <p>
               • SMS notifications are sent to +18777804236 (development number)
             </p>

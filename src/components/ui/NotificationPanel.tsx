@@ -129,7 +129,7 @@ export function NotificationPanel({
             <Bell className="h-5 w-5 text-text-light" />
             <h2 className="text-lg font-semibold">Notifications</h2>
             {stats.unreadCount > 0 && (
-              <span className="rounded-full bg-red-500 px-2 py-1 text-xs text-white">
+              <span className="rounded-full bg-destructive px-2 py-1 text-xs text-white">
                 {stats.unreadCount}
               </span>
             )}
@@ -227,7 +227,7 @@ export function NotificationPanel({
                         </h3>
 
                         {!notification.read && (
-                          <div className="ml-2 h-2 w-2 rounded-full bg-red-500" />
+                          <div className="ml-2 h-2 w-2 rounded-full bg-destructive" />
                         )}
                       </div>
 

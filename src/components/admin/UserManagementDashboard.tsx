@@ -161,15 +161,8 @@ export function UserManagementDashboard() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h2
-            className="text-2xl font-bold"
-            style={{ color: 'var(--text-primary)' }}
-          >
-            User Management
-          </h2>
-          <p style={{ color: 'var(--text-secondary)' }}>
-            Monitor user activity and manage accounts
-          </p>
+          <h2 className="text-2xl font-bold">User Management</h2>
+          <p>Monitor user activity and manage accounts</p>
         </div>
         <Button onClick={handleRefresh} variant="outline">
           <RefreshCw className="h-4 w-4 mr-2" />
@@ -231,8 +224,8 @@ export function UserManagementDashboard() {
 
           <Card className="p-6">
             <div className="flex items-center">
-              <div className="p-2 bg-yellow-100 rounded-lg">
-                <UserCheck className="h-6 w-6 text-yellow-600" />
+              <div className="p-2 bg-warning/20 rounded-lg">
+                <UserCheck className="h-6 w-6 text-warning" />
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-text-light">
@@ -327,7 +320,7 @@ export function UserManagementDashboard() {
         {/* Search Results */}
         {searchResults && (
           <div className="space-y-4">
-            <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+            <div className="text-sm">
               Showing {searchResults.users.length} of{' '}
               {searchResults.pagination.totalCount} users
             </div>
@@ -339,34 +332,19 @@ export function UserManagementDashboard() {
               >
                 <thead style={{ background: 'var(--bg-tertiary)' }}>
                   <tr>
-                    <th
-                      className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
-                      style={{ color: 'var(--text-secondary)' }}
-                    >
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
                       User
                     </th>
-                    <th
-                      className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
-                      style={{ color: 'var(--text-secondary)' }}
-                    >
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
                       Collections
                     </th>
-                    <th
-                      className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
-                      style={{ color: 'var(--text-secondary)' }}
-                    >
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
                       Groups
                     </th>
-                    <th
-                      className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
-                      style={{ color: 'var(--text-secondary)' }}
-                    >
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
                       Decisions
                     </th>
-                    <th
-                      className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
-                      style={{ color: 'var(--text-secondary)' }}
-                    >
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
                       Joined
                     </th>
                   </tr>
@@ -392,50 +370,23 @@ export function UserManagementDashboard() {
                     >
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div>
-                          <div
-                            className="text-sm font-medium"
-                            style={{ color: 'var(--text-primary)' }}
-                          >
-                            {user.name}
-                          </div>
-                          <div
-                            className="text-sm"
-                            style={{ color: 'var(--text-secondary)' }}
-                          >
-                            {user.email}
-                          </div>
+                          <div className="text-sm font-medium">{user.name}</div>
+                          <div className="text-sm">{user.email}</div>
                           {user.username && (
-                            <div
-                              className="text-xs"
-                              style={{ color: 'var(--text-secondary)' }}
-                            >
-                              @{user.username}
-                            </div>
+                            <div className="text-xs">@{user.username}</div>
                           )}
                         </div>
                       </td>
-                      <td
-                        className="px-6 py-4 whitespace-nowrap text-sm"
-                        style={{ color: 'var(--text-primary)' }}
-                      >
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
                         {user.collectionCount}
                       </td>
-                      <td
-                        className="px-6 py-4 whitespace-nowrap text-sm"
-                        style={{ color: 'var(--text-primary)' }}
-                      >
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
                         {user.groupCount}
                       </td>
-                      <td
-                        className="px-6 py-4 whitespace-nowrap text-sm"
-                        style={{ color: 'var(--text-primary)' }}
-                      >
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
                         {user.decisionCount}
                       </td>
-                      <td
-                        className="px-6 py-4 whitespace-nowrap text-sm"
-                        style={{ color: 'var(--text-secondary)' }}
-                      >
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
                         {new Date(user.createdAt).toLocaleDateString()}
                       </td>
                     </tr>
@@ -447,10 +398,7 @@ export function UserManagementDashboard() {
             {/* Pagination */}
             {searchResults.pagination.totalPages > 1 && (
               <div className="flex justify-between items-center">
-                <div
-                  className="text-sm"
-                  style={{ color: 'var(--text-primary)' }}
-                >
+                <div className="text-sm">
                   Page {searchResults.pagination.page} of{' '}
                   {searchResults.pagination.totalPages}
                 </div>

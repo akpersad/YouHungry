@@ -155,7 +155,7 @@ function CollectionList({
                 </svg>
               </div>
             </div>
-            <p className="text-tertiary mb-6 text-sm md:text-base">
+            <p className="text-secondary mb-6 text-sm md:text-base">
               You don&apos;t have any collections yet.
             </p>
             <Button
@@ -299,7 +299,7 @@ function CollectionList({
             </Button>
             <Button
               onClick={confirmDeleteCollection}
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-destructive hover:bg-destructive"
             >
               Delete Collection
             </Button>

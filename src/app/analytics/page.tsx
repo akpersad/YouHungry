@@ -99,8 +99,8 @@ export default function AnalyticsPage() {
                   {analytics.overview.groupDecisions}
                 </p>
               </div>
-              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                <Users className="w-6 h-6 text-purple-600" />
+              <div className="w-12 h-12 bg-secondary rounded-lg flex items-center justify-center">
+                <Users className="w-6 h-6 text-primary" />
               </div>
             </div>
           </Card>
@@ -115,8 +115,8 @@ export default function AnalyticsPage() {
                   {analytics.overview.personalDecisions}
                 </p>
               </div>
-              <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-                <Activity className="w-6 h-6 text-orange-600" />
+              <div className="w-12 h-12 bg-tertiary rounded-lg flex items-center justify-center">
+                <Activity className="w-6 h-6 text-primary" />
               </div>
             </div>
           </Card>
@@ -127,7 +127,7 @@ export default function AnalyticsPage() {
           {/* Popular Restaurants */}
           <Card className="p-6">
             <div className="flex items-center gap-3 mb-6">
-              <Award className="w-6 h-6 text-yellow-600" />
+              <Award className="w-6 h-6 text-warning" />
               <h2 className="text-xl font-bold text-text">
                 Most Visited Restaurants
               </h2>
@@ -141,7 +141,7 @@ export default function AnalyticsPage() {
                     key={restaurant.id}
                     className="flex items-center gap-4 p-3 bg-surface rounded-lg"
                   >
-                    <div className="flex-shrink-0 w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center text-yellow-700 font-bold">
+                    <div className="flex-shrink-0 w-8 h-8 bg-warning/20 rounded-full flex items-center justify-center text-warning font-bold">
                       {index + 1}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -196,7 +196,7 @@ export default function AnalyticsPage() {
                     </div>
                     <div className="w-full bg-surface rounded-full h-2">
                       <div
-                        className="bg-blue-600 h-2 rounded-full"
+                        className="bg-accent h-2 rounded-full"
                         style={{ width: `${percentage}%` }}
                       />
                     </div>
@@ -236,7 +236,7 @@ export default function AnalyticsPage() {
                   <div className="flex-1 flex gap-2">
                     {trend.personal > 0 && (
                       <div
-                        className="bg-blue-500 h-8 rounded flex items-center justify-center text-white text-xs font-medium"
+                        className="bg-accent h-8 rounded flex items-center justify-center text-white text-xs font-medium"
                         style={{
                           width: `${(trend.personal / trend.total) * 100}%`,
                           minWidth: '40px',
@@ -247,7 +247,7 @@ export default function AnalyticsPage() {
                     )}
                     {trend.group > 0 && (
                       <div
-                        className="bg-purple-500 h-8 rounded flex items-center justify-center text-white text-xs font-medium"
+                        className="bg-primary h-8 rounded flex items-center justify-center text-white text-xs font-medium"
                         style={{
                           width: `${(trend.group / trend.total) * 100}%`,
                           minWidth: '40px',
@@ -273,11 +273,11 @@ export default function AnalyticsPage() {
 
           <div className="flex gap-4 mt-6 pt-4 border-t border-border">
             <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-blue-500 rounded"></div>
+              <div className="w-4 h-4 bg-accent rounded"></div>
               <span className="text-sm text-text-light">Personal</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-purple-500 rounded"></div>
+              <div className="w-4 h-4 bg-primary rounded"></div>
               <span className="text-sm text-text-light">Group</span>
             </div>
           </div>
@@ -293,53 +293,53 @@ export default function AnalyticsPage() {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="text-center p-4 bg-primary/10 rounded-lg">
-                <p className="text-3xl font-bold text-blue-900">
+                <p className="text-3xl font-bold text-primary">
                   {analytics.collections.total}
                 </p>
                 <p className="text-sm text-primary mt-1">Total Collections</p>
               </div>
               <div className="text-center p-4 bg-success/10 rounded-lg">
-                <p className="text-3xl font-bold text-green-900">
+                <p className="text-3xl font-bold text-success">
                   {analytics.collections.avgRestaurantsPerCollection}
                 </p>
-                <p className="text-sm text-green-700 mt-1">Avg Restaurants</p>
+                <p className="text-sm text-success mt-1">Avg Restaurants</p>
               </div>
-              <div className="text-center p-4 bg-purple-50 rounded-lg">
-                <p className="text-3xl font-bold text-purple-900">
+              <div className="text-center p-4 bg-secondary rounded-lg">
+                <p className="text-3xl font-bold text-primary">
                   {analytics.collections.personal}
                 </p>
-                <p className="text-sm text-purple-700 mt-1">Personal</p>
+                <p className="text-sm text-secondary mt-1">Personal</p>
               </div>
-              <div className="text-center p-4 bg-orange-50 rounded-lg">
-                <p className="text-3xl font-bold text-orange-900">
+              <div className="text-center p-4 bg-tertiary rounded-lg">
+                <p className="text-3xl font-bold text-primary">
                   {analytics.collections.group}
                 </p>
-                <p className="text-sm text-orange-700 mt-1">Group</p>
+                <p className="text-sm text-secondary mt-1">Group</p>
               </div>
             </div>
           </Card>
 
           <Card className="p-6">
             <div className="flex items-center gap-3 mb-6">
-              <Users className="w-6 h-6 text-purple-600" />
+              <Users className="w-6 h-6 text-primary" />
               <h2 className="text-xl font-bold text-text">Groups</h2>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <div className="text-center p-4 bg-purple-50 rounded-lg">
-                <p className="text-3xl font-bold text-purple-900">
+              <div className="text-center p-4 bg-secondary rounded-lg">
+                <p className="text-3xl font-bold text-primary">
                   {analytics.groups.totalGroups}
                 </p>
-                <p className="text-sm text-purple-700 mt-1">Total Groups</p>
+                <p className="text-sm text-secondary mt-1">Total Groups</p>
               </div>
               <div className="text-center p-4 bg-success/10 rounded-lg">
-                <p className="text-3xl font-bold text-green-900">
+                <p className="text-3xl font-bold text-success">
                   {analytics.groups.activeGroups}
                 </p>
-                <p className="text-sm text-green-700 mt-1">Active Groups</p>
+                <p className="text-sm text-success mt-1">Active Groups</p>
               </div>
               <div className="text-center p-4 bg-primary/10 rounded-lg col-span-2">
-                <p className="text-3xl font-bold text-blue-900">
+                <p className="text-3xl font-bold text-primary">
                   {analytics.groups.adminGroups}
                 </p>
                 <p className="text-sm text-primary mt-1">Groups You Admin</p>

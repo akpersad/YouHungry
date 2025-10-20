@@ -274,22 +274,31 @@ describe('Modal Accessibility', () => {
     });
 
     it('should prevent body scroll when open', () => {
+      // Mock desktop viewport
+      global.innerWidth = 1024;
+
       render(
         <Modal isOpen onClose={jest.fn()}>
           Content
         </Modal>
       );
 
+      // On desktop, we use position: fixed to prevent scrolling
+      expect(document.body.style.position).toBe('fixed');
       expect(document.body.style.overflow).toBe('hidden');
     });
 
     it('should restore body scroll when closed', () => {
+      // Mock desktop viewport
+      global.innerWidth = 1024;
+
       const { rerender } = render(
         <Modal isOpen onClose={jest.fn()}>
           Content
         </Modal>
       );
 
+      expect(document.body.style.position).toBe('fixed');
       expect(document.body.style.overflow).toBe('hidden');
 
       rerender(
@@ -298,7 +307,9 @@ describe('Modal Accessibility', () => {
         </Modal>
       );
 
-      expect(document.body.style.overflow).toBe('unset');
+      // Body scroll should be restored (empty string means no inline style)
+      expect(document.body.style.position).toBe('');
+      expect(document.body.style.overflow).toBe('');
     });
   });
 

@@ -1,7 +1,6 @@
 'use client';
 
 import { ReactNode } from 'react';
-import { BottomNavigation } from '@/components/ui/BottomNavigation';
 import { QuickActionSheet } from '@/components/ui/BottomSheet';
 import { useMobileNavigation } from '@/hooks/useMobileNavigation';
 import { cn } from '@/lib/utils';
@@ -12,13 +11,8 @@ interface MobileLayoutProps {
 }
 
 export function MobileLayout({ children, className }: MobileLayoutProps) {
-  const {
-    navigationItems,
-    handleNavigation,
-    isMoreMenuOpen,
-    setIsMoreMenuOpen,
-    moreMenuActions,
-  } = useMobileNavigation();
+  const { isMoreMenuOpen, setIsMoreMenuOpen, moreMenuActions } =
+    useMobileNavigation();
 
   return (
     <div className={cn('flex flex-col flex-1 bg-primary', className)}>
@@ -67,17 +61,6 @@ export function MobileLayout({ children, className }: MobileLayoutProps) {
           </div>
         </div>
       </footer>
-
-      {/* Bottom Navigation */}
-      <BottomNavigation
-        items={navigationItems.map((item) => ({
-          id: item.id,
-          label: item.label,
-          icon: item.isActive ? item.activeIcon : item.icon,
-          onClick: () => handleNavigation(item),
-          isActive: item.isActive,
-        }))}
-      />
 
       {/* More Menu Bottom Sheet */}
       <QuickActionSheet

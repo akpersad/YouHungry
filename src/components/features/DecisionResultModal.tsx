@@ -77,7 +77,7 @@ export function DecisionResultModal({
                 <div className="flex flex-wrap gap-4 text-sm text-text-light">
                   <div className="flex items-center gap-1">
                     <span className="font-medium">Rating:</span>
-                    <span className="text-yellow-600">
+                    <span className="text-warning">
                       ★ {selectedRestaurant.rating}
                     </span>
                   </div>

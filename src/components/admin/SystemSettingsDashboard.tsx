@@ -314,7 +314,7 @@ export function SystemSettingsDashboard() {
             </div>
             <div className="ml-3">
               <h3 className="text-sm font-medium text-red-800">Error</h3>
-              <div className="mt-2 text-sm text-red-700">
+              <div className="mt-2 text-sm text-destructive">
                 <p>{error}</p>
               </div>
               <div className="mt-4">
@@ -346,20 +346,12 @@ export function SystemSettingsDashboard() {
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h2
-            className="text-2xl font-bold"
-            style={{ color: 'var(--text-primary)' }}
-          >
-            System Settings
-          </h2>
-          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+          <h2 className="text-2xl font-bold">System Settings</h2>
+          <p className="text-sm">
             Configure system-wide settings and monitoring thresholds
           </p>
           {lastUpdated && (
-            <p
-              className="text-xs mt-1"
-              style={{ color: 'var(--text-secondary)' }}
-            >
+            <p className="text-xs mt-1">
               Last updated: {lastUpdated.toLocaleString()}
             </p>
           )}
@@ -371,7 +363,6 @@ export function SystemSettingsDashboard() {
             className="px-4 py-2 border rounded-md text-sm font-medium disabled:opacity-50"
             style={{
               borderColor: 'var(--bg-quaternary)',
-              color: 'var(--text-primary)',
               background: 'var(--bg-secondary)',
             }}
             onMouseEnter={(e) => {
@@ -393,7 +384,6 @@ export function SystemSettingsDashboard() {
             className="px-4 py-2 rounded-md text-sm font-medium disabled:opacity-50"
             style={{
               background: 'var(--accent-primary)',
-              color: 'var(--text-inverse)',
             }}
             onMouseEnter={(e) => {
               if (!saving) {
@@ -422,12 +412,7 @@ export function SystemSettingsDashboard() {
         >
           <div className="flex">
             <div className="flex-shrink-0">
-              <svg
-                className="h-5 w-5"
-                style={{ color: 'var(--color-success)' }}
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
+              <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                 <path
                   fillRule="evenodd"
                   d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
@@ -436,12 +421,7 @@ export function SystemSettingsDashboard() {
               </svg>
             </div>
             <div className="ml-3">
-              <p
-                className="text-sm font-medium"
-                style={{ color: 'var(--color-success)' }}
-              >
-                {success}
-              </p>
+              <p className="text-sm font-medium">{success}</p>
             </div>
           </div>
         </div>
@@ -1373,13 +1353,13 @@ export function SystemSettingsDashboard() {
                         />
                         <label
                           htmlFor="emergencyModeEnabled"
-                          className="ml-2 text-sm text-red-700"
+                          className="ml-2 text-sm text-destructive"
                         >
                           Enable emergency mode
                         </label>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-red-700 mb-1">
+                        <label className="block text-sm font-medium text-destructive mb-1">
                           Emergency message
                         </label>
                         <textarea
@@ -1397,7 +1377,7 @@ export function SystemSettingsDashboard() {
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-red-700 mb-1">
+                        <label className="block text-sm font-medium text-destructive mb-1">
                           Contact information
                         </label>
                         <input
@@ -1447,7 +1427,7 @@ export function SystemSettingsDashboard() {
                       <button
                         onClick={() => clearCache('restaurant_search')}
                         disabled={cacheClearing === 'restaurant_search'}
-                        className="px-4 py-2 bg-red-600 text-white rounded-md text-sm font-medium hover:bg-red-700 disabled:opacity-50"
+                        className="px-4 py-2 bg-destructive text-white rounded-md text-sm font-medium hover:bg-destructive disabled:opacity-50"
                       >
                         {cacheClearing === 'restaurant_search'
                           ? 'Clearing...'
@@ -1471,7 +1451,7 @@ export function SystemSettingsDashboard() {
                       <button
                         onClick={() => clearCache('location_cache')}
                         disabled={cacheClearing === 'location_cache'}
-                        className="px-4 py-2 bg-red-600 text-white rounded-md text-sm font-medium hover:bg-red-700 disabled:opacity-50"
+                        className="px-4 py-2 bg-destructive text-white rounded-md text-sm font-medium hover:bg-destructive disabled:opacity-50"
                       >
                         {cacheClearing === 'location_cache'
                           ? 'Clearing...'
@@ -1494,7 +1474,7 @@ export function SystemSettingsDashboard() {
                       <button
                         onClick={() => clearCache('geocoding')}
                         disabled={cacheClearing === 'geocoding'}
-                        className="px-4 py-2 bg-red-600 text-white rounded-md text-sm font-medium hover:bg-red-700 disabled:opacity-50"
+                        className="px-4 py-2 bg-destructive text-white rounded-md text-sm font-medium hover:bg-destructive disabled:opacity-50"
                       >
                         {cacheClearing === 'geocoding'
                           ? 'Clearing...'
@@ -1517,7 +1497,7 @@ export function SystemSettingsDashboard() {
                       <button
                         onClick={() => clearCache('address_validation')}
                         disabled={cacheClearing === 'address_validation'}
-                        className="px-4 py-2 bg-red-600 text-white rounded-md text-sm font-medium hover:bg-red-700 disabled:opacity-50"
+                        className="px-4 py-2 bg-destructive text-white rounded-md text-sm font-medium hover:bg-destructive disabled:opacity-50"
                       >
                         {cacheClearing === 'address_validation'
                           ? 'Clearing...'
@@ -1540,7 +1520,7 @@ export function SystemSettingsDashboard() {
                       <button
                         onClick={() => clearCache('restaurant_details')}
                         disabled={cacheClearing === 'restaurant_details'}
-                        className="px-4 py-2 bg-red-600 text-white rounded-md text-sm font-medium hover:bg-red-700 disabled:opacity-50"
+                        className="px-4 py-2 bg-destructive text-white rounded-md text-sm font-medium hover:bg-destructive disabled:opacity-50"
                       >
                         {cacheClearing === 'restaurant_details'
                           ? 'Clearing...'
@@ -1575,7 +1555,7 @@ export function SystemSettingsDashboard() {
             </Button>
             <Button
               onClick={confirmResetSettings}
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-destructive hover:bg-destructive"
               disabled={saving}
             >
               Reset Settings

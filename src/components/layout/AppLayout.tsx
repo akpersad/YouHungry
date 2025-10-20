@@ -31,7 +31,7 @@ export function AppLayout({ children, className }: AppLayoutProps) {
       {/* Header - visible on desktop, hidden on mobile */}
       <Header />
 
-      {/* Mobile layout with bottom navigation */}
+      {/* Mobile layout */}
       <MobileLayout className={className}>{children}</MobileLayout>
     </div>
   );

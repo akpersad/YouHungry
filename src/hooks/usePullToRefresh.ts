@@ -138,6 +138,10 @@ export function usePullToRefresh(options: PullToRefreshOptions = {}) {
   // Touch start handler
   const handleTouchStart = useCallback(
     (e: TouchEvent) => {
+      // Don't trigger if modal is open
+      const hasOpenModal = document.querySelector('.modal-overlay');
+      if (hasOpenModal) return;
+
       // Only trigger if we're at the top of the page
       if (window.scrollY > 0) return;
 
@@ -159,6 +163,10 @@ export function usePullToRefresh(options: PullToRefreshOptions = {}) {
   // Touch move handler
   const handleTouchMove = useCallback(
     (e: TouchEvent) => {
+      // Don't trigger if modal is open
+      const hasOpenModal = document.querySelector('.modal-overlay');
+      if (hasOpenModal) return;
+
       if (state.isRefreshing) return;
 
       touchCurrentY.current = e.touches[0].clientY;

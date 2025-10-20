@@ -108,7 +108,7 @@ export default function DashboardPage() {
                             {decision.result?.restaurant?.name ||
                               'Restaurant Decision'}
                           </span>
-                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-tertiary text-primary">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-quaternary text-primary">
                             {decision.method}
                           </span>
                         </div>
@@ -124,7 +124,7 @@ export default function DashboardPage() {
                             {new Date(decision.createdAt).toLocaleDateString()}
                           </div>
                         </div>
-                        <div className="text-sm text-tertiary mt-1">
+                        <div className="text-sm text-secondary mt-1">
                           {decision.type === 'group'
                             ? `Group: ${decision.groupName}`
                             : 'Personal Decision'}{' '}

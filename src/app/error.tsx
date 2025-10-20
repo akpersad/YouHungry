@@ -43,13 +43,8 @@ export default function Error({
 
         {/* Error Message */}
         <div className="space-y-3">
-          <h1
-            className="text-4xl font-bold"
-            style={{ color: 'var(--text-primary)' }}
-          >
-            Oops! Something went wrong
-          </h1>
-          <p className="text-lg" style={{ color: 'var(--text-secondary)' }}>
+          <h1 className="text-4xl font-bold">Oops! Something went wrong</h1>
+          <p className="text-lg">
             Nibbles is sad because something unexpected happened.
             <br />
             Don&apos;t worry, our team has been notified and is working on a
@@ -60,17 +55,13 @@ export default function Error({
         {/* Development Error Details */}
         {process.env.NODE_ENV === 'development' && (
           <details className="text-left">
-            <summary
-              className="cursor-pointer text-sm font-medium mb-2"
-              style={{ color: 'var(--text-secondary)' }}
-            >
+            <summary className="cursor-pointer text-sm font-medium mb-2">
               Error Details (Development Only)
             </summary>
             <pre
               className="text-xs p-4 rounded-lg overflow-auto max-h-60"
               style={{
                 background: 'var(--bg-secondary)',
-                color: 'var(--text-secondary)',
               }}
             >
               {error.message}
@@ -102,7 +93,6 @@ export default function Error({
         <button
           onClick={() => setShowReportModal(true)}
           className="inline-flex items-center gap-2 text-sm transition-colors hover:text-accent-primary"
-          style={{ color: 'var(--text-light)' }}
         >
           <MessageSquare className="h-4 w-4" />
           Report this issue and help us improve
@@ -113,7 +103,7 @@ export default function Error({
           className="mt-8 p-4 rounded-lg"
           style={{ background: 'var(--bg-secondary)' }}
         >
-          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+          <p className="text-sm">
             🍔 We&apos;re constantly improving! Your feedback helps us make the
             app better for everyone.
           </p>

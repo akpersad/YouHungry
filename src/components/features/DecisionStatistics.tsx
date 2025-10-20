@@ -76,7 +76,7 @@ export function DecisionStatistics({
 
   const getWeightColor = (weight: number) => {
     if (weight >= 0.8) return 'text-success bg-success/10';
-    if (weight >= 0.5) return 'text-yellow-600 bg-yellow-50';
+    if (weight >= 0.5) return 'text-warning bg-warning/10';
     return 'text-destructive bg-destructive/10';
   };
 

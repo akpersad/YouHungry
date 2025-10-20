@@ -107,9 +107,7 @@ export function AdminPanel() {
                 System administration and monitoring
               </p>
             </div>
-            <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-              Fork In The Road Admin Dashboard
-            </div>
+            <div className="text-sm">Fork In The Road Admin Dashboard</div>
           </div>
         </div>
       </div>

@@ -37,6 +37,7 @@ export async function updateUser(
       User,
       | 'email'
       | 'name'
+      | 'username'
       | 'city'
       | 'state'
       | 'profilePicture'

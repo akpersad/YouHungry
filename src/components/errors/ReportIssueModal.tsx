@@ -58,16 +58,10 @@ export function ReportIssueModal({ error, onClose }: ReportIssueModalProps) {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-4">
-          <h3
-            className="text-xl font-bold"
-            style={{ color: 'var(--text-primary)' }}
-          >
-            Report Issue
-          </h3>
+          <h3 className="text-xl font-bold">Report Issue</h3>
           <button
             onClick={onClose}
             className="p-1 rounded transition-all hover:opacity-70"
-            style={{ color: 'var(--text-secondary)' }}
           >
             <X className="h-5 w-5" />
           </button>
@@ -79,20 +73,12 @@ export function ReportIssueModal({ error, onClose }: ReportIssueModalProps) {
               className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-4"
               style={{ background: 'var(--accent-primary-light)' }}
             >
-              <Send
-                className="h-8 w-8"
-                style={{ color: 'var(--accent-primary)' }}
-              />
+              <Send className="h-8 w-8" />
             </div>
-            <h4
-              className="text-lg font-semibold mb-2"
-              style={{ color: 'var(--text-primary)' }}
-            >
+            <h4 className="text-lg font-semibold mb-2">
               Thank you for your report!
             </h4>
-            <p style={{ color: 'var(--text-secondary)' }}>
-              We&apos;ll investigate this issue and work on a fix.
-            </p>
+            <p>We&apos;ll investigate this issue and work on a fix.</p>
           </div>
         ) : (
           <form onSubmit={handleSubmit}>
@@ -100,7 +86,6 @@ export function ReportIssueModal({ error, onClose }: ReportIssueModalProps) {
               <label
                 htmlFor="description"
                 className="block text-sm font-medium mb-2"
-                style={{ color: 'var(--text-primary)' }}
               >
                 What were you trying to do when this error occurred?
               </label>
@@ -112,7 +97,6 @@ export function ReportIssueModal({ error, onClose }: ReportIssueModalProps) {
                 style={{
                   background: 'var(--bg-secondary)',
                   borderColor: 'var(--bg-quaternary)',
-                  color: 'var(--text-primary)',
                 }}
                 rows={4}
                 placeholder="e.g., I was trying to add a restaurant to my collection..."

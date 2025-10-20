@@ -313,7 +313,7 @@ export function EnhancedPerformanceMonitor() {
       >
         {isVisible ? '📊' : '⚡'}
         {alerts.length > 0 && (
-          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+          <span className="absolute -top-1 -right-1 bg-destructive text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
             {alerts.length}
           </span>
         )}
@@ -348,7 +348,7 @@ export function EnhancedPerformanceMonitor() {
                       alert.type === 'error'
                         ? 'bg-destructive/10 text-red-800 dark:bg-destructive/20 dark:text-red-200'
                         : alert.type === 'warning'
-                          ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+                          ? 'bg-warning/20 text-warning dark:bg-warning/90 dark:text-yellow-200'
                           : 'bg-primary/10 text-blue-800 dark:bg-primary/20 dark:text-blue-200'
                     }`}
                   >

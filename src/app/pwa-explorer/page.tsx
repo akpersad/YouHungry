@@ -181,10 +181,7 @@ export default function PWAExplorerPage() {
             boxShadow: 'var(--shadow-medium)',
           }}
         >
-          <h1
-            className="text-2xl font-bold mb-4"
-            style={{ color: 'var(--text-primary)' }}
-          >
+          <h1 className="text-2xl font-bold mb-4">
             PWA Feature Explorer for iOS
           </h1>
 
@@ -194,7 +191,6 @@ export default function PWAExplorerPage() {
               className="px-4 py-2 rounded transition-colors"
               style={{
                 backgroundColor: 'var(--accent-primary)',
-                color: 'var(--text-inverse)',
                 boxShadow: 'var(--shadow-neumorphic-elevated)',
               }}
               onMouseEnter={(e) => {
@@ -222,10 +218,7 @@ export default function PWAExplorerPage() {
                 }}
               >
                 <div className="flex items-center justify-between mb-2">
-                  <h3
-                    className="font-semibold"
-                    style={{ color: 'var(--text-primary)' }}
-                  >
+                  <h3 className="font-semibold">
                     {getStatusIcon(result)} {test}
                   </h3>
                 </div>
@@ -237,10 +230,7 @@ export default function PWAExplorerPage() {
                     border: '1px solid var(--bg-quaternary)',
                   }}
                 >
-                  <pre
-                    className="text-xs font-mono"
-                    style={{ color: 'var(--text-primary)' }}
-                  >
+                  <pre className="text-xs font-mono">
                     {JSON.stringify(result, null, 2)}
                   </pre>
                 </div>
@@ -249,12 +239,7 @@ export default function PWAExplorerPage() {
           </div>
 
           {testResults.length === 0 && (
-            <div
-              className="text-center py-8"
-              style={{ color: 'var(--text-tertiary)' }}
-            >
-              Running tests...
-            </div>
+            <div className="text-center py-8">Running tests...</div>
           )}
         </div>
 
@@ -277,11 +262,11 @@ export default function PWAExplorerPage() {
           </ol>
         </div>
 
-        <div className="mt-6 bg-yellow-50 dark:bg-yellow-900 rounded-lg p-4">
+        <div className="mt-6 bg-warning/10 dark:bg-warning/90 rounded-lg p-4">
           <h2 className="font-semibold text-yellow-900 dark:text-yellow-100 mb-2">
             ⚠️ iOS PWA Limitations
           </h2>
-          <ul className="list-disc list-inside space-y-2 text-sm text-yellow-800 dark:text-yellow-200">
+          <ul className="list-disc list-inside space-y-2 text-sm text-warning dark:text-yellow-200">
             <li>
               <strong>Chrome on iOS</strong> uses Safari&apos;s WebKit engine
             </li>

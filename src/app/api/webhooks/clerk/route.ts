@@ -66,6 +66,7 @@ export async function POST(req: NextRequest) {
     const {
       id,
       email_addresses,
+      username,
       first_name,
       last_name,
       image_url,
@@ -93,11 +94,14 @@ export async function POST(req: NextRequest) {
       await createUser({
         clerkId: id,
         email: email_addresses[0]?.email_address || '',
+        username: username || undefined,
         name: `${first_name || ''} ${last_name || ''}`.trim() || 'User',
         profilePicture: image_url,
         phoneNumber,
         phoneVerified: false,
         smsOptIn,
+        // If user opted in for SMS and provided a phone, set smsPhoneNumber
+        smsPhoneNumber: smsOptIn && phoneNumber ? phoneNumber : undefined,
         city,
         state,
         preferences: {
@@ -122,10 +126,12 @@ export async function POST(req: NextRequest) {
       });
 
       logger.debug(`User created via webhook: ${id}`, {
+        username,
         city,
         state,
         smsOptIn,
         hasPhone: !!phoneNumber,
+        hasSmsPhone: !!(smsOptIn && phoneNumber),
       });
     } catch (error) {
       logger.error('Error creating user:', error);
@@ -137,6 +143,7 @@ export async function POST(req: NextRequest) {
     const {
       id,
       email_addresses,
+      username,
       first_name,
       last_name,
       image_url,
@@ -163,14 +170,25 @@ export async function POST(req: NextRequest) {
     try {
       const user = await getUserByClerkId(id);
       if (user) {
+        // Determine smsPhoneNumber based on smsOptIn and phoneNumber
+        const updatedSmsOptIn =
+          smsOptIn !== undefined ? smsOptIn : user.smsOptIn;
+        const updatedPhoneNumber = phoneNumber || user.phoneNumber;
+        const updatedSmsPhoneNumber =
+          updatedSmsOptIn && updatedPhoneNumber
+            ? updatedPhoneNumber
+            : user.smsPhoneNumber;
+
         await updateUser(user._id.toString(), {
           email: email_addresses[0]?.email_address || user.email,
           name: `${first_name || ''} ${last_name || ''}`.trim() || user.name,
+          username: username || user.username,
           profilePicture: image_url || user.profilePicture,
-          phoneNumber: phoneNumber || user.phoneNumber,
+          phoneNumber: updatedPhoneNumber,
           city: city || user.city,
           state: state || user.state,
-          smsOptIn: smsOptIn !== undefined ? smsOptIn : user.smsOptIn,
+          smsOptIn: updatedSmsOptIn,
+          smsPhoneNumber: updatedSmsPhoneNumber,
         });
 
         logger.debug(`User updated via webhook: ${id}`);

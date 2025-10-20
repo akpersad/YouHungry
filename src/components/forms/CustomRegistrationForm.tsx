@@ -545,7 +545,6 @@ export function CustomRegistrationForm() {
             className="w-16 h-16 rounded-full flex items-center justify-center"
             style={{
               backgroundColor: 'var(--color-success-light)',
-              color: 'var(--color-success)',
             }}
           >
             <svg
@@ -566,21 +565,11 @@ export function CustomRegistrationForm() {
 
         {/* Header */}
         <div className="text-center">
-          <h2
-            className="text-2xl font-bold mb-2"
-            style={{ color: 'var(--color-text)' }}
-          >
-            Check Your Email
-          </h2>
-          <p className="text-sm" style={{ color: 'var(--color-text-light)' }}>
+          <h2 className="text-2xl font-bold mb-2">Check Your Email</h2>
+          <p className="text-sm">
             We&apos;ve sent a 6-digit verification code to
           </p>
-          <p
-            className="text-sm font-medium mt-1"
-            style={{ color: 'var(--color-primary)' }}
-          >
-            {formData.email}
-          </p>
+          <p className="text-sm font-medium mt-1">{formData.email}</p>
         </div>
 
         {/* Error Message */}
@@ -590,7 +579,6 @@ export function CustomRegistrationForm() {
             style={{
               backgroundColor: 'var(--color-destructive-light)',
               borderColor: 'var(--color-destructive)',
-              color: 'var(--color-destructive)',
             }}
           >
             {errors.general}
@@ -602,7 +590,6 @@ export function CustomRegistrationForm() {
           <label
             htmlFor="verificationCode"
             className="block text-sm font-medium mb-2 text-center"
-            style={{ color: 'var(--color-text)' }}
           >
             Enter Verification Code
           </label>
@@ -619,10 +606,7 @@ export function CustomRegistrationForm() {
             maxLength={6}
             className="text-center text-2xl tracking-widest"
           />
-          <p
-            className="text-xs mt-2 text-center"
-            style={{ color: 'var(--color-text-muted)' }}
-          >
+          <p className="text-xs mt-2 text-center">
             Enter the 6-digit code from your email
           </p>
         </div>
@@ -639,22 +623,19 @@ export function CustomRegistrationForm() {
 
         {/* Resend Code */}
         <div className="text-center">
-          <p className="text-sm" style={{ color: 'var(--color-text-light)' }}>
+          <p className="text-sm">
             Didn&apos;t receive the code?{' '}
             {canResendCode ? (
               <button
                 type="button"
                 onClick={handleResendCode}
                 className="font-medium underline"
-                style={{ color: 'var(--color-primary)' }}
                 disabled={isSubmitting}
               >
                 Resend Code
               </button>
             ) : (
-              <span style={{ color: 'var(--color-text-muted)' }}>
-                Resend in {resendCooldown}s
-              </span>
+              <span>Resend in {resendCooldown}s</span>
             )}
           </p>
         </div>
@@ -671,7 +652,6 @@ export function CustomRegistrationForm() {
           style={{
             backgroundColor: 'var(--color-destructive-light)',
             borderColor: 'var(--color-destructive)',
-            color: 'var(--color-destructive)',
           }}
         >
           {errors.general}
@@ -681,11 +661,7 @@ export function CustomRegistrationForm() {
       {/* Name Fields */}
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label
-            htmlFor="firstName"
-            className="block text-sm font-medium mb-1"
-            style={{ color: 'var(--color-text)' }}
-          >
+          <label htmlFor="firstName" className="block text-sm font-medium mb-1">
             First Name *
           </label>
           <Input
@@ -699,21 +675,12 @@ export function CustomRegistrationForm() {
             placeholder="John"
           />
           {errors.firstName && (
-            <p
-              className="text-sm mt-1"
-              style={{ color: 'var(--color-destructive)' }}
-            >
-              {errors.firstName}
-            </p>
+            <p className="text-sm mt-1">{errors.firstName}</p>
           )}
         </div>
 
         <div>
-          <label
-            htmlFor="lastName"
-            className="block text-sm font-medium mb-1"
-            style={{ color: 'var(--color-text)' }}
-          >
+          <label htmlFor="lastName" className="block text-sm font-medium mb-1">
             Last Name *
           </label>
           <Input
@@ -726,24 +693,13 @@ export function CustomRegistrationForm() {
             disabled={isSubmitting}
             placeholder="Doe"
           />
-          {errors.lastName && (
-            <p
-              className="text-sm mt-1"
-              style={{ color: 'var(--color-destructive)' }}
-            >
-              {errors.lastName}
-            </p>
-          )}
+          {errors.lastName && <p className="text-sm mt-1">{errors.lastName}</p>}
         </div>
       </div>
 
       {/* Email Field */}
       <div>
-        <label
-          htmlFor="email"
-          className="block text-sm font-medium mb-1"
-          style={{ color: 'var(--color-text)' }}
-        >
+        <label htmlFor="email" className="block text-sm font-medium mb-1">
           Email Address *
         </label>
         <Input
@@ -756,23 +712,12 @@ export function CustomRegistrationForm() {
           disabled={isSubmitting}
           placeholder="john@example.com"
         />
-        {errors.email && (
-          <p
-            className="text-sm mt-1"
-            style={{ color: 'var(--color-destructive)' }}
-          >
-            {errors.email}
-          </p>
-        )}
+        {errors.email && <p className="text-sm mt-1">{errors.email}</p>}
       </div>
 
       {/* Username Field */}
       <div>
-        <label
-          htmlFor="username"
-          className="block text-sm font-medium mb-1"
-          style={{ color: 'var(--color-text)' }}
-        >
+        <label htmlFor="username" className="block text-sm font-medium mb-1">
           Username *
         </label>
         <Input
@@ -785,25 +730,15 @@ export function CustomRegistrationForm() {
           disabled={isSubmitting || isCheckingUsername}
           placeholder="johndoe"
         />
-        <p
-          className="text-xs mt-1"
-          style={{ color: 'var(--color-text-muted)' }}
-        >
-          4-64 characters (letters, numbers, -, _)
-        </p>
+        <p className="text-xs mt-1">4-64 characters (letters, numbers, -, _)</p>
         {isCheckingUsername && (
-          <p className="text-xs mt-1" style={{ color: 'var(--color-primary)' }}>
-            Checking availability...
-          </p>
+          <p className="text-xs mt-1">Checking availability...</p>
         )}
         {!isCheckingUsername &&
           fieldValidation.username &&
           !errors.username &&
           formData.username && (
-            <p
-              className="text-sm mt-1 flex items-center gap-1"
-              style={{ color: 'var(--color-success)' }}
-            >
+            <p className="text-sm mt-1 flex items-center gap-1">
               <svg
                 className="w-4 h-4"
                 fill="none"
@@ -820,23 +755,12 @@ export function CustomRegistrationForm() {
               Username is available
             </p>
           )}
-        {errors.username && (
-          <p
-            className="text-sm mt-1"
-            style={{ color: 'var(--color-destructive)' }}
-          >
-            {errors.username}
-          </p>
-        )}
+        {errors.username && <p className="text-sm mt-1">{errors.username}</p>}
       </div>
 
       {/* Password Fields */}
       <div>
-        <label
-          htmlFor="password"
-          className="block text-sm font-medium mb-1"
-          style={{ color: 'var(--color-text)' }}
-        >
+        <label htmlFor="password" className="block text-sm font-medium mb-1">
           Password *
         </label>
         <Input
@@ -849,27 +773,14 @@ export function CustomRegistrationForm() {
           disabled={isSubmitting}
           placeholder="••••••••"
         />
-        <p
-          className="text-xs mt-1"
-          style={{ color: 'var(--color-text-muted)' }}
-        >
-          Must be between 10 and 72 characters
-        </p>
-        {errors.password && (
-          <p
-            className="text-sm mt-1"
-            style={{ color: 'var(--color-destructive)' }}
-          >
-            {errors.password}
-          </p>
-        )}
+        <p className="text-xs mt-1">Must be between 10 and 72 characters</p>
+        {errors.password && <p className="text-sm mt-1">{errors.password}</p>}
       </div>
 
       <div>
         <label
           htmlFor="confirmPassword"
           className="block text-sm font-medium mb-1"
-          style={{ color: 'var(--color-text)' }}
         >
           Confirm Password *
         </label>
@@ -884,23 +795,14 @@ export function CustomRegistrationForm() {
           placeholder="••••••••"
         />
         {errors.confirmPassword && (
-          <p
-            className="text-sm mt-1"
-            style={{ color: 'var(--color-destructive)' }}
-          >
-            {errors.confirmPassword}
-          </p>
+          <p className="text-sm mt-1">{errors.confirmPassword}</p>
         )}
       </div>
 
       {/* Location Fields */}
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label
-            htmlFor="city"
-            className="block text-sm font-medium mb-1"
-            style={{ color: 'var(--color-text)' }}
-          >
+          <label htmlFor="city" className="block text-sm font-medium mb-1">
             City (Optional)
           </label>
           <Input
@@ -914,11 +816,7 @@ export function CustomRegistrationForm() {
         </div>
 
         <div>
-          <label
-            htmlFor="state"
-            className="block text-sm font-medium mb-1"
-            style={{ color: 'var(--color-text)' }}
-          >
+          <label htmlFor="state" className="block text-sm font-medium mb-1">
             State (Optional)
           </label>
           <Input
@@ -935,11 +833,7 @@ export function CustomRegistrationForm() {
 
       {/* Phone Number Field */}
       <div>
-        <label
-          htmlFor="phoneNumber"
-          className="block text-sm font-medium mb-1"
-          style={{ color: 'var(--color-text)' }}
-        >
+        <label htmlFor="phoneNumber" className="block text-sm font-medium mb-1">
           Phone Number (Optional)
         </label>
         <div className="flex gap-2">
@@ -954,7 +848,6 @@ export function CustomRegistrationForm() {
             style={{
               backgroundColor: 'var(--color-surface)',
               borderColor: 'var(--color-border)',
-              color: 'var(--color-text)',
               minWidth: '7.5rem',
             }}
           >
@@ -981,12 +874,7 @@ export function CustomRegistrationForm() {
           </div>
         </div>
         {errors.phoneNumber && (
-          <p
-            className="text-sm mt-1"
-            style={{ color: 'var(--color-destructive)' }}
-          >
-            {errors.phoneNumber}
-          </p>
+          <p className="text-sm mt-1">{errors.phoneNumber}</p>
         )}
       </div>
 
@@ -1001,18 +889,11 @@ export function CustomRegistrationForm() {
             disabled={isSubmitting}
             className="mt-1"
           />
-          <label
-            htmlFor="smsOptIn"
-            className="text-sm"
-            style={{ color: 'var(--color-text)' }}
-          >
+          <label htmlFor="smsOptIn" className="text-sm">
             Enable SMS notifications for updates
           </label>
         </div>
-        <p
-          className="text-xs ml-6"
-          style={{ color: 'var(--color-text-muted)' }}
-        >
+        <p className="text-xs ml-6">
           Receive texts about group decisions, friend requests & invites. Msg &
           data rates may apply. Frequency varies by activity. Disable anytime in
           settings.
@@ -1034,13 +915,12 @@ export function CustomRegistrationForm() {
 
       {/* Sign In Link */}
       <div className="text-center">
-        <p className="text-sm" style={{ color: 'var(--color-text-light)' }}>
+        <p className="text-sm">
           Already have an account?{' '}
           <button
             type="button"
             onClick={() => router.push('/sign-in')}
             className="font-medium"
-            style={{ color: 'var(--color-primary)' }}
             disabled={isSubmitting}
           >
             Sign in

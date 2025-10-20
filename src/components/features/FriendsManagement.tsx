@@ -42,7 +42,7 @@ export function FriendsManagement() {
         </div>
         <Button
           onClick={() => setShowSearchModal(true)}
-          className="bg-blue-600 hover:bg-blue-700 text-white"
+          className="bg-accent hover:bg-accent text-white"
         >
           Add Friends
         </Button>

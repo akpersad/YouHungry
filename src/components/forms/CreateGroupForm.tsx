@@ -247,7 +247,7 @@ export function CreateGroupForm({
                       type="button"
                       onClick={() => handleRemoveEmail(email)}
                       disabled={isSubmitting || isLoading}
-                      className="text-destructive hover:text-red-700 text-sm font-medium"
+                      className="text-destructive hover:text-destructive text-sm font-medium"
                     >
                       Remove
                     </button>

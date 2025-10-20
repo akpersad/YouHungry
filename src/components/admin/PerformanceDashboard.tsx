@@ -358,26 +358,11 @@ export function PerformanceDashboard() {
   const getTrendIcon = (trend: string) => {
     switch (trend) {
       case 'improvement':
-        return (
-          <TrendingUp
-            className="h-4 w-4"
-            style={{ color: 'var(--color-success)' }}
-          />
-        );
+        return <TrendingUp className="h-4 w-4" />;
       case 'degradation':
-        return (
-          <TrendingDown
-            className="h-4 w-4"
-            style={{ color: 'var(--color-error)' }}
-          />
-        );
+        return <TrendingDown className="h-4 w-4" />;
       default:
-        return (
-          <Minus
-            className="h-4 w-4"
-            style={{ color: 'var(--text-secondary)' }}
-          />
-        );
+        return <Minus className="h-4 w-4" />;
     }
   };
 
@@ -426,7 +411,6 @@ export function PerformanceDashboard() {
           backgroundColor: isGood
             ? 'var(--color-success)'
             : 'var(--color-error)',
-          color: 'var(--text-inverse)',
         }}
       >
         {isGood ? 'Good' : 'Needs Attention'}
@@ -437,13 +421,8 @@ export function PerformanceDashboard() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <RefreshCw
-          className="h-8 w-8 animate-spin"
-          style={{ color: 'var(--accent-primary)' }}
-        />
-        <span className="ml-2" style={{ color: 'var(--text-primary)' }}>
-          Loading performance metrics...
-        </span>
+        <RefreshCw className="h-8 w-8 animate-spin" />
+        <span className="ml-2">Loading performance metrics...</span>
       </div>
     );
   }
@@ -457,18 +436,13 @@ export function PerformanceDashboard() {
         }}
       >
         <CardHeader>
-          <CardTitle
-            className="flex items-center"
-            style={{ color: 'var(--color-error)' }}
-          >
+          <CardTitle className="flex items-center">
             <AlertTriangle className="h-5 w-5 mr-2" />
             Error Loading Metrics
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="mb-4" style={{ color: 'var(--color-error)' }}>
-            {error}
-          </p>
+          <p className="mb-4">{error}</p>
           <Button onClick={loadMetrics} variant="outline">
             <RefreshCw className="h-4 w-4 mr-2" />
             Retry
@@ -498,7 +472,6 @@ export function PerformanceDashboard() {
                 className="p-3 rounded-md text-sm"
                 style={{
                   background: 'rgba(34, 197, 94, 0.1)',
-                  color: 'var(--color-success)',
                   border: '1px solid var(--color-success)',
                 }}
               >
@@ -695,46 +668,22 @@ export function PerformanceDashboard() {
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
               <div className="text-center">
-                <div
-                  className="text-2xl font-bold"
-                  style={{ color: 'var(--color-success)' }}
-                >
+                <div className="text-2xl font-bold">
                   {comparison.summary.improvements}
                 </div>
-                <div
-                  className="text-sm"
-                  style={{ color: 'var(--text-secondary)' }}
-                >
-                  Improvements
-                </div>
+                <div className="text-sm">Improvements</div>
               </div>
               <div className="text-center">
-                <div
-                  className="text-2xl font-bold"
-                  style={{ color: 'var(--color-error)' }}
-                >
+                <div className="text-2xl font-bold">
                   {comparison.summary.degradations}
                 </div>
-                <div
-                  className="text-sm"
-                  style={{ color: 'var(--text-secondary)' }}
-                >
-                  Degradations
-                </div>
+                <div className="text-sm">Degradations</div>
               </div>
               <div className="text-center">
-                <div
-                  className="text-2xl font-bold"
-                  style={{ color: 'var(--text-secondary)' }}
-                >
+                <div className="text-2xl font-bold">
                   {comparison.summary.neutral}
                 </div>
-                <div
-                  className="text-sm"
-                  style={{ color: 'var(--text-secondary)' }}
-                >
-                  No Change
-                </div>
+                <div className="text-sm">No Change</div>
               </div>
             </div>
 
@@ -805,25 +754,19 @@ export function PerformanceDashboard() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
               <div>
                 <div className="font-medium">Platform</div>
-                <div style={{ color: 'var(--text-secondary)' }}>
-                  {latestMetrics.system.platform}
-                </div>
+                <div>{latestMetrics.system.platform}</div>
               </div>
               <div>
                 <div className="font-medium">Architecture</div>
-                <div style={{ color: 'var(--text-secondary)' }}>
-                  {latestMetrics.system.arch}
-                </div>
+                <div>{latestMetrics.system.arch}</div>
               </div>
               <div>
                 <div className="font-medium">Node Version</div>
-                <div style={{ color: 'var(--text-secondary)' }}>
-                  {latestMetrics.system.nodeVersion}
-                </div>
+                <div>{latestMetrics.system.nodeVersion}</div>
               </div>
               <div>
                 <div className="font-medium">Memory Usage</div>
-                <div style={{ color: 'var(--text-secondary)' }}>
+                <div>
                   {typeof latestMetrics.system.memoryUsage === 'object'
                     ? `${Math.round(latestMetrics.system.memoryUsage.heapUsed / 1024 / 1024)}MB`
                     : `${latestMetrics.system.memoryUsage}MB`}
