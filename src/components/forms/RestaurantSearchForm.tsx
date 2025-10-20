@@ -55,6 +55,7 @@ export function RestaurantSearchForm({
       setIsAddressValid(true); // Assume stored address is valid
       hasInitializedLocationRef.current = true;
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profile]);
 
   const handleSubmit = (e: React.FormEvent) => {
