@@ -228,7 +228,7 @@ export function CostMonitoringDashboard() {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-2 space-y-6">
       {/* Header */}
       <div className="flex flex-col gap-4">
         <div className="flex justify-between items-start">
