@@ -29,15 +29,30 @@ export class PushNotificationManager {
    * Push notifications work on iOS 16.4+ in Safari
    */
   isSupported(): boolean {
+    // Ensure we're on the client side
     if (typeof window === 'undefined' || typeof navigator === 'undefined') {
       return false;
     }
 
-    return (
-      'serviceWorker' in navigator &&
-      'PushManager' in window &&
-      'Notification' in window
-    );
+    // Check if we're in a secure context (required for push notifications)
+    if (!window.isSecureContext) {
+      logger.debug('Not in secure context - push notifications not supported');
+      return false;
+    }
+
+    const hasServiceWorker = 'serviceWorker' in navigator;
+    const hasPushManager = 'PushManager' in window;
+    const hasNotification = 'Notification' in window;
+
+    logger.debug('Push notification API availability:', {
+      hasServiceWorker,
+      hasPushManager,
+      hasNotification,
+      isSecureContext: window.isSecureContext,
+      userAgent: navigator.userAgent,
+    });
+
+    return hasServiceWorker && hasPushManager && hasNotification;
   }
 
   /**
@@ -54,21 +69,102 @@ export class PushNotificationManager {
    * Check if on iOS
    */
   isIOS(): boolean {
-    return /iPhone|iPad|iPod/.test(navigator.userAgent);
+    const userAgent = navigator.userAgent.toLowerCase();
+    const isIOS = /iphone|ipad|ipod/.test(userAgent);
+
+    const debugInfo = {
+      userAgent: navigator.userAgent,
+      userAgentLower: userAgent,
+      isIOS,
+    };
+
+    logger.debug('iOS detection:', debugInfo);
+    console.log('🔍 iOS detection:', JSON.stringify(debugInfo, null, 2));
+
+    return isIOS;
   }
 
   /**
    * Check if iOS has push support (iOS 16.4+)
+   * Updated to be more robust - if APIs are available, assume support
    */
   hasIOSPushSupport(): boolean {
-    if (!this.isIOS()) return false;
+    const isIOSDevice = this.isIOS();
+    const debugInfo = {
+      isIOSDevice,
+      userAgent: navigator.userAgent,
+    };
 
-    // Check iOS version
-    const match = navigator.userAgent.match(/OS (\d+)_/);
-    if (!match) return false;
+    logger.debug('hasIOSPushSupport check:', debugInfo);
+    console.log(
+      '🔍 hasIOSPushSupport check:',
+      JSON.stringify(debugInfo, null, 2)
+    );
 
-    const majorVersion = parseInt(match[1], 10);
-    return majorVersion >= 16;
+    if (!isIOSDevice) {
+      logger.debug('Not an iOS device, returning false');
+      console.log('🔍 Not an iOS device, returning false');
+      return false;
+    }
+
+    // Primary check: If the APIs are available, the device supports it
+    // This is more reliable than version detection
+    if (
+      typeof window !== 'undefined' &&
+      typeof navigator !== 'undefined' &&
+      'serviceWorker' in navigator &&
+      'PushManager' in window &&
+      'Notification' in window
+    ) {
+      logger.debug('iOS device has push notification APIs available');
+      console.log('🔍 iOS device has push notification APIs available');
+      return true;
+    }
+
+    // Fallback: Check iOS version
+    // Try multiple regex patterns for different iOS version formats
+    const patterns = [
+      /OS (\d+)_/, // Standard iOS format (e.g., "OS 16_4")
+      /Version\/(\d+)\./, // Alternative format
+      /iPhone OS (\d+)_/, // Older format
+    ];
+
+    for (const pattern of patterns) {
+      const match = navigator.userAgent.match(pattern);
+      if (match) {
+        const majorVersion = parseInt(match[1], 10);
+        const hasSupport = majorVersion >= 16;
+        const versionDebugInfo = {
+          version: majorVersion,
+          hasSupport,
+          userAgent: navigator.userAgent,
+        };
+        logger.debug('iOS version detected:', versionDebugInfo);
+        console.log(
+          '🔍 iOS version detected:',
+          JSON.stringify(versionDebugInfo, null, 2)
+        );
+        return hasSupport;
+      }
+    }
+
+    // If we can't detect version but we're on iOS, log it
+    const fallbackDebugInfo = {
+      userAgent: navigator.userAgent,
+      hasServiceWorker: 'serviceWorker' in navigator,
+      hasPushManager: typeof window !== 'undefined' && 'PushManager' in window,
+    };
+    logger.warn(
+      'Could not detect iOS version from userAgent:',
+      fallbackDebugInfo
+    );
+    console.log(
+      '🔍 Could not detect iOS version:',
+      JSON.stringify(fallbackDebugInfo, null, 2)
+    );
+
+    // Default to false if we can't detect version
+    return false;
   }
 
   /**
@@ -82,16 +178,30 @@ export class PushNotificationManager {
 
     // Log iOS detection for debugging
     if (this.isIOS()) {
+      const hasIOSSupport = this.hasIOSPushSupport();
       logger.debug('iOS device detected', {
-        hasIOSSupport: this.hasIOSPushSupport(),
+        hasIOSSupport,
         userAgent: navigator.userAgent,
       });
 
-      if (!this.hasIOSPushSupport()) {
+      // Only throw error if APIs are definitively not available
+      // Don't throw based on version detection alone
+      if (!hasIOSSupport && !this.isSupported()) {
         logger.warn(
-          'iOS version does not support push notifications (requires 16.4+)'
+          'iOS device does not have push notification APIs available'
         );
-        throw new Error('Push notifications require iOS 16.4 or later');
+        throw new Error(
+          'Push notifications are not available on this iOS device. Requires iOS 16.4 or later.'
+        );
+      }
+
+      // If APIs are available (isSupported() is true), proceed even if version detection failed
+      if (hasIOSSupport) {
+        logger.info('iOS device is eligible for push notifications');
+      } else {
+        logger.info(
+          'iOS version detection uncertain, but APIs are available - proceeding'
+        );
       }
     }
 
@@ -449,9 +559,51 @@ export class PushNotificationManager {
         typeof navigator !== 'undefined' && 'serviceWorker' in navigator,
       pushManager: typeof window !== 'undefined' && 'PushManager' in window,
       notifications: typeof window !== 'undefined' && 'Notification' in window,
+      isSecureContext: typeof window !== 'undefined' && window.isSecureContext,
     };
 
+    // Log detailed debugging info
     logger.debug('Push notification capabilities:', caps);
+    console.log(
+      '🔍 DEBUG: Push notification capabilities:',
+      JSON.stringify(caps, null, 2)
+    );
+    console.log('🔍 DEBUG: isSupported() result:', this.isSupported());
+    console.log(
+      '🔍 DEBUG: window.isSecureContext:',
+      typeof window !== 'undefined' ? window.isSecureContext : 'undefined'
+    );
+    console.log(
+      '🔍 DEBUG: navigator.userAgent:',
+      typeof navigator !== 'undefined' ? navigator.userAgent : 'undefined'
+    );
+
+    // Also log to server for easier debugging
+    console.log(
+      '🔍 SERVER DEBUG: Final capabilities result:',
+      JSON.stringify(caps, null, 2)
+    );
+
+    // Send debug info to server
+    try {
+      fetch('/api/debug/push-notifications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          capabilities: caps,
+          timestamp: new Date().toISOString(),
+          userAgent:
+            typeof navigator !== 'undefined'
+              ? navigator.userAgent
+              : 'undefined',
+        }),
+      }).catch(() => {
+        // Ignore fetch errors
+      });
+    } catch {
+      // Ignore errors
+    }
+
     return caps;
   }
 }

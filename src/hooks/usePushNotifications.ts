@@ -28,20 +28,119 @@ export function usePushNotifications() {
 
   // Check initial status
   const checkStatus = useCallback(async () => {
-    const capabilities = pushNotifications.getCapabilities();
+    // Only check on client side
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    console.log('🔍 HOOK DEBUG: Starting checkStatus');
+
+    // Use real-time detection instead of the potentially stale capabilities
+    const realTimeCapabilities = {
+      supported: (() => {
+        if (typeof window === 'undefined' || typeof navigator === 'undefined')
+          return false;
+        if (!window.isSecureContext) return false;
+        return (
+          'serviceWorker' in navigator &&
+          'PushManager' in window &&
+          'Notification' in window
+        );
+      })(),
+      permission: (() => {
+        if (typeof window !== 'undefined' && 'Notification' in window) {
+          return Notification.permission;
+        }
+        return 'default' as NotificationPermission;
+      })(),
+      isIOS: (() => {
+        if (typeof navigator === 'undefined') return false;
+        return /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase());
+      })(),
+      hasIOSPushSupport: (() => {
+        if (typeof navigator === 'undefined') return false;
+        const isIOS = /iphone|ipad|ipod/.test(
+          navigator.userAgent.toLowerCase()
+        );
+        if (!isIOS) return false;
+        if (typeof window === 'undefined') return false;
+        return (
+          'serviceWorker' in navigator &&
+          'PushManager' in window &&
+          'Notification' in window &&
+          window.isSecureContext
+        );
+      })(),
+    };
+
     const subscribed = await pushNotifications.isSubscribed();
 
-    setStatus({
-      supported: capabilities.supported,
-      permission: capabilities.permission,
+    const newStatus = {
+      supported: realTimeCapabilities.supported,
+      permission: realTimeCapabilities.permission,
       subscribed,
-      isIOS: capabilities.isIOS,
-      hasIOSSupport: capabilities.hasIOSPushSupport,
+      isIOS: realTimeCapabilities.isIOS,
+      hasIOSSupport: realTimeCapabilities.hasIOSPushSupport,
+    };
+
+    console.log(
+      '🔍 HOOK DEBUG: Setting status to:',
+      JSON.stringify(newStatus, null, 2)
+    );
+
+    // Force a re-render by using a callback
+    setStatus((prevStatus) => {
+      console.log(
+        '🔍 HOOK DEBUG: Previous status was:',
+        JSON.stringify(prevStatus, null, 2)
+      );
+      console.log(
+        '🔍 HOOK DEBUG: New status will be:',
+        JSON.stringify(newStatus, null, 2)
+      );
+      return newStatus;
     });
   }, []);
 
   useEffect(() => {
-    checkStatus();
+    // Wait for service worker to be ready before checking status
+    const initializeStatus = async () => {
+      try {
+        // Wait for service worker to be ready
+        if ('serviceWorker' in navigator) {
+          console.log('🔍 Waiting for service worker to be ready...');
+
+          // Check if service worker is already registered
+          const registration = await navigator.serviceWorker.getRegistration();
+          if (!registration) {
+            console.log(
+              '🔧 No service worker found, attempting to register...'
+            );
+            try {
+              await navigator.serviceWorker.register('/sw.js', { scope: '/' });
+              console.log('✅ Service worker registered successfully');
+            } catch (regError) {
+              console.error('❌ Failed to register service worker:', regError);
+            }
+          }
+
+          await navigator.serviceWorker.ready;
+          console.log('🔍 Service worker is ready!');
+        }
+
+        // Now check status
+        await checkStatus();
+      } catch (error) {
+        console.error(
+          '🔍 Failed to initialize push notification status:',
+          error
+        );
+        // Fallback: try without waiting for service worker
+        await checkStatus();
+      }
+    };
+
+    initializeStatus();
   }, [checkStatus]);
 
   // Request permission and subscribe
@@ -49,6 +148,13 @@ export function usePushNotifications() {
     useCallback(async (): Promise<PushSubscriptionData | null> => {
       setLoading(true);
       try {
+        // Wait for service worker to be ready first
+        if ('serviceWorker' in navigator) {
+          console.log('🔍 Waiting for service worker before subscribing...');
+          await navigator.serviceWorker.ready;
+          console.log('🔍 Service worker ready, proceeding with subscription');
+        }
+
         const subscription = await pushNotifications.subscribe();
 
         // Save subscription to server
