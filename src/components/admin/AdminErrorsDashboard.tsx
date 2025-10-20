@@ -181,7 +181,7 @@ export function AdminErrorsDashboard() {
       case 'error':
         return <AlertTriangle className="h-4 w-4 text-orange-500" />;
       case 'warning':
-        return <AlertCircle className="h-4 w-4 text-yellow-500" />;
+        return <AlertCircle className="h-4 w-4 text-warning" />;
       default:
         return <Info className="h-4 w-4 text-primary" />;
     }
@@ -194,7 +194,7 @@ export function AdminErrorsDashboard() {
       case 'error':
         return 'bg-orange-100 text-orange-800 border-orange-200';
       case 'warning':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+        return 'bg-warning/20 text-warning border-warning';
       default:
         return 'bg-primary/10 text-blue-800 border-primary';
     }
@@ -204,11 +204,8 @@ export function AdminErrorsDashboard() {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
-          <RefreshCw
-            className="h-8 w-8 animate-spin mx-auto mb-2"
-            style={{ color: 'var(--accent-primary)' }}
-          />
-          <p style={{ color: 'var(--text-secondary)' }}>Loading errors...</p>
+          <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-2" />
+          <p>Loading errors...</p>
         </div>
       </div>
     );
@@ -256,10 +253,7 @@ export function AdminErrorsDashboard() {
       >
         <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
           <div className="flex flex-wrap gap-2">
-            <Filter
-              className="h-5 w-5"
-              style={{ color: 'var(--text-secondary)' }}
-            />
+            <Filter className="h-5 w-5" />
 
             <select
               value={statusFilter}
@@ -268,7 +262,6 @@ export function AdminErrorsDashboard() {
               style={{
                 background: 'var(--bg-primary)',
                 borderColor: 'var(--bg-quaternary)',
-                color: 'var(--text-primary)',
               }}
             >
               <option value="">All Statuses</option>
@@ -285,7 +278,6 @@ export function AdminErrorsDashboard() {
               style={{
                 background: 'var(--bg-primary)',
                 borderColor: 'var(--bg-quaternary)',
-                color: 'var(--text-primary)',
               }}
             >
               <option value="">All Severities</option>
@@ -302,7 +294,6 @@ export function AdminErrorsDashboard() {
               style={{
                 background: 'var(--bg-primary)',
                 borderColor: 'var(--bg-quaternary)',
-                color: 'var(--text-primary)',
               }}
             >
               <option value="">All Categories</option>
@@ -329,23 +320,14 @@ export function AdminErrorsDashboard() {
       {/* Error Groups List */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="space-y-3">
-          <h3
-            className="text-lg font-semibold"
-            style={{ color: 'var(--text-primary)' }}
-          >
+          <h3 className="text-lg font-semibold">
             Error Groups ({errorGroups.length})
           </h3>
 
           <div className="space-y-2 max-h-[600px] overflow-y-auto">
             {errorGroups.length === 0 ? (
-              <div
-                className="text-center py-12"
-                style={{ color: 'var(--text-secondary)' }}
-              >
-                <Check
-                  className="h-12 w-12 mx-auto mb-2"
-                  style={{ color: 'var(--accent-primary)' }}
-                />
+              <div className="text-center py-12">
+                <Check className="h-12 w-12 mx-auto mb-2" />
                 <p>No errors found! 🎉</p>
               </div>
             ) : (
@@ -380,7 +362,6 @@ export function AdminErrorsDashboard() {
                           style={{
                             background: 'var(--bg-tertiary)',
                             borderColor: 'var(--bg-quaternary)',
-                            color: 'var(--text-secondary)',
                           }}
                         >
                           {group.category}
@@ -390,7 +371,6 @@ export function AdminErrorsDashboard() {
                           style={{
                             background: 'var(--bg-tertiary)',
                             borderColor: 'var(--bg-quaternary)',
-                            color: 'var(--text-secondary)',
                           }}
                         >
                           {group.status}
@@ -399,16 +379,12 @@ export function AdminErrorsDashboard() {
 
                       <p
                         className="text-sm font-medium mb-1 truncate"
-                        style={{ color: 'var(--text-primary)' }}
                         title={group.message}
                       >
                         {group.message}
                       </p>
 
-                      <div
-                        className="flex items-center gap-4 text-xs"
-                        style={{ color: 'var(--text-secondary)' }}
-                      >
+                      <div className="flex items-center gap-4 text-xs">
                         <span className="flex items-center gap-1">
                           <TrendingUp className="h-3 w-3" />
                           {group.totalOccurrences} occurrences
@@ -420,10 +396,7 @@ export function AdminErrorsDashboard() {
                       </div>
                     </div>
 
-                    <Eye
-                      className="h-4 w-4 flex-shrink-0"
-                      style={{ color: 'var(--text-light)' }}
-                    />
+                    <Eye className="h-4 w-4 flex-shrink-0" />
                   </div>
                 </div>
               ))
@@ -433,12 +406,7 @@ export function AdminErrorsDashboard() {
 
         {/* Error Details */}
         <div className="space-y-3">
-          <h3
-            className="text-lg font-semibold"
-            style={{ color: 'var(--text-primary)' }}
-          >
-            Error Details
-          </h3>
+          <h3 className="text-lg font-semibold">Error Details</h3>
 
           {selectedGroup ? (
             <div className="space-y-4">
@@ -451,33 +419,19 @@ export function AdminErrorsDashboard() {
               >
                 <div className="space-y-4">
                   <div>
-                    <label
-                      className="text-sm font-medium"
-                      style={{ color: 'var(--text-secondary)' }}
-                    >
-                      Error Message
-                    </label>
-                    <p
-                      className="text-sm mt-1"
-                      style={{ color: 'var(--text-primary)' }}
-                    >
-                      {selectedGroup.message}
-                    </p>
+                    <label className="text-sm font-medium">Error Message</label>
+                    <p className="text-sm mt-1">{selectedGroup.message}</p>
                   </div>
 
                   {selectedGroup.stack && (
                     <details>
-                      <summary
-                        className="text-sm font-medium cursor-pointer"
-                        style={{ color: 'var(--text-secondary)' }}
-                      >
+                      <summary className="text-sm font-medium cursor-pointer">
                         Stack Trace
                       </summary>
                       <pre
                         className="text-xs p-3 rounded mt-2 overflow-auto max-h-40"
                         style={{
                           background: 'var(--bg-quaternary)',
-                          color: 'var(--text-secondary)',
                         }}
                       >
                         {selectedGroup.stack}
@@ -487,24 +441,14 @@ export function AdminErrorsDashboard() {
 
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
-                      <label
-                        className="font-medium"
-                        style={{ color: 'var(--text-secondary)' }}
-                      >
-                        First Seen
-                      </label>
-                      <p style={{ color: 'var(--text-primary)' }}>
+                      <label className="font-medium">First Seen</label>
+                      <p>
                         {new Date(selectedGroup.firstSeenAt).toLocaleString()}
                       </p>
                     </div>
                     <div>
-                      <label
-                        className="font-medium"
-                        style={{ color: 'var(--text-secondary)' }}
-                      >
-                        Last Seen
-                      </label>
-                      <p style={{ color: 'var(--text-primary)' }}>
+                      <label className="font-medium">Last Seen</label>
+                      <p>
                         {new Date(selectedGroup.lastSeenAt).toLocaleString()}
                       </p>
                     </div>
@@ -512,18 +456,8 @@ export function AdminErrorsDashboard() {
 
                   {selectedGroup.notes && (
                     <div>
-                      <label
-                        className="text-sm font-medium"
-                        style={{ color: 'var(--text-secondary)' }}
-                      >
-                        Notes
-                      </label>
-                      <p
-                        className="text-sm mt-1"
-                        style={{ color: 'var(--text-primary)' }}
-                      >
-                        {selectedGroup.notes}
-                      </p>
+                      <label className="text-sm font-medium">Notes</label>
+                      <p className="text-sm mt-1">{selectedGroup.notes}</p>
                     </div>
                   )}
 
@@ -566,10 +500,7 @@ export function AdminErrorsDashboard() {
 
               {/* Individual Error Logs */}
               <div>
-                <h4
-                  className="text-sm font-semibold mb-2"
-                  style={{ color: 'var(--text-primary)' }}
-                >
+                <h4 className="text-sm font-semibold mb-2">
                   Recent Occurrences ({errorLogs.length})
                 </h4>
                 <div className="space-y-2 max-h-[400px] overflow-y-auto">
@@ -584,32 +515,19 @@ export function AdminErrorsDashboard() {
                     >
                       <div className="flex items-start justify-between gap-2 mb-2">
                         <div className="flex-1 min-w-0">
-                          <p
-                            className="font-medium truncate"
-                            style={{ color: 'var(--text-primary)' }}
-                          >
+                          <p className="font-medium truncate">
                             {log.userEmail || 'Anonymous'}
                           </p>
-                          <p
-                            className="text-xs truncate"
-                            style={{ color: 'var(--text-secondary)' }}
-                            title={log.url}
-                          >
+                          <p className="text-xs truncate" title={log.url}>
                             {log.url}
                           </p>
                         </div>
-                        <span
-                          className="text-xs whitespace-nowrap"
-                          style={{ color: 'var(--text-light)' }}
-                        >
+                        <span className="text-xs whitespace-nowrap">
                           {new Date(log.createdAt).toLocaleString()}
                         </span>
                       </div>
 
-                      <div
-                        className="flex items-center gap-2 text-xs"
-                        style={{ color: 'var(--text-secondary)' }}
-                      >
+                      <div className="flex items-center gap-2 text-xs">
                         <span>{log.browser}</span>
                         <span>•</span>
                         <span>{log.device}</span>
@@ -620,16 +538,10 @@ export function AdminErrorsDashboard() {
                           className="mt-2 p-2 rounded"
                           style={{ background: 'var(--bg-secondary)' }}
                         >
-                          <p
-                            className="text-xs font-medium mb-1"
-                            style={{ color: 'var(--accent-primary)' }}
-                          >
+                          <p className="text-xs font-medium mb-1">
                             User Report:
                           </p>
-                          <p
-                            className="text-xs"
-                            style={{ color: 'var(--text-secondary)' }}
-                          >
+                          <p className="text-xs">
                             {log.userReport.description}
                           </p>
                         </div>
@@ -640,15 +552,9 @@ export function AdminErrorsDashboard() {
               </div>
             </div>
           ) : (
-            <div
-              className="flex items-center justify-center h-64"
-              style={{ color: 'var(--text-secondary)' }}
-            >
+            <div className="flex items-center justify-center h-64">
               <div className="text-center">
-                <Eye
-                  className="h-12 w-12 mx-auto mb-2"
-                  style={{ color: 'var(--text-light)' }}
-                />
+                <Eye className="h-12 w-12 mx-auto mb-2" />
                 <p>Select an error group to view details</p>
               </div>
             </div>
@@ -684,15 +590,8 @@ function StatCard({ title, value, icon, color }: StatCardProps) {
     >
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-            {title}
-          </p>
-          <p
-            className="text-2xl font-bold mt-1"
-            style={{ color: 'var(--text-primary)' }}
-          >
-            {value}
-          </p>
+          <p className="text-sm">{title}</p>
+          <p className="text-2xl font-bold mt-1">{value}</p>
         </div>
         <div className={cn('p-3 rounded-lg', colorClasses[color])}>{icon}</div>
       </div>

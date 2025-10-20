@@ -111,17 +111,13 @@ export function AdminNav({ activeTab, onTabChange }: AdminNavProps) {
         className="px-6 py-4 border-t"
         style={{ borderColor: 'var(--bg-quaternary)' }}
       >
-        <div
-          className="flex items-center gap-2 text-sm"
-          style={{ color: 'var(--text-secondary)' }}
-        >
+        <div className="flex items-center gap-2 text-sm">
           <span>External Tools:</span>
           <a
             href="/performance-dashboard.html"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-1 transition-colors"
-            style={{ color: 'var(--accent-primary)' }}
             onMouseEnter={(e) => {
               e.currentTarget.style.color = 'var(--accent-primary-light)';
             }}

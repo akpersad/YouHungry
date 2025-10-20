@@ -100,14 +100,14 @@ export function DatabaseManagementDashboard() {
       case 'disconnected':
         return <XCircle className="h-5 w-5 text-destructive" />;
       default:
-        return <AlertTriangle className="h-5 w-5 text-yellow-500" />;
+        return <AlertTriangle className="h-5 w-5 text-warning" />;
     }
   };
 
   const getRecommendationIcon = (type: string) => {
     switch (type) {
       case 'warning':
-        return <AlertTriangle className="h-4 w-4 text-yellow-500" />;
+        return <AlertTriangle className="h-4 w-4 text-warning" />;
       case 'error':
         return <XCircle className="h-4 w-4 text-destructive" />;
       default:
@@ -131,15 +131,8 @@ export function DatabaseManagementDashboard() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h2
-            className="text-2xl font-bold"
-            style={{ color: 'var(--text-primary)' }}
-          >
-            Database Management
-          </h2>
-          <p style={{ color: 'var(--text-secondary)' }}>
-            Monitor database performance and health
-          </p>
+          <h2 className="text-2xl font-bold">Database Management</h2>
+          <p>Monitor database performance and health</p>
         </div>
         <Button onClick={handleRefresh} variant="outline">
           <RefreshCw className="h-4 w-4 mr-2" />
@@ -226,8 +219,8 @@ export function DatabaseManagementDashboard() {
 
           <Card className="p-6">
             <div className="flex items-center">
-              <div className="p-2 bg-yellow-100 rounded-lg">
-                <Activity className="h-6 w-6 text-yellow-600" />
+              <div className="p-2 bg-warning/20 rounded-lg">
+                <Activity className="h-6 w-6 text-warning" />
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-text-light">
@@ -253,40 +246,22 @@ export function DatabaseManagementDashboard() {
             >
               <thead style={{ background: 'var(--bg-tertiary)' }}>
                 <tr>
-                  <th
-                    className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
-                    style={{ color: 'var(--text-secondary)' }}
-                  >
+                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
                     Collection
                   </th>
-                  <th
-                    className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
-                    style={{ color: 'var(--text-secondary)' }}
-                  >
+                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
                     Documents
                   </th>
-                  <th
-                    className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
-                    style={{ color: 'var(--text-secondary)' }}
-                  >
+                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
                     Storage Size
                   </th>
-                  <th
-                    className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
-                    style={{ color: 'var(--text-secondary)' }}
-                  >
+                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
                     Index Size
                   </th>
-                  <th
-                    className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
-                    style={{ color: 'var(--text-secondary)' }}
-                  >
+                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
                     Indexes
                   </th>
-                  <th
-                    className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
-                    style={{ color: 'var(--text-secondary)' }}
-                  >
+                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
                     Status
                   </th>
                 </tr>
@@ -309,34 +284,19 @@ export function DatabaseManagementDashboard() {
                       e.currentTarget.style.background = 'var(--bg-secondary)';
                     }}
                   >
-                    <td
-                      className="px-6 py-4 whitespace-nowrap text-sm font-medium"
-                      style={{ color: 'var(--text-primary)' }}
-                    >
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       {collection.name}
                     </td>
-                    <td
-                      className="px-6 py-4 whitespace-nowrap text-sm"
-                      style={{ color: 'var(--text-primary)' }}
-                    >
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">
                       {collection.count.toLocaleString()}
                     </td>
-                    <td
-                      className="px-6 py-4 whitespace-nowrap text-sm"
-                      style={{ color: 'var(--text-primary)' }}
-                    >
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">
                       {formatBytes(collection.storageSize)}
                     </td>
-                    <td
-                      className="px-6 py-4 whitespace-nowrap text-sm"
-                      style={{ color: 'var(--text-primary)' }}
-                    >
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">
                       {formatBytes(collection.indexSize)}
                     </td>
-                    <td
-                      className="px-6 py-4 whitespace-nowrap text-sm"
-                      style={{ color: 'var(--text-primary)' }}
-                    >
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">
                       {collection.indexes}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -345,7 +305,6 @@ export function DatabaseManagementDashboard() {
                           className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
                           style={{
                             background: 'rgba(239, 68, 68, 0.1)',
-                            color: 'var(--color-error)',
                           }}
                         >
                           Error
@@ -355,7 +314,6 @@ export function DatabaseManagementDashboard() {
                           className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
                           style={{
                             background: 'rgba(34, 197, 94, 0.1)',
-                            color: 'var(--color-success)',
                           }}
                         >
                           Healthy
@@ -466,7 +424,7 @@ export function DatabaseManagementDashboard() {
                       recommendation.type === 'error'
                         ? 'text-red-800'
                         : recommendation.type === 'warning'
-                          ? 'text-yellow-800'
+                          ? 'text-warning'
                           : 'text-blue-800'
                     }`}
                   >

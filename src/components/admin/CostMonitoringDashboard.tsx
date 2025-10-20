@@ -188,18 +188,13 @@ export function CostMonitoringDashboard() {
             borderColor: 'var(--color-error)',
           }}
         >
-          <h3 className="font-medium" style={{ color: 'var(--color-error)' }}>
-            Error Loading Cost Data
-          </h3>
-          <p className="text-sm mt-1" style={{ color: 'var(--color-error)' }}>
-            {error}
-          </p>
+          <h3 className="font-medium">Error Loading Cost Data</h3>
+          <p className="text-sm mt-1">{error}</p>
           <button
             onClick={() => fetchCostData()}
             className="mt-3 px-4 py-2 rounded-md text-sm transition-colors"
             style={{
               background: 'var(--color-error)',
-              color: 'var(--text-inverse)',
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.background = '#dc2626';
@@ -218,9 +213,7 @@ export function CostMonitoringDashboard() {
   if (!costData) {
     return (
       <div className="p-6">
-        <div className="text-center" style={{ color: 'var(--text-secondary)' }}>
-          No cost data available
-        </div>
+        <div className="text-center">No cost data available</div>
       </div>
     );
   }
@@ -240,13 +233,8 @@ export function CostMonitoringDashboard() {
       <div className="flex flex-col gap-4">
         <div className="flex justify-between items-start">
           <div>
-            <h2
-              className="text-2xl font-bold"
-              style={{ color: 'var(--text-primary)' }}
-            >
-              Cost Monitoring
-            </h2>
-            <p style={{ color: 'var(--text-secondary)' }}>
+            <h2 className="text-2xl font-bold">Cost Monitoring</h2>
+            <p>
               {new Date(selectedYear, selectedMonth - 1).toLocaleDateString(
                 'en-US',
                 {
@@ -256,7 +244,7 @@ export function CostMonitoringDashboard() {
               )}
             </p>
           </div>
-          <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+          <div className="text-sm">
             {lastUpdated && `Last updated: ${lastUpdated.toLocaleTimeString()}`}
           </div>
         </div>
@@ -271,19 +259,13 @@ export function CostMonitoringDashboard() {
           }}
         >
           <div className="flex-1 min-w-[150px]">
-            <label
-              className="block text-sm font-medium mb-2"
-              style={{ color: 'var(--text-secondary)' }}
-            >
-              Month
-            </label>
+            <label className="block text-sm font-medium mb-2">Month</label>
             <select
               value={selectedMonth}
               onChange={(e) => setSelectedMonth(Number(e.target.value))}
               className="w-full px-3 py-2 rounded-md text-sm"
               style={{
                 background: 'var(--bg-secondary)',
-                color: 'var(--text-primary)',
                 border: '1px solid var(--bg-quaternary)',
               }}
             >
@@ -303,19 +285,13 @@ export function CostMonitoringDashboard() {
           </div>
 
           <div className="flex-1 min-w-[150px]">
-            <label
-              className="block text-sm font-medium mb-2"
-              style={{ color: 'var(--text-secondary)' }}
-            >
-              Year
-            </label>
+            <label className="block text-sm font-medium mb-2">Year</label>
             <select
               value={selectedYear}
               onChange={(e) => setSelectedYear(Number(e.target.value))}
               className="w-full px-3 py-2 rounded-md text-sm"
               style={{
                 background: 'var(--bg-secondary)',
-                color: 'var(--text-primary)',
                 border: '1px solid var(--bg-quaternary)',
               }}
             >
@@ -340,7 +316,6 @@ export function CostMonitoringDashboard() {
             className="px-6 py-2 rounded-md text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             style={{
               background: 'var(--accent-primary)',
-              color: 'var(--text-inverse)',
             }}
             onMouseEnter={(e) => {
               if (!loading) {
@@ -371,16 +346,8 @@ export function CostMonitoringDashboard() {
           <div className="flex flex-col items-center gap-4">
             <div className="text-6xl">📊</div>
             <div>
-              <h3
-                className="text-xl font-semibold mb-2"
-                style={{ color: 'var(--text-primary)' }}
-              >
-                No Data Available
-              </h3>
-              <p
-                className="text-sm mb-4"
-                style={{ color: 'var(--text-secondary)' }}
-              >
+              <h3 className="text-xl font-semibold mb-2">No Data Available</h3>
+              <p className="text-sm mb-4">
                 There is no API usage data for{' '}
                 <span className="font-medium">
                   {getMonthName(selectedMonth)} {selectedYear}
@@ -392,7 +359,6 @@ export function CostMonitoringDashboard() {
                   className="inline-block px-4 py-2 rounded-md text-sm"
                   style={{
                     background: 'var(--bg-tertiary)',
-                    color: 'var(--text-secondary)',
                   }}
                 >
                   💡 Data is available from{' '}
@@ -416,20 +382,12 @@ export function CostMonitoringDashboard() {
           >
             <div className="flex items-center justify-between">
               <div>
-                <p
-                  className="text-sm font-medium"
-                  style={{ color: 'var(--text-secondary)' }}
-                >
-                  Daily Cost
-                </p>
-                <p
-                  className="text-2xl font-bold"
-                  style={{ color: 'var(--text-primary)' }}
-                >
+                <p className="text-sm font-medium">Daily Cost</p>
+                <p className="text-2xl font-bold">
                   {formatCurrency(metrics.estimatedCosts.daily)}
                 </p>
               </div>
-              <div style={{ color: 'var(--color-success)' }}>
+              <div>
                 <svg
                   className="w-8 h-8"
                   fill="currentColor"
@@ -455,20 +413,12 @@ export function CostMonitoringDashboard() {
           >
             <div className="flex items-center justify-between">
               <div>
-                <p
-                  className="text-sm font-medium"
-                  style={{ color: 'var(--text-secondary)' }}
-                >
-                  Monthly Cost
-                </p>
-                <p
-                  className="text-2xl font-bold"
-                  style={{ color: 'var(--text-primary)' }}
-                >
+                <p className="text-sm font-medium">Monthly Cost</p>
+                <p className="text-2xl font-bold">
                   {formatCurrency(metrics.estimatedCosts.monthly)}
                 </p>
               </div>
-              <div style={{ color: 'var(--accent-primary)' }}>
+              <div>
                 <svg
                   className="w-8 h-8"
                   fill="currentColor"
@@ -493,26 +443,13 @@ export function CostMonitoringDashboard() {
           >
             <div className="flex items-center justify-between">
               <div>
-                <p
-                  className="text-sm font-medium"
-                  style={{ color: 'var(--text-secondary)' }}
-                >
-                  Monthly Savings
-                </p>
-                <p
-                  className="text-2xl font-bold"
-                  style={{ color: 'var(--color-success)' }}
-                >
+                <p className="text-sm font-medium">Monthly Savings</p>
+                <p className="text-2xl font-bold">
                   {formatCurrency(metrics.estimatedCosts.savings)}
                 </p>
-                <p
-                  className="text-xs mt-1"
-                  style={{ color: 'var(--text-tertiary)' }}
-                >
-                  from caching
-                </p>
+                <p className="text-xs mt-1">from caching</p>
               </div>
-              <div style={{ color: 'var(--color-success)' }}>
+              <div>
                 <svg
                   className="w-8 h-8"
                   fill="currentColor"
@@ -539,10 +476,7 @@ export function CostMonitoringDashboard() {
             borderColor: 'var(--bg-quaternary)',
           }}
         >
-          <h3
-            className="text-lg font-semibold mb-4"
-            style={{ color: 'var(--text-primary)' }}
-          >
+          <h3 className="text-lg font-semibold mb-4">
             Monthly Cost by Service
           </h3>
 
@@ -551,78 +485,50 @@ export function CostMonitoringDashboard() {
               className="text-center p-4 rounded-lg"
               style={{ background: 'var(--bg-tertiary)' }}
             >
-              <div
-                className="text-2xl font-bold"
-                style={{ color: 'var(--accent-primary)' }}
-              >
+              <div className="text-2xl font-bold">
                 {formatCostKPI(metrics.estimatedCosts.byService.google)}
               </div>
-              <div
-                className="text-sm mt-1"
-                style={{ color: 'var(--text-secondary)' }}
-              >
-                Google APIs
-              </div>
+              <div className="text-sm mt-1">Google APIs</div>
             </div>
 
             <div
               className="text-center p-4 rounded-lg"
               style={{ background: 'var(--bg-tertiary)' }}
             >
-              <div className="text-2xl font-bold" style={{ color: '#3b82f6' }}>
+              <div className="text-2xl font-bold">
                 {formatCostKPI(metrics.estimatedCosts.byService.twilio)}
               </div>
-              <div
-                className="text-sm mt-1"
-                style={{ color: 'var(--text-secondary)' }}
-              >
-                Twilio SMS
-              </div>
+              <div className="text-sm mt-1">Twilio SMS</div>
             </div>
 
             <div
               className="text-center p-4 rounded-lg"
               style={{ background: 'var(--bg-tertiary)' }}
             >
-              <div className="text-2xl font-bold" style={{ color: '#10b981' }}>
+              <div className="text-2xl font-bold">
                 {formatCostKPI(metrics.estimatedCosts.byService.resend)}
               </div>
-              <div
-                className="text-sm mt-1"
-                style={{ color: 'var(--text-secondary)' }}
-              >
-                Resend Email
-              </div>
+              <div className="text-sm mt-1">Resend Email</div>
             </div>
 
             <div
               className="text-center p-4 rounded-lg"
               style={{ background: 'var(--bg-tertiary)' }}
             >
-              <div className="text-2xl font-bold" style={{ color: '#8b5cf6' }}>
+              <div className="text-2xl font-bold">
                 {formatCostKPI(metrics.estimatedCosts.byService.vercelBlob)}
               </div>
-              <div
-                className="text-sm mt-1"
-                style={{ color: 'var(--text-secondary)' }}
-              >
-                Vercel Blob
-              </div>
+              <div className="text-sm mt-1">Vercel Blob</div>
             </div>
 
             <div
               className="text-center p-4 rounded-lg"
               style={{ background: 'var(--bg-tertiary)' }}
             >
-              <div className="text-2xl font-bold" style={{ color: '#f59e0b' }}>
+              <div className="text-2xl font-bold">
                 {formatCostKPI(metrics.estimatedCosts.byService.clerk)}
               </div>
-              <div
-                className="text-sm mt-1"
-                style={{ color: 'var(--text-secondary)' }}
-              >
-                Clerk Auth
-              </div>
+              <div className="text-sm mt-1">Clerk Auth</div>
             </div>
           </div>
         </div>
@@ -637,76 +543,43 @@ export function CostMonitoringDashboard() {
             borderColor: 'var(--bg-quaternary)',
           }}
         >
-          <h3
-            className="text-lg font-semibold mb-4"
-            style={{ color: 'var(--text-primary)' }}
-          >
-            API Usage Breakdown
-          </h3>
+          <h3 className="text-lg font-semibold mb-4">API Usage Breakdown</h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* Google Places API */}
             <div>
-              <h4
-                className="font-medium mb-3 flex items-center gap-2"
-                style={{ color: 'var(--text-primary)' }}
-              >
+              <h4 className="font-medium mb-3 flex items-center gap-2">
                 <span>🗺️</span>
                 <span>Google Places API</span>
               </h4>
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span style={{ color: 'var(--text-secondary)' }}>
-                    Text Search
-                  </span>
-                  <span
-                    className="font-medium"
-                    style={{ color: 'var(--text-primary)' }}
-                  >
+                  <span>Text Search</span>
+                  <span className="font-medium">
                     {formatNumber(metrics.googlePlaces.textSearch)}
                   </span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span style={{ color: 'var(--text-secondary)' }}>
-                    Nearby Search
-                  </span>
-                  <span
-                    className="font-medium"
-                    style={{ color: 'var(--text-primary)' }}
-                  >
+                  <span>Nearby Search</span>
+                  <span className="font-medium">
                     {formatNumber(metrics.googlePlaces.nearbySearch)}
                   </span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span style={{ color: 'var(--text-secondary)' }}>
-                    Place Details
-                  </span>
-                  <span
-                    className="font-medium"
-                    style={{ color: 'var(--text-primary)' }}
-                  >
+                  <span>Place Details</span>
+                  <span className="font-medium">
                     {formatNumber(metrics.googlePlaces.placeDetails)}
                   </span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span style={{ color: 'var(--text-secondary)' }}>
-                    Geocoding
-                  </span>
-                  <span
-                    className="font-medium"
-                    style={{ color: 'var(--text-primary)' }}
-                  >
+                  <span>Geocoding</span>
+                  <span className="font-medium">
                     {formatNumber(metrics.googlePlaces.geocoding)}
                   </span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span style={{ color: 'var(--text-secondary)' }}>
-                    Address Validation
-                  </span>
-                  <span
-                    className="font-medium"
-                    style={{ color: 'var(--text-primary)' }}
-                  >
+                  <span>Address Validation</span>
+                  <span className="font-medium">
                     {formatNumber(metrics.googlePlaces.addressValidation)}
                   </span>
                 </div>
@@ -715,22 +588,14 @@ export function CostMonitoringDashboard() {
 
             {/* Google Maps API */}
             <div>
-              <h4
-                className="font-medium mb-3 flex items-center gap-2"
-                style={{ color: 'var(--text-primary)' }}
-              >
+              <h4 className="font-medium mb-3 flex items-center gap-2">
                 <span>🗺️</span>
                 <span>Google Maps API</span>
               </h4>
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span style={{ color: 'var(--text-secondary)' }}>
-                    Maps Loads
-                  </span>
-                  <span
-                    className="font-medium"
-                    style={{ color: 'var(--text-primary)' }}
-                  >
+                  <span>Maps Loads</span>
+                  <span className="font-medium">
                     {formatNumber(metrics.googleMaps.mapsLoads)}
                   </span>
                 </div>
@@ -739,44 +604,26 @@ export function CostMonitoringDashboard() {
 
             {/* Clerk Authentication */}
             <div>
-              <h4
-                className="font-medium mb-3 flex items-center gap-2"
-                style={{ color: 'var(--text-primary)' }}
-              >
+              <h4 className="font-medium mb-3 flex items-center gap-2">
                 <span>🔐</span>
                 <span>Clerk Auth</span>
               </h4>
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span style={{ color: 'var(--text-secondary)' }}>
-                    User Creates
-                  </span>
-                  <span
-                    className="font-medium"
-                    style={{ color: 'var(--text-primary)' }}
-                  >
+                  <span>User Creates</span>
+                  <span className="font-medium">
                     {formatNumber(metrics.clerk.userCreate)}
                   </span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span style={{ color: 'var(--text-secondary)' }}>
-                    User Updates
-                  </span>
-                  <span
-                    className="font-medium"
-                    style={{ color: 'var(--text-primary)' }}
-                  >
+                  <span>User Updates</span>
+                  <span className="font-medium">
                     {formatNumber(metrics.clerk.userUpdate)}
                   </span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span style={{ color: 'var(--text-secondary)' }}>
-                    Est. MAU
-                  </span>
-                  <span
-                    className="font-medium"
-                    style={{ color: 'var(--text-primary)' }}
-                  >
+                  <span>Est. MAU</span>
+                  <span className="font-medium">
                     {formatNumber(metrics.clerk.estimatedMAU)}
                   </span>
                 </div>
@@ -785,112 +632,66 @@ export function CostMonitoringDashboard() {
 
             {/* Twilio SMS */}
             <div>
-              <h4
-                className="font-medium mb-3 flex items-center gap-2"
-                style={{ color: 'var(--text-primary)' }}
-              >
+              <h4 className="font-medium mb-3 flex items-center gap-2">
                 <span>📱</span>
                 <span>Twilio SMS</span>
               </h4>
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span style={{ color: 'var(--text-secondary)' }}>
-                    Messages Sent
-                  </span>
-                  <span
-                    className="font-medium"
-                    style={{ color: 'var(--text-primary)' }}
-                  >
+                  <span>Messages Sent</span>
+                  <span className="font-medium">
                     {formatNumber(metrics.twilio.smsSent)}
                   </span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span style={{ color: 'var(--text-secondary)' }}>
-                    Cost per SMS
-                  </span>
-                  <span
-                    className="font-medium"
-                    style={{ color: 'var(--text-primary)' }}
-                  >
-                    $0.0079
-                  </span>
+                  <span>Cost per SMS</span>
+                  <span className="font-medium">$0.0079</span>
                 </div>
               </div>
             </div>
 
             {/* Resend Email */}
             <div>
-              <h4
-                className="font-medium mb-3 flex items-center gap-2"
-                style={{ color: 'var(--text-primary)' }}
-              >
+              <h4 className="font-medium mb-3 flex items-center gap-2">
                 <span>📧</span>
                 <span>Resend Email</span>
               </h4>
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span style={{ color: 'var(--text-secondary)' }}>
-                    Emails Sent
-                  </span>
-                  <span
-                    className="font-medium"
-                    style={{ color: 'var(--text-primary)' }}
-                  >
+                  <span>Emails Sent</span>
+                  <span className="font-medium">
                     {formatNumber(metrics.resend.emailsSent)}
                   </span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span style={{ color: 'var(--text-secondary)' }}>
-                    Free Tier
-                  </span>
-                  <span
-                    className="font-medium"
-                    style={{ color: 'var(--text-primary)' }}
-                  >
-                    3,000/mo
-                  </span>
+                  <span>Free Tier</span>
+                  <span className="font-medium">3,000/mo</span>
                 </div>
               </div>
             </div>
 
             {/* Vercel Blob Storage */}
             <div>
-              <h4
-                className="font-medium mb-3 flex items-center gap-2"
-                style={{ color: 'var(--text-primary)' }}
-              >
+              <h4 className="font-medium mb-3 flex items-center gap-2">
                 <span>💾</span>
                 <span>Vercel Blob</span>
               </h4>
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span style={{ color: 'var(--text-secondary)' }}>
-                    Uploads
-                  </span>
-                  <span
-                    className="font-medium"
-                    style={{ color: 'var(--text-primary)' }}
-                  >
+                  <span>Uploads</span>
+                  <span className="font-medium">
                     {formatNumber(metrics.vercelBlob.uploads)}
                   </span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span style={{ color: 'var(--text-secondary)' }}>Reads</span>
-                  <span
-                    className="font-medium"
-                    style={{ color: 'var(--text-primary)' }}
-                  >
+                  <span>Reads</span>
+                  <span className="font-medium">
                     {formatNumber(metrics.vercelBlob.reads)}
                   </span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span style={{ color: 'var(--text-secondary)' }}>
-                    Est. Storage
-                  </span>
-                  <span
-                    className="font-medium"
-                    style={{ color: 'var(--text-primary)' }}
-                  >
+                  <span>Est. Storage</span>
+                  <span className="font-medium">
                     {metrics.vercelBlob.estimatedStorageGB.toFixed(2)} GB
                   </span>
                 </div>
@@ -909,52 +710,26 @@ export function CostMonitoringDashboard() {
             borderColor: 'var(--bg-quaternary)',
           }}
         >
-          <h3
-            className="text-lg font-semibold mb-4"
-            style={{ color: 'var(--text-primary)' }}
-          >
-            Cache Performance
-          </h3>
+          <h3 className="text-lg font-semibold mb-4">Cache Performance</h3>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="text-center">
-              <div
-                className="text-3xl font-bold"
-                style={{ color: 'var(--accent-primary)' }}
-              >
+              <div className="text-3xl font-bold">
                 {metrics.cache.hitRate.toFixed(1)}%
               </div>
-              <div
-                className="text-sm"
-                style={{ color: 'var(--text-secondary)' }}
-              >
-                Hit Rate
-              </div>
+              <div className="text-sm">Hit Rate</div>
             </div>
             <div className="text-center">
-              <div
-                className="text-3xl font-bold"
-                style={{ color: 'var(--color-success)' }}
-              >
+              <div className="text-3xl font-bold">
                 {formatNumber(metrics.cache.totalHits)}
               </div>
-              <div
-                className="text-sm"
-                style={{ color: 'var(--text-secondary)' }}
-              >
-                Total Hits
-              </div>
+              <div className="text-sm">Total Hits</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold" style={{ color: '#9333ea' }}>
+              <div className="text-3xl font-bold">
                 {formatNumber(metrics.cache.memoryEntries)}
               </div>
-              <div
-                className="text-sm"
-                style={{ color: 'var(--text-secondary)' }}
-              >
-                Memory Entries
-              </div>
+              <div className="text-sm">Memory Entries</div>
             </div>
           </div>
         </div>
@@ -969,63 +744,34 @@ export function CostMonitoringDashboard() {
             borderColor: 'var(--bg-quaternary)',
           }}
         >
-          <h3
-            className="text-lg font-semibold mb-4"
-            style={{ color: 'var(--text-primary)' }}
-          >
+          <h3 className="text-lg font-semibold mb-4">
             Location Cache (25-mile Search Results)
           </h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-4">
             <div className="text-center">
-              <div
-                className="text-3xl font-bold"
-                style={{ color: 'var(--accent-primary)' }}
-              >
+              <div className="text-3xl font-bold">
                 {formatNumber(metrics.locationCache.totalEntries)}
               </div>
-              <div
-                className="text-sm"
-                style={{ color: 'var(--text-secondary)' }}
-              >
-                Total Entries
-              </div>
+              <div className="text-sm">Total Entries</div>
             </div>
             <div className="text-center">
-              <div
-                className="text-3xl font-bold"
-                style={{ color: 'var(--color-success)' }}
-              >
+              <div className="text-3xl font-bold">
                 {formatNumber(metrics.locationCache.locationOnlyEntries)}
               </div>
-              <div
-                className="text-sm"
-                style={{ color: 'var(--text-secondary)' }}
-              >
-                Location-Only
-              </div>
+              <div className="text-sm">Location-Only</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold" style={{ color: '#3b82f6' }}>
+              <div className="text-3xl font-bold">
                 {formatNumber(metrics.locationCache.locationQueryEntries)}
               </div>
-              <div
-                className="text-sm"
-                style={{ color: 'var(--text-secondary)' }}
-              >
-                With Query
-              </div>
+              <div className="text-sm">With Query</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold" style={{ color: '#9333ea' }}>
+              <div className="text-3xl font-bold">
                 {formatNumber(metrics.locationCache.estimatedSizeKB)} KB
               </div>
-              <div
-                className="text-sm"
-                style={{ color: 'var(--text-secondary)' }}
-              >
-                Estimated Size
-              </div>
+              <div className="text-sm">Estimated Size</div>
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -1033,38 +779,22 @@ export function CostMonitoringDashboard() {
               className="text-center p-3 rounded-lg"
               style={{ background: 'var(--bg-tertiary)' }}
             >
-              <div
-                className="text-xl font-semibold"
-                style={{ color: 'var(--text-primary)' }}
-              >
+              <div className="text-xl font-semibold">
                 {metrics.locationCache.averageRestaurantsPerEntry} restaurants
               </div>
-              <div
-                className="text-sm"
-                style={{ color: 'var(--text-secondary)' }}
-              >
-                Average Per Entry
-              </div>
+              <div className="text-sm">Average Per Entry</div>
             </div>
             {metrics.locationCache.oldestEntry && (
               <div
                 className="text-center p-3 rounded-lg"
                 style={{ background: 'var(--bg-tertiary)' }}
               >
-                <div
-                  className="text-sm font-semibold"
-                  style={{ color: 'var(--text-primary)' }}
-                >
+                <div className="text-sm font-semibold">
                   {new Date(
                     metrics.locationCache.oldestEntry
                   ).toLocaleDateString()}
                 </div>
-                <div
-                  className="text-sm"
-                  style={{ color: 'var(--text-secondary)' }}
-                >
-                  Oldest Entry
-                </div>
+                <div className="text-sm">Oldest Entry</div>
               </div>
             )}
           </div>
@@ -1080,12 +810,7 @@ export function CostMonitoringDashboard() {
             borderColor: 'var(--bg-quaternary)',
           }}
         >
-          <h3
-            className="text-lg font-semibold mb-4"
-            style={{ color: 'var(--text-primary)' }}
-          >
-            Recommendations
-          </h3>
+          <h3 className="text-lg font-semibold mb-4">Recommendations</h3>
           <div className="space-y-3">
             {recommendations.map((recommendation, index) => (
               <div
@@ -1097,10 +822,7 @@ export function CostMonitoringDashboard() {
                   border: '1px solid',
                 }}
               >
-                <div
-                  className="mt-0.5"
-                  style={{ color: 'var(--color-warning)' }}
-                >
+                <div className="mt-0.5">
                   <svg
                     className="w-5 h-5"
                     fill="currentColor"
@@ -1113,12 +835,7 @@ export function CostMonitoringDashboard() {
                     />
                   </svg>
                 </div>
-                <p
-                  className="text-sm"
-                  style={{ color: 'var(--color-warning)' }}
-                >
-                  {recommendation}
-                </p>
+                <p className="text-sm">{recommendation}</p>
               </div>
             ))}
           </div>
@@ -1133,7 +850,6 @@ export function CostMonitoringDashboard() {
           className="px-4 py-2 rounded-md text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           style={{
             background: 'var(--accent-primary)',
-            color: 'var(--text-inverse)',
           }}
           onMouseEnter={(e) => {
             if (!loading) {

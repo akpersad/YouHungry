@@ -255,7 +255,7 @@ export function AdminAlertsDashboard() {
       case 'high':
         return 'text-orange-600 bg-orange-100';
       case 'medium':
-        return 'text-yellow-600 bg-yellow-100';
+        return 'text-warning bg-warning/20';
       case 'low':
         return 'text-primary bg-primary/10';
       default:
@@ -317,7 +317,7 @@ export function AdminAlertsDashboard() {
             </div>
             <div className="ml-3">
               <h3 className="text-sm font-medium text-red-800">Error</h3>
-              <div className="mt-2 text-sm text-red-700">
+              <div className="mt-2 text-sm text-destructive">
                 <p>{error}</p>
               </div>
               <div className="mt-4">
@@ -353,7 +353,7 @@ export function AdminAlertsDashboard() {
           </button>
           <button
             onClick={() => fetchAlerts(activeFilter)}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700"
+            className="px-4 py-2 bg-accent text-white rounded-md text-sm font-medium hover:bg-accent"
           >
             Refresh
           </button>
@@ -379,7 +379,7 @@ export function AdminAlertsDashboard() {
           <button
             onClick={sendTestEmail}
             disabled={emailTestLoading}
-            className="px-4 py-2 bg-green-600 text-white rounded-md text-sm font-medium hover:bg-green-700 disabled:opacity-50"
+            className="px-4 py-2 bg-success text-white rounded-md text-sm font-medium hover:bg-success disabled:opacity-50"
           >
             {emailTestLoading ? 'Sending...' : 'Send Test Email'}
           </button>
@@ -409,15 +409,8 @@ export function AdminAlertsDashboard() {
               border: '1px solid',
             }}
           >
-            <div
-              className="text-2xl font-bold"
-              style={{ color: 'var(--text-primary)' }}
-            >
-              {stats.total}
-            </div>
-            <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-              Total
-            </div>
+            <div className="text-2xl font-bold">{stats.total}</div>
+            <div className="text-sm">Total</div>
           </div>
           <div
             className="rounded-lg shadow-subtle p-4"
@@ -427,15 +420,8 @@ export function AdminAlertsDashboard() {
               border: '1px solid',
             }}
           >
-            <div
-              className="text-2xl font-bold"
-              style={{ color: 'var(--color-error)' }}
-            >
-              {stats.critical}
-            </div>
-            <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-              Critical
-            </div>
+            <div className="text-2xl font-bold">{stats.critical}</div>
+            <div className="text-sm">Critical</div>
           </div>
           <div
             className="rounded-lg shadow-subtle p-4"
@@ -445,12 +431,8 @@ export function AdminAlertsDashboard() {
               border: '1px solid',
             }}
           >
-            <div className="text-2xl font-bold" style={{ color: '#ea580c' }}>
-              {stats.high}
-            </div>
-            <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-              High
-            </div>
+            <div className="text-2xl font-bold">{stats.high}</div>
+            <div className="text-sm">High</div>
           </div>
           <div
             className="rounded-lg shadow-subtle p-4"
@@ -460,15 +442,8 @@ export function AdminAlertsDashboard() {
               border: '1px solid',
             }}
           >
-            <div
-              className="text-2xl font-bold"
-              style={{ color: 'var(--color-warning)' }}
-            >
-              {stats.medium}
-            </div>
-            <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-              Medium
-            </div>
+            <div className="text-2xl font-bold">{stats.medium}</div>
+            <div className="text-sm">Medium</div>
           </div>
           <div
             className="rounded-lg shadow-subtle p-4"
@@ -478,15 +453,8 @@ export function AdminAlertsDashboard() {
               border: '1px solid',
             }}
           >
-            <div
-              className="text-2xl font-bold"
-              style={{ color: 'var(--accent-primary)' }}
-            >
-              {stats.low}
-            </div>
-            <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-              Low
-            </div>
+            <div className="text-2xl font-bold">{stats.low}</div>
+            <div className="text-sm">Low</div>
           </div>
           <div
             className="rounded-lg shadow-subtle p-4"
@@ -496,12 +464,8 @@ export function AdminAlertsDashboard() {
               border: '1px solid',
             }}
           >
-            <div className="text-2xl font-bold" style={{ color: '#9333ea' }}>
-              {stats.unacknowledged}
-            </div>
-            <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-              Unacknowledged
-            </div>
+            <div className="text-2xl font-bold">{stats.unacknowledged}</div>
+            <div className="text-sm">Unacknowledged</div>
           </div>
           <div
             className="rounded-lg shadow-subtle p-4"
@@ -511,12 +475,8 @@ export function AdminAlertsDashboard() {
               border: '1px solid',
             }}
           >
-            <div className="text-2xl font-bold" style={{ color: '#4f46e5' }}>
-              {stats.unresolved}
-            </div>
-            <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-              Unresolved
-            </div>
+            <div className="text-2xl font-bold">{stats.unresolved}</div>
+            <div className="text-sm">Unresolved</div>
           </div>
         </div>
       )}
@@ -578,7 +538,6 @@ export function AdminAlertsDashboard() {
             <div>
               <svg
                 className="mx-auto h-12 w-12"
-                style={{ color: 'var(--text-secondary)' }}
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -590,16 +549,8 @@ export function AdminAlertsDashboard() {
                   d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                 />
               </svg>
-              <h3
-                className="mt-2 text-sm font-medium"
-                style={{ color: 'var(--text-primary)' }}
-              >
-                No alerts
-              </h3>
-              <p
-                className="mt-1 text-sm"
-                style={{ color: 'var(--text-secondary)' }}
-              >
+              <h3 className="mt-2 text-sm font-medium">No alerts</h3>
+              <p className="mt-1 text-sm">
                 {activeFilter === 'all'
                   ? 'No alerts have been generated yet.'
                   : `No ${activeFilter} alerts found.`}
@@ -640,10 +591,7 @@ export function AdminAlertsDashboard() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center space-x-2">
-                        <h3
-                          className="text-sm font-medium truncate"
-                          style={{ color: 'var(--text-primary)' }}
-                        >
+                        <h3 className="text-sm font-medium truncate">
                           {alert.title}
                         </h3>
                         <span
@@ -674,16 +622,10 @@ export function AdminAlertsDashboard() {
                           </span>
                         )}
                       </div>
-                      <p
-                        className="mt-1 text-sm line-clamp-2"
-                        style={{ color: 'var(--text-secondary)' }}
-                      >
+                      <p className="mt-1 text-sm line-clamp-2">
                         {alert.message}
                       </p>
-                      <div
-                        className="mt-2 flex items-center space-x-4 text-xs"
-                        style={{ color: 'var(--text-secondary)' }}
-                      >
+                      <div className="mt-2 flex items-center space-x-4 text-xs">
                         <span>
                           {new Date(alert.timestamp).toLocaleString()}
                         </span>
@@ -704,7 +646,6 @@ export function AdminAlertsDashboard() {
                           acknowledgeAlert(alert.id);
                         }}
                         className="px-3 py-1 text-xs font-medium"
-                        style={{ color: 'var(--accent-primary)' }}
                         onMouseEnter={(e) => {
                           e.currentTarget.style.color =
                             'var(--accent-primary-dark)';
@@ -723,7 +664,6 @@ export function AdminAlertsDashboard() {
                           resolveAlert(alert.id);
                         }}
                         className="px-3 py-1 text-xs font-medium"
-                        style={{ color: 'var(--color-success)' }}
                         onMouseEnter={(e) => {
                           e.currentTarget.style.color = '#15803d';
                         }}
@@ -740,7 +680,6 @@ export function AdminAlertsDashboard() {
                         deleteAlert(alert.id);
                       }}
                       className="px-3 py-1 text-xs font-medium"
-                      style={{ color: 'var(--color-error)' }}
                       onMouseEnter={(e) => {
                         e.currentTarget.style.color = '#dc2626';
                       }}
@@ -882,7 +821,7 @@ export function AdminAlertsDashboard() {
                       acknowledgeAlert(selectedAlert.id);
                       setSelectedAlert(null);
                     }}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700"
+                    className="px-4 py-2 bg-accent text-white rounded-md text-sm font-medium hover:bg-accent"
                   >
                     Acknowledge
                   </button>
@@ -893,7 +832,7 @@ export function AdminAlertsDashboard() {
                       resolveAlert(selectedAlert.id);
                       setSelectedAlert(null);
                     }}
-                    className="px-4 py-2 bg-green-600 text-white rounded-md text-sm font-medium hover:bg-green-700"
+                    className="px-4 py-2 bg-success text-white rounded-md text-sm font-medium hover:bg-success"
                   >
                     Resolve
                   </button>
@@ -903,7 +842,7 @@ export function AdminAlertsDashboard() {
                     deleteAlert(selectedAlert.id);
                     setSelectedAlert(null);
                   }}
-                  className="px-4 py-2 bg-red-600 text-white rounded-md text-sm font-medium hover:bg-red-700"
+                  className="px-4 py-2 bg-destructive text-white rounded-md text-sm font-medium hover:bg-destructive"
                 >
                   Delete
                 </button>
@@ -943,7 +882,7 @@ export function AdminAlertsDashboard() {
                 setShowDeleteConfirmation(false);
                 setAlertToDelete(null);
               }}
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-destructive hover:bg-destructive"
             >
               Delete
             </Button>
