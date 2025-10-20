@@ -3,6 +3,7 @@
 import { BottomNavigation } from '@/components/ui/BottomNavigation';
 import { QuickActionSheet } from '@/components/ui/BottomSheet';
 import { useMobileNavigation } from '@/hooks/useMobileNavigation';
+import { usePathname } from 'next/navigation';
 
 export function RootNavigation() {
   const {
@@ -13,9 +14,13 @@ export function RootNavigation() {
     moreMenuActions,
   } = useMobileNavigation();
 
+  const pathname = usePathname();
+  const isHomePage = pathname === '/';
+
   return (
     <>
       {/* Bottom Navigation - rendered at root level for true fixed positioning */}
+      {/* Hidden on mobile for home page (/) since it's only accessible when unauthenticated */}
       <BottomNavigation
         items={navigationItems.map((item) => ({
           id: item.id,
@@ -24,6 +29,7 @@ export function RootNavigation() {
           onClick: () => handleNavigation(item),
           isActive: item.isActive,
         }))}
+        className={isHomePage ? 'hidden' : ''}
       />
 
       {/* More Menu Bottom Sheet */}
