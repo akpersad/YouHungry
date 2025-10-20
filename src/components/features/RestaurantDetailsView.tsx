@@ -75,7 +75,7 @@ export function RestaurantDetailsView({
             </h2>
             <div className="flex items-center gap-4 text-sm text-text-light dark:text-text-light mb-2">
               <span className="flex items-center gap-1">
-                <span className="text-yellow-500">⭐</span>
+                <span className="text-warning">⭐</span>
                 {restaurant.rating}
               </span>
               <span>{restaurant.cuisine}</span>

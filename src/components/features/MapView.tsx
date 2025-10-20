@@ -103,7 +103,7 @@ class RestaurantMarker {
             </h3>
             <div class="flex items-center gap-2 mb-2">
               <div class="flex items-center">
-                <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                <svg class="w-4 h-4 text-warning" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                 </svg>
                 <span class="text-sm text-text-light dark:text-text-light ml-1">${rating.toFixed(1)}</span>
@@ -116,7 +116,7 @@ class RestaurantMarker {
             <div class="flex gap-1">
               <button 
                 onclick="window.selectRestaurant('${restaurant._id}')"
-                class="px-2 py-1 bg-blue-600 dark:bg-blue-500 text-white text-xs rounded hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors"
+                class="px-2 py-1 bg-accent dark:bg-accent text-white text-xs rounded hover:bg-accent dark:hover:bg-accent transition-colors"
               >
                 Select
               </button>
@@ -506,11 +506,11 @@ export function MapView({
 
   if (!apiKey) {
     return (
-      <div className="w-full h-full flex items-center justify-center bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+      <div className="w-full h-full flex items-center justify-center bg-warning/10 dark:bg-warning/90/20 rounded-lg">
         <div className="text-center p-6">
-          <div className="w-16 h-16 bg-yellow-100 dark:bg-yellow-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+          <div className="w-16 h-16 bg-warning/20 dark:bg-warning/90/30 rounded-full flex items-center justify-center mx-auto mb-4">
             <svg
-              className="w-8 h-8 text-yellow-500"
+              className="w-8 h-8 text-warning"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"

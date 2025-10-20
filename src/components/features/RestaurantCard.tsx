@@ -77,10 +77,7 @@ export function RestaurantCard({
           {/* Content - Use flex to ensure consistent height */}
           <div className="p-4 flex flex-col flex-1">
             {/* 2. NAME - Clear, readable restaurant name */}
-            <h3
-              className="text-lg font-semibold text-primary leading-tight mb-3"
-              style={{ color: 'var(--text-primary)' }}
-            >
+            <h3 className="text-lg font-semibold text-primary leading-tight mb-3">
               {restaurant.name}
             </h3>
 
@@ -95,7 +92,7 @@ export function RestaurantCard({
                 </span>
               </div>
               {restaurant.timeToPickUp && (
-                <span className="flex items-center gap-1 text-tertiary text-xs">
+                <span className="flex items-center gap-1 text-secondary text-xs">
                   ⏱️ {formatTimeToPickUp(restaurant.timeToPickUp)}
                 </span>
               )}
@@ -104,7 +101,7 @@ export function RestaurantCard({
             {/* 4. ADDRESS - Fixed height to prevent variation */}
             <div className="h-10 mb-3">
               {restaurant.address && (
-                <div className="text-sm text-tertiary line-clamp-2">
+                <div className="text-sm text-secondary line-clamp-2">
                   📍 {restaurant.address}
                 </div>
               )}
@@ -185,10 +182,7 @@ export function RestaurantCard({
 
             {/* Content */}
             <div className="flex-1 min-w-0">
-              <h3
-                className="text-base font-medium text-primary truncate"
-                style={{ color: 'var(--text-primary)' }}
-              >
+              <h3 className="text-base font-medium text-primary truncate">
                 {restaurant.name}
               </h3>
               <div className="flex items-center gap-3 text-sm text-secondary mt-1">
@@ -232,10 +226,7 @@ export function RestaurantCard({
           {/* Restaurant Header */}
           <div className="flex justify-between items-start">
             <div className="flex-1">
-              <h3
-                className="text-lg font-semibold text-primary mb-1"
-                style={{ color: 'var(--text-primary)' }}
-              >
+              <h3 className="text-lg font-semibold text-primary mb-1">
                 {restaurant.name}
               </h3>
               <p className="text-sm text-secondary mb-2">
@@ -304,7 +295,7 @@ export function RestaurantCard({
                     </p>
                   ))}
                 {Object.keys(restaurant.hours).length > 3 && (
-                  <p className="text-tertiary text-xs">
+                  <p className="text-secondary text-xs">
                     +{Object.keys(restaurant.hours).length - 3} more days
                   </p>
                 )}

@@ -621,7 +621,7 @@ export function RestaurantSearchPage({
             </div>
             <div className="ml-3">
               <h3 className="text-sm font-medium text-red-800">Search Error</h3>
-              <div className="mt-2 text-sm text-red-700">
+              <div className="mt-2 text-sm text-destructive">
                 {error instanceof Error ? error.message : 'An error occurred'}
               </div>
             </div>
@@ -776,7 +776,7 @@ export function RestaurantSearchPage({
                           disabled={isAlreadyInCollection}
                           className={`w-full text-left p-3 border rounded-lg transition-colors ${
                             isAlreadyInCollection
-                              ? 'border-success bg-success/10 text-green-700 cursor-not-allowed'
+                              ? 'border-success bg-success/10 text-success cursor-not-allowed'
                               : 'border-border hover:bg-surface cursor-pointer'
                           }`}
                         >
@@ -822,7 +822,7 @@ export function RestaurantSearchPage({
                         collection._id.toString()
                       )
                     ) && (
-                      <div className="text-sm text-success bg-success/10 border border-green-200 rounded-lg p-2">
+                      <div className="text-sm text-success bg-success/10 border border-success rounded-lg p-2">
                         <div className="font-medium mb-1">
                           Already in collections:
                         </div>
