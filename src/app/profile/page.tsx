@@ -1107,9 +1107,9 @@ function ProfilePageContent() {
                       </div>
                     )}
                     {!pushStatus.supported && formData.pushEnabled && (
-                      <div className="mt-2 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg flex items-start gap-2">
-                        <AlertCircle className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
-                        <p className="text-sm text-blue-600">
+                      <div className="mt-2 p-3 bg-accent/10 border border-primary/20 rounded-lg flex items-start gap-2">
+                        <AlertCircle className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                        <p className="text-sm text-primary">
                           Push notifications are not supported on this
                           device/browser, but your preference has been saved and
                           will apply to other devices where you&apos;re logged

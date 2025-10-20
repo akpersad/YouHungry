@@ -22,7 +22,6 @@ function SignInContent() {
             style={{
               backgroundColor: 'var(--color-success-light)',
               borderColor: 'var(--color-success)',
-              color: 'var(--color-success)',
             }}
           >
             <p className="text-sm font-medium">
@@ -34,15 +33,8 @@ function SignInContent() {
 
         {/* Header */}
         <div className="text-center">
-          <h1
-            className="text-3xl font-bold mb-2"
-            style={{ color: 'var(--color-text)' }}
-          >
-            Welcome Back
-          </h1>
-          <p className="text-sm" style={{ color: 'var(--color-text-light)' }}>
-            Sign in to continue to Fork In The Road
-          </p>
+          <h1 className="text-3xl font-bold mb-2">Welcome Back</h1>
+          <p className="text-sm">Sign in to continue to Fork In The Road</p>
         </div>
 
         {/* Back to Home Button */}
@@ -96,7 +88,7 @@ function SignInContent() {
 
         {/* Additional Info */}
         <div className="text-center">
-          <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
+          <p className="text-xs">
             By signing in, you agree to our Terms of Service and Privacy Policy
           </p>
         </div>

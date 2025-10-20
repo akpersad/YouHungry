@@ -12,29 +12,16 @@ export default function SignUpPage() {
       <div className="max-w-md w-full space-y-6">
         {/* Header */}
         <div className="text-center">
-          <h1
-            className="text-3xl font-bold mb-2"
-            style={{ color: 'var(--color-text)' }}
-          >
-            Join Fork In The Road
-          </h1>
-          <p className="text-sm" style={{ color: 'var(--color-text-light)' }}>
+          <h1 className="text-3xl font-bold mb-2">Join Fork In The Road</h1>
+          <p className="text-sm">
             Create your account to start discovering amazing restaurants
           </p>
         </div>
 
         {/* Benefits Section */}
         <div className="bg-surface rounded-lg p-4 border border-border">
-          <h3
-            className="font-semibold mb-3"
-            style={{ color: 'var(--color-text)' }}
-          >
-            What you&apos;ll get
-          </h3>
-          <ul
-            className="space-y-2 text-sm"
-            style={{ color: 'var(--color-text-light)' }}
-          >
+          <h3 className="font-semibold mb-3">What you&apos;ll get</h3>
+          <ul className="space-y-2 text-sm">
             <li className="flex items-start">
               <span className="text-primary mr-2">✓</span>
               Create personal restaurant collections
@@ -84,7 +71,7 @@ export default function SignUpPage() {
 
         {/* Additional Info */}
         <div className="text-center">
-          <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
+          <p className="text-xs">
             By creating an account, you agree to our{' '}
             <a
               href="/terms-of-service"

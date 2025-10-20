@@ -348,7 +348,7 @@ export default function DesignSystemPOC() {
                     {restaurant.tags.map((tag) => (
                       <span
                         key={tag}
-                        className="px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 hover:bg-blue-500 hover:text-white"
+                        className="px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 hover:bg-accent hover:text-white"
                         style={{
                           backgroundColor: currentColors.bgTertiary,
                           color: currentColors.textSecondary,
@@ -799,7 +799,7 @@ export default function DesignSystemPOC() {
                       </span>
                       <button
                         onClick={() => removeFromRanking(rank - 1)}
-                        className="text-destructive hover:text-red-700 transition-colors"
+                        className="text-destructive hover:text-destructive transition-colors"
                       >
                         ✕
                       </button>

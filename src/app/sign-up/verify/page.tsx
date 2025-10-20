@@ -19,7 +19,6 @@ function VerifyEmailContent() {
             className="w-16 h-16 rounded-full flex items-center justify-center"
             style={{
               backgroundColor: 'var(--color-success-light)',
-              color: 'var(--color-success)',
             }}
           >
             <svg
@@ -40,65 +39,28 @@ function VerifyEmailContent() {
 
         {/* Header */}
         <div className="text-center">
-          <h1
-            className="text-3xl font-bold mb-2"
-            style={{ color: 'var(--color-text)' }}
-          >
-            Check Your Email
-          </h1>
-          <p className="text-sm" style={{ color: 'var(--color-text-light)' }}>
-            We&apos;ve sent a verification link to
-          </p>
-          {email && (
-            <p
-              className="text-sm font-medium mt-1"
-              style={{ color: 'var(--color-primary)' }}
-            >
-              {email}
-            </p>
-          )}
+          <h1 className="text-3xl font-bold mb-2">Check Your Email</h1>
+          <p className="text-sm">We&apos;ve sent a verification link to</p>
+          {email && <p className="text-sm font-medium mt-1">{email}</p>}
         </div>
 
         {/* Instructions */}
         <div className="bg-surface rounded-lg p-6 border border-border space-y-4">
-          <h3
-            className="font-semibold text-center"
-            style={{ color: 'var(--color-text)' }}
-          >
-            Next Steps:
-          </h3>
-          <ol
-            className="space-y-3 text-sm"
-            style={{ color: 'var(--color-text-light)' }}
-          >
+          <h3 className="font-semibold text-center">Next Steps:</h3>
+          <ol className="space-y-3 text-sm">
             <li className="flex items-start">
-              <span
-                className="font-bold mr-3 mt-0.5"
-                style={{ color: 'var(--color-primary)' }}
-              >
-                1.
-              </span>
+              <span className="font-bold mr-3 mt-0.5">1.</span>
               <span>
                 Open the verification email from Clerk (check your spam folder
                 if you don&apos;t see it)
               </span>
             </li>
             <li className="flex items-start">
-              <span
-                className="font-bold mr-3 mt-0.5"
-                style={{ color: 'var(--color-primary)' }}
-              >
-                2.
-              </span>
+              <span className="font-bold mr-3 mt-0.5">2.</span>
               <span>Click the verification link in the email</span>
             </li>
             <li className="flex items-start">
-              <span
-                className="font-bold mr-3 mt-0.5"
-                style={{ color: 'var(--color-primary)' }}
-              >
-                3.
-              </span>
+              <span className="font-bold mr-3 mt-0.5">3.</span>
               <span>
                 Once verified, return here and sign in with your credentials
               </span>
@@ -108,7 +70,7 @@ function VerifyEmailContent() {
 
         {/* Phone Verification Info (if SMS opt-in) */}
         {phoneVerification === 'sent' && (
-          <div className="bg-success/10 dark:bg-green-950/30 rounded-lg p-4 border border-green-200 dark:border-green-800">
+          <div className="bg-success/10 dark:bg-green-950/30 rounded-lg p-4 border border-success dark:border-green-800">
             <h3 className="font-semibold text-green-900 dark:text-green-100 mb-2">
               📱 Phone Verification Sent
             </h3>
@@ -149,12 +111,11 @@ function VerifyEmailContent() {
 
         {/* Additional Help */}
         <div className="text-center">
-          <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
+          <p className="text-xs">
             Didn&apos;t receive the email?{' '}
             <button
               onClick={() => router.push('/sign-in')}
               className="font-medium underline"
-              style={{ color: 'var(--color-primary)' }}
             >
               Try signing in
             </button>{' '}
