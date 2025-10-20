@@ -134,7 +134,7 @@ export function FriendRequests({ userId }: FriendRequestsProps) {
                             handleRequestAction(request._id, 'accept')
                           }
                           disabled={updateRequestMutation.isPending}
-                          className="bg-green-600 hover:bg-green-700 text-white"
+                          className="bg-success hover:bg-success text-white"
                         >
                           Accept
                         </Button>
@@ -145,7 +145,7 @@ export function FriendRequests({ userId }: FriendRequestsProps) {
                             handleRequestAction(request._id, 'decline')
                           }
                           disabled={updateRequestMutation.isPending}
-                          className="text-destructive hover:text-red-700 hover:bg-destructive/10"
+                          className="text-destructive hover:text-destructive hover:bg-destructive/10"
                         >
                           Decline
                         </Button>
@@ -260,7 +260,7 @@ export function FriendRequests({ userId }: FriendRequestsProps) {
                         </div>
                       </div>
                       <div className="flex-shrink-0">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-warning/20 text-warning">
                           Pending
                         </span>
                       </div>

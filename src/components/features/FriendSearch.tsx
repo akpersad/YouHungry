@@ -157,7 +157,7 @@ export function FriendSearch({ userId, onClose }: FriendSearchProps) {
                         size="sm"
                         onClick={() => handleSendRequest(user.clerkId)}
                         disabled={sendFriendRequestMutation.isPending}
-                        className="bg-blue-600 hover:bg-blue-700 text-white"
+                        className="bg-accent hover:bg-accent text-white"
                       >
                         {sendFriendRequestMutation.isPending
                           ? 'Sending...'

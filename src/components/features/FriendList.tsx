@@ -51,7 +51,7 @@ export function FriendList({ userId }: FriendListProps) {
         <h2 className="text-xl font-semibold text-primary">Friends</h2>
         <div className="text-center py-8">
           <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
-          <p className="text-sm text-tertiary mt-2">Loading friends...</p>
+          <p className="text-sm text-secondary mt-2">Loading friends...</p>
         </div>
       </div>
     );
@@ -74,7 +74,7 @@ export function FriendList({ userId }: FriendListProps) {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold text-primary">Friends</h2>
-        <span className="text-sm text-tertiary">
+        <span className="text-sm text-secondary">
           {friends?.length || 0} friend{(friends?.length || 0) !== 1 ? 's' : ''}
         </span>
       </div>
@@ -96,7 +96,7 @@ export function FriendList({ userId }: FriendListProps) {
                     <p className="text-sm font-medium text-primary truncate">
                       {friend.name}
                     </p>
-                    <p className="text-sm text-tertiary truncate">
+                    <p className="text-sm text-secondary truncate">
                       {friend.email}
                     </p>
                     {friend.username && (
@@ -122,7 +122,7 @@ export function FriendList({ userId }: FriendListProps) {
                     variant="outline"
                     onClick={() => handleRemoveClick(friend.friendshipId)}
                     disabled={removeFriendMutation.isPending}
-                    className="text-destructive hover:text-red-700 hover:bg-destructive/10"
+                    className="text-destructive hover:text-destructive hover:bg-destructive/10"
                   >
                     Remove
                   </Button>
@@ -196,7 +196,7 @@ export function FriendList({ userId }: FriendListProps) {
               />
             </svg>
           </div>
-          <p className="text-sm text-tertiary">No friends yet</p>
+          <p className="text-sm text-secondary">No friends yet</p>
           <p className="text-xs text-text-light mt-1">
             Search for friends to add them to your network
           </p>
@@ -225,7 +225,7 @@ export function FriendList({ userId }: FriendListProps) {
             <Button
               onClick={handleRemoveConfirm}
               disabled={removeFriendMutation.isPending}
-              className="bg-red-600 hover:bg-red-700 text-white"
+              className="bg-destructive hover:bg-destructive text-white"
             >
               {removeFriendMutation.isPending ? 'Removing...' : 'Remove Friend'}
             </Button>
