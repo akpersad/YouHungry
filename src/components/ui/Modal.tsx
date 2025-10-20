@@ -118,8 +118,12 @@ export function Modal({
             document.body.style.width = '';
             document.body.style.overflow = '';
 
-            // Restore scroll position
-            window.scrollTo(0, scrollPosition.current);
+            // Restore scroll position (wrap in try-catch for JSDOM compatibility)
+            try {
+              window.scrollTo(0, scrollPosition.current);
+            } catch {
+              // Ignore scrollTo errors in test environments (JSDOM doesn't implement it)
+            }
           }
         }
 
@@ -139,20 +143,24 @@ export function Modal({
         <motion.div
           className="modal-overlay"
           onClick={onClose}
-          variants={isMobile ? undefined : modalBackdropVariants}
-          initial={isMobile ? false : 'hidden'}
-          animate={isMobile ? false : 'visible'}
-          exit={isMobile ? false : 'exit'}
+          {...(!isMobile && {
+            variants: modalBackdropVariants,
+            initial: 'hidden',
+            animate: 'visible',
+            exit: 'exit',
+          })}
           role="presentation"
         >
           <motion.div
             ref={modalRef}
             className={`modal-content ${className}`}
             onClick={(e) => e.stopPropagation()}
-            variants={isMobile ? undefined : modalVariants}
-            initial={isMobile ? false : 'hidden'}
-            animate={isMobile ? false : 'visible'}
-            exit={isMobile ? false : 'exit'}
+            {...(!isMobile && {
+              variants: modalVariants,
+              initial: 'hidden',
+              animate: 'visible',
+              exit: 'exit',
+            })}
             role="dialog"
             aria-modal="true"
             aria-labelledby={title ? titleId : undefined}
