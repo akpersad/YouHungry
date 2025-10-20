@@ -46,6 +46,7 @@ next-env.d.ts
 /test-results/
 /blob-report/
 /lighthouse-reports/
+.lighthouseci
 
 # Generated color audit reports
 color-contrast-audit-report.json

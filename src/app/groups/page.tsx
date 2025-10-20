@@ -108,7 +108,7 @@ export default function GroupsPage() {
         <div className="text-center">
           <h1 className="text-2xl font-bold text-text mb-4">Groups</h1>
           <div className="bg-destructive/10 border border-destructive rounded-md p-4">
-            <p className="text-red-800">
+            <p className="text-destructive font-medium">
               Failed to load groups. Please try again later.
             </p>
           </div>

@@ -1,5 +1,6 @@
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
+import type { Metadata } from 'next';
 import {
   Card,
   CardContent,
@@ -8,6 +9,12 @@ import {
   CardTitle,
 } from '@/components/ui/Card';
 import { AuthButtons } from '@/components/auth/AuthButtons';
+
+export const metadata: Metadata = {
+  title: 'Fork In The Road - Restaurant Discovery & Decision Making',
+  description:
+    'Stop the endless "where should we eat?" debate. Smart decision engine helps you and your friends choose the perfect restaurant with group voting, collections, and intelligent recommendations.',
+};
 
 export default async function Home() {
   // Redirect authenticated users to dashboard

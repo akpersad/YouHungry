@@ -7,9 +7,9 @@ import { PageTransition } from '@/components/ui/PageTransition';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { RootNavigation } from '@/components/layout/RootNavigation';
 import {
-  PWAInstallPrompt,
-  PWAOfflineBanner,
-} from '@/components/ui/PWAStatusIndicator';
+  LazyPWAInstallPrompt,
+  LazyPWAOfflineBanner,
+} from '@/components/ui/LazyPWAComponents';
 import { PullToRefresh } from '@/components/PullToRefresh';
 import { ErrorBoundary } from '@/components/errors/ErrorBoundary';
 import { GoogleAnalytics } from '@/components/analytics/GoogleAnalytics';
@@ -129,6 +129,11 @@ export default function RootLayout({
           />
           <link rel="apple-touch-icon" href="/icons/icon-192x192.svg" />
           <meta name="theme-color" content="#e3005a" />
+          {/* Performance optimizations */}
+          <link rel="preconnect" href="https://clerk.com" />
+          <link rel="dns-prefetch" href="https://clerk.com" />
+          <link rel="preconnect" href="https://img.clerk.com" />
+          <link rel="dns-prefetch" href="https://img.clerk.com" />
         </head>
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
@@ -145,8 +150,8 @@ export default function RootLayout({
                     <AppLayout>{children}</AppLayout>
                   </PageTransition>
                 </PullToRefresh>
-                <PWAInstallPrompt />
-                <PWAOfflineBanner />
+                <LazyPWAInstallPrompt />
+                <LazyPWAOfflineBanner />
                 <RootNavigation />
                 <Toaster
                   position="top-center"
@@ -162,7 +167,7 @@ export default function RootLayout({
           {/* Service Worker Registration */}
           <Script
             id="sw-register"
-            strategy="afterInteractive"
+            strategy="lazyOnload"
             dangerouslySetInnerHTML={{
               __html: `
                 if ('serviceWorker' in navigator) {
