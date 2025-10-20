@@ -32,6 +32,7 @@ interface APICostMetrics {
   };
   twilio: {
     smsSent: number;
+    verifySent: number;
   };
   resend: {
     emailsSent: number;
@@ -153,6 +154,7 @@ export async function GET(request: Request) {
       blobRead: dailyStats.byType.vercel_blob_read?.count || 0,
       // Messaging
       smsSent: dailyStats.byType.twilio_sms_sent?.count || 0,
+      verifySent: dailyStats.byType.twilio_verify_sent?.count || 0,
       emailsSent: dailyStats.byType.resend_email_sent?.count || 0,
     };
 
@@ -175,6 +177,7 @@ export async function GET(request: Request) {
       blobRead: monthlyStats.byType.vercel_blob_read?.count || 0,
       // Messaging
       smsSent: monthlyStats.byType.twilio_sms_sent?.count || 0,
+      verifySent: monthlyStats.byType.twilio_verify_sent?.count || 0,
       emailsSent: monthlyStats.byType.resend_email_sent?.count || 0,
     };
 
@@ -201,7 +204,9 @@ export async function GET(request: Request) {
       (monthlyStats.byType.vercel_blob_delete?.cost || 0) +
       (monthlyStats.byType.vercel_blob_read?.cost || 0);
 
-    const twilioCost = monthlyStats.byType.twilio_sms_sent?.cost || 0;
+    const twilioCost =
+      (monthlyStats.byType.twilio_sms_sent?.cost || 0) +
+      (monthlyStats.byType.twilio_verify_sent?.cost || 0);
     const resendCost = monthlyStats.byType.resend_email_sent?.cost || 0;
 
     // Calculate potential savings from caching
@@ -243,6 +248,7 @@ export async function GET(request: Request) {
       },
       twilio: {
         smsSent: monthlyUsage.smsSent,
+        verifySent: monthlyUsage.verifySent,
       },
       resend: {
         emailsSent: monthlyUsage.emailsSent,
@@ -341,7 +347,13 @@ function generateCostRecommendations(metrics: APICostMetrics): string[] {
 
   if (byService.twilio > 10) {
     recommendations.push(
-      `📱 SMS costs are $${byService.twilio.toFixed(2)}/month (${metrics.twilio.smsSent} messages). Consider encouraging users to use in-app or email notifications.`
+      `📱 Twilio costs are $${byService.twilio.toFixed(2)}/month (${metrics.twilio.smsSent} SMS + ${metrics.twilio.verifySent} verifications). Consider encouraging users to use in-app or email notifications.`
+    );
+  }
+
+  if (metrics.twilio.verifySent > 20) {
+    recommendations.push(
+      `🔐 Sending ${metrics.twilio.verifySent} Twilio Verify SMS/month at $0.05 each. Consider implementing phone verification caching or rate limiting.`
     );
   }
 

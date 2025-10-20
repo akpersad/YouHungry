@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { connectToDatabase } from '@/lib/db';
 import { logger } from '@/lib/logger';
+import { trackAPIUsage } from '@/lib/api-usage-tracker';
 import twilio from 'twilio';
 
 // Initialize Twilio client
@@ -74,6 +75,13 @@ export async function POST(request: NextRequest) {
           to: formattedPhone,
           channel: 'sms',
         });
+
+      // Track Twilio Verify usage
+      await trackAPIUsage('twilio_verify_sent', false, {
+        userId,
+        phoneNumber: formattedPhone,
+        verificationSid: verification.sid,
+      });
 
       logger.info('Verification code sent via Twilio Verify', {
         userId,

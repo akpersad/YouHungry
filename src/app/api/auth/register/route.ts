@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { clerkClient } from '@clerk/nextjs/server';
 import { createUser } from '@/lib/users';
 import { logger } from '@/lib/logger';
+import { trackAPIUsage } from '@/lib/api-usage-tracker';
 import twilio from 'twilio';
 
 // Initialize Twilio client
@@ -203,6 +204,14 @@ export async function POST(request: NextRequest) {
             });
 
           phoneVerificationSent = verification.status === 'pending';
+
+          // Track Twilio Verify usage
+          await trackAPIUsage('twilio_verify_sent', false, {
+            clerkId: clerkUser.id,
+            phoneNumber,
+            verificationSid: verification.sid,
+          });
+
           logger.info('Phone verification SMS sent', {
             clerkId: clerkUser.id,
             phoneNumber,

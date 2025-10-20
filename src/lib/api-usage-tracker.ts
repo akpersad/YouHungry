@@ -19,6 +19,7 @@ export type APIType =
   | 'vercel_blob_read'
   // Messaging
   | 'twilio_sms_sent'
+  | 'twilio_verify_sent'
   | 'resend_email_sent';
 
 interface APIUsageRecord {
@@ -52,7 +53,10 @@ const API_COSTS: Record<APIType, number> = {
   vercel_blob_read: 0.0001, // $0.10 per 1000 reads (estimated based on bandwidth)
 
   // Twilio SMS (per individual message)
-  twilio_sms_sent: 0.0079, // $0.0079 per SMS in US
+  twilio_sms_sent: 0.0083, // $0.0083 per SMS in US
+
+  // Twilio Verify (per verification attempt - separate from SMS pricing)
+  twilio_verify_sent: 0.05, // $0.05 per verification
 
   // Resend Email (per individual email, after 100/day free tier)
   resend_email_sent: 0.001, // $0.001 per email ($1 per 1000 emails)
@@ -61,6 +65,7 @@ const API_COSTS: Record<APIType, number> = {
 // Define which APIs are priced per individual unit (vs per 1000)
 const PER_UNIT_APIS: Set<APIType> = new Set([
   'twilio_sms_sent',
+  'twilio_verify_sent',
   'resend_email_sent',
   'clerk_user_create',
   'clerk_user_update',
