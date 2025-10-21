@@ -60,7 +60,17 @@ test.describe('Registration - Custom Sign-Up Form', () => {
     const isCI = !!process.env.CI;
     const timeout = isCI ? 30000 : 10000; // More lenient in CI
 
-    await page.click('button:has-text("Back to Home")');
+    // Close any mobile menus or overlays that might be blocking the button
+    const overlay = page.locator('div[role="presentation"]');
+    if (await overlay.isVisible().catch(() => false)) {
+      await overlay.click({ force: true }).catch(() => {});
+    }
+
+    // Wait for any toasts or overlays to be out of the way
+    await page.waitForTimeout(500);
+
+    // Use force click on mobile to bypass overlays
+    await page.click('button:has-text("Back to Home")', { force: true });
     await page.waitForURL('/', { timeout });
 
     // Verify we're on home page

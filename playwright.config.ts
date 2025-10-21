@@ -191,7 +191,7 @@ export default defineConfig({
   ],
 
   webServer: {
-    command: 'npm run dev',
+    command: 'npm run dev:force',
     url: 'http://localhost:3000',
     reuseExistingServer: !isCI,
     timeout: 120 * 1000,
