@@ -2089,3 +2089,423 @@ export default nextConfig;
 - [ ] Update documentation
 - [ ] Review code for optimization opportunities
 - [ ] Test error scenarios
+
+## 🔐 Authentication & Redirect Patterns
+
+### Deep Linking with Callback URLs
+
+**Pattern**: Preserve user intent across authentication flows
+
+**Implementation**:
+
+```typescript
+// middleware.ts
+export default authMiddleware({
+  // auth.protect() automatically adds redirect_url parameter
+});
+
+// sign-in/page.tsx
+const searchParams = useSearchParams();
+const redirectUrl = searchParams.get('redirect_url');
+
+<SignIn forceRedirectUrl={redirectUrl || '/dashboard'} />
+```
+
+**Flow**:
+
+1. User visits `/profile` (protected)
+2. Middleware redirects to `/sign-in?redirect_url=/profile`
+3. User signs in
+4. Clerk redirects to `/profile` (original destination)
+
+**iOS Equivalent**: Universal Links + Custom URL Schemes
+
+```swift
+// Handle universal link
+func application(_ application: UIApplication,
+                 continue userActivity: NSUserActivity,
+                 restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
+  guard let url = userActivity.webpageURL else { return false }
+
+  // Save intended destination
+  UserDefaults.standard.set(url.path, forKey: "pendingDeepLink")
+
+  // If not authenticated, show sign in
+  if !isAuthenticated {
+    showSignIn()
+    return true
+  }
+
+  // Navigate to destination
+  navigate(to: url.path)
+  return true
+}
+
+// After sign in success
+func didCompleteSignIn() {
+  if let pendingPath = UserDefaults.standard.string(forKey: "pendingDeepLink") {
+    navigate(to: pendingPath)
+    UserDefaults.standard.removeObject(forKey: "pendingDeepLink")
+  } else {
+    navigate(to: "/dashboard")
+  }
+}
+```
+
+**Universal Link Configuration**:
+
+- Add associated domains entitlement
+- Configure apple-app-site-association file
+- Handle both authenticated and unauthenticated states
+
+### Registration Data Flow
+
+**Pattern**: Custom form → Auth provider → Webhook → Database
+
+**Data Path**:
+
+```
+1. User fills form
+   ↓
+2. Client validates (real-time)
+   ↓
+3. Submit to Clerk API
+   - Basic fields: email, password, name, username
+   - Extended fields: phone, city, state, smsOptIn (in unsafeMetadata)
+   ↓
+4. Email verification (6-digit code)
+   ↓
+5. Clerk webhook fires (user.created)
+   ↓
+6. Webhook extracts data
+   - From user object: email, name, username, profilePicture
+   - From unsafeMetadata: phone, city, state, smsOptIn
+   ↓
+7. Create MongoDB user with all fields
+   ↓
+8. Set defaults:
+   - preferences.locationSettings
+   - preferences.notificationSettings
+   - smsPhoneNumber (if smsOptIn = true)
+```
+
+**Key Learnings**:
+
+- Username availability check BEFORE submission
+- Phone number stored in E.164 format (+1234567890)
+- SMS opt-in must be explicit (not pre-checked)
+- Profile picture synced from Clerk via webhook
+- Location data enhances user experience
+
+**iOS Implementation**:
+
+```swift
+// 1. Collect data
+struct RegistrationData {
+  let email: String
+  let password: String
+  let fullName: String
+  let username: String
+  let phone: String?
+  let city: String?
+  let state: String?
+  let smsOptIn: Bool
+}
+
+// 2. Sign in with Apple (required)
+func handleAppleSignIn() {
+  let request = ASAuthorizationAppleIDProvider().createRequest()
+  request.requestedScopes = [.fullName, .email]
+  // Present authorization controller
+}
+
+// 3. Send to backend
+func completeRegistration(_ appleCredential: ASAuthorizationAppleIDCredential,
+                          additionalData: RegistrationData) async {
+  let payload = [
+    "appleUserId": appleCredential.user,
+    "email": appleCredential.email,
+    "fullName": appleCredential.fullName,
+    "username": additionalData.username,
+    "phone": additionalData.phone,
+    "city": additionalData.city,
+    "state": additionalData.state,
+    "smsOptIn": additionalData.smsOptIn
+  ]
+
+  // POST to backend - same MongoDB structure
+  let response = try await api.post("/api/users/register", payload)
+}
+```
+
+## ⚠️ Critical Testing Patterns & Pitfalls
+
+### Avoid Module-Level Side Effects
+
+**Problem**: Tests hang indefinitely due to background intervals
+
+**Bad Pattern**:
+
+```typescript
+// ❌ BAD: Runs immediately when file is imported
+setInterval(() => {
+  cleanupCache();
+}, 60000);
+```
+
+**Good Pattern**:
+
+```typescript
+// ✅ GOOD: Guard with environment check
+if (process.env.NODE_ENV !== 'test') {
+  setInterval(() => {
+    cleanupCache();
+  }, 60000);
+}
+```
+
+**Affected Files** (already fixed):
+
+- `src/lib/api-cache.ts`
+- `src/lib/request-deduplication.ts`
+
+**iOS Equivalent**:
+
+```swift
+// Use lazy initialization
+class CacheManager {
+  private lazy var cleanupTimer: Timer? = {
+    #if !DEBUG
+    return Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { _ in
+      self.cleanupCache()
+    }
+    #else
+    return nil
+    #endif
+  }()
+}
+```
+
+### Timer Cleanup in Tests
+
+**Pattern**: Always clean up timers in `afterEach`
+
+```typescript
+// In test files
+afterEach(() => {
+  jest.clearAllTimers();
+  jest.useRealTimers();
+});
+```
+
+**iOS Equivalent**:
+
+```swift
+class MyTests: XCTestCase {
+  var timer: Timer?
+
+  override func tearDown() {
+    timer?.invalidate()
+    timer = nil
+    super.tearDown()
+  }
+}
+```
+
+### Mock Global Dependencies
+
+**Pattern**: Mock fetch, logger, and external dependencies
+
+```typescript
+// jest.setup.js
+global.fetch = jest.fn(() =>
+  Promise.resolve({
+    ok: true,
+    json: async () => ({ success: true, data: [] }),
+  })
+);
+
+global.console = {
+  ...console,
+  log: jest.fn(),
+  error: jest.fn(),
+  warn: jest.fn(),
+};
+```
+
+**iOS Equivalent**: Protocol-based dependency injection
+
+```swift
+// Define protocol
+protocol APIClient {
+  func fetch<T: Decodable>(_ endpoint: String) async throws -> T
+}
+
+// Production implementation
+class LiveAPIClient: APIClient {
+  func fetch<T: Decodable>(_ endpoint: String) async throws -> T {
+    // Real network call
+  }
+}
+
+// Test mock
+class MockAPIClient: APIClient {
+  var stubbedResult: Any?
+
+  func fetch<T: Decodable>(_ endpoint: String) async throws -> T {
+    return stubbedResult as! T
+  }
+}
+
+// Inject dependency
+class ViewModel {
+  let api: APIClient
+
+  init(api: APIClient = LiveAPIClient()) {
+    self.api = api
+  }
+}
+
+// In tests
+let mockAPI = MockAPIClient()
+mockAPI.stubbedResult = [Restaurant]()
+let viewModel = ViewModel(api: mockAPI)
+```
+
+### Global Test Timeout
+
+**Pattern**: Set reasonable timeout to catch hanging tests
+
+```typescript
+// jest.setup.js
+jest.setTimeout(10000); // 10 seconds
+```
+
+**iOS Equivalent**:
+
+```swift
+class MyTests: XCTestCase {
+  override func setUp() {
+    super.setUp()
+    continueAfterFailure = false
+    // XCTest has built-in 600s timeout per test
+  }
+}
+```
+
+## 📝 Data Validation & Sanitization
+
+### Phone Number Formatting
+
+**Pattern**: Always store in E.164 format
+
+```typescript
+// Format before storing
+function formatPhoneNumber(phone: string, countryCode: string = '+1'): string {
+  // Remove all non-digits
+  const digits = phone.replace(/\D/g, '');
+
+  // Add country code if not present
+  if (!digits.startsWith(countryCode.replace('+', ''))) {
+    return `${countryCode}${digits}`;
+  }
+
+  return `+${digits}`;
+}
+
+// Example
+formatPhoneNumber('(555) 123-4567', '+1'); // → '+15551234567'
+```
+
+**iOS Equivalent**:
+
+```swift
+import PhoneNumberKit
+
+let phoneNumberKit = PhoneNumberKit()
+
+func formatPhoneNumber(_ phone: String, defaultRegion: String = "US") -> String? {
+  do {
+    let phoneNumber = try phoneNumberKit.parse(phone, withRegion: defaultRegion)
+    return phoneNumberKit.format(phoneNumber, toType: .e164)
+  } catch {
+    return nil
+  }
+}
+
+// Example
+formatPhoneNumber("(555) 123-4567") // → "+15551234567"
+```
+
+### SMS Consent Compliance
+
+**Required Elements**:
+
+1. Clear opt-in checkbox (not pre-checked)
+2. Message types disclosed
+3. Frequency disclosed ("varies by activity")
+4. Opt-out instructions (profile settings)
+5. Cost disclosure ("Msg & data rates may apply")
+6. Privacy policy link
+
+**Pattern**:
+
+```typescript
+<label>
+  <input type="checkbox" checked={smsOptIn} onChange={e => setSmsOptIn(e.target.checked)} />
+  Enable SMS notifications for updates
+</label>
+<p className="text-xs text-muted">
+  Receive texts about group decisions, friend requests & invites.
+  Msg & data rates may apply. Frequency varies by activity.
+  Disable anytime in settings.
+  <a href="/privacy-policy">Privacy Policy & Terms</a>
+</p>
+```
+
+**iOS Equivalent**: Same consent requirements, just native UI
+
+```swift
+Toggle("Enable SMS notifications", isOn: $smsOptIn)
+  .toggleStyle(SwitchToggleStyle(tint: .accentColor))
+
+Text("Receive texts about group decisions, friend requests & invites. Msg & data rates may apply. Frequency varies by activity. Disable anytime in settings.")
+  .font(.caption)
+  .foregroundColor(.secondary)
+```
+
+---
+
+## 🎯 iOS Migration Checklist
+
+### Architecture Patterns to Preserve
+
+- [ ] Multi-channel notification orchestrator (SMS/Email/Push/In-App)
+- [ ] Privacy-preserving analytics (hashed user IDs)
+- [ ] Conditional polling/refresh based on activity
+- [ ] Optimistic updates with rollback
+- [ ] Request deduplication and throttling
+- [ ] 30-day rolling weight algorithm
+- [ ] Webhook-based auth sync pattern
+
+### Platform-Specific Replacements
+
+| Web Technology | iOS Replacement                  |
+| -------------- | -------------------------------- |
+| Clerk          | Sign in with Apple               |
+| VAPID/Web Push | APNs + UserNotifications         |
+| Service Worker | URLCache + Background fetch      |
+| TanStack Query | Combine + Core Data              |
+| localStorage   | UserDefaults + Keychain          |
+| Web Vitals     | MetricKit + Firebase Performance |
+| GA4 (gtag.js)  | Firebase Analytics SDK           |
+
+### Critical Implementation Notes
+
+- **Authentication**: Sign in with Apple is REQUIRED by App Store
+- **Push Notifications**: Test on real device (not simulator)
+- **Offline Support**: Core Data with CloudKit for sync
+- **Deep Linking**: Universal links for cross-platform consistency
+- **Analytics**: Maintain same event taxonomy as web
+- **Error Tracking**: Crashlytics with breadcrumb trail
+- **Performance**: MetricKit for system metrics, custom traces for app metrics
