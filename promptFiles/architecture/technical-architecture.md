@@ -1188,10 +1188,349 @@ The following environment variables are configured and ready for use:
 
 ### Future Considerations
 
-- **iOS App**: Architecture designed for easy iOS conversion
+- **iOS App**: Architecture designed for easy iOS conversion (see iOS Migration Patterns below)
 - **Scalability**: Design for future growth
 - **Internationalization**: Prepare for multi-language support
 - **Advanced Features**: Architecture supports future enhancements
+
+## 🎯 API Optimization & Cost Management
+
+### Request Optimization Patterns
+
+**Problem Solved**: Reduced API requests from 1.3k/hour to ~170/hour (87% reduction)
+
+**Key Strategies**:
+
+1. **Reduced Polling Frequencies**
+
+   - Before: 30-second intervals
+   - After: 5-minute intervals (10x reduction)
+   - Affected: Notifications, group decisions, PWA sync
+
+2. **Visibility-Aware Polling**
+
+   - Active tab: 5-minute intervals
+   - Inactive tab: 15-minute intervals
+   - Background polling: Disabled globally
+
+3. **Conditional Polling** (Smart Intervals)
+
+   ```typescript
+   // Pattern: Adjust based on activity state
+   const refetchInterval = hasActiveDecision
+     ? 30000 // Active: 30 seconds
+     : 300000; // Inactive: 5 minutes
+
+   // Recent activity: Fast polling for 5 minutes, then slow
+   const recentlyUpdated = Date.now() - lastUpdate < 5 * 60 * 1000;
+   const interval = recentlyUpdated ? 30000 : 300000;
+   ```
+
+4. **Request Throttling**
+   - Max 10 requests per minute per endpoint
+   - Request deduplication to prevent duplicate calls
+   - Smart caching with 30-second TTL
+
+**Cost Impact**:
+
+- 87% reduction in API requests
+- From 1.3k/hour to ~170/hour for same user base
+- Vercel free tier now supports 50+ concurrent users (was 5-10)
+
+**iOS Migration Notes**:
+
+- Use Background App Refresh instead of polling
+- Implement push notifications for real-time updates
+- NSURLSession with proper cache policies
+- URLSession background configuration for large transfers
+
+## 📱 iOS Migration Architectural Patterns
+
+### 1. Authentication Flow Adaptation
+
+**Web Pattern** (Clerk):
+
+```
+Custom Form → Clerk API (client) → Email Verification → Webhook → MongoDB
+```
+
+**iOS Pattern** (Sign in with Apple):
+
+```swift
+// 1. Request authorization
+let appleIDProvider = ASAuthorizationAppleIDProvider()
+let request = appleIDProvider.createRequest()
+request.requestedScopes = [.fullName, .email]
+
+// 2. Handle credential
+func authorizationController(didCompleteWithAuthorization authorization: ASAuthorization) {
+  guard let appleIDCredential = authorization.credential as? ASAuthorizationAppleIDCredential else { return }
+
+  // 3. Send to backend
+  let userIdentifier = appleIDCredential.user
+  sendToBackend(userIdentifier, email, fullName)
+}
+
+// 4. Backend creates user in MongoDB (same as webhook)
+```
+
+**Key Differences**:
+
+- Sign in with Apple required by App Store
+- Clerk handles web, Apple handles iOS
+- Backend API remains the same (MongoDB)
+- Consider supporting both for cross-platform users
+
+### 2. Notification System Architecture
+
+**Multi-Channel Pattern** (Preserve on iOS):
+
+```swift
+class NotificationService {
+  func send(decision: Decision, recipient: User, channels: Channels) async {
+    async let sms = channels.sms ? sendSMS(decision, recipient) : nil
+    async let email = channels.email ? sendEmail(decision, recipient) : nil
+    async let push = channels.push ? sendPush(decision, recipient) : nil
+    async let inApp = channels.inApp ? createInApp(decision, recipient) : nil
+
+    // Wait for all, don't fail if one fails
+    let _ = await (sms, email, push, inApp)
+  }
+}
+```
+
+**Replace Web Push with APNs**:
+
+- VAPID → APNs authentication key
+- Service worker → UserNotifications framework
+- Web subscription → Device token registration
+- Same backend notification logic
+
+### 3. Real-Time Updates Strategy
+
+**Web Pattern**: WebSocket subscriptions + polling fallback
+
+**iOS Pattern**: Combine multiple strategies
+
+```swift
+// 1. Push notifications for critical updates
+// 2. Background App Refresh for periodic sync
+// 3. Foreground polling for active screens
+// 4. Combine for reactive updates
+
+class DecisionViewModel: ObservableObject {
+  @Published var decisions: [Decision] = []
+
+  func startMonitoring() {
+    // Foreground polling
+    Timer.publish(every: 30, on: .main, in: .common)
+      .autoconnect()
+      .sink { _ in self.fetchDecisions() }
+      .store(in: &cancellables)
+
+    // Push notification handler
+    NotificationCenter.default
+      .publisher(for: .decisionUpdated)
+      .sink { _ in self.fetchDecisions() }
+      .store(in: &cancellables)
+  }
+}
+```
+
+### 4. Offline-First Data Management
+
+**Web Pattern**: TanStack Query + Optimistic Updates
+
+**iOS Pattern**: Core Data + CloudKit
+
+```swift
+// 1. Core Data for local persistence
+lazy var persistentContainer: NSPersistentCloudKitContainer = {
+  let container = NSPersistentCloudKitContainer(name: "ForkInTheRoad")
+  container.loadPersistentStores { description, error in
+    // Configure CloudKit sync
+    guard let description = description.cloudKitContainerOptions else { return }
+    description.databaseScope = .private
+  }
+  return container
+}()
+
+// 2. Optimistic updates
+func voteOnDecision(_ decision: Decision, rankings: [Restaurant]) async {
+  // Update local immediately
+  decision.myVote = Vote(rankings: rankings, submittedAt: Date())
+  saveContext()
+
+  // Send to server
+  do {
+    try await api.submitVote(decision.id, rankings)
+  } catch {
+    // Rollback on failure
+    decision.myVote = nil
+    saveContext()
+  }
+}
+```
+
+### 5. Caching Strategy
+
+**Web Layers** → **iOS Equivalents**:
+
+| Web Layer             | iOS Equivalent   | Use Case           |
+| --------------------- | ---------------- | ------------------ |
+| TanStack Query (5min) | NSCache          | In-memory objects  |
+| API Cache (30s-30d)   | URLCache         | HTTP responses     |
+| MongoDB               | Core Data        | Persistent storage |
+| Service Worker        | Background fetch | Offline content    |
+
+**iOS Implementation**:
+
+```swift
+// 1. Configure URLCache
+let cache = URLCache(
+  memoryCapacity: 50_000_000,   // 50 MB
+  diskCapacity: 200_000_000,    // 200 MB
+  diskPath: "url_cache"
+)
+URLCache.shared = cache
+
+// 2. Configure cache policy per request
+var request = URLRequest(url: url)
+request.cachePolicy = .returnCacheDataElseLoad
+
+// 3. NSCache for objects
+let restaurantCache = NSCache<NSString, Restaurant>()
+restaurantCache.countLimit = 100
+
+// 4. Core Data for persistence
+let fetchRequest: NSFetchRequest<RestaurantEntity> = RestaurantEntity.fetchRequest()
+let cachedRestaurants = try? context.fetch(fetchRequest)
+```
+
+### 6. Analytics Tracking
+
+**Web Pattern**: GA4 with privacy-preserving hashed IDs
+
+**iOS Pattern**: Firebase Analytics with same taxonomy
+
+```swift
+// 1. Hash user ID consistently
+func hashUserID(_ userId: String) -> String {
+  let data = Data(userId.utf8)
+  let hashed = SHA256.hash(data: data)
+  return hashed.compactMap { String(format: "%02x", $0) }.joined()
+}
+
+// 2. Track events with same names as web
+Analytics.logEvent("restaurant_search", parameters: [
+  "location": location,
+  "search_term": searchTerm,
+  "results_count": results.count,
+  "user_id": hashUserID(currentUserID)
+])
+
+// 3. Maintain event taxonomy across platforms
+// Use same event names and parameter keys
+```
+
+### 7. Error Tracking & Reporting
+
+**Web Pattern**: React Error Boundaries + Error grouping
+
+**iOS Pattern**: Crashlytics + Custom error handling
+
+```swift
+// 1. Custom error boundary equivalent
+class ErrorHandler {
+  static func handle(_ error: Error, context: [String: Any] = [:]) {
+    // Log to Crashlytics
+    Crashlytics.crashlytics().record(error: error)
+    Crashlytics.crashlytics().setCustomKeysAndValues(context)
+
+    // Group by error type (like web fingerprint)
+    let fingerprint = "\(type(of: error))-\(error.localizedDescription)"
+    Crashlytics.crashlytics().setCustomValue(fingerprint, forKey: "error_fingerprint")
+
+    // Show user-friendly error
+    showErrorAlert(error)
+  }
+}
+
+// 2. Breadcrumb trail
+class BreadcrumbTracker {
+  static var breadcrumbs: [(String, Date)] = []
+
+  static func leave(_ breadcrumb: String) {
+    breadcrumbs.append((breadcrumb, Date()))
+    if breadcrumbs.count > 10 { breadcrumbs.removeFirst() }
+
+    // Send to Crashlytics
+    Crashlytics.crashlytics().log("Breadcrumb: \(breadcrumb)")
+  }
+}
+```
+
+### 8. Performance Monitoring
+
+**Web Pattern**: Web Vitals tracking
+
+**iOS Pattern**: MetricKit + Firebase Performance
+
+```swift
+// 1. MetricKit for system metrics
+class MetricsManager: NSObject, MXMetricManagerSubscriber {
+  func didReceive(_ payloads: [MXMetricPayload]) {
+    for payload in payloads {
+      // App launch time
+      if let launchMetrics = payload.applicationLaunchMetrics {
+        logMetric("app_launch_time", launchMetrics.histogrammedTimeToFirstDraw)
+      }
+
+      // Hang metrics
+      if let hangMetrics = payload.applicationHangMetrics {
+        logMetric("app_hang_rate", hangMetrics.cumulativeHangTime)
+      }
+    }
+  }
+}
+
+// 2. Custom performance traces
+let trace = Performance.startTrace(name: "load_restaurants")
+await loadRestaurants()
+trace?.stop()
+```
+
+## 🔄 Cross-Platform Data Sync Strategy
+
+### Shared Backend Pattern
+
+**Keep Single Source of Truth**:
+
+```
+┌─────────────┐         ┌─────────────┐
+│   Web App   │────────▶│             │
+│   (React)   │         │   MongoDB   │
+└─────────────┘         │   Backend   │
+                        │             │
+┌─────────────┐         │             │
+│   iOS App   │────────▶│             │
+│   (Swift)   │         │             │
+└─────────────┘         └─────────────┘
+```
+
+**Benefits**:
+
+- Single REST/GraphQL API for both platforms
+- Consistent business logic
+- Easier to maintain
+- Real-time sync between web and iOS
+
+**Implementation Notes**:
+
+- Web: TanStack Query → REST API → MongoDB
+- iOS: Combine + URLSession → REST API → MongoDB
+- Consider CloudKit for iOS-specific features (if needed)
+- Use same webhook pattern for both platforms
 
 ## 📋 Current Implementation Status
 
