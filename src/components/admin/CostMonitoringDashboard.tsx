@@ -28,6 +28,7 @@ interface APICostMetrics {
   };
   twilio: {
     smsSent: number;
+    verifySent: number;
   };
   resend: {
     emailsSent: number;
@@ -113,6 +114,7 @@ export function CostMonitoringDashboard() {
             (v) => v > 0
           ) ||
           data.metrics.twilio.smsSent > 0 ||
+          data.metrics.twilio.verifySent > 0 ||
           data.metrics.resend.emailsSent > 0);
 
       setHasNoData(!hasData);
@@ -228,7 +230,7 @@ export function CostMonitoringDashboard() {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-2 space-y-6">
       {/* Header */}
       <div className="flex flex-col gap-4">
         <div className="flex justify-between items-start">
@@ -498,7 +500,11 @@ export function CostMonitoringDashboard() {
               <div className="text-2xl font-bold">
                 {formatCostKPI(metrics.estimatedCosts.byService.twilio)}
               </div>
-              <div className="text-sm mt-1">Twilio SMS</div>
+              <div className="text-sm mt-1">Twilio</div>
+              <div className="text-xs mt-1" style={{ opacity: 0.7 }}>
+                {metrics.twilio.smsSent} SMS + {metrics.twilio.verifySent}{' '}
+                Verify
+              </div>
             </div>
 
             <div
@@ -630,22 +636,35 @@ export function CostMonitoringDashboard() {
               </div>
             </div>
 
-            {/* Twilio SMS */}
+            {/* Twilio SMS & Verify */}
             <div>
               <h4 className="font-medium mb-3 flex items-center gap-2">
                 <span>📱</span>
-                <span>Twilio SMS</span>
+                <span>Twilio</span>
               </h4>
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span>Messages Sent</span>
+                  <span>SMS Messages</span>
                   <span className="font-medium">
                     {formatNumber(metrics.twilio.smsSent)}
                   </span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span>Cost per SMS</span>
-                  <span className="font-medium">$0.0079</span>
+                  <span className="font-medium">$0.0083</span>
+                </div>
+                <div
+                  className="flex justify-between text-sm font-semibold mt-3 pt-2"
+                  style={{ borderTop: '1px solid var(--bg-quaternary)' }}
+                >
+                  <span>Verify SMS</span>
+                  <span className="font-medium">
+                    {formatNumber(metrics.twilio.verifySent)}
+                  </span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span>Cost per Verify</span>
+                  <span className="font-medium">$0.05</span>
                 </div>
               </div>
             </div>

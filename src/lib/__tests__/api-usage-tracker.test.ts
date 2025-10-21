@@ -175,8 +175,8 @@ describe('api-usage-tracker', () => {
 
       const stats = await getAPIUsageStats(new Date(), new Date());
 
-      // Twilio: 100 * $0.0079 = $0.79
-      expect(stats.byType.twilio_sms_sent.cost).toBeCloseTo(0.79, 2);
+      // Twilio: 100 * $0.0083 = $0.83
+      expect(stats.byType.twilio_sms_sent.cost).toBeCloseTo(0.83, 2);
 
       // Resend: 50 * $0.001 = $0.05
       expect(stats.byType.resend_email_sent.cost).toBeCloseTo(0.05, 2);
@@ -474,8 +474,8 @@ describe('api-usage-tracker', () => {
         4
       );
 
-      // Twilio should use per-unit pricing
-      expect(stats.byType.twilio_sms_sent.cost).toBeCloseTo(0.079, 3);
+      // Twilio should use per-unit pricing (10 * $0.0083 = $0.083)
+      expect(stats.byType.twilio_sms_sent.cost).toBeCloseTo(0.083, 3);
     });
 
     it('should handle mixed cached and uncached calls', async () => {

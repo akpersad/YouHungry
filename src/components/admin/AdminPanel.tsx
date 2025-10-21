@@ -11,6 +11,7 @@ import { UsageAnalyticsDashboard } from './UsageAnalyticsDashboard';
 import { SystemSettingsDashboard } from './SystemSettingsDashboard';
 import { AdminAlertsDashboard } from './AdminAlertsDashboard';
 import { AdminErrorsDashboard } from './AdminErrorsDashboard';
+import { PushNotificationTestDashboard } from './PushNotificationTestDashboard';
 
 type AdminTab =
   | 'performance'
@@ -20,7 +21,8 @@ type AdminTab =
   | 'users'
   | 'database'
   | 'settings'
-  | 'alerts';
+  | 'alerts'
+  | 'push-test';
 
 const VALID_TABS: AdminTab[] = [
   'performance',
@@ -31,6 +33,7 @@ const VALID_TABS: AdminTab[] = [
   'database',
   'settings',
   'alerts',
+  'push-test',
 ];
 
 export function AdminPanel() {
@@ -85,6 +88,8 @@ export function AdminPanel() {
         return <SystemSettingsDashboard />;
       case 'alerts':
         return <AdminAlertsDashboard />;
+      case 'push-test':
+        return <PushNotificationTestDashboard />;
       default:
         return <PerformanceDashboard />;
     }

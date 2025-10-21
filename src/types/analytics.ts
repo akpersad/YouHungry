@@ -78,6 +78,14 @@ export interface NotificationEventParams {
   action?: 'clicked' | 'dismissed' | 'viewed';
   channel?: string;
   enabled?: string;
+  // Push notification tracking
+  success?: boolean;
+  recipient_count?: number;
+  error_message?: string;
+  total_recipients?: number;
+  sent_count?: number;
+  failed_count?: number;
+  success_rate?: number;
 }
 
 export interface UIEventParams {

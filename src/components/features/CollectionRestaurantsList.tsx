@@ -9,6 +9,7 @@ import { RestaurantManagementModal } from './RestaurantManagementModal';
 import { LazyMapView } from './LazyMapView';
 import { ViewToggle, ViewType } from '@/components/ui/ViewToggle';
 import { Button } from '@/components/ui/Button';
+import { DropdownMenu, DropdownMenuItem } from '@/components/ui/DropdownMenu';
 
 type SortOption = 'rating-desc' | 'name-asc' | 'name-desc';
 
@@ -329,13 +330,14 @@ export function CollectionRestaurantsList({
                     }
                     showAddButton={false}
                   />
-                  <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                  {/* Desktop: Show buttons on hover */}
+                  <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity hidden md:flex gap-1">
                     {onViewDetails && (
                       <Button
                         onClick={() => onViewDetails(restaurant)}
                         size="sm"
                         variant="outline"
-                        className="bg-white dark:bg-background shadow-sm"
+                        className="bg-white/90 dark:bg-secondary/90 backdrop-blur-sm shadow-sm border border-border/50"
                       >
                         View
                       </Button>
@@ -351,6 +353,49 @@ export function CollectionRestaurantsList({
                     >
                       Manage
                     </Button>
+                  </div>
+
+                  {/* Mobile: Show dropdown menu */}
+                  <div className="absolute top-2 right-2 flex md:hidden">
+                    <DropdownMenu
+                      trigger={
+                        <button
+                          className="p-2 bg-white/90 dark:bg-secondary/90 backdrop-blur-sm shadow-sm rounded-lg transition-colors border border-border/50"
+                          aria-label="Restaurant actions"
+                        >
+                          <svg
+                            className="w-4 h-4 text-primary"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
+                            />
+                          </svg>
+                        </button>
+                      }
+                      align="right"
+                    >
+                      {onViewDetails && (
+                        <DropdownMenuItem
+                          onClick={() => onViewDetails(restaurant)}
+                        >
+                          View Details
+                        </DropdownMenuItem>
+                      )}
+                      <DropdownMenuItem
+                        onClick={() =>
+                          onManageRestaurant?.(restaurant) ||
+                          handleManageRestaurant(restaurant)
+                        }
+                      >
+                        Manage Restaurant
+                      </DropdownMenuItem>
+                    </DropdownMenu>
                   </div>
                 </div>
               ))}

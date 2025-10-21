@@ -37,6 +37,7 @@ function CollectionList({
   const { user } = useUser();
   const router = useRouter();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [collectionToDelete, setCollectionToDelete] = useState<string | null>(
     null
@@ -171,7 +172,7 @@ function CollectionList({
           {collections.map((collection) => (
             <Card
               key={collection._id.toString()}
-              className="hover:shadow-medium transition-all duration-200 active:scale-98 touch-target"
+              className="hover:shadow-medium transition-all duration-200 active:scale-98 touch-target relative"
               onClick={() => {
                 if (onCollectionSelect) {
                   onCollectionSelect(collection);
@@ -180,8 +181,70 @@ function CollectionList({
                 }
               }}
             >
+              {/* Mobile: Menu button in top right */}
+              <div
+                className="absolute top-3 right-3 flex md:hidden z-20"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="relative">
+                  <button
+                    className="p-2 hover:bg-tertiary rounded-lg transition-colors bg-secondary/50 backdrop-blur-sm border border-border"
+                    aria-label="Collection actions"
+                    onClick={(e) => {
+                      console.log('Menu button clicked');
+                      e.stopPropagation();
+                      setOpenDropdownId(
+                        openDropdownId === collection._id.toString()
+                          ? null
+                          : collection._id.toString()
+                      );
+                    }}
+                  >
+                    <svg
+                      className="w-5 h-5 text-primary"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
+                      />
+                    </svg>
+                  </button>
+
+                  {/* Custom Dropdown */}
+                  {openDropdownId === collection._id.toString() && (
+                    <>
+                      {/* Backdrop */}
+                      <div
+                        className="fixed inset-0 z-40"
+                        onClick={() => setOpenDropdownId(null)}
+                      />
+
+                      {/* Dropdown Menu */}
+                      <div className="absolute top-full right-0 mt-2 z-50 bg-secondary border border-quaternary rounded-xl shadow-neumorphic-elevated py-1 min-w-48">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setOpenDropdownId(null);
+                            handleDeleteCollection(collection._id.toString());
+                          }}
+                          disabled={deleteCollectionMutation.isPending}
+                          className="w-full px-3 py-2 text-left text-sm flex items-center gap-2 hover:bg-tertiary transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-accent/30 disabled:opacity-50 disabled:cursor-not-allowed text-error hover:bg-error/10"
+                        >
+                          Delete Collection
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+
               <CardHeader className="pb-3">
-                <CardTitle className="text-lg text-primary truncate">
+                <CardTitle className="text-lg text-primary truncate pr-12 md:pr-0">
                   {collection.name}
                 </CardTitle>
                 {collection.description && (
@@ -210,8 +273,8 @@ function CollectionList({
                     <span>{collection.restaurantIds.length} restaurants</span>
                   </div>
 
-                  {/* Action buttons - Mobile optimized */}
-                  <div className="flex gap-2">
+                  {/* Desktop: Show buttons directly */}
+                  <div className="hidden md:flex gap-2">
                     <Button
                       size="sm"
                       variant="primary"
@@ -254,6 +317,25 @@ function CollectionList({
                           />
                         </svg>
                       )}
+                    </Button>
+                  </div>
+
+                  {/* Mobile: Full width View Collection button */}
+                  <div className="flex md:hidden">
+                    <Button
+                      size="sm"
+                      variant="primary"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (onCollectionSelect) {
+                          onCollectionSelect(collection);
+                        } else {
+                          router.push(`/collections/${collection._id}`);
+                        }
+                      }}
+                      className="w-full touch-target"
+                    >
+                      View Collection
                     </Button>
                   </div>
                 </div>

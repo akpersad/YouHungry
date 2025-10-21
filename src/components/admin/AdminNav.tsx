@@ -11,6 +11,7 @@ import {
   AlertTriangle,
   Activity,
   Bug,
+  Bell,
 } from 'lucide-react';
 
 interface AdminNavProps {
@@ -66,6 +67,12 @@ const adminNavItems = [
     title: 'Alerts',
     icon: AlertTriangle,
     description: 'System alerts and notifications',
+  },
+  {
+    id: 'push-test',
+    title: 'Push Test',
+    icon: Bell,
+    description: 'Test push notifications and device eligibility',
   },
 ];
 

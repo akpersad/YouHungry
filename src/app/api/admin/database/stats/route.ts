@@ -42,11 +42,10 @@ export async function GET() {
       'groups',
       'location_cache',
       'notifications',
-      'performance_metrics',
+      'performanceMetrics',
       'phone_verifications',
       'restaurants',
       'short_urls',
-      'user_interactions',
       'users',
     ];
     const collectionStats = await Promise.all(
