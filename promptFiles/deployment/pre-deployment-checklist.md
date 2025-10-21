@@ -164,6 +164,7 @@
 ### 3.1 MongoDB Atlas Setup
 
 - [ ] **Production database cluster**
+
   - [ ] Cluster created and running
   - [ ] Cluster tier appropriate for production (M10+ recommended)
   - [ ] Network access configured (0.0.0.0/0 or Vercel IPs)
@@ -171,6 +172,7 @@
   - [ ] Connection string tested
 
 - [ ] **Database collections verification**
+
   - [ ] Verify all required collections exist:
     - `users`
     - `restaurants`
@@ -197,12 +199,14 @@
 ### 4.1 Security Audit
 
 - [ ] **API security**
+
   - [ ] CORS settings configured (`next.config.ts`)
   - [ ] Rate limiting implemented on critical endpoints
   - [ ] Input validation on all API endpoints
   - [ ] Proper error handling (no sensitive info exposed)
 
 - [ ] **Authentication security**
+
   - [ ] Clerk configuration reviewed
   - [ ] Protected routes verified (`middleware.ts`)
   - [ ] Session management works correctly
@@ -217,6 +221,7 @@
 ### 4.2 Configuration Files
 
 - [ ] **Next.js configuration** (`next.config.ts`)
+
   - [ ] Production optimizations enabled
   - [ ] Image domains configured
   - [ ] Security headers set
@@ -258,18 +263,21 @@
 ### 5.3 Critical User Flows
 
 - [ ] **Authentication**
+
   - [ ] User can sign up
   - [ ] User can sign in
   - [ ] User can sign out
   - [ ] Protected routes redirect properly
 
 - [ ] **Collections**
+
   - [ ] Create personal collection
   - [ ] Add restaurant to collection
   - [ ] Make decision (random selection)
   - [ ] View decision history
 
 - [ ] **Social Features**
+
   - [ ] Add friend
   - [ ] Create group
   - [ ] Create group collection
@@ -306,6 +314,7 @@
 ### 6.1 Update Documentation
 
 - [ ] **README.md**
+
   - [ ] Add deployment instructions
   - [ ] Update environment variable documentation
   - [ ] Add troubleshooting section
@@ -331,6 +340,7 @@
 ### 7.1 Vercel Project Setup
 
 - [ ] **Create Vercel project**
+
   - [ ] Link GitHub repository
   - [ ] Configure build settings
     - Build Command: `npm run build`
@@ -358,12 +368,14 @@
 ### 8.1 Code Review Checklist
 
 - [ ] **Security review**
+
   - [ ] No hardcoded secrets
   - [ ] Proper input validation
   - [ ] Secure API endpoints
   - [ ] Proper error handling
 
 - [ ] **Performance review**
+
   - [ ] Optimized database queries
   - [ ] Efficient API calls
   - [ ] Proper caching strategies
@@ -501,6 +513,165 @@ After deployment, you should see:
 
 ---
 
-**Estimated Total Time**: 8-12 hours for complete pre-deployment preparation
+## 🔍 **PHASE 9: SEO & Marketing Preparation** (Estimated: 30 min)
 
-**Your app is 90% ready!** Focus on environment variable setup, database configuration, and admin panel security before deploying.
+### 9.1 SEO Verification
+
+- [ ] **Sitemap validation**
+
+  - [ ] Sitemap generates at build time (`/sitemap.xml`)
+  - [ ] All public pages included
+  - [ ] Proper priority and change frequency set
+
+- [ ] **Schema.org structured data**
+
+  - [ ] Organization schema present on homepage
+  - [ ] WebApplication schema with features list
+  - [ ] FAQ schema for GEO (AI search)
+  - [ ] Validate at [Rich Results Test](https://search.google.com/test/rich-results)
+
+- [ ] **Meta tags verification**
+
+  - [ ] Every page has unique title and description
+  - [ ] Open Graph tags for social sharing
+  - [ ] Twitter Card tags configured
+  - [ ] Canonical URLs set correctly
+
+- [ ] **Robots.txt configuration**
+  - [ ] Allows search engine crawling
+  - [ ] Blocks admin/test routes
+  - [ ] Sitemap location specified
+  - [ ] AI bot permissions configured (GPTBot, Claude-Web, PerplexityBot)
+
+### 9.2 Social Media Optimization
+
+- [ ] **Open Graph images**
+
+  - [ ] OG image exists (1200x630px recommended)
+  - [ ] Image accessible via CDN
+  - [ ] Preview looks good in [Facebook Debugger](https://developers.facebook.com/tools/debug/)
+
+- [ ] **Social preview testing**
+  - [ ] Facebook preview works
+  - [ ] Twitter card displays correctly
+  - [ ] LinkedIn preview looks good
+
+### 9.3 Post-Deployment SEO Tasks
+
+**After deployment**:
+
+- [ ] Submit sitemap to Google Search Console
+- [ ] Verify indexing in Search Console
+- [ ] Request indexing for key pages
+- [ ] Monitor search performance
+
+---
+
+## 📊 **PHASE 10: Monitoring & Alerting Setup** (Estimated: 1 hour)
+
+### 10.1 Vercel Usage Monitoring
+
+- [ ] **Environment variables for alerts**
+
+  ```bash
+  SLACK_WEBHOOK_URL=https://hooks.slack.com/...  # Optional
+  ALERT_EMAIL=your-email@example.com             # Optional
+  ```
+
+- [ ] **Vercel monitoring configuration**
+  - [ ] Cron job configured in `vercel.json` (already set: daily at midnight UTC)
+  - [ ] Alert thresholds reviewed (70% warning, 90% critical)
+  - [ ] Monitoring dashboard accessible at `/admin` (Cost Monitoring tab)
+
+### 10.2 Alert Thresholds
+
+**Default Settings**:
+
+- Bandwidth: Warning at 70%, Critical at 90%
+- Function Execution: Warning at 70%, Critical at 90%
+- Request Volume: Monitor requests/hour trends
+
+**Alert Channels**:
+
+- Email (if configured)
+- Slack (if webhook configured)
+- In-app admin notifications
+
+### 10.3 Performance Monitoring
+
+- [ ] **Enable Vercel Analytics**
+  - Automatically enabled on Vercel
+  - View in Vercel Dashboard → Analytics tab
+- [ ] **Enable Vercel Speed Insights**
+
+  - Automatically enabled on Vercel
+  - View in Vercel Dashboard → Speed Insights tab
+
+- [ ] **Google Analytics 4**
+  ```bash
+  NEXT_PUBLIC_GA_MEASUREMENT_ID=G-XXXXXXXXXX
+  ```
+  - [ ] Create GA4 property
+  - [ ] Configure data retention (recommend: 14 months)
+  - [ ] Set up custom conversions
+
+### 10.4 Error Monitoring
+
+- [ ] **Review error tracking system**
+  - [ ] Error boundaries in place
+  - [ ] Error logs stored in MongoDB
+  - [ ] Admin dashboard accessible
+  - [ ] Critical errors trigger alerts (if configured)
+
+### 10.5 Cost Monitoring
+
+- [ ] **API cost tracking**
+
+  - [ ] Cost monitoring dashboard works (`/admin` → Cost Monitoring)
+  - [ ] Google API usage tracked in `api_usage` collection
+  - [ ] Cache hit rate monitoring active
+  - [ ] Monthly cost projections reviewed
+
+- [ ] **Set cost budgets**
+  - [ ] Google Places API: Target <$30/month
+  - [ ] Vercel: Free tier limits monitored
+  - [ ] Twilio: SMS credit alerts configured
+  - [ ] Database: Atlas free tier monitored
+
+### 10.6 Production Environment Setup
+
+- [ ] **Environment-specific configuration**
+
+  ```bash
+  NODE_ENV=production
+  NEXT_PUBLIC_APP_URL=https://www.forkintheroad.app
+  ```
+
+- [ ] **Production optimization**
+  - [ ] Performance monitoring disabled in prod (already configured)
+  - [ ] Server monitoring: 5-minute intervals (already configured)
+  - [ ] Development vs production intervals verified
+
+---
+
+## ✅ **PRE-DEPLOYMENT SIGN-OFF**
+
+**Before deploying to Vercel, confirm:**
+
+- [ ] ✅ All Phase 1-10 items completed
+- [ ] ✅ All tests passing (unit + E2E)
+- [ ] ✅ Production build successful
+- [ ] ✅ Bundle optimized (<500KB JavaScript)
+- [ ] ✅ All pre-deployment env vars ready
+- [ ] ✅ Database configured and tested
+- [ ] ✅ Security audit passed
+- [ ] ✅ Documentation updated
+- [ ] ✅ SEO optimization complete
+- [ ] ✅ Monitoring and alerting configured
+- [ ] ✅ No blocking issues remain
+
+---
+
+**Estimated Total Time**: 10-14 hours for complete pre-deployment preparation
+
+**Your app is 90% ready!** Focus on environment variable setup, database configuration, admin panel security, and monitoring before deploying.
