@@ -37,18 +37,21 @@ These technologies will be implemented when they solve specific problems in each
 ### Stories:
 
 1. **Project Setup & Configuration**
+
    - Set up Next.js 15 with TypeScript
    - Configure Tailwind CSS with custom design system
    - Set up ESLint, Prettier, and development tools
    - Configure environment variables and secrets management
 
 2. **Database & Data Layer**
+
    - Set up MongoDB Atlas cluster
    - Design and implement database schema
    - Create data models and validation schemas
    - Set up database connection and utilities
 
 3. **Authentication System**
+
    - Integrate Clerk for user authentication
    - Implement registration and login flows
    - Set up user profile management
@@ -56,6 +59,7 @@ These technologies will be implemented when they solve specific problems in each
    - **Unit test authentication components (SignInButton, SignOutButton, UserProfile)**
 
 4. **Basic UI Framework**
+
    - Create reusable component library
    - Implement responsive layout system
    - Set up navigation and routing
@@ -75,6 +79,7 @@ These technologies will be implemented when they solve specific problems in each
 ### Stories:
 
 1. **Collection CRUD Operations**
+
    - Create personal collections with custom naming
    - View and manage existing collections
    - Edit collection names and metadata
@@ -82,6 +87,7 @@ These technologies will be implemented when they solve specific problems in each
    - **Unit test collection CRUD operations and API endpoints**
 
 2. **Restaurant Search & Discovery**
+
    - Integrate Google Places API for restaurant search
    - Implement location-based restaurant discovery
    - Add restaurant details and metadata storage
@@ -94,6 +100,7 @@ These technologies will be implemented when they solve specific problems in each
    - **Implement GraphQL resolvers for restaurant search with filters**
 
 3. **Enhanced Form Management**
+
    - Implement simplified form state management using useState
    - Create reliable form validation with clear error messages
    - Update CreateCollectionForm and RestaurantSearchForm with simplified approach
@@ -101,6 +108,7 @@ These technologies will be implemented when they solve specific problems in each
    - Remove complex Zod dependencies for better maintainability
 
 4. **Restaurant Management**
+
    - Add restaurants to collections
    - Manage restaurant custom fields (Price Range, Time to Pick Up)
    - Remove restaurants from collections
@@ -110,6 +118,7 @@ These technologies will be implemented when they solve specific problems in each
    - **Collection Decision Making** - Random selection from collection restaurants
 
 5. **Personal Decision Making**
+
    - Implement random selection algorithm with weighted system
    - Add 30-day rolling weight system ensuring variety while allowing favorites
    - Create decision history tracking with database storage
@@ -133,12 +142,14 @@ These technologies will be implemented when they solve specific problems in each
 ### Stories:
 
 1. **Friend Management**
+
    - Add friends by email/username search
    - Send and accept friend requests
    - Manage friend list and relationships
    - Remove friends and handle edge cases
 
 2. **Group Creation & Management**
+
    - Create groups with custom names and descriptions
    - **Searchable, paginated friend list for group invitations**
    - **Friend-based invitation system with user info and "invite to group" button**
@@ -182,6 +193,7 @@ These technologies will be implemented when they solve specific problems in each
 - Handle touch-friendly interactions for mobile
 
 2. **Random Selection for Groups**
+
    - Extend random selection to group collections
    - Implement group-specific weighting
    - Create group decision UI components
@@ -234,12 +246,14 @@ These technologies will be implemented when they solve specific problems in each
 - Optimize animations for performance
 
 2. **PWA Implementation**
+
    - Set up service workers for offline functionality
    - Implement app manifest and install prompts
    - Create offline data caching strategy
    - Enable background sync capabilities
 
 3. **Performance Optimization**
+
    - Implement `aggressive` caching strategies
    - Optimize bundle size and loading times
    - Add performance monitoring
@@ -264,6 +278,7 @@ These technologies will be implemented when they solve specific problems in each
 ### Stories:
 
 1. **Admin Panel Foundation**
+
    - Create comprehensive admin panel at `/admin` with tabbed interface
    - Implement AdminGate component with user ID allowlist for security
    - Add tabs for Analytics, Cost Monitoring, Users, Database, Settings
@@ -284,6 +299,7 @@ These technologies will be implemented when they solve specific problems in each
 _These stories should be worked on together as they share common data patterns, API endpoints, and UI components_
 
 3. **User Management Dashboard**
+
    - Display user statistics and activity metrics
    - Show user registration trends and engagement data
    - Implement user search and filtering capabilities
@@ -292,6 +308,7 @@ _These stories should be worked on together as they share common data patterns, 
    - **Unit test user management components and data tables**
 
 4. **Database Management Dashboard**
+
    - Show database connection status and performance metrics
    - Display collection and restaurant data statistics
    - Add database query performance monitoring
@@ -311,6 +328,7 @@ _These stories should be worked on together as they share common data patterns, 
 _These stories should be worked on together as they share configuration patterns, alert systems, and monitoring infrastructure_
 
 5. **System Settings Dashboard**
+
    - Configure rate limiting settigstngs and thresholds
    - Manage API key configurations and restrictions
    - Set up alert thresholds for costs and performance
@@ -397,6 +415,7 @@ Epic 6 Work Group B has been **100% completed**, implementing comprehensive syst
 - **Unit test custom authentication pages and components**
 
 2. **SMS Integration & Admin Alerts**
+
    - Integrate Twilio for SMS notifications
    - Create SMS opt-in/opt-out system
    - Implement group-specific notification preferences
@@ -425,6 +444,7 @@ Epic 6 Work Group B has been **100% completed**, implementing comprehensive syst
 - Handle notification queuing and dismissal
 
 4. **Push Notifications (PWA)**
+
    - Implement push notification manager with permission handling
    - Create push notification subscription system
    - Add push notification preferences and opt-in/opt-out
@@ -439,6 +459,7 @@ Epic 6 Work Group B has been **100% completed**, implementing comprehensive syst
    - **Unit test push notification manager and subscription flows**
 
 5. **Email Notifications**
+
    - Set up email notification system
    - Create email templates for different events
    - Implement email preferences and unsubscribing
@@ -464,12 +485,14 @@ Epic 6 Work Group B has been **100% completed**, implementing comprehensive syst
 ### Stories:
 
 1. **Decision History**
+
    - Create comprehensive decision tracking
    - Implement history viewing and filtering
    - Add manual decision entry capability
    - Create history search and analytics
 
 2. **Weighting System**
+
    - Implement 30-day rolling weight algorithm
    - Create weight adjustment and reset logic
    - Add weight visualization and debugging
@@ -492,6 +515,7 @@ Epic 6 Work Group B has been **100% completed**, implementing comprehensive syst
 ### Stories:
 
 1. **UI/UX Polish**
+
    - Refine animations and transitions
    - Improve accessibility compliance
    - Optimize color contrast and readability
@@ -512,6 +536,7 @@ Epic 6 Work Group B has been **100% completed**, implementing comprehensive syst
 - Add user-friendly error messages and recovery options
 
 3. **Advanced Testing & Quality Assurance**
+
    - Implement integration testing (full user workflows)
    - Add E2E testing for critical user journeys
    - Create accessibility testing suite
@@ -559,6 +584,7 @@ Epic 6 Work Group B has been **100% completed**, implementing comprehensive syst
 - Create performance comparison report with objective metrics
 
 2. **SEO & Marketing**
+
    - Optimize for search engines
    - Create landing page and marketing content
    - Implement analytics and tracking
@@ -570,25 +596,273 @@ Epic 6 Work Group B has been **100% completed**, implementing comprehensive syst
    - Implement feature flags for gradual rollout
    - Prepare for user onboarding and support
 
-## 📋 Epic 11: Future Enhancements
+## 📋 Epic 11: iOS App Preparation (Web App Prerequisites)
 
-**Goal**: Plan and prepare for future features and iOS app
+**Goal**: Prepare web app for iOS integration - enable cross-platform authentication and API compatibility
+
+**⚠️ CRITICAL**: This epic MUST be completed BEFORE starting iOS app development!
+
+**Total Estimated Time**: 14-21 hours
 
 ### Stories:
 
-1. **iOS App Preparation**
-   - Document architecture for iOS conversion
-   - Create component mapping and conversion plan
-   - Identify platform-specific considerations
-   - Plan state management migration strategy
+### 🔄 Parallel Work Group: All Stories Can Be Done in Parallel
 
-2. **Advanced Features**
+_All stories in this epic can be worked on simultaneously as they are independent tasks preparing different aspects of the system for iOS integration._
+
+**Story 1: Add Sign in with Apple to Web App** ⏱️ 2-4 hours
+
+**Why**: iOS app requires Sign in with Apple (App Store guideline 4.8). For cross-platform consistency, web app should offer it too. Users who sign in with Apple on iOS can then sign in on web.
+
+**Tasks**:
+
+- [ ] Configure Clerk OAuth for Apple
+
+  - Add Apple as OAuth provider in Clerk Dashboard
+  - Configure redirect URLs
+  - Test Apple OAuth flow
+
+- [ ] Add "Sign in with Apple" button to sign-in page
+
+  - Add button to `/sign-in` page
+  - Style to match design system
+  - Position alongside other social login options
+
+- [ ] Add "Sign in with Apple" button to sign-up page
+
+  - Add button to `/sign-up` page
+  - Match sign-in page styling
+  - Ensure consistent user experience
+
+- [ ] Test cross-platform account linking
+  - Sign in with Apple on iOS → use same email on web
+  - Sign in with Apple on web → use same email on iOS
+  - Verify account created in Clerk with Apple connection
+  - Test existing user linking
+
+**Deliverables**:
+
+- ✅ Sign in with Apple button present on web
+- ✅ Web and iOS users can share accounts via Apple ID
+- ✅ Clerk handles Apple OAuth properly
+- ✅ Cross-platform authentication working
+
+**Files to Modify**:
+
+- `src/app/sign-in/[[...sign-in]]/page.tsx`
+- `src/app/sign-up/[[...sign-up]]/page.tsx`
+- Clerk Dashboard configuration (external)
+
+---
+
+**Story 2: API Documentation for iOS Team** ⏱️ 4-6 hours
+
+**Why**: iOS team (AI) needs clear documentation of all API endpoints to implement mobile API and ensure compatibility.
+
+**Tasks**:
+
+- [ ] Document all REST API endpoints
+
+  - List all routes in `/api/*`
+  - Document request/response formats
+  - Include authentication requirements
+  - Note rate limits and caching
+
+- [ ] Create API endpoint reference document
+
+  - Create `/docs/api-reference.md`
+  - Document each endpoint with examples
+  - Include error codes and responses
+
+- [ ] Add API versioning (if not present)
+
+  - Implement `/api/v1/*` versioning
+  - Or add version header (`X-API-Version: 1.0`)
+  - Ensures mobile API can match web API version
+
+- [ ] Create Postman/Insomnia collection
+
+  - Export API collection for testing
+  - Include sample requests
+  - Add authentication examples
+  - Save to `/docs/api-collection.json`
+
+- [ ] Document authentication flow
+  - Clerk JWT token structure
+  - Token expiration and refresh
+  - Authorization header format
+
+**Deliverables**:
+
+- ✅ All API endpoints documented
+- ✅ Request/response formats clear
+- ✅ Postman collection for testing
+- ✅ Authentication flow documented
+- ✅ iOS team can replicate API in mobile backend
+
+**Files to Create**:
+
+- `docs/api-reference.md`
+- `docs/api-collection.json` (Postman export)
+- `docs/authentication-flow.md`
+
+---
+
+**Story 3: Privacy Policy Updates for iOS** ⏱️ 2-3 hours
+
+**Why**: iOS app requires updated Privacy Policy covering iOS-specific data collection (device ID, push tokens, Face ID usage).
+
+**Tasks**:
+
+- [ ] Add iOS-specific data collection
+
+  - Device information (for push notifications)
+  - Biometric data usage (Face ID/Touch ID)
+  - App usage patterns (Firebase Analytics)
+
+- [ ] Add Sign in with Apple privacy information
+
+  - How Apple ID data is used
+  - Email and name handling
+  - Account linking process
+
+- [ ] Ensure Privacy Policy accessible
+
+  - Link in app footer (already present?)
+  - Link in user settings
+  - Link in sign-up flow
+  - Accessible without login
+
+- [ ] Review for Apple App Store compliance
+  - Covers all data types in App Privacy questionnaire
+  - Mentions all third-party services
+  - Contact information present
+  - GDPR/CCPA compliant
+
+**Deliverables**:
+
+- ✅ Privacy Policy updated with iOS sections
+- ✅ Accessible from multiple places in app
+- ✅ Compliant with App Store requirements
+- ✅ Matches App Privacy questionnaire answers
+
+**Files to Modify**:
+
+- Web app Privacy Policy page
+- `src/app/privacy/page.tsx` (or wherever Privacy Policy lives)
+- Add links in footer and settings if not present
+
+---
+
+**Story 4: Backend Prep for Mobile API** ⏱️ 6-8 hours
+
+**Why**: Mobile API (Node.js/Express on Render) needs to reuse business logic from Next.js. Extract and prepare for reuse.
+
+**Tasks**:
+
+- [ ] Extract business logic into shared modules
+
+  - Decision algorithm (30-day weighting)
+  - Collection management logic
+  - Group permissions logic
+  - Vote calculation (tiered voting)
+  - Create `/lib/shared/` directory for reusable logic
+
+- [ ] Document database queries
+
+  - MongoDB queries used in each API route
+  - Indexes required for performance
+  - Query optimization notes
+
+- [ ] Prepare environment variables
+
+  - List all env vars needed (MongoDB, Google Places, Clerk, Twilio, etc.)
+  - Document what each is used for
+  - Create `.env.mobile-api.example` file
+
+- [ ] Document external API integrations
+
+  - Google Places API usage and caching
+  - Twilio SMS sending
+  - Resend email sending
+  - Clerk authentication verification
+
+- [ ] Test API endpoints thoroughly
+  - Ensure all endpoints work
+  - Document any edge cases
+  - Note rate limits and quotas
+
+**Deliverables**:
+
+- ✅ Business logic extracted and documented
+- ✅ Database queries documented
+- ✅ Environment variables listed
+- ✅ External API integrations documented
+- ✅ Mobile API team can replicate web API behavior
+
+**Files to Create/Modify**:
+
+- `lib/shared/decision-algorithm.ts` (extracted logic)
+- `lib/shared/vote-calculator.ts` (extracted logic)
+- `docs/database-queries.md`
+- `docs/external-apis.md`
+- `.env.mobile-api.example`
+
+---
+
+## ✅ Epic 11 Completion Checklist
+
+Before starting iOS development:
+
+**Web App Updates**:
+
+- [ ] Sign in with Apple added and tested
+- [ ] Clerk configured for Apple OAuth
+- [ ] Cross-platform auth verified
+
+**Documentation**:
+
+- [ ] API endpoints documented
+- [ ] Postman collection created
+- [ ] Authentication flow documented
+- [ ] Privacy Policy updated
+
+**Backend Preparation**:
+
+- [ ] Business logic extracted
+- [ ] Database queries documented
+- [ ] External APIs documented
+- [ ] Environment variables documented
+
+**Verification**:
+
+- [ ] All links work
+- [ ] Privacy Policy accessible
+- [ ] Sign in with Apple works on web
+- [ ] API documentation accurate
+
+---
+
+## 🚀 Epic 11 Ready?
+
+**When all checkboxes above are complete**, you're ready to start iOS development!
+
+**Next Step**: Begin [iOS Epic 1: Foundation](../../iosConversion/epic-breakdown/epic-01-foundation.md)
+
+---
+
+## 📋 Epic 11 Future Enhancements (Deferred)
+
+_These were originally in Epic 11 but are deferred to post-iOS launch:_
+
+2. **Advanced Features** (Post-iOS)
+
    - Plan advanced search and filtering
    - Design recommendation system
    - Plan social features and sharing
    - Design integration with food delivery services
 
-3. **Scalability & Growth**
+3. **Scalability & Growth** (Post-iOS)
    - Plan for increased user base
    - Design multi-tenant architecture
    - Plan for international expansion

@@ -329,12 +329,14 @@ npm run test:performance
 **Components**:
 
 1. **Metrics Collection** (`performance-metrics/collect-metrics.js`)
+
    - Real Web Vitals from Lighthouse (FCP, LCP, FID, CLS, TTFB)
    - API performance from cost monitoring endpoint
    - Bundle size and build time from actual builds
    - System metrics from Node.js runtime
 
 2. **Synthetic Monitoring** (`e2e/performance/synthetic-monitoring.spec.ts`)
+
    - API response time validation for all endpoints
    - Health checks and uptime monitoring
    - Rate limiting verification
@@ -694,6 +696,243 @@ npm run test:coverage
 
 ---
 
+## ⚠️ Critical Testing Patterns (Learned from Production)
+
+### 1. Avoid Module-Level Side Effects
+
+**Problem**: Tests hang indefinitely when modules start background tasks on import
+
+**Root Cause**: Files with top-level `setInterval()` or `setTimeout()` calls
+
+**Bad Pattern**:
+
+```typescript
+// ❌ BAD: api-cache.ts
+const cache = new Map();
+
+// This runs immediately when file is imported
+setInterval(() => {
+  cleanupExpiredEntries(cache);
+}, 60000);
+```
+
+**Good Pattern**:
+
+```typescript
+// ✅ GOOD: Guard with environment check
+const cache = new Map();
+
+if (process.env.NODE_ENV !== 'test') {
+  setInterval(() => {
+    cleanupExpiredEntries(cache);
+  }, 60000);
+}
+```
+
+**Files Already Fixed**:
+
+- `src/lib/api-cache.ts`
+- `src/lib/request-deduplication.ts`
+
+**Why This Matters**:
+
+- Tests import these modules (directly or transitively)
+- Background intervals prevent test process from exiting
+- Tests appear to "hang" or run forever
+- No timeout errors, just infinite execution
+
+**Jest Configuration** (already in `jest.setup.js`):
+
+```javascript
+// Global test timeout to catch hanging tests
+jest.setTimeout(10000); // 10 seconds
+
+// Clean up timers between tests
+beforeEach(() => {
+  jest.clearAllTimers();
+});
+```
+
+**iOS Testing Equivalent**:
+
+```swift
+// Use #if DEBUG to prevent background tasks in tests
+class CacheManager {
+  init() {
+    #if !DEBUG
+    setupCleanupTimer()
+    #endif
+  }
+
+  private func setupCleanupTimer() {
+    Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { _ in
+      self.cleanupCache()
+    }
+  }
+}
+
+// In tests
+override func tearDown() {
+  // Cancel any running operations
+  operationQueue.cancelAllOperations()
+
+  // Invalidate timers
+  cleanupTimer?.invalidate()
+
+  super.tearDown()
+}
+```
+
+### 2. Mock Global Fetch for API Tests
+
+**Pattern**: Prevent actual API calls during tests
+
+```javascript
+// jest.setup.js
+global.fetch = jest.fn(() =>
+  Promise.resolve({
+    ok: true,
+    status: 200,
+    json: async () => ({ success: true, data: [] }),
+  })
+);
+```
+
+**Per-Test Override**:
+
+```typescript
+it('handles API error', async () => {
+  global.fetch = jest.fn(() => Promise.reject(new Error('Network error')));
+
+  // Test error handling
+  await expect(fetchData()).rejects.toThrow('Network error');
+});
+```
+
+### 3. Clean Up Async Operations
+
+**Pattern**: Always wait for async operations to complete
+
+```typescript
+// ❌ BAD
+it('updates data', () => {
+  fetchData(); // Fires and forgets
+  expect(data).toBeUpdated(); // Race condition!
+});
+
+// ✅ GOOD
+it('updates data', async () => {
+  await fetchData();
+  expect(data).toBeUpdated();
+});
+
+// ✅ BETTER (with act wrapper for React)
+it('updates component', async () => {
+  await act(async () => {
+    render(<Component />);
+  });
+
+  expect(screen.getByText('Updated')).toBeInTheDocument();
+});
+```
+
+### 4. Test Timeout Management
+
+**Pattern**: Set appropriate timeouts for slow operations
+
+```typescript
+// Default timeout (jest.setup.js)
+jest.setTimeout(10000); // 10 seconds
+
+// Override for slow test
+it('performs slow operation', async () => {
+  // Test code
+}, 30000); // 30 seconds for this specific test
+```
+
+**When to Increase Timeout**:
+
+- External API calls (even mocked, if complex)
+- Database operations with large datasets
+- Complex rendering with many components
+- E2E tests with network delays
+
+**When NOT to Increase**:
+
+- If test consistently times out, fix the test (don't just increase timeout)
+- Tests should complete quickly (<5s for unit, <30s for integration)
+
+### 5. Mock Logger to Reduce Noise
+
+**Pattern**: Suppress console output during tests
+
+```javascript
+// jest.setup.js
+global.console = {
+  ...console,
+  log: jest.fn(),
+  debug: jest.fn(),
+  info: jest.fn(),
+  warn: jest.fn(),
+  error: jest.fn(),
+};
+```
+
+**When to See Logs**:
+
+```typescript
+// In specific test
+it('logs error correctly', () => {
+  const consoleSpy = jest.spyOn(console, 'error');
+
+  performAction();
+
+  expect(consoleSpy).toHaveBeenCalledWith('Expected error message');
+});
+```
+
+## 📊 Test Results Tracking
+
+### Success Metrics (Current)
+
+**Unit Tests**:
+
+- Test Suites: 99 passed / 99 total (100%)
+- Tests: 1,220 passed / 1,234 total (98.9%)
+- Execution Time: ~11 seconds
+- Zero timeout errors ✅
+- Zero hanging tests ✅
+
+**E2E Tests**:
+
+- Critical paths: 100% passing
+- Cross-browser: Chrome, Firefox, Safari tested
+- Mobile devices: iOS, Android tested
+
+### Performance Baselines
+
+**Test Execution Times**:
+
+- Unit tests: 10-15 seconds (target: <20s)
+- Integration tests: 30-60 seconds (target: <90s)
+- E2E tests (full suite): 15-25 minutes (target: <30m)
+- E2E tests (smoke): 3-5 minutes (target: <10m)
+
+**iOS Testing Equivalent**:
+
+```swift
+// XCTest performance metrics
+func testPerformanceExample() {
+  measure {
+    // Code to measure
+    loadRestaurants()
+  }
+}
+
+// Results stored in .xcresult bundle
+// Compare against baseline in CI/CD
+```
+
 ## Summary
 
 This testing strategy ensures:
@@ -706,5 +945,7 @@ This testing strategy ensures:
 - ✅ **Mobile optimization** across devices
 - ✅ **Cost-effective** test execution
 - ✅ **Maintainable** test suite
+- ✅ **No hanging tests** (learned from production incidents)
+- ✅ **Proper async handling** (prevents race conditions)
 
 **Questions?** Refer to this document or reach out to the team.
