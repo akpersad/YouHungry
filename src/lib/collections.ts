@@ -1,6 +1,6 @@
 import { logger } from '@/lib/logger';
 import { connectToDatabase } from './db';
-import { Collection, Restaurant } from '@/types/database';
+import { Collection, Restaurant, User } from '@/types/database';
 import { ObjectId } from 'mongodb';
 import { getUserByClerkId } from './users';
 
@@ -297,6 +297,68 @@ export async function canUserModifyCollection(
   }
 
   return false;
+}
+
+/**
+ * Verify a user's access to a collection and return it when access is granted.
+ *
+ * - Personal collections: the user must be the owner. Legacy data stores
+ *   ownerId either as the user's Mongo ObjectId or their Clerk ID string,
+ *   so both formats are matched.
+ * - Group collections: ownerId is the owning group's id. The user must be a
+ *   member (requiredLevel 'member') or an admin (requiredLevel 'admin') of
+ *   that group. Restaurant/content changes use 'member'; renaming or deleting
+ *   the collection itself requires 'admin'.
+ *
+ * Returns the collection when access is granted, otherwise null (including
+ * when the collection does not exist, so callers can respond 404 without
+ * leaking which collections exist).
+ */
+export async function verifyCollectionAccess(
+  collectionId: string,
+  user: Pick<User, '_id' | 'clerkId'>,
+  requiredLevel: 'member' | 'admin' = 'member'
+): Promise<Collection | null> {
+  const db = await connectToDatabase();
+
+  let collectionObjectId: ObjectId;
+  try {
+    collectionObjectId = new ObjectId(collectionId);
+  } catch {
+    return null;
+  }
+
+  const collection = await db
+    .collection('collections')
+    .findOne({ _id: collectionObjectId });
+
+  if (!collection) {
+    return null;
+  }
+
+  if (collection.type === 'personal') {
+    const ownerId = collection.ownerId?.toString();
+    if (ownerId === user._id.toString() || ownerId === user.clerkId) {
+      return collection as Collection;
+    }
+    return null;
+  }
+
+  if (collection.type === 'group') {
+    const userObjectId = new ObjectId(user._id.toString());
+    const membershipQuery =
+      requiredLevel === 'admin'
+        ? { _id: collection.ownerId, adminIds: userObjectId }
+        : {
+            _id: collection.ownerId,
+            $or: [{ adminIds: userObjectId }, { memberIds: userObjectId }],
+          };
+
+    const group = await db.collection('groups').findOne(membershipQuery);
+    return group ? (collection as Collection) : null;
+  }
+
+  return null;
 }
 
 export async function updateCollection(

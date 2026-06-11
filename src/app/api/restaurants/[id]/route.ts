@@ -1,5 +1,6 @@
 import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
+import { getCurrentUser, requireAdminAuth } from '@/lib/auth';
 import {
   getRestaurantDetails,
   updateRestaurant,
@@ -50,6 +51,16 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Restaurants are shared documents sourced from Google Places; updating
+    // the custom fields (priceRange/timeToPickUp) requires authentication.
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
     const { id } = await params;
     const body = await request.json();
 
@@ -119,6 +130,19 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Restaurants are shared documents referenced by many collections and no
+    // client-side flow deletes them; restrict deletion to admins.
+    try {
+      await requireAdminAuth();
+    } catch (authError) {
+      const message =
+        authError instanceof Error ? authError.message : 'Unauthorized';
+      return NextResponse.json(
+        { success: false, error: message },
+        { status: message === 'Admin access required' ? 403 : 401 }
+      );
+    }
+
     const { id } = await params;
 
     if (!id) {

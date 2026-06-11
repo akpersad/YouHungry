@@ -1,12 +1,24 @@
 import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
+import { getCurrentUser } from '@/lib/auth';
 import { createRestaurant, getRestaurantDetails } from '@/lib/restaurants';
-import { addRestaurantToCollection } from '@/lib/collections';
+import {
+  addRestaurantToCollection,
+  verifyCollectionAccess,
+} from '@/lib/collections';
 import { connectToDatabase } from '@/lib/db';
 import { ObjectId } from 'mongodb';
 
 export async function GET(request: NextRequest) {
   try {
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const restaurantIds = searchParams.get('restaurantIds');
 
@@ -40,6 +52,14 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
     const { restaurantData, collectionId } = body;
 
@@ -55,6 +75,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { success: false, error: 'Collection ID is required' },
         { status: 400 }
+      );
+    }
+
+    // Caller must own the collection (personal) or be a group member (group)
+    const accessibleCollection = await verifyCollectionAccess(
+      collectionId,
+      user,
+      'member'
+    );
+    if (!accessibleCollection) {
+      return NextResponse.json(
+        { success: false, error: 'Collection not found' },
+        { status: 404 }
       );
     }
 

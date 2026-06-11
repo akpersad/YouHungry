@@ -5,9 +5,14 @@ import {
   GET as randomSelectGET,
 } from '../decisions/random-select/route';
 
-// Mock Clerk auth
-jest.mock('@clerk/nextjs/server', () => ({
-  auth: jest.fn(),
+// Mock auth helpers
+jest.mock('@/lib/auth', () => ({
+  getCurrentUser: jest.fn(),
+}));
+
+// Mock the collections library (ownership checks)
+jest.mock('@/lib/collections', () => ({
+  verifyCollectionAccess: jest.fn(),
 }));
 
 // Mock the decisions library
@@ -18,7 +23,8 @@ jest.mock('@/lib/decisions', () => ({
   getDecisionStatistics: jest.fn(),
 }));
 
-import { auth } from '@clerk/nextjs/server';
+import { getCurrentUser } from '@/lib/auth';
+import { verifyCollectionAccess } from '@/lib/collections';
 import {
   createPersonalDecision,
   getDecisionHistory,
@@ -26,14 +32,28 @@ import {
   getDecisionStatistics,
 } from '@/lib/decisions';
 
+const mockUser = {
+  _id: { toString: () => 'dbUser123' },
+  clerkId: 'user123',
+} as any;
+
+const mockOwnedCollection = {
+  _id: { toString: () => 'collection123' },
+  type: 'personal',
+  ownerId: 'user123',
+} as any;
+
 describe('/api/decisions', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (getCurrentUser as jest.Mock).mockResolvedValue(mockUser);
+    (verifyCollectionAccess as jest.Mock).mockResolvedValue(
+      mockOwnedCollection
+    );
   });
 
   describe('POST /api/decisions', () => {
     it('should create a personal decision successfully', async () => {
-      (auth as unknown as jest.Mock).mockResolvedValue({ userId: 'user123' });
       (createPersonalDecision as jest.Mock).mockResolvedValue({
         _id: 'decision123',
         type: 'personal',
@@ -78,7 +98,7 @@ describe('/api/decisions', () => {
     });
 
     it('should return 401 if user not authenticated', async () => {
-      (auth as unknown as jest.Mock).mockResolvedValue({ userId: null });
+      (getCurrentUser as jest.Mock).mockResolvedValue(null);
 
       const request = new NextRequest('http://localhost:3000/api/decisions', {
         method: 'POST',
@@ -99,9 +119,30 @@ describe('/api/decisions', () => {
       expect(data.error).toBe('Unauthorized');
     });
 
-    it('should return 400 for invalid input', async () => {
-      (auth as unknown as jest.Mock).mockResolvedValue({ userId: 'user123' });
+    it('should return 404 when the collection does not belong to the caller', async () => {
+      (verifyCollectionAccess as jest.Mock).mockResolvedValue(null);
 
+      const request = new NextRequest('http://localhost:3000/api/decisions', {
+        method: 'POST',
+        body: JSON.stringify({
+          collectionId: 'foreignCollection',
+          method: 'random',
+          visitDate: '2024-01-01T19:00:00Z',
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(404);
+      expect(data.error).toBe('Collection not found');
+      expect(createPersonalDecision).not.toHaveBeenCalled();
+    });
+
+    it('should return 400 for invalid input', async () => {
       const request = new NextRequest('http://localhost:3000/api/decisions', {
         method: 'POST',
         body: JSON.stringify({
@@ -125,8 +166,6 @@ describe('/api/decisions', () => {
 
   describe('GET /api/decisions', () => {
     it('should return decision history and validate required params', async () => {
-      (auth as unknown as jest.Mock).mockResolvedValue({ userId: 'user123' });
-
       // Test missing collectionId
       const invalidRequest = new NextRequest(
         'http://localhost:3000/api/decisions'
@@ -180,17 +219,34 @@ describe('/api/decisions', () => {
       });
       expect(getDecisionHistory).toHaveBeenCalledWith('collection123', 50);
     });
+
+    it('should return 404 when the collection does not belong to the caller', async () => {
+      (verifyCollectionAccess as jest.Mock).mockResolvedValue(null);
+
+      const request = new NextRequest(
+        'http://localhost:3000/api/decisions?collectionId=foreignCollection'
+      );
+      const response = await GET(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(404);
+      expect(data.error).toBe('Collection not found');
+      expect(getDecisionHistory).not.toHaveBeenCalled();
+    });
   });
 });
 
 describe('/api/decisions/random-select', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (getCurrentUser as jest.Mock).mockResolvedValue(mockUser);
+    (verifyCollectionAccess as jest.Mock).mockResolvedValue(
+      mockOwnedCollection
+    );
   });
 
   describe('POST /api/decisions/random-select', () => {
     it('should perform random selection successfully', async () => {
-      (auth as unknown as jest.Mock).mockResolvedValue({ userId: 'user123' });
       (performRandomSelection as jest.Mock).mockResolvedValue({
         restaurantId: 'restaurant123',
         selectedAt: new Date('2024-01-01T18:30:00Z'),
@@ -239,8 +295,6 @@ describe('/api/decisions/random-select', () => {
     });
 
     it('should return 400 for invalid input', async () => {
-      (auth as unknown as jest.Mock).mockResolvedValue({ userId: 'user123' });
-
       const request = new NextRequest(
         'http://localhost:3000/api/decisions/random-select',
         {
@@ -263,7 +317,6 @@ describe('/api/decisions/random-select', () => {
     });
 
     it('should handle decision errors', async () => {
-      (auth as unknown as jest.Mock).mockResolvedValue({ userId: 'user123' });
       (performRandomSelection as jest.Mock).mockRejectedValue(
         new Error('No restaurants in collection')
       );
@@ -288,12 +341,35 @@ describe('/api/decisions/random-select', () => {
       expect(response.status).toBe(400);
       expect(data.error).toBe('No restaurants in collection');
     });
+
+    it('should return 404 when the collection does not belong to the caller', async () => {
+      (verifyCollectionAccess as jest.Mock).mockResolvedValue(null);
+
+      const request = new NextRequest(
+        'http://localhost:3000/api/decisions/random-select',
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            collectionId: 'foreignCollection',
+            visitDate: '2024-01-01T19:00:00Z',
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      const response = await randomSelectPOST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(404);
+      expect(data.error).toBe('Collection not found');
+      expect(performRandomSelection).not.toHaveBeenCalled();
+    });
   });
 
   describe('GET /api/decisions/random-select', () => {
     it('should return statistics and validate required params', async () => {
-      (auth as unknown as jest.Mock).mockResolvedValue({ userId: 'user123' });
-
       // Test missing collectionId
       const invalidRequest = new NextRequest(
         'http://localhost:3000/api/decisions/random-select'
@@ -353,6 +429,20 @@ describe('/api/decisions/random-select', () => {
         ],
       });
       expect(getDecisionStatistics).toHaveBeenCalledWith('collection123');
+    });
+
+    it('should return 404 when the collection does not belong to the caller', async () => {
+      (verifyCollectionAccess as jest.Mock).mockResolvedValue(null);
+
+      const request = new NextRequest(
+        'http://localhost:3000/api/decisions/random-select?collectionId=foreignCollection'
+      );
+      const response = await randomSelectGET(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(404);
+      expect(data.error).toBe('Collection not found');
+      expect(getDecisionStatistics).not.toHaveBeenCalled();
     });
   });
 });

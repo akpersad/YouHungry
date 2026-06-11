@@ -1,8 +1,16 @@
 import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@clerk/nextjs/server';
 
 export async function POST(request: NextRequest) {
   try {
+    // Defense in depth: this route spends Google API budget, so require an
+    // authenticated session even though middleware also protects it.
+    const { userId } = await auth();
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { address } = await request.json();
 
     if (!address) {

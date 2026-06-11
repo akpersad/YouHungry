@@ -1,6 +1,6 @@
 import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
+import { getCurrentUser } from '@/lib/auth';
 import { connectToDatabase } from '@/lib/db';
 import { ObjectId } from 'mongodb';
 import {
@@ -8,6 +8,7 @@ import {
   getUserDecisionHistory,
   getGroupDecisionHistory,
 } from '@/lib/decisions';
+import { verifyCollectionAccess } from '@/lib/collections';
 import { z } from 'zod';
 
 const resetWeightsSchema = z.object({
@@ -18,8 +19,8 @@ const resetWeightsSchema = z.object({
 // GET: Get current weights for a collection
 export async function GET(request: NextRequest) {
   try {
-    const { userId } = await auth();
-    if (!userId) {
+    const user = await getCurrentUser();
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -27,7 +28,7 @@ export async function GET(request: NextRequest) {
     const collectionId = searchParams.get('collectionId');
 
     logger.debug('Weights API: collectionId:', collectionId);
-    logger.debug('Weights API: userId:', userId);
+    logger.debug('Weights API: userId:', user.clerkId);
 
     if (!collectionId) {
       return NextResponse.json(
@@ -38,10 +39,9 @@ export async function GET(request: NextRequest) {
 
     const db = await connectToDatabase();
 
-    // Verify collection exists and user has access
-    const collection = await db
-      .collection('collections')
-      .findOne({ _id: new ObjectId(collectionId) });
+    // Verify collection exists and the caller owns it (personal) or is a
+    // member of the owning group (group)
+    const collection = await verifyCollectionAccess(collectionId, user);
 
     if (!collection) {
       return NextResponse.json(
@@ -69,7 +69,8 @@ export async function GET(request: NextRequest) {
       );
     } else {
       // For personal collections, get decision history across all user's personal collections
-      decisionHistory = await getUserDecisionHistory(userId);
+      // (personal decisions store the Clerk ID in participants)
+      decisionHistory = await getUserDecisionHistory(user.clerkId);
     }
 
     // Get all restaurants in the collection
@@ -145,8 +146,8 @@ export async function GET(request: NextRequest) {
 // POST: Reset weights for a restaurant or entire collection
 export async function POST(request: NextRequest) {
   try {
-    const { userId } = await auth();
-    if (!userId) {
+    const user = await getCurrentUser();
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -155,10 +156,9 @@ export async function POST(request: NextRequest) {
 
     const db = await connectToDatabase();
 
-    // Verify collection exists and user has access
-    const collection = await db
-      .collection('collections')
-      .findOne({ _id: new ObjectId(collectionId) });
+    // SECURITY: resetting weights deletes decision history, so the caller
+    // must own the collection (personal) or be a member of the owning group
+    const collection = await verifyCollectionAccess(collectionId, user);
 
     if (!collection) {
       return NextResponse.json(
@@ -173,12 +173,14 @@ export async function POST(request: NextRequest) {
     };
 
     // For group collections, reset across all group collections
+    // (group collections store the owning group's id in ownerId).
     // For personal collections, reset across all user's personal collections
-    if (collection.type === 'group' && collection.groupId) {
-      filter.groupId = new ObjectId(collection.groupId);
+    // (personal decisions store the Clerk ID in participants).
+    if (collection.type === 'group') {
+      filter.groupId = new ObjectId(collection.ownerId.toString());
       filter.type = 'group';
     } else {
-      filter.participants = userId;
+      filter.participants = user.clerkId;
       filter.type = 'personal';
     }
 
@@ -194,7 +196,7 @@ export async function POST(request: NextRequest) {
       collectionId,
       restaurantId,
       deletedCount: result.deletedCount,
-      userId,
+      userId: user.clerkId,
     });
 
     return NextResponse.json({

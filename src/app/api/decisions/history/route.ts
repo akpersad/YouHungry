@@ -1,6 +1,6 @@
 import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
+import { getCurrentUser } from '@/lib/auth';
 import { connectToDatabase } from '@/lib/db';
 import { ObjectId } from 'mongodb';
 import { z } from 'zod';
@@ -19,8 +19,8 @@ const historyQuerySchema = z.object({
 
 export async function GET(request: NextRequest) {
   try {
-    const { userId } = await auth();
-    if (!userId) {
+    const user = await getCurrentUser();
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -41,9 +41,11 @@ export async function GET(request: NextRequest) {
 
     const db = await connectToDatabase();
 
-    // Build the query filter
+    // Build the query filter.
+    // Personal decisions store the Clerk ID in participants; group decisions
+    // store Mongo ObjectId strings, so match against both.
     const filter: Record<string, unknown> = {
-      participants: userId,
+      participants: { $in: [user.clerkId, user._id.toString()] },
       status: 'completed',
     };
 

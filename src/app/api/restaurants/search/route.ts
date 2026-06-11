@@ -1,5 +1,6 @@
 import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@clerk/nextjs/server';
 import {
   searchRestaurantsByCoordinates,
   searchRestaurantsByAddress,
@@ -9,6 +10,13 @@ import { geocodeAddressOptimized } from '@/lib/optimized-google-places';
 
 export async function GET(request: NextRequest) {
   try {
+    // Defense in depth: this route spends Google API budget, so require an
+    // authenticated session even though middleware also protects it.
+    const { userId } = await auth();
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
     const query = searchParams.get('q');
     const location = searchParams.get('location');

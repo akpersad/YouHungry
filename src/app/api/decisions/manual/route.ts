@@ -54,11 +54,12 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Group not found' }, { status: 404 });
       }
 
-      if (
-        !group.memberIds.some(
-          (id: ObjectId) => id.toString() === user._id.toString()
-        )
-      ) {
+      const isMember = [
+        ...(group.memberIds || []),
+        ...(group.adminIds || []),
+      ].some((id: ObjectId) => id.toString() === user._id.toString());
+
+      if (!isMember) {
         return NextResponse.json(
           { error: 'User is not a member of this group' },
           { status: 403 }
@@ -97,28 +98,11 @@ export async function POST(request: NextRequest) {
         restaurantObjectId: new ObjectId(restaurantId),
       });
 
-      // For personal decisions, we need to find collections by Clerk ID
-      // First, let's see what personal collections exist with the Clerk ID
-      const personalCollections = await db
-        .collection('collections')
-        .find({
-          ownerId: user.clerkId,
-          type: 'personal',
-        })
-        .toArray();
-
-      logger.debug(
-        'Found personal collections with Clerk ID:',
-        personalCollections.map((c) => ({
-          _id: c._id,
-          name: c.name,
-          ownerId: c.ownerId,
-          restaurantIds: c.restaurantIds,
-        }))
-      );
-
+      // SECURITY: the collection must belong to the caller. Legacy data
+      // stores ownerId either as the user's Mongo ObjectId or their Clerk ID
+      // string, so match both formats.
       const personalCollection = await db.collection('collections').findOne({
-        ownerId: user.clerkId,
+        ownerId: { $in: [user._id, user.clerkId] },
         type: 'personal',
         $or: [
           { restaurantIds: new ObjectId(restaurantId) },

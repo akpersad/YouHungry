@@ -1,7 +1,8 @@
 import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
+import { getCurrentUser } from '@/lib/auth';
 import {
-  getCollectionById,
+  verifyCollectionAccess,
   updateCollection,
   deleteCollection,
 } from '@/lib/collections';
@@ -12,6 +13,14 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
     const { id } = await params;
 
     if (!id) {
@@ -21,7 +30,8 @@ export async function GET(
       );
     }
 
-    const collection = await getCollectionById(id);
+    // Owner (personal) or group member (group) only
+    const collection = await verifyCollectionAccess(id, user, 'member');
 
     if (!collection) {
       return NextResponse.json(
@@ -51,6 +61,14 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
     const { id } = await params;
     const body = await request.json();
     const { name, description } = body;
@@ -59,6 +77,15 @@ export async function PUT(
       return NextResponse.json(
         { success: false, error: 'Collection ID is required' },
         { status: 400 }
+      );
+    }
+
+    // Renaming requires owner (personal) or group admin (group)
+    const existing = await verifyCollectionAccess(id, user, 'admin');
+    if (!existing) {
+      return NextResponse.json(
+        { success: false, error: 'Collection not found' },
+        { status: 404 }
       );
     }
 
@@ -108,12 +135,29 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
     const { id } = await params;
 
     if (!id) {
       return NextResponse.json(
         { success: false, error: 'Collection ID is required' },
         { status: 400 }
+      );
+    }
+
+    // Deleting requires owner (personal) or group admin (group)
+    const existing = await verifyCollectionAccess(id, user, 'admin');
+    if (!existing) {
+      return NextResponse.json(
+        { success: false, error: 'Collection not found' },
+        { status: 404 }
       );
     }
 
