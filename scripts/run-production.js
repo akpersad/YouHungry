@@ -192,8 +192,12 @@ async function main() {
         log('\n⚠️  Press Ctrl+C to stop the server', colors.yellow);
 
         // Check if certificates exist
-        const certPath = path.join(process.cwd(), 'public', 'cert.pem');
-        const keyPath = path.join(process.cwd(), 'public', 'cert-key.pem');
+        const certPath = path.join(process.cwd(), 'certificates', 'cert.pem');
+        const keyPath = path.join(
+          process.cwd(),
+          'certificates',
+          'cert-key.pem'
+        );
 
         if (!fs.existsSync(certPath) || !fs.existsSync(keyPath)) {
           log('\n❌ HTTPS certificates not found!', colors.red);
@@ -202,7 +206,7 @@ async function main() {
           log(`   - ${keyPath}`, colors.reset);
           log('\n   Generate certificates with:', colors.cyan);
           log(
-            '   openssl req -x509 -newkey rsa:4096 -keyout public/cert-key.pem -out public/cert.pem -days 365 -nodes',
+            '   openssl req -x509 -newkey rsa:4096 -keyout certificates/cert-key.pem -out certificates/cert.pem -days 365 -nodes',
             colors.reset
           );
           process.exit(1);

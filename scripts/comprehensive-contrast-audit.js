@@ -377,9 +377,7 @@ function generateReport() {
 function generateFixRecommendations() {
   console.log('\n💡 FIX RECOMMENDATIONS:');
   console.log('-'.repeat(40));
-  console.log(
-    '• Run: npm run fix-colors (comprehensive-fix-contrast-issues.js)'
-  );
+  console.log('• Run: node scripts/comprehensive-fix-contrast-issues.js');
   console.log(
     '• This will automatically replace hardcoded colors with design system colors'
   );

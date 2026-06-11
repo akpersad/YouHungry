@@ -31,8 +31,6 @@
 - 🔔 Multi-channel notifications (in-app, email, SMS, push)
 - 📱 Progressive Web App with offline support
 
-> 📸 **Note**: Create a demo GIF showing the core flow: search → add to collection → create group decision → vote → result
-
 ---
 
 ## 📑 Table of Contents
