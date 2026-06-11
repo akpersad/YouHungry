@@ -23,6 +23,17 @@ jest.mock('@/lib/logger', () => ({
   },
 }));
 
+// Mock the rate limiter (keep the real key helpers + 429 response builder)
+jest.mock('@/lib/rate-limit', () => {
+  const actual = jest.requireActual('@/lib/rate-limit');
+  return { ...actual, checkRateLimit: jest.fn() };
+});
+
+import { checkRateLimit } from '@/lib/rate-limit';
+const mockCheckRateLimit = checkRateLimit as jest.MockedFunction<
+  typeof checkRateLimit
+>;
+
 import { getCurrentUser } from '@/lib/auth';
 const mockGetCurrentUser = getCurrentUser as jest.MockedFunction<
   typeof getCurrentUser
@@ -42,9 +53,42 @@ const mockUser = {
 describe('/api/email', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockCheckRateLimit.mockResolvedValue({
+      allowed: true,
+      remaining: 9,
+      retryAfterSeconds: 0,
+    });
   });
 
   describe('POST', () => {
+    it('should return 429 when the per-user rate limit is exceeded', async () => {
+      mockGetCurrentUser.mockResolvedValue(mockUser);
+      mockCheckRateLimit.mockResolvedValue({
+        allowed: false,
+        remaining: 0,
+        retryAfterSeconds: 600,
+      });
+
+      const request = new NextRequest('http://localhost:3000/api/email', {
+        method: 'POST',
+        body: JSON.stringify({ action: 'test' }),
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(429);
+      expect(response.headers.get('Retry-After')).toBe('600');
+      expect(data.error).toBe('Too many requests. Please try again later.');
+      expect(mockCheckRateLimit).toHaveBeenCalledWith({
+        key: 'email-send:user:user-123',
+        limit: 10,
+        windowMs: 60 * 60 * 1000,
+      });
+      expect(mockUserEmailService.sendTestUserEmail).not.toHaveBeenCalled();
+    });
+
     it('should send test email to the authenticated user own email', async () => {
       mockGetCurrentUser.mockResolvedValue(mockUser);
       mockUserEmailService.sendTestUserEmail.mockResolvedValue({

@@ -1,14 +1,38 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { clerkClient } from '@clerk/nextjs/server';
 import { logger } from '@/lib/logger';
+import {
+  checkRateLimit,
+  getClientIp,
+  rateLimitResponse,
+} from '@/lib/rate-limit';
+
+// Identical response for known and unknown emails so this endpoint cannot be
+// used to enumerate registered accounts.
+const GENERIC_RESPONSE = {
+  success: true,
+  message:
+    'If an account exists for this email, please check your inbox or try signing in to receive a new code',
+};
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { email } = body;
 
-    if (!email) {
+    if (!email || typeof email !== 'string') {
       return NextResponse.json({ error: 'Email is required' }, { status: 400 });
+    }
+
+    // 3 per hour per IP+email — each lookup hits Clerk and (conceptually)
+    // triggers an email send.
+    const rateLimit = await checkRateLimit({
+      key: `auth-resend-verification:ip:${getClientIp(request)}:email:${email.trim().toLowerCase()}`,
+      limit: 3,
+      windowMs: 60 * 60 * 1000,
+    });
+    if (!rateLimit.allowed) {
+      return rateLimitResponse(rateLimit.retryAfterSeconds);
     }
 
     try {
@@ -20,7 +44,8 @@ export async function POST(request: NextRequest) {
       });
 
       if (users.data.length === 0) {
-        return NextResponse.json({ error: 'User not found' }, { status: 404 });
+        // Don't reveal whether the account exists.
+        return NextResponse.json(GENERIC_RESPONSE);
       }
 
       const user = users.data[0];
@@ -30,19 +55,10 @@ export async function POST(request: NextRequest) {
         (e) => e.emailAddress === email
       );
 
-      if (!emailAddress) {
-        return NextResponse.json(
-          { error: 'Email address not found' },
-          { status: 404 }
-        );
-      }
-
-      // Check if already verified
-      if (emailAddress.verification?.status === 'verified') {
-        return NextResponse.json(
-          { error: 'Email is already verified' },
-          { status: 400 }
-        );
+      if (!emailAddress || emailAddress.verification?.status === 'verified') {
+        // Same generic response — "already verified" / "address not found"
+        // would also leak account existence.
+        return NextResponse.json(GENERIC_RESPONSE);
       }
 
       // Note: Clerk's backend SDK doesn't support manually resending verification codes
@@ -55,11 +71,7 @@ export async function POST(request: NextRequest) {
         note: 'Clerk handles verification emails automatically',
       });
 
-      return NextResponse.json({
-        success: true,
-        message:
-          'If verification is required, please check your email or try signing in to receive a new code',
-      });
+      return NextResponse.json(GENERIC_RESPONSE);
     } catch (clerkError) {
       logger.error('Error resending verification', {
         email,

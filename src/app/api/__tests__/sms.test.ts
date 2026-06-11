@@ -30,6 +30,17 @@ jest.mock('@/lib/logger', () => ({
   },
 }));
 
+// Mock the rate limiter (keep the real key helpers + 429 response builder)
+jest.mock('@/lib/rate-limit', () => {
+  const actual = jest.requireActual('@/lib/rate-limit');
+  return { ...actual, checkRateLimit: jest.fn() };
+});
+
+import { checkRateLimit } from '@/lib/rate-limit';
+const mockCheckRateLimit = checkRateLimit as jest.MockedFunction<
+  typeof checkRateLimit
+>;
+
 import { getCurrentUser, isAdminUser } from '@/lib/auth';
 const mockGetCurrentUser = getCurrentUser as jest.MockedFunction<
   typeof getCurrentUser
@@ -74,9 +85,38 @@ describe('/api/sms', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockIsAdminUser.mockReturnValue(false);
+    mockCheckRateLimit.mockResolvedValue({
+      allowed: true,
+      remaining: 9,
+      retryAfterSeconds: 0,
+    });
   });
 
   describe('POST', () => {
+    it('should return 429 when the per-user rate limit is exceeded', async () => {
+      mockGetCurrentUser.mockResolvedValue(verifiedUser);
+      mockCheckRateLimit.mockResolvedValue({
+        allowed: false,
+        remaining: 0,
+        retryAfterSeconds: 1800,
+      });
+
+      const response = await POST(
+        makeRequest({ action: 'custom', phoneNumber: OWN_PHONE, message: 'x' })
+      );
+      const data = await response.json();
+
+      expect(response.status).toBe(429);
+      expect(response.headers.get('Retry-After')).toBe('1800');
+      expect(data.error).toBe('Too many requests. Please try again later.');
+      expect(mockCheckRateLimit).toHaveBeenCalledWith({
+        key: 'sms-send:user:user-123',
+        limit: 10,
+        windowMs: 60 * 60 * 1000,
+      });
+      expect(mockSmsNotifications.sendSMS).not.toHaveBeenCalled();
+    });
+
     it('should return 401 for unauthenticated requests', async () => {
       mockGetCurrentUser.mockResolvedValue(null);
 

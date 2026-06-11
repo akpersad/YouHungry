@@ -1,9 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { clerkClient } from '@clerk/nextjs/server';
 import { logger } from '@/lib/logger';
+import {
+  checkRateLimit,
+  ipRateLimitKey,
+  rateLimitResponse,
+} from '@/lib/rate-limit';
 
 export async function GET(request: NextRequest) {
   try {
+    // Username availability is a user-enumeration vector — 30 per IP per hour
+    // is plenty for the sign-up form's on-blur checks.
+    const rateLimit = await checkRateLimit({
+      key: ipRateLimitKey('auth-check-username', request),
+      limit: 30,
+      windowMs: 60 * 60 * 1000,
+    });
+    if (!rateLimit.allowed) {
+      return rateLimitResponse(rateLimit.retryAfterSeconds);
+    }
+
     const searchParams = request.nextUrl.searchParams;
     const username = searchParams.get('username');
 

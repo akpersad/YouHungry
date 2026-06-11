@@ -5,6 +5,9 @@ const isPublicRoute = createRouteMatcher([
   '/sign-in(.*)',
   '/sign-up(.*)',
   '/api/webhooks/clerk', // svix-signature verified in the handler
+  // Called by the sign-up form before any session exists; protected by
+  // per-IP rate limiting + strict input validation in the handler.
+  '/api/auth/check-username',
   '/api/pwa-status',
   '/api/cron(.*)', // Vercel cron jobs — each handler must verify CRON_SECRET
 ]);

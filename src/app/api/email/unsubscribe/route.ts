@@ -1,9 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/db';
 import { logger } from '@/lib/logger';
+import {
+  checkRateLimit,
+  ipRateLimitKey,
+  rateLimitResponse,
+} from '@/lib/rate-limit';
 
 export async function GET(request: NextRequest) {
   try {
+    // Belt-and-braces against enumeration probing (responses are already
+    // identical for known/unknown emails) — 10 per IP per hour.
+    const rateLimit = await checkRateLimit({
+      key: ipRateLimitKey('email-unsubscribe', request),
+      limit: 10,
+      windowMs: 60 * 60 * 1000,
+    });
+    if (!rateLimit.allowed) {
+      return rateLimitResponse(rateLimit.retryAfterSeconds);
+    }
+
     const { searchParams } = new URL(request.url);
     const token = searchParams.get('token');
     const email = searchParams.get('email');

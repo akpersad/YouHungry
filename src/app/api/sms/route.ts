@@ -2,6 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser, isAdminUser } from '@/lib/auth';
 import { smsNotifications } from '@/lib/sms-notifications';
 import { logger } from '@/lib/logger';
+import {
+  checkRateLimit,
+  rateLimitResponse,
+  userRateLimitKey,
+} from '@/lib/rate-limit';
 import type { User } from '@/types/database';
 
 // Normalize a phone number for comparison (digits only, US country code stripped)
@@ -25,6 +30,16 @@ export async function POST(req: NextRequest) {
     const user = await getCurrentUser();
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Real Twilio sends cost money — 10 SMS per user per hour.
+    const rateLimit = await checkRateLimit({
+      key: userRateLimitKey('sms-send', user._id.toString()),
+      limit: 10,
+      windowMs: 60 * 60 * 1000,
+    });
+    if (!rateLimit.allowed) {
+      return rateLimitResponse(rateLimit.retryAfterSeconds);
     }
 
     const body = await req.json();

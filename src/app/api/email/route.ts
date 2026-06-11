@@ -2,6 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth';
 import { userEmailNotificationService } from '@/lib/user-email-notifications';
 import { logger } from '@/lib/logger';
+import {
+  checkRateLimit,
+  rateLimitResponse,
+  userRateLimitKey,
+} from '@/lib/rate-limit';
 
 export async function POST(request: NextRequest) {
   try {
@@ -9,6 +14,16 @@ export async function POST(request: NextRequest) {
 
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Real Resend sends cost money — 10 emails per user per hour.
+    const rateLimit = await checkRateLimit({
+      key: userRateLimitKey('email-send', user._id.toString()),
+      limit: 10,
+      windowMs: 60 * 60 * 1000,
+    });
+    if (!rateLimit.allowed) {
+      return rateLimitResponse(rateLimit.retryAfterSeconds);
     }
 
     const body = await request.json();

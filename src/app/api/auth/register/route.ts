@@ -3,6 +3,11 @@ import { clerkClient } from '@clerk/nextjs/server';
 import { createUser } from '@/lib/users';
 import { logger } from '@/lib/logger';
 import { trackAPIUsage } from '@/lib/api-usage-tracker';
+import {
+  checkRateLimit,
+  ipRateLimitKey,
+  rateLimitResponse,
+} from '@/lib/rate-limit';
 import twilio from 'twilio';
 
 // Initialize Twilio client
@@ -15,6 +20,16 @@ const TWILIO_VERIFY_SERVICE_SID = process.env.TWILIO_VERIFY_SERVICE_SID;
 
 export async function POST(request: NextRequest) {
   try {
+    // Registration can trigger real SMS + email sends — 5 per IP per hour.
+    const rateLimit = await checkRateLimit({
+      key: ipRateLimitKey('auth-register', request),
+      limit: 5,
+      windowMs: 60 * 60 * 1000,
+    });
+    if (!rateLimit.allowed) {
+      return rateLimitResponse(rateLimit.retryAfterSeconds);
+    }
+
     const body = await request.json();
     const {
       email,

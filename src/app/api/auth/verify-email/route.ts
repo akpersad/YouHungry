@@ -1,9 +1,37 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { clerkClient } from '@clerk/nextjs/server';
 import { logger } from '@/lib/logger';
+import {
+  checkRateLimit,
+  ipRateLimitKey,
+  rateLimitResponse,
+} from '@/lib/rate-limit';
+
+// NOTE: Clerk's backend SDK cannot verify email codes, so this endpoint never
+// actually verifies anything — the client flow uses Clerk's
+// signUp.attemptEmailAddressVerification() instead, and nothing in src/ calls
+// this route. It is kept only to return a safe, uniform answer.
+//
+// Identical response for known and unknown emails so this endpoint cannot be
+// used to enumerate registered accounts.
+const GENERIC_RESPONSE = {
+  success: false,
+  error:
+    'Please verify your email through the link sent to your inbox, or try signing in to receive a new verification email',
+};
 
 export async function POST(request: NextRequest) {
   try {
+    // 10 per hour per IP — guards Clerk lookups and code brute-forcing.
+    const rateLimit = await checkRateLimit({
+      key: ipRateLimitKey('auth-verify-email', request),
+      limit: 10,
+      windowMs: 60 * 60 * 1000,
+    });
+    if (!rateLimit.allowed) {
+      return rateLimitResponse(rateLimit.retryAfterSeconds);
+    }
+
     const body = await request.json();
     const { email, code } = body;
 
@@ -23,7 +51,8 @@ export async function POST(request: NextRequest) {
       });
 
       if (users.data.length === 0) {
-        return NextResponse.json({ error: 'User not found' }, { status: 404 });
+        // Don't reveal whether the account exists.
+        return NextResponse.json(GENERIC_RESPONSE, { status: 400 });
       }
 
       const user = users.data[0];
@@ -34,10 +63,8 @@ export async function POST(request: NextRequest) {
       );
 
       if (!emailAddress) {
-        return NextResponse.json(
-          { error: 'Email address not found' },
-          { status: 404 }
-        );
+        // Same generic response — "address not found" would leak existence.
+        return NextResponse.json(GENERIC_RESPONSE, { status: 400 });
       }
 
       // Note: Clerk's backend SDK verification flow is different
@@ -53,14 +80,7 @@ export async function POST(request: NextRequest) {
 
       // Since backend SDK doesn't support code verification directly,
       // instruct users to use Clerk's sign-in flow for verification
-      return NextResponse.json(
-        {
-          success: false,
-          error:
-            'Please verify your email through the link sent to your inbox, or try signing in to receive a new verification email',
-        },
-        { status: 400 }
-      );
+      return NextResponse.json(GENERIC_RESPONSE, { status: 400 });
     } catch (clerkError) {
       logger.error('Error in email verification', {
         email,

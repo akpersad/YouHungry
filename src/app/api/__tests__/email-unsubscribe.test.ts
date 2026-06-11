@@ -15,6 +15,17 @@ jest.mock('@/lib/logger', () => ({
   },
 }));
 
+// Mock the rate limiter (keep the real key helpers + 429 response builder)
+jest.mock('@/lib/rate-limit', () => {
+  const actual = jest.requireActual('@/lib/rate-limit');
+  return { ...actual, checkRateLimit: jest.fn() };
+});
+
+import { checkRateLimit } from '@/lib/rate-limit';
+const mockCheckRateLimit = checkRateLimit as jest.MockedFunction<
+  typeof checkRateLimit
+>;
+
 const mockConnectToDatabase = connectToDatabase as jest.MockedFunction<
   typeof connectToDatabase
 >;
@@ -43,6 +54,11 @@ describe('/api/email/unsubscribe', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     process.env.NEXT_PUBLIC_APP_URL = 'http://localhost:3000';
+    mockCheckRateLimit.mockResolvedValue({
+      allowed: true,
+      remaining: 9,
+      retryAfterSeconds: 0,
+    });
   });
 
   afterEach(() => {
@@ -50,6 +66,31 @@ describe('/api/email/unsubscribe', () => {
   });
 
   describe('GET', () => {
+    it('should return 429 when the per-IP rate limit is exceeded', async () => {
+      const mockCollection = mockDbWithUpdateResult(1);
+      mockCheckRateLimit.mockResolvedValue({
+        allowed: false,
+        remaining: 0,
+        retryAfterSeconds: 3600,
+      });
+
+      const request = new NextRequest(
+        'http://localhost:3000/api/email/unsubscribe?email=test@example.com',
+        { headers: { 'x-forwarded-for': '203.0.113.7' } }
+      );
+
+      const response = await GET(request);
+
+      expect(response.status).toBe(429);
+      expect(response.headers.get('Retry-After')).toBe('3600');
+      expect(mockCheckRateLimit).toHaveBeenCalledWith({
+        key: 'email-unsubscribe:ip:203.0.113.7',
+        limit: 10,
+        windowMs: 60 * 60 * 1000,
+      });
+      expect(mockCollection.updateOne).not.toHaveBeenCalled();
+    });
+
     it('should unsubscribe an existing user by email', async () => {
       const mockCollection = mockDbWithUpdateResult(1);
 
