@@ -578,32 +578,6 @@ export class PushNotificationManager {
       typeof navigator !== 'undefined' ? navigator.userAgent : 'undefined'
     );
 
-    // Also log to server for easier debugging
-    console.log(
-      '🔍 SERVER DEBUG: Final capabilities result:',
-      JSON.stringify(caps, null, 2)
-    );
-
-    // Send debug info to server
-    try {
-      fetch('/api/debug/push-notifications', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          capabilities: caps,
-          timestamp: new Date().toISOString(),
-          userAgent:
-            typeof navigator !== 'undefined'
-              ? navigator.userAgent
-              : 'undefined',
-        }),
-      }).catch(() => {
-        // Ignore fetch errors
-      });
-    } catch {
-      // Ignore errors
-    }
-
     return caps;
   }
 }

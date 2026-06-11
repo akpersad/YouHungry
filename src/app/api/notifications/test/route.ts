@@ -1,9 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { notificationService } from '@/lib/notification-service';
+import { requireAdminAuth } from '@/lib/auth';
 import { logger } from '@/lib/logger';
 
 export async function POST(request: NextRequest) {
   try {
+    // Triggers real SMS/email/push sends with caller-supplied targets — admin only.
+    try {
+      await requireAdminAuth();
+    } catch {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+    }
+
     const body = await request.json();
     const { type, data, options } = body;
 
