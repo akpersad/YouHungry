@@ -1,20 +1,20 @@
 import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
+import { getCurrentUser } from '@/lib/auth';
 import { sendFriendRequest, getFriendRequests } from '@/lib/friends';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
-    const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId');
-
-    if (!userId) {
+    const user = await getCurrentUser();
+    if (!user) {
       return NextResponse.json(
-        { success: false, error: 'User ID is required' },
-        { status: 400 }
+        { success: false, error: 'Unauthorized' },
+        { status: 401 }
       );
     }
 
-    const requests = await getFriendRequests(userId);
+    // Always act as the session user; caller-supplied userId is ignored
+    const requests = await getFriendRequests(user.clerkId);
 
     return NextResponse.json({
       success: true,
@@ -34,24 +34,34 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { requesterId, addresseeId } = body;
-
-    if (!requesterId || !addresseeId) {
+    const user = await getCurrentUser();
+    if (!user) {
       return NextResponse.json(
-        { success: false, error: 'Requester ID and addressee ID are required' },
+        { success: false, error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    const body = await request.json();
+    const { addresseeId } = body;
+
+    if (!addresseeId) {
+      return NextResponse.json(
+        { success: false, error: 'Addressee ID is required' },
         { status: 400 }
       );
     }
 
-    if (requesterId === addresseeId) {
+    // The requester is always the session user; caller-supplied
+    // requesterId is ignored
+    if (user.clerkId === addresseeId) {
       return NextResponse.json(
         { success: false, error: 'Cannot send friend request to yourself' },
         { status: 400 }
       );
     }
 
-    const friendship = await sendFriendRequest(requesterId, addresseeId);
+    const friendship = await sendFriendRequest(user.clerkId, addresseeId);
 
     return NextResponse.json(
       {

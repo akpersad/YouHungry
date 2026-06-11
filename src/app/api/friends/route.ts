@@ -1,20 +1,20 @@
 import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
+import { getCurrentUser } from '@/lib/auth';
 import { getFriends, removeFriend } from '@/lib/friends';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
-    const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId');
-
-    if (!userId) {
+    const user = await getCurrentUser();
+    if (!user) {
       return NextResponse.json(
-        { success: false, error: 'User ID is required' },
-        { status: 400 }
+        { success: false, error: 'Unauthorized' },
+        { status: 401 }
       );
     }
 
-    const friends = await getFriends(userId);
+    // Always act as the session user; caller-supplied userId is ignored
+    const friends = await getFriends(user.clerkId);
 
     return NextResponse.json({
       success: true,
@@ -35,18 +35,27 @@ export async function GET(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const friendshipId = searchParams.get('friendshipId');
-    const userId = searchParams.get('userId');
 
-    if (!friendshipId || !userId) {
+    if (!friendshipId) {
       return NextResponse.json(
-        { success: false, error: 'Friendship ID and user ID are required' },
+        { success: false, error: 'Friendship ID is required' },
         { status: 400 }
       );
     }
 
-    const success = await removeFriend(friendshipId, userId);
+    // Always act as the session user; lib verifies the user is part of
+    // the friendship before deleting
+    const success = await removeFriend(friendshipId, user.clerkId);
 
     if (!success) {
       return NextResponse.json(

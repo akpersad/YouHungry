@@ -15,8 +15,10 @@ export const friendKeys = {
 };
 
 // API functions
-const fetchFriends = async (userId: string): Promise<Friend[]> => {
-  const response = await fetch(`/api/friends?userId=${userId}`);
+// Note: the API derives the acting user from the Clerk session — the
+// userId passed to these hooks is only used for client-side cache keys.
+const fetchFriends = async (): Promise<Friend[]> => {
+  const response = await fetch('/api/friends');
   const data = await response.json();
 
   if (!response.ok) {
@@ -26,13 +28,11 @@ const fetchFriends = async (userId: string): Promise<Friend[]> => {
   return data.friends;
 };
 
-const fetchFriendRequests = async (
-  userId: string
-): Promise<{
+const fetchFriendRequests = async (): Promise<{
   sent: FriendRequest[];
   received: FriendRequest[];
 }> => {
-  const response = await fetch(`/api/friends/requests?userId=${userId}`);
+  const response = await fetch('/api/friends/requests');
   const data = await response.json();
 
   if (!response.ok) {
@@ -42,12 +42,9 @@ const fetchFriendRequests = async (
   return data.requests;
 };
 
-const searchUsers = async (
-  query: string,
-  userId: string
-): Promise<FriendSearchResult[]> => {
+const searchUsers = async (query: string): Promise<FriendSearchResult[]> => {
   const response = await fetch(
-    `/api/friends/search?q=${encodeURIComponent(query)}&userId=${userId}`
+    `/api/friends/search?q=${encodeURIComponent(query)}`
   );
   const data = await response.json();
 
@@ -59,7 +56,6 @@ const searchUsers = async (
 };
 
 const sendFriendRequest = async ({
-  requesterId,
   addresseeId,
 }: {
   requesterId: string;
@@ -70,7 +66,7 @@ const sendFriendRequest = async ({
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ requesterId, addresseeId }),
+    body: JSON.stringify({ addresseeId }),
   });
 
   const data = await response.json();
@@ -83,7 +79,6 @@ const sendFriendRequest = async ({
 const updateFriendRequest = async ({
   friendshipId,
   action,
-  userId,
 }: {
   friendshipId: string;
   action: 'accept' | 'decline';
@@ -94,7 +89,7 @@ const updateFriendRequest = async ({
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ action, userId }),
+    body: JSON.stringify({ action }),
   });
 
   const data = await response.json();
@@ -106,17 +101,13 @@ const updateFriendRequest = async ({
 
 const removeFriend = async ({
   friendshipId,
-  userId,
 }: {
   friendshipId: string;
   userId: string;
 }): Promise<void> => {
-  const response = await fetch(
-    `/api/friends?friendshipId=${friendshipId}&userId=${userId}`,
-    {
-      method: 'DELETE',
-    }
-  );
+  const response = await fetch(`/api/friends?friendshipId=${friendshipId}`, {
+    method: 'DELETE',
+  });
 
   const data = await response.json();
 
@@ -130,9 +121,7 @@ export function useFriends(userId?: string) {
   return useQuery({
     queryKey: userId ? friendKeys.list(userId) : friendKeys.lists(),
     queryFn: () =>
-      userId
-        ? fetchFriends(userId)
-        : Promise.reject(new Error('User ID required')),
+      userId ? fetchFriends() : Promise.reject(new Error('User ID required')),
     enabled: !!userId,
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
@@ -143,7 +132,7 @@ export function useFriendRequests(userId?: string) {
     queryKey: userId ? friendKeys.requestsList(userId) : friendKeys.requests(),
     queryFn: () =>
       userId
-        ? fetchFriendRequests(userId)
+        ? fetchFriendRequests()
         : Promise.reject(new Error('User ID required')),
     enabled: !!userId,
     staleTime: 2 * 60 * 1000, // 2 minutes (more frequent for requests)
@@ -156,8 +145,7 @@ export function useUserSearch(query: string, userId?: string) {
       query && userId
         ? friendKeys.searchQuery(query, userId)
         : friendKeys.search(),
-    queryFn: () =>
-      query && userId ? searchUsers(query, userId) : Promise.resolve([]),
+    queryFn: () => (query && userId ? searchUsers(query) : Promise.resolve([])),
     enabled: !!query && !!userId && query.length >= 2,
     staleTime: 30 * 1000, // 30 seconds
   });
