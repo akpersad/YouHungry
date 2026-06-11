@@ -4,13 +4,19 @@ import {
   getRestaurantsByCollection,
   addRestaurantToCollection,
   removeRestaurantFromCollection,
+  verifyCollectionAccess,
 } from '@/lib/collections';
+import { getCurrentUser } from '@/lib/auth';
 
 // Mock dependencies
 jest.mock('@/lib/collections', () => ({
   getRestaurantsByCollection: jest.fn(),
   addRestaurantToCollection: jest.fn(),
   removeRestaurantFromCollection: jest.fn(),
+  verifyCollectionAccess: jest.fn(),
+}));
+jest.mock('@/lib/auth', () => ({
+  getCurrentUser: jest.fn(),
 }));
 
 const mockGetRestaurantsByCollection =
@@ -25,11 +31,23 @@ const mockRemoveRestaurantFromCollection =
   removeRestaurantFromCollection as jest.MockedFunction<
     typeof removeRestaurantFromCollection
   >;
+const mockVerifyCollectionAccess =
+  verifyCollectionAccess as jest.MockedFunction<typeof verifyCollectionAccess>;
+const mockGetCurrentUser = getCurrentUser as jest.MockedFunction<
+  typeof getCurrentUser
+>;
+
+const mockUser = {
+  _id: { toString: () => '507f1f77bcf86cd799439010' },
+  clerkId: 'clerk_user_123',
+} as any;
 
 describe('/api/collections/[id]/restaurants', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     // Set up default mocks
+    mockGetCurrentUser.mockResolvedValue(mockUser);
+    mockVerifyCollectionAccess.mockResolvedValue(mockCollection);
     mockAddRestaurantToCollection.mockResolvedValue({
       collection: mockCollection,
       wasAdded: true,
@@ -101,6 +119,38 @@ describe('/api/collections/[id]/restaurants', () => {
       );
     });
 
+    it('should return 401 when unauthenticated', async () => {
+      mockGetCurrentUser.mockResolvedValue(null);
+
+      const request = new NextRequest(
+        'http://localhost:3000/api/collections/507f1f77bcf86cd799439011/restaurants'
+      );
+      const response = await GET(request, {
+        params: Promise.resolve({ id: '507f1f77bcf86cd799439011' }),
+      });
+      const data = await response.json();
+
+      expect(response.status).toBe(401);
+      expect(data.error).toBe('Unauthorized');
+      expect(mockGetRestaurantsByCollection).not.toHaveBeenCalled();
+    });
+
+    it('should return 404 when the collection does not belong to the caller', async () => {
+      mockVerifyCollectionAccess.mockResolvedValue(null);
+
+      const request = new NextRequest(
+        'http://localhost:3000/api/collections/507f1f77bcf86cd799439011/restaurants'
+      );
+      const response = await GET(request, {
+        params: Promise.resolve({ id: '507f1f77bcf86cd799439011' }),
+      });
+      const data = await response.json();
+
+      expect(response.status).toBe(404);
+      expect(data.error).toBe('Collection not found');
+      expect(mockGetRestaurantsByCollection).not.toHaveBeenCalled();
+    });
+
     it('should return 400 when collection ID is missing', async () => {
       const request = new NextRequest(
         'http://localhost:3000/api/collections//restaurants'
@@ -168,6 +218,46 @@ describe('/api/collections/[id]/restaurants', () => {
         '507f1f77bcf86cd799439011',
         '507f1f77bcf86cd799439013'
       );
+    });
+
+    it('should return 401 when unauthenticated', async () => {
+      mockGetCurrentUser.mockResolvedValue(null);
+
+      const request = new NextRequest(
+        'http://localhost:3000/api/collections/507f1f77bcf86cd799439011/restaurants',
+        {
+          method: 'POST',
+          body: JSON.stringify({ restaurantId: '507f1f77bcf86cd799439013' }),
+        }
+      );
+      const response = await POST(request, {
+        params: Promise.resolve({ id: '507f1f77bcf86cd799439011' }),
+      });
+      const data = await response.json();
+
+      expect(response.status).toBe(401);
+      expect(data.error).toBe('Unauthorized');
+      expect(mockAddRestaurantToCollection).not.toHaveBeenCalled();
+    });
+
+    it('should return 404 when the collection does not belong to the caller', async () => {
+      mockVerifyCollectionAccess.mockResolvedValue(null);
+
+      const request = new NextRequest(
+        'http://localhost:3000/api/collections/507f1f77bcf86cd799439011/restaurants',
+        {
+          method: 'POST',
+          body: JSON.stringify({ restaurantId: '507f1f77bcf86cd799439013' }),
+        }
+      );
+      const response = await POST(request, {
+        params: Promise.resolve({ id: '507f1f77bcf86cd799439011' }),
+      });
+      const data = await response.json();
+
+      expect(response.status).toBe(404);
+      expect(data.error).toBe('Collection not found');
+      expect(mockAddRestaurantToCollection).not.toHaveBeenCalled();
     });
 
     it('should return 400 when collection ID is missing', async () => {
@@ -305,6 +395,40 @@ describe('/api/collections/[id]/restaurants', () => {
         '507f1f77bcf86cd799439011',
         '507f1f77bcf86cd799439013'
       );
+    });
+
+    it('should return 401 when unauthenticated', async () => {
+      mockGetCurrentUser.mockResolvedValue(null);
+
+      const request = new NextRequest(
+        'http://localhost:3000/api/collections/507f1f77bcf86cd799439011/restaurants?restaurantId=507f1f77bcf86cd799439013',
+        { method: 'DELETE' }
+      );
+      const response = await DELETE(request, {
+        params: Promise.resolve({ id: '507f1f77bcf86cd799439011' }),
+      });
+      const data = await response.json();
+
+      expect(response.status).toBe(401);
+      expect(data.error).toBe('Unauthorized');
+      expect(mockRemoveRestaurantFromCollection).not.toHaveBeenCalled();
+    });
+
+    it('should return 404 when the collection does not belong to the caller', async () => {
+      mockVerifyCollectionAccess.mockResolvedValue(null);
+
+      const request = new NextRequest(
+        'http://localhost:3000/api/collections/507f1f77bcf86cd799439011/restaurants?restaurantId=507f1f77bcf86cd799439013',
+        { method: 'DELETE' }
+      );
+      const response = await DELETE(request, {
+        params: Promise.resolve({ id: '507f1f77bcf86cd799439011' }),
+      });
+      const data = await response.json();
+
+      expect(response.status).toBe(404);
+      expect(data.error).toBe('Collection not found');
+      expect(mockRemoveRestaurantFromCollection).not.toHaveBeenCalled();
     });
 
     it('should return 400 when collection ID is missing', async () => {

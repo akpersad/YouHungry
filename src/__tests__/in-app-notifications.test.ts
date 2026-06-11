@@ -1,6 +1,5 @@
 import { inAppNotifications } from '@/lib/in-app-notifications';
 import { ObjectId } from 'mongodb';
-import { db } from '@/lib/db';
 
 // Mock database
 jest.mock('@/lib/db', () => {
@@ -21,13 +20,22 @@ jest.mock('@/lib/db', () => {
     deleteMany: jest.fn(),
   };
 
+  const mockDb = {
+    collection: jest.fn().mockReturnValue(mockCollection),
+  };
+
   return {
-    db: {
-      collection: jest.fn().mockReturnValue(mockCollection),
-    },
+    connectToDatabase: jest.fn().mockResolvedValue(mockDb),
+    __mockDb: mockDb,
     mockCollection,
   };
 });
+
+const db = (
+  jest.requireMock('@/lib/db') as {
+    __mockDb: { collection: jest.Mock };
+  }
+).__mockDb;
 
 // Mock logger
 jest.mock('@/lib/logger', () => ({
@@ -55,7 +63,7 @@ describe('In-App Notifications', () => {
       const mockInsertOne = jest.fn().mockResolvedValue({
         insertedId: new ObjectId(),
       });
-      (db!.collection as jest.Mock).mockReturnValue({
+      (db.collection as jest.Mock).mockReturnValue({
         insertOne: mockInsertOne,
       });
 
@@ -112,7 +120,7 @@ describe('In-App Notifications', () => {
       const mockSort = jest.fn().mockReturnValue({ skip: mockSkip });
       const mockFind = jest.fn().mockReturnValue({ sort: mockSort });
 
-      (db!.collection as jest.Mock).mockReturnValue({
+      (db.collection as jest.Mock).mockReturnValue({
         insertOne: jest.fn(),
         find: mockFind,
         updateOne: jest.fn(),
@@ -144,7 +152,7 @@ describe('In-App Notifications', () => {
   describe('markAsRead', () => {
     it('should mark notification as read', async () => {
       const mockUpdateOne = jest.fn().mockResolvedValue({ modifiedCount: 1 });
-      (db!.collection as jest.Mock).mockReturnValue({
+      (db.collection as jest.Mock).mockReturnValue({
         insertOne: jest.fn(),
         find: jest.fn(),
         updateOne: mockUpdateOne,
@@ -172,7 +180,7 @@ describe('In-App Notifications', () => {
   describe('markAllAsRead', () => {
     it('should mark all notifications as read for a user', async () => {
       const mockUpdateMany = jest.fn().mockResolvedValue({ modifiedCount: 3 });
-      (db!.collection as jest.Mock).mockReturnValue({
+      (db.collection as jest.Mock).mockReturnValue({
         insertOne: jest.fn(),
         find: jest.fn(),
         updateOne: jest.fn(),
@@ -202,7 +210,7 @@ describe('In-App Notifications', () => {
   describe('getUnreadCount', () => {
     it('should get unread notification count', async () => {
       const mockCountDocuments = jest.fn().mockResolvedValue(5);
-      (db!.collection as jest.Mock).mockReturnValue({
+      (db.collection as jest.Mock).mockReturnValue({
         insertOne: jest.fn(),
         find: jest.fn(),
         updateOne: jest.fn(),
@@ -229,7 +237,7 @@ describe('In-App Notifications', () => {
         insertedId: new ObjectId(),
       });
 
-      (db!.collection as jest.Mock).mockReturnValue({
+      (db.collection as jest.Mock).mockReturnValue({
         insertOne: mockInsertOne,
         find: jest.fn(),
         updateOne: jest.fn(),

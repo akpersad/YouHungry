@@ -171,30 +171,24 @@ export default function RootLayout({
             dangerouslySetInnerHTML={{
               __html: `
                 if ('serviceWorker' in navigator) {
-                  console.log('🔧 Attempting to register service worker...');
-                  
                   const registerSW = function() {
                     navigator.serviceWorker.register('/sw.js', { scope: '/' })
                       .then(function(registration) {
-                        console.log('✅ Service worker registered successfully:', registration);
                         window.dispatchEvent(new CustomEvent('sw-registered', { detail: registration }));
                       })
                       .catch(function(err) {
-                        console.error('❌ Service worker registration failed:', err);
+                        console.error('Service worker registration failed:', err);
                         window.dispatchEvent(new CustomEvent('sw-error', { detail: err }));
                       });
                   };
-                  
+
                   // Try to register immediately
                   registerSW();
-                  
+
                   // Also try on window load as fallback
                   window.addEventListener('load', function() {
-                    console.log('🔧 Window loaded, attempting service worker registration...');
                     registerSW();
                   });
-                } else {
-                  console.log('❌ Service Worker not supported in this browser');
                 }
               `,
             }}

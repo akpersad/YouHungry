@@ -54,7 +54,8 @@ export async function POST(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
-    await requireAuth();
+    const user = await requireAuth();
+    const userId = user._id.toString();
 
     const body = await request.json();
     const { decisionId } = body;
@@ -64,6 +65,23 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json(
         { error: 'decisionId is required and must be a string' },
         { status: 400 }
+      );
+    }
+
+    // SECURITY: only participants of the decision (group members) may
+    // complete it. Group decision participants are stored as Mongo
+    // ObjectId strings.
+    const existingDecision = await getGroupDecision(decisionId);
+    if (!existingDecision) {
+      return NextResponse.json(
+        { error: 'Decision not found' },
+        { status: 404 }
+      );
+    }
+    if (!existingDecision.participants?.includes(userId)) {
+      return NextResponse.json(
+        { error: 'You are not a participant in this decision' },
+        { status: 403 }
       );
     }
 

@@ -1,12 +1,13 @@
 import { logger } from '@/lib/logger';
 import { NextRequest } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
+import { getCurrentUser } from '@/lib/auth';
 import { getActiveGroupDecisions, getGroupDecision } from '@/lib/decisions';
+import { isGroupMemberOrAdmin } from '@/lib/groups';
 
 export async function GET(request: NextRequest) {
   try {
-    const { userId } = await auth();
-    if (!userId) {
+    const user = await getCurrentUser();
+    if (!user) {
       return new Response('Unauthorized', { status: 401 });
     }
 
@@ -18,6 +19,29 @@ export async function GET(request: NextRequest) {
       return new Response('Group ID or Decision ID is required', {
         status: 400,
       });
+    }
+
+    // SECURITY: only group members may subscribe to a group's decision stream
+    const userId = user._id.toString();
+    if (groupId) {
+      const isMember = await isGroupMemberOrAdmin(groupId, userId);
+      if (!isMember) {
+        return new Response('Forbidden', { status: 403 });
+      }
+    }
+    if (decisionId) {
+      const decision = await getGroupDecision(decisionId);
+      if (!decision) {
+        return new Response('Decision not found', { status: 404 });
+      }
+      // Group decision participants are stored as Mongo ObjectId strings
+      const isParticipant = decision.participants?.includes(userId);
+      const isMember = decision.groupId
+        ? await isGroupMemberOrAdmin(decision.groupId.toString(), userId)
+        : false;
+      if (!isParticipant && !isMember) {
+        return new Response('Forbidden', { status: 403 });
+      }
     }
 
     // Create a readable stream for Server-Sent Events

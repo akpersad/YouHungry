@@ -1,7 +1,8 @@
 import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
+import { getCurrentUser } from '@/lib/auth';
 import { createPersonalDecision, getDecisionHistory } from '@/lib/decisions';
+import { verifyCollectionAccess } from '@/lib/collections';
 import { z } from 'zod';
 
 const createDecisionSchema = z.object({
@@ -12,8 +13,8 @@ const createDecisionSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
-    const { userId } = await auth();
-    if (!userId) {
+    const user = await getCurrentUser();
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -21,9 +22,19 @@ export async function POST(request: NextRequest) {
     const { collectionId, method, visitDate } =
       createDecisionSchema.parse(body);
 
+    // Caller must own the collection (personal) or be a group member (group)
+    const collection = await verifyCollectionAccess(collectionId, user);
+    if (!collection) {
+      return NextResponse.json(
+        { error: 'Collection not found' },
+        { status: 404 }
+      );
+    }
+
+    // Personal decisions store the Clerk ID in participants
     const decision = await createPersonalDecision(
       collectionId,
-      userId,
+      user.clerkId,
       method,
       new Date(visitDate)
     );
@@ -60,8 +71,8 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
-    const { userId } = await auth();
-    if (!userId) {
+    const user = await getCurrentUser();
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -73,6 +84,15 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(
         { error: 'Collection ID is required' },
         { status: 400 }
+      );
+    }
+
+    // Caller must own the collection (personal) or be a group member (group)
+    const collection = await verifyCollectionAccess(collectionId, user);
+    if (!collection) {
+      return NextResponse.json(
+        { error: 'Collection not found' },
+        { status: 404 }
       );
     }
 

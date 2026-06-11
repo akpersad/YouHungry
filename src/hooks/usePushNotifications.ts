@@ -33,8 +33,6 @@ export function usePushNotifications() {
       return;
     }
 
-    console.log('🔍 HOOK DEBUG: Starting checkStatus');
-
     // Use real-time detection instead of the potentially stale capabilities
     const realTimeCapabilities = {
       supported: (() => {
@@ -83,23 +81,7 @@ export function usePushNotifications() {
       hasIOSSupport: realTimeCapabilities.hasIOSPushSupport,
     };
 
-    console.log(
-      '🔍 HOOK DEBUG: Setting status to:',
-      JSON.stringify(newStatus, null, 2)
-    );
-
-    // Force a re-render by using a callback
-    setStatus((prevStatus) => {
-      console.log(
-        '🔍 HOOK DEBUG: Previous status was:',
-        JSON.stringify(prevStatus, null, 2)
-      );
-      console.log(
-        '🔍 HOOK DEBUG: New status will be:',
-        JSON.stringify(newStatus, null, 2)
-      );
-      return newStatus;
-    });
+    setStatus(newStatus);
   }, []);
 
   useEffect(() => {
@@ -108,33 +90,25 @@ export function usePushNotifications() {
       try {
         // Wait for service worker to be ready
         if ('serviceWorker' in navigator) {
-          console.log('🔍 Waiting for service worker to be ready...');
-
           // Check if service worker is already registered
           const registration = await navigator.serviceWorker.getRegistration();
           if (!registration) {
-            console.log(
-              '🔧 No service worker found, attempting to register...'
-            );
+            logger.debug('No service worker found, attempting to register...');
             try {
               await navigator.serviceWorker.register('/sw.js', { scope: '/' });
-              console.log('✅ Service worker registered successfully');
+              logger.debug('Service worker registered successfully');
             } catch (regError) {
-              console.error('❌ Failed to register service worker:', regError);
+              logger.error('Failed to register service worker:', regError);
             }
           }
 
           await navigator.serviceWorker.ready;
-          console.log('🔍 Service worker is ready!');
         }
 
         // Now check status
         await checkStatus();
       } catch (error) {
-        console.error(
-          '🔍 Failed to initialize push notification status:',
-          error
-        );
+        logger.error('Failed to initialize push notification status:', error);
         // Fallback: try without waiting for service worker
         await checkStatus();
       }
@@ -150,9 +124,7 @@ export function usePushNotifications() {
       try {
         // Wait for service worker to be ready first
         if ('serviceWorker' in navigator) {
-          console.log('🔍 Waiting for service worker before subscribing...');
           await navigator.serviceWorker.ready;
-          console.log('🔍 Service worker ready, proceeding with subscription');
         }
 
         const subscription = await pushNotifications.subscribe();

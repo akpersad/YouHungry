@@ -109,10 +109,10 @@ export async function GET() {
 
     const isConfigured = smsNotifications.isConfigured();
 
+    // Only expose non-sensitive configuration status - never phone numbers
     return NextResponse.json({
       configured: isConfigured,
-      fromNumber: process.env.TWILIO_PHONE_NUMBER,
-      developmentNumber: '+18777804236',
+      fromNumberConfigured: Boolean(process.env.TWILIO_PHONE_NUMBER),
       message: isConfigured
         ? 'SMS service is configured'
         : 'SMS service is not configured',

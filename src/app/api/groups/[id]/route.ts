@@ -6,6 +6,7 @@ import {
   updateGroup,
   deleteGroup,
   getGroupMembers,
+  isGroupMemberOrAdmin,
 } from '@/lib/groups';
 import { validateData, groupSchema } from '@/lib/validation';
 
@@ -14,11 +15,19 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await requireAuth();
+    const user = await requireAuth();
     const { id: groupId } = await params;
 
     const group = await getGroupById(groupId);
     if (!group) {
+      return NextResponse.json({ error: 'Group not found' }, { status: 404 });
+    }
+
+    // Only members/admins may view group details. Return 404 (not 403) so
+    // non-members can't probe for group existence — same pattern as the
+    // collections routes.
+    const isMember = await isGroupMemberOrAdmin(groupId, user._id.toString());
+    if (!isMember) {
       return NextResponse.json({ error: 'Group not found' }, { status: 404 });
     }
 

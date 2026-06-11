@@ -1,9 +1,13 @@
 import { logger } from '@/lib/logger';
 import { NextResponse } from 'next/server';
 import { getRecentPerformanceMetrics } from '@/lib/performance-metrics';
+import { requireAdminAuth } from '@/lib/auth';
 
 export async function GET() {
   try {
+    // Check if user is admin
+    await requireAdminAuth();
+
     // Get all metrics from MongoDB (limit to 90 days)
     const metrics = await getRecentPerformanceMetrics(90);
 
@@ -28,6 +32,10 @@ export async function GET() {
       },
     });
   } catch (error) {
+    if (error instanceof Error && error.message === 'Admin access required') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+    }
+
     logger.error('Error loading performance metrics:', error);
     return NextResponse.json(
       { error: 'Failed to load performance metrics' },

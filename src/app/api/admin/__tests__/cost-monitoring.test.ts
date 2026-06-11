@@ -29,10 +29,16 @@ jest.mock('@/lib/logger', () => ({
   },
 }));
 
+// Mock the auth module
+jest.mock('@/lib/auth', () => ({
+  requireAdminAuth: jest.fn(),
+}));
+
 import {
   getAPIUsageStats,
   getAvailableDataYears,
 } from '@/lib/api-usage-tracker';
+import { requireAdminAuth } from '@/lib/auth';
 import { getCacheStats } from '@/lib/optimized-google-places';
 import { getLocationCacheStats } from '@/lib/google-places';
 
@@ -52,6 +58,14 @@ const mockGetAvailableDataYears = getAvailableDataYears as jest.MockedFunction<
 describe('/api/admin/cost-monitoring', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+
+    // Mock admin user
+    (requireAdminAuth as jest.Mock).mockResolvedValue({
+      _id: 'admin123',
+      clerkId: 'clerk_admin',
+      email: 'admin@example.com',
+      name: 'Admin User',
+    });
 
     // Default mock for API usage stats - returns different values for daily vs monthly
     mockGetAPIUsageStats

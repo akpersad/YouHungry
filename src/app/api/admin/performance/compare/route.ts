@@ -4,9 +4,13 @@ import {
   getRecentPerformanceMetrics,
   comparePerformanceMetrics,
 } from '@/lib/performance-metrics';
+import { requireAdminAuth } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {
   try {
+    // Check if user is admin
+    await requireAdminAuth();
+
     const { searchParams } = new URL(request.url);
     const days = parseInt(searchParams.get('days') || '1');
 
@@ -116,6 +120,10 @@ export async function GET(request: NextRequest) {
       metrics2: comparison.metrics2,
     });
   } catch (error) {
+    if (error instanceof Error && error.message === 'Admin access required') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+    }
+
     logger.error('Error comparing performance metrics:', error);
     return NextResponse.json(
       { error: 'Failed to compare performance metrics' },

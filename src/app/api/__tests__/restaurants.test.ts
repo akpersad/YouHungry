@@ -1,11 +1,18 @@
 import { NextRequest } from 'next/server';
 import { POST } from '../restaurants/route';
 import { createRestaurant, getRestaurantDetails } from '@/lib/restaurants';
-import { addRestaurantToCollection } from '@/lib/collections';
+import {
+  addRestaurantToCollection,
+  verifyCollectionAccess,
+} from '@/lib/collections';
+import { getCurrentUser } from '@/lib/auth';
 
 // Mock dependencies
 jest.mock('@/lib/restaurants');
 jest.mock('@/lib/collections');
+jest.mock('@/lib/auth', () => ({
+  getCurrentUser: jest.fn(),
+}));
 
 const mockCreateRestaurant = createRestaurant as jest.MockedFunction<
   typeof createRestaurant
@@ -17,10 +24,22 @@ const mockAddRestaurantToCollection =
   addRestaurantToCollection as jest.MockedFunction<
     typeof addRestaurantToCollection
   >;
+const mockVerifyCollectionAccess =
+  verifyCollectionAccess as jest.MockedFunction<typeof verifyCollectionAccess>;
+const mockGetCurrentUser = getCurrentUser as jest.MockedFunction<
+  typeof getCurrentUser
+>;
+
+const mockUser = {
+  _id: { toString: () => '507f1f77bcf86cd799439010' },
+  clerkId: 'clerk_user_123',
+} as any;
 
 describe('/api/restaurants POST', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockGetCurrentUser.mockResolvedValue(mockUser);
+    mockVerifyCollectionAccess.mockResolvedValue(mockCollection);
   });
 
   const mockRestaurantData = {
@@ -90,6 +109,44 @@ describe('/api/restaurants POST', () => {
       mockRestaurant._id
     );
     expect(mockAddRestaurantToCollection).toHaveBeenCalledTimes(1);
+  });
+
+  it('should return 401 when unauthenticated', async () => {
+    mockGetCurrentUser.mockResolvedValue(null);
+
+    const request = new NextRequest('http://localhost:3000/api/restaurants', {
+      method: 'POST',
+      body: JSON.stringify({
+        restaurantData: mockRestaurantData,
+        collectionId: '507f1f77bcf86cd799439011',
+      }),
+    });
+
+    const response = await POST(request);
+    const data = await response.json();
+
+    expect(response.status).toBe(401);
+    expect(data.error).toBe('Unauthorized');
+    expect(mockAddRestaurantToCollection).not.toHaveBeenCalled();
+  });
+
+  it('should return 404 when the collection does not belong to the caller', async () => {
+    mockVerifyCollectionAccess.mockResolvedValue(null);
+
+    const request = new NextRequest('http://localhost:3000/api/restaurants', {
+      method: 'POST',
+      body: JSON.stringify({
+        restaurantData: mockRestaurantData,
+        collectionId: '507f1f77bcf86cd799439011',
+      }),
+    });
+
+    const response = await POST(request);
+    const data = await response.json();
+
+    expect(response.status).toBe(404);
+    expect(data.error).toBe('Collection not found');
+    expect(mockAddRestaurantToCollection).not.toHaveBeenCalled();
   });
 
   it('should create new restaurant and add to collection', async () => {

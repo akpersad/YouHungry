@@ -13,7 +13,7 @@ jest.mock('@/lib/db', () => ({
 }));
 
 jest.mock('@/lib/auth', () => ({
-  requireAuth: jest.fn(),
+  requireAdminAuth: jest.fn(),
 }));
 
 jest.mock('@/lib/api-usage-tracker', () => ({
@@ -21,13 +21,15 @@ jest.mock('@/lib/api-usage-tracker', () => ({
 }));
 
 import { connectToDatabase } from '@/lib/db';
-import { requireAuth } from '@/lib/auth';
+import { requireAdminAuth } from '@/lib/auth';
 import { getAPIUsageStats } from '@/lib/api-usage-tracker';
 
 const mockConnectToDatabase = connectToDatabase as jest.MockedFunction<
   typeof connectToDatabase
 >;
-const mockRequireAuth = requireAuth as jest.MockedFunction<typeof requireAuth>;
+const mockRequireAdminAuth = requireAdminAuth as jest.MockedFunction<
+  typeof requireAdminAuth
+>;
 const mockGetAPIUsageStats = getAPIUsageStats as jest.MockedFunction<
   typeof getAPIUsageStats
 >;
@@ -37,7 +39,7 @@ describe('/api/admin/analytics/usage', () => {
     jest.clearAllMocks();
 
     // Mock authenticated user
-    mockRequireAuth.mockResolvedValue({
+    mockRequireAdminAuth.mockResolvedValue({
       _id: 'user123',
       clerkId: 'clerk123',
       email: 'admin@example.com',
@@ -381,7 +383,7 @@ describe('/api/admin/analytics/usage', () => {
   });
 
   it('returns error when authentication fails', async () => {
-    mockRequireAuth.mockRejectedValue(new Error('Unauthorized'));
+    mockRequireAdminAuth.mockRejectedValue(new Error('Unauthorized'));
 
     const request = new NextRequest(
       'http://localhost:3000/api/admin/analytics/usage?period=7d'

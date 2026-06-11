@@ -6,7 +6,7 @@ import {
   getActiveGroupDecisions,
   getAllGroupDecisions,
 } from '@/lib/decisions';
-import { getGroupById } from '@/lib/groups';
+import { getGroupById, isGroupMemberOrAdmin } from '@/lib/groups';
 import { sendDecisionStartedNotifications } from '@/lib/decision-notifications';
 import { z } from 'zod';
 
@@ -44,6 +44,14 @@ export async function POST(request: NextRequest) {
       ...new Set(allMemberIds.map((id) => id.toString())),
     ];
     const participants = uniqueMemberIds;
+
+    // SECURITY: only group members can start decisions for the group
+    if (!participants.includes(currentUser._id.toString())) {
+      return NextResponse.json(
+        { error: 'You are not a member of this group' },
+        { status: 403 }
+      );
+    }
 
     const decision = await createGroupDecision(
       collectionId,
@@ -114,7 +122,7 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
-    await requireAuth();
+    const user = await requireAuth();
 
     const { searchParams } = new URL(request.url);
     const groupId = searchParams.get('groupId');
@@ -124,6 +132,15 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(
         { error: 'Group ID is required' },
         { status: 400 }
+      );
+    }
+
+    // SECURITY: only group members can read the group's decisions
+    const isMember = await isGroupMemberOrAdmin(groupId, user._id.toString());
+    if (!isMember) {
+      return NextResponse.json(
+        { error: 'You are not a member of this group' },
+        { status: 403 }
       );
     }
 

@@ -66,7 +66,7 @@ describe('useFriends', () => {
     });
 
     expect(result.current.data).toEqual(mockFriends);
-    expect(fetch).toHaveBeenCalledWith('/api/friends?userId=user1');
+    expect(fetch).toHaveBeenCalledWith('/api/friends');
   });
 
   it('should handle fetch error', async () => {
@@ -148,7 +148,7 @@ describe('useFriendRequests', () => {
     });
 
     expect(result.current.data).toEqual(mockRequests);
-    expect(fetch).toHaveBeenCalledWith('/api/friends/requests?userId=user1');
+    expect(fetch).toHaveBeenCalledWith('/api/friends/requests');
   });
 });
 
@@ -182,9 +182,7 @@ describe('useUserSearch', () => {
     });
 
     expect(result.current.data).toEqual(mockResults);
-    expect(fetch).toHaveBeenCalledWith(
-      '/api/friends/search?q=john&userId=user1'
-    );
+    expect(fetch).toHaveBeenCalledWith('/api/friends/search?q=john');
   });
 
   it('should not search when query is too short', () => {
@@ -249,8 +247,8 @@ describe('useSendFriendRequest', () => {
         headers: expect.objectContaining({
           'Content-Type': 'application/json',
         }),
+        // requesterId is derived from the session server-side
         body: JSON.stringify({
-          requesterId: 'user1',
           addresseeId: 'user2',
         }),
       })
@@ -325,9 +323,9 @@ describe('useUpdateFriendRequest', () => {
       headers: {
         'Content-Type': 'application/json',
       },
+      // userId is derived from the session server-side
       body: JSON.stringify({
         action: 'accept',
-        userId: 'user2',
       }),
     });
   });
@@ -367,9 +365,9 @@ describe('useUpdateFriendRequest', () => {
       headers: {
         'Content-Type': 'application/json',
       },
+      // userId is derived from the session server-side
       body: JSON.stringify({
         action: 'decline',
-        userId: 'user2',
       }),
     });
   });
@@ -401,7 +399,7 @@ describe('useRemoveFriend', () => {
     });
 
     expect(fetch).toHaveBeenCalledWith(
-      '/api/friends?friendshipId=friendship1&userId=user1',
+      '/api/friends?friendshipId=friendship1',
       {
         method: 'DELETE',
       }

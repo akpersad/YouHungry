@@ -45,6 +45,14 @@ export async function POST(request: NextRequest) {
     ];
     const participants = uniqueMemberIds;
 
+    // SECURITY: only group members can run a random selection for the group
+    if (!participants.includes(currentUser._id.toString())) {
+      return NextResponse.json(
+        { error: 'You are not a member of this group' },
+        { status: 403 }
+      );
+    }
+
     const result = await performGroupRandomSelection(
       collectionId,
       groupId,

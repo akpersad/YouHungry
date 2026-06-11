@@ -3,6 +3,11 @@ import { auth } from '@clerk/nextjs/server';
 import { connectToDatabase } from '@/lib/db';
 import { logger } from '@/lib/logger';
 import { trackAPIUsage } from '@/lib/api-usage-tracker';
+import {
+  checkRateLimit,
+  rateLimitResponse,
+  userRateLimitKey,
+} from '@/lib/rate-limit';
 import twilio from 'twilio';
 
 // Initialize Twilio client
@@ -44,6 +49,16 @@ export async function POST(request: NextRequest) {
 
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Each request sends a real Twilio verification SMS — 3 per user per hour.
+    const rateLimit = await checkRateLimit({
+      key: userRateLimitKey('verify-phone-send', userId),
+      limit: 3,
+      windowMs: 60 * 60 * 1000,
+    });
+    if (!rateLimit.allowed) {
+      return rateLimitResponse(rateLimit.retryAfterSeconds);
     }
 
     const body = await request.json();
@@ -158,6 +173,17 @@ export async function PUT(request: NextRequest) {
 
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Brute-force guard on code checks (on top of Twilio's own max-attempts):
+    // 10 checks per user per 15 minutes.
+    const rateLimit = await checkRateLimit({
+      key: userRateLimitKey('verify-phone-check', userId),
+      limit: 10,
+      windowMs: 15 * 60 * 1000,
+    });
+    if (!rateLimit.allowed) {
+      return rateLimitResponse(rateLimit.retryAfterSeconds);
     }
 
     const body = await request.json();

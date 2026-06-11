@@ -27,11 +27,20 @@ export async function POST(req: NextRequest) {
   const webhookSecret = process.env.CLERK_WEBHOOK_SECRET;
 
   if (!webhookSecret) {
+    // Fail closed in production: never process unverified webhook payloads
+    if (process.env.NODE_ENV === 'production') {
+      logger.error(
+        'CLERK_WEBHOOK_SECRET not configured in production - rejecting webhook'
+      );
+      return new Response('Webhook secret not configured', { status: 500 });
+    }
+
     logger.debug(
       'CLERK_WEBHOOK_SECRET not set, running in development mode without verification'
     );
-    // In development, we'll process the webhook without verification
-    // This allows testing user creation locally before production webhook setup
+    // In development (non-production only), we'll process the webhook without
+    // verification. This allows testing user creation locally before
+    // production webhook setup.
   }
 
   let evt: WebhookEvent;

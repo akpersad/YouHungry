@@ -79,7 +79,6 @@ export class PushNotificationManager {
     };
 
     logger.debug('iOS detection:', debugInfo);
-    console.log('🔍 iOS detection:', JSON.stringify(debugInfo, null, 2));
 
     return isIOS;
   }
@@ -96,14 +95,9 @@ export class PushNotificationManager {
     };
 
     logger.debug('hasIOSPushSupport check:', debugInfo);
-    console.log(
-      '🔍 hasIOSPushSupport check:',
-      JSON.stringify(debugInfo, null, 2)
-    );
 
     if (!isIOSDevice) {
       logger.debug('Not an iOS device, returning false');
-      console.log('🔍 Not an iOS device, returning false');
       return false;
     }
 
@@ -117,7 +111,6 @@ export class PushNotificationManager {
       'Notification' in window
     ) {
       logger.debug('iOS device has push notification APIs available');
-      console.log('🔍 iOS device has push notification APIs available');
       return true;
     }
 
@@ -140,10 +133,6 @@ export class PushNotificationManager {
           userAgent: navigator.userAgent,
         };
         logger.debug('iOS version detected:', versionDebugInfo);
-        console.log(
-          '🔍 iOS version detected:',
-          JSON.stringify(versionDebugInfo, null, 2)
-        );
         return hasSupport;
       }
     }
@@ -157,10 +146,6 @@ export class PushNotificationManager {
     logger.warn(
       'Could not detect iOS version from userAgent:',
       fallbackDebugInfo
-    );
-    console.log(
-      '🔍 Could not detect iOS version:',
-      JSON.stringify(fallbackDebugInfo, null, 2)
     );
 
     // Default to false if we can't detect version
@@ -564,45 +549,6 @@ export class PushNotificationManager {
 
     // Log detailed debugging info
     logger.debug('Push notification capabilities:', caps);
-    console.log(
-      '🔍 DEBUG: Push notification capabilities:',
-      JSON.stringify(caps, null, 2)
-    );
-    console.log('🔍 DEBUG: isSupported() result:', this.isSupported());
-    console.log(
-      '🔍 DEBUG: window.isSecureContext:',
-      typeof window !== 'undefined' ? window.isSecureContext : 'undefined'
-    );
-    console.log(
-      '🔍 DEBUG: navigator.userAgent:',
-      typeof navigator !== 'undefined' ? navigator.userAgent : 'undefined'
-    );
-
-    // Also log to server for easier debugging
-    console.log(
-      '🔍 SERVER DEBUG: Final capabilities result:',
-      JSON.stringify(caps, null, 2)
-    );
-
-    // Send debug info to server
-    try {
-      fetch('/api/debug/push-notifications', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          capabilities: caps,
-          timestamp: new Date().toISOString(),
-          userAgent:
-            typeof navigator !== 'undefined'
-              ? navigator.userAgent
-              : 'undefined',
-        }),
-      }).catch(() => {
-        // Ignore fetch errors
-      });
-    } catch {
-      // Ignore errors
-    }
 
     return caps;
   }

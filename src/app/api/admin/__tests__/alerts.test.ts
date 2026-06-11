@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { GET, POST, PUT, DELETE } from '../alerts/route';
 import { clearAlertStorage } from '@/lib/alert-storage';
+import { requireAdminAuth } from '@/lib/auth';
 
 // Mock logger
 jest.mock('@/lib/logger', () => ({
@@ -11,6 +12,11 @@ jest.mock('@/lib/logger', () => ({
   },
 }));
 
+// Mock the auth module
+jest.mock('@/lib/auth', () => ({
+  requireAdminAuth: jest.fn(),
+}));
+
 // Mock fetch for email notifications
 global.fetch = jest.fn();
 
@@ -19,6 +25,14 @@ describe('/api/admin/alerts', () => {
     jest.clearAllMocks();
     (global.fetch as jest.Mock).mockClear();
     clearAlertStorage(); // Clear alert storage before each test
+
+    // Mock admin user
+    (requireAdminAuth as jest.Mock).mockResolvedValue({
+      _id: 'admin123',
+      clerkId: 'clerk_admin',
+      email: 'admin@example.com',
+      name: 'Admin User',
+    });
   });
 
   describe('GET', () => {

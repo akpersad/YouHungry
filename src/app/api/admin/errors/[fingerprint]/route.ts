@@ -7,23 +7,16 @@
 
 import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
 import { connectToDatabase } from '@/lib/db';
-import { ObjectId } from 'mongodb';
-
-const ADMIN_USER_IDS = process.env.ADMIN_USER_IDS?.split(',') || [];
+import { requireAdminAuth } from '@/lib/auth';
 
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ fingerprint: string }> }
 ) {
   try {
-    const { userId } = await auth();
-
     // Check if user is admin
-    if (!userId || !ADMIN_USER_IDS.includes(userId)) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
-    }
+    const user = await requireAdminAuth();
 
     const { fingerprint } = await params;
     const body = await request.json();
@@ -39,7 +32,7 @@ export async function PATCH(
       updateData.status = status;
       if (status === 'resolved') {
         updateData.resolvedAt = new Date();
-        updateData.resolvedBy = new ObjectId(userId);
+        updateData.resolvedBy = user._id;
       }
     }
 
@@ -60,6 +53,10 @@ export async function PATCH(
 
     return NextResponse.json({ success: true });
   } catch (error) {
+    if (error instanceof Error && error.message === 'Admin access required') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+    }
+
     logger.error('Error updating error group:', error);
     return NextResponse.json(
       { error: 'Failed to update error group' },
@@ -73,12 +70,8 @@ export async function DELETE(
   { params }: { params: Promise<{ fingerprint: string }> }
 ) {
   try {
-    const { userId } = await auth();
-
     // Check if user is admin
-    if (!userId || !ADMIN_USER_IDS.includes(userId)) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
-    }
+    await requireAdminAuth();
 
     const { fingerprint } = await params;
     const db = await connectToDatabase();
@@ -89,6 +82,10 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
+    if (error instanceof Error && error.message === 'Admin access required') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+    }
+
     logger.error('Error deleting error group:', error);
     return NextResponse.json(
       { error: 'Failed to delete error group' },

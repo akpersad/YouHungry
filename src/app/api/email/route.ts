@@ -1,29 +1,56 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
+import { getCurrentUser } from '@/lib/auth';
 import { userEmailNotificationService } from '@/lib/user-email-notifications';
 import { logger } from '@/lib/logger';
+import {
+  checkRateLimit,
+  rateLimitResponse,
+  userRateLimitKey,
+} from '@/lib/rate-limit';
 
 export async function POST(request: NextRequest) {
   try {
-    const { userId } = await auth();
+    const user = await getCurrentUser();
 
-    if (!userId) {
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Real Resend sends cost money — 10 emails per user per hour.
+    const rateLimit = await checkRateLimit({
+      key: userRateLimitKey('email-send', user._id.toString()),
+      limit: 10,
+      windowMs: 60 * 60 * 1000,
+    });
+    if (!rateLimit.allowed) {
+      return rateLimitResponse(rateLimit.retryAfterSeconds);
     }
 
     const body = await request.json();
     const { action, email } = body;
 
     if (action === 'test') {
-      if (!email) {
+      // Security: test emails may only be sent to the authenticated user's
+      // own email address. Admins can use /api/admin/alerts/test-email for
+      // arbitrary recipients.
+      const targetEmail = email || user.email;
+
+      if (
+        typeof targetEmail !== 'string' ||
+        targetEmail.trim().toLowerCase() !== user.email.trim().toLowerCase()
+      ) {
+        logger.warn('Test email to non-own address rejected', {
+          userId: user._id.toString(),
+        });
         return NextResponse.json(
-          { error: 'Email address is required for test' },
-          { status: 400 }
+          { error: 'Test emails can only be sent to your own email address' },
+          { status: 403 }
         );
       }
 
-      const result =
-        await userEmailNotificationService.sendTestUserEmail(email);
+      const result = await userEmailNotificationService.sendTestUserEmail(
+        user.email
+      );
 
       return NextResponse.json({
         success: result.success,

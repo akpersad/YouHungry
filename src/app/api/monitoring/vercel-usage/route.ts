@@ -1,5 +1,6 @@
 import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAdminAuth } from '@/lib/auth';
 
 interface VercelUsageData {
   bandwidth: {
@@ -205,6 +206,9 @@ export async function checkVercelUsage(): Promise<void> {
 // API endpoint to manually check usage
 export async function GET(_request: NextRequest) {
   try {
+    // Check if user is admin
+    await requireAdminAuth();
+
     await checkVercelUsage();
     return NextResponse.json({
       success: true,
@@ -212,6 +216,13 @@ export async function GET(_request: NextRequest) {
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
+    if (error instanceof Error && error.message === 'Admin access required') {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 403 }
+      );
+    }
+
     return NextResponse.json(
       {
         success: false,
@@ -225,6 +236,9 @@ export async function GET(_request: NextRequest) {
 // API endpoint to get current usage data
 export async function POST(_request: NextRequest) {
   try {
+    // Check if user is admin
+    await requireAdminAuth();
+
     const data = await getVercelUsageData();
     return NextResponse.json({
       success: true,
@@ -233,6 +247,13 @@ export async function POST(_request: NextRequest) {
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
+    if (error instanceof Error && error.message === 'Admin access required') {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 403 }
+      );
+    }
+
     return NextResponse.json(
       {
         success: false,

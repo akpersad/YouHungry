@@ -12,7 +12,7 @@ jest.mock('@/lib/db', () => ({
 }));
 
 jest.mock('@/lib/auth', () => ({
-  requireAuth: jest.fn(),
+  requireAdminAuth: jest.fn(),
 }));
 
 // Mock MongoDB ObjectId
@@ -21,19 +21,21 @@ jest.mock('mongodb', () => ({
 }));
 
 import { connectToDatabase } from '@/lib/db';
-import { requireAuth } from '@/lib/auth';
+import { requireAdminAuth } from '@/lib/auth';
 
 const mockConnectToDatabase = connectToDatabase as jest.MockedFunction<
   typeof connectToDatabase
 >;
-const mockRequireAuth = requireAuth as jest.MockedFunction<typeof requireAuth>;
+const mockRequireAdminAuth = requireAdminAuth as jest.MockedFunction<
+  typeof requireAdminAuth
+>;
 
 describe('/api/admin/users/stats', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
     // Mock authenticated user
-    mockRequireAuth.mockResolvedValue({
+    mockRequireAdminAuth.mockResolvedValue({
       _id: 'user123',
       clerkId: 'clerk123',
       email: 'admin@example.com',
@@ -114,7 +116,7 @@ describe('/api/admin/users/stats', () => {
   });
 
   it('returns error when authentication fails', async () => {
-    mockRequireAuth.mockRejectedValue(new Error('Unauthorized'));
+    mockRequireAdminAuth.mockRejectedValue(new Error('Unauthorized'));
 
     const response = await GET();
     const data = await response.json();

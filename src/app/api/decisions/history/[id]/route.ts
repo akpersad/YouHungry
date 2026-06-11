@@ -1,6 +1,6 @@
 import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
+import { getCurrentUser } from '@/lib/auth';
 import { connectToDatabase } from '@/lib/db';
 import { ObjectId } from 'mongodb';
 import { z } from 'zod';
@@ -19,8 +19,8 @@ export async function PATCH(
   context: RouteContext
 ): Promise<NextResponse> {
   try {
-    const { userId } = await auth();
-    if (!userId) {
+    const user = await getCurrentUser();
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -39,10 +39,12 @@ export async function PATCH(
 
     const db = await connectToDatabase();
 
-    // Check if decision exists and user is a participant
+    // Check if decision exists and user is a participant.
+    // Personal decisions store the Clerk ID in participants; group decisions
+    // store Mongo ObjectId strings, so match against both.
     const decision = await db.collection('decisions').findOne({
       _id: new ObjectId(id),
-      participants: userId,
+      participants: { $in: [user.clerkId, user._id.toString()] },
       status: 'completed',
     });
 
@@ -101,8 +103,8 @@ export async function DELETE(
   context: RouteContext
 ): Promise<NextResponse> {
   try {
-    const { userId } = await auth();
-    if (!userId) {
+    const user = await getCurrentUser();
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -118,10 +120,12 @@ export async function DELETE(
 
     const db = await connectToDatabase();
 
-    // Check if decision exists and user is a participant
+    // Check if decision exists and user is a participant.
+    // Personal decisions store the Clerk ID in participants; group decisions
+    // store Mongo ObjectId strings, so match against both.
     const decision = await db.collection('decisions').findOne({
       _id: new ObjectId(id),
-      participants: userId,
+      participants: { $in: [user.clerkId, user._id.toString()] },
     });
 
     if (!decision) {
@@ -144,7 +148,7 @@ export async function DELETE(
     }
 
     logger.info(
-      `Decision ${id} deleted by user ${userId}. Restaurant: ${decision.result?.restaurantId}, Collection: ${decision.collectionId}`
+      `Decision ${id} deleted by user ${user.clerkId}. Restaurant: ${decision.result?.restaurantId}, Collection: ${decision.collectionId}`
     );
 
     return NextResponse.json({

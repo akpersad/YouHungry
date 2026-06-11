@@ -1,19 +1,14 @@
 import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/db';
-import { requireAuth } from '@/lib/auth';
+import { requireAdminAuth } from '@/lib/auth';
 import { getAPIUsageStats } from '@/lib/api-usage-tracker';
 // import { ObjectId } from 'mongodb';
 
 export async function GET(request: NextRequest) {
   try {
     // Check authentication and admin access
-    await requireAuth();
-
-    // TODO: Add admin role check when implemented
-    // if (!user.isAdmin) {
-    //   return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
-    // }
+    await requireAdminAuth();
 
     const { searchParams } = new URL(request.url);
     const period = searchParams.get('period') || '7d'; // 7d, 30d, 90d
@@ -357,6 +352,10 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
+    if (error instanceof Error && error.message === 'Admin access required') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+    }
+
     logger.error('Error fetching usage analytics:', error);
     return NextResponse.json(
       { error: 'Failed to fetch usage analytics' },

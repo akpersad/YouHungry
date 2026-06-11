@@ -1,16 +1,25 @@
 import { GET } from '../history/route';
-import { auth } from '@clerk/nextjs/server';
+import { getCurrentUser } from '@/lib/auth';
 import { connectToDatabase } from '@/lib/db';
 import { NextRequest } from 'next/server';
 import { Db } from 'mongodb';
 
-jest.mock('@clerk/nextjs/server');
+jest.mock('@/lib/auth', () => ({
+  getCurrentUser: jest.fn(),
+}));
 jest.mock('@/lib/db');
 
-const mockAuth = auth as jest.MockedFunction<typeof auth>;
+const mockGetCurrentUser = getCurrentUser as jest.MockedFunction<
+  typeof getCurrentUser
+>;
 const mockConnectToDatabase = connectToDatabase as jest.MockedFunction<
   typeof connectToDatabase
 >;
+
+const mockUser = {
+  _id: { toString: () => 'dbUser123' },
+  clerkId: 'user123',
+} as any;
 
 describe('GET /api/decisions/history', () => {
   let mockDb: any;
@@ -32,17 +41,7 @@ describe('GET /api/decisions/history', () => {
   });
 
   it('should return unauthorized if user is not authenticated', async () => {
-    mockAuth.mockResolvedValue({
-      userId: null,
-      sessionId: null,
-      orgId: null,
-      orgRole: null,
-      orgSlug: null,
-      sessionClaims: null,
-      orgPermissions: null,
-      actor: null,
-      factorVerificationAge: null,
-    } as any);
+    mockGetCurrentUser.mockResolvedValue(null);
 
     const request = new NextRequest(
       'http://localhost:3000/api/decisions/history'
@@ -55,17 +54,7 @@ describe('GET /api/decisions/history', () => {
   });
 
   it('should fetch decision history with default filters', async () => {
-    mockAuth.mockResolvedValue({
-      userId: 'user123',
-      sessionId: 'session123',
-      orgId: null,
-      orgRole: null,
-      orgSlug: null,
-      sessionClaims: {},
-      orgPermissions: null,
-      actor: null,
-      factorVerificationAge: null,
-    } as any);
+    mockGetCurrentUser.mockResolvedValue(mockUser);
 
     const mockDecisions = [
       {
@@ -123,17 +112,7 @@ describe('GET /api/decisions/history', () => {
   });
 
   it('should apply filters (type, date range, search)', async () => {
-    mockAuth.mockResolvedValue({
-      userId: 'user123',
-      sessionId: 'session123',
-      orgId: null,
-      orgRole: null,
-      orgSlug: null,
-      sessionClaims: {},
-      orgPermissions: null,
-      actor: null,
-      factorVerificationAge: null,
-    } as any);
+    mockGetCurrentUser.mockResolvedValue(mockUser);
 
     // Test type filter
     mockDb.countDocuments.mockResolvedValue(0);
@@ -150,6 +129,9 @@ describe('GET /api/decisions/history', () => {
     expect(mockDb.find).toHaveBeenCalledWith(
       expect.objectContaining({
         type: 'group',
+        // Personal decisions store the Clerk ID in participants; group
+        // decisions store Mongo ObjectId strings - both must match
+        participants: { $in: ['user123', 'dbUser123'] },
       })
     );
 
@@ -179,17 +161,7 @@ describe('GET /api/decisions/history', () => {
   });
 
   it('should handle pagination correctly', async () => {
-    mockAuth.mockResolvedValue({
-      userId: 'user123',
-      sessionId: 'session123',
-      orgId: null,
-      orgRole: null,
-      orgSlug: null,
-      sessionClaims: {},
-      orgPermissions: null,
-      actor: null,
-      factorVerificationAge: null,
-    } as any);
+    mockGetCurrentUser.mockResolvedValue(mockUser);
 
     mockDb.countDocuments.mockResolvedValue(150);
     mockDb.toArray
@@ -213,17 +185,7 @@ describe('GET /api/decisions/history', () => {
   });
 
   it('should return validation error for invalid query params', async () => {
-    mockAuth.mockResolvedValue({
-      userId: 'user123',
-      sessionId: 'session123',
-      orgId: null,
-      orgRole: null,
-      orgSlug: null,
-      sessionClaims: {},
-      orgPermissions: null,
-      actor: null,
-      factorVerificationAge: null,
-    } as any);
+    mockGetCurrentUser.mockResolvedValue(mockUser);
 
     const request = new NextRequest(
       'http://localhost:3000/api/decisions/history?limit=1000'

@@ -2,10 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { logger } from '@/lib/logger';
 import { emailNotificationService, AlertData } from '@/lib/email-notifications';
 import { alertStorage, StoredAlert } from '@/lib/alert-storage';
+import { requireAdminAuth } from '@/lib/auth';
 
 // GET /api/admin/alerts - Retrieve all alerts
 export async function GET(request: NextRequest) {
   try {
+    // Check if user is admin
+    await requireAdminAuth();
+
     const { searchParams } = new URL(request.url);
     const limit = parseInt(searchParams.get('limit') || '50');
     const offset = parseInt(searchParams.get('offset') || '0');
@@ -70,6 +74,13 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
+    if (error instanceof Error && error.message === 'Admin access required') {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 403 }
+      );
+    }
+
     logger.error('Admin: Error fetching alerts', { error });
     return NextResponse.json(
       {
@@ -84,6 +95,9 @@ export async function GET(request: NextRequest) {
 // POST /api/admin/alerts - Create a new alert
 export async function POST(request: NextRequest) {
   try {
+    // Check if user is admin
+    await requireAdminAuth();
+
     const body = await request.json();
     const {
       alertData,
@@ -154,6 +168,13 @@ export async function POST(request: NextRequest) {
       message: 'Alert created successfully',
     });
   } catch (error) {
+    if (error instanceof Error && error.message === 'Admin access required') {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 403 }
+      );
+    }
+
     logger.error('Admin: Error creating alert', { error });
     return NextResponse.json(
       {
@@ -168,6 +189,9 @@ export async function POST(request: NextRequest) {
 // PUT /api/admin/alerts/[id] - Update an alert (acknowledge/resolve)
 export async function PUT(request: NextRequest) {
   try {
+    // Check if user is admin
+    await requireAdminAuth();
+
     const body = await request.json();
     const {
       alertId,
@@ -217,6 +241,13 @@ export async function PUT(request: NextRequest) {
       message: `Alert ${action}d successfully`,
     });
   } catch (error) {
+    if (error instanceof Error && error.message === 'Admin access required') {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 403 }
+      );
+    }
+
     logger.error('Admin: Error updating alert', { error });
     return NextResponse.json(
       {
@@ -231,6 +262,9 @@ export async function PUT(request: NextRequest) {
 // DELETE /api/admin/alerts/[id] - Delete an alert
 export async function DELETE(request: NextRequest) {
   try {
+    // Check if user is admin
+    await requireAdminAuth();
+
     const { searchParams } = new URL(request.url);
     const alertId = searchParams.get('id');
 
@@ -264,6 +298,13 @@ export async function DELETE(request: NextRequest) {
       message: 'Alert deleted successfully',
     });
   } catch (error) {
+    if (error instanceof Error && error.message === 'Admin access required') {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 403 }
+      );
+    }
+
     logger.error('Admin: Error deleting alert', { error });
     return NextResponse.json(
       {

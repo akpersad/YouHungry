@@ -27,6 +27,7 @@ jest.mock('@/lib/groups', () => ({
   promoteToAdmin: jest.fn(),
   leaveGroup: jest.fn(),
   getGroupMembers: jest.fn(),
+  isGroupMemberOrAdmin: jest.fn(),
 }));
 
 // Mock the validation module
@@ -70,6 +71,8 @@ describe('Groups API Routes', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (requireAuth as jest.Mock).mockResolvedValue(mockUser);
+    // Default: the authenticated user is a member of the group under test
+    (groupsLib.isGroupMemberOrAdmin as jest.Mock).mockResolvedValue(true);
   });
 
   describe('GET /api/groups', () => {
@@ -214,6 +217,30 @@ describe('Groups API Routes', () => {
         createdAt: mockGroup.createdAt.toISOString(),
         updatedAt: mockGroup.updatedAt.toISOString(),
       });
+      expect(groupsLib.isGroupMemberOrAdmin).toHaveBeenCalledWith(
+        '507f1f77bcf86cd799439012',
+        mockUser._id
+      );
+    });
+
+    it('should return 404 if user is not a member of the group', async () => {
+      const { getGroupById, getGroupMembers, isGroupMemberOrAdmin } = groupsLib;
+
+      (getGroupById as jest.Mock).mockResolvedValue(mockGroup);
+      (isGroupMemberOrAdmin as jest.Mock).mockResolvedValue(false);
+
+      const request = new NextRequest(
+        'http://localhost:3000/api/groups/507f1f77bcf86cd799439012'
+      );
+      const response = await GET_BY_ID(request, {
+        params: { id: '507f1f77bcf86cd799439012' },
+      } as any);
+      const data = await response.json();
+
+      // 404 (not 403) so non-members cannot probe for group existence
+      expect(response.status).toBe(404);
+      expect(data.error).toBe('Group not found');
+      expect(getGroupMembers).not.toHaveBeenCalled();
     });
 
     it('should return 404 if group not found', async () => {

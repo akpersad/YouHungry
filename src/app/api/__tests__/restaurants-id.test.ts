@@ -8,6 +8,24 @@ import {
 
 // Mock dependencies
 jest.mock('@/lib/restaurants');
+jest.mock('@/lib/auth', () => ({
+  getCurrentUser: jest.fn(),
+  requireAdminAuth: jest.fn(),
+}));
+
+import { getCurrentUser, requireAdminAuth } from '@/lib/auth';
+
+const mockGetCurrentUser = getCurrentUser as jest.MockedFunction<
+  typeof getCurrentUser
+>;
+const mockRequireAdminAuth = requireAdminAuth as jest.MockedFunction<
+  typeof requireAdminAuth
+>;
+
+const mockUser = {
+  _id: { toString: () => '507f1f77bcf86cd799439010' },
+  clerkId: 'clerk_user_123',
+} as any;
 
 const mockGetRestaurantDetails = getRestaurantDetails as jest.MockedFunction<
   typeof getRestaurantDetails
@@ -22,6 +40,8 @@ const mockDeleteRestaurant = deleteRestaurant as jest.MockedFunction<
 describe('/api/restaurants/[id]', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockGetCurrentUser.mockResolvedValue(mockUser);
+    mockRequireAdminAuth.mockResolvedValue(mockUser);
   });
 
   const mockRestaurant = {
@@ -140,6 +160,27 @@ describe('/api/restaurants/[id]', () => {
           timeToPickUp: 30,
         }
       );
+    });
+
+    it('should return 401 when unauthenticated', async () => {
+      mockGetCurrentUser.mockResolvedValue(null);
+
+      const request = new NextRequest(
+        'http://localhost:3000/api/restaurants/507f1f77bcf86cd799439013',
+        {
+          method: 'PUT',
+          body: JSON.stringify({ priceRange: '$$$' }),
+        }
+      );
+
+      const response = await PUT(request, {
+        params: Promise.resolve({ id: '507f1f77bcf86cd799439013' }),
+      });
+      const data = await response.json();
+
+      expect(response.status).toBe(401);
+      expect(data.error).toBe('Unauthorized');
+      expect(mockUpdateRestaurant).not.toHaveBeenCalled();
     });
 
     it('should return 400 when ID is missing', async () => {
@@ -266,6 +307,46 @@ describe('/api/restaurants/[id]', () => {
       expect(mockDeleteRestaurant).toHaveBeenCalledWith(
         '507f1f77bcf86cd799439013'
       );
+    });
+
+    it('should return 401 when unauthenticated', async () => {
+      mockRequireAdminAuth.mockRejectedValue(
+        new Error('Authentication required')
+      );
+
+      const request = new NextRequest(
+        'http://localhost:3000/api/restaurants/507f1f77bcf86cd799439013',
+        { method: 'DELETE' }
+      );
+
+      const response = await DELETE(request, {
+        params: Promise.resolve({ id: '507f1f77bcf86cd799439013' }),
+      });
+      const data = await response.json();
+
+      expect(response.status).toBe(401);
+      expect(data.error).toBe('Authentication required');
+      expect(mockDeleteRestaurant).not.toHaveBeenCalled();
+    });
+
+    it('should return 403 when caller is not an admin', async () => {
+      mockRequireAdminAuth.mockRejectedValue(
+        new Error('Admin access required')
+      );
+
+      const request = new NextRequest(
+        'http://localhost:3000/api/restaurants/507f1f77bcf86cd799439013',
+        { method: 'DELETE' }
+      );
+
+      const response = await DELETE(request, {
+        params: Promise.resolve({ id: '507f1f77bcf86cd799439013' }),
+      });
+      const data = await response.json();
+
+      expect(response.status).toBe(403);
+      expect(data.error).toBe('Admin access required');
+      expect(mockDeleteRestaurant).not.toHaveBeenCalled();
     });
 
     it('should return 400 when ID is missing', async () => {

@@ -473,6 +473,37 @@ export async function isGroupMember(
 }
 
 /**
+ * Check if user is a member or admin of a group.
+ * Checks both adminIds and memberIds to cover legacy groups where admins
+ * may not also be listed in memberIds.
+ *
+ * @param userId The user's Mongo ObjectId (as a string)
+ */
+export async function isGroupMemberOrAdmin(
+  groupId: string,
+  userId: string
+): Promise<boolean> {
+  const db = await connectToDatabase();
+  const groupsCollection = db.collection<Group>('groups');
+
+  let groupObjectId: ObjectId;
+  let userObjectId: ObjectId;
+  try {
+    groupObjectId = new ObjectId(groupId);
+    userObjectId = new ObjectId(userId);
+  } catch {
+    return false;
+  }
+
+  const group = await groupsCollection.findOne({
+    _id: groupObjectId,
+    $or: [{ adminIds: userObjectId }, { memberIds: userObjectId }],
+  });
+
+  return group !== null;
+}
+
+/**
  * Check if user is an admin of a group
  */
 export async function isGroupAdmin(

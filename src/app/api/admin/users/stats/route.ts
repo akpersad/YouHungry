@@ -1,19 +1,13 @@
 import { logger } from '@/lib/logger';
 import { NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/db';
-import { requireAuth } from '@/lib/auth';
+import { requireAdminAuth } from '@/lib/auth';
 // import { ObjectId } from 'mongodb';
 
 export async function GET() {
   try {
     // Check authentication and admin access
-    await requireAuth();
-
-    // TODO: Add admin role check when implemented
-    // For now, allow access to any authenticated user
-    // if (!user.isAdmin) {
-    //   return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
-    // }
+    await requireAdminAuth();
 
     const db = await connectToDatabase();
 
@@ -187,6 +181,10 @@ export async function GET() {
 
     return response;
   } catch (error) {
+    if (error instanceof Error && error.message === 'Admin access required') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+    }
+
     logger.error('Error fetching user stats:', error);
     return NextResponse.json(
       { error: 'Failed to fetch user statistics' },

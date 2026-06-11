@@ -10,34 +10,87 @@ jest.mock('@/lib/user-email-notifications', () => ({
   },
 }));
 
-// Mock Clerk auth
-jest.mock('@clerk/nextjs/server', () => ({
-  auth: jest.fn(),
+// Mock auth helpers
+jest.mock('@/lib/auth', () => ({
+  getCurrentUser: jest.fn(),
 }));
 
 // Mock logger
 jest.mock('@/lib/logger', () => ({
   logger: {
+    warn: jest.fn(),
     error: jest.fn(),
   },
 }));
 
-import { auth } from '@clerk/nextjs/server';
-const mockAuth = auth as jest.MockedFunction<typeof auth>;
+// Mock the rate limiter (keep the real key helpers + 429 response builder)
+jest.mock('@/lib/rate-limit', () => {
+  const actual = jest.requireActual('@/lib/rate-limit');
+  return { ...actual, checkRateLimit: jest.fn() };
+});
+
+import { checkRateLimit } from '@/lib/rate-limit';
+const mockCheckRateLimit = checkRateLimit as jest.MockedFunction<
+  typeof checkRateLimit
+>;
+
+import { getCurrentUser } from '@/lib/auth';
+const mockGetCurrentUser = getCurrentUser as jest.MockedFunction<
+  typeof getCurrentUser
+>;
 const mockUserEmailService = userEmailNotificationService as jest.Mocked<
   typeof userEmailNotificationService
 >;
 
+const mockUser = {
+  _id: { toString: () => 'user-123' },
+  clerkId: 'clerk-123',
+  email: 'test@example.com',
+  name: 'Test User',
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+} as any;
+
 describe('/api/email', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockCheckRateLimit.mockResolvedValue({
+      allowed: true,
+      remaining: 9,
+      retryAfterSeconds: 0,
+    });
   });
 
   describe('POST', () => {
-    it('should send test email successfully', async () => {
-      (mockAuth as unknown as jest.Mock).mockResolvedValue({
-        userId: 'user-123',
-      } as any);
+    it('should return 429 when the per-user rate limit is exceeded', async () => {
+      mockGetCurrentUser.mockResolvedValue(mockUser);
+      mockCheckRateLimit.mockResolvedValue({
+        allowed: false,
+        remaining: 0,
+        retryAfterSeconds: 600,
+      });
+
+      const request = new NextRequest('http://localhost:3000/api/email', {
+        method: 'POST',
+        body: JSON.stringify({ action: 'test' }),
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(429);
+      expect(response.headers.get('Retry-After')).toBe('600');
+      expect(data.error).toBe('Too many requests. Please try again later.');
+      expect(mockCheckRateLimit).toHaveBeenCalledWith({
+        key: 'email-send:user:user-123',
+        limit: 10,
+        windowMs: 60 * 60 * 1000,
+      });
+      expect(mockUserEmailService.sendTestUserEmail).not.toHaveBeenCalled();
+    });
+
+    it('should send test email to the authenticated user own email', async () => {
+      mockGetCurrentUser.mockResolvedValue(mockUser);
       mockUserEmailService.sendTestUserEmail.mockResolvedValue({
         success: true,
         emailId: 'email-123',
@@ -67,10 +120,87 @@ describe('/api/email', () => {
       );
     });
 
+    it('should default to the authenticated user email when none is provided', async () => {
+      mockGetCurrentUser.mockResolvedValue(mockUser);
+      mockUserEmailService.sendTestUserEmail.mockResolvedValue({
+        success: true,
+        emailId: 'email-456',
+        timestamp: new Date(),
+      });
+
+      const request = new NextRequest('http://localhost:3000/api/email', {
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'test',
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(data.success).toBe(true);
+      expect(mockUserEmailService.sendTestUserEmail).toHaveBeenCalledWith(
+        'test@example.com'
+      );
+    });
+
+    it('should reject test emails to addresses other than the authenticated user', async () => {
+      mockGetCurrentUser.mockResolvedValue(mockUser);
+
+      const request = new NextRequest('http://localhost:3000/api/email', {
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'test',
+          email: 'victim@example.com',
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(403);
+      expect(data.error).toBe(
+        'Test emails can only be sent to your own email address'
+      );
+      expect(mockUserEmailService.sendTestUserEmail).not.toHaveBeenCalled();
+    });
+
+    it('should allow case-insensitive matches of the user own email', async () => {
+      mockGetCurrentUser.mockResolvedValue(mockUser);
+      mockUserEmailService.sendTestUserEmail.mockResolvedValue({
+        success: true,
+        emailId: 'email-789',
+        timestamp: new Date(),
+      });
+
+      const request = new NextRequest('http://localhost:3000/api/email', {
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'test',
+          email: 'Test@Example.com',
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const response = await POST(request);
+
+      expect(response.status).toBe(200);
+      expect(mockUserEmailService.sendTestUserEmail).toHaveBeenCalledWith(
+        'test@example.com'
+      );
+    });
+
     it('should handle test email failure', async () => {
-      (mockAuth as unknown as jest.Mock).mockResolvedValue({
-        userId: 'user-123',
-      } as any);
+      mockGetCurrentUser.mockResolvedValue(mockUser);
       mockUserEmailService.sendTestUserEmail.mockResolvedValue({
         success: false,
         error: 'Failed to send email',
@@ -98,9 +228,7 @@ describe('/api/email', () => {
     });
 
     it('should validate configuration successfully', async () => {
-      (mockAuth as unknown as jest.Mock).mockResolvedValue({
-        userId: 'user-123',
-      } as any);
+      mockGetCurrentUser.mockResolvedValue(mockUser);
       mockUserEmailService.validateConfiguration.mockResolvedValue({
         valid: true,
       });
@@ -124,9 +252,7 @@ describe('/api/email', () => {
     });
 
     it('should handle validation failure', async () => {
-      (mockAuth as unknown as jest.Mock).mockResolvedValue({
-        userId: 'user-123',
-      } as any);
+      mockGetCurrentUser.mockResolvedValue(mockUser);
       mockUserEmailService.validateConfiguration.mockResolvedValue({
         valid: false,
         error: 'API key not configured',
@@ -151,9 +277,7 @@ describe('/api/email', () => {
     });
 
     it('should return 401 for unauthenticated requests', async () => {
-      (mockAuth as unknown as jest.Mock).mockResolvedValue({
-        userId: null,
-      } as any);
+      mockGetCurrentUser.mockResolvedValue(null);
 
       const request = new NextRequest('http://localhost:3000/api/email', {
         method: 'POST',
@@ -171,34 +295,11 @@ describe('/api/email', () => {
 
       expect(response.status).toBe(401);
       expect(data.error).toBe('Unauthorized');
-    });
-
-    it('should return 400 for missing email in test action', async () => {
-      (mockAuth as unknown as jest.Mock).mockResolvedValue({
-        userId: 'user-123',
-      } as any);
-
-      const request = new NextRequest('http://localhost:3000/api/email', {
-        method: 'POST',
-        body: JSON.stringify({
-          action: 'test',
-        }),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      const response = await POST(request);
-      const data = await response.json();
-
-      expect(response.status).toBe(400);
-      expect(data.error).toBe('Email address is required for test');
+      expect(mockUserEmailService.sendTestUserEmail).not.toHaveBeenCalled();
     });
 
     it('should return 400 for invalid action', async () => {
-      (mockAuth as unknown as jest.Mock).mockResolvedValue({
-        userId: 'user-123',
-      } as any);
+      mockGetCurrentUser.mockResolvedValue(mockUser);
 
       const request = new NextRequest('http://localhost:3000/api/email', {
         method: 'POST',
@@ -220,9 +321,7 @@ describe('/api/email', () => {
     });
 
     it('should handle service errors', async () => {
-      (mockAuth as unknown as jest.Mock).mockResolvedValue({
-        userId: 'user-123',
-      } as any);
+      mockGetCurrentUser.mockResolvedValue(mockUser);
       mockUserEmailService.sendTestUserEmail.mockRejectedValue(
         new Error('Service error')
       );

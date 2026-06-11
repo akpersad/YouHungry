@@ -20,11 +20,25 @@ jest.mock('@/lib/performance-metrics', () => ({
   getRecentPerformanceMetrics: jest.fn(),
 }));
 
+// Mock the auth module
+jest.mock('@/lib/auth', () => ({
+  requireAdminAuth: jest.fn(),
+}));
+
 import { getRecentPerformanceMetrics } from '@/lib/performance-metrics';
+import { requireAdminAuth } from '@/lib/auth';
 
 describe('/api/admin/performance/metrics', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+
+    // Mock admin user
+    (requireAdminAuth as jest.Mock).mockResolvedValue({
+      _id: 'admin123',
+      clerkId: 'clerk_admin',
+      email: 'admin@example.com',
+      name: 'Admin User',
+    });
   });
 
   it('should return metrics data successfully', async () => {

@@ -1,5 +1,6 @@
 import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
+import { getCurrentUser } from '@/lib/auth';
 import { acceptFriendRequest, declineFriendRequest } from '@/lib/friends';
 
 export async function PUT(
@@ -7,13 +8,21 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
     const { id } = await params;
     const body = await request.json();
-    const { action, userId } = body;
+    const { action } = body;
 
-    if (!action || !userId) {
+    if (!action) {
       return NextResponse.json(
-        { success: false, error: 'Action and user ID are required' },
+        { success: false, error: 'Action is required' },
         { status: 400 }
       );
     }
@@ -28,11 +37,13 @@ export async function PUT(
       );
     }
 
+    // Always act as the session user; caller-supplied userId is ignored.
+    // The lib only updates requests addressed to this user.
     let friendship;
     if (action === 'accept') {
-      friendship = await acceptFriendRequest(id, userId);
+      friendship = await acceptFriendRequest(id, user.clerkId);
     } else {
-      friendship = await declineFriendRequest(id, userId);
+      friendship = await declineFriendRequest(id, user.clerkId);
     }
 
     return NextResponse.json({

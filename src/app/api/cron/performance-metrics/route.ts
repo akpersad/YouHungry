@@ -12,6 +12,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { collectAllMetrics, healthCheck } from '@/lib/metrics-collector';
+import { isCronSecretConfigured, verifyCronAuth } from '@/lib/cron-auth';
 import { logger } from '@/lib/logger';
 
 // Allow up to 5 minutes for metrics collection
@@ -30,11 +31,10 @@ export async function GET(request: NextRequest) {
   const startTime = Date.now();
 
   try {
-    // Security: Verify cron secret
+    // Security: Verify cron secret (timing-safe comparison)
     const authHeader = request.headers.get('authorization');
-    const expectedAuth = `Bearer ${process.env.CRON_SECRET}`;
 
-    if (!process.env.CRON_SECRET) {
+    if (!isCronSecretConfigured()) {
       logger.error('CRON_SECRET not configured');
       return NextResponse.json(
         { error: 'Server misconfiguration' },
@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    if (authHeader !== expectedAuth) {
+    if (!verifyCronAuth(authHeader)) {
       logger.warn('Unauthorized cron job access attempt', {
         ip: request.headers.get('x-forwarded-for'),
         userAgent: request.headers.get('user-agent'),

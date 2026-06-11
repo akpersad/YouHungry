@@ -10,6 +10,11 @@ import { NextRequest } from 'next/server';
 // Mock dependencies
 jest.mock('@clerk/nextjs/server');
 jest.mock('@/lib/error-tracking');
+jest.mock('@/lib/users', () => ({
+  getUserByClerkId: jest.fn().mockResolvedValue({
+    _id: { toString: () => '507f1f77bcf86cd799439011' },
+  }),
+}));
 
 describe('POST /api/errors', () => {
   const mockAuth = auth as jest.MockedFunction<typeof auth>;
@@ -51,7 +56,7 @@ describe('POST /api/errors', () => {
     expect(data.success).toBe(true);
     expect(mockLogError).toHaveBeenCalledWith(
       expect.objectContaining({
-        mongoUserId: undefined, // Will be undefined since getUserByClerkId is not mocked
+        mongoUserId: '507f1f77bcf86cd799439011',
         userEmail: 'test@example.com',
         userName: 'Test User',
         url: 'http://localhost:3000/test',

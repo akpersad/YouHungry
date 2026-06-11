@@ -13,6 +13,7 @@ import {
   removeRestaurantFromCollection,
   deleteCollection,
   getRestaurantsByCollection,
+  verifyCollectionAccess,
 } from '../collections';
 import * as db from '../db';
 import { ObjectId } from 'mongodb';
@@ -600,6 +601,176 @@ describe('Collections API Functions', () => {
       );
 
       expect(result).toEqual(mockRestaurants);
+    });
+  });
+
+  describe('verifyCollectionAccess', () => {
+    const ownerObjectId = new ObjectId('507f1f77bcf86cd799439012');
+    const groupId = new ObjectId('507f1f77bcf86cd799439099');
+
+    const personalUser = {
+      _id: ownerObjectId,
+      clerkId: 'clerk_owner_123',
+    } as any;
+
+    const foreignUser = {
+      _id: new ObjectId('507f1f77bcf86cd799439055'),
+      clerkId: 'clerk_foreign_456',
+    } as any;
+
+    const makeDbInstance = (
+      collectionDoc: unknown,
+      groupDoc: unknown = null
+    ) => ({
+      collection: jest.fn().mockImplementation((collectionName: string) => {
+        if (collectionName === 'collections') {
+          return { findOne: jest.fn().mockResolvedValue(collectionDoc) };
+        }
+        if (collectionName === 'groups') {
+          return { findOne: jest.fn().mockResolvedValue(groupDoc) };
+        }
+        return { findOne: jest.fn().mockResolvedValue(null) };
+      }),
+    });
+
+    it('grants access to the owner of a personal collection (ObjectId ownerId)', async () => {
+      const doc = { ...mockCollection, ownerId: ownerObjectId };
+      mockDb.connectToDatabase.mockResolvedValue(
+        makeDbInstance(doc) as unknown as ReturnType<
+          typeof db.connectToDatabase
+        >
+      );
+
+      const result = await verifyCollectionAccess(
+        mockCollection._id.toString(),
+        personalUser
+      );
+
+      expect(result).toEqual(doc);
+    });
+
+    it('grants access to the owner of a personal collection (Clerk ID ownerId)', async () => {
+      const doc = { ...mockCollection, ownerId: 'clerk_owner_123' };
+      mockDb.connectToDatabase.mockResolvedValue(
+        makeDbInstance(doc) as unknown as ReturnType<
+          typeof db.connectToDatabase
+        >
+      );
+
+      const result = await verifyCollectionAccess(
+        mockCollection._id.toString(),
+        personalUser
+      );
+
+      expect(result).toEqual(doc);
+    });
+
+    it('denies access to a foreign personal collection', async () => {
+      const doc = { ...mockCollection, ownerId: ownerObjectId };
+      mockDb.connectToDatabase.mockResolvedValue(
+        makeDbInstance(doc) as unknown as ReturnType<
+          typeof db.connectToDatabase
+        >
+      );
+
+      const result = await verifyCollectionAccess(
+        mockCollection._id.toString(),
+        foreignUser
+      );
+
+      expect(result).toBeNull();
+    });
+
+    it('grants member-level access to a group collection for group members', async () => {
+      const doc = { ...mockCollection, type: 'group', ownerId: groupId };
+      const group = { _id: groupId };
+      mockDb.connectToDatabase.mockResolvedValue(
+        makeDbInstance(doc, group) as unknown as ReturnType<
+          typeof db.connectToDatabase
+        >
+      );
+
+      const result = await verifyCollectionAccess(
+        mockCollection._id.toString(),
+        personalUser,
+        'member'
+      );
+
+      expect(result).toEqual(doc);
+    });
+
+    it('denies access to a group collection for non-members', async () => {
+      const doc = { ...mockCollection, type: 'group', ownerId: groupId };
+      mockDb.connectToDatabase.mockResolvedValue(
+        makeDbInstance(doc, null) as unknown as ReturnType<
+          typeof db.connectToDatabase
+        >
+      );
+
+      const result = await verifyCollectionAccess(
+        mockCollection._id.toString(),
+        foreignUser,
+        'member'
+      );
+
+      expect(result).toBeNull();
+    });
+
+    it('queries by adminIds only when admin level is required', async () => {
+      const doc = { ...mockCollection, type: 'group', ownerId: groupId };
+      const groupsFindOne = jest.fn().mockResolvedValue(null);
+      const dbInstance = {
+        collection: jest.fn().mockImplementation((collectionName: string) => {
+          if (collectionName === 'collections') {
+            return { findOne: jest.fn().mockResolvedValue(doc) };
+          }
+          return { findOne: groupsFindOne };
+        }),
+      };
+      mockDb.connectToDatabase.mockResolvedValue(
+        dbInstance as unknown as ReturnType<typeof db.connectToDatabase>
+      );
+
+      const result = await verifyCollectionAccess(
+        mockCollection._id.toString(),
+        personalUser,
+        'admin'
+      );
+
+      expect(result).toBeNull();
+      expect(groupsFindOne).toHaveBeenCalledWith(
+        expect.objectContaining({ adminIds: expect.anything() })
+      );
+      expect(groupsFindOne).toHaveBeenCalledWith(
+        expect.not.objectContaining({ $or: expect.anything() })
+      );
+    });
+
+    it('returns null for an invalid collection id', async () => {
+      mockDb.connectToDatabase.mockResolvedValue(
+        makeDbInstance(null) as unknown as ReturnType<
+          typeof db.connectToDatabase
+        >
+      );
+
+      const result = await verifyCollectionAccess('not-an-id', personalUser);
+
+      expect(result).toBeNull();
+    });
+
+    it('returns null when the collection does not exist', async () => {
+      mockDb.connectToDatabase.mockResolvedValue(
+        makeDbInstance(null) as unknown as ReturnType<
+          typeof db.connectToDatabase
+        >
+      );
+
+      const result = await verifyCollectionAccess(
+        mockCollection._id.toString(),
+        personalUser
+      );
+
+      expect(result).toBeNull();
     });
   });
 });

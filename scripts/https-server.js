@@ -18,15 +18,15 @@ const hostname = 'forkintheroad.local';
 const port = process.env.PORT || 3000;
 
 // Paths to certificates
-const certPath = path.join(process.cwd(), 'public', 'cert.pem');
-const keyPath = path.join(process.cwd(), 'public', 'cert-key.pem');
+const certPath = path.join(process.cwd(), 'certificates', 'cert.pem');
+const keyPath = path.join(process.cwd(), 'certificates', 'cert-key.pem');
 
 // Check if certificates exist
 if (!fs.existsSync(certPath) || !fs.existsSync(keyPath)) {
   console.error('❌ SSL certificates not found!');
   console.error('   Generate with:');
   console.error(
-    '   openssl req -x509 -newkey rsa:4096 -keyout public/cert-key.pem -out public/cert.pem -days 365 -nodes'
+    '   openssl req -x509 -newkey rsa:4096 -keyout certificates/cert-key.pem -out certificates/cert.pem -days 365 -nodes'
   );
   process.exit(1);
 }
