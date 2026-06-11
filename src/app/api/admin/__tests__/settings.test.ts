@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server';
 import { GET, PUT, POST } from '../settings/route';
+import { requireAdminAuth } from '@/lib/auth';
 
 // Mock logger
 jest.mock('@/lib/logger', () => ({
@@ -10,9 +11,22 @@ jest.mock('@/lib/logger', () => ({
   },
 }));
 
+// Mock the auth module
+jest.mock('@/lib/auth', () => ({
+  requireAdminAuth: jest.fn(),
+}));
+
 describe('/api/admin/settings', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+
+    // Mock admin user
+    (requireAdminAuth as jest.Mock).mockResolvedValue({
+      _id: 'admin123',
+      clerkId: 'clerk_admin',
+      email: 'admin@example.com',
+      name: 'Admin User',
+    });
   });
 
   describe('GET', () => {

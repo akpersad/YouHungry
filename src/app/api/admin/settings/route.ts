@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { logger } from '@/lib/logger';
+import { requireAdminAuth } from '@/lib/auth';
 
 // System settings configuration interface
 interface SystemSettings {
@@ -75,6 +76,16 @@ interface SystemSettings {
   };
 }
 
+// Admin notification recipients come from the environment so no personal
+// email addresses are hardcoded or exposed in API responses
+const getAdminEmailRecipients = (): string[] => {
+  return (
+    process.env.ADMIN_ALERT_EMAILS?.split(',')
+      .map((email) => email.trim())
+      .filter(Boolean) || []
+  );
+};
+
 // Default system settings
 const defaultSettings: SystemSettings = {
   rateLimiting: {
@@ -119,7 +130,7 @@ const defaultSettings: SystemSettings = {
   notificationSettings: {
     email: {
       enabled: true,
-      recipients: ['akpersad@gmail.com'],
+      recipients: getAdminEmailRecipients(),
       frequency: 'immediate',
     },
     sms: {
@@ -144,7 +155,7 @@ const defaultSettings: SystemSettings = {
     emergencyMode: {
       enabled: false,
       message: 'System is currently in emergency mode',
-      contactInfo: 'akpersad@gmail.com',
+      contactInfo: getAdminEmailRecipients()[0] || '',
     },
   },
 };
@@ -152,6 +163,9 @@ const defaultSettings: SystemSettings = {
 // GET /api/admin/settings - Retrieve current system settings
 export async function GET() {
   try {
+    // Check if user is admin
+    await requireAdminAuth();
+
     logger.info('Admin: Fetching system settings');
 
     // In a real implementation, this would fetch from a database or config file
@@ -164,6 +178,13 @@ export async function GET() {
       lastUpdated: new Date().toISOString(),
     });
   } catch (error) {
+    if (error instanceof Error && error.message === 'Admin access required') {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 403 }
+      );
+    }
+
     logger.error('Admin: Error fetching system settings', { error });
     return NextResponse.json(
       {
@@ -178,6 +199,9 @@ export async function GET() {
 // PUT /api/admin/settings - Update system settings
 export async function PUT(request: NextRequest) {
   try {
+    // Check if user is admin
+    await requireAdminAuth();
+
     const body = await request.json();
     const { settings }: { settings: Partial<SystemSettings> } = body;
 
@@ -313,6 +337,13 @@ export async function PUT(request: NextRequest) {
       lastUpdated: new Date().toISOString(),
     });
   } catch (error) {
+    if (error instanceof Error && error.message === 'Admin access required') {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 403 }
+      );
+    }
+
     logger.error('Admin: Error updating system settings', { error });
     return NextResponse.json(
       {
@@ -327,6 +358,9 @@ export async function PUT(request: NextRequest) {
 // POST /api/admin/settings/reset - Reset settings to defaults
 export async function POST(request: NextRequest) {
   try {
+    // Check if user is admin
+    await requireAdminAuth();
+
     const body = await request.json();
     const { confirmReset } = body;
 
@@ -353,6 +387,13 @@ export async function POST(request: NextRequest) {
       lastUpdated: new Date().toISOString(),
     });
   } catch (error) {
+    if (error instanceof Error && error.message === 'Admin access required') {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 403 }
+      );
+    }
+
     logger.error('Admin: Error resetting system settings', { error });
     return NextResponse.json(
       {

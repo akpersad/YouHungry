@@ -18,7 +18,13 @@ jest.mock('@/lib/email-notifications', () => ({
   },
 }));
 
+// Mock the auth module
+jest.mock('@/lib/auth', () => ({
+  requireAdminAuth: jest.fn(),
+}));
+
 import { emailNotificationService } from '@/lib/email-notifications';
+import { requireAdminAuth } from '@/lib/auth';
 
 const mockEmailService = emailNotificationService as jest.Mocked<
   typeof emailNotificationService
@@ -27,6 +33,14 @@ const mockEmailService = emailNotificationService as jest.Mocked<
 describe('/api/admin/alerts/test-email', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+
+    // Mock admin user
+    (requireAdminAuth as jest.Mock).mockResolvedValue({
+      _id: 'admin123',
+      clerkId: 'clerk_admin',
+      email: 'admin@example.com',
+      name: 'Admin User',
+    });
   });
 
   describe('GET (Validate Configuration)', () => {

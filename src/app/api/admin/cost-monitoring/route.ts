@@ -6,6 +6,7 @@ import {
 } from '@/lib/api-usage-tracker';
 import { getCacheStats } from '@/lib/optimized-google-places';
 import { getLocationCacheStats } from '@/lib/google-places';
+import { requireAdminAuth } from '@/lib/auth';
 
 interface APICostMetrics {
   googlePlaces: {
@@ -72,11 +73,10 @@ export async function GET(request: Request) {
     const isInternalCall =
       internalSecret && internalSecret === process.env.INTERNAL_API_SECRET;
 
-    // For internal calls, bypass authentication
-    // For external calls, authentication is handled by middleware
+    // For internal calls (authenticated via INTERNAL_API_SECRET), bypass user auth
+    // For external calls, require an admin user
     if (!isInternalCall) {
-      // External call - middleware will handle auth
-      // We're allowing it through for now, but middleware should protect /api/admin/*
+      await requireAdminAuth();
     }
 
     // Parse query parameters
@@ -299,6 +299,10 @@ export async function GET(request: Request) {
       availableYears,
     });
   } catch (error) {
+    if (error instanceof Error && error.message === 'Admin access required') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+    }
+
     logger.error('Error fetching cost monitoring data:', error);
     return NextResponse.json(
       { error: 'Failed to fetch cost monitoring data' },
