@@ -191,7 +191,6 @@ function CollectionList({
                     className="p-2 hover:bg-tertiary rounded-lg transition-colors bg-secondary/50 backdrop-blur-sm border border-border"
                     aria-label="Collection actions"
                     onClick={(e) => {
-                      console.log('Menu button clicked');
                       e.stopPropagation();
                       setOpenDropdownId(
                         openDropdownId === collection._id.toString()

@@ -26,38 +26,10 @@ export function PushNotificationTestDashboard() {
   const [error, setError] = useState<string>('');
   const [success, setSuccess] = useState<string>('');
   const [mounted, setMounted] = useState(false);
-  const [debugLogs, setDebugLogs] = useState<string[]>([]);
 
   // Fix hydration issues
   React.useEffect(() => {
     setMounted(true);
-  }, []);
-
-  // Capture console logs
-  React.useEffect(() => {
-    if (typeof window === 'undefined') return;
-
-    const originalLog = console.log;
-    console.log = (...args) => {
-      originalLog(...args);
-
-      // Capture debug logs
-      const message = args.join(' ');
-      if (
-        message.includes('🔍 DEBUG:') ||
-        message.includes('iOS detection:') ||
-        message.includes('hasIOSPushSupport check:')
-      ) {
-        setDebugLogs((prev) => [
-          ...prev.slice(-9),
-          `${new Date().toLocaleTimeString()}: ${message}`,
-        ]);
-      }
-    };
-
-    return () => {
-      console.log = originalLog;
-    };
   }, []);
 
   const handleBasicNotification = async () => {
@@ -112,9 +84,7 @@ export function PushNotificationTestDashboard() {
       }
 
       // Wait for service worker to be ready first
-      console.log('🔍 Waiting for service worker to be ready...');
       await navigator.serviceWorker.ready;
-      console.log('🔍 Service worker is ready!');
 
       // Add longer timeout and better error handling
       const timeoutPromise = new Promise((_, reject) =>
@@ -250,7 +220,6 @@ export function PushNotificationTestDashboard() {
         <div className="flex gap-2">
           <Button
             onClick={() => {
-              console.log('🔍 REFRESH BUTTON CLICKED');
               refresh();
             }}
             variant="outline"
@@ -261,7 +230,6 @@ export function PushNotificationTestDashboard() {
           </Button>
           <Button
             onClick={() => {
-              console.log('🔍 FORCE UPDATE CLICKED');
               // Force a re-render by updating state
               setMounted(false);
               setTimeout(() => setMounted(true), 100);
@@ -273,16 +241,15 @@ export function PushNotificationTestDashboard() {
           </Button>
           <Button
             onClick={async () => {
-              console.log('🔍 REGISTER SW CLICKED');
               try {
                 if ('serviceWorker' in navigator) {
                   const registration =
                     await navigator.serviceWorker.register('/sw.js');
-                  console.log('🔍 Service worker registered:', registration);
+                  logger.debug('Service worker registered:', registration);
                   setSuccess('Service worker registered! Try subscribing now.');
                 }
               } catch (error) {
-                console.error('🔍 Service worker registration failed:', error);
+                logger.error('Service worker registration failed:', error);
                 setError('Failed to register service worker: ' + error);
               }
             }}
@@ -486,23 +453,6 @@ export function PushNotificationTestDashboard() {
                 )}
               </pre>
             </div>
-
-            {/* Debug Logs */}
-            {debugLogs.length > 0 && (
-              <div className="mt-4 p-3 bg-quaternary rounded-lg">
-                <h4 className="text-sm font-semibold mb-2">Debug Logs:</h4>
-                <div className="space-y-1">
-                  {debugLogs.map((log, index) => (
-                    <div
-                      key={index}
-                      className="text-xs text-tertiary font-mono break-all"
-                    >
-                      {log}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
           </CardContent>
         </Card>
       )}

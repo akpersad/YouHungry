@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
+import { logger } from '@/lib/logger';
 
 /**
  * Hook for visibility-aware polling that reduces frequency when tab is inactive
@@ -102,7 +103,7 @@ export function useSmartPolling(
         setErrorCount(0);
       }
     } catch (error) {
-      console.warn('Polling error:', error);
+      logger.warn('Polling error:', error);
       setErrorCount((prev) => prev + 1);
     }
   }, [errorCount]);

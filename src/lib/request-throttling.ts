@@ -3,6 +3,8 @@
  * Helps prevent excessive API calls and reduces server load
  */
 
+import { logger } from '@/lib/logger';
+
 interface ThrottleOptions {
   maxRequests: number;
   windowMs: number;
@@ -157,7 +159,7 @@ export function useThrottledQuery<T>(
     } catch (error) {
       // If throttled, fall back to direct query function
       if (error instanceof Error && error.message.includes('throttled')) {
-        console.warn('Query throttled, using cached data or direct call');
+        logger.warn('Query throttled, using cached data or direct call');
         return queryFn();
       }
       throw error;

@@ -375,5 +375,7 @@ export const offlineStorage = new OfflineStorage();
 let isInitialized = false;
 if (typeof window !== 'undefined' && 'indexedDB' in window && !isInitialized) {
   isInitialized = true;
-  offlineStorage.init().catch(console.error);
+  offlineStorage.init().catch((error) => {
+    logger.error('Failed to initialize offline storage:', error);
+  });
 }

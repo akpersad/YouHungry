@@ -1,4 +1,5 @@
 import type { EventParams } from '@/types/analytics';
+import { logger } from '@/lib/logger';
 
 /**
  * Hash a user ID using SHA-256 for privacy-preserving analytics
@@ -45,7 +46,7 @@ export async function setAnalyticsUserId(userId: string | null) {
       user_id: hashedUserId,
     });
   } catch (error) {
-    console.error('Failed to set analytics user ID:', error);
+    logger.error('Failed to set analytics user ID:', error);
   }
 }
 
@@ -56,10 +57,8 @@ export async function setAnalyticsUserId(userId: string | null) {
  */
 export function trackEvent(eventName: string, params?: EventParams) {
   if (!isAnalyticsAvailable()) {
-    // Log in development for debugging
-    if (process.env.NODE_ENV === 'development') {
-      console.debug('[Analytics]', eventName, params);
-    }
+    // Logged in development only for debugging
+    logger.analytics(eventName, params);
     return;
   }
 
@@ -69,7 +68,7 @@ export function trackEvent(eventName: string, params?: EventParams) {
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    console.error('Failed to track event:', error);
+    logger.error('Failed to track event:', error);
   }
 }
 
@@ -88,7 +87,7 @@ export function trackPageView(url: string, title?: string) {
       page_location: window.location.href,
     });
   } catch (error) {
-    console.error('Failed to track page view:', error);
+    logger.error('Failed to track page view:', error);
   }
 }
 
