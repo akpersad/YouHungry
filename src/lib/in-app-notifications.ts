@@ -1,5 +1,5 @@
 import { ObjectId, Collection } from 'mongodb';
-import { db } from '@/lib/db';
+import { connectToDatabase } from '@/lib/db';
 import { logger } from '@/lib/logger';
 import { InAppNotification } from '@/types/database';
 
@@ -29,11 +29,7 @@ export class InAppNotificationService {
 
   private async getCollection(): Promise<Collection<InAppNotification>> {
     if (!this.collection) {
-      if (!db) {
-        throw new Error(
-          'Database not initialized. Call connectToDatabase() first.'
-        );
-      }
+      const db = await connectToDatabase();
       this.collection = db.collection<InAppNotification>('notifications');
     }
     return this.collection;

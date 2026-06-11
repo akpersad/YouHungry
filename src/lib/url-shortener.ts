@@ -1,5 +1,5 @@
 import { logger } from '@/lib/logger';
-import { db } from '@/lib/db';
+import { connectToDatabase } from '@/lib/db';
 import { ObjectId, Collection } from 'mongodb';
 
 export interface ShortUrlData {
@@ -21,11 +21,7 @@ export class URLShortenerService {
 
   private async getCollection() {
     if (!this.collection) {
-      if (!db) {
-        throw new Error(
-          'Database not initialized. Call connectToDatabase() first.'
-        );
-      }
+      const db = await connectToDatabase();
       this.collection = db.collection<ShortUrlData>('short_urls');
     }
     return this.collection;
