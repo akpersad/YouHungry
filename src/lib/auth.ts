@@ -66,6 +66,10 @@ export async function requireAuth(): Promise<User> {
   return user;
 }
 
+export function isAdminUser(user: User): boolean {
+  return getAdminUserIds().includes(user._id.toString());
+}
+
 export async function requireAdminAuth(): Promise<User> {
   const user = await requireAuth();
 

@@ -118,19 +118,28 @@ export class InAppNotificationService {
 
   /**
    * Mark notification as read
+   *
+   * When `userId` is provided, only a notification owned by that user is
+   * updated (prevents marking other users' notifications as read).
    */
-  async markAsRead(notificationId: ObjectId | string): Promise<boolean> {
+  async markAsRead(
+    notificationId: ObjectId | string,
+    userId?: ObjectId | string
+  ): Promise<boolean> {
     try {
       const collection = await this.getCollection();
-      const result = await collection.updateOne(
-        { _id: new ObjectId(notificationId) },
-        {
-          $set: {
-            read: true,
-            updatedAt: new Date(),
-          },
-        }
-      );
+      const filter: { _id: ObjectId; userId?: ObjectId } = {
+        _id: new ObjectId(notificationId),
+      };
+      if (userId) {
+        filter.userId = new ObjectId(userId);
+      }
+      const result = await collection.updateOne(filter, {
+        $set: {
+          read: true,
+          updatedAt: new Date(),
+        },
+      });
 
       return result.modifiedCount > 0;
     } catch (error) {

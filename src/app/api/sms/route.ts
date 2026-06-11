@@ -1,7 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getCurrentUser } from '@/lib/auth';
+import { getCurrentUser, isAdminUser } from '@/lib/auth';
 import { smsNotifications } from '@/lib/sms-notifications';
 import { logger } from '@/lib/logger';
+import type { User } from '@/types/database';
+
+// Normalize a phone number for comparison (digits only, US country code stripped)
+function normalizePhoneNumber(phone: string): string {
+  const digits = phone.replace(/\D/g, '');
+  return digits.length === 11 && digits.startsWith('1')
+    ? digits.slice(1)
+    : digits;
+}
+
+// The only number a non-admin user may send SMS to: their own verified phone
+function getOwnVerifiedPhoneNumber(user: User): string | null {
+  if (!user.phoneVerified) {
+    return null;
+  }
+  return user.smsPhoneNumber || user.phoneNumber || null;
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -31,7 +48,53 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (action !== 'test' && !phoneNumber) {
+    const isAdmin = isAdminUser(user);
+    const ownPhoneNumber = getOwnVerifiedPhoneNumber(user);
+
+    // Security: non-admin callers may only target their own verified phone
+    // number. Admins may pass arbitrary numbers (e.g. for ops/testing).
+    let targetPhoneNumber: string = phoneNumber;
+
+    if (action === 'admin_alert' && !isAdmin) {
+      logger.warn('Non-admin user attempted admin_alert SMS', {
+        userId: user._id.toString(),
+      });
+      return NextResponse.json(
+        { error: 'Admin access required' },
+        { status: 403 }
+      );
+    }
+
+    if (!isAdmin) {
+      if (!ownPhoneNumber) {
+        return NextResponse.json(
+          { error: 'No verified phone number on your profile' },
+          { status: 400 }
+        );
+      }
+
+      if (
+        phoneNumber &&
+        normalizePhoneNumber(phoneNumber) !==
+          normalizePhoneNumber(ownPhoneNumber)
+      ) {
+        logger.warn('SMS send to non-own phone number rejected', {
+          userId: user._id.toString(),
+          action,
+        });
+        return NextResponse.json(
+          {
+            error: 'SMS can only be sent to your own verified phone number',
+          },
+          { status: 403 }
+        );
+      }
+
+      // Always send to the user's own verified number from their profile
+      targetPhoneNumber = ownPhoneNumber;
+    }
+
+    if (action !== 'test' && !targetPhoneNumber) {
       return NextResponse.json(
         { error: 'Phone number is required' },
         { status: 400 }
@@ -41,10 +104,21 @@ export async function POST(req: NextRequest) {
     let result;
 
     switch (action) {
-      case 'test':
-        // For test, use the development phone number
-        result = await smsNotifications.sendTestSMS('+18777804236');
+      case 'test': {
+        // Send the test to the caller's own verified phone (admins may
+        // override with an explicit phoneNumber)
+        const testTarget = isAdmin
+          ? phoneNumber || ownPhoneNumber
+          : targetPhoneNumber;
+        if (!testTarget) {
+          return NextResponse.json(
+            { error: 'No verified phone number on your profile' },
+            { status: 400 }
+          );
+        }
+        result = await smsNotifications.sendTestSMS(testTarget);
         break;
+      }
 
       case 'group_decision':
         if (!groupName || !decisionType || !deadline) {
@@ -54,7 +128,7 @@ export async function POST(req: NextRequest) {
           );
         }
         result = await smsNotifications.sendGroupDecisionNotification(
-          phoneNumber,
+          targetPhoneNumber,
           groupName,
           decisionType,
           new Date(deadline),
@@ -70,7 +144,7 @@ export async function POST(req: NextRequest) {
           );
         }
         result = await smsNotifications.sendFriendRequestNotification(
-          phoneNumber,
+          targetPhoneNumber,
           message
         );
         break;
@@ -83,7 +157,7 @@ export async function POST(req: NextRequest) {
           );
         }
         result = await smsNotifications.sendGroupInvitationNotification(
-          phoneNumber,
+          targetPhoneNumber,
           groupName,
           message
         );
@@ -97,7 +171,7 @@ export async function POST(req: NextRequest) {
           );
         }
         result = await smsNotifications.sendAdminAlert(
-          phoneNumber,
+          targetPhoneNumber,
           alertType,
           details
         );
@@ -111,7 +185,7 @@ export async function POST(req: NextRequest) {
           );
         }
         result = await smsNotifications.sendSMS({
-          to: phoneNumber,
+          to: targetPhoneNumber,
           body: message,
         });
         break;

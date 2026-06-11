@@ -65,7 +65,12 @@ export async function POST(req: NextRequest) {
     const { action, notificationId } = body;
 
     if (action === 'mark_read' && notificationId) {
-      const success = await inAppNotifications.markAsRead(notificationId);
+      // Scope to the authenticated user so notifications belonging to other
+      // users cannot be marked as read
+      const success = await inAppNotifications.markAsRead(
+        notificationId,
+        user._id
+      );
       return NextResponse.json({ success });
     }
 
