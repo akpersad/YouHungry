@@ -4,16 +4,9 @@ const isPublicRoute = createRouteMatcher([
   '/',
   '/sign-in(.*)',
   '/sign-up(.*)',
-  '/api/restaurants/search',
-  '/api/webhooks/clerk',
-  '/api/decisions(.*)',
-  '/api/collections(.*)',
-  '/api/restaurants(.*)',
-  '/api/address(.*)',
-  '/push-test',
-  '/pwa-explorer',
+  '/api/webhooks/clerk', // svix-signature verified in the handler
   '/api/pwa-status',
-  '/api/cron(.*)', // Allow Vercel cron jobs (protected by CRON_SECRET)
+  '/api/cron(.*)', // Vercel cron jobs — each handler must verify CRON_SECRET
 ]);
 
 export default clerkMiddleware((auth, req) => {
