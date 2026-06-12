@@ -521,15 +521,18 @@ RUN_ALL_BROWSERS=true npm run test:e2e               # Nightly mode
 **Root Causes & Solutions:**
 
 1. **Test user doesn't exist in Clerk**
+
    - Check: Clerk Dashboard → Users
    - Solution: See [e2e/SETUP.md](../e2e/SETUP.md) to create test user
 
 2. **Wrong credentials**
+
    - Check: `.env.local` matches Clerk exactly (case-sensitive!)
    - Verify: `E2E_TEST_USER_EMAIL` and `E2E_TEST_USER_PASSWORD` are set
    - Test manually: Try logging in at `http://localhost:3000/sign-in`
 
 3. **Email not verified in Clerk**
+
    - Check: User in Clerk Dashboard shows "Verified" status
    - Solution: Mark email as verified in Clerk Dashboard
 
@@ -646,6 +649,7 @@ npx playwright test -g "test name" --headed --project=chromium
    ```
 
 2. **Find the right selector:**
+
    - Run: `npx playwright test --debug`
    - Click "Pick locator" in Playwright Inspector
    - Click the element in browser

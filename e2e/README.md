@@ -7,6 +7,7 @@ We use Playwright's test tags to organize and filter tests:
 ### Available Tags
 
 - **`@smoke`** - Quick smoke tests for critical functionality
+
   - Run time: ~2-3 minutes
   - Run on: Every PR
   - Tests: 5 core tests

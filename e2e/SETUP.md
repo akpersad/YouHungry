@@ -11,6 +11,7 @@ Before running E2E tests, you need to set up test users in Clerk.
 1. Go to your **Clerk Dashboard** → Users
 2. Click **"Create User"**
 3. Add test users:
+
    - Email: `test-user-1@your-domain.com` (use a real email you control)
    - Password: Create a secure password
    - **Important**: Mark email as verified

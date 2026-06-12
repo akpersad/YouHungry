@@ -11,11 +11,13 @@ The Fork In The Road app includes a comprehensive error tracking system designed
 Errors are automatically captured through React Error Boundaries at three levels:
 
 1. **Root Level** (`/app/layout.tsx`)
+
    - Catches catastrophic errors
    - Shows full-screen error page
    - Always active, no configuration needed
 
 2. **Route Level** (Individual pages)
+
    - Wrap page components with `<ErrorBoundary level="route">`
    - Example:
 

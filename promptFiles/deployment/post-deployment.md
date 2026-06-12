@@ -115,11 +115,13 @@ TWILIO_PHONE_NUMBER=+1...
 **Common Issues:**
 
 1. **"Phone verification failed"**
+
    - Check Twilio credentials are correct
    - Verify phone number format (+1XXXXXXXXXX)
    - Ensure Twilio account has sufficient credits
 
 2. **"SMS not received"**
+
    - Check Twilio phone number is valid
    - Verify destination phone number format
    - Check Twilio console for delivery errors
@@ -145,6 +147,7 @@ TWILIO_PHONE_NUMBER=+1...
 ### Database Connection Testing
 
 1. **Test production connection**
+
    - Verify MongoDB connection works from Vercel
    - Check connection logs in Vercel dashboard
    - Test database operations through your deployed app
@@ -152,6 +155,7 @@ TWILIO_PHONE_NUMBER=+1...
 2. **Database Collections Verification**
 
    Verify these collections exist and are accessible:
+
    - `users`
    - `restaurants`
    - `collections`
@@ -171,6 +175,7 @@ TWILIO_PHONE_NUMBER=+1...
 Now that you have a live URL, update your Google API key restrictions:
 
 1. **Google Places API**
+
    - Go to [Google Cloud Console](https://console.cloud.google.com)
    - Navigate to **APIs & Services > Credentials**
    - Select your API key
@@ -220,6 +225,7 @@ Now that you have a live URL, update your Google API key restrictions:
 ### SMS Integration Testing
 
 1. **Test SMS functionality**
+
    - Send test SMS from your deployed app
    - Verify SMS delivery to test numbers
    - Check Twilio logs for any delivery issues
@@ -260,6 +266,7 @@ A2P (Application-to-Person) 10DLC (10-Digit Long Code) is a system in the United
 ### Step 1: Register Your Business Brand
 
 1. **Access Twilio Console**
+
    - Go to [https://console.twilio.com](https://console.twilio.com)
    - Navigate to **Messaging** → **Regulatory Compliance** → **A2P 10DLC**
 
@@ -274,6 +281,7 @@ A2P (Application-to-Person) 10DLC (10-Digit Long Code) is a system in the United
      - Business type (Sole Proprietor, LLC, Corporation, etc.)
      - Industry/vertical
 3. **Business Verification**
+
    - Twilio may require additional documentation:
      - Business registration documents
      - Tax documentation
@@ -289,10 +297,12 @@ A2P (Application-to-Person) 10DLC (10-Digit Long Code) is a system in the United
 Once your brand is approved:
 
 1. **Create Campaign**
+
    - Navigate to **A2P 10DLC** → **Campaigns**
    - Click **"Create new campaign"**
 
 2. **Campaign Details**
+
    - **Campaign Use Case**: Choose appropriate category
      - For You Hungry?: "Account Notifications" or "Customer Care"
    - **Campaign Description**: Describe your SMS use case
@@ -308,6 +318,7 @@ Once your brand is approved:
      - Example: "Users can reply HELP for support or visit our help center"
 
 3. **Message Volume**
+
    - Estimate monthly message volume
    - Be realistic - this affects your throughput tier
 
@@ -321,10 +332,12 @@ Once your brand is approved:
 After campaign approval:
 
 1. **Navigate to Phone Numbers**
+
    - Go to **Phone Numbers** → **Manage** → **Active Numbers**
    - Select your messaging phone number
 
 2. **Link to Campaign**
+
    - Find **"A2P 10DLC Campaign"** section
    - Select your approved campaign from dropdown
    - Click **"Save"**
@@ -366,11 +379,13 @@ After registration is complete, no code changes are typically needed, but verify
 ### Monitoring A2P 10DLC Status
 
 1. **Check Registration Status**
+
    - Twilio Console → Messaging → A2P 10DLC
    - View brand and campaign status
    - Monitor approval progress
 
 2. **Track Message Throughput**
+
    - Monitor actual vs. allowed throughput
    - Check for carrier filtering
    - Review delivery reports
@@ -424,6 +439,7 @@ After registration is complete, no code changes are typically needed, but verify
 ### CORS Testing
 
 1. **Test CORS configuration**
+
    - Verify API endpoints work from your live domain
    - Test cross-origin requests
    - Check for CORS errors in browser console
@@ -447,12 +463,14 @@ After registration is complete, no code changes are typically needed, but verify
 ### Enable Production Monitoring
 
 1. **Vercel Analytics**
+
    - Enable Vercel Analytics in your project dashboard
    - Verify analytics tracking is working
    - Set up performance monitoring
    - Configure error tracking
 
 2. **Error Tracking**
+
    - Activate error tracking service (Sentry, etc.)
    - Verify error reporting is working
    - Set up alert notifications
@@ -481,10 +499,12 @@ Google Analytics 4 provides comprehensive analytics for understanding user behav
 ### Step 1: Create GA4 Property
 
 1. **Access Google Analytics**
+
    - Go to [https://analytics.google.com](https://analytics.google.com)
    - Sign in with your Google account
 
 2. **Create Property**
+
    - Click **"Admin"** (bottom left)
    - Under **"Property"**, click **"Create Property"**
    - **Property Details**:
@@ -494,6 +514,7 @@ Google Analytics 4 provides comprehensive analytics for understanding user behav
    - Click **"Next"**
 
 3. **Business Information**
+
    - Industry category: "Food & Drink" or "Technology"
    - Business size: Choose appropriate size
    - Intended use: "Examine user behavior" + "Measure advertising ROI"
@@ -506,10 +527,12 @@ Google Analytics 4 provides comprehensive analytics for understanding user behav
 ### Step 2: Set Up Data Stream
 
 1. **Create Web Data Stream**
+
    - After property creation, you'll be prompted to set up a data stream
    - Click **"Web"**
 
 2. **Stream Configuration**
+
    - **Website URL**: `https://www.forkintheroad.app` (your production URL)
    - **Stream name**: "You Hungry? Production"
    - **Enhanced measurement**: Toggle ON (recommended)
@@ -768,6 +791,7 @@ const handleDecision = async (algorithm: string, restaurants: Restaurant[]) => {
 ### Step 5: Verify Installation
 
 1. **Real-Time Testing**
+
    - Go to GA4 dashboard
    - Click **"Reports"** → **"Realtime"**
    - Visit your production site
@@ -775,6 +799,7 @@ const handleDecision = async (algorithm: string, restaurants: Restaurant[]) => {
    - Navigate to different pages to see page views
 
 2. **DebugView (Recommended)**
+
    - In GA4, go to **"Admin"** → **"DebugView"**
    - Install [Google Analytics Debugger](https://chrome.google.com/webstore/detail/google-analytics-debugger/) Chrome extension
    - Visit your site with extension enabled
@@ -790,10 +815,12 @@ const handleDecision = async (algorithm: string, restaurants: Restaurant[]) => {
 Set up conversions for important user actions:
 
 1. **Navigate to Conversions**
+
    - GA4 Dashboard → **"Admin"** → **"Events"**
    - Click **"Create event"** or mark existing events as conversions
 
 2. **Recommended Conversions**
+
    - `sign_up` - New user registration
    - `login` - User sign-in
    - `create_group` - Group creation
@@ -812,6 +839,7 @@ Set up conversions for important user actions:
 Create custom reports for app-specific metrics:
 
 1. **Exploration Reports**
+
    - Click **"Explore"** → **"Create new exploration"**
    - Choose template or start blank
 
@@ -825,6 +853,7 @@ Create custom reports for app-specific metrics:
 ### Step 8: Configure Data Retention
 
 1. **Navigate to Data Settings**
+
    - **"Admin"** → **"Data Settings"** → **"Data Retention"**
 
 2. **Set Retention Period**
@@ -843,11 +872,13 @@ NEXT_PUBLIC_GA_MEASUREMENT_ID=G-XXXXXXXXXX
 ### Privacy Considerations
 
 1. **Cookie Consent**
+
    - Consider implementing cookie consent banner
    - Respect user privacy preferences
    - Follow GDPR/CCPA requirements if applicable
 
 2. **IP Anonymization**
+
    - GA4 anonymizes IPs by default
    - No additional configuration needed
 
@@ -859,11 +890,13 @@ NEXT_PUBLIC_GA_MEASUREMENT_ID=G-XXXXXXXXXX
 ### Monitoring GA4 Performance
 
 1. **Daily Checks**
+
    - Review real-time users
    - Check for tracking errors
    - Monitor key conversions
 
 2. **Weekly Reviews**
+
    - Analyze user behavior patterns
    - Review popular pages and features
    - Check conversion funnel performance

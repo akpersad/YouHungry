@@ -65,6 +65,7 @@
 
 1. Navigate to `/push-test` page
 2. Review the status section - should show:
+
    - ✅ Supported: Yes
    - ✅ Permission: default (or granted if already allowed)
    - ❌ Subscribed: No (initially)
@@ -72,12 +73,14 @@
    - ✅ iOS Push Support: Yes
 
 3. Check the debug info section:
+
    - ✅ SW in navigator: Yes
    - ✅ PushManager: Yes
    - ✅ Notification: Yes
    - ✅ Display Mode: Standalone
 
 4. Click **"🔔 Subscribe to Push Notifications (Full)"** button
+
    - Should be **BLUE** (not gray)
    - Should be **clickable**
    - Should prompt for notification permission
@@ -186,6 +189,7 @@ Once tested successfully, document:
 The following pages are available for testing:
 
 - **`/push-test`** - Comprehensive push notification testing
+
   - Status display
   - Subscribe/unsubscribe functionality
   - Test notification sending

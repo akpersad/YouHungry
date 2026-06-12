@@ -91,6 +91,7 @@ These can be prepared before deployment since they don't require the live URL:
   ```
 
   **Phone Verification Setup:**
+
   - [ ] **Upgrade to Twilio Paid Plan** (required for phone verification)
     - [ ] Purchase Twilio paid plan to enable SMS to any number
     - [ ] Verify account with Twilio (may require credit card)
@@ -117,12 +118,14 @@ These require the live URL and must be set after deployment:
 ### MongoDB Atlas Setup
 
 - [ ] **Create production database cluster**
+
   - [ ] Set up MongoDB Atlas cluster for production
   - [ ] Configure network access (allow Vercel IP ranges or 0.0.0.0/0)
   - [ ] Create database user with read/write permissions
   - [ ] Test connection from your development environment
 
 - [ ] **Database schema verification**
+
   - [ ] Ensure all required collections exist:
     - `users`
     - `restaurants`
@@ -143,12 +146,14 @@ These require the live URL and must be set after deployment:
 ### Security Audit
 
 - [ ] **Environment variable security**
+
   - [ ] Remove any hardcoded secrets from code
   - [ ] Ensure `.env` files are in `.gitignore`
   - [ ] Verify no sensitive data in commit history
   - [ ] Use environment-specific configurations
 
 - [ ] **API security**
+
   - [ ] Implement proper CORS settings
   - [ ] Add rate limiting to API endpoints
   - [ ] Validate all input data
@@ -163,6 +168,7 @@ These require the live URL and must be set after deployment:
 ### Configuration Files
 
 - [ ] **Next.js configuration**
+
   - [ ] Review `next.config.ts` for production settings
   - [ ] Optimize image domains and remote patterns
   - [ ] Configure proper headers and security policies
@@ -190,6 +196,7 @@ These require the live URL and must be set after deployment:
   - [ ] Verify authentication flow
 
 - [ ] **Integration testing**
+
   - [ ] Test MongoDB connection
   - [ ] Test Google Places API integration
   - [ ] Test Twilio SMS (if implemented)
@@ -204,6 +211,7 @@ These require the live URL and must be set after deployment:
 ### Performance Testing
 
 - [ ] **Load testing**
+
   - [ ] Test API endpoints under load
   - [ ] Verify database performance
   - [ ] Test concurrent user scenarios
@@ -220,6 +228,7 @@ These require the live URL and must be set after deployment:
 ### Documentation Updates
 
 - [ ] **Update README.md**
+
   - [ ] Add deployment instructions
   - [ ] Update environment variable documentation
   - [ ] Add troubleshooting section
@@ -233,6 +242,7 @@ These require the live URL and must be set after deployment:
 ### Monitoring Setup
 
 - [ ] **Error tracking preparation**
+
   - [ ] Set up error tracking service (Sentry, etc.)
   - [ ] Configure error reporting
   - [ ] Set up alert notifications
@@ -249,6 +259,7 @@ These require the live URL and must be set after deployment:
 ### Vercel Configuration
 
 - [ ] **Vercel project setup**
+
   - [ ] Create Vercel project
   - [ ] Configure build settings
   - [ ] Set up custom domain (if applicable)
@@ -273,18 +284,21 @@ These require the live URL and must be set after deployment:
 ### Account Setup & Verification
 
 - [ ] **Clerk account**
+
   - [ ] Set up production project
   - [ ] Configure production settings
   - [ ] Test authentication flow
   - [ ] Prepare webhook configuration (requires live URL)
 
 - [ ] **MongoDB Atlas**
+
   - [ ] Set up production cluster
   - [ ] Configure network access
   - [ ] Create database user
   - [ ] Test connection
 
 - [ ] **Google Cloud Console**
+
   - [ ] Set up production project
   - [ ] Configure API keys
   - [ ] Set up billing
@@ -301,12 +315,14 @@ These require the live URL and must be set after deployment:
 ### Code Review Checklist
 
 - [ ] **Security review**
+
   - [ ] No hardcoded secrets
   - [ ] Proper input validation
   - [ ] Secure API endpoints
   - [ ] Proper error handling
 
 - [ ] **Performance review**
+
   - [ ] Optimized database queries
   - [ ] Efficient API calls
   - [ ] Proper caching strategies
@@ -321,6 +337,7 @@ These require the live URL and must be set after deployment:
 ### Deployment Readiness
 
 - [ ] **Team coordination**
+
   - [ ] Notify team of deployment schedule
   - [ ] Assign deployment responsibilities
   - [ ] Set up communication channels for issues
