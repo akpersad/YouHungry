@@ -1,166 +1,184 @@
 @import 'tailwindcss';
 
-/* Tailwind v4 Dark Mode Configuration - Use system preference */
-@variant dark (@media (prefers-color-scheme: dark));
+/* Tailwind v4 dark mode: class-driven. A pre-hydration script in layout.tsx
+   sets .light/.dark on <html> before first paint (manual choice from
+   localStorage, else system preference), so the class is always present. */
+@variant dark (&:where(.dark, .dark *));
 
-/* Neumorphic Design System - Sophisticated Monochrome with Strategic Accents */
+/* Fork In The Road design system — warm & appetizing (see DESIGN.md).
+   Canonical tokens first; legacy-name aliases below them keep every
+   pre-Phase-3 component working until the final cleanup commit. */
 
-/* Default to system preference */
 :root {
   color-scheme: light dark;
 }
 
-/* Light Mode Variables - Shades of White & Gray */
-@media (prefers-color-scheme: light) {
-  :root {
-    /* Base Colors (Monochrome Foundation) */
-    --bg-primary: #fafafa; /* Main background - off-white */
-    --bg-secondary: #ffffff; /* Card surfaces - pure white */
-    --bg-tertiary: #f5f5f5; /* Secondary backgrounds - light gray */
-    --bg-quaternary: #e5e5e5; /* Borders, dividers - medium gray */
-    --bg-quinary: #d1d1d1; /* Stronger borders - dark gray */
+/* ---------- Light mode (default) ---------- */
+:root {
+  /* Canvas & surfaces — blush-tinted warm neutrals (hue ~35) */
+  --bg: oklch(0.965 0.008 35);
+  --surface: oklch(0.99 0.004 35);
+  --surface-sunken: oklch(0.94 0.012 40);
+  --border: oklch(0.88 0.015 40);
+  --border-strong: oklch(0.8 0.02 38);
 
-    /* Strategic Accent Colors - Infrared */
-    --accent-primary: #e3005a; /* Infrared - primary actions (WCAG AA compliant: 4.51:1 contrast with #fafafa) */
-    --accent-primary-light: #ff3366; /* Light infrared - hover states */
-    --accent-primary-dark: #cc1144; /* Dark infrared - pressed states */
-    --accent-primary-muted: #ff4477; /* Muted infrared - subtle highlights */
+  /* Ink */
+  --ink: oklch(0.24 0.015 35);
+  --ink-secondary: oklch(0.42 0.02 35);
+  --ink-muted: oklch(0.5 0.02 35);
+  --ink-inverse: #ffffff;
 
-    /* Text Colors */
-    --text-primary: #1a1a1a; /* Primary text - high contrast */
-    --text-secondary: #4a4a4a; /* Secondary text - body text */
-    --text-tertiary: #6b6b6b; /* Tertiary text - muted (adjusted for WCAG AA 4.5:1 on white) */
-    --text-inverse: #ffffff; /* Text on dark backgrounds */
+  /* Accent trio */
+  --tomato: oklch(0.52 0.18 32);
+  --tomato-hover: oklch(0.46 0.17 32);
+  --tomato-tint: oklch(0.94 0.04 32);
+  --saffron: oklch(0.78 0.14 75);
+  --saffron-tint: oklch(0.95 0.05 80);
+  --olive: oklch(0.52 0.1 135);
+  --olive-tint: oklch(0.94 0.04 135);
 
-    /* Enhanced Shadow & Depth System */
-    --shadow-subtle: 0 2px 8px rgba(0, 0, 0, 0.08); /* Light elevation, subtle depth */
-    --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.12); /* Card elevation, natural depth */
-    --shadow-strong: 0 8px 32px rgba(0, 0, 0, 0.16); /* High elevation, dramatic depth */
-    --shadow-inset: inset 0 2px 4px rgba(0, 0, 0, 0.06); /* Pressed states, subtle indentation */
-    --shadow-layered:
-      0 2px 8px rgba(0, 0, 0, 0.08), 0 8px 32px rgba(0, 0, 0, 0.12); /* Complex depth */
-    --shadow-glow: 0 0 20px rgba(255, 51, 102, 0.15); /* Infrared accent glow */
+  /* Text-on-accent pairings (dark mode flips tomato to ink text) */
+  --on-tomato: #ffffff;
+  --on-saffron: oklch(0.24 0.015 35);
+  --on-olive: #ffffff;
 
-    /* Light Mode Neumorphic Shadows */
-    --shadow-neumorphic-light:
-      inset 2px 2px 4px rgba(255, 255, 255, 0.9),
-      inset -2px -2px 4px rgba(0, 0, 0, 0.08);
-    --shadow-neumorphic-elevated:
-      4px 4px 12px rgba(0, 0, 0, 0.08), -4px -4px 12px rgba(255, 255, 255, 0.9);
-    --shadow-neumorphic-pressed:
-      inset 4px 4px 8px rgba(0, 0, 0, 0.08),
-      inset -4px -4px 8px rgba(255, 255, 255, 0.9);
+  /* Status */
+  --color-success: var(--olive);
+  --color-warning: oklch(0.6 0.13 70);
+  --color-error: oklch(0.5 0.19 25);
+  --color-info: oklch(0.55 0.12 250);
 
-    /* Status Colors */
-    --color-success: #22c55e;
-    --color-warning: #f59e0b;
-    --color-error: #ef4444;
-    --color-info: #3b82f6;
+  /* Shadows — soft and warm-cast; hairline borders do most of the work */
+  --shadow-subtle: 0 1px 3px oklch(0.24 0.015 35 / 0.08);
+  --shadow-medium: 0 4px 12px oklch(0.24 0.015 35 / 0.1);
+  --shadow-strong: 0 8px 24px oklch(0.24 0.015 35 / 0.14);
+  --shadow-inset: inset 0 1px 2px oklch(0.24 0.015 35 / 0.06);
+  --shadow-layered:
+    0 1px 3px oklch(0.24 0.015 35 / 0.08), 0 8px 24px oklch(0.24 0.015 35 / 0.1);
+  --shadow-glow: 0 0 20px oklch(0.52 0.18 32 / 0.15);
 
-    /* Spacing Scale */
-    --spacing-xs: 0.25rem;
-    --spacing-sm: 0.5rem;
-    --spacing-md: 1rem;
-    --spacing-lg: 1.5rem;
-    --spacing-xl: 2rem;
-    --spacing-2xl: 3rem;
-    --spacing-3xl: 4rem;
+  /* Spacing Scale */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
+  --spacing-3xl: 4rem;
 
-    /* Typography Scale */
-    --text-xs: 0.75rem;
-    --text-sm: 0.875rem;
-    --text-base: 1rem;
-    --text-lg: 1.125rem;
-    --text-xl: 1.25rem;
-    --text-2xl: 1.5rem;
-    --text-3xl: 1.875rem;
-    --text-4xl: 2.25rem;
+  /* Typography Scale */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
 
-    /* Border Radius */
-    --radius-sm: 0.25rem;
-    --radius-md: 0.375rem;
-    --radius-lg: 0.5rem;
-    --radius-xl: 0.75rem;
-    --radius-2xl: 1rem;
-    --radius-3xl: 1.5rem;
-    --radius-full: 9999px;
-  }
+  /* Border Radius */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
+  --radius-3xl: 1.5rem;
+  --radius-full: 9999px;
+
+  /* ---- Legacy aliases (pre-Phase-3 names; removed in cleanup commit) ---- */
+  --bg-primary: var(--bg);
+  --bg-secondary: var(--surface);
+  --bg-tertiary: var(--surface-sunken);
+  --bg-quaternary: var(--border);
+  --bg-quinary: var(--border-strong);
+  --accent-primary: var(--tomato);
+  --accent-primary-light: var(--tomato-hover);
+  --accent-primary-dark: var(--tomato-hover);
+  --accent-primary-muted: var(--tomato-tint);
+  --text-primary: var(--ink);
+  --text-secondary: var(--ink-secondary);
+  --text-tertiary: var(--ink-muted);
+  --text-inverse: var(--ink-inverse);
+  --shadow-neumorphic-light: var(--shadow-subtle);
+  --shadow-neumorphic-dark: var(--shadow-subtle);
+  --shadow-neumorphic-elevated: var(--shadow-medium);
+  --shadow-neumorphic-pressed: var(--shadow-inset);
 }
 
-/* Dark Mode Variables - Shades of Black & Gray */
+/* ---------- Dark mode — warm charcoal, same hue family ---------- */
+:root.dark {
+  --bg: oklch(0.2 0.012 35);
+  --surface: oklch(0.24 0.014 35);
+  --surface-sunken: oklch(0.17 0.01 35);
+  --border: oklch(0.32 0.015 35);
+  --border-strong: oklch(0.42 0.02 35);
+
+  --ink: oklch(0.95 0.008 40);
+  --ink-secondary: oklch(0.78 0.015 38);
+  --ink-muted: oklch(0.68 0.015 38);
+  --ink-inverse: oklch(0.24 0.015 35);
+
+  /* Brightened accents; tomato takes ink-dark text in dark mode */
+  --tomato: oklch(0.68 0.17 35);
+  --tomato-hover: oklch(0.73 0.16 35);
+  --tomato-tint: oklch(0.3 0.05 32);
+  --saffron: oklch(0.8 0.13 78);
+  --saffron-tint: oklch(0.3 0.04 78);
+  --olive: oklch(0.68 0.11 135);
+  --olive-tint: oklch(0.28 0.04 135);
+
+  --on-tomato: oklch(0.18 0.012 35);
+  --on-saffron: oklch(0.18 0.012 35);
+  --on-olive: oklch(0.18 0.012 35);
+
+  --color-success: oklch(0.7 0.12 135);
+  --color-warning: oklch(0.8 0.14 80);
+  --color-error: oklch(0.68 0.17 25);
+  --color-info: oklch(0.7 0.1 250);
+
+  --shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.35);
+  --shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.45);
+  --shadow-strong: 0 8px 24px rgba(0, 0, 0, 0.55);
+  --shadow-inset: inset 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-layered:
+    0 1px 3px rgba(0, 0, 0, 0.35), 0 8px 24px rgba(0, 0, 0, 0.45);
+  --shadow-glow: 0 0 20px oklch(0.68 0.17 35 / 0.25);
+}
+
+/* No-JS fallback: honor system preference when the pre-hydration script
+   never ran (no .light/.dark class present). Values mirror :root.dark. */
 @media (prefers-color-scheme: dark) {
-  :root {
-    /* Base Colors (Monochrome Foundation) */
-    --bg-primary: #000000; /* Deepest background - pure black */
-    --bg-secondary: #1a1a1a; /* Primary dark background - charcoal */
-    --bg-tertiary: #2d2d2d; /* Card surfaces - dark gray */
-    --bg-quaternary: #404040; /* Secondary surfaces - medium dark gray */
-    --bg-quinary: #ababab; /* Borders, dividers - light dark gray (WCAG AA 4.5:1 on all backgrounds) */
-
-    /* Strategic Accent Colors - Infrared (Dark Mode) */
-    --accent-primary: #e3005a; /* Infrared - primary actions (WCAG AA compliant) */
-    --accent-primary-light: #ff3366; /* Light infrared - hover states */
-    --accent-primary-dark: #cc1144; /* Dark infrared - pressed states */
-    --accent-primary-muted: #ff4477; /* Muted infrared - subtle highlights */
-
-    /* Text Colors */
-    --text-primary: #ffffff; /* Primary text - high contrast */
-    --text-secondary: #d1d1d1; /* Secondary text - body text */
-    --text-tertiary: #b8b8b8; /* Tertiary text - muted (WCAG AA 5.0:1+ on all backgrounds) */
-    --text-inverse: #1a1a1a; /* Text on light backgrounds */
-
-    /* Enhanced Shadow & Depth System */
-    --shadow-subtle: 0 2px 8px rgba(0, 0, 0, 0.4); /* Light elevation, subtle depth */
-    --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.5); /* Card elevation, natural depth */
-    --shadow-strong: 0 8px 32px rgba(0, 0, 0, 0.6); /* High elevation, dramatic depth */
-    --shadow-inset: inset 0 2px 4px rgba(0, 0, 0, 0.3); /* Pressed states, subtle indentation */
+  :root:not(.light):not(.dark) {
+    --bg: oklch(0.2 0.012 35);
+    --surface: oklch(0.24 0.014 35);
+    --surface-sunken: oklch(0.17 0.01 35);
+    --border: oklch(0.32 0.015 35);
+    --border-strong: oklch(0.42 0.02 35);
+    --ink: oklch(0.95 0.008 40);
+    --ink-secondary: oklch(0.78 0.015 38);
+    --ink-muted: oklch(0.68 0.015 38);
+    --ink-inverse: oklch(0.24 0.015 35);
+    --tomato: oklch(0.68 0.17 35);
+    --tomato-hover: oklch(0.73 0.16 35);
+    --tomato-tint: oklch(0.3 0.05 32);
+    --saffron: oklch(0.8 0.13 78);
+    --saffron-tint: oklch(0.3 0.04 78);
+    --olive: oklch(0.68 0.11 135);
+    --olive-tint: oklch(0.28 0.04 135);
+    --on-tomato: oklch(0.18 0.012 35);
+    --on-saffron: oklch(0.18 0.012 35);
+    --on-olive: oklch(0.18 0.012 35);
+    --color-success: oklch(0.7 0.12 135);
+    --color-warning: oklch(0.8 0.14 80);
+    --color-error: oklch(0.68 0.17 25);
+    --color-info: oklch(0.7 0.1 250);
+    --shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.35);
+    --shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.45);
+    --shadow-strong: 0 8px 24px rgba(0, 0, 0, 0.55);
+    --shadow-inset: inset 0 1px 2px rgba(0, 0, 0, 0.3);
     --shadow-layered:
-      0 2px 8px rgba(0, 0, 0, 0.4), 0 8px 32px rgba(0, 0, 0, 0.5); /* Complex depth */
-    --shadow-glow: 0 0 20px rgba(255, 51, 102, 0.25); /* Infrared accent glow (stronger in dark mode) */
-
-    /* Dark Mode Neumorphic Shadows */
-    --shadow-neumorphic-dark:
-      inset 2px 2px 4px rgba(255, 255, 255, 0.05),
-      inset -2px -2px 4px rgba(0, 0, 0, 0.4);
-    --shadow-neumorphic-elevated:
-      4px 4px 12px rgba(0, 0, 0, 0.4), -4px -4px 12px rgba(255, 255, 255, 0.05);
-    --shadow-neumorphic-pressed:
-      inset 4px 4px 8px rgba(0, 0, 0, 0.4),
-      inset -4px -4px 8px rgba(255, 255, 255, 0.05);
-
-    /* Status Colors - Enhanced for dark mode contrast */
-    --color-success: #34d399; /* Brighter green for better dark mode contrast */
-    --color-warning: #fbbf24; /* Brighter yellow for better dark mode contrast */
-    --color-error: #f87171; /* Brighter red for better dark mode contrast */
-    --color-info: #60a5fa; /* Brighter blue for better dark mode contrast */
-
-    /* Spacing Scale */
-    --spacing-xs: 0.25rem;
-    --spacing-sm: 0.5rem;
-    --spacing-md: 1rem;
-    --spacing-lg: 1.5rem;
-    --spacing-xl: 2rem;
-    --spacing-2xl: 3rem;
-    --spacing-3xl: 4rem;
-
-    /* Typography Scale */
-    --text-xs: 0.75rem;
-    --text-sm: 0.875rem;
-    --text-base: 1rem;
-    --text-lg: 1.125rem;
-    --text-xl: 1.25rem;
-    --text-2xl: 1.5rem;
-    --text-3xl: 1.875rem;
-    --text-4xl: 2.25rem;
-
-    /* Border Radius */
-    --radius-sm: 0.25rem;
-    --radius-md: 0.375rem;
-    --radius-lg: 0.5rem;
-    --radius-xl: 0.75rem;
-    --radius-2xl: 1rem;
-    --radius-3xl: 1.5rem;
-    --radius-full: 9999px;
+      0 1px 3px rgba(0, 0, 0, 0.35), 0 8px 24px rgba(0, 0, 0, 0.45);
+    --shadow-glow: 0 0 20px oklch(0.68 0.17 35 / 0.25);
   }
 }
 
@@ -174,8 +192,8 @@ html {
 }
 
 body {
-  background: var(--bg-primary);
-  color: var(--text-primary);
+  background: var(--bg);
+  color: var(--ink);
   font-family:
     var(--font-geist-sans),
     system-ui,
@@ -187,6 +205,24 @@ body {
   transition:
     background-color 0.3s ease,
     color 0.3s ease;
+}
+
+/* Display typography — Fraunces for headings and brand moments */
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
+
+h1,
+h2 {
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.font-display {
+  font-family: var(--font-display), Georgia, serif;
 }
 
 /* Theme transition support */
@@ -226,9 +262,8 @@ body {
 
 /* Primary Button - Neumorphic */
 .btn-primary {
-  background: var(--accent-primary);
-  color: #ffffff;
-  box-shadow: var(--shadow-neumorphic-elevated);
+  background: var(--tomato);
+  color: var(--on-tomato);
   border-radius: var(--radius-xl);
   padding: 12px 24px;
   font-weight: 600;
@@ -236,28 +271,24 @@ body {
 }
 
 .btn-primary:hover {
-  background: var(--accent-primary-light);
-  box-shadow: var(--shadow-neumorphic-elevated);
-  transform: translateY(-1px);
+  background: var(--tomato-hover);
 }
 
 .btn-primary:active {
-  background: var(--accent-primary-dark);
-  box-shadow: var(--shadow-neumorphic-pressed);
-  transform: translateY(0);
+  background: var(--tomato-hover);
+  box-shadow: var(--shadow-inset);
 }
 
 .btn-primary:focus {
-  --tw-ring-color: var(--accent-primary);
+  --tw-ring-color: var(--tomato);
   --tw-ring-opacity: 0.3;
 }
 
-/* Secondary Button - Neumorphic */
+/* Secondary Button - quiet: surface + hairline + ink */
 .btn-secondary {
-  background: var(--bg-secondary);
-  color: var(--text-primary);
-  box-shadow: var(--shadow-neumorphic-light);
-  border: 1px solid var(--bg-quaternary);
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--border);
   border-radius: var(--radius-xl);
   padding: 12px 24px;
   font-weight: 500;
@@ -265,27 +296,23 @@ body {
 }
 
 .btn-secondary:hover {
-  background: var(--bg-tertiary);
-  box-shadow: var(--shadow-neumorphic-elevated);
-  border-color: var(--accent-primary);
-  transform: translateY(-1px);
+  background: var(--surface-sunken);
+  border-color: var(--border-strong);
 }
 
 .btn-secondary:active {
-  box-shadow: var(--shadow-neumorphic-pressed);
-  transform: translateY(0);
+  box-shadow: var(--shadow-inset);
 }
 
 .btn-secondary:focus {
-  --tw-ring-color: var(--accent-primary);
+  --tw-ring-color: var(--tomato);
   --tw-ring-opacity: 0.3;
 }
 
-/* Accent Button - Neumorphic */
+/* Accent Button - same family as primary */
 .btn-accent {
-  background: var(--accent-primary);
-  color: #ffffff;
-  box-shadow: var(--shadow-neumorphic-elevated);
+  background: var(--tomato);
+  color: var(--on-tomato);
   border-radius: var(--radius-xl);
   padding: 12px 24px;
   font-weight: 600;
@@ -293,27 +320,23 @@ body {
 }
 
 .btn-accent:hover {
-  background: var(--accent-primary-light);
-  box-shadow: var(--shadow-neumorphic-elevated);
-  transform: translateY(-1px);
+  background: var(--tomato-hover);
 }
 
 .btn-accent:active {
-  background: var(--accent-primary-dark);
-  box-shadow: var(--shadow-neumorphic-pressed);
-  transform: translateY(0);
+  background: var(--tomato-hover);
+  box-shadow: var(--shadow-inset);
 }
 
 .btn-accent:focus {
-  --tw-ring-color: var(--accent-primary);
+  --tw-ring-color: var(--tomato);
   --tw-ring-opacity: 0.3;
 }
 
-/* Warm Button - Neumorphic */
+/* Warm Button - saffron, always ink text (never white on saffron) */
 .btn-warm {
-  background: #ffd23f;
-  color: var(--text-primary);
-  box-shadow: var(--shadow-neumorphic-elevated);
+  background: var(--saffron);
+  color: var(--on-saffron);
   border-radius: var(--radius-xl);
   padding: 12px 24px;
   font-weight: 600;
@@ -321,77 +344,65 @@ body {
 }
 
 .btn-warm:hover {
-  background: #f4c430;
-  box-shadow: var(--shadow-neumorphic-elevated);
-  transform: translateY(-1px);
+  filter: brightness(0.95);
 }
 
 .btn-warm:active {
-  background: #e6b800;
-  box-shadow: var(--shadow-neumorphic-pressed);
-  transform: translateY(0);
+  box-shadow: var(--shadow-inset);
 }
 
 .btn-warm:focus {
-  --tw-ring-color: #ffd23f;
-  --tw-ring-opacity: 0.3;
+  --tw-ring-color: var(--saffron);
+  --tw-ring-opacity: 0.4;
 }
 
-/* Outline Button - Neumorphic */
+/* Outline Button - tomato-bordered; used for destructive confirms */
 .btn-outline {
-  background: var(--bg-secondary);
-  color: var(--text-primary);
-  border: 2px solid var(--accent-primary);
-  box-shadow: var(--shadow-neumorphic-light);
+  background: var(--surface);
+  color: var(--tomato);
+  border: 1px solid var(--tomato);
   border-radius: var(--radius-xl);
-  padding: 10px 22px;
+  padding: 11px 23px;
   font-weight: 600;
   font-size: var(--text-sm);
 }
 
 .btn-outline:hover {
-  background: var(--accent-primary);
-  color: #ffffff;
-  box-shadow: var(--shadow-neumorphic-elevated);
-  transform: translateY(-1px);
+  background: var(--tomato);
+  color: var(--on-tomato);
 }
 
 .btn-outline:active {
-  box-shadow: var(--shadow-neumorphic-pressed);
-  transform: translateY(0);
+  box-shadow: var(--shadow-inset);
 }
 
 .btn-outline:focus {
-  --tw-ring-color: var(--accent-primary);
+  --tw-ring-color: var(--tomato);
   --tw-ring-opacity: 0.3;
 }
 
-/* Outline Accent Button - Neumorphic */
+/* Outline Accent Button - alias of outline */
 .btn-outline-accent {
-  background: var(--bg-secondary);
-  color: var(--text-primary);
-  border: 2px solid var(--accent-primary);
-  box-shadow: var(--shadow-neumorphic-light);
+  background: var(--surface);
+  color: var(--tomato);
+  border: 1px solid var(--tomato);
   border-radius: var(--radius-xl);
-  padding: 10px 22px;
+  padding: 11px 23px;
   font-weight: 600;
   font-size: var(--text-sm);
 }
 
 .btn-outline-accent:hover {
-  background: var(--accent-primary);
-  color: #ffffff;
-  box-shadow: var(--shadow-neumorphic-elevated);
-  transform: translateY(-1px);
+  background: var(--tomato);
+  color: var(--on-tomato);
 }
 
 .btn-outline-accent:active {
-  box-shadow: var(--shadow-neumorphic-pressed);
-  transform: translateY(0);
+  box-shadow: var(--shadow-inset);
 }
 
 .btn-outline-accent:focus {
-  --tw-ring-color: var(--accent-primary);
+  --tw-ring-color: var(--tomato);
   --tw-ring-opacity: 0.3;
 }
 
@@ -414,33 +425,31 @@ body {
   border-radius: var(--radius-2xl);
 }
 
-/* Neumorphic Input System */
+/* Input System - sunken fill, tomato focus ring */
 .input-base {
-  background: var(--bg-secondary);
-  border: 1px solid var(--bg-quaternary);
+  background: var(--surface-sunken);
+  border: 1px solid var(--border);
   border-radius: var(--radius-xl);
   padding: 12px 16px;
   font-size: var(--text-base);
-  color: var(--text-primary);
-  box-shadow: var(--shadow-neumorphic-light);
+  color: var(--ink);
   transition: all 0.2s ease;
   width: 100%;
 }
 
 .input-base:focus {
   outline: none;
-  box-shadow: var(--shadow-neumorphic-elevated);
-  border-color: var(--accent-primary);
-  background: var(--bg-secondary);
+  box-shadow: 0 0 0 3px oklch(0.52 0.18 32 / 0.18);
+  border-color: var(--tomato);
+  background: var(--surface);
 }
 
 .input-base:hover {
-  border-color: var(--bg-quinary);
-  box-shadow: var(--shadow-neumorphic-light);
+  border-color: var(--border-strong);
 }
 
 .input-base::placeholder {
-  color: var(--text-tertiary);
+  color: var(--ink-muted);
   font-weight: 400;
 }
 
@@ -506,12 +515,12 @@ body {
   --tw-ring-opacity: 0.3;
 }
 
-/* Neumorphic Card System */
+/* Card System - hairline border + subtle shadow */
 .card-base {
-  background: var(--bg-secondary);
+  background: var(--surface);
   border-radius: var(--radius-2xl);
   box-shadow: var(--shadow-subtle);
-  border: 1px solid var(--bg-quaternary);
+  border: 1px solid var(--border);
   transition: all 0.3s ease;
   overflow: hidden;
 }
@@ -519,7 +528,7 @@ body {
 .card-base:hover {
   box-shadow: var(--shadow-medium);
   transform: translateY(-2px);
-  border-color: var(--accent-primary);
+  border-color: var(--border-strong);
 }
 
 .card-elevated {

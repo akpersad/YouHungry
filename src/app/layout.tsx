@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
+import { Geist, Geist_Mono, Fraunces } from 'next/font/google';
 import { ClerkProvider } from '@clerk/nextjs';
 import { QueryProvider } from '@/components/providers/QueryProvider';
 import { ThemeProvider } from '@/components/providers/ThemeProvider';
@@ -27,6 +27,14 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: '--font-geist-mono',
   subsets: ['latin'],
+});
+
+// Display serif for headings and brand moments (DESIGN.md). Variable axes:
+// opsz auto-tunes for size; SOFT/WONK reserved for decision-reveal moments.
+const fraunces = Fraunces({
+  variable: '--font-display',
+  subsets: ['latin'],
+  axes: ['opsz', 'SOFT', 'WONK'],
 });
 
 export const metadata: Metadata = {
@@ -88,14 +96,14 @@ export const metadata: Metadata = {
     'mobile-web-app-capable': 'yes',
     'apple-mobile-web-app-capable': 'yes',
     'apple-mobile-web-app-status-bar-style': 'default',
-    'theme-color': '#e3005a',
+    'theme-color': '#bd3e26',
   },
 };
 
 export const viewport = {
   width: 'device-width',
   initialScale: 1,
-  themeColor: '#527a51',
+  themeColor: '#bd3e26',
   viewportFit: 'cover', // Enable safe area insets for notch/status bar
 };
 
@@ -114,8 +122,16 @@ export default function RootLayout({
     >
       {/* data-scroll-behavior keeps Next 16 overriding our CSS smooth-scroll
           during route transitions (pre-16 default behavior) */}
-      <html lang="en" data-scroll-behavior="smooth">
+      <html lang="en" data-scroll-behavior="smooth" suppressHydrationWarning>
         <head>
+          {/* Pre-hydration theme: set .light/.dark on <html> before first
+              paint so class-driven tokens and dark: utilities never flash.
+              Mirrors ThemeProvider's storage key and resolution rules. */}
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `(function(){try{var t=localStorage.getItem('forkintheroad-theme');var r=t==='light'||t==='dark'?t:(window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.classList.add(r);}catch(e){}})();`,
+            }}
+          />
           <link rel="manifest" href="/manifest.json" />
           <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
           <link
@@ -131,7 +147,7 @@ export default function RootLayout({
             type="image/svg+xml"
           />
           <link rel="apple-touch-icon" href="/icons/icon-192x192.svg" />
-          <meta name="theme-color" content="#e3005a" />
+          <meta name="theme-color" content="#bd3e26" />
           {/* Performance optimizations */}
           <link rel="preconnect" href="https://clerk.com" />
           <link rel="dns-prefetch" href="https://clerk.com" />
@@ -139,7 +155,7 @@ export default function RootLayout({
           <link rel="dns-prefetch" href="https://img.clerk.com" />
         </head>
         <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+          className={`${geistSans.variable} ${geistMono.variable} ${fraunces.variable} antialiased`}
         >
           {/* Analytics Components - Google Analytics & Vercel Analytics work independently */}
           <GoogleAnalytics />
