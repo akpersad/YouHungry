@@ -40,9 +40,11 @@ export default defineConfig({
   ],
 
   webServer: {
-    command: 'npm run dev',
+    // Production server — see playwright.config.ts for why (Next 16 dev
+    // overlay interferes with dialog tests).
+    command: 'npm run build && npm run start',
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
-    timeout: 120 * 1000,
+    timeout: 300 * 1000,
   },
 });

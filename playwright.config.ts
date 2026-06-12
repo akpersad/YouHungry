@@ -194,9 +194,15 @@ export default defineConfig({
   ],
 
   webServer: {
-    command: 'npm run dev:force',
+    // Production server, not `next dev`: the Next 16 dev overlay renders its
+    // own role="dialog" and auto-opens on any console error (e.g. an
+    // intermittent Clerk dev-instance 401), breaking strict-mode dialog
+    // assertions and intercepting clicks. No overlay exists in production.
+    // Locally a dev server already on :3000 is still reused — kill it first
+    // for a CI-faithful run.
+    command: 'npm run build && npm run start',
     url: 'http://localhost:3000',
     reuseExistingServer: !isCI,
-    timeout: 120 * 1000,
+    timeout: 300 * 1000,
   },
 });
