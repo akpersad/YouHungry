@@ -94,11 +94,29 @@ verification (2026-06-12, same day):
   badges render.
 - **Lockfile poisoning regression check: clean** (`grep -c elilillyco
 package-lock.json` = 0).
-- **One defect found:** Vercel attempts to deploy the orphan `badges` branch
+- **Defect 1:** Vercel attempts to deploy the orphan `badges` branch
   on every badge push and ERRORs (no Next app there). Fixed on
   `housekeeping/post-phase2-verification`: the publish-badges job now writes
   a `vercel.json` with `git.deploymentEnabled: { badges: false }` onto the
   branch, which Vercel reads from the deployed commit.
+- **Defect 2 — the main-branch Playwright run FAILED** (Accessibility +
+  PR Tests jobs; Smoke and Lighthouse passed). Root cause: **Next 16's dev
+  overlay** renders its own `role="dialog"` and auto-opens a "Console
+  Error" panel whenever an app-level error logs — the trigger was the
+  documented Clerk dev-instance flake (intermittent 401 on
+  `/api/decisions/history` + `unhandledRejection: NEXT_REDIRECT` from
+  `auth.protect()` in middleware, with Clerk's "infinite redirect loop"
+  refresh warning in the server log). Strict-mode dialog assertions then
+  resolve two dialogs and the overlay intercepts clicks; the modal a11y
+  tests failed deterministically even in isolation. **Fix (same branch):
+  both Playwright configs now run against `npm run build && npm run start`**
+  — no dev overlay exists in production, and e2e now tests what ships.
+  Verified: `test:e2e:fast` 43 passed / 2 flaky-passed-on-retry / 0 failed
+  (= the 45-green Phase 2 baseline). Note: locally a dev server already on
+  :3000 is still reused — kill it for a CI-faithful run. The Clerk
+  `NEXT_REDIRECT` unhandledRejection noise still logs server-side
+  (clerk#8302 territory; harmless, redirect works) — candidate alongside
+  the proxy.ts rename.
 - Dependabot re-opened ~10 PRs after the merge (majors: glob 13,
   lint-staged 17, twilio 6, @vercel/analytics 2, @vercel/speed-insights 2,
   actions/checkout 6, setup-node 6, upload/download-artifact, plus a grouped
