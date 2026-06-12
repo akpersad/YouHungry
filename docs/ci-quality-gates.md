@@ -25,6 +25,14 @@ local husky pre-push hook.
 | `Lighthouse Performance`              | `lhci autorun` against a production build           |
 | `Nightly Tests (All Browsers)`        | schedule-only, all 5 browsers, 4 shards             |
 
+All Playwright jobs run against a **production server** (`npm run build &&
+npm run start`, started by the Playwright `webServer` config) — not `next
+dev`. The Next 16 dev overlay renders its own `role="dialog"` and auto-opens
+on any console error, which breaks strict-mode dialog assertions and
+intercepts clicks; no overlay exists in production. Locally, a dev server
+already running on :3000 is reused instead — kill it first for a CI-faithful
+run.
+
 ## Required PR checks (owner action — one-time GitHub UI setup)
 
 Branch protection can only be configured by the repo admin. On

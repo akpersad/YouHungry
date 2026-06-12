@@ -89,4 +89,4 @@ Major families: `decisions/*` (random-select, group, group/vote, weights, histor
 ### Testing
 
 - Jest: `src/__tests__/`, `src/lib/__tests__/`, `src/hooks/__tests__/`; mocks for mongodb/clerk/bson in `src/__mocks__/`; jsdom env.
-- Playwright: `e2e/` with `@smoke`/`@critical` grep tags; projects split fast/slow/mobile/auth (`playwright.config.ts`); `playwright.config.no-auth.ts` for public routes; fixtures in `e2e/fixtures/`.
+- Playwright: `e2e/` with `@smoke`/`@critical` grep tags; projects split fast/slow/mobile/auth (`playwright.config.ts`); `playwright.config.no-auth.ts` for public routes; fixtures in `e2e/fixtures/`. The `webServer` builds and runs a **production** server (`next dev`'s Next 16 overlay breaks dialog tests) — but reuses an existing server on :3000 locally, so kill any dev server first for a CI-faithful run.
