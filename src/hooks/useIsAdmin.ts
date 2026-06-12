@@ -9,8 +9,6 @@ export function useIsAdmin() {
 
   useEffect(() => {
     if (!isLoaded || !user) {
-      setIsAdmin(false);
-      setIsChecking(false);
       return;
     }
 
@@ -44,6 +42,12 @@ export function useIsAdmin() {
 
     checkAdminStatus();
   }, [user, isLoaded]);
+
+  // Without a signed-in user there is nothing to check — derive the result
+  // during render instead of setting state synchronously in the effect.
+  if (!isLoaded || !user) {
+    return { isAdmin: false, isChecking: false };
+  }
 
   return { isAdmin, isChecking };
 }

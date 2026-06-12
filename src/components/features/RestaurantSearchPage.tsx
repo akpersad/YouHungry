@@ -1,7 +1,7 @@
 'use client';
 
 import { logger } from '@/lib/logger';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { Restaurant, Collection } from '@/types/database';
 import { RestaurantSearchForm } from '../forms/RestaurantSearchForm';
@@ -67,9 +67,6 @@ export function RestaurantSearchPage({
   const [showAddToCollectionModal, setShowAddToCollectionModal] =
     useState(false);
   const [selectedCollectionId, setSelectedCollectionId] = useState<string>('');
-  const [restaurantInCollections, setRestaurantInCollections] = useState<
-    Set<string>
-  >(new Set());
   const [selectedRestaurantCollections, setSelectedRestaurantCollections] =
     useState<Set<string>>(new Set());
   const [searchFilters, setSearchFilters] = useState<{
@@ -242,63 +239,6 @@ export function RestaurantSearchPage({
   // Alias for compatibility with existing code
   const restaurants = paginatedRestaurants;
 
-  const checkRestaurantsInCollections = useCallback(
-    async (collections: Collection[]) => {
-      if (restaurants.length === 0 || collections.length === 0) return;
-
-      try {
-        // Get all restaurant IDs from search results (use googlePlaceId if _id not available)
-        const restaurantIds = restaurants
-          .filter((r) => r._id || r.googlePlaceId)
-          .map((r) => (r._id || r.googlePlaceId).toString());
-
-        // Check each collection for these restaurants
-        const inCollections = new Set<string>();
-
-        for (const collection of collections) {
-          for (const restaurantId of restaurantIds) {
-            if (
-              collection.restaurantIds.some((restaurantData) => {
-                // Handle both old format (string IDs) and new format (objects with _id and googlePlaceId)
-                if (typeof restaurantData === 'string') {
-                  return restaurantData === restaurantId;
-                } else if (
-                  restaurantData &&
-                  typeof restaurantData === 'object' &&
-                  'toString' in restaurantData
-                ) {
-                  return restaurantData.toString() === restaurantId;
-                } else if (
-                  restaurantData &&
-                  typeof restaurantData === 'object'
-                ) {
-                  // New format: object with _id and/or googlePlaceId
-                  const obj = restaurantData as Record<string, unknown>;
-                  return (
-                    ('_id' in obj &&
-                      obj._id &&
-                      obj._id.toString() === restaurantId) ||
-                    ('googlePlaceId' in obj &&
-                      obj.googlePlaceId &&
-                      obj.googlePlaceId === restaurantId)
-                  );
-                }
-                return false;
-              })
-            ) {
-              inCollections.add(restaurantId);
-            }
-          }
-        }
-
-        setRestaurantInCollections(inCollections);
-      } catch (error) {
-        logger.error('Error checking restaurants in collections:', error);
-      }
-    },
-    [restaurants]
-  );
-
   // Fetch collections if not provided as props
   // Use propCollections if provided, otherwise use TanStack Query data
   const effectiveCollections = useMemo(() => {
@@ -318,12 +258,60 @@ export function RestaurantSearchPage({
         : [];
   }, [propCollections, collections]);
 
-  // Check restaurants in collections when restaurants or collections change
-  useEffect(() => {
-    if (restaurants.length > 0 && effectiveCollections.length > 0) {
-      checkRestaurantsInCollections(effectiveCollections);
+  // Derive which search results are already in collections (pure derivation
+  // via useMemo instead of state synced from an effect)
+  const restaurantInCollections = useMemo(() => {
+    // Check each collection for these restaurants
+    const inCollections = new Set<string>();
+
+    if (restaurants.length === 0 || effectiveCollections.length === 0) {
+      return inCollections;
     }
-  }, [restaurants, effectiveCollections, checkRestaurantsInCollections]);
+
+    try {
+      // Get all restaurant IDs from search results (use googlePlaceId if _id not available)
+      const restaurantIds = restaurants
+        .filter((r) => r._id || r.googlePlaceId)
+        .map((r) => (r._id || r.googlePlaceId).toString());
+
+      for (const collection of effectiveCollections as Collection[]) {
+        for (const restaurantId of restaurantIds) {
+          if (
+            collection.restaurantIds.some((restaurantData) => {
+              // Handle both old format (string IDs) and new format (objects with _id and googlePlaceId)
+              if (typeof restaurantData === 'string') {
+                return restaurantData === restaurantId;
+              } else if (
+                restaurantData &&
+                typeof restaurantData === 'object' &&
+                'toString' in restaurantData
+              ) {
+                return restaurantData.toString() === restaurantId;
+              } else if (restaurantData && typeof restaurantData === 'object') {
+                // New format: object with _id and/or googlePlaceId
+                const obj = restaurantData as Record<string, unknown>;
+                return (
+                  ('_id' in obj &&
+                    obj._id &&
+                    obj._id.toString() === restaurantId) ||
+                  ('googlePlaceId' in obj &&
+                    obj.googlePlaceId &&
+                    obj.googlePlaceId === restaurantId)
+                );
+              }
+              return false;
+            })
+          ) {
+            inCollections.add(restaurantId);
+          }
+        }
+      }
+    } catch (error) {
+      logger.error('Error checking restaurants in collections:', error);
+    }
+
+    return inCollections;
+  }, [restaurants, effectiveCollections]);
 
   const searchRestaurants = (
     location: string,

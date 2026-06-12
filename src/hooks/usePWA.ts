@@ -19,32 +19,31 @@ export interface InstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 }
 
+// Check if app is installed (mount-time read; false during SSR)
+function getInitialInstallStatus(): boolean {
+  if (typeof window === 'undefined') return false;
+
+  return (
+    window.matchMedia('(display-mode: standalone)').matches ||
+    (window.navigator as unknown as Record<string, unknown>).standalone ===
+      true ||
+    Boolean(document.referrer && document.referrer.includes('android-app://'))
+  );
+}
+
 export function usePWA() {
-  const [status, setStatus] = useState<PWAStatus>({
+  const [status, setStatus] = useState<PWAStatus>(() => ({
     isOnline: true,
-    isInstalled: false,
+    isInstalled: getInitialInstallStatus(),
     canInstall: false,
     isServiceWorkerReady: false,
     offlineActionsCount: 0,
     lastSync: null,
-  });
+  }));
 
   const [installPrompt, setInstallPrompt] = useState<InstallPromptEvent | null>(
     null
   );
-
-  // Check if app is installed
-  const checkInstallStatus = useCallback(() => {
-    const isInstalled =
-      window.matchMedia('(display-mode: standalone)').matches ||
-      (window.navigator as unknown as Record<string, unknown>).standalone ===
-        true ||
-      Boolean(
-        document.referrer && document.referrer.includes('android-app://')
-      );
-
-    setStatus((prev) => ({ ...prev, isInstalled }));
-  }, []);
 
   // Check service worker status
   const checkServiceWorkerStatus = useCallback(async () => {
@@ -195,10 +194,12 @@ export function usePWA() {
 
   // Initialize PWA features
   useEffect(() => {
-    // Check initial status
-    checkInstallStatus();
-    checkServiceWorkerStatus();
-    checkOfflineActions();
+    // Check initial status (install status is read in the useState initializer);
+    // both checks set state asynchronously, after their awaited browser reads.
+    const checkInitialStatus = async () => {
+      await Promise.all([checkServiceWorkerStatus(), checkOfflineActions()]);
+    };
+    checkInitialStatus();
 
     // Set up event listeners
     window.addEventListener('online', updateOnlineStatus);
@@ -233,7 +234,6 @@ export function usePWA() {
       }
     };
   }, [
-    checkInstallStatus,
     checkServiceWorkerStatus,
     checkOfflineActions,
     updateOnlineStatus,

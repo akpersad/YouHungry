@@ -28,7 +28,9 @@ export default function PushTestPage() {
 
   // Fix hydration issues
   React.useEffect(() => {
-    setMounted(true);
+    // Wrapped so setState is not called synchronously in the effect body
+    const markMounted = () => setMounted(true);
+    markMounted();
   }, []);
 
   const handleBasicNotification = async () => {

@@ -1,7 +1,7 @@
 'use client';
 
 import { logger } from '@/lib/logger';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { useManualDecision } from '@/hooks/api/useHistory';
@@ -155,11 +155,16 @@ export function ManualDecisionForm({ onSuccess }: ManualDecisionFormProps) {
       (type === 'personal' || (type === 'group' && !!groupId)),
   });
 
-  useEffect(() => {
-    if (restaurantsData && Array.isArray(restaurantsData)) {
-      setRestaurants(restaurantsData);
-    }
-  }, [restaurantsData]);
+  // Sync the restaurants list with the latest query data (render-time sync
+  // instead of a setState-in-effect); keeps the previous list while a new
+  // query is loading, matching the prior behavior
+  if (
+    restaurantsData &&
+    Array.isArray(restaurantsData) &&
+    restaurants !== restaurantsData
+  ) {
+    setRestaurants(restaurantsData);
+  }
 
   // Fetch groups if type is group
   const { data: groupsData } = useQuery({

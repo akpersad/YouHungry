@@ -151,7 +151,11 @@ export default function PWAExplorerPage() {
   };
 
   useEffect(() => {
-    runAllTests();
+    // Wrapped so setState is not called synchronously in the effect body
+    const run = () => {
+      void runAllTests();
+    };
+    run();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

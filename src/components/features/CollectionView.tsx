@@ -47,7 +47,22 @@ export function CollectionView({ collectionId }: CollectionViewProps) {
     visitDate: Date;
   } | null>(null);
   const [decisionError, setDecisionError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState('restaurants');
+
+  // Initialize the active tab from the URL query parameter, then keep it in
+  // sync when the parameter changes (render-time sync instead of an effect)
+  const tabParam = searchParams.get('tab');
+  const [activeTab, setActiveTab] = useState(() =>
+    tabParam && ['restaurants', 'decisions'].includes(tabParam)
+      ? tabParam
+      : 'restaurants'
+  );
+  const [prevTabParam, setPrevTabParam] = useState(tabParam);
+  if (tabParam !== prevTabParam) {
+    setPrevTabParam(tabParam);
+    if (tabParam && ['restaurants', 'decisions'].includes(tabParam)) {
+      setActiveTab(tabParam);
+    }
+  }
 
   // Use TanStack Query hooks
   const {
@@ -97,14 +112,6 @@ export function CollectionView({ collectionId }: CollectionViewProps) {
     },
     enabled: !!collection && collection.type === 'group',
   });
-
-  // Handle tab query parameter
-  useEffect(() => {
-    const tabParam = searchParams.get('tab');
-    if (tabParam && ['restaurants', 'decisions'].includes(tabParam)) {
-      setActiveTab(tabParam);
-    }
-  }, [searchParams]);
 
   // Update URL when tab changes
   const handleTabChange = useCallback(

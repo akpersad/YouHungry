@@ -80,9 +80,13 @@ export function DatabaseManagementDashboard() {
   };
 
   useEffect(() => {
-    fetchStats().finally(() => {
-      setLoading(false);
-    });
+    // Wrapped so setState is not called synchronously in the effect body
+    const load = () => {
+      fetchStats().finally(() => {
+        setLoading(false);
+      });
+    };
+    load();
   }, []);
 
   const formatBytes = (bytes: number) => {

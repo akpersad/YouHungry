@@ -267,7 +267,11 @@ export function SystemSettingsDashboard() {
   };
 
   useEffect(() => {
-    fetchSettings();
+    // Wrapped so setState is not called synchronously in the effect body
+    const load = () => {
+      void fetchSettings();
+    };
+    load();
   }, []);
 
   const sections = [

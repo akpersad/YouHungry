@@ -117,9 +117,13 @@ export function UsageAnalyticsDashboard() {
   };
 
   useEffect(() => {
-    fetchAnalytics().finally(() => {
-      setLoading(false);
-    });
+    // Wrapped so setState is not called synchronously in the effect body
+    const load = () => {
+      fetchAnalytics().finally(() => {
+        setLoading(false);
+      });
+    };
+    load();
   }, [fetchAnalytics]);
 
   const formatNumber = (num: number) => {

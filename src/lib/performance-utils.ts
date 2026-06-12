@@ -33,14 +33,14 @@ export function useThrottle<T extends (...args: unknown[]) => unknown>(
   const lastRun = useRef(0);
 
   return useCallback(
-    ((...args) => {
+    (...args: unknown[]) => {
       if (Date.now() - lastRun.current >= delay) {
         callback(...args);
         lastRun.current = Date.now();
       }
-    }) as T,
+    },
     [callback, delay]
-  );
+  ) as T;
 }
 
 // Memoized callback hook with dependency array
@@ -48,15 +48,10 @@ export function useStableCallback<T extends (...args: unknown[]) => unknown>(
   callback: T,
   deps: React.DependencyList
 ): T {
-  const ref = useRef<T | undefined>(undefined);
-  const depsRef = useRef<React.DependencyList | undefined>(undefined);
-
-  if (!ref.current || !depsRef.current || !areEqual(deps, depsRef.current)) {
-    ref.current = ((...args: unknown[]) => callback(...args)) as T;
-    depsRef.current = deps;
-  }
-
-  return ref.current;
+  return useStableMemo(
+    () => ((...args: unknown[]) => callback(...args)) as T,
+    deps
+  );
 }
 
 // Memoized value hook with custom equality function
@@ -64,15 +59,20 @@ export function useStableMemo<T>(
   factory: () => T,
   deps: React.DependencyList
 ): T {
-  const ref = useRef<{ deps: React.DependencyList; value: T } | undefined>(
-    undefined
-  );
+  const [cache, setCache] = useState<{
+    deps: React.DependencyList;
+    value: T;
+  }>(() => ({ deps, value: factory() }));
 
-  if (!ref.current || !areEqual(deps, ref.current.deps)) {
-    ref.current = { deps, value: factory() };
+  // Adjust state during render when deps change (guarded, so it cannot loop):
+  // https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes
+  let current = cache;
+  if (!areEqual(deps, cache.deps)) {
+    current = { deps, value: factory() };
+    setCache(current);
   }
 
-  return ref.current.value;
+  return current.value;
 }
 
 // Intersection Observer hook for lazy loading
@@ -157,7 +157,7 @@ export function useVirtualScroll<T>({
 // Performance monitoring hook
 export function usePerformanceMonitor(componentName: string) {
   const renderCount = useRef(0);
-  const startTime = useRef(performance.now());
+  const startTime = useRef<number | null>(null);
 
   useEffect(() => {
     renderCount.current += 1;
@@ -166,7 +166,7 @@ export function usePerformanceMonitor(componentName: string) {
     performance.mark(`${componentName}-render-start`);
 
     const endTime = performance.now();
-    const renderTime = endTime - startTime.current;
+    const renderTime = endTime - (startTime.current ?? endTime);
 
     // Mark render end
     performance.mark(`${componentName}-render-end`);
@@ -194,6 +194,7 @@ export function usePerformanceMonitor(componentName: string) {
     startTime.current = performance.now();
   });
 
+  // eslint-disable-next-line react-hooks/refs -- diagnostics-only render counter; reading it during render is intentional and the one-render-behind value is acceptable for display
   return { renderCount: renderCount.current };
 }
 

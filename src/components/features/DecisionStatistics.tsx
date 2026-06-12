@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 
@@ -28,32 +28,50 @@ export function DecisionStatistics({
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Reset loading/error state when the collection changes (render-time reset
+  // instead of a setState-in-effect)
+  const [prevCollectionId, setPrevCollectionId] = useState(collectionId);
+  if (prevCollectionId !== collectionId) {
+    setPrevCollectionId(collectionId);
+    setIsLoading(true);
+    setError(null);
+  }
+
+  // State updates happen in promise callbacks (not synchronously in the
+  // effect body), so the effect only kicks off the request
+  const fetchStatistics = useCallback(() => {
+    Promise.resolve()
+      .then(() =>
+        fetch(`/api/decisions/random-select?collectionId=${collectionId}`)
+      )
+      .then(async (response) => {
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to fetch statistics');
+        }
+
+        setStatistics(data.statistics);
+        setError(null);
+      })
+      .catch((err) => {
+        setError(
+          err instanceof Error ? err.message : 'Failed to fetch statistics'
+        );
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, [collectionId]);
+
   useEffect(() => {
     fetchStatistics();
-  }, [collectionId]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [fetchStatistics]);
 
-  const fetchStatistics = async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-
-      const response = await fetch(
-        `/api/decisions/random-select?collectionId=${collectionId}`
-      );
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to fetch statistics');
-      }
-
-      setStatistics(data.statistics);
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : 'Failed to fetch statistics'
-      );
-    } finally {
-      setIsLoading(false);
-    }
+  const handleRetry = () => {
+    setIsLoading(true);
+    setError(null);
+    fetchStatistics();
   };
 
   const formatLastSelected = (lastSelected?: string) => {
@@ -108,7 +126,7 @@ export function DecisionStatistics({
         <CardContent className="p-6">
           <div className="text-center">
             <p className="text-destructive mb-4">{error}</p>
-            <Button onClick={fetchStatistics} variant="outline">
+            <Button onClick={handleRetry} variant="outline">
               Try Again
             </Button>
           </div>

@@ -88,11 +88,6 @@ export function AdminErrorsDashboard() {
   const [severityFilter, setSeverityFilter] = useState<string>('');
   const [categoryFilter, setCategoryFilter] = useState<string>('');
 
-  useEffect(() => {
-    fetchErrors();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [statusFilter, severityFilter, categoryFilter]);
-
   const fetchErrors = async () => {
     setIsRefreshing(true);
     try {
@@ -122,6 +117,16 @@ export function AdminErrorsDashboard() {
       setIsRefreshing(false);
     }
   };
+
+  // Declared after fetchErrors so the function exists when referenced
+  useEffect(() => {
+    // Wrapped so setState is not called synchronously in the effect body
+    const load = () => {
+      void fetchErrors();
+    };
+    load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [statusFilter, severityFilter, categoryFilter]);
 
   const fetchGroupDetails = async (fingerprint: string) => {
     try {

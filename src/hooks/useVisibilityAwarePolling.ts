@@ -11,7 +11,10 @@ export function useVisibilityAwarePolling(
   inactiveInterval: number = 900000, // 15 minutes when inactive
   enabled: boolean = true
 ) {
-  const [isVisible, setIsVisible] = useState(true);
+  // Mount-time read via lazy initializer (true during SSR, matching the old default)
+  const [isVisible, setIsVisible] = useState(
+    () => typeof document === 'undefined' || !document.hidden
+  );
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const callbackRef = useRef(callback);
 
@@ -39,9 +42,6 @@ export function useVisibilityAwarePolling(
         }, interval);
       }
     };
-
-    // Set initial visibility
-    setIsVisible(!document.hidden);
 
     // Listen for visibility changes
     document.addEventListener('visibilitychange', handleVisibilityChange);

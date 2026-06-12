@@ -1,7 +1,7 @@
 'use client';
 
 import { logger } from '@/lib/logger';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Restaurant } from '@/types/database';
 import { RestaurantCard } from './RestaurantCard';
 import { RestaurantCardCompact } from './RestaurantCardCompact';
@@ -43,19 +43,19 @@ export function RestaurantSearchResults({
   onPageChange,
   totalResults = 0,
 }: RestaurantSearchResultsProps) {
-  const [viewType, setViewType] = useState<ViewType>('list');
-  const [mapSelectedRestaurant, setMapSelectedRestaurant] =
-    useState<Restaurant | null>(null);
-
-  // Load view type from localStorage on mount
-  useEffect(() => {
+  // Load view type from localStorage on mount (lazy initializer instead of
+  // a setState-in-effect)
+  const [viewType, setViewType] = useState<ViewType>(() => {
+    if (typeof window === 'undefined') return 'list';
     const savedViewType = localStorage.getItem(
       'restaurant-search-view-type'
     ) as ViewType;
-    if (savedViewType && ['list', 'grid', 'map'].includes(savedViewType)) {
-      setViewType(savedViewType);
-    }
-  }, []);
+    return savedViewType && ['list', 'grid', 'map'].includes(savedViewType)
+      ? savedViewType
+      : 'list';
+  });
+  const [mapSelectedRestaurant, setMapSelectedRestaurant] =
+    useState<Restaurant | null>(null);
 
   // Save view type to localStorage when it changes
   const handleViewTypeChange = (newViewType: ViewType) => {

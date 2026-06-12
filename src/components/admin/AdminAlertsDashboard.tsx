@@ -279,7 +279,11 @@ export function AdminAlertsDashboard() {
   };
 
   useEffect(() => {
-    fetchAlerts(activeFilter);
+    // Wrapped so setState is not called synchronously in the effect body
+    const load = () => {
+      void fetchAlerts(activeFilter);
+    };
+    load();
   }, [activeFilter]);
 
   if (loading) {

@@ -13,6 +13,55 @@ interface ViewToggleProps {
   position?: 'top-right' | 'top-left' | 'inline';
 }
 
+// List icon
+const ListIcon = ({ className }: { className?: string }) => (
+  <svg
+    className={className}
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <line x1="8" y1="6" x2="21" y2="6" />
+    <line x1="8" y1="12" x2="21" y2="12" />
+    <line x1="8" y1="18" x2="21" y2="18" />
+    <line x1="3" y1="6" x2="3.01" y2="6" />
+    <line x1="3" y1="12" x2="3.01" y2="12" />
+    <line x1="3" y1="18" x2="3.01" y2="18" />
+  </svg>
+);
+
+// Map icon
+const MapIcon = ({ className }: { className?: string }) => (
+  <svg
+    className={className}
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z" />
+    <line x1="8" y1="2" x2="8" y2="18" />
+    <line x1="16" y1="6" x2="16" y2="22" />
+  </svg>
+);
+
+// Grid icon
+const GridIcon = ({ className }: { className?: string }) => (
+  <svg
+    className={className}
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <rect x="3" y="3" width="7" height="7" />
+    <rect x="14" y="3" width="7" height="7" />
+    <rect x="14" y="14" width="7" height="7" />
+    <rect x="3" y="14" width="7" height="7" />
+  </svg>
+);
+
 export function ViewToggle({
   currentView,
   onToggle,
@@ -56,55 +105,6 @@ export function ViewToggle({
     }
   };
 
-  // List icon
-  const ListIcon = () => (
-    <svg
-      className={getIconSize()}
-      fill="none"
-      stroke="currentColor"
-      viewBox="0 0 24 24"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <line x1="8" y1="6" x2="21" y2="6" />
-      <line x1="8" y1="12" x2="21" y2="12" />
-      <line x1="8" y1="18" x2="21" y2="18" />
-      <line x1="3" y1="6" x2="3.01" y2="6" />
-      <line x1="3" y1="12" x2="3.01" y2="12" />
-      <line x1="3" y1="18" x2="3.01" y2="18" />
-    </svg>
-  );
-
-  // Map icon
-  const MapIcon = () => (
-    <svg
-      className={getIconSize()}
-      fill="none"
-      stroke="currentColor"
-      viewBox="0 0 24 24"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z" />
-      <line x1="8" y1="2" x2="8" y2="18" />
-      <line x1="16" y1="6" x2="16" y2="22" />
-    </svg>
-  );
-
-  // Grid icon
-  const GridIcon = () => (
-    <svg
-      className={getIconSize()}
-      fill="none"
-      stroke="currentColor"
-      viewBox="0 0 24 24"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <rect x="3" y="3" width="7" height="7" />
-      <rect x="14" y="3" width="7" height="7" />
-      <rect x="14" y="14" width="7" height="7" />
-      <rect x="3" y="14" width="7" height="7" />
-    </svg>
-  );
-
   return (
     <div
       className={cn(
@@ -141,7 +141,7 @@ export function ViewToggle({
         }
         aria-label="Switch to list view"
       >
-        <ListIcon />
+        <ListIcon className={getIconSize()} />
       </button>
 
       {/* Map View Button */}
@@ -168,7 +168,7 @@ export function ViewToggle({
         }
         aria-label="Switch to map view"
       >
-        <MapIcon />
+        <MapIcon className={getIconSize()} />
       </button>
 
       {/* Grid View Button */}
@@ -195,7 +195,7 @@ export function ViewToggle({
         }
         aria-label="Switch to grid view"
       >
-        <GridIcon />
+        <GridIcon className={getIconSize()} />
       </button>
     </div>
   );

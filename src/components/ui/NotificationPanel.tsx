@@ -53,22 +53,24 @@ export function NotificationPanel({
     switch (notification.type) {
       case 'friend_request':
         // Navigate to friends page
-        window.location.href = '/friends';
+        window.location.assign('/friends');
         break;
       case 'group_invitation':
         // Navigate to groups page
-        window.location.href = '/groups';
+        window.location.assign('/groups');
         break;
       case 'group_decision':
         // Navigate to specific group
         if (notification.data?.groupId) {
-          window.location.href = `/groups/${notification.data.groupId}`;
+          window.location.assign(`/groups/${notification.data.groupId}`);
         }
         break;
       case 'decision_result':
         // Navigate to decision result
         if (notification.data?.groupId && notification.data?.decisionId) {
-          window.location.href = `/groups/${notification.data.groupId}/decisions/${notification.data.decisionId}`;
+          window.location.assign(
+            `/groups/${notification.data.groupId}/decisions/${notification.data.decisionId}`
+          );
         }
         break;
       default:
