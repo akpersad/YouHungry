@@ -1,6 +1,6 @@
 # Session Handoff — Fork In The Road portfolio upgrade
 
-**Last updated:** 2026-06-11
+**Last updated:** 2026-06-12
 **Read this first, then:** `promptFiles/phased-execution-plan.md` (the authoritative plan), `CLAUDE.md` (repo guide).
 
 ## Workflow rules (owner-set 2026-06-11 — do not deviate)
@@ -84,7 +84,20 @@ The product is **Fork In The Road** (repo `you-hungry` is historical). Never "Yo
 
 ## Where we are
 
-**Status: Phase 1 MERGED (PR #45) and dependabot-majors fix MERGED (PR #59); Phase 2 (CI & quality gates, then Next 16) is IN PROGRESS on branch `phase2/ci-quality-gates`** (branched off main at `927bf9b`, 2026-06-11). TS 6 + the dependabot ignores are in the base.
+**Status: Phase 2 COMPLETE on branch `phase2/ci-quality-gates` (2026-06-12), committed locally, NOT pushed — awaiting owner go-ahead.** All Phase 2 plan items landed:
+
+1. **`--legacy-peer-deps` root cause fixed** — the flag dated to Epic 9 (Oct 2025) pinned-deps peer conflicts; Phase 1 unpinning removed the cause. Verified clean `npm ci` from empty node_modules; flag removed from workflows, runners moved Node 20 → 22 (engines requires >=22).
+2. **`ci.yml` quality gates** — types / eslint --max-warnings=0 / prettier --check / jest --coverage (summary + artifact) / production build on every PR+push; `pre-push` now mirrors CI exactly (added --max-warnings=0 + format:check). Repo-wide prettier normalized; vendored skills (.agents/, .github/skills/, .cursor/) prettier-ignored.
+3. **CI-generated badges** — `publish-badges` job (main pushes) writes shields endpoint JSON (coverage %, test count) to the `badges` branch; README badges now CI workflow badges + endpoint badges. **The fabricated README claims (91.2% coverage, "90+" Lighthouse) were replaced with measured reality.**
+4. **Lanes** — new `E2E Smoke` job (--grep @smoke); Lighthouse a11y category warn → **error** at 0.9 (measured 0.93–1.0 locally); perf/BP/SEO stay warn. `docs/ci-quality-gates.md` lists every check name + the **owner-action branch-protection setup** (GitHub UI, one-time).
+5. **Coverage honesty pass** — real coverage was **42%, not the asserted 90%+** (old 60% jest threshold never executed in any gate). New tests: auth.ts 0→100%, decisions.ts 37→99.6% lines (45 edge tests), notification-service.ts functions 37.5→100% (all channels factory-mocked — no live sends), verifyCollectionAccess 100%. Thresholds now ratchet-only floors at measured reality (43L/43S/34F/38B). Suite: 1551 passed / 120 suites. **Source bugs found while testing (NOT fixed, candidates for later):** tiered-consensus NaN/TypeError when a voted restaurant leaves the collection; voteBreakdown understates ranks >3; getCurrentUser auto-creates with placeholder email/name in prod; ADMIN_USER_IDS compares Mongo \_id not Clerk id; hardcoded admin phone in notification-service.
+6. **Next 15 → 16 + Clerk 6 → 7 + eslint-config-next 16** (Clerk 7 was REQUIRED — Clerk 6 has no Next 16 peer support):
+   - Turbopack now default: --turbopack flags dropped; build:webpack → `next build --webpack`; webpack config in next.config.ts gated behind explicit --webpack; removed-in-16 `eslint` config option deleted; tsconfig rewritten by Next (jsx react-jsx, .next/dev/types).
+   - Clerk 7: ClerkProvider afterSignInUrl/afterSignUpUrl → signInFallbackRedirectUrl/signUpFallbackRedirectUrl + afterSignOutUrl moved off UserButton to provider; appearance variables renamed (colorInput/colorInputForeground/colorForeground/colorMutedForeground); CustomRegistrationForm imports useSignUp from `@clerk/nextjs/legacy` (v6 resource shape — the new signals API is a future refactor).
+   - **middleware.ts deliberately NOT renamed to proxy.ts**: clerk/javascript#8302 (OPEN) — auth.protect() in proxy mode redirects to current URL instead of sign-in = route-protection bypass, exactly our pattern. Migrate when that closes. middleware.ts is deprecated-not-removed in 16.
+   - React Compiler hooks rules: all 74 errors fixed across ~30 files (set-state-in-effect 36, refs 18, immutability 10, static-components 8, + misc); 1 justified eslint-disable total. eslint.config.mjs migrated off FlatCompat to native flat configs.
+   - sw.js cache bumped v26 → v27. dependabot ignore for eslint-config-next majors removed (eslint 10 ignore stays — retest deliberately, config-next 16 peers eslint >=9).
+   - **Validation: full pre-push green + `test:e2e:fast` 45 passed / 0 failed** (same as Phase 1 baseline; 2 a11y tests flaked once under parallel load, pass deterministically in isolation — CI has retries=2).
 
 ## Background documents
 
@@ -118,14 +131,13 @@ status section above and `docs/api-auth-matrix.md`. Still true:
 
 ## Next actions
 
-1. Owner housekeeping (non-blocking): close the stale Phase 1 stack branches, the merged `fix/dependabot-major-bumps` branch, and the dependabot eslint-10 PR; review the remaining green dependabot PRs.
-2. Do **Phase 2** on `phase2/ci-quality-gates` per `phased-execution-plan.md`, in order:
-   - `ci.yml`: type-check, lint, format:check, jest --coverage, build on every PR/push; investigate the `--legacy-peer-deps` root cause rather than propagating it.
-   - Coverage uploaded; README badges become CI-generated, not asserted.
-   - Lighthouse CI + axe/smoke Playwright lanes as required PR checks.
-   - Coverage honesty pass (priority: `decisions.ts` edges, Phase 1 ownership checks, notification orchestration).
-   - **Closing PR(s): Next 15 → 16** (Tailwind is already on 4.0.14 — minor bump at most). Fold in eslint-config-next 16 + the React Compiler hooks-rules migration (~74 errors, see Post-merge section). Full e2e verification; abandon rather than ship half-migrated.
-3. **Workflow: ONE branch for all of Phase 2, multiple logical commits; NO pushes without owner go-ahead** (see Workflow rules above); `npm run pre-push` must pass per commit batch; `npm run test:e2e:fast` before handing over for merge.
+1. **Owner: give push go-ahead for `phase2/ci-quality-gates`**, then open the PR (gh CLI still has the wrong-account token — owner pushes/PRs via own auth). After merge:
+   - One-time GitHub UI setup: mark the required PR checks per `docs/ci-quality-gates.md` (Types/Lint/Format, Unit Tests, Build, E2E Smoke, Accessibility, Lighthouse).
+   - First main push creates the `badges` branch automatically; README badges go live then.
+   - Watch the first Vercel deploy on Next 16 (build now Turbopack-default).
+2. Owner housekeeping (non-blocking): close stale Phase 1 stack branches and any auto-closed dependabot PRs (typescript/eslint-config-next ones are now satisfied or obsolete).
+3. Then **Phase 3 — UI/UX refresh** per `phased-execution-plan.md`: starts with the design-direction discussion with the owner (palette/typography/style; owner NOT tied to `#e3005a`), `/impeccable init` prerequisite.
+4. Later candidates recorded from the Phase 2 honesty pass: tiered-consensus crash edge, voteBreakdown >3-rank scoring, getCurrentUser placeholder auto-create, ADMIN_USER_IDS id-form footgun, hardcoded admin phone, proxy.ts rename when clerk#8302 closes, eslint 10 retest.
 
 ## Owner context
 
