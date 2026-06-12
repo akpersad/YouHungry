@@ -41,15 +41,16 @@ const customJestConfig = {
     '!src/app/page.tsx',
   ],
   coverageReporters: ['text', 'lcov', 'clover', 'json', 'json-summary'],
-  // Honest floors at measured coverage (2026-06: 43.19L/42.48S/33.24F/37.77B).
-  // The old 60% figure never ran in any gate and was never actually met —
-  // ratchet these up as the Phase 2 coverage honesty pass adds tests.
+  // Honest floors at measured coverage (2026-06 honesty pass: 44.0L/43.3S/
+  // 34.4F/38.9B globally; decisions.ts/auth.ts/notification-service.ts are
+  // now 99-100%). The old 60% figure never ran in any gate and was never
+  // actually met. Policy: ratchet-only — raise floors when coverage rises.
   coverageThreshold: {
     global: {
-      branches: 37,
-      functions: 33,
+      branches: 38,
+      functions: 34,
       lines: 43,
-      statements: 42,
+      statements: 43,
     },
   },
 };
