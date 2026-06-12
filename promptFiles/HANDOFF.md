@@ -84,7 +84,29 @@ The product is **Fork In The Road** (repo `you-hungry` is historical). Never "Yo
 
 ## Where we are
 
-**Status: Phase 2 COMPLETE on branch `phase2/ci-quality-gates` (2026-06-12), committed locally, NOT pushed — awaiting owner go-ahead.** All Phase 2 plan items landed:
+**Status: Phase 2 MERGED ✅ (PR #60, `29cf15c`, 2026-06-12).** Post-merge
+verification (2026-06-12, same day):
+
+- **Production deploy on Next 16/Turbopack: READY** (`bundler: turbopack` in
+  deploy meta); live site returns 200.
+- **CI workflow on the merge commit: success.** `badges` branch auto-created;
+  endpoint JSON serving (coverage 44.06%, 1551 tests passed) and README
+  badges render.
+- **Lockfile poisoning regression check: clean** (`grep -c elilillyco
+package-lock.json` = 0).
+- **One defect found:** Vercel attempts to deploy the orphan `badges` branch
+  on every badge push and ERRORs (no Next app there). Fixed on
+  `housekeeping/post-phase2-verification`: the publish-badges job now writes
+  a `vercel.json` with `git.deploymentEnabled: { badges: false }` onto the
+  branch, which Vercel reads from the deployed commit.
+- Dependabot re-opened ~10 PRs after the merge (majors: glob 13,
+  lint-staged 17, twilio 6, @vercel/analytics 2, @vercel/speed-insights 2,
+  actions/checkout 6, setup-node 6, upload/download-artifact, plus a grouped
+  minor-and-patch PR). The typescript-6 / eslint-config-next-16 / eslint-10
+  PRs auto-closed as expected (first two satisfied by main, third ignored).
+  Merging these is the owner's call — CI quality gates now run on each.
+
+All Phase 2 plan items that landed in PR #60:
 
 1. **`--legacy-peer-deps` root cause fixed** — the flag dated to Epic 9 (Oct 2025) pinned-deps peer conflicts; Phase 1 unpinning removed the cause. Verified clean `npm ci` from empty node_modules; flag removed from workflows, runners moved Node 20 → 22 (engines requires >=22).
 2. **`ci.yml` quality gates** — types / eslint --max-warnings=0 / prettier --check / jest --coverage (summary + artifact) / production build on every PR+push; `pre-push` now mirrors CI exactly (added --max-warnings=0 + format:check). Repo-wide prettier normalized; vendored skills (.agents/, .github/skills/, .cursor/) prettier-ignored.
@@ -132,13 +154,18 @@ status section above and `docs/api-auth-matrix.md`. Still true:
 
 ## Next actions
 
-1. **Owner: give push go-ahead for `phase2/ci-quality-gates`**, then open the PR (gh CLI still has the wrong-account token — owner pushes/PRs via own auth). After merge:
-   - One-time GitHub UI setup: mark the required PR checks per `docs/ci-quality-gates.md` (Types/Lint/Format, Unit Tests, Build, E2E Smoke, Accessibility, Lighthouse).
-   - First main push creates the `badges` branch automatically; README badges go live then.
-   - Watch the first Vercel deploy on Next 16 (build now Turbopack-default).
-2. Owner housekeeping (non-blocking): close stale Phase 1 stack branches and any auto-closed dependabot PRs (typescript/eslint-config-next ones are now satisfied or obsolete).
-3. Then **Phase 3 — UI/UX refresh** per `phased-execution-plan.md`: starts with the design-direction discussion with the owner (palette/typography/style; owner NOT tied to `#e3005a`), `/impeccable init` prerequisite.
-4. Later candidates recorded from the Phase 2 honesty pass: tiered-consensus crash edge, voteBreakdown >3-rank scoring, getCurrentUser placeholder auto-create, ADMIN_USER_IDS id-form footgun, hardcoded admin phone, proxy.ts rename when clerk#8302 closes, eslint 10 retest.
+1. **Owner: push go-ahead for `housekeeping/post-phase2-verification`**
+   (badges-branch Vercel fix + this handoff update), then merge.
+2. **Owner one-time GitHub UI setup (still pending):** branch protection on
+   `main` — required PR checks per `docs/ci-quality-gates.md`
+   (Types/Lint/Format, Unit Tests, Build, E2E Smoke, Accessibility,
+   Lighthouse).
+3. Owner housekeeping (non-blocking): review/merge the ~10 open dependabot
+   PRs (all majors or grouped minors — CI gates them now); delete stale
+   remote branches (12 Phase 1 stack branches, `phase2/ci-quality-gates`,
+   `feature/upgrade-plan-rework`, `fix/dependabot-major-bumps`).
+4. Then **Phase 3 — UI/UX refresh** per `phased-execution-plan.md`: starts with the design-direction discussion with the owner (palette/typography/style; owner NOT tied to `#e3005a`), `/impeccable init` prerequisite.
+5. Later candidates recorded from the Phase 2 honesty pass: tiered-consensus crash edge, voteBreakdown >3-rank scoring, getCurrentUser placeholder auto-create, ADMIN_USER_IDS id-form footgun, hardcoded admin phone, proxy.ts rename when clerk#8302 closes, eslint 10 retest.
 
 ## Owner context
 
