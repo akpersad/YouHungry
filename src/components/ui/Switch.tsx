@@ -1,8 +1,10 @@
 import React, { useId } from 'react';
 import { cn } from '@/lib/utils';
 
-interface SwitchProps
-  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'type'> {
+interface SwitchProps extends Omit<
+  React.InputHTMLAttributes<HTMLInputElement>,
+  'type'
+> {
   checked?: boolean;
   onCheckedChange?: (checked: boolean) => void;
   label?: string;
