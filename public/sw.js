@@ -1,6 +1,6 @@
 // Service Worker for Fork In The Road PWA
 // Bump version to force cache invalidation
-const CACHE_NAME = 'forkintheroad-v26';
+const CACHE_NAME = 'forkintheroad-v27';
 
 console.log('🔔 Service Worker: Script loaded and running!');
 const STATIC_CACHE_NAME = 'forkintheroad-static-v13';

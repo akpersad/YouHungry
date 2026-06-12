@@ -108,10 +108,13 @@ export default function RootLayout({
     <ClerkProvider
       signInUrl="/sign-in"
       signUpUrl="/sign-up"
-      afterSignInUrl="/dashboard"
-      afterSignUpUrl="/dashboard"
+      signInFallbackRedirectUrl="/dashboard"
+      signUpFallbackRedirectUrl="/dashboard"
+      afterSignOutUrl="/"
     >
-      <html lang="en">
+      {/* data-scroll-behavior keeps Next 16 overriding our CSS smooth-scroll
+          during route transitions (pre-16 default behavior) */}
+      <html lang="en" data-scroll-behavior="smooth">
         <head>
           <link rel="manifest" href="/manifest.json" />
           <link rel="icon" href="/favicon.svg" type="image/svg+xml" />

@@ -5,7 +5,9 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { useRouter } from 'next/navigation';
-import { useSignUp } from '@clerk/nextjs';
+// Clerk 7 moved useSignUp to a signals-based API; the legacy entry point
+// preserves the v6 resource shape this multi-step form is built on.
+import { useSignUp } from '@clerk/nextjs/legacy';
 import { trackSignupComplete } from '@/lib/analytics';
 
 interface FormData {

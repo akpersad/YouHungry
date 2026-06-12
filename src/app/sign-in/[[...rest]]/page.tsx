@@ -73,10 +73,10 @@ function SignInContent() {
               variables: {
                 colorPrimary: 'var(--color-primary)',
                 colorBackground: 'var(--color-background)',
-                colorInputBackground: 'var(--color-surface)',
-                colorInputText: 'var(--color-text)',
-                colorText: 'var(--color-text)',
-                colorTextSecondary: 'var(--color-text-light)',
+                colorInput: 'var(--color-surface)',
+                colorInputForeground: 'var(--color-text)',
+                colorForeground: 'var(--color-text)',
+                colorMutedForeground: 'var(--color-text-light)',
                 borderRadius: '0.5rem',
               },
             }}

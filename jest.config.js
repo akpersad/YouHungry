@@ -13,6 +13,7 @@ const customJestConfig = {
     '^mongodb$': '<rootDir>/src/__mocks__/mongodb.js',
     '^bson$': '<rootDir>/src/__mocks__/bson.js',
     '^@clerk/nextjs$': '<rootDir>/src/__mocks__/@clerk/nextjs.js',
+    '^@clerk/nextjs/legacy$': '<rootDir>/src/__mocks__/@clerk/nextjs.js',
     '^@clerk/nextjs/server$': '<rootDir>/src/__mocks__/@clerk/nextjs.js',
     '^@clerk/backend$': '<rootDir>/src/__mocks__/@clerk/backend.js',
     '^@vercel/blob$': '<rootDir>/src/__mocks__/@vercel/blob.js',
