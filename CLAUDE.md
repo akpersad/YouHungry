@@ -35,6 +35,7 @@ Husky hooks: pre-commit runs lint-staged (eslint --fix + prettier); pre-push run
 ## Workflow conventions
 
 - PR-based workflow; conventional-ish commit messages. **One feature branch per phase/work session with multiple logical commits — do not split work across multiple/stacked branches. The owner personally handles all PR merges; never merge PRs or push to main** (production deploys from main).
+- **Never `git push` — any branch — without the owner's explicit go-ahead.** Commit locally as work completes; announce "ready to push" and wait.
 - Use the structured logger `src/lib/logger.ts` (`logger.debug/info/warn/error`, plus dev-only `perf/api/component/analytics`) — never raw `console.log` in `src/`.
 - Path alias: `@/*` → `./src/*`.
 

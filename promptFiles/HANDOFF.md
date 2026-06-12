@@ -10,12 +10,16 @@
   this rule).
 - **The owner handles ALL PR merges personally.** Never merge PRs or push to
   main; production deploys from main.
+- **NEVER `git push` — any branch — without the owner's explicit go-ahead**
+  (owner-set 2026-06-11). Commit locally as work completes; when ready, say
+  "ready to push" and wait.
 
-## Phase 1 status (2026-06-11): WORK COMPLETE — owner is merging
+## Phase 1 status: MERGED ✅ (PR #45, 2026-06-11)
 
-All Phase 1 work is implemented, tested, and pushed as a **stacked branch chain**
-(each branch based on the previous; the owner merges in this order — or merges
-just `phase1/auth-matrix`, which contains everything, as a single PR):
+The owner squash-merged `phase1/auth-matrix` (top of the stack, contains
+everything) into main as PR #45 (`c357be3e`). Production deployed READY and
+the live site was verified healthy. The stacked branches below are historical
+record only — the other 12 PRs/branches can be closed/deleted:
 
 1. `feature/upgrade-plan-rework` — setup docs + skills (this file, plans, CLAUDE.md)
 2. `phase1/middleware-auth` — public-route matcher tightened (decisions/collections/restaurants/address APIs were PUBLIC)
@@ -34,17 +38,46 @@ just `phase1/auth-matrix`, which contains everything, as a single PR):
 Validation: full Jest suite green at every push (1468 tests; husky pre-push runs
 type-check/lint/jest/build); `test:e2e:fast` green on the full stack (45 passed).
 
-**Blockers/owner actions:**
+**Resolved at merge time (2026-06-11):**
 
-- `gh` CLI had a stale token for the wrong account (apersad_deloitte) — PRs could
-  not be created from the CLI. Owner: run `gh auth login -h github.com` (as
-  akpersad), then PRs can be created per branch, or merge the stack manually.
-- New env vars to set in Vercel before merging: `ADMIN_ALERT_EMAILS`,
-  `INTERNAL_API_SECRET` (verify it's set — cost-monitoring internal bypass),
-  confirm `CRON_SECRET` and `CLERK_WEBHOOK_SECRET` are set (handlers now fail
-  closed without them).
+- **Vercel env vars: ALL FIVE CONFIRMED SET in the Vercel project**
+  (`ADMIN_ALERT_EMAILS`, `INTERNAL_API_SECRET`, `CRON_SECRET`,
+  `CLERK_WEBHOOK_SECRET`, `ADMIN_USER_IDS`). Note `ADMIN_ALERT_EMAILS` is
+  still absent from local `.env.local`/`.env.prod` if syncing those matters.
+- **Lockfile registry poisoning (found + fixed):** every Vercel deploy since
+  Oct 2025 failed at `npm install` with E401 because 749 `package-lock.json`
+  `resolved` URLs pointed at the owner's old corporate Artifactory proxy
+  (`elilillyco.jfrog.io`, from a now-commented-out `~/.npmrc` line). Local
+  installs masked it via warm npm cache. Fixed in `3fbf212` (URLs rewritten
+  to registry.npmjs.org; integrity hashes unchanged). **Watch for
+  re-poisoning** if the lockfile regenerates while that npmrc line is active:
+  `grep -c elilillyco package-lock.json` must be 0.
+- `gh` CLI still has a stale token for the wrong account (apersad_deloitte) —
+  PRs cannot be created from the CLI until the owner runs
+  `gh auth login -h github.com` as akpersad. Owner merges via the GitHub UI.
 - See "Known gaps / deferred" in docs/api-auth-matrix.md (unsubscribe token
   redesign → Phase 5; dead auth/\* routes are deletion candidates).
+
+## Post-merge: Dependabot majors (branch `fix/dependabot-major-bumps`, awaiting owner PR/merge)
+
+Merging Phase 1 activated dependabot.yml; it opened major-bump PRs, two of
+whose preview builds failed. Resolution (commit `2e3f9ce`, pushed, Vercel
+preview READY):
+
+- **typescript ^6.0.3 ADOPTED** — TS 6's new TS2882 check requires
+  declarations for side-effect asset imports; `src/types/css.d.ts`
+  (`declare module '*.css'`) fixes it. type-check/lint/jest/build all green.
+- **eslint stays ^9** — eslint 10 removed `context.getFilename()`, which
+  eslint-plugin-react (bundled by eslint-config-next, peer eslint ≤^9.7)
+  still calls. Not fixable on our side; dependabot now ignores eslint majors.
+- **eslint-config-next stays ^15.x** (bumped to ^15.5.19) — v16 works
+  mechanically but introduces the React Compiler hooks rules
+  (`react-hooks/refs` etc.) = ~74 lint errors; adopt during the Phase 2
+  Next 16 upgrade. Dependabot ignores its majors too.
+- After this branch merges: the dependabot typescript PR auto-closes; the
+  green minor/patch dependabot PRs (twilio 6, glob 13, …) are the owner's
+  call — note twilio 6 and glob 13 are ALSO majors, just ones that built
+  green; review before merging.
 
 ## Naming
 
@@ -52,7 +85,7 @@ The product is **Fork In The Road** (repo `you-hungry` is historical). Never "Yo
 
 ## Where we are
 
-**Status: Phase 1 complete (see status section above); Phase 2 (CI & quality gates, then Next 16 + Tailwind 4) is next, starting AFTER the owner has merged the Phase 1 branches into `main`.** Verify merge state with `git log origin/main` before starting Phase 2.
+**Status: Phase 1 MERGED (PR #45); `fix/dependabot-major-bumps` pushed and awaiting owner PR/merge; Phase 2 (CI & quality gates, then Next 16 + Tailwind 4) starts next.** Phase 2 work should branch off main after the dependabot-fix branch merges (or rebase onto it) so TS 6 + the dependabot ignores are in the base.
 
 ## Background documents
 
@@ -86,10 +119,14 @@ status section above and `docs/api-auth-matrix.md`. Still true:
 
 ## Next actions
 
-1. **Wait for the owner to merge the Phase 1 branches** (verify via `git log origin/main`).
-2. Owner: set Vercel env vars (`ADMIN_ALERT_EMAILS`; confirm `CRON_SECRET`, `CLERK_WEBHOOK_SECRET`, `INTERNAL_API_SECRET`) before/at merge.
-3. Begin **Phase 2** per `phased-execution-plan.md`: ci.yml (type-check/lint/format/jest+coverage/build), Lighthouse CI + axe lanes, coverage honesty pass, then Next 15 → 16 as the closing PR(s).
-4. **Workflow: ONE branch for all of Phase 2, multiple logical commits** (see Workflow rules above); `npm run pre-push` must pass before push; `npm run test:e2e:fast` before handing over for merge.
+1. **Owner: open/merge the PR for `fix/dependabot-major-bumps`** (already pushed, preview READY); close the stale Phase 1 stack branches and the dependabot eslint-10 PR.
+2. Begin **Phase 2** per `phased-execution-plan.md`, in order:
+   - `ci.yml`: type-check, lint, format:check, jest --coverage, build on every PR/push; investigate the `--legacy-peer-deps` root cause rather than propagating it.
+   - Coverage uploaded; README badges become CI-generated, not asserted.
+   - Lighthouse CI + axe/smoke Playwright lanes as required PR checks.
+   - Coverage honesty pass (priority: `decisions.ts` edges, Phase 1 ownership checks, notification orchestration).
+   - **Closing PR(s): Next 15 → 16** (Tailwind is already on 4.0.14 — minor bump at most). Fold in eslint-config-next 16 + the React Compiler hooks-rules migration (~74 errors, see Post-merge section). Full e2e verification; abandon rather than ship half-migrated.
+3. **Workflow: ONE branch for all of Phase 2, multiple logical commits; NO pushes without owner go-ahead** (see Workflow rules above); `npm run pre-push` must pass per commit batch; `npm run test:e2e:fast` before handing over for merge.
 
 ## Owner context
 
