@@ -97,6 +97,7 @@ The product is **Fork In The Road** (repo `you-hungry` is historical). Never "Yo
    - **middleware.ts deliberately NOT renamed to proxy.ts**: clerk/javascript#8302 (OPEN) — auth.protect() in proxy mode redirects to current URL instead of sign-in = route-protection bypass, exactly our pattern. Migrate when that closes. middleware.ts is deprecated-not-removed in 16.
    - React Compiler hooks rules: all 74 errors fixed across ~30 files (set-state-in-effect 36, refs 18, immutability 10, static-components 8, + misc); 1 justified eslint-disable total. eslint.config.mjs migrated off FlatCompat to native flat configs.
    - sw.js cache bumped v26 → v27. dependabot ignore for eslint-config-next majors removed (eslint 10 ignore stays — retest deliberately, config-next 16 peers eslint >=9).
+   - **Tailwind 4.0.14 → 4.3.0** (the plan's "minor bump at most"). Came with an a11y-lane determinism fix: PageTransition now honors prefers-reduced-motion, the axe spec emulates reduced motion (axe was scanning mid page-fade — primary button read #ec5f97 = #e3005a half-faded over white, 3.1:1), and local playwright retries are 1 (Clerk DEV-instance usage limits intermittently produce a signed-out render under 4-worker load; CI keeps retries=2).
    - **Validation: full pre-push green + `test:e2e:fast` 45 passed / 0 failed** (same as Phase 1 baseline; 2 a11y tests flaked once under parallel load, pass deterministically in isolation — CI has retries=2).
 
 ## Background documents
