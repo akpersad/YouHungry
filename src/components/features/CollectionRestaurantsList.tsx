@@ -32,22 +32,22 @@ export function CollectionRestaurantsList({
   const [selectedRestaurant, setSelectedRestaurant] =
     useState<Restaurant | null>(null);
   const [isManagementModalOpen, setIsManagementModalOpen] = useState(false);
-  const [viewType, setViewType] = useState<ViewType>('list');
+  // Load view type from localStorage on mount (lazy initializer instead of
+  // a setState-in-effect; this component only renders client-side)
+  const [viewType, setViewType] = useState<ViewType>(() => {
+    if (typeof window === 'undefined') return 'list';
+    const savedViewType = localStorage.getItem(
+      'collection-view-type'
+    ) as ViewType;
+    return savedViewType && ['list', 'grid', 'map'].includes(savedViewType)
+      ? savedViewType
+      : 'list';
+  });
   const [mapSelectedRestaurant, setMapSelectedRestaurant] =
     useState<Restaurant | null>(null);
   const [sortBy, setSortBy] = useState<SortOption>('rating-desc');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
-
-  // Load view type from localStorage on mount
-  useEffect(() => {
-    const savedViewType = localStorage.getItem(
-      'collection-view-type'
-    ) as ViewType;
-    if (savedViewType && ['list', 'grid', 'map'].includes(savedViewType)) {
-      setViewType(savedViewType);
-    }
-  }, []);
 
   // Save view type to localStorage when it changes
   const handleViewTypeChange = (newViewType: ViewType) => {
@@ -55,30 +55,41 @@ export function CollectionRestaurantsList({
     localStorage.setItem('collection-view-type', newViewType);
   };
 
-  const fetchRestaurants = useCallback(async () => {
+  // Reset loading/error state when the collection changes (render-time reset
+  // instead of a setState-in-effect)
+  const collectionIdString = collection._id?.toString() ?? '';
+  const [prevCollectionId, setPrevCollectionId] = useState(collectionIdString);
+  if (prevCollectionId !== collectionIdString) {
+    setPrevCollectionId(collectionIdString);
     setIsLoading(true);
     setError(null);
+  }
 
-    try {
-      const response = await fetch(
-        `/api/collections/${collection._id}/restaurants`
-      );
-      const data = await response.json();
+  // State updates happen in promise callbacks (not synchronously in the
+  // effect body), so the effect only kicks off the request
+  const fetchRestaurants = useCallback(() => {
+    Promise.resolve()
+      .then(() => fetch(`/api/collections/${collection._id}/restaurants`))
+      .then(async (response) => {
+        const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to fetch restaurants');
-      }
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to fetch restaurants');
+        }
 
-      setRestaurants(data.restaurants || []);
-    } catch (err) {
-      logger.error('Error fetching restaurants:', err);
-      setError(
-        err instanceof Error ? err.message : 'Failed to fetch restaurants'
-      );
-      setRestaurants([]);
-    } finally {
-      setIsLoading(false);
-    }
+        setRestaurants(data.restaurants || []);
+        setError(null);
+      })
+      .catch((err) => {
+        logger.error('Error fetching restaurants:', err);
+        setError(
+          err instanceof Error ? err.message : 'Failed to fetch restaurants'
+        );
+        setRestaurants([]);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
   }, [collection._id]);
 
   useEffect(() => {
@@ -86,6 +97,12 @@ export function CollectionRestaurantsList({
       fetchRestaurants();
     }
   }, [collection._id, fetchRestaurants]);
+
+  const handleRetry = () => {
+    setIsLoading(true);
+    setError(null);
+    fetchRestaurants();
+  };
 
   const handleManageRestaurant = (restaurant: Restaurant) => {
     setSelectedRestaurant(restaurant);
@@ -201,13 +218,10 @@ export function CollectionRestaurantsList({
 
   const totalPages = Math.ceil(sortedRestaurants.length / itemsPerPage);
 
-  // Reset to page 1 when sort changes
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [sortBy]);
-
   const handleSortChange = (newSort: SortOption) => {
     setSortBy(newSort);
+    // Reset to page 1 when sort changes
+    setCurrentPage(1);
   };
 
   const handlePageChange = (page: number) => {
@@ -255,7 +269,7 @@ export function CollectionRestaurantsList({
         <div className="bg-destructive/10 dark:bg-destructive/20/20 border border-destructive dark:border-destructive rounded-md p-4">
           <p className="text-destructive dark:text-destructive">{error}</p>
           <Button
-            onClick={fetchRestaurants}
+            onClick={handleRetry}
             variant="outline"
             className="mt-2 text-destructive border-destructive hover:bg-destructive/10 dark:text-destructive dark:border-destructive dark:hover:bg-destructive/20/20"
           >

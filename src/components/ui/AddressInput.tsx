@@ -44,6 +44,71 @@ interface AddressInputProps {
   id?: string;
 }
 
+const EMPTY_VALIDATION_STATE: ValidationState = {
+  isValid: false,
+  hasUnconfirmedComponents: false,
+  hasInferredComponents: false,
+  hasReplacedComponents: false,
+  missingComponents: [],
+  unconfirmedComponents: [],
+  unresolvedTokens: [],
+};
+
+const VALID_VALIDATION_STATE: ValidationState = {
+  ...EMPTY_VALIDATION_STATE,
+  isValid: true,
+};
+
+interface ValidationOutcome {
+  state: ValidationState;
+  error: string | null;
+}
+
+// Resolve the validation outcome for an address (async so state updates
+// happen in the resolution callback, never synchronously in an effect)
+async function resolveAddressValidation(
+  address: string
+): Promise<ValidationOutcome> {
+  if (!address.trim()) {
+    return { state: EMPTY_VALIDATION_STATE, error: null };
+  }
+
+  // Skip validation for "Current Location" - it's handled separately
+  if (address.trim() === 'Current Location') {
+    return { state: VALID_VALIDATION_STATE, error: null };
+  }
+
+  try {
+    const validationResult = await validateAddress(address);
+    if (validationResult) {
+      const valid = isAddressValidForSearch(validationResult);
+      return {
+        state: {
+          isValid: valid,
+          hasUnconfirmedComponents:
+            validationResult.verdict.hasUnconfirmedComponents,
+          hasInferredComponents: validationResult.verdict.hasInferredComponents,
+          hasReplacedComponents: validationResult.verdict.hasReplacedComponents,
+          missingComponents: validationResult.missingComponentTypes,
+          unconfirmedComponents: validationResult.unconfirmedComponentTypes,
+          unresolvedTokens: validationResult.unresolvedTokens,
+        },
+        error: valid ? null : 'Address not found or incomplete',
+      };
+    }
+    return {
+      state: EMPTY_VALIDATION_STATE,
+      error: 'Unable to validate address',
+    };
+  } catch (error) {
+    logger.error('Address validation error:', error);
+    return {
+      state: EMPTY_VALIDATION_STATE,
+      error: 'Address validation failed',
+    };
+  }
+}
+
 export function AddressInput({
   value,
   onChange,
@@ -105,86 +170,15 @@ export function AddressInput({
     [sessionToken]
   );
 
-  // Validate address when user stops typing
+  // Validate address when user stops typing (state updates happen in the
+  // promise resolution callback, never synchronously)
   const validateCurrentAddress = useCallback(
-    async (address: string) => {
-      if (!address.trim()) {
-        setValidationState({
-          isValid: false,
-          hasUnconfirmedComponents: false,
-          hasInferredComponents: false,
-          hasReplacedComponents: false,
-          missingComponents: [],
-          unconfirmedComponents: [],
-          unresolvedTokens: [],
-        });
-        setValidationError(null);
-        onValidationChange?.(false);
-        return;
-      }
-
-      // Skip validation for "Current Location" - it's handled separately
-      if (address.trim() === 'Current Location') {
-        setValidationState({
-          isValid: true,
-          hasUnconfirmedComponents: false,
-          hasInferredComponents: false,
-          hasReplacedComponents: false,
-          missingComponents: [],
-          unconfirmedComponents: [],
-          unresolvedTokens: [],
-        });
-        setValidationError(null);
-        onValidationChange?.(true);
-        return;
-      }
-
-      try {
-        const validationResult = await validateAddress(address);
-        if (validationResult) {
-          const valid = isAddressValidForSearch(validationResult);
-          setValidationState({
-            isValid: valid,
-            hasUnconfirmedComponents:
-              validationResult.verdict.hasUnconfirmedComponents,
-            hasInferredComponents:
-              validationResult.verdict.hasInferredComponents,
-            hasReplacedComponents:
-              validationResult.verdict.hasReplacedComponents,
-            missingComponents: validationResult.missingComponentTypes,
-            unconfirmedComponents: validationResult.unconfirmedComponentTypes,
-            unresolvedTokens: validationResult.unresolvedTokens,
-          });
-          setValidationError(valid ? null : 'Address not found or incomplete');
-          onValidationChange?.(valid);
-        } else {
-          setValidationState({
-            isValid: false,
-            hasUnconfirmedComponents: false,
-            hasInferredComponents: false,
-            hasReplacedComponents: false,
-            missingComponents: [],
-            unconfirmedComponents: [],
-            unresolvedTokens: [],
-          });
-          setValidationError('Unable to validate address');
-          onValidationChange?.(false);
-        }
-      } catch (error) {
-        logger.error('Address validation error:', error);
-        setValidationState({
-          isValid: false,
-          hasUnconfirmedComponents: false,
-          hasInferredComponents: false,
-          hasReplacedComponents: false,
-          missingComponents: [],
-          unconfirmedComponents: [],
-          unresolvedTokens: [],
-        });
-        setValidationError('Address validation failed');
-        onValidationChange?.(false);
-      }
-    },
+    (address: string) =>
+      resolveAddressValidation(address).then(({ state, error }) => {
+        setValidationState(state);
+        setValidationError(error);
+        onValidationChange?.(state.isValid);
+      }),
     [onValidationChange]
   );
 

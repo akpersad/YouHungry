@@ -15,8 +15,8 @@ npm run type-check          # tsc
 npm run lint / lint:fix     # ESLint
 npm run format:check        # Prettier
 npm run test                # Jest unit tests
-npm run test:coverage       # Jest with coverage (60% threshold in jest.config.js)
-npm run pre-push            # type-check + lint + jest + build — must pass before every push (husky enforces)
+npm run test:coverage       # Jest with coverage (ratchet-only thresholds in jest.config.js)
+npm run pre-push            # type-check + lint(--max-warnings=0) + format:check + jest + build — must pass before every push (husky enforces)
 
 # Run a single Jest test
 npx jest src/lib/__tests__/decisions.test.ts
@@ -30,17 +30,18 @@ npm run test:accessibility  # axe spec (e2e/accessibility.spec.ts)
 npx playwright test e2e/group-decisions.spec.ts   # single e2e suite
 ```
 
-Husky hooks: pre-commit runs lint-staged (eslint --fix + prettier); pre-push runs the full `pre-push` script. CI (`.github/workflows/playwright.yml`) currently runs only Playwright — unit tests/lint/build are enforced locally only.
+Husky hooks: pre-commit runs lint-staged (eslint --fix + prettier); pre-push runs the full `pre-push` script. CI: `.github/workflows/ci.yml` (types/lint/format/jest-coverage/build + badge publishing) and `playwright.yml` (smoke/e2e/axe/Lighthouse) run on every PR/push — see `docs/ci-quality-gates.md` for check names and the branch-protection setup.
 
 ## Workflow conventions
 
 - PR-based workflow; conventional-ish commit messages. **One feature branch per phase/work session with multiple logical commits — do not split work across multiple/stacked branches. The owner personally handles all PR merges; never merge PRs or push to main** (production deploys from main).
+- **Never `git push` — any branch — without the owner's explicit go-ahead.** Commit locally as work completes; announce "ready to push" and wait.
 - Use the structured logger `src/lib/logger.ts` (`logger.debug/info/warn/error`, plus dev-only `perf/api/component/analytics`) — never raw `console.log` in `src/`.
 - Path alias: `@/*` → `./src/*`.
 
 ## Architecture
 
-Next.js 15 App Router + TypeScript + Tailwind. ~113k LOC. MongoDB (raw driver, no ORM), Clerk auth, TanStack Query client state, Zod validation.
+Next.js 16 App Router + TypeScript + Tailwind. ~113k LOC. MongoDB (raw driver, no ORM), Clerk auth, TanStack Query client state, Zod validation.
 
 ### Core domain: the decision engine
 
@@ -59,7 +60,7 @@ Next.js 15 App Router + TypeScript + Tailwind. ~113k LOC. MongoDB (raw driver, n
 
 ### Auth
 
-- `src/middleware.ts` — Clerk `clerkMiddleware` with public-route matcher.
+- `src/middleware.ts` — Clerk `clerkMiddleware` with public-route matcher. (Next 16 deprecates the filename in favor of `proxy.ts`; we deliberately stay on `middleware.ts` until clerk/javascript#8302 — an auth.protect redirect bug in proxy mode — is fixed.)
 - `src/lib/auth.ts` — `getCurrentUser()` (Clerk ID → DB user, auto-creates), `requireAuth()`, `requireAdminAuth()`. **Admin = user ID listed in `ADMIN_USER_IDS` env var.** Route handlers call these at the top; mutation routes must also verify ownership/membership (collection owner, group admin), not just authentication.
 - `api/webhooks/clerk` — svix-signed Clerk user lifecycle events.
 

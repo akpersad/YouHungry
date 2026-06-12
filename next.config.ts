@@ -6,17 +6,13 @@ const bundleAnalyzer = withBundleAnalyzer({
   enabled: process.env.ANALYZE === 'true',
 });
 
-// Check if Turbopack is being used
-const isUsingTurbopack =
-  process.argv.includes('--turbopack') || process.env.TURBOPACK;
+// Turbopack is the default in Next 16; the webpack config below may only be
+// present when explicitly building with `next build --webpack`, otherwise
+// Next fails the build to prevent misconfiguration.
+const isUsingWebpack = process.argv.includes('--webpack');
 
 const nextConfig: NextConfig = {
   outputFileTracingRoot: __dirname,
-
-  // ESLint configuration - ignore errors during build for performance collection
-  eslint: {
-    ignoreDuringBuilds: process.env.ESLINT_NO_DEV_ERRORS === 'true',
-  },
 
   // Performance optimizations
   experimental: {
@@ -146,8 +142,8 @@ const nextConfig: NextConfig = {
     ];
   },
 
-  // Webpack optimizations (only when not using Turbopack)
-  ...(!isUsingTurbopack && {
+  // Webpack optimizations (only for explicit `next build --webpack`)
+  ...(isUsingWebpack && {
     webpack: (config, { dev, isServer }) => {
       // Production optimizations
       if (!dev && !isServer) {
@@ -192,9 +188,9 @@ const nextConfig: NextConfig = {
     },
   }),
 
-  // Bundle analyzer (only when not using Turbopack)
+  // Bundle analyzer (webpack-only; `npm run analyze` uses build:webpack)
   ...(process.env.ANALYZE === 'true' &&
-    !isUsingTurbopack && {
+    isUsingWebpack && {
       webpack: (config, { isServer }) => {
         if (!isServer) {
           // eslint-disable-next-line @typescript-eslint/no-require-imports

@@ -1,0 +1,164 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  static-checks:
+    name: Types, Lint & Format
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check
+        run: npm run type-check
+
+      - name: Lint
+        run: npm run lint -- --max-warnings=0
+
+      - name: Format check
+        run: npm run format:check
+
+  unit-tests:
+    name: Unit Tests (Coverage)
+    timeout-minutes: 20
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Jest with coverage
+        run: npm run test:coverage -- --json --outputFile=jest-results.json
+        env:
+          CI: true
+
+      - name: Coverage summary
+        if: always()
+        run: |
+          node -e '
+            const fs = require("fs");
+            const s = JSON.parse(fs.readFileSync("coverage/coverage-summary.json", "utf8")).total;
+            const j = JSON.parse(fs.readFileSync("jest-results.json", "utf8"));
+            const rows = ["| Metric | Coverage |", "| --- | --- |"];
+            for (const k of ["lines", "statements", "functions", "branches"]) {
+              rows.push(`| ${k} | ${s[k].pct}% (${s[k].covered}/${s[k].total}) |`);
+            }
+            const md = [
+              `## Unit tests: ${j.numPassedTests}/${j.numTotalTests} passed`,
+              "",
+              ...rows,
+            ].join("\n");
+            fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, md + "\n");
+          '
+
+      - name: Upload coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: |
+            coverage/
+            jest-results.json
+          retention-days: 14
+
+  build:
+    name: Production Build
+    timeout-minutes: 20
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+        env:
+          CI: true
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
+          MONGODB_DATABASE: ${{ secrets.MONGODB_DATABASE }}
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
+          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+          GOOGLE_PLACES_API_KEY: ${{ secrets.GOOGLE_PLACES_API_KEY }}
+          NEXT_PUBLIC_GOOGLE_PLACES_API_KEY: ${{ secrets.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY }}
+          NEXT_PUBLIC_APP_URL: http://localhost:3000
+
+  # Publishes shields.io endpoint JSON (coverage % + test count) to the
+  # `badges` branch so README badges are CI-generated rather than asserted.
+  publish-badges:
+    name: Publish Badges
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: unit-tests
+    timeout-minutes: 5
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage-artifact
+
+      - name: Generate badge JSON
+        run: |
+          node -e '
+            const fs = require("fs");
+            const s = JSON.parse(fs.readFileSync("coverage-artifact/coverage/coverage-summary.json", "utf8")).total;
+            const j = JSON.parse(fs.readFileSync("coverage-artifact/jest-results.json", "utf8"));
+            const pct = s.lines.pct;
+            const color = pct >= 80 ? "brightgreen" : pct >= 60 ? "green" : pct >= 40 ? "yellow" : "red";
+            fs.mkdirSync("badge-output", { recursive: true });
+            fs.writeFileSync("badge-output/coverage.json", JSON.stringify({
+              schemaVersion: 1, label: "coverage", message: `${pct}%`, color,
+            }));
+            fs.writeFileSync("badge-output/tests.json", JSON.stringify({
+              schemaVersion: 1, label: "tests",
+              message: `${j.numPassedTests} passed`,
+              color: j.numFailedTests === 0 ? "brightgreen" : "red",
+            }));
+          '
+
+      - name: Push to badges branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout --orphan badges
+          git rm -rf --quiet .
+          mv badge-output/*.json .
+          git add coverage.json tests.json
+          git commit -m "badges: update from ${GITHUB_SHA::7}"
+          git push --force origin badges

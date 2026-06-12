@@ -2,16 +2,16 @@
 
 **A sophisticated restaurant decision-making platform built with modern web technologies**
 
-[![Next.js](https://img.shields.io/badge/Next.js-15.5.4-black?style=flat&logo=next.js)](https://nextjs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?style=flat&logo=typescript)](https://www.typescriptlang.org/)
-[![React](https://img.shields.io/badge/React-19.1.0-61DAFB?style=flat&logo=react)](https://reactjs.org/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.0-38B2AC?style=flat&logo=tailwind-css)](https://tailwindcss.com/)
+[![CI](https://github.com/akpersad/YouHungry/actions/workflows/ci.yml/badge.svg)](https://github.com/akpersad/YouHungry/actions/workflows/ci.yml)
+[![E2E](https://github.com/akpersad/YouHungry/actions/workflows/playwright.yml/badge.svg)](https://github.com/akpersad/YouHungry/actions/workflows/playwright.yml)
+[![Tests](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Fakpersad%2FYouHungry%2Fbadges%2Ftests.json)](https://github.com/akpersad/YouHungry/actions/workflows/ci.yml)
+[![Coverage](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Fakpersad%2FYouHungry%2Fbadges%2Fcoverage.json)](https://github.com/akpersad/YouHungry/actions/workflows/ci.yml)
+[![Next.js](https://img.shields.io/badge/Next.js-black?style=flat&logo=next.js)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-blue?style=flat&logo=typescript)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-61DAFB?style=flat&logo=react&logoColor=black)](https://react.dev/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=flat&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
 [![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?style=flat&logo=mongodb)](https://www.mongodb.com/)
 [![PWA](https://img.shields.io/badge/PWA-Enabled-5A0FC8?style=flat&logo=pwa)](https://web.dev/progressive-web-apps/)
-[![Tests](https://img.shields.io/badge/Tests-1367%20Passing-success)](/)
-[![Coverage](https://img.shields.io/badge/Coverage-90%25+-success)](/)
-[![Lighthouse](https://img.shields.io/badge/Lighthouse-90%2B-success)](/)
-[![Bundle](https://img.shields.io/badge/Bundle-<500KB-success)](/)
 
 > **Born from the eternal question: "What should we eat tonight?"**  
 > Fork In The Road helps individuals and groups discover, organize, and decide on restaurants with intelligent decision-making algorithms and real-time collaboration features.
@@ -127,7 +127,7 @@
 
 | Decision      | What I Chose             | Why                                                                                                                                                 | Alternative Considered         | Tradeoff                                                              |
 | ------------- | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ | --------------------------------------------------------------------- |
-| **Framework** | Next.js 15 (App Router)  | • React Server Components for performance<br>• Built-in API routes eliminate backend setup<br>• Vercel deployment is seamless<br>• Best-in-class DX | Remix, SvelteKit               | Learning curve for App Router, but RSC benefits outweigh complexity   |
+| **Framework** | Next.js 16 (App Router)  | • React Server Components for performance<br>• Built-in API routes eliminate backend setup<br>• Vercel deployment is seamless<br>• Best-in-class DX | Remix, SvelteKit               | Learning curve for App Router, but RSC benefits outweigh complexity   |
 | **Database**  | MongoDB Atlas            | • Flexible schema for rapid iteration<br>• Generous free tier<br>• Built-in performance monitoring<br>• Excellent Node.js support                   | PostgreSQL + Prisma, Supabase  | No relational constraints, but document model fits use case perfectly |
 | **Auth**      | Clerk                    | • Phone verification out of the box<br>• Webhooks for real-time sync<br>• Beautiful pre-built UI<br>• Social login support                          | NextAuth.js, Auth0             | Vendor lock-in, but 10,000 free MAUs and incredible DX justify it     |
 | **Styling**   | Tailwind CSS 4           | • Utility-first = rapid prototyping<br>• Built-in dark mode<br>• Tiny production bundle<br>• Excellent VS Code support                              | CSS Modules, styled-components | No component isolation, but design system prevents chaos              |
@@ -258,19 +258,17 @@ Explore the most interesting implementations in this codebase:
 ### Test Coverage
 
 ```bash
-# Unit Tests (Jest + React Testing Library)
-Test Suites: 109 passed, 109 total
-Tests:       1,367 passed, 1,367 total
-Coverage:    91.2% statements, 87.5% branches, 89.3% functions, 90.8% lines
-Duration:    45.32s
+# Unit Tests (Jest + React Testing Library) — measured 2026-06
+Test Suites: 118 passed, 118 total
+Tests:       1,468 passed, 13 skipped, 1,481 total
+Coverage:    42.5% statements, 37.8% branches, 33.2% functions, 43.2% lines
+Duration:    ~9s
 ```
 
-**Coverage Breakdown:**
-
-- ✅ Components: 92.1%
-- ✅ API Routes: 89.4%
-- ✅ Library Functions: 94.7%
-- ✅ Hooks: 88.2%
+Live numbers come from CI: every PR runs the full suite with coverage
+(thresholds enforced in `jest.config.js`), and the Tests/Coverage badges at
+the top of this README are regenerated by the `publish-badges` job on every
+push to `main` — never hand-edited.
 
 ---
 
@@ -897,7 +895,7 @@ git commit --no-verify
 ### Unit Tests
 
 **Framework**: Jest + React Testing Library  
-**Coverage**: 109 test suites, ~1,367 tests
+**Suite size**: 118 test suites, ~1,470 tests (live count on the Tests badge)
 
 ```bash
 # Run all unit tests

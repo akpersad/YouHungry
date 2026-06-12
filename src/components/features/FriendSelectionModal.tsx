@@ -1,7 +1,7 @@
 'use client';
 
 import { logger } from '@/lib/logger';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -43,6 +43,18 @@ export function FriendSelectionModal({
   const [currentPage, setCurrentPage] = useState(1);
   const [invitingFriend, setInvitingFriend] = useState<string | null>(null);
 
+  // Reset state when the modal opens (render-time reset instead of a
+  // setState-in-effect)
+  const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
+  if (isOpen !== prevIsOpen) {
+    setPrevIsOpen(isOpen);
+    if (isOpen) {
+      setSearchTerm('');
+      setCurrentPage(1);
+      setInvitingFriend(null);
+    }
+  }
+
   const ITEMS_PER_PAGE = 10;
 
   const {
@@ -67,15 +79,6 @@ export function FriendSelectionModal({
     startIndex,
     startIndex + ITEMS_PER_PAGE
   );
-
-  // Reset state when modal opens/closes
-  useEffect(() => {
-    if (isOpen) {
-      setSearchTerm('');
-      setCurrentPage(1);
-      setInvitingFriend(null);
-    }
-  }, [isOpen]);
 
   const handleInviteFriend = async (friendEmail: string) => {
     setInvitingFriend(friendEmail);

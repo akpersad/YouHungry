@@ -758,6 +758,39 @@ describe('Collections API Functions', () => {
       expect(result).toBeNull();
     });
 
+    it('returns null when the collection id cannot be parsed as an ObjectId', async () => {
+      const dbInstance = makeDbInstance(mockCollection);
+      mockDb.connectToDatabase.mockResolvedValue(
+        dbInstance as unknown as ReturnType<typeof db.connectToDatabase>
+      );
+      // The real ObjectId constructor throws on malformed ids; the mock does
+      // not, so force one throw to exercise the catch branch.
+      (ObjectId as unknown as jest.Mock).mockImplementationOnce(() => {
+        throw new Error('invalid ObjectId');
+      });
+
+      const result = await verifyCollectionAccess('not-an-id', personalUser);
+
+      expect(result).toBeNull();
+      expect(dbInstance.collection).not.toHaveBeenCalled();
+    });
+
+    it('returns null for collections of unknown type', async () => {
+      const doc = { ...mockCollection, type: 'mystery' };
+      mockDb.connectToDatabase.mockResolvedValue(
+        makeDbInstance(doc) as unknown as ReturnType<
+          typeof db.connectToDatabase
+        >
+      );
+
+      const result = await verifyCollectionAccess(
+        mockCollection._id.toString(),
+        personalUser
+      );
+
+      expect(result).toBeNull();
+    });
+
     it('returns null when the collection does not exist', async () => {
       mockDb.connectToDatabase.mockResolvedValue(
         makeDbInstance(null) as unknown as ReturnType<

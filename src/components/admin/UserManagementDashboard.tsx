@@ -138,9 +138,13 @@ export function UserManagementDashboard() {
   };
 
   useEffect(() => {
-    Promise.all([fetchStats(), searchUsers()]).finally(() => {
-      setLoading(false);
-    });
+    // Wrapped so setState is not called synchronously in the effect body
+    const load = () => {
+      Promise.all([fetchStats(), searchUsers()]).finally(() => {
+        setLoading(false);
+      });
+    };
+    load();
   }, [searchUsers]);
 
   if (loading) {

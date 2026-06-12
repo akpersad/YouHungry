@@ -1,7 +1,7 @@
 'use client';
 
 // PWA Status Indicator Component
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useSyncExternalStore } from 'react';
 import { usePWA } from '@/hooks/usePWA';
 import { Button } from './Button';
 import { Modal } from './Modal';
@@ -147,45 +147,59 @@ const isInStandaloneMode = () => {
   );
 };
 
+// One-time environment read (iOS + not installed); never changes during a
+// session, so the subscription is a no-op and the server snapshot is false
+const subscribeToNothing = () => () => {};
+const getIsIOSDeviceSnapshot = () => isIOS() && !isInStandaloneMode();
+const getIsIOSDeviceServerSnapshot = () => false;
+
+// Read a dismissal timestamp, pruning it if expired. Async so the resulting
+// state updates happen in a resolution callback rather than synchronously in
+// the mount effect.
+const readDismissal = async (key: string): Promise<boolean> => {
+  const dismissedTime = localStorage.getItem(key);
+  if (!dismissedTime) return false;
+
+  const elapsed = Date.now() - parseInt(dismissedTime, 10);
+  if (elapsed < DISMISS_DURATION) {
+    return true;
+  }
+
+  localStorage.removeItem(key);
+  return false;
+};
+
 export function PWAInstallPrompt({
   onDismiss,
   onInstall,
 }: PWAInstallPromptProps) {
   const { status, installApp, canInstall } = usePWA();
   const [isDismissed, setIsDismissed] = useState(false);
-  const [isIOSDevice, setIsIOSDevice] = useState(false);
+  const isIOSDevice = useSyncExternalStore(
+    subscribeToNothing,
+    getIsIOSDeviceSnapshot,
+    getIsIOSDeviceServerSnapshot
+  );
   const [isIOSDismissed, setIsIOSDismissed] = useState(false);
   const [countdown, setCountdown] = useState(30);
   const [_isAutoClosing, setIsAutoClosing] = useState(false);
   const [isHidden, setIsHidden] = useState(false);
 
-  // Check if device is iOS and dismissal state
+  // Check dismissal state
   useEffect(() => {
-    const iOS = isIOS();
-    const standalone = isInStandaloneMode();
-    setIsIOSDevice(iOS && !standalone);
-
     // Check Chrome/Edge dismissal
-    const dismissedTime = localStorage.getItem(PWA_DISMISS_KEY);
-    if (dismissedTime) {
-      const elapsed = Date.now() - parseInt(dismissedTime, 10);
-      if (elapsed < DISMISS_DURATION) {
+    readDismissal(PWA_DISMISS_KEY).then((dismissed) => {
+      if (dismissed) {
         setIsDismissed(true);
-      } else {
-        localStorage.removeItem(PWA_DISMISS_KEY);
       }
-    }
+    });
 
     // Check iOS dismissal
-    const iOSDismissedTime = localStorage.getItem(PWA_IOS_DISMISS_KEY);
-    if (iOSDismissedTime) {
-      const elapsed = Date.now() - parseInt(iOSDismissedTime, 10);
-      if (elapsed < DISMISS_DURATION) {
+    readDismissal(PWA_IOS_DISMISS_KEY).then((dismissed) => {
+      if (dismissed) {
         setIsIOSDismissed(true);
-      } else {
-        localStorage.removeItem(PWA_IOS_DISMISS_KEY);
       }
-    }
+    });
   }, []);
 
   // Show iOS banner if on iOS and not dismissed

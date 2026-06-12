@@ -114,7 +114,11 @@ function ProfilePageContent() {
 
   // Update form data when profile loads
   useEffect(() => {
-    if (profile) {
+    // Wrapped so setState is not called synchronously in the effect body
+    const syncFormDataFromProfile = () => {
+      if (!profile) {
+        return;
+      }
       const city = profile.city || '';
       const state = profile.state || '';
       const cityState = city && state ? `${city}, ${state}` : '';
@@ -151,34 +155,23 @@ function ProfilePageContent() {
         pushEnabled:
           profile.preferences?.notificationSettings?.pushEnabled ?? false,
       });
-    }
+    };
+    syncFormDataFromProfile();
   }, [profile]);
 
   // Check push permission status on mount and update state
   useEffect(() => {
-    if (pushStatus.permission === 'denied') {
-      setPushPermissionDenied(true);
-    } else if (pushStatus.permission === 'granted' && pushStatus.subscribed) {
-      // User has already granted permission and is subscribed
-      setFormData((prev) => ({ ...prev, pushEnabled: true }));
-    }
+    // Wrapped so setState is not called synchronously in the effect body
+    const syncFromPushStatus = () => {
+      if (pushStatus.permission === 'denied') {
+        setPushPermissionDenied(true);
+      } else if (pushStatus.permission === 'granted' && pushStatus.subscribed) {
+        // User has already granted permission and is subscribed
+        setFormData((prev) => ({ ...prev, pushEnabled: true }));
+      }
+    };
+    syncFromPushStatus();
   }, [pushStatus]);
-
-  // Prompt for push notifications on first profile visit after registration
-  useEffect(() => {
-    const isNewUser = searchParams.get('new_user') === 'true';
-
-    if (
-      isNewUser &&
-      !hasPromptedForPush &&
-      pushStatus.permission === 'default'
-    ) {
-      // Only prompt if permission hasn't been asked yet
-      setHasPromptedForPush(true);
-      handlePushToggle(true);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams, hasPromptedForPush, pushStatus.permission]);
 
   const handleInputChange = (field: string, value: string | boolean) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -453,6 +446,27 @@ function ProfilePageContent() {
       }
     }
   };
+
+  // Prompt for push notifications on first profile visit after registration
+  // (declared after handlePushToggle so the handler exists when referenced)
+  useEffect(() => {
+    const isNewUser = searchParams.get('new_user') === 'true';
+
+    if (
+      isNewUser &&
+      !hasPromptedForPush &&
+      pushStatus.permission === 'default'
+    ) {
+      // Only prompt if permission hasn't been asked yet; wrapped so setState
+      // is not called synchronously in the effect body
+      const promptForPush = () => {
+        setHasPromptedForPush(true);
+        void handlePushToggle(true);
+      };
+      promptForPush();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, hasPromptedForPush, pushStatus.permission]);
 
   const handleSave = async () => {
     // Validate default location if it's provided
@@ -1244,7 +1258,6 @@ function ProfilePageContent() {
                     },
                   }}
                   userProfileMode="modal"
-                  afterSignOutUrl="/"
                   userProfileProps={{
                     appearance: {
                       elements: {

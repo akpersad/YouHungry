@@ -187,11 +187,13 @@ After implementing GraphQL (Epic 10), we will compare:
 ### Automated Monitoring
 
 1. **Daily Metrics Collection**
+
    - Script: `npm run perf:collect`
    - Frequency: Daily at 2 AM
    - Storage: `performance-metrics/daily-metrics/`
 
 2. **Performance Comparison**
+
    - Script: `npm run perf:compare`
    - Frequency: Weekly
    - Output: Trend analysis and alerts
@@ -212,6 +214,7 @@ After implementing GraphQL (Epic 10), we will compare:
 ### Manual Monitoring
 
 1. **Admin Dashboard**
+
    - Path: `/admin` → Cost Monitoring tab
    - Metrics: Real-time API usage and costs
    - Refresh: Auto-refresh every 5 minutes
@@ -305,11 +308,13 @@ npm run test:e2e:perf
 ### Future Optimizations (Post-Baseline)
 
 1. **Phase 1: GraphQL Migration** (Epic 10)
+
    - Implement Apollo Server + Client
    - Migrate complex queries
    - Measure improvements
 
 2. **Phase 2: Advanced Caching**
+
    - Redis for distributed caching
    - Service worker enhancements
    - CDN optimization

@@ -8,6 +8,24 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 
+// Axe must scan the SETTLED page. The PageTransition opacity fade otherwise
+// blends colors mid-transition — e.g. the primary button half-faded over
+// white reads #ec5f97 instead of #e3005a and fails color-contrast at 3.1:1
+// even though the settled UI passes. PageTransition honors
+// prefers-reduced-motion, so emulating it gives deterministic scans; the
+// injected style kills plain CSS animations/transitions the same way.
+test.beforeEach(async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.addInitScript(() => {
+    const style = document.createElement('style');
+    style.textContent =
+      '*, *::before, *::after { animation: none !important; transition: none !important; }';
+    document.addEventListener('DOMContentLoaded', () =>
+      document.head.appendChild(style)
+    );
+  });
+});
+
 test.describe('Accessibility Tests - Critical User Flows', () => {
   test.skip('Home page meets WCAG AA standards', async ({ page }) => {
     // FLAKY: Intermittent failures on mobile-safari-fast

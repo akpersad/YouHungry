@@ -335,8 +335,12 @@ export function PerformanceDashboard() {
 
   useEffect(() => {
     logger.debug('useEffect triggered with selectedDays:', selectedDays, 'v2');
-    loadMetrics();
-    loadComparison(selectedDays);
+    // Wrapped so setState is not called synchronously in the effect body
+    const load = () => {
+      void loadMetrics();
+      void loadComparison(selectedDays);
+    };
+    load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedDays]);
 

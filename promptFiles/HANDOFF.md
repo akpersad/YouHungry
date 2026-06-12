@@ -1,6 +1,6 @@
 # Session Handoff — Fork In The Road portfolio upgrade
 
-**Last updated:** 2026-06-11
+**Last updated:** 2026-06-12
 **Read this first, then:** `promptFiles/phased-execution-plan.md` (the authoritative plan), `CLAUDE.md` (repo guide).
 
 ## Workflow rules (owner-set 2026-06-11 — do not deviate)
@@ -10,12 +10,16 @@
   this rule).
 - **The owner handles ALL PR merges personally.** Never merge PRs or push to
   main; production deploys from main.
+- **NEVER `git push` — any branch — without the owner's explicit go-ahead**
+  (owner-set 2026-06-11). Commit locally as work completes; when ready, say
+  "ready to push" and wait.
 
-## Phase 1 status (2026-06-11): WORK COMPLETE — owner is merging
+## Phase 1 status: MERGED ✅ (PR #45, 2026-06-11)
 
-All Phase 1 work is implemented, tested, and pushed as a **stacked branch chain**
-(each branch based on the previous; the owner merges in this order — or merges
-just `phase1/auth-matrix`, which contains everything, as a single PR):
+The owner squash-merged `phase1/auth-matrix` (top of the stack, contains
+everything) into main as PR #45 (`c357be3e`). Production deployed READY and
+the live site was verified healthy. The stacked branches below are historical
+record only — the other 12 PRs/branches can be closed/deleted:
 
 1. `feature/upgrade-plan-rework` — setup docs + skills (this file, plans, CLAUDE.md)
 2. `phase1/middleware-auth` — public-route matcher tightened (decisions/collections/restaurants/address APIs were PUBLIC)
@@ -34,17 +38,45 @@ just `phase1/auth-matrix`, which contains everything, as a single PR):
 Validation: full Jest suite green at every push (1468 tests; husky pre-push runs
 type-check/lint/jest/build); `test:e2e:fast` green on the full stack (45 passed).
 
-**Blockers/owner actions:**
+**Resolved at merge time (2026-06-11):**
 
-- `gh` CLI had a stale token for the wrong account (apersad_deloitte) — PRs could
-  not be created from the CLI. Owner: run `gh auth login -h github.com` (as
-  akpersad), then PRs can be created per branch, or merge the stack manually.
-- New env vars to set in Vercel before merging: `ADMIN_ALERT_EMAILS`,
-  `INTERNAL_API_SECRET` (verify it's set — cost-monitoring internal bypass),
-  confirm `CRON_SECRET` and `CLERK_WEBHOOK_SECRET` are set (handlers now fail
-  closed without them).
+- **Vercel env vars: ALL FIVE CONFIRMED SET in the Vercel project**
+  (`ADMIN_ALERT_EMAILS`, `INTERNAL_API_SECRET`, `CRON_SECRET`,
+  `CLERK_WEBHOOK_SECRET`, `ADMIN_USER_IDS`). Note `ADMIN_ALERT_EMAILS` is
+  still absent from local `.env.local`/`.env.prod` if syncing those matters.
+- **Lockfile registry poisoning (found + fixed):** every Vercel deploy since
+  Oct 2025 failed at `npm install` with E401 because 749 `package-lock.json`
+  `resolved` URLs pointed at the owner's old corporate Artifactory proxy
+  (`elilillyco.jfrog.io`, from a now-commented-out `~/.npmrc` line). Local
+  installs masked it via warm npm cache. Fixed in `3fbf212` (URLs rewritten
+  to registry.npmjs.org; integrity hashes unchanged). **Watch for
+  re-poisoning** if the lockfile regenerates while that npmrc line is active:
+  `grep -c elilillyco package-lock.json` must be 0.
+- `gh` CLI still has a stale token for the wrong account (apersad_deloitte) —
+  PRs cannot be created from the CLI until the owner runs
+  `gh auth login -h github.com` as akpersad. Owner merges via the GitHub UI.
 - See "Known gaps / deferred" in docs/api-auth-matrix.md (unsubscribe token
   redesign → Phase 5; dead auth/\* routes are deletion candidates).
+
+## Post-merge: Dependabot majors (MERGED ✅ as PR #59, `927bf9b`)
+
+Merging Phase 1 activated dependabot.yml; it opened major-bump PRs, two of
+whose preview builds failed. Resolution (merged 2026-06-11):
+
+- **typescript ^6.0.3 ADOPTED** — TS 6's new TS2882 check requires
+  declarations for side-effect asset imports; `src/types/css.d.ts`
+  (`declare module '*.css'`) fixes it. type-check/lint/jest/build all green.
+- **eslint stays ^9** — eslint 10 removed `context.getFilename()`, which
+  eslint-plugin-react (bundled by eslint-config-next, peer eslint ≤^9.7)
+  still calls. Not fixable on our side; dependabot now ignores eslint majors.
+- **eslint-config-next stays ^15.x** (bumped to ^15.5.19) — v16 works
+  mechanically but introduces the React Compiler hooks rules
+  (`react-hooks/refs` etc.) = ~74 lint errors; adopt during the Phase 2
+  Next 16 upgrade. Dependabot ignores its majors too.
+- The dependabot typescript PR auto-closes now that main has 6.0.3; the
+  remaining green dependabot PRs (twilio 6, glob 13, …) are the owner's
+  call — note twilio 6 and glob 13 are ALSO majors, just ones that built
+  green; review before merging.
 
 ## Naming
 
@@ -52,7 +84,21 @@ The product is **Fork In The Road** (repo `you-hungry` is historical). Never "Yo
 
 ## Where we are
 
-**Status: Phase 1 complete (see status section above); Phase 2 (CI & quality gates, then Next 16 + Tailwind 4) is next, starting AFTER the owner has merged the Phase 1 branches into `main`.** Verify merge state with `git log origin/main` before starting Phase 2.
+**Status: Phase 2 COMPLETE on branch `phase2/ci-quality-gates` (2026-06-12), committed locally, NOT pushed — awaiting owner go-ahead.** All Phase 2 plan items landed:
+
+1. **`--legacy-peer-deps` root cause fixed** — the flag dated to Epic 9 (Oct 2025) pinned-deps peer conflicts; Phase 1 unpinning removed the cause. Verified clean `npm ci` from empty node_modules; flag removed from workflows, runners moved Node 20 → 22 (engines requires >=22).
+2. **`ci.yml` quality gates** — types / eslint --max-warnings=0 / prettier --check / jest --coverage (summary + artifact) / production build on every PR+push; `pre-push` now mirrors CI exactly (added --max-warnings=0 + format:check). Repo-wide prettier normalized; vendored skills (.agents/, .github/skills/, .cursor/) prettier-ignored.
+3. **CI-generated badges** — `publish-badges` job (main pushes) writes shields endpoint JSON (coverage %, test count) to the `badges` branch; README badges now CI workflow badges + endpoint badges. **The fabricated README claims (91.2% coverage, "90+" Lighthouse) were replaced with measured reality.**
+4. **Lanes** — new `E2E Smoke` job (--grep @smoke); Lighthouse a11y category warn → **error** at 0.9 (measured 0.93–1.0 locally); perf/BP/SEO stay warn. `docs/ci-quality-gates.md` lists every check name + the **owner-action branch-protection setup** (GitHub UI, one-time).
+5. **Coverage honesty pass** — real coverage was **42%, not the asserted 90%+** (old 60% jest threshold never executed in any gate). New tests: auth.ts 0→100%, decisions.ts 37→99.6% lines (45 edge tests), notification-service.ts functions 37.5→100% (all channels factory-mocked — no live sends), verifyCollectionAccess 100%. Thresholds now ratchet-only floors at measured reality (43L/43S/34F/38B). Suite: 1551 passed / 120 suites. **Source bugs found while testing (NOT fixed, candidates for later):** tiered-consensus NaN/TypeError when a voted restaurant leaves the collection; voteBreakdown understates ranks >3; getCurrentUser auto-creates with placeholder email/name in prod; ADMIN_USER_IDS compares Mongo \_id not Clerk id; hardcoded admin phone in notification-service.
+6. **Next 15 → 16 + Clerk 6 → 7 + eslint-config-next 16** (Clerk 7 was REQUIRED — Clerk 6 has no Next 16 peer support):
+   - Turbopack now default: --turbopack flags dropped; build:webpack → `next build --webpack`; webpack config in next.config.ts gated behind explicit --webpack; removed-in-16 `eslint` config option deleted; tsconfig rewritten by Next (jsx react-jsx, .next/dev/types).
+   - Clerk 7: ClerkProvider afterSignInUrl/afterSignUpUrl → signInFallbackRedirectUrl/signUpFallbackRedirectUrl + afterSignOutUrl moved off UserButton to provider; appearance variables renamed (colorInput/colorInputForeground/colorForeground/colorMutedForeground); CustomRegistrationForm imports useSignUp from `@clerk/nextjs/legacy` (v6 resource shape — the new signals API is a future refactor).
+   - **middleware.ts deliberately NOT renamed to proxy.ts**: clerk/javascript#8302 (OPEN) — auth.protect() in proxy mode redirects to current URL instead of sign-in = route-protection bypass, exactly our pattern. Migrate when that closes. middleware.ts is deprecated-not-removed in 16.
+   - React Compiler hooks rules: all 74 errors fixed across ~30 files (set-state-in-effect 36, refs 18, immutability 10, static-components 8, + misc); 1 justified eslint-disable total. eslint.config.mjs migrated off FlatCompat to native flat configs.
+   - sw.js cache bumped v26 → v27. dependabot ignore for eslint-config-next majors removed (eslint 10 ignore stays — retest deliberately, config-next 16 peers eslint >=9).
+   - **Tailwind 4.0.14 → 4.3.0** (the plan's "minor bump at most"). Came with an a11y-lane determinism fix: PageTransition now honors prefers-reduced-motion, the axe spec emulates reduced motion (axe was scanning mid page-fade — primary button read #ec5f97 = #e3005a half-faded over white, 3.1:1), and local playwright retries are 1 (Clerk DEV-instance usage limits intermittently produce a signed-out render under 4-worker load; CI keeps retries=2).
+   - **Validation: full pre-push green + `test:e2e:fast` 45 passed / 0 failed** (same as Phase 1 baseline; 2 a11y tests flaked once under parallel load, pass deterministically in isolation — CI has retries=2).
 
 ## Background documents
 
@@ -86,10 +132,13 @@ status section above and `docs/api-auth-matrix.md`. Still true:
 
 ## Next actions
 
-1. **Wait for the owner to merge the Phase 1 branches** (verify via `git log origin/main`).
-2. Owner: set Vercel env vars (`ADMIN_ALERT_EMAILS`; confirm `CRON_SECRET`, `CLERK_WEBHOOK_SECRET`, `INTERNAL_API_SECRET`) before/at merge.
-3. Begin **Phase 2** per `phased-execution-plan.md`: ci.yml (type-check/lint/format/jest+coverage/build), Lighthouse CI + axe lanes, coverage honesty pass, then Next 15 → 16 as the closing PR(s).
-4. **Workflow: ONE branch for all of Phase 2, multiple logical commits** (see Workflow rules above); `npm run pre-push` must pass before push; `npm run test:e2e:fast` before handing over for merge.
+1. **Owner: give push go-ahead for `phase2/ci-quality-gates`**, then open the PR (gh CLI still has the wrong-account token — owner pushes/PRs via own auth). After merge:
+   - One-time GitHub UI setup: mark the required PR checks per `docs/ci-quality-gates.md` (Types/Lint/Format, Unit Tests, Build, E2E Smoke, Accessibility, Lighthouse).
+   - First main push creates the `badges` branch automatically; README badges go live then.
+   - Watch the first Vercel deploy on Next 16 (build now Turbopack-default).
+2. Owner housekeeping (non-blocking): close stale Phase 1 stack branches and any auto-closed dependabot PRs (typescript/eslint-config-next ones are now satisfied or obsolete).
+3. Then **Phase 3 — UI/UX refresh** per `phased-execution-plan.md`: starts with the design-direction discussion with the owner (palette/typography/style; owner NOT tied to `#e3005a`), `/impeccable init` prerequisite.
+4. Later candidates recorded from the Phase 2 honesty pass: tiered-consensus crash edge, voteBreakdown >3-rank scoring, getCurrentUser placeholder auto-create, ADMIN_USER_IDS id-form footgun, hardcoded admin phone, proxy.ts rename when clerk#8302 closes, eslint 10 retest.
 
 ## Owner context
 

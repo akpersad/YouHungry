@@ -17,18 +17,22 @@ interface PullToRefreshProps extends PullToRefreshOptions {
 export function PullToRefresh({ children, ...options }: PullToRefreshProps) {
   const { isPulling, pullDistance, isRefreshing, isEnabled } =
     usePullToRefresh(options);
+  const isActive = isPulling || isRefreshing;
   const [showIndicator, setShowIndicator] = useState(false);
 
-  // Show/hide indicator based on state
+  // Show indicator as soon as a pull/refresh starts (set during render
+  // instead of in an effect to avoid cascading renders)
+  if (isActive && !showIndicator) {
+    setShowIndicator(true);
+  }
+
+  // Hide indicator with a delay so the animation can complete
   useEffect(() => {
-    if (isPulling || isRefreshing) {
-      setShowIndicator(true);
-    } else {
-      // Delay hiding to allow animation to complete
+    if (!isActive) {
       const timeout = setTimeout(() => setShowIndicator(false), 300);
       return () => clearTimeout(timeout);
     }
-  }, [isPulling, isRefreshing]);
+  }, [isActive]);
 
   if (!isEnabled) {
     return <>{children}</>;

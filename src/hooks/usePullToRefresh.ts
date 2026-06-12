@@ -1,6 +1,12 @@
 'use client';
 
-import { useEffect, useCallback, useState, useRef } from 'react';
+import {
+  useEffect,
+  useCallback,
+  useState,
+  useRef,
+  useSyncExternalStore,
+} from 'react';
 import { logger } from '@/lib/logger';
 
 export interface PullToRefreshOptions {
@@ -66,19 +72,26 @@ export function usePullToRefresh(options: PullToRefreshOptions = {}) {
     onPullEnd,
   } = options;
 
-  const [state, setState] = useState<PullToRefreshState>({
+  const [state, setState] = useState<Omit<PullToRefreshState, 'isEnabled'>>({
     isPulling: false,
     pullDistance: 0,
     isRefreshing: false,
-    isEnabled: false,
   });
 
   const touchStartY = useRef<number>(0);
   const touchCurrentY = useRef<number>(0);
   const pullDistance = useRef<number>(0);
 
-  // Check if pull-to-refresh should be enabled
-  const checkIfEnabled = useCallback(() => {
+  // Check if pull-to-refresh should be enabled — read as an external store
+  // (re-checked on window resize; false during SSR)
+  const subscribeToResize = useCallback((onStoreChange: () => void) => {
+    window.addEventListener('resize', onStoreChange);
+    return () => {
+      window.removeEventListener('resize', onStoreChange);
+    };
+  }, []);
+
+  const getIsEnabled = useCallback(() => {
     let enabled = true;
 
     // Check if PWA
@@ -108,9 +121,14 @@ export function usePullToRefresh(options: PullToRefreshOptions = {}) {
       }
     }
 
-    setState((prev) => ({ ...prev, isEnabled: enabled }));
     return enabled;
   }, [pwaOnly, mobileOnly]);
+
+  const isEnabled = useSyncExternalStore(
+    subscribeToResize,
+    getIsEnabled,
+    () => false
+  );
 
   // Handle refresh action
   const handleRefresh = useCallback(async () => {
@@ -219,9 +237,7 @@ export function usePullToRefresh(options: PullToRefreshOptions = {}) {
 
   // Set up event listeners
   useEffect(() => {
-    const enabled = checkIfEnabled();
-
-    if (!enabled) return;
+    if (!isEnabled) return;
 
     // Add passive: false to prevent default scrolling during pull
     const options = { passive: false };
@@ -235,21 +251,11 @@ export function usePullToRefresh(options: PullToRefreshOptions = {}) {
       document.removeEventListener('touchmove', handleTouchMove);
       document.removeEventListener('touchend', handleTouchEnd);
     };
-  }, [checkIfEnabled, handleTouchStart, handleTouchMove, handleTouchEnd]);
-
-  // Re-check enabled status on window events
-  useEffect(() => {
-    checkIfEnabled();
-
-    window.addEventListener('resize', checkIfEnabled);
-
-    return () => {
-      window.removeEventListener('resize', checkIfEnabled);
-    };
-  }, [checkIfEnabled]);
+  }, [isEnabled, handleTouchStart, handleTouchMove, handleTouchEnd]);
 
   return {
     ...state,
+    isEnabled,
     refresh: handleRefresh,
   };
 }

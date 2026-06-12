@@ -371,6 +371,7 @@ A2P (Application-to-Person) 10DLC (10-Digit Long Code) is required by US carrier
 ### Database Connection Testing
 
 1. [ ] **Test production connection**
+
    - [ ] Verify MongoDB connection works from Vercel
    - [ ] Check connection logs in Vercel dashboard
    - [ ] Test database operations through deployed app
@@ -378,6 +379,7 @@ A2P (Application-to-Person) 10DLC (10-Digit Long Code) is required by US carrier
 2. [ ] **Database Collections Verification**
 
    Verify these collections exist and are accessible:
+
    - [ ] `users`
    - [ ] `restaurants`
    - [ ] `collections`
@@ -404,6 +406,7 @@ A2P (Application-to-Person) 10DLC (10-Digit Long Code) is required by US carrier
 ### Update API Key Restrictions
 
 1. [ ] **Google Places API**
+
    - [ ] Go to [Google Cloud Console](https://console.cloud.google.com)
    - [ ] Navigate to **APIs & Services > Credentials**
    - [ ] Select your API key
@@ -491,12 +494,14 @@ A2P (Application-to-Person) 10DLC (10-Digit Long Code) is required by US carrier
 ### Step 4: Verify Installation
 
 1. [ ] **Real-Time Testing**
+
    - [ ] Go to GA4 dashboard → **Reports** → **Realtime**
    - [ ] Visit your production site
    - [ ] You should see your session in real-time
    - [ ] Navigate to different pages to see page views
 
 2. [ ] **DebugView (Recommended)**
+
    - [ ] In GA4, go to **Admin** → **DebugView**
    - [ ] Install [Google Analytics Debugger](https://chrome.google.com/webstore/detail/google-analytics-debugger/) Chrome extension
    - [ ] Visit your site with extension enabled
@@ -561,11 +566,13 @@ A2P (Application-to-Person) 10DLC (10-Digit Long Code) is required by US carrier
 ### Admin Panel Security (CRITICAL)
 
 1. [ ] **Get Production User ID**
+
    - [ ] Sign in to production app
    - [ ] Check MongoDB `users` collection for your user document
    - [ ] Copy your MongoDB user `_id` (e.g., `507f1f77bcf86cd799439011`)
 
 2. [ ] **Configure Admin Access**
+
    - [ ] Go to Vercel project → **Settings** → **Environment Variables**
    - [ ] Add `ADMIN_USER_IDS` (comma-separated MongoDB user IDs)
    - [ ] Example: `507f1f77bcf86cd799439011,507f1f77bcf86cd799439012`
@@ -589,12 +596,14 @@ A2P (Application-to-Person) 10DLC (10-Digit Long Code) is required by US carrier
 ### Security Testing
 
 - [ ] **CORS Testing**
+
   - [ ] Verify API endpoints work from live domain
   - [ ] Test cross-origin requests
   - [ ] Check for CORS errors in browser console
   - [ ] Ensure preflight requests work correctly
 
 - [ ] **Rate Limiting Testing**
+
   - [ ] Verify rate limiting is working on API endpoints
   - [ ] Test with multiple requests
   - [ ] Check rate limit responses
@@ -612,12 +621,14 @@ A2P (Application-to-Person) 10DLC (10-Digit Long Code) is required by US carrier
 ### Enable Production Monitoring
 
 1. [ ] **Vercel Analytics**
+
    - [ ] Enable Vercel Analytics in project dashboard
    - [ ] Verify analytics tracking is working
    - [ ] Set up performance monitoring
    - [ ] Verify Vercel Speed Insights is tracking Core Web Vitals
 
 2. [ ] **Custom Error Tracking**
+
    - [ ] Verify custom error tracking dashboard works (`/admin?tab=errors`)
    - [ ] Test error reporting functionality
    - [ ] Set up alert notifications for critical errors
@@ -642,11 +653,13 @@ A2P (Application-to-Person) 10DLC (10-Digit Long Code) is required by US carrier
    ```
 
 2. [ ] **Add Environment Variables**
+
    - [ ] Add `CRON_SECRET` to Vercel environment variables
    - [ ] Add `INTERNAL_API_SECRET` to Vercel environment variables
    - [ ] Set for all environments (Production, Preview, Development)
 
 3. [ ] **Verify Cron Job**
+
    - [ ] Go to Vercel project → **Settings** → **Cron Jobs**
    - [ ] Verify cron jobs are scheduled:
      - Path: `/api/cron/performance-metrics`

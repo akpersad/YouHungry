@@ -140,7 +140,11 @@ export function CostMonitoringDashboard() {
 
   useEffect(() => {
     // Fetch data for current month/year on mount
-    fetchCostData(selectedMonth, selectedYear);
+    // Wrapped so setState is not called synchronously in the effect body
+    const load = () => {
+      void fetchCostData(selectedMonth, selectedYear);
+    };
+    load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

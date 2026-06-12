@@ -5,3 +5,15 @@ build
 dist
 *.min.js
 *.min.css
+
+# Vendored third-party skill packages — not our code style to enforce
+.agents/
+.github/skills/
+.cursor/
+
+# Generated artifacts
+coverage/
+playwright-report/
+test-results/
+lighthouse-reports/
+tsconfig.tsbuildinfo

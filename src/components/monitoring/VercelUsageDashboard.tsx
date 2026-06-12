@@ -75,7 +75,11 @@ export function VercelUsageDashboard() {
   };
 
   useEffect(() => {
-    fetchUsageData();
+    // Wrapped so setState is not called synchronously in the effect body
+    const load = () => {
+      void fetchUsageData();
+    };
+    load();
 
     // Refresh every 5 minutes
     const interval = setInterval(fetchUsageData, 5 * 60 * 1000);

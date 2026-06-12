@@ -56,8 +56,11 @@ export function DatePicker({
     };
   }, []);
 
-  // Update selected date when value prop changes
-  useEffect(() => {
+  // Update selected date when value prop changes (state adjustment during
+  // render, per https://react.dev/learn/you-might-not-need-an-effect)
+  const [prevValue, setPrevValue] = useState(value);
+  if (value !== prevValue) {
+    setPrevValue(value);
     if (value) {
       const date = new Date(value);
       setSelectedDate(date);
@@ -66,7 +69,7 @@ export function DatePicker({
       setSelectedDate(null);
       setSelectedTime('');
     }
-  }, [value]);
+  }
 
   const formatDisplayValue = () => {
     if (!selectedDate) return '';

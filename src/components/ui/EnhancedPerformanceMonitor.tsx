@@ -31,8 +31,43 @@ interface PerformanceAlert {
   threshold: number;
 }
 
+// Get a specific performance metric
+const getMetric = (metricName: string): Promise<number | null> => {
+  return new Promise((resolve) => {
+    const observer = new PerformanceObserver((list) => {
+      for (const entry of list.getEntries()) {
+        if (entry.name === metricName || entry.entryType === metricName) {
+          observer.disconnect();
+          resolve(entry.startTime || entry.duration || 0);
+          return;
+        }
+      }
+    });
+
+    try {
+      observer.observe({
+        entryTypes: [
+          'paint',
+          'largest-contentful-paint',
+          'first-input',
+          'layout-shift',
+          'navigation',
+        ],
+      });
+
+      // Timeout after 5 seconds
+      setTimeout(() => {
+        observer.disconnect();
+        resolve(null);
+      }, 5000);
+    } catch {
+      resolve(null);
+    }
+  });
+};
+
 export function EnhancedPerformanceMonitor() {
-  const [metrics, setMetrics] = useState<PerformanceMetrics>({});
+  const [collectedMetrics, setMetrics] = useState<PerformanceMetrics>({});
   const [alerts, setAlerts] = useState<PerformanceAlert[]>([]);
   const [isVisible, setIsVisible] = useState(false);
   const [isCollecting, setIsCollecting] = useState(false);
@@ -50,104 +85,6 @@ export function EnhancedPerformanceMonitor() {
     ttfb: 800, // 800ms
     bundleSize: 500000, // 500KB
     memoryUsage: 0.8, // 80% of limit
-  };
-
-  // Collect performance metrics
-  const collectMetrics = useCallback(async () => {
-    if (isCollecting) return;
-
-    setIsCollecting(true);
-    const newMetrics: PerformanceMetrics = {};
-
-    try {
-      // Core Web Vitals
-      const fcp = await getMetric('first-contentful-paint');
-      const lcp = await getMetric('largest-contentful-paint');
-      const fid = await getMetric('first-input-delay');
-      const cls = await getMetric('cumulative-layout-shift');
-      const ttfb = await getMetric('time-to-first-byte');
-
-      if (fcp !== null) newMetrics.fcp = fcp;
-      if (lcp !== null) newMetrics.lcp = lcp;
-      if (fid !== null) newMetrics.fid = fid;
-      if (cls !== null) newMetrics.cls = cls;
-      if (ttfb !== null) newMetrics.ttfb = ttfb;
-
-      // Bundle size
-      if (bundleSize !== null) {
-        newMetrics.bundleSize = bundleSize;
-      }
-
-      // Memory usage
-      if (memoryInfo) {
-        newMetrics.memoryUsed = memoryInfo.used;
-        newMetrics.memoryTotal = memoryInfo.total;
-        newMetrics.memoryLimit = memoryInfo.limit;
-      }
-
-      // Network information
-      const connection = (
-        navigator as {
-          connection?: { effectiveType: string; downlink: number; rtt: number };
-        }
-      ).connection;
-      if (connection) {
-        newMetrics.networkType = connection.effectiveType;
-        newMetrics.networkDownlink = connection.downlink;
-        newMetrics.networkRtt = connection.rtt;
-      }
-
-      // Update metrics
-      const updatedMetrics = { ...metricsRef.current, ...newMetrics };
-      setMetrics(updatedMetrics);
-      metricsRef.current = updatedMetrics;
-
-      // Check for alerts
-      checkAlerts(updatedMetrics);
-
-      // Send to analytics
-      await sendMetricsToAnalytics(updatedMetrics);
-    } catch (error) {
-      logger.error('Error collecting performance metrics:', error);
-    } finally {
-      setIsCollecting(false);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isCollecting]);
-
-  // Get a specific performance metric
-  const getMetric = (metricName: string): Promise<number | null> => {
-    return new Promise((resolve) => {
-      const observer = new PerformanceObserver((list) => {
-        for (const entry of list.getEntries()) {
-          if (entry.name === metricName || entry.entryType === metricName) {
-            observer.disconnect();
-            resolve(entry.startTime || entry.duration || 0);
-            return;
-          }
-        }
-      });
-
-      try {
-        observer.observe({
-          entryTypes: [
-            'paint',
-            'largest-contentful-paint',
-            'first-input',
-            'layout-shift',
-            'navigation',
-          ],
-        });
-
-        // Timeout after 5 seconds
-        setTimeout(() => {
-          observer.disconnect();
-          resolve(null);
-        }, 5000);
-      } catch {
-        resolve(null);
-      }
-    });
   };
 
   // Check for performance alerts
@@ -251,6 +188,69 @@ export function EnhancedPerformanceMonitor() {
     }
   };
 
+  // Collect performance metrics
+  const collectMetrics = useCallback(async () => {
+    if (isCollecting) return;
+
+    setIsCollecting(true);
+    const newMetrics: PerformanceMetrics = {};
+
+    try {
+      // Core Web Vitals
+      const fcp = await getMetric('first-contentful-paint');
+      const lcp = await getMetric('largest-contentful-paint');
+      const fid = await getMetric('first-input-delay');
+      const cls = await getMetric('cumulative-layout-shift');
+      const ttfb = await getMetric('time-to-first-byte');
+
+      if (fcp !== null) newMetrics.fcp = fcp;
+      if (lcp !== null) newMetrics.lcp = lcp;
+      if (fid !== null) newMetrics.fid = fid;
+      if (cls !== null) newMetrics.cls = cls;
+      if (ttfb !== null) newMetrics.ttfb = ttfb;
+
+      // Bundle size
+      if (bundleSize !== null) {
+        newMetrics.bundleSize = bundleSize;
+      }
+
+      // Memory usage
+      if (memoryInfo) {
+        newMetrics.memoryUsed = memoryInfo.used;
+        newMetrics.memoryTotal = memoryInfo.total;
+        newMetrics.memoryLimit = memoryInfo.limit;
+      }
+
+      // Network information
+      const connection = (
+        navigator as {
+          connection?: { effectiveType: string; downlink: number; rtt: number };
+        }
+      ).connection;
+      if (connection) {
+        newMetrics.networkType = connection.effectiveType;
+        newMetrics.networkDownlink = connection.downlink;
+        newMetrics.networkRtt = connection.rtt;
+      }
+
+      // Update metrics
+      const updatedMetrics = { ...metricsRef.current, ...newMetrics };
+      setMetrics(updatedMetrics);
+      metricsRef.current = updatedMetrics;
+
+      // Check for alerts
+      checkAlerts(updatedMetrics);
+
+      // Send to analytics
+      await sendMetricsToAnalytics(updatedMetrics);
+    } catch (error) {
+      logger.error('Error collecting performance metrics:', error);
+    } finally {
+      setIsCollecting(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isCollecting]);
+
   // Initialize monitoring
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -277,26 +277,19 @@ export function EnhancedPerformanceMonitor() {
     };
   }, [collectMetrics]);
 
-  // Update metrics when memory or bundle size changes
-  useEffect(() => {
-    if (memoryInfo) {
-      setMetrics((prev) => ({
-        ...prev,
-        memoryUsed: memoryInfo.used,
-        memoryTotal: memoryInfo.total,
-        memoryLimit: memoryInfo.limit,
-      }));
-    }
-  }, [memoryInfo]);
-
-  useEffect(() => {
-    if (bundleSize !== null) {
-      setMetrics((prev) => ({
-        ...prev,
-        bundleSize,
-      }));
-    }
-  }, [bundleSize]);
+  // Merge in the latest memory/bundle readings during render instead of
+  // syncing them into state via effects (same rendered output, fewer renders)
+  const metrics: PerformanceMetrics = {
+    ...collectedMetrics,
+    ...(memoryInfo
+      ? {
+          memoryUsed: memoryInfo.used,
+          memoryTotal: memoryInfo.total,
+          memoryLimit: memoryInfo.limit,
+        }
+      : {}),
+    ...(bundleSize !== null ? { bundleSize } : {}),
+  };
 
   // Don't render in production
   if (process.env.NODE_ENV === 'production') {

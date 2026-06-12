@@ -22,7 +22,10 @@ if (!isCI) {
 export default defineConfig({
   testDir: './e2e',
   forbidOnly: isCI,
-  retries: isCI ? 2 : 0,
+  // 1 local retry: auth-dependent specs flake under 4-worker load because
+  // the Clerk DEV instance (strict usage limits) intermittently fails to
+  // resolve the session — passes deterministically in isolation/on retry.
+  retries: isCI ? 2 : 1,
 
   // Use multiple workers - let projects override if needed
   // Maximize workers for fast tests (slow tests override to 1 per project)

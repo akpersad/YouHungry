@@ -479,10 +479,12 @@ decision-notifications.test.ts - Decision-Specific Integration
 **Delete These Redundant Tests:**
 
 1. **From `notification-service.test.ts`:**
+
    - Remove detailed SMS validation tests (lines ~125-172) → Already in `sms-notifications.test.ts`
    - Simplify to just test that it calls the SMS service
 
 2. **From `decision-notifications.test.ts`:**
+
    - Fix and consolidate the skipped tests
    - Remove overlap with `notification-service.test.ts` for basic channel testing
 
@@ -627,11 +629,13 @@ app/api/decisions/__tests__/history.test.ts - History API Tests
 **Delete These Redundant Tests:**
 
 1. **From `lib/__tests__/decisions.test.ts`:**
+
    - Remove database connection/query tests → Those are implementation details
    - Focus on pure algorithm testing
    - Remove lines 719-853 (duplicate weight calculation tests)
 
 2. **From `app/api/__tests__/decisions.test.ts`:**
+
    - Remove detailed business logic tests → That's for lib tests
    - Focus on HTTP layer concerns
 
@@ -904,11 +908,13 @@ Skipped Tests:           21 (undocumented)
 #### Actions Taken
 
 1. ✅ **Deleted Duplicate SignInButton Test**
+
    - Removed: `src/components/auth/__tests__/SignInButton.test.tsx` (78 lines, 5 tests)
    - Moved: `src/__tests__/SignInButton-updated.test.tsx` → `src/components/auth/__tests__/SignInButton.test.tsx`
    - Result: Consolidated to single, comprehensive test file (111 lines, 9 tests)
 
 2. ✅ **Documented Acceptable Skipped Tests**
+
    - Added skip reasons to `Modal.accessibility.test.tsx` (3 tests)
    - Added skip reasons to `Button.accessibility.test.tsx` (2 tests)
    - All comments reference E2E coverage and explain JSDOM limitations
@@ -1317,6 +1323,7 @@ Test Execution Time:     Reduce by ~10%
 
 1. **Check for existing tests** - Don't duplicate
 2. **Choose the right layer:**
+
    - Lib tests: Pure business logic
    - API tests: HTTP layer only
    - Component tests: Isolated component behavior
@@ -1443,11 +1450,13 @@ The recommended changes will result in a leaner, clearer, and more maintainable 
 Phase 1 successfully cleaned up the most obvious test redundancies and improved documentation:
 
 1. **Eliminated Duplicate Test File**
+
    - Removed duplicate `SignInButton.test.tsx`
    - Consolidated to comprehensive version with 9 tests
    - All tests passing ✅
 
 2. **Reduced Code Bloat**
+
    - Removed 215 lines of duplicate test code (-20.6%)
    - Deleted 137 lines of redundant weight calculation tests
    - Maintained 100% test coverage
@@ -1531,6 +1540,7 @@ All modified tests verified passing:
 Phase 2 focused on fixing or removing the 10 critical skipped tests identified in the audit:
 
 1. **Fixed 4 AdminAlertsDashboard Tests**
+
    - Empty alerts list handling ✅
    - Test email error handling ✅
    - Alert details modal opening ✅
@@ -1538,6 +1548,7 @@ Phase 2 focused on fixing or removing the 10 critical skipped tests identified i
    - All 4 tests now passing
 
 2. **Removed 2 Obsolete Tests**
+
    - Profile page notification toggle test (UI changed)
    - FriendList cancellation test (behavior changed)
    - Both tests no longer match current implementation
@@ -1774,16 +1785,19 @@ All 5 modified test files passing:
 Phase 3 successfully consolidated redundant notification tests across 6 test files:
 
 1. **Removed Redundant Predefined Notification Tests**
+
    - sms-notifications.test.ts: Consolidated 5 tests → 1 test (-4 tests)
    - All predefined notification types tested in single comprehensive test
    - All tests passing ✅
 
 2. **Consolidated In-App Notification Creators**
+
    - in-app-notifications.test.ts: Consolidated 5 tests → 1 test (-4 tests)
    - Representative examples of different notification types
    - All tests passing ✅
 
 3. **Streamlined Email Notification Tests**
+
    - user-email-notifications.test.ts: Consolidated 8 tests → 2 tests (-6 tests)
    - Combined 4 sendUserNotification tests into 1
    - Combined 4 template tests into 1
@@ -1895,6 +1909,7 @@ All modified test files verified passing:
 Phase 4 focused on consolidating decision tests and improving separation between lib (business logic) and API (HTTP layer) tests:
 
 1. **Consolidated History API Filter Tests**
+
    - history.test.ts: Consolidated 3 filter tests → 1 test (-2 tests)
    - Combined type, date range, and search filter tests
    - All tests passing ✅
@@ -2052,12 +2067,14 @@ All modified test files verified passing:
 ### Value Delivered
 
 1. **Immediate Benefits:**
+
    - Cleaner, more maintainable test suite
    - Faster test execution (~3% faster)
    - 100% of skipped tests now documented
    - Zero technical debt from mystery skips
 
 2. **Long-term Benefits:**
+
    - Easier to add new tests (clear patterns)
    - Reduced maintenance burden
    - Better test organization

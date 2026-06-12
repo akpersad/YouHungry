@@ -51,3 +51,4 @@ next-env.d.ts
 # Generated color audit reports
 color-contrast-audit-report.json
 .cursor/
+jest-results.json

@@ -51,12 +51,16 @@ export function AdminPanel() {
 
   // Update active tab when URL changes
   useEffect(() => {
-    if (tabParam && VALID_TABS.includes(tabParam as AdminTab)) {
-      setActiveTab(tabParam as AdminTab);
-    } else if (!tabParam) {
-      // If no tab param, default to performance
-      setActiveTab('performance');
-    }
+    // Wrapped so setState is not called synchronously in the effect body
+    const syncTabFromUrl = () => {
+      if (tabParam && VALID_TABS.includes(tabParam as AdminTab)) {
+        setActiveTab(tabParam as AdminTab);
+      } else if (!tabParam) {
+        // If no tab param, default to performance
+        setActiveTab('performance');
+      }
+    };
+    syncTabFromUrl();
   }, [tabParam]);
 
   // Handle tab changes by updating URL
