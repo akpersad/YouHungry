@@ -320,7 +320,7 @@ export function PWAInstallPrompt({
         </div>
 
         <div
-          className="fixed top-60 left-4 right-4 z-[101] bg-secondary rounded-lg p-4 md:left-auto md:right-4 md:max-w-md md:bottom-4 md:z-50"
+          className="fixed top-60 left-4 right-4 z-[101] bg-secondary rounded-lg p-4 md:top-auto md:left-auto md:right-4 md:max-w-md md:bottom-4 md:z-50"
           style={{
             boxShadow: 'var(--shadow-strong)',
             border: '1px solid var(--bg-quaternary)',
@@ -485,7 +485,7 @@ export function PWAInstallPrompt({
       </div>
 
       <div
-        className="fixed top-60 left-4 right-4 z-[101] bg-secondary rounded-lg p-4 md:left-auto md:right-4 md:max-w-md md:bottom-4 md:z-50"
+        className="fixed top-60 left-4 right-4 z-[101] bg-secondary rounded-lg p-4 md:top-auto md:left-auto md:right-4 md:max-w-md md:bottom-4 md:z-50"
         style={{
           boxShadow: 'var(--shadow-strong)',
           border: '1px solid var(--bg-quaternary)',
