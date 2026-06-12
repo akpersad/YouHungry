@@ -1,5 +1,11 @@
 import nextJest from 'next/jest.js';
 
+// Pin the timezone so date-rendering assertions are deterministic: 6 tests
+// assert toLocaleDateString output, which differs between local (EST) and
+// CI (UTC) runners. Unconditional on purpose — tests must not depend on the
+// host timezone.
+process.env.TZ = 'America/New_York';
+
 const createJestConfig = nextJest({
   dir: './',
 });
