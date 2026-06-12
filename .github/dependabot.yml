@@ -16,6 +16,16 @@ updates:
       # Playwright is intentionally pinned; bump it deliberately alongside
       # the browser images used in CI.
       - dependency-name: '@playwright/test'
+      # eslint 10 removed context.getFilename(), which eslint-plugin-react
+      # (bundled by eslint-config-next, peer eslint <=^9.7) still calls.
+      # Revisit once eslint-config-next supports eslint 10.
+      - dependency-name: 'eslint'
+        update-types: ['version-update:semver-major']
+      # eslint-config-next 16 adds the React Compiler hooks rules
+      # (react-hooks/refs etc., ~74 errors here); adopt alongside the
+      # Next 16 upgrade in Phase 2.
+      - dependency-name: 'eslint-config-next'
+        update-types: ['version-update:semver-major']
 
   - package-ecosystem: github-actions
     directory: '/'
