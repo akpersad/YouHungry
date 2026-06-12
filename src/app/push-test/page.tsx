@@ -12,8 +12,18 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/Card';
+import { AdminGate } from '@/components/admin/AdminGate';
 
+// Push-subscription test console — admin only.
 export default function PushTestPage() {
+  return (
+    <AdminGate>
+      <PushTestContent />
+    </AdminGate>
+  );
+}
+
+function PushTestContent() {
   const {
     status,
     loading,

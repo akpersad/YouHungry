@@ -102,11 +102,11 @@ export function useMobileNavigation() {
   const moreMenuActions =
     isLoaded && isSignedIn
       ? [
-          // User info section
+          // User info section — doubles as the profile/settings entry
           {
             id: 'user-info',
             label: user?.firstName ? `Hi, ${user.firstName}` : 'Account',
-            icon: <UserIcon className="w-5 h-5" />,
+            icon: <Cog6ToothIcon className="w-5 h-5" />,
             onClick: () => router.push('/profile'),
             variant: 'default' as const,
           },
@@ -128,12 +128,6 @@ export function useMobileNavigation() {
             label: 'Analytics',
             icon: <ChartBarIcon className="w-5 h-5" />,
             onClick: () => router.push('/analytics'),
-          },
-          {
-            id: 'profile',
-            label: 'Profile Settings',
-            icon: <Cog6ToothIcon className="w-5 h-5" />,
-            onClick: () => router.push('/profile'),
           },
           // Admin Dashboard - only show for authorized admins
           ...(isAdmin && !isCheckingAdmin

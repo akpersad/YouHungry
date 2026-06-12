@@ -315,6 +315,10 @@ describe('GroupView', () => {
     const removeButton = screen.getByText('Remove from Group');
     fireEvent.click(removeButton);
 
+    // Confirm removal in the ConfirmDialog
+    const confirmButton = screen.getByRole('button', { name: 'Remove' });
+    fireEvent.click(confirmButton);
+
     await waitFor(() => {
       expect(mockOnRemoveUser).toHaveBeenCalledWith('jane@example.com');
     });
@@ -359,6 +363,15 @@ describe('GroupView', () => {
 
     const leaveButton = screen.getByText('Leave Group');
     fireEvent.click(leaveButton);
+
+    // Confirm leaving in the ConfirmDialog (modal h2 + confirm button share the label)
+    const leaveElements = screen.getAllByText('Leave Group');
+    const modalContent = leaveElements[1].closest('.modal-content');
+    const buttons = modalContent?.querySelectorAll('button');
+    const confirmButton = buttons?.[buttons.length - 1];
+    if (confirmButton) {
+      fireEvent.click(confirmButton);
+    }
 
     await waitFor(() => {
       expect(mockOnLeaveGroup).toHaveBeenCalled();

@@ -14,6 +14,7 @@ import {
 import { Button } from '@/components/ui/Button';
 import { UserAvatar } from '@/components/ui/UserAvatar';
 import { Modal } from '@/components/ui/Modal';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { Input } from '@/components/ui/Input';
 import { DropdownMenu, DropdownMenuItem } from '@/components/ui/DropdownMenu';
 import { FriendSelectionModal } from './FriendSelectionModal';
@@ -76,6 +77,11 @@ export function GroupView({
     useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
+  const [memberToRemove, setMemberToRemove] = useState<{
+    name: string;
+    email: string;
+  } | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   const isCurrentUserAdmin = group.adminIds.some(
@@ -141,6 +147,7 @@ export function GroupView({
     setActionLoading(`remove-${email}`);
     try {
       await onRemoveUser(email);
+      setMemberToRemove(null);
     } catch (error) {
       logger.error('Error removing user:', error);
     } finally {
@@ -167,6 +174,7 @@ export function GroupView({
     setActionLoading('leave');
     try {
       await onLeaveGroup();
+      setShowLeaveConfirm(false);
     } catch (error) {
       logger.error('Error leaving group:', error);
     } finally {
@@ -306,7 +314,7 @@ export function GroupView({
           {!isLastAdmin ? (
             <Button
               variant="secondary"
-              onClick={handleLeaveGroup}
+              onClick={() => setShowLeaveConfirm(true)}
               isLoading={actionLoading === 'leave'}
               className="flex-1 sm:flex-none"
             >
@@ -420,7 +428,12 @@ export function GroupView({
                       </DropdownMenuItem>
                     )}
                     <DropdownMenuItem
-                      onClick={() => handleRemoveUser(member.email)}
+                      onClick={() =>
+                        setMemberToRemove({
+                          name: member.name,
+                          email: member.email,
+                        })
+                      }
                       variant="destructive"
                     >
                       <UserMinus className="w-4 h-4" />
@@ -577,6 +590,32 @@ export function GroupView({
           </div>
         </div>
       </Modal>
+
+      {/* Leave Group Confirmation */}
+      <ConfirmDialog
+        isOpen={showLeaveConfirm}
+        onClose={() => setShowLeaveConfirm(false)}
+        onConfirm={handleLeaveGroup}
+        title="Leave Group"
+        message={`Are you sure you want to leave "${group.name}"? You'll need a new invitation to rejoin.`}
+        confirmLabel="Leave Group"
+        isLoading={actionLoading === 'leave'}
+      />
+
+      {/* Remove Member Confirmation */}
+      <ConfirmDialog
+        isOpen={memberToRemove !== null}
+        onClose={() => setMemberToRemove(null)}
+        onConfirm={() => {
+          if (memberToRemove) {
+            void handleRemoveUser(memberToRemove.email);
+          }
+        }}
+        title="Remove Member"
+        message={`Remove ${memberToRemove?.name ?? 'this member'} from "${group.name}"? They'll need a new invitation to rejoin.`}
+        confirmLabel="Remove"
+        isLoading={actionLoading === `remove-${memberToRemove?.email}`}
+      />
 
       {/* Friend Selection Modal */}
       <FriendSelectionModal

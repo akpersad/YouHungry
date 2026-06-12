@@ -1,8 +1,18 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { AdminGate } from '@/components/admin/AdminGate';
 
+// PWA capability test console — admin only.
 export default function PWAExplorerPage() {
+  return (
+    <AdminGate>
+      <PWAExplorerContent />
+    </AdminGate>
+  );
+}
+
+function PWAExplorerContent() {
   const [results, setResults] = useState<Record<string, unknown>>({});
   const [testResults, setTestResults] = useState<string[]>([]);
 

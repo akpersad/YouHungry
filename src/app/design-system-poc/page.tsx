@@ -2,8 +2,18 @@
 
 import { useState } from 'react';
 import { Modal } from '@/components/ui/Modal';
+import { AdminGate } from '@/components/admin/AdminGate';
 
+// Internal design-system preview — admin only.
 export default function DesignSystemPOC() {
+  return (
+    <AdminGate>
+      <DesignSystemPOCContent />
+    </AdminGate>
+  );
+}
+
+function DesignSystemPOCContent() {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [selectedRestaurants, setSelectedRestaurants] = useState<string[]>([]);
   const [dragOverSlot, setDragOverSlot] = useState<number | null>(null);

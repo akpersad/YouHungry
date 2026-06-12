@@ -17,8 +17,18 @@ import { Badge } from '@/components/ui/Badge';
 import { NotificationBell } from '@/components/ui/NotificationBell';
 import { NotificationPanel } from '@/components/ui/NotificationPanel';
 import { logger } from '@/lib/logger';
+import { AdminGate } from '@/components/admin/AdminGate';
 
+// Test console that can trigger real SMS/push/email sends — admin only.
 export default function NotificationTestPage() {
+  return (
+    <AdminGate>
+      <NotificationTestContent />
+    </AdminGate>
+  );
+}
+
+function NotificationTestContent() {
   const [showNotificationPanel, setShowNotificationPanel] = useState(false);
 
   // SMS notifications
