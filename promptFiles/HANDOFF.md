@@ -170,20 +170,53 @@ status section above and `docs/api-auth-matrix.md`. Still true:
 - The Oct 2025 "ios app prep" epic was docs-only — no Swift code exists anywhere.
 - Tailwind is ALREADY on 4.0.14 — Phase 2's "Tailwind → 4" item reduces to a minor-version bump at most; the real Phase 2 framework work is Next 15 → 16.
 
+## Housekeeping completed 2026-06-12 (after Phase 2)
+
+- `housekeeping/post-phase2-verification` merged (PR #63).
+- All ~10 reopened dependabot PRs consolidated into one rollup
+  (`chore/deps-rollup`, PR #64, `11aab7d`): the 18-package minor/patch group
+  - majors twilio 6 / glob 13 / lint-staged 17 / @vercel/analytics 2 /
+    @vercel/speed-insights 2 + 4 GitHub Actions bumps + the prettier 3.8
+    repo reformat. Lockfile verified clean of corporate-registry URLs.
+    Dependabot auto-closes its PRs/branches now that main satisfies them.
+- All 58 stale remote branches deleted (epic/_, phase1/_ stack, phase2,
+  housekeeping, feature/fix branches). Remote is now `main` + `badges` +
+  live dependabot branches only.
+
+## Phase 3 — UI/UX refresh: IN PROGRESS (branch `phase3/ui-refresh`)
+
+Design-direction discussion with the owner held 2026-06-12; decisions:
+
+- **Personality: fresh, playful, social** on a **warm & appetizing**
+  foundation. References: Airbnb (warm human product craft) + Resy (dining
+  culture editorial). Anti-references: delivery-app generic, corporate SaaS
+  dashboard, cartoonish/over-gamified, AI-template slop.
+- **Palette: warm trio** — tomato/terracotta primary, saffron + olive
+  support; **whole canvas warms** (blush-tinted neutrals, hue ~35, both
+  modes; dark = warm charcoal). Replaces `#e3005a` infrared.
+- **Typography: Fraunces** display serif over existing Geist Sans UI.
+- **Both modes ship, light-led.**
+
+`/impeccable init` prerequisite DONE: `PRODUCT.md` (register: product) and
+`DESIGN.md` (full token spec, OKLCH) written at repo root — read both before
+any design work. Live-mode config at `.impeccable/live/config.json`.
+Implementation not yet started; exact OKLCH values in DESIGN.md need WCAG AA
+contrast verification as they land in `globals.css` (axe + Lighthouse a11y
+gate at error level in CI). Remember `manifest.json` theme_color + sw.js
+cache bump when tokens ship.
+
 ## Next actions
 
-1. **Owner: push go-ahead for `housekeeping/post-phase2-verification`**
-   (badges-branch Vercel fix + this handoff update), then merge.
-2. **Owner one-time GitHub UI setup (still pending):** branch protection on
+1. **Owner one-time GitHub UI setup (still pending):** branch protection on
    `main` — required PR checks per `docs/ci-quality-gates.md`
    (Types/Lint/Format, Unit Tests, Build, E2E Smoke, Accessibility,
-   Lighthouse).
-3. Owner housekeeping (non-blocking): review/merge the ~10 open dependabot
-   PRs (all majors or grouped minors — CI gates them now); delete stale
-   remote branches (12 Phase 1 stack branches, `phase2/ci-quality-gates`,
-   `feature/upgrade-plan-rework`, `fix/dependabot-major-bumps`).
-4. Then **Phase 3 — UI/UX refresh** per `phased-execution-plan.md`: starts with the design-direction discussion with the owner (palette/typography/style; owner NOT tied to `#e3005a`), `/impeccable init` prerequisite.
-5. Later candidates recorded from the Phase 2 honesty pass: tiered-consensus crash edge, voteBreakdown >3-rank scoring, getCurrentUser placeholder auto-create, ADMIN_USER_IDS id-form footgun, hardcoded admin phone, proxy.ts rename when clerk#8302 closes, eslint 10 retest.
+   Lighthouse). Also still pending: `gh auth login -h github.com` as
+   akpersad (CLI can't create PRs until then).
+2. **Phase 3 implementation** on `phase3/ui-refresh`: token system into
+   `globals.css` first (light then dark), Fraunces via `next/font`, then
+   component sweep (Button/Badge/Card/forms), then the decision-moment
+   choreography. Validate each step against the axe lane.
+3. Later candidates recorded from the Phase 2 honesty pass: tiered-consensus crash edge, voteBreakdown >3-rank scoring, getCurrentUser placeholder auto-create, ADMIN_USER_IDS id-form footgun, hardcoded admin phone, proxy.ts rename when clerk#8302 closes, eslint 10 retest.
 
 ## Owner context
 
