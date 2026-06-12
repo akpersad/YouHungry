@@ -159,6 +159,9 @@ jobs:
           git checkout --orphan badges
           git rm -rf --quiet .
           mv badge-output/*.json .
-          git add coverage.json tests.json
+          # The orphan branch has no Next.js app; without this Vercel tries
+          # (and fails) to deploy every badge push.
+          printf '{"git":{"deploymentEnabled":{"badges":false}}}\n' > vercel.json
+          git add coverage.json tests.json vercel.json
           git commit -m "badges: update from ${GITHUB_SHA::7}"
           git push --force origin badges
