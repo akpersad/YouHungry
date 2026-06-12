@@ -26,9 +26,8 @@ export async function GET(request: NextRequest) {
     }
 
     // Import the monitoring function
-    const { checkVercelUsage } = await import(
-      '@/app/api/monitoring/vercel-usage/route'
-    );
+    const { checkVercelUsage } =
+      await import('@/app/api/monitoring/vercel-usage/route');
 
     // Run the usage check
     await checkVercelUsage();

@@ -176,9 +176,8 @@ export async function searchRestaurantsByCoordinates(
     );
 
     // Enrich restaurants with missing addresses using Place Details API
-    const { enrichRestaurantsWithAddresses } = await import(
-      './optimized-google-places'
-    );
+    const { enrichRestaurantsWithAddresses } =
+      await import('./optimized-google-places');
     const enrichedRestaurants =
       await enrichRestaurantsWithAddresses(storedRestaurants);
 

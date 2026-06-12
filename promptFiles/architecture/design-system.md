@@ -900,17 +900,20 @@ A. I think what's most important is capturing all of this and making sure every 
 --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.12); /* Card elevation, natural depth */
 --shadow-strong: 0 8px 32px rgba(0, 0, 0, 0.16); /* High elevation, dramatic depth */
 --shadow-inset: inset 0 2px 4px rgba(0, 0, 0, 0.06); /* Pressed states, subtle indentation */
---shadow-layered: 0 2px 8px rgba(0, 0, 0, 0.08), 0 8px 32px rgba(0, 0, 0, 0.12); /* Complex depth */
+--shadow-layered:
+  0 2px 8px rgba(0, 0, 0, 0.08), 0 8px 32px rgba(0, 0, 0, 0.12); /* Complex depth */
 --shadow-glow: 0 0 20px rgba(255, 51, 102, 0.15); /* Infrared accent glow */
 
 /* Light Mode Neumorphic Shadows */
---shadow-neumorphic-light: inset 2px 2px 4px rgba(255, 255, 255, 0.9),
+--shadow-neumorphic-light:
+  inset 2px 2px 4px rgba(255, 255, 255, 0.9),
   inset -2px -2px 4px rgba(0, 0, 0, 0.08);
 
---shadow-neumorphic-elevated: 4px 4px 12px rgba(0, 0, 0, 0.08),
-  -4px -4px 12px rgba(255, 255, 255, 0.9);
+--shadow-neumorphic-elevated:
+  4px 4px 12px rgba(0, 0, 0, 0.08), -4px -4px 12px rgba(255, 255, 255, 0.9);
 
---shadow-neumorphic-pressed: inset 4px 4px 8px rgba(0, 0, 0, 0.08),
+--shadow-neumorphic-pressed:
+  inset 4px 4px 8px rgba(0, 0, 0, 0.08),
   inset -4px -4px 8px rgba(255, 255, 255, 0.9);
 ```
 
@@ -922,18 +925,20 @@ A. I think what's most important is capturing all of this and making sure every 
 --shadow-medium-dark: 0 4px 16px rgba(0, 0, 0, 0.5); /* Card elevation, natural depth */
 --shadow-strong-dark: 0 8px 32px rgba(0, 0, 0, 0.6); /* High elevation, dramatic depth */
 --shadow-inset-dark: inset 0 2px 4px rgba(0, 0, 0, 0.3); /* Pressed states, subtle indentation */
---shadow-layered-dark: 0 2px 8px rgba(0, 0, 0, 0.4),
-  0 8px 32px rgba(0, 0, 0, 0.5); /* Complex depth */
+--shadow-layered-dark:
+  0 2px 8px rgba(0, 0, 0, 0.4), 0 8px 32px rgba(0, 0, 0, 0.5); /* Complex depth */
 --shadow-glow-dark: 0 0 20px rgba(255, 51, 102, 0.25); /* Infrared accent glow (stronger in dark mode) */
 
 /* Dark Mode Neumorphic Shadows */
---shadow-neumorphic-dark: inset 2px 2px 4px rgba(255, 255, 255, 0.05),
+--shadow-neumorphic-dark:
+  inset 2px 2px 4px rgba(255, 255, 255, 0.05),
   inset -2px -2px 4px rgba(0, 0, 0, 0.4);
 
---shadow-neumorphic-elevated-dark: 4px 4px 12px rgba(0, 0, 0, 0.4),
-  -4px -4px 12px rgba(255, 255, 255, 0.05);
+--shadow-neumorphic-elevated-dark:
+  4px 4px 12px rgba(0, 0, 0, 0.4), -4px -4px 12px rgba(255, 255, 255, 0.05);
 
---shadow-neumorphic-pressed-dark: inset 4px 4px 8px rgba(0, 0, 0, 0.4),
+--shadow-neumorphic-pressed-dark:
+  inset 4px 4px 8px rgba(0, 0, 0, 0.4),
   inset -4px -4px 8px rgba(255, 255, 255, 0.05);
 ```
 
@@ -1398,8 +1403,8 @@ A. I think what's most important is capturing all of this and making sure every 
 ### **Font Stack**
 
 ```css
---font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-  sans-serif;
+--font-primary:
+  'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
 ```
 
@@ -1492,8 +1497,8 @@ A. I think what's most important is capturing all of this and making sure every 
     --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.12);
     --shadow-strong: 0 8px 32px rgba(0, 0, 0, 0.16);
     --shadow-inset: inset 0 2px 4px rgba(0, 0, 0, 0.06);
-    --shadow-layered: 0 2px 8px rgba(0, 0, 0, 0.08),
-      0 8px 32px rgba(0, 0, 0, 0.12);
+    --shadow-layered:
+      0 2px 8px rgba(0, 0, 0, 0.08), 0 8px 32px rgba(0, 0, 0, 0.12);
     --shadow-glow: 0 0 20px rgba(255, 51, 102, 0.15);
   }
 }
@@ -1518,8 +1523,8 @@ A. I think what's most important is capturing all of this and making sure every 
     --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.5);
     --shadow-strong: 0 8px 32px rgba(0, 0, 0, 0.6);
     --shadow-inset: inset 0 2px 4px rgba(0, 0, 0, 0.3);
-    --shadow-layered: 0 2px 8px rgba(0, 0, 0, 0.4),
-      0 8px 32px rgba(0, 0, 0, 0.5);
+    --shadow-layered:
+      0 2px 8px rgba(0, 0, 0, 0.4), 0 8px 32px rgba(0, 0, 0, 0.5);
     --shadow-glow: 0 0 20px rgba(255, 51, 102, 0.25);
   }
 }

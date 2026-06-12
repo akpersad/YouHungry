@@ -5,8 +5,10 @@ import { cn } from '@/lib/utils';
 import { motion, HTMLMotionProps } from 'framer-motion';
 import { buttonVariants } from '@/lib/animations';
 
-interface ButtonProps
-  extends Omit<HTMLMotionProps<'button'>, 'variant' | 'size' | 'children'> {
+interface ButtonProps extends Omit<
+  HTMLMotionProps<'button'>,
+  'variant' | 'size' | 'children'
+> {
   variant?:
     | 'primary'
     | 'secondary'
