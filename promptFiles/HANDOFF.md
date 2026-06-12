@@ -58,11 +58,10 @@ type-check/lint/jest/build); `test:e2e:fast` green on the full stack (45 passed)
 - See "Known gaps / deferred" in docs/api-auth-matrix.md (unsubscribe token
   redesign → Phase 5; dead auth/\* routes are deletion candidates).
 
-## Post-merge: Dependabot majors (branch `fix/dependabot-major-bumps`, awaiting owner PR/merge)
+## Post-merge: Dependabot majors (MERGED ✅ as PR #59, `927bf9b`)
 
 Merging Phase 1 activated dependabot.yml; it opened major-bump PRs, two of
-whose preview builds failed. Resolution (commit `2e3f9ce`, pushed, Vercel
-preview READY):
+whose preview builds failed. Resolution (merged 2026-06-11):
 
 - **typescript ^6.0.3 ADOPTED** — TS 6's new TS2882 check requires
   declarations for side-effect asset imports; `src/types/css.d.ts`
@@ -74,8 +73,8 @@ preview READY):
   mechanically but introduces the React Compiler hooks rules
   (`react-hooks/refs` etc.) = ~74 lint errors; adopt during the Phase 2
   Next 16 upgrade. Dependabot ignores its majors too.
-- After this branch merges: the dependabot typescript PR auto-closes; the
-  green minor/patch dependabot PRs (twilio 6, glob 13, …) are the owner's
+- The dependabot typescript PR auto-closes now that main has 6.0.3; the
+  remaining green dependabot PRs (twilio 6, glob 13, …) are the owner's
   call — note twilio 6 and glob 13 are ALSO majors, just ones that built
   green; review before merging.
 
@@ -85,7 +84,7 @@ The product is **Fork In The Road** (repo `you-hungry` is historical). Never "Yo
 
 ## Where we are
 
-**Status: Phase 1 MERGED (PR #45); `fix/dependabot-major-bumps` pushed and awaiting owner PR/merge; Phase 2 (CI & quality gates, then Next 16 + Tailwind 4) starts next.** Phase 2 work should branch off main after the dependabot-fix branch merges (or rebase onto it) so TS 6 + the dependabot ignores are in the base.
+**Status: Phase 1 MERGED (PR #45) and dependabot-majors fix MERGED (PR #59); Phase 2 (CI & quality gates, then Next 16) is IN PROGRESS on branch `phase2/ci-quality-gates`** (branched off main at `927bf9b`, 2026-06-11). TS 6 + the dependabot ignores are in the base.
 
 ## Background documents
 
@@ -119,8 +118,8 @@ status section above and `docs/api-auth-matrix.md`. Still true:
 
 ## Next actions
 
-1. **Owner: open/merge the PR for `fix/dependabot-major-bumps`** (already pushed, preview READY); close the stale Phase 1 stack branches and the dependabot eslint-10 PR.
-2. Begin **Phase 2** per `phased-execution-plan.md`, in order:
+1. Owner housekeeping (non-blocking): close the stale Phase 1 stack branches, the merged `fix/dependabot-major-bumps` branch, and the dependabot eslint-10 PR; review the remaining green dependabot PRs.
+2. Do **Phase 2** on `phase2/ci-quality-gates` per `phased-execution-plan.md`, in order:
    - `ci.yml`: type-check, lint, format:check, jest --coverage, build on every PR/push; investigate the `--legacy-peer-deps` root cause rather than propagating it.
    - Coverage uploaded; README badges become CI-generated, not asserted.
    - Lighthouse CI + axe/smoke Playwright lanes as required PR checks.
