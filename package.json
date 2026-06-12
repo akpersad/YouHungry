@@ -44,7 +44,7 @@
     "lighthouse:assert": "lhci assert",
     "prepare": "husky install",
     "pre-commit": "lint-staged",
-    "pre-push": "npm run type-check && npm run lint && npm run test && npm run build",
+    "pre-push": "npm run type-check && npm run lint -- --max-warnings=0 && npm run format:check && npm run test && npm run build",
     "perf:collect": "node performance-metrics/collect-metrics.js",
     "perf:compare": "node performance-metrics/compare-metrics.js",
     "perf:dashboard": "node performance-metrics/dashboard.js",

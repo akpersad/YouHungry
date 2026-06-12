@@ -3,7 +3,6 @@ import { MongoClient, Db } from 'mongodb';
 // Cache the client promise on globalThis so it survives Next.js HMR in dev
 // and is shared across invocations within a warm serverless instance.
 declare global {
-  // eslint-disable-next-line no-var
   var _mongoClientPromise: Promise<MongoClient> | undefined;
 }
 
