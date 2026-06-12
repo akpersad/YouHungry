@@ -18,9 +18,9 @@ jobs:
     if: github.event_name == 'pull_request' || github.event_name == 'push'
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 22
           cache: 'npm'
@@ -51,7 +51,7 @@ jobs:
           # App Configuration
           NEXT_PUBLIC_APP_URL: http://localhost:3000
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: smoke-test-results
@@ -69,9 +69,9 @@ jobs:
     if: github.event_name == 'pull_request' || github.event_name == 'push'
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 22
           cache: 'npm'
@@ -104,7 +104,7 @@ jobs:
           # App Configuration
           NEXT_PUBLIC_APP_URL: http://localhost:3000
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: pr-test-results
@@ -128,9 +128,9 @@ jobs:
         shard: [1, 2, 3, 4]
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 22
           cache: 'npm'
@@ -163,7 +163,7 @@ jobs:
           # App Configuration
           NEXT_PUBLIC_APP_URL: http://localhost:3000
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: nightly-test-results-shard-${{ matrix.shard }}
@@ -180,9 +180,9 @@ jobs:
     if: github.event_name == 'pull_request' || github.event_name == 'push'
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 22
           cache: 'npm'
@@ -213,7 +213,7 @@ jobs:
           # App Configuration
           NEXT_PUBLIC_APP_URL: http://localhost:3000
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: accessibility-report
@@ -228,9 +228,9 @@ jobs:
     if: github.event_name == 'pull_request' || (github.ref == 'refs/heads/main' && github.event_name == 'push')
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 22
           cache: 'npm'
@@ -274,7 +274,7 @@ jobs:
           # App Configuration
           NEXT_PUBLIC_APP_URL: http://localhost:3000
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: lighthouse-reports
