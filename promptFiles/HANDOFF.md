@@ -1,6 +1,6 @@
 # Session Handoff — Fork In The Road portfolio upgrade
 
-**Last updated:** 2026-06-12
+**Last updated:** 2026-06-12 (C8 complete)
 **Read this first, then:** `promptFiles/phased-execution-plan.md` (the authoritative plan), `CLAUDE.md` (repo guide).
 
 ## Workflow rules (owner-set 2026-06-11 — do not deviate)
@@ -222,8 +222,8 @@ desktop fix).
 | C5  | Landing/marketing restyle (N1–N3) — **no dedicated commit**: page.tsx inherits the warm palette via C3 aliases ("restyle only"). Revisit only if it reads off after the sweep.                                                                                                                                      | (folded)  | —         |
 | C6  | Decision-first dashboard hero + `/decide` route + SpinReveal + WhyThisPick (N7,S1,S2,S3,S4)                                                                                                                                                                                                                         | ✅        | `61d7e04` |
 | C7  | **Loading & empty states (dashboard)**: skeleton lib already existed → made base `Skeleton` decorative + new `SkeletonGroup` (announce once); `CollectionList` loading→skeleton, zero-state→`EmptyState`; activity-feed loading→skeleton rows (N4 done, X1 dashboard). C9–C12 apply skeletons to remaining surfaces | ✅        | `f0ed224` |
-| C8  | Group decision full-page flow: VoteBreakdown, localStorage draft, presence line, tap-to-rank, past-decisions (O4,O6,O7,O8,V3,V4,V5,V6,V7)                                                                                                                                                                           | ▶ NEXT    | —         |
-| C9  | Restaurant search: skeletons, sort affordance, `normalizeRestaurantId` correctness fix (N6)                                                                                                                                                                                                                         | ☐         | —         |
+| C8  | Group decision full-page flow: VoteBreakdown, localStorage draft, presence line, tap-to-rank, past-decisions (O4,O6,O7,O8,V3,V4,V5,V6,V7)                                                                                                                                                                           | ✅        | `PENDING` |
+| C9  | Restaurant search: skeletons, sort affordance, `normalizeRestaurantId` correctness fix (N6)                                                                                                                                                                                                                         | ▶ NEXT    | —         |
 | C10 | Collection cards + restyle: card stats (count/last decided), weight-viz recolor, create-collection (N5,R3,S6)                                                                                                                                                                                                       | ☐         | —         |
 | C11 | Groups & friends: single Invite flow, cancel sent request (may need sender DELETE on `api/friends/requests/[id]`) (O1,O2,V1,R4)                                                                                                                                                                                     | ☐         | —         |
 | C12 | History + profile restyle: re-decide from history, date grouping, remove fake calendar, manual/confirm/prefs (R1,R2,R5,S5,S7)                                                                                                                                                                                       | ☐         | —         |
@@ -237,9 +237,22 @@ desktop fix).
    (Types/Lint/Format, Unit Tests, Build, E2E Smoke, Accessibility,
    Lighthouse). Also still pending: `gh auth login -h github.com` as
    akpersad (CLI can't create PRs until then).
-2. **Phase 3: C7 done (`f0ed224`); implement C8** (group decision full-page
-   flow) next — see ledger above; then C9→C14 in order. Validate each commit
-   against the axe lane + full pre-push.
+2. **Phase 3: C8 done; implement C9** (restaurant search: skeletons, sort
+   affordance, `normalizeRestaurantId` correctness fix) next — see ledger
+   above; then C10→C14 in order. Validate each commit against the axe lane +
+   full pre-push.
+   C8 notes: group-decision voting moved out of the cramped modal into a
+   full-page tap-to-rank view (up/down reorder; drag kept for pointers);
+   localStorage draft per decision (`fitr-vote-draft:<id>`); re-vote preloads
+   the user's own ballot via a new `myRankings` field; quiet live-dot presence
+   ("Live · N of M voted") replaces the Connected/Disconnected jargon;
+   `VoteBreakdown` (new `decide/VoteBreakdown.tsx`) renders on the completed
+   card and in a new Past decisions section (no more 24h history cliff). API:
+   `serializeGroupDecision`/`buildVoteBreakdown` in `decisions.ts` now back
+   both the REST and SSE group routes (individual ballots stay private — only
+   an aggregated breakdown + the requester's own rankings are exposed).
+   **All active group-decision e2e specs are `test.skip`** (Google Places /
+   multi-session), so behavior changes carried no e2e lane risk.
    **Checkpoint discipline (owner-set 2026-06-12):** at each C-task commit,
    update this ledger (status + hash) AND the USER-STORIES "Phase 3 action"
    column for the rows it resolved — documentation must stay lossless across a

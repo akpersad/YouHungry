@@ -46,29 +46,29 @@ to walk every ✅ story end-to-end. The final Phase 3 commit updates the
 
 ## Group organizer (admin)
 
-| #   | Story                                 | Flow as implemented                                                                   | Verdict                                         | Phase 3 action                               |
-| --- | ------------------------------------- | ------------------------------------------------------------------------------------- | ----------------------------------------------- | -------------------------------------------- |
-| O1  | Create a group                        | `/groups` → Create Group modal (`useCreateGroup`)                                     | ✅                                              | Restyle (C11)                                |
-| O2  | Invite people                         | TWO paths: email input + friend-selection modal (`GroupView.tsx`)                     | ⚠️ competing methods confuse                    | C11: single Invite flow                      |
-| O3  | Promote/demote admins; remove members | Dropdown per member; remove previously fired instantly                                | ⚠️→✅ remove now confirms (C1, `ConfirmDialog`) | Done in C1                                   |
-| O4  | Start a tiered vote with a deadline   | `GroupDecisionMaking.tsx` → method modal → `POST /api/decisions/group` (24h deadline) | ✅ logic; ⚠️ modal UX                           | C8: full-page flow                           |
-| O5  | Start a group random decision         | Same modal → instant result                                                           | ⚠️ same anticlimax as S2                        | C6/C8 shared reveal                          |
-| O6  | See who hasn't voted / nudge          | Vote count "2/5" + notification triggers on creation                                  | ⚠️ no per-member status UI                      | C8: presence line ("Live · 3 of 5 voted")    |
-| O7  | Complete or close the decision        | Complete (≥1 vote) / Close with warning                                               | ✅                                              | Restyle (C8)                                 |
-| O8  | Review the outcome + how votes fell   | Result card hides after 24h; votes never shown                                        | ❌ no breakdown, history cliff                  | C8: `VoteBreakdown` + past-decisions section |
-| O9  | Delete the group safely               | Confirmation modal exists (`GroupView.tsx`)                                           | ✅                                              | —                                            |
+| #   | Story                                 | Flow as implemented                                                                   | Verdict                                         | Phase 3 action                              |
+| --- | ------------------------------------- | ------------------------------------------------------------------------------------- | ----------------------------------------------- | ------------------------------------------- |
+| O1  | Create a group                        | `/groups` → Create Group modal (`useCreateGroup`)                                     | ✅                                              | Restyle (C11)                               |
+| O2  | Invite people                         | TWO paths: email input + friend-selection modal (`GroupView.tsx`)                     | ⚠️ competing methods confuse                    | C11: single Invite flow                     |
+| O3  | Promote/demote admins; remove members | Dropdown per member; remove previously fired instantly                                | ⚠️→✅ remove now confirms (C1, `ConfirmDialog`) | Done in C1                                  |
+| O4  | Start a tiered vote with a deadline   | `GroupDecisionMaking.tsx` → method modal → `POST /api/decisions/group` (24h deadline) | ✅ logic; ⚠️→✅ full-page voting (C8)           | ✅ C8 — full-page flow                      |
+| O5  | Start a group random decision         | Same modal → instant result                                                           | ⚠️ same anticlimax as S2                        | C6/C8 shared reveal                         |
+| O6  | See who hasn't voted / nudge          | Vote count "2/5" + notification triggers on creation                                  | ⚠️→✅ presence line (C8)                        | ✅ C8 — "Live · N of M voted" presence line |
+| O7  | Complete or close the decision        | Complete (≥1 vote) / Close with warning                                               | ✅                                              | ✅ C8 restyle                               |
+| O8  | Review the outcome + how votes fell   | Completed → `VoteBreakdown` card + Past decisions section (no more 24h cliff)         | ❌→✅ breakdown + history (C8)                  | ✅ C8 — `VoteBreakdown` + past-decisions    |
+| O9  | Delete the group safely               | Confirmation modal exists (`GroupView.tsx`)                                           | ✅                                              | —                                           |
 
 ## Group voter (member)
 
-| #   | Story                                 | Flow as implemented                                                                                               | Verdict                                                         | Phase 3 action                             |
-| --- | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- | ------------------------------------------ |
-| V1  | Receive and accept a group invite     | `GroupInvitations.tsx` cards, accept/decline                                                                      | ✅                                                              | Restyle (C11)                              |
-| V2  | Get told a vote is open               | Push/SMS/email per prefs; **no in-app inbox** (`src/components/notifications/` empty; Bell/Panel exist unmounted) | ❌ in-app channel invisible                                     | C13: notification center                   |
-| V3  | Rank choices on my phone              | Drag-to-rank inside a Modal (`GroupDecisionMaking.tsx`)                                                           | ⚠️ cramped; drag affordance unclear; 3-choice limit unexplained | C8: full page + tap-to-rank                |
-| V4  | Not lose my picks if I close mid-vote | Closing the modal discards selections                                                                             | ❌ no draft                                                     | C8: localStorage draft                     |
-| V5  | Change my vote before deadline        | Re-vote supported; yellow warning easy to miss                                                                    | ⚠️                                                              | C8: persistent banner + preloaded rankings |
-| V6  | Watch the vote fill in live           | `useGroupDecisionSubscription` + polling fallback; bare "Connected/Disconnected" text                             | ⚠️ status jargon                                                | C8: quiet live-dot presence                |
-| V7  | See the result and the breakdown      | Result modal/card only; vanishes after 24h                                                                        | ❌                                                              | C8                                         |
+| #   | Story                                 | Flow as implemented                                                                                               | Verdict                            | Phase 3 action                            |
+| --- | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | ---------------------------------- | ----------------------------------------- |
+| V1  | Receive and accept a group invite     | `GroupInvitations.tsx` cards, accept/decline                                                                      | ✅                                 | Restyle (C11)                             |
+| V2  | Get told a vote is open               | Push/SMS/email per prefs; **no in-app inbox** (`src/components/notifications/` empty; Bell/Panel exist unmounted) | ❌ in-app channel invisible        | C13: notification center                  |
+| V3  | Rank choices on my phone              | Full-page tap-to-rank view + up/down reorder (drag retained for pointers); 3-choice limit explained               | ⚠️→✅ full page + tap-to-rank (C8) | ✅ C8 — full-page voting + tap-to-rank    |
+| V4  | Not lose my picks if I close mid-vote | localStorage draft per decision; restored on reopen, cleared on submit                                            | ❌→✅ draft (C8)                   | ✅ C8 — localStorage draft                |
+| V5  | Change my vote before deadline        | Re-vote preloads existing ballot (`myRankings`) + persistent replace banner                                       | ⚠️→✅ (C8)                         | ✅ C8 — re-vote banner + preloaded ballot |
+| V6  | Watch the vote fill in live           | `useGroupDecisionSubscription` + polling fallback; quiet live-dot replaces jargon                                 | ⚠️→✅ live-dot presence (C8)       | ✅ C8 — quiet live-dot presence           |
+| V7  | See the result and the breakdown      | `VoteBreakdown` on the completed card + in Past decisions (survives the 24h cliff)                                | ❌→✅ (C8)                         | ✅ C8                                     |
 
 ## Returning user
 

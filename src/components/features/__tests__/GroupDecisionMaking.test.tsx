@@ -23,58 +23,65 @@ const mockUser = {
   emailAddresses: [{ emailAddress: 'test@example.com' }],
 };
 
-const mockDecisions = [
-  {
-    id: 'decision_1',
-    type: 'group' as const,
-    collectionId: 'collection_1',
-    groupId: 'group_1',
-    method: 'tiered' as const,
-    status: 'active' as const,
-    deadline: '2024-01-02T12:00:00Z',
-    visitDate: '2024-01-01T18:00:00Z',
-    participants: ['user_123', 'user_456'],
-    votes: [
-      {
-        userId: 'user_123',
-        submittedAt: '2024-01-01T10:00:00Z',
-        hasRankings: true,
-      },
-    ],
-    createdAt: '2024-01-01T09:00:00Z',
-    updatedAt: '2024-01-01T10:00:00Z',
-  },
-  {
-    id: 'decision_2',
-    type: 'group' as const,
-    collectionId: 'collection_1',
-    groupId: 'group_1',
-    method: 'tiered' as const,
-    status: 'completed' as const,
-    deadline: '2024-01-02T12:00:00Z',
-    visitDate: '2024-01-01T18:00:00Z',
-    participants: ['user_123', 'user_456'],
-    votes: [
-      {
-        userId: 'user_123',
-        submittedAt: '2024-01-01T10:00:00Z',
-        hasRankings: true,
-      },
-      {
-        userId: 'user_456',
-        submittedAt: '2024-01-01T11:00:00Z',
-        hasRankings: true,
-      },
-    ],
-    result: {
-      restaurantId: 'restaurant_1',
-      selectedAt: '2024-01-01T12:00:00Z',
-      reasoning: 'Most popular choice among group members',
+const activeDecision = {
+  id: 'decision_1',
+  type: 'group' as const,
+  collectionId: 'collection_1',
+  groupId: 'group_1',
+  method: 'tiered' as const,
+  status: 'active' as const,
+  deadline: '2024-01-02T12:00:00Z',
+  visitDate: '2024-01-01T18:00:00Z',
+  participants: ['user_123', 'user_456'],
+  votes: [
+    {
+      userId: 'user_123',
+      submittedAt: '2024-01-01T10:00:00Z',
+      hasRankings: true,
     },
-    createdAt: '2024-01-01T09:00:00Z',
-    updatedAt: '2024-01-01T12:00:00Z',
+  ],
+  voteBreakdown: {},
+  myRankings: ['restaurant_1'],
+  createdAt: '2024-01-01T09:00:00Z',
+  updatedAt: '2024-01-01T10:00:00Z',
+};
+
+const completedDecision = {
+  id: 'decision_2',
+  type: 'group' as const,
+  collectionId: 'collection_1',
+  groupId: 'group_1',
+  method: 'tiered' as const,
+  status: 'completed' as const,
+  deadline: '2024-01-02T12:00:00Z',
+  // Recent visit (within 24h) so it renders as a result card.
+  visitDate: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+  participants: ['user_123', 'user_456'],
+  votes: [
+    {
+      userId: 'user_123',
+      submittedAt: '2024-01-01T10:00:00Z',
+      hasRankings: true,
+    },
+    {
+      userId: 'user_456',
+      submittedAt: '2024-01-01T11:00:00Z',
+      hasRankings: true,
+    },
+  ],
+  voteBreakdown: {
+    restaurant_1: { first: 2, second: 0, third: 0, total: 6 },
+    restaurant_2: { first: 0, second: 2, third: 0, total: 4 },
   },
-];
+  myRankings: ['restaurant_1', 'restaurant_2'],
+  result: {
+    restaurantId: 'restaurant_1',
+    selectedAt: '2024-01-01T12:00:00Z',
+    reasoning: 'Most popular choice among group members',
+  },
+  createdAt: '2024-01-01T09:00:00Z',
+  updatedAt: '2024-01-01T12:00:00Z',
+};
 
 const mockRestaurants = [
   {
@@ -88,16 +95,6 @@ const mockRestaurants = [
     priceRange: '$$',
     phoneNumber: '+1-555-0123',
     photos: ['photo1.jpg'],
-    website: 'https://testrestaurant1.com',
-    hours: {
-      Monday: '9:00 AM - 10:00 PM',
-      Tuesday: '9:00 AM - 10:00 PM',
-      Wednesday: '9:00 AM - 10:00 PM',
-      Thursday: '9:00 AM - 10:00 PM',
-      Friday: '9:00 AM - 11:00 PM',
-      Saturday: '9:00 AM - 11:00 PM',
-      Sunday: '9:00 AM - 10:00 PM',
-    },
     cachedAt: new Date('2024-01-01T00:00:00Z'),
     lastUpdated: new Date('2024-01-01T00:00:00Z'),
   },
@@ -109,19 +106,8 @@ const mockRestaurants = [
     coordinates: { lat: 40.7589, lng: -73.9851 },
     cuisine: 'Mexican',
     rating: 4.2,
-    priceLevel: '$',
-    phone: '+1-555-0456',
+    priceRange: '$',
     photos: ['photo2.jpg'],
-    website: 'https://testrestaurant2.com',
-    hours: {
-      Monday: '11:00 AM - 9:00 PM',
-      Tuesday: '11:00 AM - 9:00 PM',
-      Wednesday: '11:00 AM - 9:00 PM',
-      Thursday: '11:00 AM - 9:00 PM',
-      Friday: '11:00 AM - 10:00 PM',
-      Saturday: '11:00 AM - 10:00 PM',
-      Sunday: '11:00 AM - 9:00 PM',
-    },
     cachedAt: new Date('2024-01-01T00:00:00Z'),
     lastUpdated: new Date('2024-01-01T00:00:00Z'),
   },
@@ -132,23 +118,43 @@ const mockCurrentUser = {
   clerkId: 'user_123',
   email: 'test@example.com',
   name: 'Test User',
-  profilePicture: 'https://example.com/avatar.jpg',
-  city: 'Test City',
-  smsOptIn: false,
-  smsPhoneNumber: null,
   createdAt: new Date('2024-01-01T00:00:00Z'),
   updatedAt: new Date('2024-01-01T00:00:00Z'),
+};
+
+/**
+ * Route fetch by URL so the three queries (current user, collection
+ * restaurants, decision history) resolve regardless of call order.
+ */
+const installFetchMock = (allDecisions: unknown[] = []) => {
+  (global.fetch as jest.Mock).mockImplementation((url: string) => {
+    if (url.includes('/api/user/current')) {
+      return Promise.resolve({
+        ok: true,
+        json: async () => ({ user: mockCurrentUser }),
+      });
+    }
+    if (url.includes('/restaurants')) {
+      return Promise.resolve({
+        ok: true,
+        json: async () => ({ restaurants: mockRestaurants }),
+      });
+    }
+    if (url.includes('/api/decisions/group')) {
+      return Promise.resolve({
+        ok: true,
+        json: async () => ({ success: true, decisions: allDecisions }),
+      });
+    }
+    return Promise.resolve({ ok: true, json: async () => ({}) });
+  });
 };
 
 const createTestQueryClient = () =>
   new QueryClient({
     defaultOptions: {
-      queries: {
-        retry: false,
-      },
-      mutations: {
-        retry: false,
-      },
+      queries: { retry: false },
+      mutations: { retry: false },
     },
   });
 
@@ -159,158 +165,99 @@ const renderWithQueryClient = (component: React.ReactElement) => {
   );
 };
 
+const renderComponent = (isAdmin = true) =>
+  renderWithQueryClient(
+    <GroupDecisionMaking
+      groupId="group_1"
+      collectionId="collection_1"
+      isAdmin={isAdmin}
+    />
+  );
+
 describe('GroupDecisionMaking', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    (useUser as jest.Mock).mockReturnValue({
-      user: mockUser,
-      isLoaded: true,
-    });
+    (useUser as jest.Mock).mockReturnValue({ user: mockUser, isLoaded: true });
 
     (useGroupDecisionSubscription as jest.Mock).mockReturnValue({
-      decisions: mockDecisions,
+      decisions: [activeDecision],
       isConnected: true,
       error: null,
       reconnect: jest.fn(),
     });
 
-    (global.fetch as jest.Mock)
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ user: mockCurrentUser }),
-      })
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ restaurants: mockRestaurants }),
-      });
+    installFetchMock([activeDecision, completedDecision]);
   });
 
   it('renders group decision making interface', async () => {
-    renderWithQueryClient(
-      <GroupDecisionMaking
-        groupId="group_1"
-        collectionId="collection_1"
-        isAdmin={true}
-      />
-    );
-
+    renderComponent();
     await waitFor(() => {
       expect(screen.getByText('Group Decisions')).toBeInTheDocument();
     });
   });
 
-  it('shows start decision button for admins', async () => {
-    renderWithQueryClient(
-      <GroupDecisionMaking
-        groupId="group_1"
-        collectionId="collection_1"
-        isAdmin={true}
-      />
-    );
+  it('shows live presence status', async () => {
+    renderComponent();
+    await waitFor(() => {
+      expect(screen.getAllByText('Live').length).toBeGreaterThan(0);
+    });
+  });
 
+  it('shows start decision button for admins', async () => {
+    renderComponent(true);
     await waitFor(() => {
       expect(screen.getByText('Start Decision')).toBeInTheDocument();
     });
   });
 
   it('does not show start decision button for non-admins', async () => {
-    renderWithQueryClient(
-      <GroupDecisionMaking
-        groupId="group_1"
-        collectionId="collection_1"
-        isAdmin={false}
-      />
-    );
-
+    renderComponent(false);
     await waitFor(() => {
-      expect(screen.queryByText('Start Decision')).not.toBeInTheDocument();
+      expect(screen.getByText('Group Decisions')).toBeInTheDocument();
     });
+    expect(
+      screen.queryByRole('button', { name: 'Start Decision' })
+    ).not.toBeInTheDocument();
   });
 
-  it('displays active decisions correctly', async () => {
-    renderWithQueryClient(
-      <GroupDecisionMaking
-        groupId="group_1"
-        collectionId="collection_1"
-        isAdmin={true}
-      />
-    );
-
+  it('displays active decisions with a presence line', async () => {
+    renderComponent();
     await waitFor(() => {
       expect(screen.getByText('Tiered Choice')).toBeInTheDocument();
-      // Text is split across elements, so search for the date part only
-      expect(screen.getByText('1/1/2024')).toBeInTheDocument();
-      expect(screen.getByText(/1\/2\/2024, 7:00:00 AM/)).toBeInTheDocument();
     });
+    // "1 of 2 voted" presence line
+    expect(
+      screen.getByText(
+        (_content, element) =>
+          element?.tagName.toLowerCase() === 'p' &&
+          (element?.textContent ?? '').includes('1 of 2 voted')
+      )
+    ).toBeInTheDocument();
   });
 
-  it('shows vote status for active decisions', async () => {
-    renderWithQueryClient(
-      <GroupDecisionMaking
-        groupId="group_1"
-        collectionId="collection_1"
-        isAdmin={true}
-      />
-    );
-
+  it('shows the voted badge for the current user', async () => {
+    renderComponent();
     await waitFor(() => {
       expect(screen.getByText("✓ You've Voted")).toBeInTheDocument();
-      // Text is split across elements, so use a flexible matcher
-      expect(
-        screen.getByText((content, element) => {
-          return element?.textContent === 'Votes: 1 / 2' || false;
-        })
-      ).toBeInTheDocument();
     });
   });
 
-  it('displays completed decisions with restaurant details', async () => {
-    // Mock completed decision data with recent visit date (within 24 hours)
-    const completedDecision = {
-      ...mockDecisions[1],
-      status: 'completed' as const,
-      visitDate: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
-    };
-
-    (useGroupDecisionSubscription as jest.Mock).mockReturnValue({
-      decisions: [completedDecision],
-      isConnected: true,
-      error: null,
-      reconnect: jest.fn(),
-    });
-
-    renderWithQueryClient(
-      <GroupDecisionMaking
-        groupId="group_1"
-        collectionId="collection_1"
-        isAdmin={true}
-      />
-    );
-
+  it('displays recently completed decisions with a vote breakdown', async () => {
+    renderComponent();
     await waitFor(() => {
       expect(screen.getByText('Decision Completed!')).toBeInTheDocument();
-      expect(screen.getByText('Selected Restaurant:')).toBeInTheDocument();
-      expect(screen.getByText('Test Restaurant 1')).toBeInTheDocument();
-      expect(screen.getByText('📍 123 Test St, Test City')).toBeInTheDocument();
-      expect(screen.getByText('📞 +1-555-0123')).toBeInTheDocument();
-      expect(screen.getByText('⭐ 4.5/5')).toBeInTheDocument();
-      expect(screen.getByText('💰 $$')).toBeInTheDocument();
-      expect(
-        screen.getByText('Most popular choice among group members')
-      ).toBeInTheDocument();
     });
+    expect(screen.getByText('Selected Restaurant')).toBeInTheDocument();
+    expect(screen.getAllByText('Test Restaurant 1').length).toBeGreaterThan(0);
+    expect(screen.getByText('How votes fell')).toBeInTheDocument();
+    expect(
+      screen.getByText('Most popular choice among group members')
+    ).toBeInTheDocument();
   });
 
-  it('opens create decision modal when start decision is clicked', async () => {
-    renderWithQueryClient(
-      <GroupDecisionMaking
-        groupId="group_1"
-        collectionId="collection_1"
-        isAdmin={true}
-      />
-    );
-
+  it('opens the create decision modal when start decision is clicked', async () => {
+    renderComponent();
     await waitFor(() => {
       expect(screen.getByText('Start Decision')).toBeInTheDocument();
     });
@@ -323,15 +270,8 @@ describe('GroupDecisionMaking', () => {
     });
   });
 
-  it('opens voting interface when vote button is clicked', async () => {
-    renderWithQueryClient(
-      <GroupDecisionMaking
-        groupId="group_1"
-        collectionId="collection_1"
-        isAdmin={true}
-      />
-    );
-
+  it('opens the full-page voting view when vote is clicked', async () => {
+    renderComponent();
     await waitFor(() => {
       expect(screen.getByText('Re-vote')).toBeInTheDocument();
     });
@@ -339,213 +279,125 @@ describe('GroupDecisionMaking', () => {
     fireEvent.click(screen.getByText('Re-vote'));
 
     await waitFor(() => {
-      expect(screen.getByText('Rank Your Preferences')).toBeInTheDocument();
+      expect(screen.getByText('Rank your top 3')).toBeInTheDocument();
+    });
+    // Restaurants are tappable in the voting view
+    expect(screen.getAllByText('Test Restaurant 1').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Test Restaurant 2').length).toBeGreaterThan(0);
+  });
+
+  it('preloads the existing ballot when re-voting (V5)', async () => {
+    renderComponent();
+    await waitFor(() => {
+      expect(screen.getByText('Re-vote')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByText('Re-vote'));
+
+    await waitFor(() => {
+      // myRankings preloaded -> shows "Your ranking (1/3)"
+      expect(screen.getByText(/Your ranking \(1\/3\)/)).toBeInTheDocument();
     });
   });
 
   it('shows complete button for decisions that can be completed', async () => {
-    renderWithQueryClient(
-      <GroupDecisionMaking
-        groupId="group_1"
-        collectionId="collection_1"
-        isAdmin={true}
-      />
-    );
-
+    renderComponent();
     await waitFor(() => {
       expect(screen.getByText('Complete')).toBeInTheDocument();
     });
   });
 
   it('shows close button for active decisions when user is admin', async () => {
-    renderWithQueryClient(
-      <GroupDecisionMaking
-        groupId="group_1"
-        collectionId="collection_1"
-        isAdmin={true}
-      />
-    );
-
+    renderComponent(true);
     await waitFor(() => {
       expect(screen.getByText('Close')).toBeInTheDocument();
     });
   });
 
   it('does not show close button for non-admins', async () => {
-    renderWithQueryClient(
-      <GroupDecisionMaking
-        groupId="group_1"
-        collectionId="collection_1"
-        isAdmin={false}
-      />
-    );
-
+    renderComponent(false);
     await waitFor(() => {
-      expect(screen.queryByText('Close')).not.toBeInTheDocument();
+      expect(screen.getByText('Tiered Choice')).toBeInTheDocument();
     });
+    expect(screen.queryByText('Close')).not.toBeInTheDocument();
   });
 
-  it('handles drag and drop for restaurant rankings', async () => {
-    renderWithQueryClient(
-      <GroupDecisionMaking
-        groupId="group_1"
-        collectionId="collection_1"
-        isAdmin={true}
-      />
-    );
-
-    // Click vote button to open voting interface
-    await waitFor(() => {
-      expect(screen.getByText('Re-vote')).toBeInTheDocument();
-    });
-
-    fireEvent.click(screen.getByText('Re-vote'));
-
-    await waitFor(() => {
-      expect(screen.getByText('Rank Your Preferences')).toBeInTheDocument();
-    });
-
-    // Check that restaurants are displayed for ranking
-    expect(screen.getByText('Test Restaurant 1')).toBeInTheDocument();
-    expect(screen.getByText('Test Restaurant 2')).toBeInTheDocument();
-  });
-
-  it('shows loading state while fetching data', () => {
+  it('shows loading skeleton while fetching data', () => {
     (useGroupDecisionSubscription as jest.Mock).mockReturnValue({
       decisions: [],
       isConnected: false,
       error: null,
       reconnect: jest.fn(),
     });
-
     (global.fetch as jest.Mock).mockImplementation(() => new Promise(() => {}));
 
-    renderWithQueryClient(
-      <GroupDecisionMaking
-        groupId="group_1"
-        collectionId="collection_1"
-        isAdmin={true}
-      />
-    );
+    renderComponent();
 
-    expect(screen.getByText('Loading decisions...')).toBeInTheDocument();
+    expect(
+      screen.getByLabelText('Loading group decisions')
+    ).toBeInTheDocument();
   });
 
-  it('shows no decisions message when no decisions exist', async () => {
+  it('shows a designed empty state when no active decision exists', async () => {
     (useGroupDecisionSubscription as jest.Mock).mockReturnValue({
       decisions: [],
       isConnected: true,
       error: null,
       reconnect: jest.fn(),
     });
+    installFetchMock([]);
 
-    renderWithQueryClient(
-      <GroupDecisionMaking
-        groupId="group_1"
-        collectionId="collection_1"
-        isAdmin={true}
-      />
-    );
+    renderComponent();
 
     await waitFor(() => {
-      expect(
-        screen.getByText('No active or recent decisions')
-      ).toBeInTheDocument();
+      expect(screen.getByText('No active decision')).toBeInTheDocument();
     });
   });
 
-  it('handles subscription errors gracefully', async () => {
-    (useGroupDecisionSubscription as jest.Mock).mockReturnValue({
-      decisions: [], // Empty array from subscription
-      isConnected: false,
-      error: new Error('Subscription failed'),
-      reconnect: jest.fn(),
-    });
-
-    (global.fetch as jest.Mock)
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ user: mockCurrentUser }),
-      })
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ restaurants: mockRestaurants }),
-      })
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ success: true, decisions: mockDecisions }),
-      });
-
-    renderWithQueryClient(
-      <GroupDecisionMaking
-        groupId="group_1"
-        collectionId="collection_1"
-        isAdmin={true}
-      />
-    );
-
-    // Should show disconnected status
-    await waitFor(() => {
-      expect(screen.getByText('Disconnected')).toBeInTheDocument();
-    });
-
-    // Should show reconnect button
-    expect(screen.getByText('Reconnect')).toBeInTheDocument();
-  });
-
-  it('filters completed decisions by 24-hour rule', async () => {
-    const oldCompletedDecision = {
-      ...mockDecisions[1],
-      visitDate: new Date(Date.now() - 25 * 60 * 60 * 1000).toISOString(), // 25 hours ago
+  it('lists older completed/closed decisions under past decisions', async () => {
+    const oldCompleted = {
+      ...completedDecision,
+      id: 'decision_old',
+      visitDate: new Date(Date.now() - 72 * 60 * 60 * 1000).toISOString(),
     };
 
     (useGroupDecisionSubscription as jest.Mock).mockReturnValue({
-      decisions: [mockDecisions[0], oldCompletedDecision],
+      decisions: [activeDecision],
       isConnected: true,
       error: null,
       reconnect: jest.fn(),
     });
+    installFetchMock([activeDecision, oldCompleted]);
 
-    renderWithQueryClient(
-      <GroupDecisionMaking
-        groupId="group_1"
-        collectionId="collection_1"
-        isAdmin={true}
-      />
-    );
+    renderComponent();
 
     await waitFor(() => {
-      // Should only show the active decision, not the old completed one
-      expect(screen.getByText('Tiered Choice')).toBeInTheDocument();
-      expect(screen.queryByText('Decision Completed!')).not.toBeInTheDocument();
+      expect(screen.getByText('Past decisions')).toBeInTheDocument();
     });
+    expect(screen.queryByText('Decision Completed!')).not.toBeInTheDocument();
   });
 
-  it('does not show closed decisions', async () => {
+  it('does not surface closed decisions as active', async () => {
     const closedDecision = {
-      ...mockDecisions[0],
+      ...activeDecision,
+      id: 'decision_closed',
       status: 'closed' as const,
     };
 
     (useGroupDecisionSubscription as jest.Mock).mockReturnValue({
-      decisions: [closedDecision],
+      decisions: [],
       isConnected: true,
       error: null,
       reconnect: jest.fn(),
     });
+    installFetchMock([closedDecision]);
 
-    renderWithQueryClient(
-      <GroupDecisionMaking
-        groupId="group_1"
-        collectionId="collection_1"
-        isAdmin={true}
-      />
-    );
+    renderComponent();
 
     await waitFor(() => {
-      expect(
-        screen.getByText('No active or recent decisions')
-      ).toBeInTheDocument();
+      expect(screen.getByText('No active decision')).toBeInTheDocument();
     });
+    // Closed decision still appears in the past list
+    expect(screen.getByText('Past decisions')).toBeInTheDocument();
   });
 });

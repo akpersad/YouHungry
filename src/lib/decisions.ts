@@ -848,6 +848,115 @@ export async function performGroupRandomSelection(
 /**
  * Get group decision details
  */
+/** Per-restaurant tally of how a tiered vote fell (1st/2nd/3rd counts + 3/2/1 points). */
+export interface VoteBreakdownEntry {
+  first: number;
+  second: number;
+  third: number;
+  total: number;
+}
+
+/** The wire shape every group-decision endpoint returns (REST + SSE). */
+export interface SerializedGroupDecision {
+  id: string;
+  type: 'personal' | 'group';
+  collectionId: string;
+  groupId?: string;
+  method: 'tiered' | 'random' | 'manual';
+  status: 'active' | 'completed' | 'expired' | 'closed';
+  deadline: string;
+  visitDate: string;
+  participants: string[];
+  votes?: Array<{
+    userId: string;
+    submittedAt: string;
+    hasRankings: boolean;
+  }>;
+  /** Aggregated tally keyed by restaurant id — drives VoteBreakdown (O8/V7). */
+  voteBreakdown: Record<string, VoteBreakdownEntry>;
+  /** The requesting user's own rankings, so re-voting can preload them (V5). */
+  myRankings: string[];
+  result?: {
+    restaurantId: string;
+    selectedAt: string;
+    reasoning: string;
+  } | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * Aggregate how a tiered vote fell, keyed by restaurant id. Pure function of
+ * the votes — mirrors the 3/2/1 scoring in calculateTieredConsensus (ranks
+ * beyond the top 3 are not tallied, matching the live scorer).
+ */
+export function buildVoteBreakdown(
+  votes?: Decision['votes']
+): Record<string, VoteBreakdownEntry> {
+  const breakdown: Record<string, VoteBreakdownEntry> = {};
+  (votes ?? []).forEach((vote) => {
+    vote.rankings.forEach((restaurantId, index) => {
+      if (index > 2) return;
+      const id = restaurantId.toString();
+      if (!breakdown[id]) {
+        breakdown[id] = { first: 0, second: 0, third: 0, total: 0 };
+      }
+      if (index === 0) {
+        breakdown[id].first++;
+        breakdown[id].total += 3;
+      } else if (index === 1) {
+        breakdown[id].second++;
+        breakdown[id].total += 2;
+      } else {
+        breakdown[id].third++;
+        breakdown[id].total += 1;
+      }
+    });
+  });
+  return breakdown;
+}
+
+/**
+ * Map a Decision document to the client wire shape shared by the REST and SSE
+ * endpoints. Individual ballots stay private — only an aggregated breakdown and
+ * the requesting user's own rankings are exposed.
+ */
+export function serializeGroupDecision(
+  decision: Decision,
+  requestingUserId?: string
+): SerializedGroupDecision {
+  const myVote = requestingUserId
+    ? decision.votes?.find((vote) => vote.userId === requestingUserId)
+    : undefined;
+  return {
+    id: decision._id.toString(),
+    type: decision.type,
+    collectionId: decision.collectionId.toString(),
+    groupId: decision.groupId?.toString(),
+    method: decision.method,
+    status: decision.status,
+    deadline: decision.deadline.toISOString(),
+    visitDate: decision.visitDate.toISOString(),
+    participants: decision.participants,
+    votes: decision.votes?.map((vote) => ({
+      userId: vote.userId,
+      submittedAt: vote.submittedAt.toISOString(),
+      hasRankings: vote.rankings.length > 0,
+    })),
+    voteBreakdown: buildVoteBreakdown(decision.votes),
+    myRankings: myVote ? myVote.rankings.map((id) => id.toString()) : [],
+    result: decision.result
+      ? {
+          restaurantId: decision.result.restaurantId.toString(),
+          selectedAt: decision.result.selectedAt.toISOString(),
+          reasoning: decision.result.reasoning,
+        }
+      : null,
+    createdAt: decision.createdAt.toISOString(),
+    updatedAt: decision.updatedAt.toISOString(),
+  };
+}
+
 export async function getGroupDecision(
   decisionId: string
 ): Promise<Decision | null> {

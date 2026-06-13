@@ -1,7 +1,7 @@
 'use client';
 
 import { logger } from '@/lib/logger';
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useUser } from '@clerk/nextjs';
 import {
@@ -13,15 +13,26 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Modal } from '@/components/ui/Modal';
 import { DatePicker } from '@/components/ui/DatePicker';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { Skeleton, SkeletonGroup } from '@/components/ui/Skeleton';
 import { DecisionResultModal } from './DecisionResultModal';
+import { VoteBreakdown } from './decide/VoteBreakdown';
 import { useGroupDecisionSubscription } from '@/hooks/api/useGroupDecisionSubscription';
 import { Restaurant as DatabaseRestaurant } from '@/types/database';
+import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
 interface GroupDecisionMakingProps {
   groupId: string;
   collectionId: string;
   isAdmin: boolean;
+}
+
+interface VoteBreakdownEntry {
+  first: number;
+  second: number;
+  third: number;
+  total: number;
 }
 
 interface GroupDecision {
@@ -39,11 +50,13 @@ interface GroupDecision {
     submittedAt: string;
     hasRankings: boolean;
   }>;
+  voteBreakdown?: Record<string, VoteBreakdownEntry>;
+  myRankings?: string[];
   result?: {
     restaurantId: string;
     selectedAt: string;
     reasoning: string;
-  };
+  } | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -66,6 +79,28 @@ interface Restaurant {
   lastUpdated: Date;
 }
 
+const MAX_RANKINGS = 3;
+const draftKey = (decisionId: string) => `fitr-vote-draft:${decisionId}`;
+
+function readDraft(decisionId: string): string[] {
+  try {
+    const raw = localStorage.getItem(draftKey(decisionId));
+    const parsed = raw ? JSON.parse(raw) : null;
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+// A completed decision is "recent" for the celebratory card up to 24h past its
+// visit date; older completed/closed decisions move to the past-decisions list.
+function isRecentlyCompleted(d: GroupDecision): boolean {
+  if (d.status !== 'completed') return false;
+  const hoursSinceVisit =
+    (Date.now() - new Date(d.visitDate).getTime()) / (1000 * 60 * 60);
+  return hoursSinceVisit <= 24;
+}
+
 export function GroupDecisionMaking({
   groupId,
   collectionId,
@@ -73,9 +108,11 @@ export function GroupDecisionMaking({
 }: GroupDecisionMakingProps) {
   const { user } = useUser();
   const [showCreateDecision, setShowCreateDecision] = useState(false);
-  const [showVotingInterface, setShowVotingInterface] = useState(false);
-  const [selectedDecision, setSelectedDecision] =
-    useState<GroupDecision | null>(null);
+  // The decision currently being voted on — when set, the full-page voting
+  // view replaces the decision list (V3: out of the cramped modal).
+  const [votingDecision, setVotingDecision] = useState<GroupDecision | null>(
+    null
+  );
   const [showDecisionResult, setShowDecisionResult] = useState(false);
   const [decisionResult, setDecisionResult] = useState<{
     restaurant: DatabaseRestaurant;
@@ -93,29 +130,35 @@ export function GroupDecisionMaking({
 
   const queryClient = useQueryClient();
 
-  // Use real-time subscription for group decisions
-  const {
-    decisions,
-    isConnected,
-    error: subscriptionError,
-    reconnect,
-  } = useGroupDecisionSubscription(groupId, undefined, true); // Re-enable subscription
+  // Open the full-page voting view. Preloads the user's existing ballot (V5)
+  // or a locally-saved draft (V4) so picks are never lost.
+  const openVoting = useCallback((decision: GroupDecision) => {
+    const fromServer = decision.myRankings ?? [];
+    const fromDraft = readDraft(decision.id);
+    const preset = fromServer.length > 0 ? fromServer : fromDraft;
+    setRankings(preset);
+    setVotingDecision(decision);
+  }, []);
 
-  // Fallback to regular query if subscription fails or is disabled
-  const { data: fallbackDecisions, isLoading: decisionsLoading } = useQuery({
-    queryKey: ['groupDecisions', groupId],
+  // Use real-time subscription for active group decisions.
+  const { decisions, isConnected } = useGroupDecisionSubscription(
+    groupId,
+    undefined,
+    true
+  );
+
+  // Always-on query for the full decision history (active + completed +
+  // closed) — drives the past-decisions section and is the fallback for the
+  // live list when the SSE stream is down.
+  const { data: allDecisions, isLoading: decisionsLoading } = useQuery({
+    queryKey: ['groupDecisions', groupId, 'all'],
     queryFn: async () => {
       const response = await fetch(`/api/decisions/group?groupId=${groupId}`);
       if (!response.ok) throw new Error('Failed to fetch group decisions');
       const data = await response.json();
       return data.decisions as GroupDecision[];
     },
-    enabled: !isConnected || !!subscriptionError, // Use fallback if subscription is disabled or failed
   });
-
-  // Use subscription data if available, otherwise fallback to query data
-  const currentDecisions =
-    decisions.length > 0 ? decisions : fallbackDecisions || [];
 
   // Get current user's database ID
   const { data: currentUserData } = useQuery({
@@ -142,6 +185,25 @@ export function GroupDecisionMaking({
     },
   });
 
+  // Active decisions stream live over SSE; everything else comes from the
+  // history query. Merge so completed/closed decisions are always available.
+  const liveActive = (decisions as GroupDecision[]).filter(
+    (d) => d.status === 'active'
+  );
+  const activeDecisions: GroupDecision[] =
+    liveActive.length > 0
+      ? liveActive
+      : (allDecisions || []).filter((d) => d.status === 'active');
+
+  const nonActiveDecisions: GroupDecision[] = (allDecisions || []).filter(
+    (d) => d.status !== 'active'
+  );
+
+  const recentResults = nonActiveDecisions.filter(isRecentlyCompleted);
+  const pastDecisions = nonActiveDecisions.filter(
+    (d) => !isRecentlyCompleted(d)
+  );
+
   // Create group decision mutation
   const createDecisionMutation = useMutation({
     mutationFn: async (data: {
@@ -163,7 +225,6 @@ export function GroupDecisionMaking({
       queryClient.invalidateQueries({ queryKey: ['groupDecisions', groupId] });
       setShowCreateDecision(false);
 
-      // Track group decision start
       if (data.decision) {
         trackDecisionGroupStart({
           groupId,
@@ -171,12 +232,9 @@ export function GroupDecisionMaking({
           decisionType: data.decision.method,
           restaurantCount: restaurants?.length || 0,
         });
-      }
 
-      // If it's a tiered decision, open the voting interface
-      if (data.decision) {
-        setSelectedDecision(data.decision);
-        setShowVotingInterface(true);
+        // Open the full-page voting view for the freshly started decision.
+        openVoting(data.decision as GroupDecision);
       }
     },
   });
@@ -195,16 +253,21 @@ export function GroupDecisionMaking({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['groupDecisions', groupId] });
 
-      // Track vote submission
-      if (selectedDecision) {
+      if (votingDecision) {
         trackDecisionVoteSubmitted({
           groupId,
-          decisionId: selectedDecision.id.toString(),
+          decisionId: votingDecision.id.toString(),
           rankingPositions: rankings.length,
         });
+        try {
+          localStorage.removeItem(draftKey(votingDecision.id));
+        } catch {
+          // best-effort draft cleanup
+        }
       }
 
-      setShowVotingInterface(false);
+      toast.success('Vote submitted.');
+      setVotingDecision(null);
       setRankings([]);
     },
   });
@@ -223,7 +286,6 @@ export function GroupDecisionMaking({
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['groupDecisions', groupId] });
 
-      // Track decision completion
       if (data.result && data.decision) {
         trackDecisionGroupComplete({
           groupId,
@@ -295,7 +357,6 @@ export function GroupDecisionMaking({
       return;
     }
 
-    // Convert datetime-local value to ISO string
     const isoVisitDate = new Date(visitDate).toISOString();
 
     if (method === 'random') {
@@ -315,30 +376,37 @@ export function GroupDecisionMaking({
     }
   };
 
+  // Persist the in-progress ballot so closing the tab/app keeps the picks (V4).
+  useEffect(() => {
+    if (!votingDecision) return;
+    try {
+      localStorage.setItem(
+        draftKey(votingDecision.id),
+        JSON.stringify(rankings)
+      );
+    } catch {
+      // localStorage may be unavailable (private mode) — non-fatal.
+    }
+  }, [rankings, votingDecision]);
+
   const handleVote = () => {
-    if (!selectedDecision || rankings.length === 0) {
+    if (!votingDecision || rankings.length === 0) {
       toast.error('Please select at least one restaurant');
       return;
     }
 
-    // Use id property from API response
-    const decisionId = selectedDecision.id;
-
+    const decisionId = votingDecision.id;
     if (!decisionId) {
       logger.error('Selected decision has no ID!');
       toast.error('Error: Decision ID is missing. Please try again.');
       return;
     }
 
-    submitVoteMutation.mutate({
-      decisionId: decisionId,
-      rankings,
-    });
+    submitVoteMutation.mutate({ decisionId, rankings });
   };
 
   const handleCompleteDecision = (decision: GroupDecision) => {
-    const decisionId = decision.id;
-    completeDecisionMutation.mutate(decisionId);
+    completeDecisionMutation.mutate(decision.id);
   };
 
   const handleCloseDecision = (decision: GroupDecision) => {
@@ -348,26 +416,35 @@ export function GroupDecisionMaking({
 
   const confirmCloseDecision = () => {
     if (decisionToClose) {
-      const decisionId = decisionToClose.id;
-      closeDecisionMutation.mutate(decisionId);
+      closeDecisionMutation.mutate(decisionToClose.id);
     }
     setShowCloseConfirmation(false);
     setDecisionToClose(null);
   };
 
-  const handleRankRestaurant = (restaurantId: string) => {
+  // Tap-to-rank: tapping an unranked restaurant appends it; tapping a ranked
+  // one removes it. Works without drag — the primary path on mobile (V3).
+  const toggleRanking = (restaurantId: string) => {
     if (rankings.includes(restaurantId)) {
       setRankings(rankings.filter((id) => id !== restaurantId));
-    } else if (rankings.length < 3) {
+    } else if (rankings.length < MAX_RANKINGS) {
       setRankings([...rankings, restaurantId]);
     } else {
-      toast.warning('You can only rank up to 3 restaurants');
+      toast.warning(`You can only rank up to ${MAX_RANKINGS} restaurants`);
     }
   };
 
-  // Drag and drop handlers for reordering within rankings
+  // Tap-friendly reorder controls (alternative to drag for touch).
+  const moveRanking = (index: number, direction: -1 | 1) => {
+    const target = index + direction;
+    if (target < 0 || target >= rankings.length) return;
+    const next = [...rankings];
+    [next[index], next[target]] = [next[target], next[index]];
+    setRankings(next);
+  };
+
+  // Drag-and-drop reorder (progressive enhancement for pointer devices).
   const handleDragStart = (e: React.DragEvent, restaurantId: string) => {
-    // Only allow dragging if the item is already in rankings
     if (rankings.includes(restaurantId)) {
       setDraggedItem(restaurantId);
       e.dataTransfer.effectAllowed = 'move';
@@ -387,114 +464,280 @@ export function GroupDecisionMaking({
 
     const newRankings = [...rankings];
     const draggedIndex = newRankings.indexOf(draggedItem);
-
     if (draggedIndex !== -1) {
-      // Remove the item from its current position
       newRankings.splice(draggedIndex, 1);
-      // Insert it at the new position
       newRankings.splice(targetIndex, 0, draggedItem);
       setRankings(newRankings);
     }
-
     setDraggedItem(null);
-  };
-
-  const handleRemoveFromRankings = (restaurantId: string) => {
-    setRankings(rankings.filter((id) => id !== restaurantId));
-  };
-
-  const getVoteStatus = (decision: GroupDecision) => {
-    if (!currentUserData?._id) return 'Not Voted';
-
-    const userVote = decision.votes?.find(
-      (vote) => vote.userId === currentUserData._id.toString()
-    );
-    if (userVote) {
-      return userVote.hasRankings ? 'Voted' : 'Vote Submitted';
-    }
-    return 'Not Voted';
   };
 
   const hasUserVoted = (decision: GroupDecision) => {
     if (!currentUserData?._id) return false;
-
-    const userVote = decision.votes?.find(
+    return !!decision.votes?.find(
       (vote) => vote.userId === currentUserData._id.toString()
     );
-    return !!userVote;
   };
 
-  const canCompleteDecision = (decision: GroupDecision) => {
-    return (
-      isAdmin &&
-      decision.method === 'tiered' &&
-      decision.status === 'active' &&
-      decision.votes &&
-      decision.votes.length > 0
-    );
-  };
+  const votedCount = (decision: GroupDecision) =>
+    decision.votes?.filter((v) => v.hasRankings).length ?? 0;
 
-  const canCloseDecision = (decision: GroupDecision) => {
-    return isAdmin && decision.status === 'active';
-  };
+  const canCompleteDecision = (decision: GroupDecision) =>
+    isAdmin &&
+    decision.method === 'tiered' &&
+    decision.status === 'active' &&
+    !!decision.votes &&
+    decision.votes.length > 0;
 
-  // Helper function to filter decisions for the main display
-  const getVisibleDecisions = (decisions: GroupDecision[]) => {
-    return decisions.filter((d) => {
-      if (d.status === 'active') return true;
-      if (d.status === 'completed') {
-        // Only show completed decisions within 24 hours of visit date
-        const visitDate = new Date(d.visitDate);
-        const now = new Date();
-        const hoursSinceVisit =
-          (now.getTime() - visitDate.getTime()) / (1000 * 60 * 60);
-        return hoursSinceVisit <= 24;
-      }
-      // Don't show closed decisions
-      return false;
-    });
-  };
+  const canCloseDecision = (decision: GroupDecision) =>
+    isAdmin && decision.status === 'active';
+
+  const restaurantById = (id?: string) =>
+    id ? restaurants?.find((r) => r._id === id) : undefined;
 
   if (decisionsLoading || restaurantsLoading) {
     return (
-      <div className="flex justify-center items-center p-8">
-        <div className="text-text-light">Loading decisions...</div>
+      <SkeletonGroup label="Loading group decisions" className="space-y-4">
+        {[0, 1].map((i) => (
+          <Card key={i} className="space-y-3 p-6">
+            <Skeleton className="h-5 w-40" />
+            <Skeleton className="h-4 w-28" />
+            <Skeleton className="h-9 w-full max-w-[12rem]" />
+          </Card>
+        ))}
+      </SkeletonGroup>
+    );
+  }
+
+  // ---- Full-page voting view (V3) ----------------------------------------
+  if (votingDecision) {
+    const alreadyVoted = hasUserVoted(votingDecision);
+    return (
+      <div className="space-y-5">
+        <div className="flex items-center gap-3">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setVotingDecision(null)}
+          >
+            ← Back
+          </Button>
+          <h2 className="font-display text-2xl font-semibold text-primary">
+            Rank your top {MAX_RANKINGS}
+          </h2>
+        </div>
+
+        {alreadyVoted && (
+          <div
+            className="rounded-xl border p-4 text-sm"
+            style={{
+              background: 'var(--saffron-tint)',
+              borderColor: 'var(--saffron)',
+              color: 'var(--on-saffron)',
+            }}
+          >
+            You&apos;ve already voted — submitting again replaces your previous
+            ranking. Your picks are preloaded below.
+          </div>
+        )}
+
+        <p className="text-secondary">
+          Tap up to {MAX_RANKINGS} restaurants in order of preference. Your 1st
+          choice is worth 3 points, 2nd worth 2, and 3rd worth 1 — the highest
+          total wins.
+        </p>
+
+        {/* Current ranking */}
+        {rankings.length > 0 && (
+          <div className="space-y-2">
+            <h3 className="text-sm font-medium text-secondary">
+              Your ranking ({rankings.length}/{MAX_RANKINGS})
+            </h3>
+            <ul className="space-y-2">
+              {rankings.map((restaurantId, index) => {
+                const restaurant = restaurantById(restaurantId);
+                if (!restaurant) return null;
+                return (
+                  <li
+                    key={`rank-${restaurantId}`}
+                    className={cn(
+                      'flex items-center gap-3 rounded-xl border p-3 transition-all',
+                      draggedItem === restaurantId && 'opacity-50'
+                    )}
+                    style={{
+                      borderColor: 'var(--tomato)',
+                      background: 'var(--tomato-tint)',
+                    }}
+                    draggable
+                    onDragStart={(e) => handleDragStart(e, restaurantId)}
+                    onDragOver={handleDragOver}
+                    onDrop={(e) => handleDrop(e, index)}
+                  >
+                    <span
+                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold text-inverse"
+                      style={{ background: 'var(--tomato)' }}
+                    >
+                      {index + 1}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate font-medium text-primary">
+                        {restaurant.name}
+                      </p>
+                      <p className="truncate text-sm text-tertiary">
+                        {restaurant.cuisine}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={() => moveRanking(index, -1)}
+                        disabled={index === 0}
+                        aria-label={`Move ${restaurant.name} up`}
+                        className="touch-target rounded px-2 py-1 text-secondary disabled:opacity-30"
+                      >
+                        ↑
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => moveRanking(index, 1)}
+                        disabled={index === rankings.length - 1}
+                        aria-label={`Move ${restaurant.name} down`}
+                        className="touch-target rounded px-2 py-1 text-secondary disabled:opacity-30"
+                      >
+                        ↓
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => toggleRanking(restaurantId)}
+                        aria-label={`Remove ${restaurant.name}`}
+                        className="touch-target rounded px-2 py-1 text-sm text-destructive"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        )}
+
+        {/* Available restaurants */}
+        <div className="space-y-2">
+          <h3 className="text-sm font-medium text-secondary">
+            {rankings.length >= MAX_RANKINGS
+              ? 'Ranking full — remove one to swap'
+              : 'Tap to add to your ranking'}
+          </h3>
+          <ul className="space-y-2">
+            {restaurants?.map((restaurant) => {
+              const isSelected = rankings.includes(restaurant._id);
+              const canSelect = !isSelected && rankings.length < MAX_RANKINGS;
+              return (
+                <li key={restaurant._id}>
+                  <button
+                    type="button"
+                    onClick={() => toggleRanking(restaurant._id)}
+                    disabled={!isSelected && !canSelect}
+                    aria-pressed={isSelected}
+                    className={cn(
+                      'flex w-full items-center justify-between gap-3 rounded-xl border p-3 text-left transition-all',
+                      isSelected
+                        ? 'border-[var(--olive)]'
+                        : canSelect
+                          ? 'border-border hover:border-[var(--border-strong)]'
+                          : 'border-border opacity-50'
+                    )}
+                    style={
+                      isSelected
+                        ? { background: 'var(--olive-tint)' }
+                        : undefined
+                    }
+                  >
+                    <div className="flex min-w-0 items-center gap-3">
+                      <span
+                        className={cn(
+                          'flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-sm',
+                          isSelected ? 'text-inverse' : 'border border-border'
+                        )}
+                        style={
+                          isSelected
+                            ? { background: 'var(--olive)' }
+                            : undefined
+                        }
+                        aria-hidden="true"
+                      >
+                        {isSelected ? '✓' : ''}
+                      </span>
+                      <div className="min-w-0">
+                        <p className="truncate font-medium text-primary">
+                          {restaurant.name}
+                        </p>
+                        <p className="truncate text-sm text-tertiary">
+                          {restaurant.cuisine}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="shrink-0 text-right">
+                      <p className="text-sm font-medium text-secondary">
+                        ⭐ {restaurant.rating}
+                      </p>
+                      {restaurant.priceRange && (
+                        <p className="text-sm text-tertiary">
+                          {restaurant.priceRange}
+                        </p>
+                      )}
+                    </div>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+
+        <div className="sticky bottom-0 flex justify-end gap-2 border-t border-border bg-surface py-3">
+          <Button variant="outline" onClick={() => setVotingDecision(null)}>
+            Cancel
+          </Button>
+          <Button
+            onClick={handleVote}
+            disabled={rankings.length === 0 || submitVoteMutation.isPending}
+          >
+            {alreadyVoted ? 'Update vote' : 'Submit vote'}
+          </Button>
+        </div>
       </div>
     );
   }
 
-  // Show connection status
-  const connectionStatus = isConnected ? 'Connected' : 'Disconnected';
-  const connectionColor = isConnected ? 'text-success' : 'text-destructive';
-
+  // ---- Decision hub -------------------------------------------------------
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-text">Group Decisions</h2>
-          <div className="flex items-center space-x-2 mt-1">
-            <div
-              className={`w-2 h-2 rounded-full ${isConnected ? 'bg-success' : 'bg-destructive'}`}
-            ></div>
-            <span className={`text-sm ${connectionColor}`}>
-              {connectionStatus}
-            </span>
-            {subscriptionError && (
-              <Button
-                onClick={reconnect}
-                size="sm"
-                className="text-xs bg-surface hover:bg-surface"
-              >
-                Reconnect
-              </Button>
-            )}
-          </div>
+          <h2 className="font-display text-2xl font-semibold text-primary">
+            Group Decisions
+          </h2>
+          <span className="mt-1 inline-flex items-center gap-1.5 text-xs text-tertiary">
+            <span
+              className={cn(
+                'h-2 w-2 rounded-full',
+                isConnected && 'motion-safe:animate-pulse'
+              )}
+              style={{
+                background: isConnected
+                  ? 'var(--color-success)'
+                  : 'var(--border-strong)',
+              }}
+              aria-hidden="true"
+            />
+            {isConnected ? 'Live' : 'Reconnecting…'}
+          </span>
         </div>
         {isAdmin && (
           <Button
             onClick={() => setShowCreateDecision(true)}
-            className="bg-accent hover:bg-accent/90 text-inverse"
             data-start-decision
           >
             Start Decision
@@ -502,208 +745,220 @@ export function GroupDecisionMaking({
         )}
       </div>
 
-      {/* Active and Recently Completed Decisions */}
+      {/* Active decisions */}
       <div className="space-y-4">
-        {getVisibleDecisions(currentDecisions || []).map((decision, index) => (
-          <Card
-            key={`group-decision-making-${decision.id || index}`}
-            className="p-6"
-          >
-            {decision.status === 'completed' ? (
-              // Completed Decision Display
-              <div className="bg-success/10 border border-success/20 rounded-lg p-4">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="flex-shrink-0">
-                    <svg
-                      className="h-6 w-6 text-success"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
+        {activeDecisions.map((decision) => (
+          <Card key={`active-${decision.id}`} className="p-6">
+            <div className="block md:flex md:items-start md:justify-between">
+              <div className="w-full md:w-auto">
+                <div className="mb-4 flex items-center justify-between gap-3 md:mb-2 md:justify-start">
+                  <h3 className="text-lg font-semibold text-primary">
+                    {decision.method === 'tiered'
+                      ? 'Tiered Choice'
+                      : 'Random Selection'}
+                  </h3>
+                  {hasUserVoted(decision) && (
+                    <span
+                      className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium"
+                      style={{
+                        background: 'var(--olive-tint)',
+                        color: 'var(--olive)',
+                      }}
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M5 13l4 4L19 7"
-                      />
-                    </svg>
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-success">
-                      Decision Completed!
-                    </h3>
-                    <p className="text-sm text-success">
-                      {decision.method === 'tiered'
-                        ? 'Tiered Choice'
-                        : 'Random Selection'}{' '}
-                      •{new Date(decision.visitDate).toLocaleDateString()}
-                    </p>
-                  </div>
+                      ✓ You&apos;ve Voted
+                    </span>
+                  )}
                 </div>
 
-                {decision.result && (
-                  <div className="mt-3 p-3 bg-secondary rounded border border-quaternary">
-                    <p className="font-medium text-text mb-2">
-                      Selected Restaurant:
-                    </p>
-                    {(() => {
-                      const restaurant = restaurants?.find(
-                        (r) => r._id === decision.result?.restaurantId
-                      );
-                      return restaurant ? (
-                        <div className="space-y-1">
-                          <p className="text-lg font-semibold text-text">
-                            {restaurant.name}
-                          </p>
-                          {restaurant.address && (
-                            <p className="text-sm text-text-light">
-                              📍 {restaurant.address}
-                            </p>
-                          )}
-                          {restaurant.phoneNumber && (
-                            <p className="text-sm text-text-light">
-                              📞 {restaurant.phoneNumber}
-                            </p>
-                          )}
-                          {restaurant.rating && (
-                            <p className="text-sm text-text-light">
-                              ⭐ {restaurant.rating}/5
-                            </p>
-                          )}
-                          {restaurant.priceRange && (
-                            <p className="text-sm text-text-light">
-                              💰 {restaurant.priceRange}
-                            </p>
-                          )}
-                        </div>
-                      ) : (
-                        <p className="text-text">Restaurant not found</p>
-                      );
-                    })()}
-                    {decision.result.reasoning && (
-                      <p className="text-sm text-text-light mt-3 pt-2 border-t">
-                        <span className="font-medium">Reasoning:</span>{' '}
-                        {decision.result.reasoning}
-                      </p>
-                    )}
-                  </div>
+                <div className="mb-6 space-y-2 md:mb-0 md:space-y-0">
+                  <p className="text-secondary">
+                    Visit Date:{' '}
+                    {new Date(decision.visitDate).toLocaleDateString()}
+                  </p>
+                  <p className="text-secondary">
+                    Deadline: {new Date(decision.deadline).toLocaleDateString()}{' '}
+                    {new Date(decision.deadline).toLocaleTimeString([], {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                  </p>
+                  {/* Presence line — quiet live status (O6/V6) */}
+                  <p className="inline-flex items-center gap-1.5 text-sm font-medium text-secondary">
+                    <span
+                      className={cn(
+                        'h-2 w-2 rounded-full',
+                        isConnected && 'motion-safe:animate-pulse'
+                      )}
+                      style={{
+                        background: isConnected
+                          ? 'var(--color-success)'
+                          : 'var(--border-strong)',
+                      }}
+                      aria-hidden="true"
+                    />
+                    {isConnected ? 'Live · ' : ''}
+                    {votedCount(decision)} of {decision.participants.length}{' '}
+                    voted
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-6 flex flex-col space-y-2 md:mt-0 md:flex-row md:space-x-2 md:space-y-0">
+                {decision.method === 'tiered' &&
+                  decision.status === 'active' && (
+                    <Button
+                      onClick={() => openVoting(decision)}
+                      className="w-full touch-target md:w-auto"
+                    >
+                      {hasUserVoted(decision) ? 'Re-vote' : 'Vote'}
+                    </Button>
+                  )}
+                {canCompleteDecision(decision) && (
+                  <Button
+                    onClick={() => handleCompleteDecision(decision)}
+                    variant="outline"
+                    className="w-full touch-target md:w-auto"
+                  >
+                    Complete
+                  </Button>
+                )}
+                {canCloseDecision(decision) && (
+                  <Button
+                    onClick={() => handleCloseDecision(decision)}
+                    variant="outline"
+                    className="w-full touch-target border-destructive text-destructive md:w-auto"
+                  >
+                    Close
+                  </Button>
                 )}
               </div>
-            ) : (
-              // Active Decision Display
-              <div className="block md:flex md:justify-between md:items-start">
-                <div className="w-full md:w-auto">
-                  <div className="flex justify-between items-center md:flex md:items-center md:gap-3 mb-4 md:mb-2">
-                    <h3 className="text-lg font-semibold text-text">
-                      {decision.method === 'tiered'
-                        ? 'Tiered Choice'
-                        : 'Random Selection'}
-                    </h3>
-                    {hasUserVoted(decision) && (
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-success/10 text-success">
-                        ✓ You&apos;ve Voted
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Mobile: Better formatted details */}
-                  <div className="space-y-2 md:space-y-0 mb-6 md:mb-0">
-                    <div className="flex justify-between items-center md:block">
-                      <span className="text-text-light md:hidden">
-                        Visit Date:
-                      </span>
-                      <p className="text-text-light">
-                        <span className="hidden md:inline">Visit Date: </span>
-                        {new Date(decision.visitDate).toLocaleDateString()}
-                      </p>
-                    </div>
-                    <div className="flex justify-between items-center md:block">
-                      <span className="text-text-light md:hidden">
-                        Deadline:
-                      </span>
-                      <p className="text-text-light">
-                        <span className="hidden md:inline">Deadline: </span>
-                        {new Date(decision.deadline).toLocaleDateString()}
-                        <br className="md:hidden" />
-                        <span className="text-sm md:hidden">
-                          {new Date(decision.deadline).toLocaleTimeString([], {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })}
-                        </span>
-                        <span className="hidden md:inline">
-                          {' '}
-                          {new Date(decision.deadline).toLocaleString()}
-                        </span>
-                      </p>
-                    </div>
-                    <div className="flex justify-between items-center md:block">
-                      <span className="text-text-light md:hidden">Status:</span>
-                      <p className="text-sm text-text-light">
-                        <span className="hidden md:inline">Status: </span>
-                        {getVoteStatus(decision)}
-                      </p>
-                    </div>
-                    {decision.votes && (
-                      <div className="flex justify-between items-center md:block">
-                        <span className="text-text-light md:hidden">
-                          Votes:
-                        </span>
-                        <p className="text-sm text-text-light">
-                          <span className="hidden md:inline">Votes: </span>
-                          {decision.votes.length} /{' '}
-                          {decision.participants.length}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                <div className="flex flex-col space-y-2 md:flex-row md:space-y-0 md:space-x-2 mt-6 md:mt-0">
-                  {decision.method === 'tiered' &&
-                    decision.status === 'active' && (
-                      <Button
-                        key={`vote-${decision.id || index}`}
-                        onClick={() => {
-                          setSelectedDecision(decision);
-                          setShowVotingInterface(true);
-                        }}
-                        className="w-full md:w-auto bg-success hover:bg-success/90 text-inverse touch-target"
-                      >
-                        {hasUserVoted(decision) ? 'Re-vote' : 'Vote'}
-                      </Button>
-                    )}
-                  {canCompleteDecision(decision) && (
-                    <Button
-                      key={`complete-${decision.id || index}`}
-                      onClick={() => handleCompleteDecision(decision)}
-                      className="w-full md:w-auto bg-accent hover:bg-accent/90 text-inverse touch-target"
-                    >
-                      Complete
-                    </Button>
-                  )}
-                  {canCloseDecision(decision) && (
-                    <Button
-                      key={`close-${decision.id || index}`}
-                      onClick={() => handleCloseDecision(decision)}
-                      variant="outline"
-                      className="w-full md:w-auto border-destructive text-destructive hover:bg-destructive/10 touch-target"
-                    >
-                      Close
-                    </Button>
-                  )}
-                </div>
-              </div>
-            )}
+            </div>
           </Card>
         ))}
 
-        {getVisibleDecisions(currentDecisions || []).length === 0 && (
-          <Card className="p-6 text-center">
-            <p className="text-text-light">No active or recent decisions</p>
-          </Card>
+        {activeDecisions.length === 0 && (
+          <EmptyState
+            title="No active decision"
+            description={
+              isAdmin
+                ? 'Start a tiered vote or spin a random pick for the group.'
+                : 'When an admin starts a decision, it shows up here to vote on.'
+            }
+            action={
+              isAdmin
+                ? {
+                    label: 'Start Decision',
+                    onClick: () => setShowCreateDecision(true),
+                  }
+                : undefined
+            }
+          />
         )}
       </div>
+
+      {/* Recent results — celebratory card with the full breakdown (O8/V7) */}
+      {recentResults.map((decision) => {
+        const winner = restaurantById(decision.result?.restaurantId);
+        return (
+          <Card key={`result-${decision.id}`} className="p-6">
+            <div className="mb-3 flex items-center gap-3">
+              <span aria-hidden="true" className="text-2xl">
+                🎉
+              </span>
+              <div>
+                <h3 className="text-lg font-semibold text-primary">
+                  Decision Completed!
+                </h3>
+                <p className="text-sm text-tertiary">
+                  {decision.method === 'tiered'
+                    ? 'Tiered Choice'
+                    : 'Random Selection'}{' '}
+                  · {new Date(decision.visitDate).toLocaleDateString()}
+                </p>
+              </div>
+            </div>
+
+            {winner ? (
+              <div className="mb-4">
+                <p className="text-sm text-tertiary">Selected Restaurant</p>
+                <p className="font-display text-xl font-semibold text-primary">
+                  {winner.name}
+                </p>
+                {winner.address && (
+                  <p className="text-sm text-secondary">📍 {winner.address}</p>
+                )}
+              </div>
+            ) : (
+              decision.result && (
+                <p className="mb-4 text-secondary">Restaurant not found</p>
+              )
+            )}
+
+            {decision.method === 'tiered' && decision.voteBreakdown && (
+              <VoteBreakdown
+                breakdown={decision.voteBreakdown}
+                restaurants={restaurants || []}
+                winnerId={decision.result?.restaurantId}
+              />
+            )}
+
+            {decision.result?.reasoning && (
+              <p className="mt-3 border-t border-border pt-2 text-sm text-tertiary">
+                <span className="font-medium">Reasoning:</span>{' '}
+                {decision.result.reasoning}
+              </p>
+            )}
+          </Card>
+        );
+      })}
+
+      {/* Past decisions — no more 24h history cliff (O8) */}
+      {pastDecisions.length > 0 && (
+        <section className="space-y-3">
+          <h3 className="font-display text-xl font-semibold text-primary">
+            Past decisions
+          </h3>
+          {pastDecisions.slice(0, 10).map((decision) => {
+            const winner = restaurantById(decision.result?.restaurantId);
+            return (
+              <Card key={`past-${decision.id}`} className="p-5">
+                <div className="mb-2 flex items-center justify-between gap-3">
+                  <div>
+                    <p className="font-medium text-primary">
+                      {winner?.name ??
+                        (decision.status === 'closed'
+                          ? 'Closed without a pick'
+                          : 'No selection')}
+                    </p>
+                    <p className="text-sm text-tertiary">
+                      {decision.method === 'tiered'
+                        ? 'Tiered Choice'
+                        : 'Random Selection'}{' '}
+                      · {new Date(decision.visitDate).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <span
+                    className="shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium capitalize"
+                    style={{
+                      background: 'var(--surface-sunken)',
+                      color: 'var(--text-tertiary)',
+                    }}
+                  >
+                    {decision.status}
+                  </span>
+                </div>
+                {decision.method === 'tiered' && decision.voteBreakdown && (
+                  <VoteBreakdown
+                    breakdown={decision.voteBreakdown}
+                    restaurants={restaurants || []}
+                    winnerId={decision.result?.restaurantId}
+                  />
+                )}
+              </Card>
+            );
+          })}
+        </section>
+      )}
 
       {/* Create Decision Modal */}
       <Modal
@@ -712,214 +967,36 @@ export function GroupDecisionMaking({
         title="Start Group Decision"
       >
         <div className="space-y-4">
-          <div>
-            <DatePicker
-              id="visit-date"
-              label="Visit Date"
-              value={visitDate}
-              onChange={setVisitDate}
-              required
-              placeholder="Select date and time for your visit"
-            />
-          </div>
+          <DatePicker
+            id="visit-date"
+            label="Visit Date"
+            value={visitDate}
+            onChange={setVisitDate}
+            required
+            placeholder="Select date and time for your visit"
+          />
 
           <div>
-            <label className="block text-sm font-medium text-text mb-2">
+            <label className="mb-2 block text-sm font-medium text-primary">
               Decision Method
             </label>
             <div className="space-y-2">
               <Button
                 onClick={() => handleCreateDecision('tiered')}
-                className="w-full bg-success hover:bg-success"
+                className="w-full"
                 disabled={createDecisionMutation.isPending}
               >
                 Tiered Choice (Voting)
               </Button>
               <Button
                 onClick={() => handleCreateDecision('random')}
-                className="w-full bg-accent hover:bg-accent"
+                variant="outline"
+                className="w-full"
                 disabled={randomSelectMutation.isPending}
               >
                 Random Selection
               </Button>
             </div>
-          </div>
-        </div>
-      </Modal>
-
-      {/* Voting Interface Modal */}
-      <Modal
-        isOpen={showVotingInterface}
-        onClose={() => setShowVotingInterface(false)}
-        title="Rank Your Preferences"
-      >
-        <div className="space-y-4">
-          {selectedDecision && hasUserVoted(selectedDecision) && (
-            <div className="bg-warning/10 border border-warning rounded-lg p-4">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <svg
-                    className="h-5 w-5 text-warning"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </div>
-                <div className="ml-3">
-                  <p className="text-sm font-medium text-warning">
-                    You&apos;ve already voted in this decision. Your new vote
-                    will replace your previous vote.
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-          <div className="bg-accent/10 border border-accent/20 rounded-lg p-4">
-            <h4 className="font-medium text-text mb-2">How to vote:</h4>
-            <ol className="text-sm text-text-secondary space-y-1">
-              <li>1. Click on up to 3 restaurants you want to vote for</li>
-              <li>
-                2. Drag and drop to reorder them by preference (1st, 2nd, 3rd
-                choice)
-              </li>
-              <li>3. Submit your vote when ready</li>
-            </ol>
-          </div>
-
-          {/* Rankings Display */}
-          {rankings.length > 0 && (
-            <div className="space-y-2">
-              <h4 className="font-medium text-text">
-                Your Rankings ({rankings.length}/3):
-              </h4>
-              <div className="space-y-2">
-                {rankings.map((restaurantId, index) => {
-                  const restaurant = restaurants?.find(
-                    (r) => r._id === restaurantId
-                  );
-                  if (!restaurant) return null;
-
-                  return (
-                    <div
-                      key={`ranking-${restaurantId}`}
-                      className={`p-3 border-2 border-accent bg-accent/10 rounded-lg cursor-move transition-all hover:shadow-md ${
-                        draggedItem === restaurantId ? 'opacity-50' : ''
-                      }`}
-                      draggable
-                      onDragStart={(e) => handleDragStart(e, restaurantId)}
-                      onDragOver={handleDragOver}
-                      onDrop={(e) => handleDrop(e, index)}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-3">
-                          <div className="w-8 h-8 bg-accent text-inverse rounded-full flex items-center justify-center text-sm font-bold">
-                            {index + 1}
-                          </div>
-                          <div>
-                            <h4 className="font-medium text-text">
-                              {restaurant.name}
-                            </h4>
-                            <p className="text-sm text-text-light">
-                              {restaurant.cuisine}
-                            </p>
-                          </div>
-                        </div>
-                        <button
-                          onClick={() => handleRemoveFromRankings(restaurantId)}
-                          className="text-destructive hover:text-red-800 text-sm px-2 py-1 rounded hover:bg-destructive/10"
-                        >
-                          Remove
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* Available Restaurants */}
-          <div className="space-y-2">
-            <h4 className="font-medium text-text">
-              Click to Select Restaurants ({rankings.length}/3 selected):
-            </h4>
-            {restaurants?.map((restaurant) => {
-              const isSelected = rankings.includes(restaurant._id);
-              const canSelect = !isSelected && rankings.length < 3;
-
-              return (
-                <div
-                  key={restaurant._id}
-                  className={`p-3 border rounded-lg transition-all ${
-                    isSelected
-                      ? 'border-success bg-success/10 cursor-not-allowed'
-                      : canSelect
-                        ? 'border-border hover:border-success hover:bg-success/10 cursor-pointer'
-                        : 'border-border bg-surface cursor-not-allowed opacity-50'
-                  }`}
-                  onClick={() =>
-                    canSelect && handleRankRestaurant(restaurant._id)
-                  }
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div
-                        className={`w-6 h-6 rounded-full flex items-center justify-center text-sm ${
-                          isSelected
-                            ? 'bg-success text-inverse'
-                            : canSelect
-                              ? 'border-2 border-quaternary'
-                              : 'bg-tertiary'
-                        }`}
-                      >
-                        {isSelected ? '✓' : ''}
-                      </div>
-                      <div>
-                        <h4 className="font-medium text-text">
-                          {restaurant.name}
-                        </h4>
-                        <p className="text-sm text-text-light">
-                          {restaurant.cuisine}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm font-medium text-text">
-                        ⭐ {restaurant.rating}
-                      </p>
-                      {restaurant.priceRange && (
-                        <p className="text-sm text-text-light">
-                          {restaurant.priceRange}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          <div className="flex justify-end space-x-2">
-            <Button
-              onClick={() => setShowVotingInterface(false)}
-              className="bg-surface hover:bg-surface"
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleVote}
-              disabled={rankings.length === 0 || submitVoteMutation.isPending}
-              className="bg-success hover:bg-success"
-            >
-              {selectedDecision && hasUserVoted(selectedDecision)
-                ? 'Update Vote'
-                : 'Submit Vote'}
-            </Button>
           </div>
         </div>
       </Modal>
@@ -947,7 +1024,7 @@ export function GroupDecisionMaking({
         title="Close Decision?"
       >
         <div className="space-y-4">
-          <p className="text-text">
+          <p className="text-secondary">
             Are you sure you want to close this decision? This will end voting
             without selecting a restaurant.
           </p>
@@ -963,7 +1040,8 @@ export function GroupDecisionMaking({
             </Button>
             <Button
               onClick={confirmCloseDecision}
-              className="bg-destructive hover:bg-destructive"
+              className="border-destructive text-destructive"
+              variant="outline"
             >
               Close Decision
             </Button>
