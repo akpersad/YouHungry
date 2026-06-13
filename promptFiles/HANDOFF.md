@@ -1,6 +1,6 @@
 # Session Handoff — Fork In The Road portfolio upgrade
 
-**Last updated:** 2026-06-12 (C8 complete)
+**Last updated:** 2026-06-13 (C9 + C10 complete)
 **Read this first, then:** `promptFiles/phased-execution-plan.md` (the authoritative plan), `CLAUDE.md` (repo guide).
 
 ## Workflow rules (owner-set 2026-06-11 — do not deviate)
@@ -223,9 +223,9 @@ desktop fix).
 | C6  | Decision-first dashboard hero + `/decide` route + SpinReveal + WhyThisPick (N7,S1,S2,S3,S4)                                                                                                                                                                                                                         | ✅        | `61d7e04` |
 | C7  | **Loading & empty states (dashboard)**: skeleton lib already existed → made base `Skeleton` decorative + new `SkeletonGroup` (announce once); `CollectionList` loading→skeleton, zero-state→`EmptyState`; activity-feed loading→skeleton rows (N4 done, X1 dashboard). C9–C12 apply skeletons to remaining surfaces | ✅        | `f0ed224` |
 | C8  | Group decision full-page flow: VoteBreakdown, localStorage draft, presence line, tap-to-rank, past-decisions (O4,O6,O7,O8,V3,V4,V5,V6,V7)                                                                                                                                                                           | ✅        | `dd9c232` |
-| C9  | Restaurant search: skeletons, sort affordance, `normalizeRestaurantId` correctness fix (N6)                                                                                                                                                                                                                         | ▶ NEXT    | —         |
-| C10 | Collection cards + restyle: card stats (count/last decided), weight-viz recolor, create-collection (N5,R3,S6)                                                                                                                                                                                                       | ☐         | —         |
-| C11 | Groups & friends: single Invite flow, cancel sent request (may need sender DELETE on `api/friends/requests/[id]`) (O1,O2,V1,R4)                                                                                                                                                                                     | ☐         | —         |
+| C9  | Restaurant search: skeletons, sort affordance, `normalizeRestaurantId` correctness fix (N6)                                                                                                                                                                                                                         | ✅        | `9472e2e` |
+| C10 | Collection cards + restyle: card stats (count/last decided), weight-viz recolor, create-collection (N5,R3,S6)                                                                                                                                                                                                       | ✅        | `7b4628e` |
+| C11 | Groups & friends: single Invite flow, cancel sent request (may need sender DELETE on `api/friends/requests/[id]`) (O1,O2,V1,R4)                                                                                                                                                                                     | ▶ NEXT    | —         |
 | C12 | History + profile restyle: re-decide from history, date grouping, remove fake calendar, manual/confirm/prefs (R1,R2,R5,S5,S7)                                                                                                                                                                                       | ☐         | —         |
 | C13 | Notification center (V2) — bell mounted in desktop header + panel dark-mode fix (`6be3bd5`); **mobile access + full center restyle still pending**                                                                                                                                                                  | ◧ partial | `6be3bd5` |
 | C14 | Cleanup: retire C3 token aliases, decide Mascot fate (conflicts with no-mascots anti-ref), final USER-STORIES action-column pass                                                                                                                                                                                    | ☐         | —         |
@@ -237,10 +237,27 @@ desktop fix).
    (Types/Lint/Format, Unit Tests, Build, E2E Smoke, Accessibility,
    Lighthouse). Also still pending: `gh auth login -h github.com` as
    akpersad (CLI can't create PRs until then).
-2. **Phase 3: C8 done; implement C9** (restaurant search: skeletons, sort
-   affordance, `normalizeRestaurantId` correctness fix) next — see ledger
-   above; then C10→C14 in order. Validate each commit against the axe lane +
-   full pre-push.
+2. **Phase 3: C9 + C10 done; implement C11** (groups & friends: single Invite
+   flow, cancel sent request — may need a sender DELETE on
+   `api/friends/requests/[id]`) next — see ledger above; then C12→C14 in
+   order. Validate each commit against the axe lane + full pre-push.
+   C9 notes (`9472e2e`): search loading now renders a view-aware
+   `SkeletonGroup` grid (announces once) instead of a spinner; the sort
+   `<select>` is rendered during loading and beside results so it no longer
+   pops in only after the first page; the duplicated, brittle restaurant-id
+   comparison in `RestaurantSearchPage` (two paths) was replaced by
+   `normalizeRestaurantId` / `restaurantIdentityKeys` / `restaurantIdsMatch`
+   in `lib/utils` (googlePlaceId-preferred canonical key + key-set
+   intersection that still matches legacy bare-ObjectId entries). `lib/utils`
+   also gained a shared `formatRelativeDate` consumed by C10.
+   C10 notes (`7b4628e`): `getCollectionsByUserId` /
+   `getGroupCollectionsByUserId` attach a derived (not persisted)
+   `lastDecisionAt` via one grouped aggregation over **completed** decisions;
+   dashboard collection cards show restaurant count + "Decided N ago" /
+   "Not decided yet". WeightManagement viz moved onto warm tokens (dropped a
+   hardcoded cold `text-blue-900` info card; sunk the weight-bar track for
+   contrast — the High/Medium/Low bars already alias to olive/saffron/tomato).
+   CreateCollectionForm was already token-based, so N5 needed no restyle.
    C8 notes: group-decision voting moved out of the cramped modal into a
    full-page tap-to-rank view (up/down reorder; drag kept for pointers);
    localStorage draft per decision (`fitr-vote-draft:<id>`); re-vote preloads
