@@ -116,7 +116,10 @@ export function NotificationPanel({
   if (!isOpen) return null;
 
   return (
-    <div className={cn('fixed inset-0 z-50 overflow-hidden', className)}>
+    <div
+      className={cn('fixed inset-0 overflow-hidden', className)}
+      style={{ zIndex: 'var(--z-modal)' }}
+    >
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black bg-opacity-50"
@@ -124,7 +127,7 @@ export function NotificationPanel({
       />
 
       {/* Panel */}
-      <div className="absolute right-0 top-0 h-full w-full max-w-md bg-white shadow-xl">
+      <div className="absolute right-0 top-0 h-full w-full max-w-md bg-surface shadow-xl">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-border p-4">
           <div className="flex items-center gap-2">
