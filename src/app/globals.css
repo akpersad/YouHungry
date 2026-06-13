@@ -85,6 +85,16 @@
   --radius-3xl: 1.5rem;
   --radius-full: 9999px;
 
+  /* Semantic z-index scale — layer by role, never arbitrary 999/9999 */
+  --z-base: 1;
+  --z-dropdown: 1000;
+  --z-sticky: 1010;
+  --z-fixed: 1020;
+  --z-modal-backdrop: 1030;
+  --z-modal: 1040;
+  --z-toast: 1050;
+  --z-tooltip: 1060;
+
   /* ---- Legacy aliases (pre-Phase-3 names; removed in cleanup commit) ---- */
   --bg-primary: var(--bg);
   --bg-secondary: var(--surface);
@@ -548,7 +558,7 @@ h2 {
   right: 0 !important;
   bottom: 0 !important;
   background-color: rgba(0, 0, 0, 0.5);
-  z-index: 1000;
+  z-index: var(--z-modal-backdrop);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -565,7 +575,7 @@ h2 {
   width: 90vw;
   max-width: 600px;
   max-height: 85vh;
-  z-index: 1001;
+  z-index: var(--z-modal);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -582,7 +592,7 @@ h2 {
 
 .cl-modalOverlay {
   background-color: rgba(0, 0, 0, 0.5) !important;
-  z-index: 1000 !important;
+  z-index: var(--z-modal-backdrop) !important;
   backdrop-filter: blur(4px) !important;
 }
 
