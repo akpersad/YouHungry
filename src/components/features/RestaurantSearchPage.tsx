@@ -8,6 +8,7 @@ import { RestaurantSearchForm } from '../forms/RestaurantSearchForm';
 import { RestaurantSearchResults } from './RestaurantSearchResults';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
+import { normalizeRestaurantId, restaurantIdsMatch } from '@/lib/utils';
 import { useRestaurantSearch, useAddRestaurantToCollection } from '@/hooks/api';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMemo } from 'react';
@@ -259,9 +260,11 @@ export function RestaurantSearchPage({
   }, [propCollections, collections]);
 
   // Derive which search results are already in collections (pure derivation
-  // via useMemo instead of state synced from an effect)
+  // via useMemo instead of state synced from an effect). Keyed by the
+  // canonical restaurant id so `RestaurantSearchResults` can look up the same
+  // value — `normalizeRestaurantId`/`restaurantIdsMatch` own the legacy/new
+  // id-shape reconciliation (see src/lib/utils.ts).
   const restaurantInCollections = useMemo(() => {
-    // Check each collection for these restaurants
     const inCollections = new Set<string>();
 
     if (restaurants.length === 0 || effectiveCollections.length === 0) {
@@ -269,42 +272,18 @@ export function RestaurantSearchPage({
     }
 
     try {
-      // Get all restaurant IDs from search results (use googlePlaceId if _id not available)
-      const restaurantIds = restaurants
-        .filter((r) => r._id || r.googlePlaceId)
-        .map((r) => (r._id || r.googlePlaceId).toString());
+      for (const restaurant of restaurants) {
+        const key = normalizeRestaurantId(restaurant);
+        if (!key) continue;
 
-      for (const collection of effectiveCollections as Collection[]) {
-        for (const restaurantId of restaurantIds) {
-          if (
-            collection.restaurantIds.some((restaurantData) => {
-              // Handle both old format (string IDs) and new format (objects with _id and googlePlaceId)
-              if (typeof restaurantData === 'string') {
-                return restaurantData === restaurantId;
-              } else if (
-                restaurantData &&
-                typeof restaurantData === 'object' &&
-                'toString' in restaurantData
-              ) {
-                return restaurantData.toString() === restaurantId;
-              } else if (restaurantData && typeof restaurantData === 'object') {
-                // New format: object with _id and/or googlePlaceId
-                const obj = restaurantData as Record<string, unknown>;
-                return (
-                  ('_id' in obj &&
-                    obj._id &&
-                    obj._id.toString() === restaurantId) ||
-                  ('googlePlaceId' in obj &&
-                    obj.googlePlaceId &&
-                    obj.googlePlaceId === restaurantId)
-                );
-              }
-              return false;
-            })
-          ) {
-            inCollections.add(restaurantId);
-          }
-        }
+        const isInAnyCollection = (effectiveCollections as Collection[]).some(
+          (collection) =>
+            collection.restaurantIds.some((entry) =>
+              restaurantIdsMatch(entry, restaurant)
+            )
+        );
+
+        if (isInAnyCollection) inCollections.add(key);
       }
     } catch (error) {
       logger.error('Error checking restaurants in collections:', error);
@@ -380,86 +359,25 @@ export function RestaurantSearchPage({
     restaurant: Restaurant,
     collections: Collection[]
   ) => {
-    // Use googlePlaceId if _id is not available (for search results)
-    const restaurantId = restaurant._id || restaurant.googlePlaceId;
-    if (!restaurantId) return new Set<string>();
+    const inCollections = new Set<string>();
+
+    if (!normalizeRestaurantId(restaurant)) return inCollections;
 
     // Safety check: ensure collections is an array
     if (!Array.isArray(collections)) {
       logger.error('collections is not an array:', collections);
-      return new Set<string>();
+      return inCollections;
     }
 
-    const inCollections = new Set<string>();
-    logger.debug('Checking restaurant:', restaurantId.toString());
-    logger.debug(
-      'Available collections:',
-      collections.map((c) => ({
-        id: c._id.toString(),
-        name: c.name,
-        restaurantIds: c.restaurantIds,
-      }))
-    );
-
     for (const collection of collections) {
-      logger.debug(
-        `Checking collection ${collection.name} with restaurantIds:`,
-        collection.restaurantIds
-      );
-      const hasRestaurant = collection.restaurantIds.some((restaurantData) => {
-        // Handle both old format (string IDs) and new format (objects with _id and googlePlaceId)
-        if (typeof restaurantData === 'string') {
-          const idStr = restaurantData;
-          const restaurantIdStr = restaurantId.toString();
-          logger.debug(
-            `Comparing old format ${idStr} with ${restaurantIdStr}:`,
-            idStr === restaurantIdStr
-          );
-          return idStr === restaurantIdStr;
-        } else if (restaurantData && typeof restaurantData === 'object') {
-          const obj = restaurantData as Record<string, unknown>;
-          // Check if it's the new format with _id and googlePlaceId properties first
-          if ('_id' in obj || 'googlePlaceId' in obj) {
-            // New format: object with _id and/or googlePlaceId
-            const matchesId =
-              '_id' in obj &&
-              obj._id &&
-              String(obj._id) === String(restaurantId);
-            const matchesGooglePlaceId =
-              'googlePlaceId' in obj &&
-              obj.googlePlaceId &&
-              obj.googlePlaceId === restaurantId;
-            logger.debug(
-              `Comparing new format ${JSON.stringify(restaurantData)} with ${restaurantId}:`,
-              `_id match: ${matchesId}, googlePlaceId match: ${matchesGooglePlaceId}`
-            );
-            return matchesId || matchesGooglePlaceId;
-          } else if ('toString' in restaurantData) {
-            // ObjectId format
-            const idStr = restaurantData.toString();
-            const restaurantIdStr = restaurantId.toString();
-            logger.debug(
-              `Comparing ObjectId format ${idStr} with ${restaurantIdStr}:`,
-              idStr === restaurantIdStr
-            );
-            // Also try comparing the string representation
-            return (
-              idStr === restaurantIdStr || idStr === restaurantId.toString()
-            );
-          }
-        }
-        return false;
-      });
-      logger.debug(
-        `Collection ${collection.name} has restaurant:`,
-        hasRestaurant
+      const hasRestaurant = collection.restaurantIds.some((entry) =>
+        restaurantIdsMatch(entry, restaurant)
       );
       if (hasRestaurant) {
         inCollections.add(collection._id.toString());
       }
     }
 
-    logger.debug('Restaurant is in collections:', Array.from(inCollections));
     return inCollections;
   };
 

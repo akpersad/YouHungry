@@ -8,7 +8,20 @@ import { RestaurantCardCompact } from './RestaurantCardCompact';
 import { LazyMapView } from './LazyMapView';
 import { ViewToggle, ViewType } from '@/components/ui/ViewToggle';
 import { Button } from '@/components/ui/Button';
+import {
+  RestaurantCardSkeleton,
+  SkeletonGroup,
+} from '@/components/ui/Skeleton';
 import { SortOption } from './RestaurantSearchPage';
+import { normalizeRestaurantId } from '@/lib/utils';
+
+const SORT_OPTIONS: { value: SortOption; label: string }[] = [
+  { value: 'distance-asc', label: 'Distance (closest first)' },
+  { value: 'name-asc', label: 'Name (A-Z)' },
+  { value: 'name-desc', label: 'Name (Z-A)' },
+  { value: 'price-asc', label: 'Price ($ to $$$$)' },
+  { value: 'price-desc', label: 'Price ($$$$ to $)' },
+];
 
 interface RestaurantSearchResultsProps {
   restaurants: Restaurant[];
@@ -76,25 +89,61 @@ export function RestaurantSearchResults({
     }
   };
 
+  // Persistent sort affordance — rendered while loading and alongside results
+  // so the control no longer pops in only after the first page arrives.
+  const sortControl = onSortChange ? (
+    <div className="flex items-center gap-2">
+      <label htmlFor="sort" className="text-sm text-text-light">
+        Sort by:
+      </label>
+      <select
+        id="sort"
+        value={sortBy}
+        onChange={(e) => onSortChange(e.target.value as SortOption)}
+        disabled={isLoading}
+        className="input-base shadow-neumorphic-light dark:shadow-neumorphic-dark py-2 px-3 text-sm disabled:opacity-60"
+      >
+        {SORT_OPTIONS.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+    </div>
+  ) : null;
+
   if (isLoading) {
+    const skeletonCount = viewType === 'grid' ? 8 : 6;
+    const skeletonGridClass =
+      viewType === 'grid'
+        ? 'grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4'
+        : 'space-y-4 md:grid md:grid-cols-3 md:gap-4 md:space-y-0';
+
     return (
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-text">
-            {searchQuery ? `Results for "${searchQuery}"` : 'Restaurants'}
-          </h2>
-          {/* View Toggle - Hidden during loading */}
-          <div className="hidden sm:block">
-            <ViewToggle
-              currentView={viewType}
-              onToggle={handleViewTypeChange}
-            />
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <h2 className="text-xl font-semibold text-text">
+              {searchQuery ? `Results for "${searchQuery}"` : 'Restaurants'}
+            </h2>
+            <div className="hidden sm:flex justify-end">
+              <ViewToggle
+                currentView={viewType}
+                onToggle={handleViewTypeChange}
+              />
+            </div>
           </div>
+          {sortControl && <div className="flex justify-end">{sortControl}</div>}
         </div>
-        <div className="text-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-2 text-text-light">Searching for restaurants...</p>
-        </div>
+
+        <SkeletonGroup
+          label="Searching for restaurants"
+          className={skeletonGridClass}
+        >
+          {Array.from({ length: skeletonCount }).map((_, index) => (
+            <RestaurantCardSkeleton key={index} />
+          ))}
+        </SkeletonGroup>
       </div>
     );
   }
@@ -114,14 +163,6 @@ export function RestaurantSearchResults({
       </div>
     );
   }
-
-  const sortOptions: { value: SortOption; label: string }[] = [
-    { value: 'distance-asc', label: 'Distance (closest first)' },
-    { value: 'name-asc', label: 'Name (A-Z)' },
-    { value: 'name-desc', label: 'Name (Z-A)' },
-    { value: 'price-asc', label: 'Price ($ to $$$$)' },
-    { value: 'price-desc', label: 'Price ($$$$ to $)' },
-  ];
 
   return (
     <div className="space-y-4">
@@ -148,27 +189,7 @@ export function RestaurantSearchResults({
         </div>
 
         {/* Sort Dropdown */}
-        {onSortChange && restaurants.length > 0 && (
-          <div className="flex justify-end">
-            <div className="flex items-center gap-2">
-              <label htmlFor="sort" className="text-sm text-text-light">
-                Sort by:
-              </label>
-              <select
-                id="sort"
-                value={sortBy}
-                onChange={(e) => onSortChange(e.target.value as SortOption)}
-                className="input-base shadow-neumorphic-light dark:shadow-neumorphic-dark py-2 px-3 text-sm"
-              >
-                {sortOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-        )}
+        {sortControl && <div className="flex justify-end">{sortControl}</div>}
       </div>
 
       {/* List View */}
@@ -181,7 +202,7 @@ export function RestaurantSearchResults({
               onAddToCollection={onAddToCollection}
               onViewDetails={onViewDetails}
               isInCollection={restaurantInCollections.has(
-                (restaurant._id || restaurant.googlePlaceId).toString()
+                normalizeRestaurantId(restaurant) ?? ''
               )}
             />
           ))}
