@@ -102,11 +102,11 @@ export function WeightManagement({
       </div>
 
       {/* Info Card */}
-      <Card className="p-4 bg-primary/10 border-primary">
+      <Card className="p-4 bg-tertiary border-border">
         <div className="flex gap-3">
           <TrendingUp className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-          <div className="text-sm text-blue-900">
-            <p className="font-medium mb-1">
+          <div className="text-sm text-text-light">
+            <p className="font-medium mb-1 text-text">
               How the 30-Day Weight System Works
             </p>
             <p>
@@ -179,7 +179,7 @@ export function WeightManagement({
 
                   {/* Weight Bar */}
                   <div className="w-32">
-                    <div className="w-full bg-surface rounded-full h-3">
+                    <div className="w-full bg-tertiary rounded-full h-3">
                       <div
                         className={`h-3 rounded-full ${
                           weight.currentWeight >= 0.8

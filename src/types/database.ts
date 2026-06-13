@@ -84,6 +84,12 @@ export interface Collection {
   )[];
   createdAt: Date;
   updatedAt: Date;
+  /**
+   * Derived, not persisted: timestamp of this collection's most recent
+   * completed decision (null if it has never been decided). Attached by the
+   * collection-list queries so cards can show a "last decided" stat.
+   */
+  lastDecisionAt?: Date | string | null;
 }
 
 export interface Group {
