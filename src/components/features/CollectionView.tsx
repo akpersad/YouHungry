@@ -332,13 +332,11 @@ export function CollectionView({ collectionId }: CollectionViewProps) {
                 <>
                   {!isGroupCollection && (
                     <Button
-                      onClick={handleRandomDecision}
-                      variant="outline"
-                      disabled={randomDecisionMutation.isPending}
+                      onClick={() =>
+                        router.push(`/decide?collectionId=${collectionId}`)
+                      }
                     >
-                      {randomDecisionMutation.isPending
-                        ? 'Making Decision...'
-                        : 'Decide for Me'}
+                      Decide for Me
                     </Button>
                   )}
                   <Button
@@ -480,6 +478,7 @@ export function CollectionView({ collectionId }: CollectionViewProps) {
     collectionId,
     handleRandomDecision,
     activeDecisionsCount,
+    router,
   ]);
 
   if (isLoading) {

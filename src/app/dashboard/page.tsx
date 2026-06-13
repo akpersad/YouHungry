@@ -25,48 +25,24 @@ export default function DashboardPage() {
   return (
     <ProtectedRoute>
       <div className="max-w-4xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-text mb-2">Dashboard</h1>
-          <p className="text-text-light">
-            Welcome to your personal restaurant collection manager.
+        {/* Decision-first hero — the product's whole job, one tap away */}
+        <section className="mb-10 rounded-3xl border border-border bg-surface p-8 text-center sm:p-12">
+          <h1 className="font-display text-3xl font-semibold text-primary text-balance sm:text-4xl">
+            Hungry? Let&apos;s end the debate.
+          </h1>
+          <p className="mx-auto mt-3 max-w-md text-secondary text-pretty">
+            Pick a collection and let the wheel settle it — weighted so you
+            don&apos;t eat the same place twice in a row.
           </p>
-        </div>
+          <Link
+            href="/decide"
+            className="btn-base btn-primary mt-6 inline-flex px-10 py-3 text-base"
+          >
+            Decide where to eat
+          </Link>
+        </section>
 
         <CollectionList />
-
-        {/* Hidden on mobile - actions are available via bottom navigation */}
-        <div className="hidden md:block mt-8">
-          <h2 className="text-2xl font-semibold text-text mb-4">
-            Quick Actions
-          </h2>
-          <div className="grid md:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Find Restaurants</CardTitle>
-                <CardDescription>
-                  Search and discover new restaurants
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Link href="/restaurants">
-                  <Button className="w-full">Search Restaurants</Button>
-                </Link>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Groups</CardTitle>
-                <CardDescription>
-                  Create and manage groups with friends
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button className="w-full">Manage Groups</Button>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
 
         {/* Hidden on mobile - not essential for mobile experience */}
         <div className="hidden md:block mt-8">

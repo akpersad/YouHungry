@@ -451,29 +451,12 @@ describe('CollectionView', () => {
     expect(screen.queryByText('Decide for Me')).not.toBeInTheDocument();
   });
 
-  it('handles random decision when decide for me is clicked', async () => {
+  it('routes to the decide flow when decide for me is clicked', async () => {
     mockUseCollection.mockReturnValue({
       data: mockCollection,
       isLoading: false,
       error: null,
       refetch: jest.fn(),
-    } as any);
-
-    mockUseRandomDecision.mockReturnValue({
-      mutateAsync: jest.fn().mockResolvedValue({
-        result: {
-          restaurantId: mockCollection.restaurantIds[0],
-          reasoning: 'Selected using weighted random algorithm',
-          weight: 1,
-        },
-        statistics: {
-          totalDecisions: 1,
-          averageWeight: 1,
-          mostChosenRestaurant: mockCollection.restaurantIds[0],
-        },
-      }),
-      isPending: false,
-      error: null,
     } as any);
 
     render(
@@ -486,25 +469,14 @@ describe('CollectionView', () => {
       expect(screen.getByText('My Test Collection')).toBeInTheDocument();
     });
 
-    // Set up fetch mock right before clicking the button
-    (fetch as jest.Mock).mockImplementationOnce(() =>
-      Promise.resolve({
-        ok: true,
-        json: async () => ({
-          restaurant: mockRestaurants[0],
-        }),
-      })
-    );
-
+    // Personal "Decide for Me" now navigates to the dedicated /decide flow
+    // (the spin + reveal lives there) rather than opening a modal in place.
     const decideButton = screen.getByText('Decide for Me');
     fireEvent.click(decideButton);
 
-    // Wait for the decision result modal to appear
-    await waitFor(() => {
-      expect(screen.getByText('Decision Made!')).toBeInTheDocument();
-    });
-
-    expect(screen.getByText('Test Restaurant 1')).toBeInTheDocument();
+    expect(mockPush).toHaveBeenCalledWith(
+      '/decide?collectionId=507f1f77bcf86cd799439011'
+    );
   });
 
   it('shows error when decide for me is clicked on empty collection', async () => {
