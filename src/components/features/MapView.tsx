@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Restaurant } from '@/types/database';
 import { logger } from '@/lib/logger';
 import { Button } from '@/components/ui/Button';
-import { Skeleton } from '@/components/ui/Skeleton';
+import { Skeleton, SkeletonGroup } from '@/components/ui/Skeleton';
 import { useGoogleMaps } from '@/hooks/useGoogleMaps';
 
 interface MapViewProps {
@@ -440,11 +440,11 @@ function MapComponent({
 function MapLoading() {
   return (
     <div className="w-full h-full flex items-center justify-center bg-surface dark:bg-background rounded-lg">
-      <div className="text-center">
+      <SkeletonGroup label="Loading map" className="text-center">
         <Skeleton className="w-16 h-16 rounded-full mx-auto mb-4" />
         <Skeleton className="w-32 h-4 mx-auto mb-2" />
         <Skeleton className="w-24 h-3 mx-auto" />
-      </div>
+      </SkeletonGroup>
     </div>
   );
 }

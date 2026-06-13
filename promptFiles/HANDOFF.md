@@ -199,11 +199,36 @@ Design-direction discussion with the owner held 2026-06-12; decisions:
 
 `/impeccable init` prerequisite DONE: `PRODUCT.md` (register: product) and
 `DESIGN.md` (full token spec, OKLCH) written at repo root — read both before
-any design work. Live-mode config at `.impeccable/live/config.json`.
-Implementation not yet started; exact OKLCH values in DESIGN.md need WCAG AA
-contrast verification as they land in `globals.css` (axe + Lighthouse a11y
-gate at error level in CI). Remember `manifest.json` theme_color + sw.js
-cache bump when tokens ship.
+any design work. Live-mode config at `.impeccable/live/config.json`. The token
+system landed in C3 (OKLCH values WCAG-verified as they hit `globals.css`; axe
+
+- Lighthouse a11y gate stays at error level in CI). `manifest.json`
+  theme_color + `sw.js` cache were bumped with C3.
+
+### C-task ledger (Phase 3 commit sequence — KEEP CURRENT each checkpoint)
+
+Phase 3 is sequenced as numbered commits **C1–C14**, each resolving a set of
+USER-STORIES.md rows (see that doc's "Phase 3 action" column). Status legend:
+✅ done · ◧ partial · ▶ in progress / next · ☐ not started. Non-C-task
+commits this branch: `be787c6` (design docs), `2a3b623` (PWA install-banner
+desktop fix).
+
+| C   | Scope (stories)                                                                                                                                                                                                                                                                                                     | Status    | Commit    |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | --------- |
+| C1  | Hazard sweep: gate test consoles, ConfirmDialog on destructive actions, segment error boundaries (X3,X4,O3,R7)                                                                                                                                                                                                      | ✅        | `f29e852` |
+| C2  | USER-STORIES.md code-derived story audit                                                                                                                                                                                                                                                                            | ✅        | `2c1ece2` |
+| C3  | Warm OKLCH token system + Fraunces + class-driven theming; legacy names aliased; manifest/sw bump (X5)                                                                                                                                                                                                              | ✅        | `835d5af` |
+| C4  | `ui/EmptyState` primitive, accent-tint Badge variants, semantic z-index scale (X2 primitive)                                                                                                                                                                                                                        | ✅        | `b566e55` |
+| C5  | Landing/marketing restyle (N1–N3) — **no dedicated commit**: page.tsx inherits the warm palette via C3 aliases ("restyle only"). Revisit only if it reads off after the sweep.                                                                                                                                      | (folded)  | —         |
+| C6  | Decision-first dashboard hero + `/decide` route + SpinReveal + WhyThisPick (N7,S1,S2,S3,S4)                                                                                                                                                                                                                         | ✅        | `61d7e04` |
+| C7  | **Loading & empty states (dashboard)**: skeleton lib already existed → made base `Skeleton` decorative + new `SkeletonGroup` (announce once); `CollectionList` loading→skeleton, zero-state→`EmptyState`; activity-feed loading→skeleton rows (N4 done, X1 dashboard). C9–C12 apply skeletons to remaining surfaces | ✅        | `b7af492` |
+| C8  | Group decision full-page flow: VoteBreakdown, localStorage draft, presence line, tap-to-rank, past-decisions (O4,O6,O7,O8,V3,V4,V5,V6,V7)                                                                                                                                                                           | ▶ NEXT    | —         |
+| C9  | Restaurant search: skeletons, sort affordance, `normalizeRestaurantId` correctness fix (N6)                                                                                                                                                                                                                         | ☐         | —         |
+| C10 | Collection cards + restyle: card stats (count/last decided), weight-viz recolor, create-collection (N5,R3,S6)                                                                                                                                                                                                       | ☐         | —         |
+| C11 | Groups & friends: single Invite flow, cancel sent request (may need sender DELETE on `api/friends/requests/[id]`) (O1,O2,V1,R4)                                                                                                                                                                                     | ☐         | —         |
+| C12 | History + profile restyle: re-decide from history, date grouping, remove fake calendar, manual/confirm/prefs (R1,R2,R5,S5,S7)                                                                                                                                                                                       | ☐         | —         |
+| C13 | Notification center (V2) — bell mounted in desktop header + panel dark-mode fix (`6be3bd5`); **mobile access + full center restyle still pending**                                                                                                                                                                  | ◧ partial | `6be3bd5` |
+| C14 | Cleanup: retire C3 token aliases, decide Mascot fate (conflicts with no-mascots anti-ref), final USER-STORIES action-column pass                                                                                                                                                                                    | ☐         | —         |
 
 ## Next actions
 
@@ -212,10 +237,13 @@ cache bump when tokens ship.
    (Types/Lint/Format, Unit Tests, Build, E2E Smoke, Accessibility,
    Lighthouse). Also still pending: `gh auth login -h github.com` as
    akpersad (CLI can't create PRs until then).
-2. **Phase 3 implementation** on `phase3/ui-refresh`: token system into
-   `globals.css` first (light then dark), Fraunces via `next/font`, then
-   component sweep (Button/Badge/Card/forms), then the decision-moment
-   choreography. Validate each step against the axe lane.
+2. **Phase 3: C7 done (`b7af492`); implement C8** (group decision full-page
+   flow) next — see ledger above; then C9→C14 in order. Validate each commit
+   against the axe lane + full pre-push.
+   **Checkpoint discipline (owner-set 2026-06-12):** at each C-task commit,
+   update this ledger (status + hash) AND the USER-STORIES "Phase 3 action"
+   column for the rows it resolved — documentation must stay lossless across a
+   context clear.
 3. Later candidates recorded from the Phase 2 honesty pass: tiered-consensus crash edge, voteBreakdown >3-rank scoring, getCurrentUser placeholder auto-create, ADMIN_USER_IDS id-form footgun, hardcoded admin phone, proxy.ts rename when clerk#8302 closes, eslint 10 retest.
 
 ## Owner context

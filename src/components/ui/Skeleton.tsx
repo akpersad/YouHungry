@@ -1,37 +1,70 @@
 'use client';
 
+import { ReactNode } from 'react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { skeletonVariants } from '@/lib/animations';
 
+/**
+ * Loading-state primitives.
+ *
+ * A11y: a shimmer block is decorative (`aria-hidden`) — wrap a loading region
+ * in `<SkeletonGroup>` so assistive tech announces "Loading…" once, instead of
+ * reading every placeholder block. Per-item skeletons (RestaurantCard /
+ * CollectionCard / ListItem) are decorative on their own; the multi-item
+ * containers (CollectionList / SearchResults / Form / Page) carry the region.
+ */
+
 interface SkeletonProps {
   className?: string;
-  children?: React.ReactNode;
-  srText?: string;
 }
 
-export function Skeleton({
-  className,
-  children,
-  srText = 'Loading...',
-}: SkeletonProps) {
+/** Decorative shimmer block. Size it with className height/width utilities. */
+export function Skeleton({ className }: SkeletonProps) {
   return (
     <motion.div
       className={cn('bg-tertiary rounded', className)}
       variants={skeletonVariants}
       animate="animate"
-      role="status"
-      aria-busy="true"
-      aria-live="polite"
-      aria-label={srText}
-    >
-      <span className="sr-only">{srText}</span>
-      {children}
-    </motion.div>
+      aria-hidden="true"
+    />
   );
 }
 
-// Restaurant Card Skeleton
+interface SkeletonGroupProps {
+  /** Announced once while loading (e.g. "Loading collections"). */
+  label?: string;
+  children: ReactNode;
+  className?: string;
+  'data-testid'?: string;
+}
+
+/**
+ * Accessible loading region. Announces `label` a single time to assistive tech
+ * while its children render as decorative shimmer blocks.
+ */
+export function SkeletonGroup({
+  label = 'Loading…',
+  children,
+  className,
+  'data-testid': testId,
+}: SkeletonGroupProps) {
+  return (
+    <div
+      role="status"
+      aria-busy="true"
+      aria-live="polite"
+      aria-label={label}
+      className={className}
+      data-testid={testId}
+    >
+      <span className="sr-only">{label}</span>
+      {children}
+    </div>
+  );
+}
+
+// Restaurant Card Skeleton (decorative — wrap in SkeletonGroup when standalone)
 export function RestaurantCardSkeleton() {
   return (
     <div className="p-0 overflow-hidden" data-testid="restaurant-card-skeleton">
@@ -70,7 +103,7 @@ export function RestaurantCardSkeleton() {
   );
 }
 
-// Collection Card Skeleton
+// Collection Card Skeleton (decorative — wrap in SkeletonGroup when standalone)
 export function CollectionCardSkeleton() {
   return (
     <div className="p-4" data-testid="collection-card-skeleton">
@@ -97,7 +130,7 @@ export function CollectionCardSkeleton() {
   );
 }
 
-// List Item Skeleton
+// List Item Skeleton (decorative — wrap in SkeletonGroup when standalone)
 export function ListItemSkeleton() {
   return (
     <div className="p-3">
@@ -125,7 +158,7 @@ export function ListItemSkeleton() {
 // Form Skeleton
 export function FormSkeleton() {
   return (
-    <div className="space-y-6">
+    <SkeletonGroup label="Loading form" className="space-y-6">
       {/* Form fields skeleton */}
       <div className="space-y-4">
         <div className="space-y-2">
@@ -144,14 +177,14 @@ export function FormSkeleton() {
         <Skeleton className="h-10 w-full sm:w-auto rounded-lg" />
         <Skeleton className="h-10 w-full sm:w-auto rounded-lg" />
       </div>
-    </div>
+    </SkeletonGroup>
   );
 }
 
 // Search Results Skeleton
 export function SearchResultsSkeleton({ count = 3 }: { count?: number }) {
   return (
-    <div className="space-y-4">
+    <SkeletonGroup label="Loading results" className="space-y-4">
       {Array.from({ length: count }).map((_, index) => (
         <motion.div
           key={index}
@@ -162,14 +195,14 @@ export function SearchResultsSkeleton({ count = 3 }: { count?: number }) {
           <RestaurantCardSkeleton />
         </motion.div>
       ))}
-    </div>
+    </SkeletonGroup>
   );
 }
 
 // Collection List Skeleton
 export function CollectionListSkeleton({ count = 3 }: { count?: number }) {
   return (
-    <div className="space-y-6">
+    <SkeletonGroup label="Loading collections" className="space-y-6">
       {/* Header skeleton */}
       <div className="space-y-4 md:space-y-0 md:flex md:items-center md:justify-between">
         <div className="space-y-2">
@@ -192,14 +225,18 @@ export function CollectionListSkeleton({ count = 3 }: { count?: number }) {
           </motion.div>
         ))}
       </div>
-    </div>
+    </SkeletonGroup>
   );
 }
 
 // Decision Interface Skeleton
 export function DecisionInterfaceSkeleton() {
   return (
-    <div className="space-y-6" data-testid="decision-interface-skeleton">
+    <SkeletonGroup
+      label="Loading decision"
+      className="space-y-6"
+      data-testid="decision-interface-skeleton"
+    >
       {/* Progress header skeleton */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
@@ -228,18 +265,14 @@ export function DecisionInterfaceSkeleton() {
         <Skeleton className="h-10 flex-1 rounded-lg" />
         <Skeleton className="h-10 flex-1 rounded-lg" />
       </div>
-    </div>
+    </SkeletonGroup>
   );
 }
 
 // Page Loading Skeleton
 export function PageLoadingSkeleton() {
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="space-y-6"
-    >
+    <SkeletonGroup label="Loading page" className="space-y-6">
       {/* Page header skeleton */}
       <div className="space-y-4">
         <Skeleton className="h-8 w-64" />
@@ -255,6 +288,6 @@ export function PageLoadingSkeleton() {
           ))}
         </div>
       </div>
-    </motion.div>
+    </SkeletonGroup>
   );
 }

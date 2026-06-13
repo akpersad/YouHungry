@@ -10,6 +10,7 @@ import {
   CardTitle,
 } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { Skeleton, SkeletonGroup } from '@/components/ui/Skeleton';
 import { useDecisionHistory } from '@/hooks/api/useHistory';
 import { Clock, Users, User, Calendar } from 'lucide-react';
 import Link from 'next/link';
@@ -55,9 +56,24 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
               {isLoadingDecisions ? (
-                <p className="text-text-muted text-center py-8">
-                  Loading recent activity...
-                </p>
+                <SkeletonGroup
+                  label="Loading recent activity"
+                  className="space-y-4"
+                >
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <div
+                      key={i}
+                      className="flex items-start gap-3 p-3 border border-quaternary rounded-lg"
+                    >
+                      <Skeleton className="h-4 w-4 flex-shrink-0 mt-1 rounded-full" />
+                      <div className="flex-1 min-w-0 space-y-2">
+                        <Skeleton className="h-4 w-1/2" />
+                        <Skeleton className="h-3 w-2/3" />
+                        <Skeleton className="h-3 w-1/3" />
+                      </div>
+                    </div>
+                  ))}
+                </SkeletonGroup>
               ) : !recentDecisions?.decisions ||
                 recentDecisions.decisions.length === 0 ? (
                 <p className="text-text-muted text-center py-8">

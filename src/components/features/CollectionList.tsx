@@ -13,6 +13,9 @@ import {
 } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { CollectionListSkeleton } from '@/components/ui/Skeleton';
+import { UtensilsCrossed } from 'lucide-react';
 import { CreateCollectionForm } from '../forms/CreateCollectionForm';
 import { Collection } from '@/types/database';
 import { useCollections, useDeleteCollection } from '@/hooks/api';
@@ -84,15 +87,7 @@ function CollectionList({
   };
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-8">
-        <div
-          className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"
-          role="status"
-          aria-label="Loading collections"
-        ></div>
-      </div>
-    );
+    return <CollectionListSkeleton />;
   }
 
   if (error) {
@@ -138,34 +133,15 @@ function CollectionList({
 
       {collections.length === 0 ? (
         <Card className="p-6">
-          <div className="text-center py-8">
-            <div className="mb-4">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-tertiary flex items-center justify-center">
-                <svg
-                  className="w-8 h-8 text-secondary"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-                  />
-                </svg>
-              </div>
-            </div>
-            <p className="text-secondary mb-6 text-sm md:text-base">
-              You don&apos;t have any collections yet.
-            </p>
-            <Button
-              onClick={() => setIsCreateModalOpen(true)}
-              className="touch-target"
-            >
-              Create Your First Collection
-            </Button>
-          </div>
+          <EmptyState
+            icon={<UtensilsCrossed className="h-7 w-7" aria-hidden="true" />}
+            title="Let's find your first spot"
+            description="Build a collection, add a few restaurants you love, and we'll spin to settle where you eat."
+            action={{
+              label: 'Create your first collection',
+              onClick: () => setIsCreateModalOpen(true),
+            }}
+          />
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
