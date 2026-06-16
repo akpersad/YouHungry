@@ -1,6 +1,6 @@
 # Session Handoff — Fork In The Road portfolio upgrade
 
-**Last updated:** 2026-06-13 (C9 + C10 complete)
+**Last updated:** 2026-06-16 (C11 complete)
 **Read this first, then:** `promptFiles/phased-execution-plan.md` (the authoritative plan), `CLAUDE.md` (repo guide).
 
 ## Workflow rules (owner-set 2026-06-11 — do not deviate)
@@ -225,8 +225,8 @@ desktop fix).
 | C8  | Group decision full-page flow: VoteBreakdown, localStorage draft, presence line, tap-to-rank, past-decisions (O4,O6,O7,O8,V3,V4,V5,V6,V7)                                                                                                                                                                           | ✅        | `dd9c232` |
 | C9  | Restaurant search: skeletons, sort affordance, `normalizeRestaurantId` correctness fix (N6)                                                                                                                                                                                                                         | ✅        | `9472e2e` |
 | C10 | Collection cards + restyle: card stats (count/last decided), weight-viz recolor, create-collection (N5,R3,S6)                                                                                                                                                                                                       | ✅        | `7b4628e` |
-| C11 | Groups & friends: single Invite flow, cancel sent request (may need sender DELETE on `api/friends/requests/[id]`) (O1,O2,V1,R4)                                                                                                                                                                                     | ▶ NEXT    | —         |
-| C12 | History + profile restyle: re-decide from history, date grouping, remove fake calendar, manual/confirm/prefs (R1,R2,R5,S5,S7)                                                                                                                                                                                       | ☐         | —         |
+| C11 | Groups & friends: single Invite flow, cancel sent request via sender DELETE on `api/friends/requests/[id]` (O1,O2,V1,R4)                                                                                                                                                                                            | ✅        | `fae0832` |
+| C12 | History + profile restyle: re-decide from history, date grouping, remove fake calendar, manual/confirm/prefs (R1,R2,R5,S5,S7)                                                                                                                                                                                       | ▶ NEXT    | —         |
 | C13 | Notification center (V2) — bell mounted in desktop header + panel dark-mode fix (`6be3bd5`); **mobile access + full center restyle still pending**                                                                                                                                                                  | ◧ partial | `6be3bd5` |
 | C14 | Cleanup: retire C3 token aliases, decide Mascot fate (conflicts with no-mascots anti-ref), final USER-STORIES action-column pass                                                                                                                                                                                    | ☐         | —         |
 
@@ -237,10 +237,27 @@ desktop fix).
    (Types/Lint/Format, Unit Tests, Build, E2E Smoke, Accessibility,
    Lighthouse). Also still pending: `gh auth login -h github.com` as
    akpersad (CLI can't create PRs until then).
-2. **Phase 3: C9 + C10 done; implement C11** (groups & friends: single Invite
-   flow, cancel sent request — may need a sender DELETE on
-   `api/friends/requests/[id]`) next — see ledger above; then C12→C14 in
-   order. Validate each commit against the axe lane + full pre-push.
+2. **Phase 3: C9–C11 done; implement C12** (history + profile restyle:
+   re-decide from history, date grouping, remove the fake calendar,
+   manual/confirm/prefs) next — see ledger above; then C13→C14 in order.
+   Validate each commit against the axe lane + full pre-push.
+   C11 notes (`fae0832`): **O2** folded the two competing group-invite
+   paths into one — `FriendSelectionModal` gained an optional
+   `onInviteByEmail` prop (email field + divider + friend list in one
+   "Invite to Group" modal); `GroupView`'s header dropdown is now Edit-only
+   and the Members section shows a single primary **Invite** button (the old
+   standalone email Modal + `showInviteModal`/`inviteEmail` state/handler are
+   gone). **R4** added withdraw-a-sent-request: `cancelFriendRequest` in
+   `lib/friends.ts` (deletes only a _pending_ request where `requesterId ===`
+   the caller), `DELETE /api/friends/requests/[id]`, `useCancelFriendRequest`,
+   and a Cancel button on sent-request cards. **O1/V1** moved the
+   Admin/member-count badges off the cold leftover `text-blue-800` onto the
+   warm `Badge` primitive (`default` for Admin, `secondary` for the count) and
+   gave invitation cards a hover affordance. Pre-push green (1612 passed).
+   Note: the GroupView close-modal test asserts the Close control is present
+   rather than that the modal unmounts — framer-motion's `AnimatePresence`
+   defers unmount in jsdom (the old test only ever checked a never-mounted
+   title); actual dismissal is covered in the `FriendSelectionModal` unit test.
    C9 notes (`9472e2e`): search loading now renders a view-aware
    `SkeletonGroup` grid (announces once) instead of a spinner; the sort
    `<select>` is rendered during loading and beside results so it no longer
