@@ -1,12 +1,15 @@
 'use client';
 
+import { useState } from 'react';
 import { logger } from '@/lib/logger';
 import {
   useFriendRequests,
   useUpdateFriendRequest,
+  useCancelFriendRequest,
 } from '@/hooks/api/useFriends';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import { Badge } from '@/components/ui/Badge';
 import { UserAvatar } from '@/components/ui/UserAvatar';
 import { DropdownMenu, DropdownMenuItem } from '@/components/ui/DropdownMenu';
 
@@ -17,6 +20,8 @@ interface FriendRequestsProps {
 export function FriendRequests({ userId }: FriendRequestsProps) {
   const { data: requests, isLoading, error } = useFriendRequests(userId);
   const updateRequestMutation = useUpdateFriendRequest();
+  const cancelRequestMutation = useCancelFriendRequest();
+  const [cancelingId, setCancelingId] = useState<string | null>(null);
 
   const handleRequestAction = async (
     friendshipId: string,
@@ -30,6 +35,17 @@ export function FriendRequests({ userId }: FriendRequestsProps) {
       });
     } catch (error) {
       logger.error(`Failed to ${action} friend request:`, error);
+    }
+  };
+
+  const handleCancelRequest = async (friendshipId: string) => {
+    setCancelingId(friendshipId);
+    try {
+      await cancelRequestMutation.mutateAsync({ friendshipId, userId });
+    } catch (error) {
+      logger.error('Failed to cancel friend request:', error);
+    } finally {
+      setCancelingId(null);
     }
   };
 
@@ -259,10 +275,18 @@ export function FriendRequests({ userId }: FriendRequestsProps) {
                           </p>
                         </div>
                       </div>
-                      <div className="flex-shrink-0">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-warning/20 text-warning">
-                          Pending
-                        </span>
+                      <div className="flex flex-shrink-0 items-center gap-2">
+                        <Badge variant="warning">Pending</Badge>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleCancelRequest(request._id)}
+                          isLoading={cancelingId === request._id}
+                          disabled={cancelRequestMutation.isPending}
+                          className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                        >
+                          Cancel
+                        </Button>
                       </div>
                     </div>
                   </Card>

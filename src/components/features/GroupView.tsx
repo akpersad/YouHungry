@@ -12,6 +12,7 @@ import {
   CardTitle,
 } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { Badge } from '@/components/ui/Badge';
 import { UserAvatar } from '@/components/ui/UserAvatar';
 import { Modal } from '@/components/ui/Modal';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
@@ -72,10 +73,8 @@ export function GroupView({
     name: group.name,
     description: group.description || '',
   });
-  const [showInviteModal, setShowInviteModal] = useState(false);
   const [showFriendSelectionModal, setShowFriendSelectionModal] =
     useState(false);
-  const [inviteEmail, setInviteEmail] = useState('');
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
   const [memberToRemove, setMemberToRemove] = useState<{
@@ -107,22 +106,6 @@ export function GroupView({
       setIsEditing(false);
     } catch (error) {
       logger.error('Error updating group:', error);
-    } finally {
-      setActionLoading(null);
-    }
-  };
-
-  const handleInviteUser = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!onInviteUser) return;
-
-    setActionLoading('invite');
-    try {
-      await onInviteUser(inviteEmail);
-      setInviteEmail('');
-      setShowInviteModal(false);
-    } catch (error) {
-      logger.error('Error inviting user:', error);
     } finally {
       setActionLoading(null);
     }
@@ -295,10 +278,6 @@ export function GroupView({
                 <Edit className="w-4 h-4" />
                 Edit Group
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setShowInviteModal(true)}>
-                <UserPlus className="w-4 h-4" />
-                Invite by Email
-              </DropdownMenuItem>
             </DropdownMenu>
           )}
         </div>
@@ -352,25 +331,14 @@ export function GroupView({
       <Card className="p-6 !mb-4">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-lg font-semibold text-primary">Members</h2>
-          <DropdownMenu
-            trigger={
-              <button
-                className="p-2 rounded-lg bg-secondary hover:bg-tertiary transition-colors duration-200"
-                aria-label="Invite options"
-              >
-                <UserPlus className="w-5 h-5 text-primary" />
-              </button>
-            }
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={() => setShowFriendSelectionModal(true)}
           >
-            <DropdownMenuItem onClick={() => setShowFriendSelectionModal(true)}>
-              <Users className="w-4 h-4" />
-              Invite Friends
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setShowInviteModal(true)}>
-              <UserPlus className="w-4 h-4" />
-              Invite by Email
-            </DropdownMenuItem>
-          </DropdownMenu>
+            <UserPlus className="w-4 h-4" />
+            Invite
+          </Button>
         </div>
 
         <div className="space-y-4">
@@ -397,9 +365,9 @@ export function GroupView({
                         {member.name}
                       </span>
                       {isAdmin && (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-blue-800 flex-shrink-0">
+                        <Badge variant="default" className="flex-shrink-0">
                           Admin
-                        </span>
+                        </Badge>
                       )}
                     </div>
                     <p className="text-sm text-tertiary truncate">
@@ -517,49 +485,6 @@ export function GroupView({
         </CardContent>
       </Card>
 
-      {/* Invite Modal */}
-      <Modal
-        isOpen={showInviteModal}
-        onClose={() => setShowInviteModal(false)}
-        title="Invite User to Group"
-      >
-        <form onSubmit={handleInviteUser} className="space-y-4">
-          <div>
-            <label
-              htmlFor="invite-email"
-              className="block text-sm font-medium text-primary mb-1"
-            >
-              Email Address
-            </label>
-            <Input
-              id="invite-email"
-              type="email"
-              value={inviteEmail}
-              onChange={(e) => setInviteEmail(e.target.value)}
-              placeholder="Enter user's email"
-              required
-            />
-          </div>
-
-          <div className="flex justify-end space-x-3 pt-4">
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => setShowInviteModal(false)}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              variant="primary"
-              isLoading={actionLoading === 'invite'}
-            >
-              Send Invite
-            </Button>
-          </div>
-        </form>
-      </Modal>
-
       {/* Delete Confirmation Modal */}
       <Modal
         isOpen={showDeleteModal}
@@ -622,6 +547,7 @@ export function GroupView({
         isOpen={showFriendSelectionModal}
         onClose={() => setShowFriendSelectionModal(false)}
         onInviteFriends={handleInviteFriends}
+        onInviteByEmail={onInviteUser}
         groupId={group._id.toString()}
         isLoading={actionLoading === 'invite-friends'}
       />

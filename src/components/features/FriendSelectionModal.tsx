@@ -27,6 +27,10 @@ interface FriendSelectionModalProps {
   isOpen: boolean;
   onClose: () => void;
   onInviteFriends: (friendEmails: string[]) => Promise<void>;
+  // Invite anyone by email — the single flow folds the old standalone
+  // "Invite by Email" modal into this one. Optional so older callers keep
+  // working without an email affordance.
+  onInviteByEmail?: (email: string) => Promise<void>;
   groupId: string;
   isLoading?: boolean;
 }
@@ -35,6 +39,7 @@ export function FriendSelectionModal({
   isOpen,
   onClose,
   onInviteFriends,
+  onInviteByEmail,
   groupId, // eslint-disable-line @typescript-eslint/no-unused-vars
   isLoading = false, // eslint-disable-line @typescript-eslint/no-unused-vars
 }: FriendSelectionModalProps) {
@@ -42,6 +47,8 @@ export function FriendSelectionModal({
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [invitingFriend, setInvitingFriend] = useState<string | null>(null);
+  const [emailInput, setEmailInput] = useState('');
+  const [invitingEmail, setInvitingEmail] = useState(false);
 
   // Reset state when the modal opens (render-time reset instead of a
   // setState-in-effect)
@@ -52,8 +59,12 @@ export function FriendSelectionModal({
       setSearchTerm('');
       setCurrentPage(1);
       setInvitingFriend(null);
+      setEmailInput('');
+      setInvitingEmail(false);
     }
   }
+
+  const busy = invitingFriend !== null || invitingEmail;
 
   const ITEMS_PER_PAGE = 10;
 
@@ -94,19 +105,78 @@ export function FriendSelectionModal({
     }
   };
 
+  const handleInviteByEmail = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const email = emailInput.trim();
+    if (!email || !onInviteByEmail) return;
+
+    setInvitingEmail(true);
+    try {
+      await onInviteByEmail(email);
+      toast.success(`Invitation sent to ${email}!`);
+      setEmailInput('');
+      onClose();
+    } catch (error) {
+      logger.error('Error inviting by email:', error);
+      toast.error('Failed to send invitation. Please try again.');
+    } finally {
+      setInvitingEmail(false);
+    }
+  };
+
   const handleClose = () => {
-    if (!invitingFriend) {
+    if (!busy) {
       onClose();
     }
   };
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={handleClose}
-      title="Invite Friends to Group"
-    >
+    <Modal isOpen={isOpen} onClose={handleClose} title="Invite to Group">
       <div className="space-y-6">
+        {/* Invite by email — anyone, friend or not */}
+        {onInviteByEmail && (
+          <form onSubmit={handleInviteByEmail} className="space-y-2">
+            <label
+              htmlFor="invite-email"
+              className="block text-sm font-medium text-text"
+            >
+              Invite by email
+            </label>
+            <div className="flex gap-2">
+              <Input
+                id="invite-email"
+                type="email"
+                value={emailInput}
+                onChange={(e) => setEmailInput(e.target.value)}
+                placeholder="name@example.com"
+                className="flex-1 text-sm"
+                disabled={busy}
+              />
+              <Button
+                type="submit"
+                variant="primary"
+                size="sm"
+                isLoading={invitingEmail}
+                disabled={!emailInput.trim() || busy}
+                className="whitespace-nowrap"
+              >
+                Send Invite
+              </Button>
+            </div>
+          </form>
+        )}
+
+        {/* Divider between the two ways to invite */}
+        {onInviteByEmail && (
+          <div className="flex items-center gap-3">
+            <div className="h-px flex-1 bg-border" />
+            <span className="text-xs font-medium uppercase tracking-wide text-text-light">
+              Or pick a friend
+            </span>
+            <div className="h-px flex-1 bg-border" />
+          </div>
+        )}
+
         {/* Search */}
         <div>
           <Input
@@ -170,7 +240,7 @@ export function FriendSelectionModal({
                     size="sm"
                     onClick={() => handleInviteFriend(friend.email)}
                     isLoading={invitingFriend === friend.email}
-                    disabled={invitingFriend !== null}
+                    disabled={busy}
                     className="whitespace-nowrap min-w-[120px]"
                   >
                     Invite To Group
@@ -188,7 +258,7 @@ export function FriendSelectionModal({
               variant="secondary"
               size="sm"
               onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-              disabled={currentPage === 1 || invitingFriend !== null}
+              disabled={currentPage === 1 || busy}
             >
               Previous
             </Button>
@@ -201,7 +271,7 @@ export function FriendSelectionModal({
               onClick={() =>
                 setCurrentPage(Math.min(totalPages, currentPage + 1))
               }
-              disabled={currentPage === totalPages || invitingFriend !== null}
+              disabled={currentPage === totalPages || busy}
             >
               Next
             </Button>

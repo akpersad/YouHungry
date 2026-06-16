@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Group } from '@/types/database';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { Badge } from '@/components/ui/Badge';
 // import { UserAvatar } from '@/components/ui/UserAvatar';
 
 interface GroupListProps {
@@ -82,10 +83,10 @@ export function GroupList({
                 <h3 className="text-lg font-semibold text-primary">
                   {group.name}
                 </h3>
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-blue-800">
+                <Badge variant="secondary">
                   {group.memberIds.length} member
                   {group.memberIds.length !== 1 ? 's' : ''}
-                </span>
+                </Badge>
               </div>
 
               {group.description && (

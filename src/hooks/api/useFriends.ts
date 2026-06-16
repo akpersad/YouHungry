@@ -99,6 +99,23 @@ const updateFriendRequest = async ({
   }
 };
 
+const cancelFriendRequest = async ({
+  friendshipId,
+}: {
+  friendshipId: string;
+  userId: string;
+}): Promise<void> => {
+  const response = await fetch(`/api/friends/requests/${friendshipId}`, {
+    method: 'DELETE',
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error || 'Failed to cancel friend request');
+  }
+};
+
 const removeFriend = async ({
   friendshipId,
 }: {
@@ -187,6 +204,23 @@ export function useUpdateFriendRequest() {
     },
     onError: (error) => {
       logger.error('Failed to update friend request:', error);
+    },
+  });
+}
+
+export function useCancelFriendRequest() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: cancelFriendRequest,
+    onSuccess: (_, variables) => {
+      // Refresh the requester's pending requests (the sent list shrinks)
+      queryClient.invalidateQueries({
+        queryKey: friendKeys.requestsList(variables.userId),
+      });
+    },
+    onError: (error) => {
+      logger.error('Failed to cancel friend request:', error);
     },
   });
 }

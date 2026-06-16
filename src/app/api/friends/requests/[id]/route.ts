@@ -1,7 +1,11 @@
 import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth';
-import { acceptFriendRequest, declineFriendRequest } from '@/lib/friends';
+import {
+  acceptFriendRequest,
+  declineFriendRequest,
+  cancelFriendRequest,
+} from '@/lib/friends';
 
 export async function PUT(
   request: NextRequest,
@@ -52,6 +56,52 @@ export async function PUT(
     });
   } catch (error) {
     logger.error('Update friend request error:', error);
+
+    if (error instanceof Error) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: error.message,
+        },
+        { status: 400 }
+      );
+    }
+
+    return NextResponse.json(
+      {
+        success: false,
+        error: 'Internal server error',
+      },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    const { id } = await params;
+
+    // The lib only deletes a pending request this user originally sent,
+    // so a caller can never cancel someone else's request.
+    await cancelFriendRequest(id, user.clerkId);
+
+    return NextResponse.json({
+      success: true,
+      message: 'Friend request cancelled',
+    });
+  } catch (error) {
+    logger.error('Cancel friend request error:', error);
 
     if (error instanceof Error) {
       return NextResponse.json(

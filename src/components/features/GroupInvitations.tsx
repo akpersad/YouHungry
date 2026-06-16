@@ -93,7 +93,10 @@ export function GroupInvitations({
   return (
     <div className="space-y-4">
       {invitations.map((invitation) => (
-        <Card key={invitation._id} className="p-6">
+        <Card
+          key={invitation._id}
+          className="p-6 transition-shadow hover:shadow-md"
+        >
           <div className="flex items-start space-x-4">
             <UserAvatar name={invitation.inviterName} size="md" />
             <div className="flex-1">
