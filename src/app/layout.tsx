@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Fraunces } from 'next/font/google';
 import { ClerkProvider } from '@clerk/nextjs';
 import { QueryProvider } from '@/components/providers/QueryProvider';
 import { ThemeProvider } from '@/components/providers/ThemeProvider';
+import { NotificationCenterProvider } from '@/components/providers/NotificationCenterProvider';
 import { PageTransition } from '@/components/ui/PageTransition';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { RootNavigation } from '@/components/layout/RootNavigation';
@@ -164,14 +165,16 @@ export default function RootLayout({
           <ErrorBoundary level="root">
             <ThemeProvider>
               <QueryProvider>
-                <PullToRefresh>
-                  <PageTransition>
-                    <AppLayout>{children}</AppLayout>
-                  </PageTransition>
-                </PullToRefresh>
-                <LazyPWAInstallPrompt />
-                <LazyPWAOfflineBanner />
-                <RootNavigation />
+                <NotificationCenterProvider>
+                  <PullToRefresh>
+                    <PageTransition>
+                      <AppLayout>{children}</AppLayout>
+                    </PageTransition>
+                  </PullToRefresh>
+                  <LazyPWAInstallPrompt />
+                  <LazyPWAOfflineBanner />
+                  <RootNavigation />
+                </NotificationCenterProvider>
                 <Toaster
                   position="top-center"
                   expand={false}

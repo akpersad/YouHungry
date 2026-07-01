@@ -204,6 +204,8 @@ interface QuickActionSheetProps {
     icon: ReactNode;
     onClick: () => void;
     variant?: 'default' | 'destructive';
+    /** Optional trailing badge (e.g. an unread notification count). */
+    badge?: ReactNode;
   }[];
 }
 
@@ -233,6 +235,9 @@ export function QuickActionSheet({
           >
             <div className="flex-shrink-0">{action.icon}</div>
             <span className="font-medium">{action.label}</span>
+            {action.badge != null && (
+              <span className="ml-auto flex-shrink-0">{action.badge}</span>
+            )}
           </button>
         ))}
       </div>

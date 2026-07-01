@@ -1,13 +1,13 @@
 'use client';
 
-import { ReactNode, useState } from 'react';
+import { ReactNode } from 'react';
 import { useUser } from '@clerk/nextjs';
 import Link from 'next/link';
 import { SignInButton } from '@/components/auth/SignInButton';
 import { UserProfile } from '@/components/auth/UserProfile';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { NotificationBell } from '@/components/ui/NotificationBell';
-import { NotificationPanel } from '@/components/ui/NotificationPanel';
+import { useNotificationCenter } from '@/components/providers/NotificationCenterProvider';
 
 interface HeaderProps {
   children?: ReactNode;
@@ -15,7 +15,7 @@ interface HeaderProps {
 
 export function Header({ children }: HeaderProps) {
   const { isSignedIn, isLoaded } = useUser();
-  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const { open: openNotifications } = useNotificationCenter();
 
   return (
     <header
@@ -140,20 +140,13 @@ export function Header({ children }: HeaderProps) {
           <div className="flex items-center space-x-4">
             {children}
             {isLoaded && isSignedIn && (
-              <NotificationBell onClick={() => setIsNotificationsOpen(true)} />
+              <NotificationBell onClick={openNotifications} />
             )}
             <ThemeToggle variant="button" size="md" />
             {isLoaded && (isSignedIn ? <UserProfile /> : <SignInButton />)}
           </div>
         </div>
       </div>
-
-      {isLoaded && isSignedIn && (
-        <NotificationPanel
-          isOpen={isNotificationsOpen}
-          onClose={() => setIsNotificationsOpen(false)}
-        />
-      )}
     </header>
   );
 }
