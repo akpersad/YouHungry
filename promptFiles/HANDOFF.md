@@ -280,15 +280,28 @@ desktop fix).
    floating emoji, `SkeletonGroup` loading rows instead of a spinner, and the
    `EmptyState` primitive with caught-up vs never-had-any copy. Cold hardcoded
    colors removed (`divide-gray-100`, `bg-white`, `bg-black bg-opacity-50`).
-   **Token gotcha confirmed:** the semantic color utilities
-   (`bg-primary`/`text-tertiary`/`border-border`/`bg-surface`…) are
-   hand-written CSS classes in `globals.css`, **not** Tailwind `@theme`
-   `--color-*` entries — so opacity modifiers (`bg-tertiary/60`) and
-   `divide-*` do NOT generate for them; unread-row tint uses an inline
-   `--tomato-tint` style and list separators use explicit `border-b
-border-border`. (`bg-black/50` is fine — black is a real Tailwind color.)
+   **Token-system root fix (`globals.css`):** the canonical design tokens were
+   only CSS vars + hand-written `.bg-*/.text-*` classes, never registered with
+   Tailwind — so opacity modifiers (`bg-surface/60`), `divide-*`, `ring-*` and
+   utility classes for the accent tints did NOT generate, which is why the
+   first cut of the panel used inline `style` props. Fixed properly by adding
+   an **`@theme inline`** block that registers the canonical tokens as Tailwind
+   colors (`--color-tomato`/`-tint`, `saffron`/`-tint`, `olive`/`-tint`,
+   `surface`/`-sunken`, `border`/`-strong`, `ink`/`-secondary`/`-muted`).
+   `inline` makes the generated utilities reference the CSS vars directly, so
+   the `.dark` overrides still flip them; verified in the compiled CSS
+   (`.bg-tomato-tint{background-color:var(--tomato-tint)}`). Purely additive —
+   where a name overlaps a hand-written class the values are identical and the
+   hand-written (unlayered) rule still wins; the legacy `bg-primary`/`-text`
+   aliases (which DO still collide on the `primary` name and stay no-op for
+   opacity) are the C14 alias-retirement job. The panel now uses `bg-tomato`,
+   `text-olive`, `bg-*-tint` etc. — zero inline color styles remain (only the
+   `--z-modal` z-index token, which has no utility equivalent by design).
    No test renders Header/nav/panel, so no suite needed updating. Validation:
-   full pre-push green (129 suites, 1612 passed / 12 skipped, build OK).
+   full pre-push green (129 suites, 1612 passed / 12 skipped, build OK) **and
+   the axe lane** `test:accessibility` green (22 passed / 9 skipped / 0 failed;
+   the `[WebServer]` `/sign-in` redirect noise is the documented harmless Clerk
+   dev-instance behavior, clerk#8302 territory).
    C12 notes (`0a42114`): **R2** — `/history` flat list is now
    `groupDecisionsByDate` sections (Today / Yesterday / Earlier this week /
    This month / then `Month YYYY`) with sticky per-group headers; the

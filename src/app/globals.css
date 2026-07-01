@@ -5,6 +5,32 @@
    localStorage, else system preference), so the class is always present. */
 @variant dark (&:where(.dark, .dark *));
 
+/* Register the canonical design tokens (DESIGN.md) as Tailwind colors so
+   `bg-tomato`, `text-olive`, `bg-surface/60`, `divide-border`, `ring-tomato`
+   and every opacity/variant utility generate natively. `inline` makes the
+   generated utilities reference the CSS vars directly, so the `.dark`
+   overrides above still flip them. This supersedes the hand-written
+   `.bg-*`/`.text-*` classes further down (kept until the C14 alias cleanup);
+   where names overlap the values are identical, so it's purely additive. */
+@theme inline {
+  --color-tomato: var(--tomato);
+  --color-tomato-hover: var(--tomato-hover);
+  --color-tomato-tint: var(--tomato-tint);
+  --color-saffron: var(--saffron);
+  --color-saffron-tint: var(--saffron-tint);
+  --color-olive: var(--olive);
+  --color-olive-tint: var(--olive-tint);
+
+  --color-surface: var(--surface);
+  --color-surface-sunken: var(--surface-sunken);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+
+  --color-ink: var(--ink);
+  --color-ink-secondary: var(--ink-secondary);
+  --color-ink-muted: var(--ink-muted);
+}
+
 /* Fork In The Road design system — warm & appetizing (see DESIGN.md).
    Canonical tokens first; legacy-name aliases below them keep every
    pre-Phase-3 component working until the final cleanup commit. */

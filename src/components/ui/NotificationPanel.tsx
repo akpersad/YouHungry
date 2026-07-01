@@ -19,36 +19,18 @@ interface NotificationPanelProps {
 }
 
 // Warm tinted chip per notification type — replaces the raw floating emoji.
+// `chip` pairs a tint background with its accent foreground (design tokens
+// registered as Tailwind colors in globals.css).
 const NOTIFICATION_STYLES: Record<
   InAppNotification['type'] | 'default',
-  { emoji: string; tint: string; fg: string }
+  { emoji: string; chip: string }
 > = {
-  group_decision: {
-    emoji: '🍽️',
-    tint: 'var(--tomato-tint)',
-    fg: 'var(--tomato)',
-  },
-  friend_request: {
-    emoji: '👋',
-    tint: 'var(--saffron-tint)',
-    fg: 'var(--saffron)',
-  },
-  group_invitation: {
-    emoji: '👥',
-    tint: 'var(--olive-tint)',
-    fg: 'var(--olive)',
-  },
-  decision_result: {
-    emoji: '🎯',
-    tint: 'var(--tomato-tint)',
-    fg: 'var(--tomato)',
-  },
-  admin_alert: {
-    emoji: '🚨',
-    tint: 'var(--tomato-tint)',
-    fg: 'var(--tomato)',
-  },
-  default: { emoji: '🔔', tint: 'var(--saffron-tint)', fg: 'var(--saffron)' },
+  group_decision: { emoji: '🍽️', chip: 'bg-tomato-tint text-tomato' },
+  friend_request: { emoji: '👋', chip: 'bg-saffron-tint text-saffron' },
+  group_invitation: { emoji: '👥', chip: 'bg-olive-tint text-olive' },
+  decision_result: { emoji: '🎯', chip: 'bg-tomato-tint text-tomato' },
+  admin_alert: { emoji: '🚨', chip: 'bg-tomato-tint text-tomato' },
+  default: { emoji: '🔔', chip: 'bg-saffron-tint text-saffron' },
 };
 
 export function NotificationPanel({
@@ -190,13 +172,7 @@ export function NotificationPanel({
                   Notifications
                 </h2>
                 {stats.unreadCount > 0 && (
-                  <span
-                    className="rounded-full px-2 py-0.5 text-xs font-medium tabular-nums"
-                    style={{
-                      background: 'var(--tomato-tint)',
-                      color: 'var(--tomato)',
-                    }}
-                  >
+                  <span className="rounded-full bg-tomato-tint px-2 py-0.5 text-xs font-medium tabular-nums text-tomato">
                     {stats.unreadCount} new
                   </span>
                 )}
@@ -251,8 +227,7 @@ export function NotificationPanel({
                     {isSelected && (
                       <motion.span
                         layoutId="notification-tab-underline"
-                        className="absolute inset-x-3 -bottom-px h-0.5 rounded-full"
-                        style={{ background: 'var(--tomato)' }}
+                        className="absolute inset-x-3 -bottom-px h-0.5 rounded-full bg-tomato"
                       />
                     )}
                   </button>
@@ -305,20 +280,19 @@ export function NotificationPanel({
                       >
                         <button
                           onClick={() => handleNotificationClick(notification)}
-                          className="w-full p-4 text-left transition-colors hover:bg-tertiary focus:outline-none focus:ring-2 focus:ring-inset focus:ring-accent"
-                          style={
-                            !notification.read
-                              ? { background: 'var(--tomato-tint)' }
-                              : undefined
-                          }
+                          className={cn(
+                            'w-full p-4 text-left transition-colors focus:outline-none focus:ring-2 focus:ring-inset focus:ring-accent',
+                            notification.read
+                              ? 'hover:bg-tertiary'
+                              : 'bg-tomato-tint'
+                          )}
                         >
                           <div className="flex items-start gap-3">
                             <span
-                              className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full text-lg"
-                              style={{
-                                background: style.tint,
-                                color: style.fg,
-                              }}
+                              className={cn(
+                                'flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full text-lg',
+                                style.chip
+                              )}
                               aria-hidden="true"
                             >
                               {style.emoji}
@@ -331,8 +305,7 @@ export function NotificationPanel({
                                 </h3>
                                 {!notification.read && (
                                   <span
-                                    className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full"
-                                    style={{ background: 'var(--tomato)' }}
+                                    className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-tomato"
                                     aria-label="Unread"
                                   />
                                 )}
