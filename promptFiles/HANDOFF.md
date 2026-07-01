@@ -169,6 +169,23 @@ status section above and `docs/api-auth-matrix.md`. Still true:
 - Production is LIVE (fork-in-the-road.vercel.app) with real Clerk/Mongo/Twilio/Resend/push integrations. Suppress real sends in any test/demo work; don't rotate credentials without flagging the owner.
 - The Oct 2025 "ios app prep" epic was docs-only — no Swift code exists anywhere.
 - Tailwind is ALREADY on 4.0.14 — Phase 2's "Tailwind → 4" item reduces to a minor-version bump at most; the real Phase 2 framework work is Next 15 → 16.
+- **LOCAL-DEV GOTCHA — always browse `http://localhost:3000`, NOT
+  `forkintheroad.local:3000`.** `/etc/hosts` maps `127.0.0.1
+forkintheroad.local` and `.env.local` uses a Clerk **dev** instance
+  (`pk_test`) with `NEXT_PUBLIC_APP_URL=http://localhost:3000`. Clerk dev
+  instances only trust `localhost`/`127.0.0.1`, so on the custom host the
+  client shows you signed-in (Clerk FAPI cookies on accounts.dev) but the
+  **server** can't validate the session → `auth.protect()` redirects **every**
+  request to `/sign-in`, flooding the log with `NEXT_REDIRECT` /
+  `CLERK_PROTECT_REDIRECT_TO_URL` unhandled rejections and 500-ing every data
+  fetch (dashboard shows "Internal server error"). This looks like a Mongo or
+  app bug and is neither — it's purely the domain mismatch. Making
+  `forkintheroad.local` work would need a `pk_live`/satellite domain +
+  `allowedDevOrigins` + Clerk-dashboard config; not worth it for local dev.
+  Diagnosed 2026-06-30. Separately, `src/middleware.ts` now `await`s
+  `auth.protect()` (`1859f81`) — the callback was sync + un-awaited, which by
+  itself leaked the rejection as `unhandledRejection` on every protected
+  request even on localhost when signed out.
 
 ## Housekeeping completed 2026-06-12 (after Phase 2)
 
