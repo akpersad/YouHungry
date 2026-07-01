@@ -1,6 +1,6 @@
 # Session Handoff — Fork In The Road portfolio upgrade
 
-**Last updated:** 2026-06-16 (C11 complete)
+**Last updated:** 2026-06-30 (C12 complete)
 **Read this first, then:** `promptFiles/phased-execution-plan.md` (the authoritative plan), `CLAUDE.md` (repo guide).
 
 ## Workflow rules (owner-set 2026-06-11 — do not deviate)
@@ -213,22 +213,22 @@ USER-STORIES.md rows (see that doc's "Phase 3 action" column). Status legend:
 commits this branch: `be787c6` (design docs), `2a3b623` (PWA install-banner
 desktop fix).
 
-| C   | Scope (stories)                                                                                                                                                                                                                                                                                                     | Status    | Commit    |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | --------- |
-| C1  | Hazard sweep: gate test consoles, ConfirmDialog on destructive actions, segment error boundaries (X3,X4,O3,R7)                                                                                                                                                                                                      | ✅        | `f29e852` |
-| C2  | USER-STORIES.md code-derived story audit                                                                                                                                                                                                                                                                            | ✅        | `2c1ece2` |
-| C3  | Warm OKLCH token system + Fraunces + class-driven theming; legacy names aliased; manifest/sw bump (X5)                                                                                                                                                                                                              | ✅        | `835d5af` |
-| C4  | `ui/EmptyState` primitive, accent-tint Badge variants, semantic z-index scale (X2 primitive)                                                                                                                                                                                                                        | ✅        | `b566e55` |
-| C5  | Landing/marketing restyle (N1–N3) — **no dedicated commit**: page.tsx inherits the warm palette via C3 aliases ("restyle only"). Revisit only if it reads off after the sweep.                                                                                                                                      | (folded)  | —         |
-| C6  | Decision-first dashboard hero + `/decide` route + SpinReveal + WhyThisPick (N7,S1,S2,S3,S4)                                                                                                                                                                                                                         | ✅        | `61d7e04` |
-| C7  | **Loading & empty states (dashboard)**: skeleton lib already existed → made base `Skeleton` decorative + new `SkeletonGroup` (announce once); `CollectionList` loading→skeleton, zero-state→`EmptyState`; activity-feed loading→skeleton rows (N4 done, X1 dashboard). C9–C12 apply skeletons to remaining surfaces | ✅        | `f0ed224` |
-| C8  | Group decision full-page flow: VoteBreakdown, localStorage draft, presence line, tap-to-rank, past-decisions (O4,O6,O7,O8,V3,V4,V5,V6,V7)                                                                                                                                                                           | ✅        | `dd9c232` |
-| C9  | Restaurant search: skeletons, sort affordance, `normalizeRestaurantId` correctness fix (N6)                                                                                                                                                                                                                         | ✅        | `9472e2e` |
-| C10 | Collection cards + restyle: card stats (count/last decided), weight-viz recolor, create-collection (N5,R3,S6)                                                                                                                                                                                                       | ✅        | `7b4628e` |
-| C11 | Groups & friends: single Invite flow, cancel sent request via sender DELETE on `api/friends/requests/[id]` (O1,O2,V1,R4)                                                                                                                                                                                            | ✅        | `fae0832` |
-| C12 | History + profile restyle: re-decide from history, date grouping, remove fake calendar, manual/confirm/prefs (R1,R2,R5,S5,S7)                                                                                                                                                                                       | ▶ NEXT    | —         |
-| C13 | Notification center (V2) — bell mounted in desktop header + panel dark-mode fix (`6be3bd5`); **mobile access + full center restyle still pending**                                                                                                                                                                  | ◧ partial | `6be3bd5` |
-| C14 | Cleanup: retire C3 token aliases, decide Mascot fate (conflicts with no-mascots anti-ref), final USER-STORIES action-column pass                                                                                                                                                                                    | ☐         | —         |
+| C   | Scope (stories)                                                                                                                                                                                                                                                                                                     | Status             | Commit    |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------ | --------- |
+| C1  | Hazard sweep: gate test consoles, ConfirmDialog on destructive actions, segment error boundaries (X3,X4,O3,R7)                                                                                                                                                                                                      | ✅                 | `f29e852` |
+| C2  | USER-STORIES.md code-derived story audit                                                                                                                                                                                                                                                                            | ✅                 | `2c1ece2` |
+| C3  | Warm OKLCH token system + Fraunces + class-driven theming; legacy names aliased; manifest/sw bump (X5)                                                                                                                                                                                                              | ✅                 | `835d5af` |
+| C4  | `ui/EmptyState` primitive, accent-tint Badge variants, semantic z-index scale (X2 primitive)                                                                                                                                                                                                                        | ✅                 | `b566e55` |
+| C5  | Landing/marketing restyle (N1–N3) — **no dedicated commit**: page.tsx inherits the warm palette via C3 aliases ("restyle only"). Revisit only if it reads off after the sweep.                                                                                                                                      | (folded)           | —         |
+| C6  | Decision-first dashboard hero + `/decide` route + SpinReveal + WhyThisPick (N7,S1,S2,S3,S4)                                                                                                                                                                                                                         | ✅                 | `61d7e04` |
+| C7  | **Loading & empty states (dashboard)**: skeleton lib already existed → made base `Skeleton` decorative + new `SkeletonGroup` (announce once); `CollectionList` loading→skeleton, zero-state→`EmptyState`; activity-feed loading→skeleton rows (N4 done, X1 dashboard). C9–C12 apply skeletons to remaining surfaces | ✅                 | `f0ed224` |
+| C8  | Group decision full-page flow: VoteBreakdown, localStorage draft, presence line, tap-to-rank, past-decisions (O4,O6,O7,O8,V3,V4,V5,V6,V7)                                                                                                                                                                           | ✅                 | `dd9c232` |
+| C9  | Restaurant search: skeletons, sort affordance, `normalizeRestaurantId` correctness fix (N6)                                                                                                                                                                                                                         | ✅                 | `9472e2e` |
+| C10 | Collection cards + restyle: card stats (count/last decided), weight-viz recolor, create-collection (N5,R3,S6)                                                                                                                                                                                                       | ✅                 | `7b4628e` |
+| C11 | Groups & friends: single Invite flow, cancel sent request via sender DELETE on `api/friends/requests/[id]` (O1,O2,V1,R4)                                                                                                                                                                                            | ✅                 | `fae0832` |
+| C12 | History + profile restyle: re-decide from history, date grouping, remove fake calendar, manual/confirm/prefs (R1,R2,R5,S5,S7)                                                                                                                                                                                       | ✅                 | `0a42114` |
+| C13 | Notification center (V2) — bell mounted in desktop header + panel dark-mode fix (`6be3bd5`); **mobile access + full center restyle still pending**                                                                                                                                                                  | ◧ partial → ▶ NEXT | `6be3bd5` |
+| C14 | Cleanup: retire C3 token aliases, decide Mascot fate (conflicts with no-mascots anti-ref), final USER-STORIES action-column pass                                                                                                                                                                                    | ☐                  | —         |
 
 ## Next actions
 
@@ -237,10 +237,43 @@ desktop fix).
    (Types/Lint/Format, Unit Tests, Build, E2E Smoke, Accessibility,
    Lighthouse). Also still pending: `gh auth login -h github.com` as
    akpersad (CLI can't create PRs until then).
-2. **Phase 3: C9–C11 done; implement C12** (history + profile restyle:
-   re-decide from history, date grouping, remove the fake calendar,
-   manual/confirm/prefs) next — see ledger above; then C13→C14 in order.
+2. **Phase 3: C9–C12 done; implement C13** (notification center V2 —
+   mobile access to the bell + full notification-center restyle; the desktop
+   header bell + panel dark-mode fix already landed in `6be3bd5`) next — see
+   ledger above; then C14 (cleanup) in order.
    Validate each commit against the axe lane + full pre-push.
+   C12 notes (`0a42114`): **R2** — `/history` flat list is now
+   `groupDecisionsByDate` sections (Today / Yesterday / Earlier this week /
+   This month / then `Month YYYY`) with sticky per-group headers; the
+   `viewMode` list/calendar toggle and the "Calendar view coming soon"
+   placeholder are **gone** (the fake calendar was an anti-slop dead-end).
+   Loading is a layout-mirroring `SkeletonGroup` (X1); the zero-state is the
+   `EmptyState` primitive with **filter-aware** copy (distinguishes "no
+   matches" from "no decisions yet") + a CTA (X2). The redundant duplicate
+   mobile/desktop search inputs were collapsed to one. **R1** — every card
+   has a "Decide again" action (desktop action column + mobile dropdown);
+   `handleDecideAgain` routes personal decisions → `/decide?collectionId=`
+   and group decisions → `/groups/[id]`. **S5** — `ManualDecisionForm`
+   selects/textarea moved onto `input-base` (dropped `border-quinary`); the
+   personal/group radios became a **segmented control** (kept real radio
+   inputs + label text "Personal"/"Group" + `role="radiogroup"` so the
+   existing `getByLabelText`/`getByRole('combobox')` tests stay green); group
+   & restaurant selects gained `htmlFor` labels (1.3.1). **S7** —
+   `DecisionResultModal` "Planned visit" box moved off cold
+   `text-blue-900/800` onto a warm tomato tint (fill only, no border+shadow);
+   reasoning box onto warm ink tokens; `tabular-nums` on dates/amounts. Two
+   `DecisionResultModal.test` string assertions were updated for the
+   sentence-cased "Planned visit" / "Selection reasoning". **R5/X1** —
+   `/profile` full-screen spinner → `ProfileSkeleton` that mirrors the
+   settings-card layout; the amount input gained `aria-invalid` +
+   `aria-describedby`. The profile loading-state test now asserts the
+   skeleton's "Loading profile settings" region. **Note:** the design
+   manual (`DESIGN-UI-UX-SKILLS.md`) was expanded and added to
+   `.prettierignore` (commit `cfc5063`) — it is hand-formatted and Prettier
+   mangles its emphasis + TOC; treat it as a vendored reference doc.
+   Validation: full pre-push green (1612 passed / 12 skipped, build OK); axe
+   lane `test:accessibility` green (20 passed, 0 failed, 2 flaky = the
+   documented dashboard Clerk dev-instance flake, passed on retry).
    C11 notes (`fae0832`): **O2** folded the two competing group-invite
    paths into one — `FriendSelectionModal` gained an optional
    `onInviteByEmail` prop (email field + divider + friend list in one
