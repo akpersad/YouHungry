@@ -56,7 +56,7 @@ describe('DecisionResultModal', () => {
   it('displays visit date correctly', () => {
     render(<DecisionResultModal {...defaultProps} />);
 
-    expect(screen.getByText('Planned Visit')).toBeInTheDocument();
+    expect(screen.getByText('Planned visit')).toBeInTheDocument();
     expect(
       screen.getByText('Tuesday, January 2, 2024 at 2:00 PM')
     ).toBeInTheDocument();
@@ -65,7 +65,7 @@ describe('DecisionResultModal', () => {
   it('displays reasoning correctly', () => {
     render(<DecisionResultModal {...defaultProps} />);
 
-    expect(screen.getByText('Selection Reasoning')).toBeInTheDocument();
+    expect(screen.getByText('Selection reasoning')).toBeInTheDocument();
     expect(
       screen.getByText(
         'Selected using weighted random algorithm. Weight: 0.85, Previous selections: 2'

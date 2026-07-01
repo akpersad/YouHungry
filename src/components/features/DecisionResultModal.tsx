@@ -109,15 +109,22 @@ export function DecisionResultModal({
         </Card>
 
         {/* Visit Date */}
-        <div className="bg-primary/10 border border-primary rounded-lg p-4">
-          <h4 className="font-medium text-blue-900 mb-2">Planned Visit</h4>
-          <p className="text-blue-800">{formatVisitDate(visitDate)}</p>
+        <div
+          className="rounded-lg p-4"
+          style={{ background: 'var(--tomato-tint)' }}
+        >
+          <h4 className="font-medium mb-2" style={{ color: 'var(--tomato)' }}>
+            Planned visit
+          </h4>
+          <p className="text-primary tabular-nums">
+            {formatVisitDate(visitDate)}
+          </p>
         </div>
 
         {/* Reasoning */}
         <div className="bg-surface border border-border rounded-lg p-4">
-          <h4 className="font-medium text-text mb-2">Selection Reasoning</h4>
-          <p className="text-text text-sm">{reasoning}</p>
+          <h4 className="font-medium text-primary mb-2">Selection reasoning</h4>
+          <p className="text-secondary text-sm">{reasoning}</p>
         </div>
 
         {/* Action Buttons */}

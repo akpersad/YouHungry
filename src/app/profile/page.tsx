@@ -7,6 +7,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { Skeleton, SkeletonGroup } from '@/components/ui/Skeleton';
 import { Label } from '@/components/ui/Label';
 import { Switch } from '@/components/ui/Switch';
 import { UserAvatar } from '@/components/ui/UserAvatar';
@@ -25,6 +26,39 @@ import {
   Check,
   AlertCircle,
 } from 'lucide-react';
+
+/**
+ * Loading placeholder that mirrors the settings-card layout so the page
+ * reserves its space (no CLS) and reads as "loading these settings" once
+ * (X1) rather than a bare full-screen spinner.
+ */
+function ProfileSkeleton() {
+  return (
+    <div className="min-h-screen bg-primary py-8">
+      <div className="max-w-4xl mx-auto lg:px-8">
+        <div className="mb-8 space-y-2">
+          <Skeleton className="h-8 w-56" />
+          <Skeleton className="h-4 w-80 max-w-full" />
+        </div>
+        <SkeletonGroup label="Loading profile settings" className="space-y-6">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Card key={i}>
+              <CardHeader>
+                <Skeleton className="h-5 w-40" />
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-11 w-full rounded-xl" />
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-11 w-full rounded-xl" />
+              </CardContent>
+            </Card>
+          ))}
+        </SkeletonGroup>
+      </div>
+    </div>
+  );
+}
 
 function ProfilePageContent() {
   const { user: clerkUser, isLoaded } = useUser();
@@ -507,14 +541,7 @@ function ProfilePageContent() {
   };
 
   if (!isLoaded || isLoading) {
-    return (
-      <div className="min-h-screen bg-primary flex items-center justify-center">
-        <div className="flex items-center space-x-2">
-          <Loader2 className="h-6 w-6 animate-spin" />
-          <span>Loading profile...</span>
-        </div>
-      </div>
-    );
+    return <ProfileSkeleton />;
   }
 
   if (error) {
@@ -1316,16 +1343,7 @@ function ProfilePageContent() {
 
 export default function ProfilePage() {
   return (
-    <Suspense
-      fallback={
-        <div className="min-h-screen bg-primary flex items-center justify-center">
-          <div className="flex items-center space-x-2">
-            <Loader2 className="h-6 w-6 animate-spin" />
-            <span>Loading profile...</span>
-          </div>
-        </div>
-      }
-    >
+    <Suspense fallback={<ProfileSkeleton />}>
       <ProfilePageContent />
     </Suspense>
   );

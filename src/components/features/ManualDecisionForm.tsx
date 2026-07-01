@@ -4,6 +4,7 @@ import { logger } from '@/lib/logger';
 import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { cn } from '@/lib/utils';
 import { useManualDecision } from '@/hooks/api/useHistory';
 import { useProfile } from '@/hooks/useProfile';
 import { useQuery } from '@tanstack/react-query';
@@ -221,50 +222,65 @@ export function ManualDecisionForm({ onSuccess }: ManualDecisionFormProps) {
         <label className="block text-sm font-medium text-primary mb-2">
           Decision Type
         </label>
-        <div className="flex gap-4">
-          <label className="flex items-center">
-            <input
-              type="radio"
-              value="personal"
-              checked={type === 'personal'}
-              onChange={(e) => {
-                setType(e.target.value as 'personal' | 'group');
-                setRestaurantId(''); // Reset restaurant selection when type changes
-              }}
-              className="mr-2"
-            />
-            Personal
-          </label>
-          <label className="flex items-center">
-            <input
-              type="radio"
-              value="group"
-              checked={type === 'group'}
-              onChange={(e) => {
-                setType(e.target.value as 'personal' | 'group');
-                setRestaurantId(''); // Reset restaurant selection when type changes
-                setGroupId(''); // Reset group selection when switching to personal
-              }}
-              className="mr-2"
-            />
-            Group
-          </label>
+        <div
+          role="radiogroup"
+          className="flex w-full gap-1 rounded-xl border border-border bg-[var(--surface-sunken)] p-1"
+        >
+          {(
+            [
+              { value: 'personal', label: 'Personal' },
+              { value: 'group', label: 'Group' },
+            ] as const
+          ).map((option) => (
+            <label
+              key={option.value}
+              className={cn(
+                'flex-1 cursor-pointer rounded-lg px-4 py-2 text-center text-sm font-medium transition-colors',
+                'focus-within:ring-2 focus-within:ring-[var(--tomato)] focus-within:ring-offset-2',
+                type === option.value
+                  ? 'bg-surface text-primary shadow-sm'
+                  : 'text-secondary hover:text-primary'
+              )}
+            >
+              <input
+                type="radio"
+                name="decision-type"
+                value={option.value}
+                checked={type === option.value}
+                onChange={() => {
+                  setType(option.value);
+                  // Reset restaurant selection whenever the type changes
+                  setRestaurantId('');
+                  // Switching to Group starts with no group chosen
+                  if (option.value === 'group') {
+                    setGroupId('');
+                  }
+                }}
+                className="sr-only"
+              />
+              {option.label}
+            </label>
+          ))}
         </div>
       </div>
 
       {/* Group Selection (if group type) */}
       {type === 'group' && (
         <div>
-          <label className="block text-sm font-medium text-primary mb-2">
+          <label
+            htmlFor="manual-group"
+            className="block text-sm font-medium text-primary mb-2"
+          >
             Group <span className="text-destructive">*</span>
           </label>
           <select
+            id="manual-group"
             value={groupId}
             onChange={(e) => {
               setGroupId(e.target.value);
               setRestaurantId(''); // Reset restaurant selection when group changes
             }}
-            className="w-full rounded-lg border border-quinary px-3 py-2"
+            className="input-base"
             required
           >
             <option value="">Select a group</option>
@@ -279,13 +295,17 @@ export function ManualDecisionForm({ onSuccess }: ManualDecisionFormProps) {
 
       {/* Restaurant Selection */}
       <div>
-        <label className="block text-sm font-medium text-primary mb-2">
+        <label
+          htmlFor="manual-restaurant"
+          className="block text-sm font-medium text-primary mb-2"
+        >
           Restaurant <span className="text-destructive">*</span>
         </label>
         <select
+          id="manual-restaurant"
           value={restaurantId}
           onChange={(e) => setRestaurantId(e.target.value)}
-          className="w-full rounded-lg border border-quinary px-3 py-2"
+          className="input-base disabled:opacity-50 disabled:cursor-not-allowed"
           required
           disabled={type === 'group' ? !groupId : false}
         >
@@ -326,14 +346,18 @@ export function ManualDecisionForm({ onSuccess }: ManualDecisionFormProps) {
 
       {/* Notes */}
       <div>
-        <label className="block text-sm font-medium text-primary mb-2">
-          Notes (Optional)
+        <label
+          htmlFor="manual-notes"
+          className="block text-sm font-medium text-primary mb-2"
+        >
+          Notes (optional)
         </label>
         <textarea
+          id="manual-notes"
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           placeholder="Add any notes about this visit..."
-          className="w-full rounded-lg border border-quinary px-3 py-2 h-24 resize-none"
+          className="input-base h-24 resize-none"
         />
       </div>
 
@@ -345,7 +369,7 @@ export function ManualDecisionForm({ onSuccess }: ManualDecisionFormProps) {
           disabled={!isFormValid() || manualDecisionMutation.isPending}
           className="flex-1"
         >
-          {manualDecisionMutation.isPending ? 'Adding...' : 'Add Decision'}
+          {manualDecisionMutation.isPending ? 'Adding...' : 'Add decision'}
         </Button>
       </div>
     </form>
