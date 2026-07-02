@@ -12,8 +12,9 @@ auth posture changes.
    `/api/auth/check-username` (rate-limited; needed pre-session by the sign-up
    form), `/api/pwa-status`, `/api/cron/*` (CRON_SECRET-verified).
 2. **Handler auth (`src/lib/auth.ts`)** — `getCurrentUser()` /
-   `requireAuth()` / `requireAdminAuth()` (admin = `ADMIN_USER_IDS` env, Mongo
-   user ids) / `isAdminUser()`.
+   `requireAuth()` / `requireAdminAuth()` (admin = `ADMIN_USER_IDS` env;
+   accepts Mongo user ids and/or Clerk ids) / `isAdminUser()` — every admin
+   route now routes through these; no handler parses `ADMIN_USER_IDS` itself.
 3. **Ownership / scope** — `verifyCollectionAccess()` (`src/lib/collections.ts`;
    personal owner or group member/admin, handles legacy Clerk-id and ObjectId
    `ownerId` formats), `isGroupMemberOrAdmin()` (`src/lib/groups.ts`),
@@ -75,12 +76,16 @@ the edge redirect).
 
 ## Required environment variables
 
-- `ADMIN_USER_IDS` — comma-separated Mongo user ids with admin access.
+- `ADMIN_USER_IDS` — comma-separated ids with admin access; each entry may
+  be the user's Mongo `_id` or their Clerk id (both forms match).
 - `CRON_SECRET` — must be set in Vercel so cron invocations carry
   `Authorization: Bearer …`; handlers return 500 if unset, 401 on mismatch.
 - `CLERK_WEBHOOK_SECRET` — required in production (webhook fails closed).
 - `ADMIN_ALERT_EMAILS` — alert recipients (replaces a hardcoded address).
 - `INTERNAL_API_SECRET` — internal bypass for cost-monitoring collection.
+- `ADMIN_ALERT_PHONE` — E.164 number for admin-alert SMS (replaces a
+  hardcoded number); when unset the SMS channel is skipped with a warning
+  and `admin/sms` test/alert actions return 400.
 
 ## Known gaps / deferred
 

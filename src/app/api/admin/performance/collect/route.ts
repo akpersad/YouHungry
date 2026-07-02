@@ -9,14 +9,10 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
+import { isAdminUser } from '@/lib/auth';
 import { getUserByClerkId } from '@/lib/users';
 import { collectAllMetrics } from '@/lib/metrics-collector';
 import { logger } from '@/lib/logger';
-
-// Get admin user IDs from environment variable (MongoDB user IDs)
-const ADMIN_USER_IDS =
-  process.env.ADMIN_USER_IDS?.split(',').map((id) => id.trim()) || [];
-
 // Allow up to 5 minutes for metrics collection
 export const maxDuration = 300;
 
@@ -34,7 +30,7 @@ export async function POST(_request: NextRequest) {
     }
 
     const user = await getUserByClerkId(userId);
-    if (!user || !ADMIN_USER_IDS.includes(user._id.toString())) {
+    if (!user || !isAdminUser(user)) {
       logger.warn('Unauthorized metrics collection attempt', {
         userId,
         clerkId: userId,

@@ -1,14 +1,10 @@
 import { logger } from '@/lib/logger';
+import { isAdminUser } from '@/lib/auth';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { getUserByClerkId } from '@/lib/users';
 import { apiCache } from '@/lib/api-cache';
 import { clearLocationCache } from '@/lib/google-places';
-
-// Get admin user IDs from environment variable (MongoDB user IDs)
-const ADMIN_USER_IDS =
-  process.env.ADMIN_USER_IDS?.split(',').map((id) => id.trim()) || [];
-
 export async function POST(request: NextRequest) {
   try {
     const { userId } = await auth();
@@ -19,7 +15,7 @@ export async function POST(request: NextRequest) {
 
     // Check if user is admin
     const user = await getUserByClerkId(userId);
-    if (!user || !ADMIN_USER_IDS.includes(user._id.toString())) {
+    if (!user || !isAdminUser(user)) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 

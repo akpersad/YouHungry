@@ -6,6 +6,7 @@
  */
 
 import { logger } from '@/lib/logger';
+import { isAdminUser } from '@/lib/auth';
 import { NextRequest, NextResponse } from 'next/server';
 import {
   comparePerformanceMetrics,
@@ -14,11 +15,6 @@ import {
 import { ComparisonPeriod } from '@/types/performance-metrics';
 import { auth } from '@clerk/nextjs/server';
 import { getUserByClerkId } from '@/lib/users';
-
-// Get admin user IDs from environment variable (MongoDB user IDs)
-const ADMIN_USER_IDS =
-  process.env.ADMIN_USER_IDS?.split(',').map((id) => id.trim()) || [];
-
 /**
  * GET - Compare performance metrics
  * Query params:
@@ -35,7 +31,7 @@ export async function GET(request: NextRequest) {
     }
 
     const user = await getUserByClerkId(userId);
-    if (!user || !ADMIN_USER_IDS.includes(user._id.toString())) {
+    if (!user || !isAdminUser(user)) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
