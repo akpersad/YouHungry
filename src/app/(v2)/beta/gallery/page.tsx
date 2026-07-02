@@ -1,11 +1,6 @@
 'use client';
 
-import {
-  useEffect,
-  useState,
-  useSyncExternalStore,
-  type ReactNode,
-} from 'react';
+import { useState, type ReactNode } from 'react';
 import {
   Button,
   Card,
@@ -26,81 +21,6 @@ import {
  * promptFiles/v2/IDENTITY.md decides what's here; the design manual decides
  * how well.
  */
-
-// Same hydration-safe shape as v1's ThemeProvider: external state comes in
-// through useSyncExternalStore (server snapshot = light), the session choice
-// wins, and the DOM class is synced in an effect — no setState-in-effect.
-const subscribeToSystem = (cb: () => void) => {
-  const mq = window.matchMedia('(prefers-color-scheme: dark)');
-  mq.addEventListener('change', cb);
-  return () => mq.removeEventListener('change', cb);
-};
-const noopSubscribe = () => () => {};
-
-function ThemeToggle() {
-  const stored = useSyncExternalStore(
-    noopSubscribe,
-    () => {
-      try {
-        return localStorage.getItem('fitr-v2-theme');
-      } catch {
-        return null;
-      }
-    },
-    () => null
-  );
-  const system = useSyncExternalStore(
-    subscribeToSystem,
-    () =>
-      window.matchMedia('(prefers-color-scheme: dark)').matches
-        ? 'dark'
-        : 'light',
-    () => 'light' as const
-  );
-  const [session, setSession] = useState<'light' | 'dark' | null>(null);
-  const mode: 'light' | 'dark' =
-    session ?? (stored === 'light' || stored === 'dark' ? stored : system);
-
-  useEffect(() => {
-    document.documentElement.classList.remove('light', 'dark');
-    document.documentElement.classList.add(mode);
-  }, [mode]);
-
-  const apply = (next: 'light' | 'dark') => {
-    setSession(next);
-    try {
-      localStorage.setItem('fitr-v2-theme', next);
-    } catch {
-      // private mode — the toggle still works for this visit
-    }
-  };
-
-  return (
-    <div
-      role="group"
-      aria-label="Color mode"
-      className="flex rounded-lg border border-line-strong p-0.5"
-    >
-      {(['light', 'dark'] as const).map((m) => (
-        <button
-          key={m}
-          type="button"
-          aria-pressed={mode === m}
-          onClick={() => apply(m)}
-          className={
-            'h-9 rounded-md px-3 text-sm font-semibold outline-none transition-colors motion-safe:duration-100 ' +
-            'focus-visible:ring-2 focus-visible:ring-focus ' +
-            (mode === m
-              ? 'bg-ink text-canvas'
-              : 'text-ink-muted hover:text-ink')
-          }
-        >
-          {m === 'light' ? 'Light' : 'Dark'}
-        </button>
-      ))}
-    </div>
-  );
-}
 
 function Section({
   title,
@@ -167,12 +87,10 @@ export default function GalleryPage() {
   return (
     <main className="mx-auto flex min-h-dvh max-w-3xl flex-col gap-14 px-4 py-10 sm:px-6 sm:py-14">
       <header className="flex flex-col gap-4">
-        <div className="flex items-start justify-between gap-4">
-          <p className="type-board text-sm text-ink-muted">
-            Fork In The Road · v2 identity
-          </p>
-          <ThemeToggle />
-        </div>
+        {/* The color-mode toggle lives in the shared shell header. */}
+        <p className="type-board text-sm text-ink-muted">
+          Fork In The Road · v2 identity
+        </p>
         <h1 className="type-board text-4xl text-ink sm:text-5xl">
           Tonight&apos;s board
         </h1>
