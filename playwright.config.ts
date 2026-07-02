@@ -48,10 +48,28 @@ export default defineConfig({
   },
 
   projects: [
-    // 1. Setup - runs once, sequentially
+    // 1. Setup - runs once, sequentially (pinned to the v1 setup file so it
+    // doesn't pick up e2e/v2 setups — v1 lanes are frozen from Phase 1 on)
     {
       name: 'setup',
-      testMatch: /.*\.setup\.ts/,
+      testMatch: /e2e\/auth\.setup\.ts/,
+    },
+
+    // v2 (greenfield /beta tree): its own setup + project, authed as the
+    // seeded test-squad organizer (scripts/v2/test-squad.ts).
+    {
+      name: 'v2-setup',
+      testMatch: /e2e\/v2\/.*\.setup\.ts/,
+    },
+    {
+      name: 'v2-beta',
+      testMatch: ['**/v2/**/*.spec.ts'],
+      use: {
+        ...devices['Desktop Chrome'],
+        storageState: 'playwright/.auth/v2-organizer.json',
+      },
+      dependencies: ['v2-setup'],
+      fullyParallel: true,
     },
 
     // 2. Auth tests - sequential (Clerk state management)
