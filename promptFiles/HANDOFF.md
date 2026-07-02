@@ -1,6 +1,6 @@
 # Session Handoff — Fork In The Road portfolio upgrade
 
-**Last updated:** 2026-07-01 (C13 complete)
+**Last updated:** 2026-07-02 (C14 complete — **Phase 3 UI refresh DONE, all C-tasks ✅**; C15 bug-fix follow-ups in progress on the same branch)
 **Read this first, then:** `promptFiles/phased-execution-plan.md` (the authoritative plan), `CLAUDE.md` (repo guide).
 
 ## Workflow rules (owner-set 2026-06-11 — do not deviate)
@@ -245,7 +245,7 @@ desktop fix).
 | C11 | Groups & friends: single Invite flow, cancel sent request via sender DELETE on `api/friends/requests/[id]` (O1,O2,V1,R4)                                                                                                                                                                                            | ✅       | `fae0832` |
 | C12 | History + profile restyle: re-decide from history, date grouping, remove fake calendar, manual/confirm/prefs (R1,R2,R5,S5,S7)                                                                                                                                                                                       | ✅       | `0a42114` |
 | C13 | Notification center (V2): desktop bell (`6be3bd5`) + shared `NotificationCenterProvider`, mobile More-menu entry w/ unread badge, drawer restyle (Fraunces, warm type-tinted chips, dialog semantics, skeleton, EmptyState)                                                                                         | ✅       | `7ac03a9` |
-| C14 | Cleanup: retire C3 token aliases, decide Mascot fate (conflicts with no-mascots anti-ref), final USER-STORIES action-column pass                                                                                                                                                                                    | ▶ NEXT   | —         |
+| C14 | Cleanup: FULL legacy-alias retirement (owner decision A), Mascot removed + error/404 rebuilt on-brand (owner decision B), final USER-STORIES action-column pass                                                                                                                                                     | ✅       | `bb67f6c` |
 
 ## Next actions
 
@@ -254,10 +254,10 @@ desktop fix).
    (Types/Lint/Format, Unit Tests, Build, E2E Smoke, Accessibility,
    Lighthouse). Also still pending: `gh auth login -h github.com` as
    akpersad (CLI can't create PRs until then).
-2. **Phase 3: C9–C13 done; implement C14** (cleanup — retire the C3 token
-   aliases, decide the Mascot's fate vs the no-mascots anti-reference, and do
-   the final USER-STORIES action-column pass) — see ledger above; it is the
-   last Phase 3 commit.
+2. **Phase 3 COMPLETE (C1–C14 all ✅, `bb67f6c`)** — see the ledger above and
+   the C14 completion notes below. Owner to review + push/PR when ready
+   (never push without the owner's go-ahead). Next phase per plan: Phase 4
+   (README) — regroup with the owner first.
    Validate each commit against the axe lane + full pre-push.
    C13 notes (`7ac03a9`): **V2** was the last ❌ story — the in-app channel
    existed (Bell/Panel components + `/api/notifications`) but had no
@@ -385,6 +385,49 @@ desktop fix).
    column for the rows it resolved — documentation must stay lossless across a
    context clear.
 3. Later candidates recorded from the Phase 2 honesty pass: tiered-consensus crash edge, voteBreakdown >3-rank scoring, getCurrentUser placeholder auto-create, ADMIN_USER_IDS id-form footgun, hardcoded admin phone, proxy.ts rename when clerk#8302 closes, eslint 10 retest.
+
+## C14 completion notes (2026-07-02, `bb67f6c`) — Phase 3 complete
+
+Executed the pin below exactly; the pin's step list is kept for the record in
+git history only (section replaced). What matters going forward:
+
+- **`@theme inline` now registers `--color-bg` + `--color-ink-inverse`** on top
+  of the C13 set — every utility (incl. `bg-bg`, `text-ink-inverse`,
+  `accent-tomato`) generates from canonical tokens; compiled CSS contains ZERO
+  legacy names.
+- **~113 files renamed to canonical tokens.** Key discovery during execution:
+  pre-C3 there was NO Tailwind color registration at all, so every
+  variant-prefixed legacy class (`hover:bg-tertiary`, `focus:ring-primary`,
+  `dark:text-text-light`, ~250 sites) had been generating **no CSS ever**.
+  Policy applied: hand-written-class names → pure rename (pixel-identical);
+  inert `hover:`/`focus:` states → renamed canonical (ACTIVATES the intended
+  affordances: tomato focus rings/borders on inputs, sunken hovers, brand
+  spinners); inert `dark:` legacy overrides → DELETED (canonical tokens
+  self-flip in dark mode; deletion is the pixel-preserving move).
+- **`bg-primary` disambiguated by author intent**: plain = canvas → `bg-bg`;
+  `/alpha` + `text-white` pairings = brand → `bg-tomato...`; native checkboxes
+  `text-primary focus:ring-primary` → `accent-tomato focus:ring-tomato`.
+- **Dead code deleted:** unused Button `outline-accent` variant +
+  `.btn-outline-accent` CSS (byte-identical duplicate of `.btn-outline`),
+  never-imported `src/components/ui/Tabs.css` (referenced vars that never
+  existed), unused `.focus\:ring-ring` / `.text-destructive-foreground` rules.
+- **Mascot ("Nibbles") removed** per owner decision B; `error.tsx` /
+  `not-found.tsx` rebuilt as on-brand typographic pages (Fraunces headline,
+  tomato-tint icon chip / giant Fraunces 404 numeral, warm tokens, honest
+  copy-led text, quiet `hover:text-tomato` links). Visually verified light +
+  dark via production-server screenshots.
+- **Bug found & fixed during the visual spot-check (`7a0993b`):**
+  `auth.protect({ unauthenticatedUrl: '/sign-in' })` (from `1859f81`, this
+  branch only, never deployed) throws ERR_INVALID_URL inside
+  NextResponse.redirect — every signed-out visit to a protected route
+  **500'd instead of redirecting**. Fixed with
+  `new URL('/sign-in', req.url).toString()`; verified 307 → /sign-in.
+- Validation: type-check / eslint --max-warnings=0 / prettier / Jest
+  (128 suites, 1607 passed / 12 skipped) / production build all green; axe
+  lane `test:accessibility` green (22 passed / 9 skipped / 0 failed);
+  landing + 404 + sign-in screenshots checked in both modes.
+- USER-STORIES.md action column finalized (all rows resolved or explicitly
+  deferred with phase); X5 now ✅ C3–C14.
 
 ## Owner context
 
