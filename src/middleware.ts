@@ -13,6 +13,10 @@ const isPublicRoute = createRouteMatcher([
   // v2 (greenfield tree, Phase 1+): cold-open value with no account. Routes
   // that need auth call requireAuth-style guards in their handlers/pages.
   '/beta(.*)',
+  // v2 API: every handler guards itself via requireV2User (JSON 401, not an
+  // HTML sign-in redirect — these are fetch/EventSource targets). quick-spin
+  // is genuinely public; the rest 401 without a session.
+  '/api/v2(.*)',
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
