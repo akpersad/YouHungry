@@ -4,11 +4,11 @@ import { lazy, Suspense } from 'react';
 // import { useRouter } from 'next/navigation'; // Reserved for future route preloading
 
 // Lazy load page components
-const LazyDashboard = lazy(() => import('@/app/dashboard/page'));
-const LazyRestaurants = lazy(() => import('@/app/restaurants/page'));
-const LazyGroups = lazy(() => import('@/app/groups/page'));
-const LazyFriends = lazy(() => import('@/app/friends/page'));
-const LazyCollections = lazy(() => import('@/app/collections/[id]/page'));
+const LazyDashboard = lazy(() => import('@/app/(v1)/dashboard/page'));
+const LazyRestaurants = lazy(() => import('@/app/(v1)/restaurants/page'));
+const LazyGroups = lazy(() => import('@/app/(v1)/groups/page'));
+const LazyFriends = lazy(() => import('@/app/(v1)/friends/page'));
+const LazyCollections = lazy(() => import('@/app/(v1)/collections/[id]/page'));
 
 // Loading components for different page types
 function PageSkeleton() {
@@ -109,20 +109,20 @@ export function useRoutePreloader() {
     // Preload the route component
     switch (route) {
       case '/dashboard':
-        import('@/app/dashboard/page');
+        import('@/app/(v1)/dashboard/page');
         break;
       case '/restaurants':
-        import('@/app/restaurants/page');
+        import('@/app/(v1)/restaurants/page');
         break;
       case '/groups':
-        import('@/app/groups/page');
+        import('@/app/(v1)/groups/page');
         break;
       case '/friends':
-        import('@/app/friends/page');
+        import('@/app/(v1)/friends/page');
         break;
       default:
         if (route.startsWith('/collections/')) {
-          import('@/app/collections/[id]/page');
+          import('@/app/(v1)/collections/[id]/page');
         }
         break;
     }

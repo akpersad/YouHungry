@@ -98,23 +98,23 @@ jest.mock('@/components/forms/CreateGroupForm', () => ({
 }));
 
 // Mock page components
-jest.mock('@/app/dashboard/page', () => ({
+jest.mock('@/app/(v1)/dashboard/page', () => ({
   default: () => <div data-testid="dashboard-page">Dashboard</div>,
 }));
 
-jest.mock('@/app/restaurants/page', () => ({
+jest.mock('@/app/(v1)/restaurants/page', () => ({
   default: () => <div data-testid="restaurants-page">Restaurants</div>,
 }));
 
-jest.mock('@/app/groups/page', () => ({
+jest.mock('@/app/(v1)/groups/page', () => ({
   default: () => <div data-testid="groups-page">Groups</div>,
 }));
 
-jest.mock('@/app/friends/page', () => ({
+jest.mock('@/app/(v1)/friends/page', () => ({
   default: () => <div data-testid="friends-page">Friends</div>,
 }));
 
-jest.mock('@/app/collections/[id]/page', () => ({
+jest.mock('@/app/(v1)/collections/[id]/page', () => ({
   default: () => <div data-testid="collection-page">Collection</div>,
 }));
 

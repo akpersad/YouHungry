@@ -1,6 +1,6 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { useRouter } from 'next/navigation';
-import SignInPage from '@/app/sign-in/[[...rest]]/page';
+import SignInPage from '@/app/(v1)/sign-in/[[...rest]]/page';
 
 // Mock Next.js router
 jest.mock('next/navigation', () => ({

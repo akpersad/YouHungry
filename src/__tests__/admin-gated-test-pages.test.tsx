@@ -8,10 +8,10 @@ jest.mock('@/components/admin/AdminGate', () => ({
   AdminGate: () => <div data-testid="admin-gate" />,
 }));
 
-import NotificationTestPage from '@/app/notification-test/page';
-import PushTestPage from '@/app/push-test/page';
-import DesignSystemPOC from '@/app/design-system-poc/page';
-import PWAExplorerPage from '@/app/pwa-explorer/page';
+import NotificationTestPage from '@/app/(v1)/notification-test/page';
+import PushTestPage from '@/app/(v1)/push-test/page';
+import DesignSystemPOC from '@/app/(v1)/design-system-poc/page';
+import PWAExplorerPage from '@/app/(v1)/pwa-explorer/page';
 
 describe('admin-gated test pages', () => {
   it.each([
