@@ -351,20 +351,11 @@ describe('Admin route authorization', () => {
     });
 
     it('GET /api/admin/sms does not leak phone numbers to admins', async () => {
-      // The route reads ADMIN_USER_IDS at module load, so re-import it with
-      // the admin env var set
-      process.env.ADMIN_USER_IDS = mockAdminUser._id;
+      (requireAdminAuth as jest.Mock).mockResolvedValue(mockAdminUser);
+      const smsModule = jest.requireMock('@/lib/sms-notifications');
+      smsModule.smsNotifications.isConfigured.mockReturnValue(true);
 
-      let getSmsStatusAsAdmin: () => Promise<Response>;
-      jest.isolateModules(() => {
-        const authModule = jest.requireMock('@/lib/auth');
-        authModule.requireAuth.mockResolvedValue(mockAdminUser);
-        const smsModule = jest.requireMock('@/lib/sms-notifications');
-        smsModule.smsNotifications.isConfigured.mockReturnValue(true);
-        ({ GET: getSmsStatusAsAdmin } = require('../admin/sms/route'));
-      });
-
-      const response = await getSmsStatusAsAdmin!();
+      const response = await getSmsStatus();
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -374,8 +365,6 @@ describe('Admin route authorization', () => {
       expect(body).not.toContain(process.env.TWILIO_PHONE_NUMBER as string);
       expect(data.fromNumber).toBeUndefined();
       expect(data.developmentNumber).toBeUndefined();
-
-      delete process.env.ADMIN_USER_IDS;
     });
   });
 });

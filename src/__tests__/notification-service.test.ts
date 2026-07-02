@@ -964,6 +964,15 @@ describe('Notification Service', () => {
     const alertType = 'cost_spike' as const;
     const message = 'Daily costs exceeded threshold';
     const details = { amount: 100 };
+    const adminPhone = '+15550001111';
+
+    beforeEach(() => {
+      process.env.ADMIN_ALERT_PHONE = adminPhone;
+    });
+
+    afterEach(() => {
+      delete process.env.ADMIN_ALERT_PHONE;
+    });
 
     it('should send admin alert through multiple channels', async () => {
       await notificationService.sendAdminAlert(
@@ -974,7 +983,7 @@ describe('Notification Service', () => {
       );
 
       expect(smsNotifications.sendAdminAlert).toHaveBeenCalledWith(
-        '+18777804236', // Hard-coded admin number in the service
+        adminPhone, // From ADMIN_ALERT_PHONE
         alertType,
         message
       );
@@ -989,6 +998,25 @@ describe('Notification Service', () => {
           description: message,
         })
       );
+    });
+
+    it('should skip the SMS channel with a warning when ADMIN_ALERT_PHONE is unset', async () => {
+      delete process.env.ADMIN_ALERT_PHONE;
+
+      await notificationService.sendAdminAlert(
+        mockUserId,
+        alertType,
+        message,
+        details
+      );
+
+      expect(smsNotifications.sendAdminAlert).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('ADMIN_ALERT_PHONE is not set')
+      );
+      expect(
+        inAppNotifications.createAdminAlertNotification
+      ).toHaveBeenCalledWith(mockUserId, alertType, message, details);
     });
 
     it('should throw and skip in-app when the admin SMS fails', async () => {
