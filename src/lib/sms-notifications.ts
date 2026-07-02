@@ -1,6 +1,10 @@
 import { logger } from '@/lib/logger';
 import twilio from 'twilio';
 import { urlShortener } from '@/lib/url-shortener';
+import {
+  isExternalSendAllowed,
+  warnSuppressed,
+} from '@/lib/notification-suppression';
 
 // Initialize Twilio client
 const client = twilio(
@@ -127,6 +131,11 @@ export class SMSNotificationService {
         messageOptions.messagingServiceSid = this.messagingServiceSid;
       } else {
         messageOptions.from = this.fromNumber;
+      }
+
+      if (!isExternalSendAllowed()) {
+        warnSuppressed('sms', { to: formattedTo });
+        return { success: true, messageId: 'suppressed-non-production' };
       }
 
       const result = await client.messages.create(messageOptions);

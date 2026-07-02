@@ -1,4 +1,8 @@
 import { logger } from './logger';
+import {
+  isExternalSendAllowed,
+  warnSuppressed,
+} from './notification-suppression';
 
 // Email notification types
 export type AlertType =
@@ -603,6 +607,14 @@ export class EmailNotificationService {
         html: template.template(alertData),
       };
 
+      if (!isExternalSendAllowed()) {
+        warnSuppressed('email', {
+          alertType: alertData.type,
+          recipients: recipients.length,
+        });
+        return true;
+      }
+
       const response = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
@@ -707,6 +719,16 @@ export class EmailNotificationService {
 
       if (!this.fromEmail) {
         return { valid: false, error: 'FROM_EMAIL not configured' };
+      }
+
+      // The "validation" below actually POSTs to the send endpoint, so it
+      // sits behind the suppression seam like any other external send.
+      if (!isExternalSendAllowed()) {
+        return {
+          valid: false,
+          error:
+            'Not validated: external sends are suppressed outside production',
+        };
       }
 
       // Test API key by making a simple request to the emails endpoint

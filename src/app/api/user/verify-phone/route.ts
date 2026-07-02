@@ -8,6 +8,10 @@ import {
   rateLimitResponse,
   userRateLimitKey,
 } from '@/lib/rate-limit';
+import {
+  isExternalSendAllowed,
+  warnSuppressed,
+} from '@/lib/notification-suppression';
 import twilio from 'twilio';
 
 // Initialize Twilio client
@@ -83,6 +87,13 @@ export async function POST(request: NextRequest) {
     const formattedPhone = formatPhoneNumber(phoneNumber);
 
     // Send verification code using Twilio Verify API
+    if (!isExternalSendAllowed()) {
+      warnSuppressed('sms-verify', { userId, phoneNumber: formattedPhone });
+      return NextResponse.json(
+        { error: 'SMS verification is unavailable outside production' },
+        { status: 503 }
+      );
+    }
     try {
       const verification = await twilioClient.verify.v2
         .services(TWILIO_VERIFY_SERVICE_SID)

@@ -30,12 +30,30 @@ describe('UserEmailNotificationService', () => {
     process.env.RESEND_API_KEY = 'test-api-key';
     process.env.FROM_EMAIL = 'test@example.com';
     process.env.NEXT_PUBLIC_APP_URL = 'http://localhost:3000';
+    // These suites unit-test the send path against mocked fetch, so opt
+    // past the hard non-production suppression seam.
+    process.env.ALLOW_REAL_NOTIFICATIONS = 'true';
   });
 
   afterEach(() => {
     delete process.env.RESEND_API_KEY;
     delete process.env.FROM_EMAIL;
     delete process.env.NEXT_PUBLIC_APP_URL;
+    delete process.env.ALLOW_REAL_NOTIFICATIONS;
+  });
+
+  describe('suppression seam', () => {
+    it('no-ops the send outside production without calling fetch', async () => {
+      delete process.env.ALLOW_REAL_NOTIFICATIONS;
+      const result = await userEmailNotificationService.sendUserNotification({
+        type: 'friend_request',
+        recipientEmail: 'user@example.com',
+        recipientName: 'User',
+      });
+
+      expect(result.success).toBe(true);
+      expect(global.fetch).not.toHaveBeenCalled();
+    });
   });
 
   describe('sendUserNotification', () => {
