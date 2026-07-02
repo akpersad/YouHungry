@@ -34,9 +34,14 @@ tokens good but only ~60% adopted; `Collection.restaurantIds` is a 3-shape
 union; mixed Clerk-id/ObjectId identity model.
 
 **Next session:** Phase 1 (`v2/foundations`) per WORKPLAN.md, cut from main
-after this PR merges. Owner actions needed: enable Google/Apple social
-connections in Clerk dashboard (dev + prod); confirm dev Clerk keys in
+after this PR merges. Owner action needed: confirm dev Clerk keys in
 `.env.local`.
+
+**Owner decision 2026-07-02 (auth):** NO Google/Apple social login — Apple
+sign-in requires a paid Apple Developer account (owner won't pay yet) and
+owner won't ship Google without Apple. v2 auth = Clerk **email/password
+only** (2 fields, no phone/username). Revisit social providers only if the
+Apple economics change.
 
 ## Workflow rules (owner-set 2026-06-11 — do not deviate)
 

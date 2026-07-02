@@ -71,8 +71,9 @@ Make v2 buildable and self-verifiable before building anything visible.
 **Exit demo:** a scripted end-to-end run (seeded data → fake fork → spin →
 persisted result) executes locally with zero owner involvement.
 **Owner input needed:** confirm dev Clerk instance keys exist in
-`.env.local`; enable Google/Apple social connections in the Clerk dashboard
-(dev + prod) — an owner-only dashboard action.
+`.env.local`. (Auth is Clerk email/password only — owner decision
+2026-07-02: no Google/Apple social providers; Apple requires a paid
+developer account and Google won't ship without Apple.)
 
 ### Phase 2 — Identity & design system
 
@@ -100,8 +101,9 @@ now, expensive after Phase 3.
   lifespan; Fork detail page with live state.
 - Vote mode for signed-in users: tap-to-rank top 3, live tally (SSE),
   quorum/timer auto-close, result reveal + breakdown.
-- One-tap Clerk sign-in (Google/Apple) integrated where the flow first
-  requires an account.
+- Minimal Clerk email/password sign-up/sign-in (email + password, nothing
+  else — no phone, no username, no social providers) integrated where the
+  flow first requires an account.
 
 **Exit demo:** solo journey and a 3-user signed-in vote, driven end-to-end
 by Playwright with the test squad; owner can also click through on `/beta`.
@@ -188,14 +190,14 @@ told.
 
 ## Standing risks & mitigations
 
-| Risk                                                   | Mitigation                                                                           |
-| ------------------------------------------------------ | ------------------------------------------------------------------------------------ |
-| Guest voting abuse (unauthenticated writes)            | Phase 4 security checklist: signed tokens, rate limits, caps, expiry; reviewed in PR |
-| Google Places cost during dev                          | Seeded/cached payloads in dev DB; single client; cache-first                         |
-| Clerk dashboard settings (social login) are owner-only | Flagged as Phase 1 owner action, requested early                                     |
-| Two apps in one tree bloat CI                          | v1 test lanes frozen (not extended) from Phase 1; deleted at Phase 7                 |
-| Migration corrupts live data                           | Dry-run on snapshot + owner sign-off gate; v1 collections archived before drop       |
-| Design direction rejected late                         | Phase 2 gallery gate exists precisely to fail fast                                   |
+| Risk                                               | Mitigation                                                                           |
+| -------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| Guest voting abuse (unauthenticated writes)        | Phase 4 security checklist: signed tokens, rate limits, caps, expiry; reviewed in PR |
+| Google Places cost during dev                      | Seeded/cached payloads in dev DB; single client; cache-first                         |
+| Email/password-only signup adds friction vs social | Keep the form to 2 fields; guest Fork Links carry the zero-friction load             |
+| Two apps in one tree bloat CI                      | v1 test lanes frozen (not extended) from Phase 1; deleted at Phase 7                 |
+| Migration corrupts live data                       | Dry-run on snapshot + owner sign-off gate; v1 collections archived before drop       |
+| Design direction rejected late                     | Phase 2 gallery gate exists precisely to fail fast                                   |
 
 ## Session ritual (every phase)
 

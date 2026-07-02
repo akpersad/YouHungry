@@ -77,16 +77,19 @@ SMS is deleted outright: it cost real money per send, demanded phone
 verification at signup, and dragged a homegrown URL shortener behind it. The
 Fork Link does its job better for free.
 
-## Accounts: one tap, and only when they pay for themselves
+## Accounts: featherweight, and only when they pay for themselves
 
-- Sign in with Google/Apple via Clerk. No phone number, no username
-  ceremony, no multi-field form. First-run should reach a completed Fork
-  faster than v1 reached the end of its registration form.
+- Clerk **email/password only** — email, password, done. No phone number,
+  no username ceremony, no multi-field form, no social providers. (Owner
+  decision 2026-07-02: Apple sign-in requires a paid developer account,
+  and Google won't ship without Apple; revisit both together later if the
+  economics change.) First-run should still reach a completed Fork faster
+  than v1 reached the end of its registration form.
 - An account buys: saved Places/Lists, Crew membership and shared weight
   history, decision history, push/email results. Voting on a Fork Link never
   requires one.
 - Organizing a Fork requires an account (spam control + someone must own the
-  lifecycle), but creating one is a single tap inside that same flow.
+  lifecycle), but creating one is a ~15-second step inside that same flow.
 
 ## What carries over from v1 (kept on merit, not sentiment)
 
@@ -136,8 +139,8 @@ plumbing.
 1. **Cold open → completed solo Fork in ≤ 2 taps** (no account).
 2. **Group chat → cast vote in ≤ 15 seconds** from tapping a Fork Link (no
    account).
-3. **New user → organized group Fork in under a minute**, including one-tap
-   sign-in.
+3. **New user → organized group Fork in under a minute**, including
+   email/password sign-up.
 4. Every journey drivable end-to-end by automated tests with the dev-instance
    test squad — no manual owner intervention to verify a flow.
 5. The codebase shrinks: v2 at cutover is meaningfully smaller than v1 while
