@@ -113,6 +113,18 @@
 
   /* motion — "decisive snap" */
   --ease-snap: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* one flap tick of the reveal board (Reveal.tsx re-keys per tick) */
+  --animate-flap: v2-flap 130ms var(--ease-snap) both;
+}
+
+@keyframes v2-flap {
+  from {
+    transform: rotateX(-85deg);
+  }
+  to {
+    transform: rotateX(0deg);
+  }
 }
 
 /* The departure-board display register: condensed, heavy, tracked caps.
