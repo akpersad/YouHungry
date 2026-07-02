@@ -89,7 +89,7 @@ export function DecideFlow({ collectionId }: DecideFlowProps) {
   }, []);
 
   if (loadingCollection || loadingRestaurants) {
-    return <Card className="p-8 text-center text-secondary">Loading…</Card>;
+    return <Card className="p-8 text-center text-ink-secondary">Loading…</Card>;
   }
 
   if (!collection) {
@@ -127,15 +127,15 @@ export function DecideFlow({ collectionId }: DecideFlowProps) {
   return (
     <Card className="p-6">
       <div className="mb-4 text-center">
-        <p className="text-sm text-tertiary">Deciding from</p>
-        <h2 className="font-display text-xl font-semibold text-primary">
+        <p className="text-sm text-ink-muted">Deciding from</p>
+        <h2 className="font-display text-xl font-semibold text-ink">
           {collection.name}
         </h2>
       </div>
 
       {phase === 'idle' && (
         <div className="flex flex-col items-center gap-4 py-6">
-          <p className="text-center text-secondary">
+          <p className="text-center text-ink-secondary">
             {restaurants.length} spots in the running. Let the weighting do the
             work.
           </p>

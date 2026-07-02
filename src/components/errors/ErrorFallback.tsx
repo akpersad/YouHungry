@@ -63,7 +63,7 @@ export function ErrorFallback({ error, level, onReset }: ErrorFallbackProps) {
     <div
       className="flex flex-col items-center justify-center p-8 rounded-lg"
       style={{
-        background: 'var(--bg-secondary)',
+        background: 'var(--surface)',
         minHeight:
           level === 'root' ? '100vh' : level === 'route' ? '50vh' : '200px',
       }}
@@ -71,7 +71,7 @@ export function ErrorFallback({ error, level, onReset }: ErrorFallbackProps) {
       <div className="flex flex-col items-center max-w-md text-center space-y-6">
         <div
           className="p-4 rounded-full"
-          style={{ background: 'var(--bg-tertiary)' }}
+          style={{ background: 'var(--surface-sunken)' }}
         >
           <AlertTriangle className="h-12 w-12" />
         </div>
@@ -89,7 +89,7 @@ export function ErrorFallback({ error, level, onReset }: ErrorFallbackProps) {
             <pre
               className="text-xs p-3 rounded overflow-auto max-h-40"
               style={{
-                background: 'var(--bg-quaternary)',
+                background: 'var(--border)',
               }}
             >
               {error.message}
@@ -119,7 +119,7 @@ export function ErrorFallback({ error, level, onReset }: ErrorFallbackProps) {
 
         <button
           onClick={() => setShowReportModal(true)}
-          className="text-sm transition-colors flex items-center gap-1 hover:text-accent-primary"
+          className="text-sm transition-colors flex items-center gap-1 hover:text-tomato"
         >
           <MessageSquare className="h-4 w-4" />
           Report this issue

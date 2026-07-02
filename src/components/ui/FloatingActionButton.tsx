@@ -37,10 +37,8 @@ export function FloatingActionButton({
   };
 
   const variantClasses = {
-    primary:
-      'bg-accent text-inverse shadow-neumorphic-elevated hover:shadow-neumorphic-pressed',
-    secondary:
-      'bg-secondary text-primary shadow-neumorphic-elevated hover:shadow-neumorphic-pressed border border-quaternary',
+    primary: 'bg-tomato text-ink-inverse shadow-medium',
+    secondary: 'bg-surface text-ink shadow-medium border border-border',
   };
 
   const buttonContent = (
@@ -49,7 +47,7 @@ export function FloatingActionButton({
       className={cn(
         'fixed z-40 rounded-full',
         'transition-all duration-200',
-        'focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent',
+        'focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-tomato',
         'active:scale-95 hover:scale-105',
         'flex items-center justify-center',
         'touch-target',

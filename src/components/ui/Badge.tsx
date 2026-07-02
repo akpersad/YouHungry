@@ -13,7 +13,7 @@ const badgeVariants = cva(
         success: 'bg-[var(--olive-tint)] text-[var(--olive)]',
         warning: 'bg-[var(--saffron-tint)] text-[var(--on-saffron)]',
         destructive: 'bg-[var(--color-error)] text-[var(--on-tomato)]',
-        outline: 'border-[var(--border)] text-foreground',
+        outline: 'border-[var(--border)] text-ink',
       },
     },
     defaultVariants: {

@@ -25,11 +25,11 @@ export function GroupList({
         {[...Array(3)].map((_, i) => (
           <Card key={i} className="p-4">
             <div className="animate-pulse">
-              <div className="h-4 bg-quaternary rounded w-1/3 mb-2"></div>
-              <div className="h-3 bg-quaternary rounded w-2/3 mb-4"></div>
+              <div className="h-4 bg-border rounded w-1/3 mb-2"></div>
+              <div className="h-3 bg-border rounded w-2/3 mb-4"></div>
               <div className="flex space-x-2">
-                <div className="h-8 bg-quaternary rounded w-20"></div>
-                <div className="h-8 bg-quaternary rounded w-16"></div>
+                <div className="h-8 bg-border rounded w-20"></div>
+                <div className="h-8 bg-border rounded w-16"></div>
               </div>
             </div>
           </Card>
@@ -41,9 +41,9 @@ export function GroupList({
   if (groups.length === 0) {
     return (
       <div className="text-center py-8">
-        <div className="text-secondary mb-4">
+        <div className="text-ink-secondary mb-4">
           <svg
-            className="mx-auto h-12 w-12 text-text-light"
+            className="mx-auto h-12 w-12 text-ink-secondary"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -56,8 +56,8 @@ export function GroupList({
             />
           </svg>
         </div>
-        <h3 className="text-lg font-medium text-primary mb-2">No groups yet</h3>
-        <p className="text-secondary mb-4">
+        <h3 className="text-lg font-medium text-ink mb-2">No groups yet</h3>
+        <p className="text-ink-secondary mb-4">
           Create your first group to start collaborating with friends on
           restaurant decisions.
         </p>
@@ -80,9 +80,7 @@ export function GroupList({
           <div className="flex items-start justify-between">
             <div className="flex-1">
               <div className="flex items-center space-x-3 mb-2">
-                <h3 className="text-lg font-semibold text-primary">
-                  {group.name}
-                </h3>
+                <h3 className="text-lg font-semibold text-ink">{group.name}</h3>
                 <Badge variant="secondary">
                   {group.memberIds.length} member
                   {group.memberIds.length !== 1 ? 's' : ''}
@@ -90,18 +88,18 @@ export function GroupList({
               </div>
 
               {group.description && (
-                <p className="text-secondary text-sm mb-3">
+                <p className="text-ink-secondary text-sm mb-3">
                   {group.description}
                 </p>
               )}
 
               <div className="flex items-center space-x-2 mb-3">
-                <span className="text-sm text-secondary">
+                <span className="text-sm text-ink-secondary">
                   {group.collectionIds.length} collection
                   {group.collectionIds.length !== 1 ? 's' : ''}
                 </span>
-                <span className="text-text-light">•</span>
-                <span className="text-sm text-secondary">
+                <span className="text-ink-secondary">•</span>
+                <span className="text-sm text-ink-secondary">
                   Created {new Date(group.createdAt).toLocaleDateString()}
                 </span>
               </div>

@@ -60,23 +60,20 @@ export function Switch({
           'after:bg-white after:rounded-full after:h-5 after:w-5',
           'after:transition-all after:duration-200',
           {
-            'bg-accent peer-checked:bg-accent-primary peer-focus:ring-accent':
-              checked,
-            'bg-quaternary peer-focus:ring-quaternary': !checked,
+            'bg-tomato peer-checked:bg-tomato peer-focus:ring-tomato': checked,
+            'bg-border peer-focus:ring-border': !checked,
             'peer-checked:after:translate-x-full': checked,
             'opacity-50 cursor-not-allowed': props.disabled,
           },
           className
         )}
         style={{
-          backgroundColor: checked
-            ? 'var(--accent-primary)'
-            : 'var(--bg-quaternary)',
+          backgroundColor: checked ? 'var(--tomato)' : 'var(--border)',
         }}
         aria-hidden="true"
       />
       {label && (
-        <span className="ml-3 text-sm font-medium text-primary">{label}</span>
+        <span className="ml-3 text-sm font-medium text-ink">{label}</span>
       )}
     </label>
   );

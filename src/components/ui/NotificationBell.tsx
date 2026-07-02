@@ -64,7 +64,7 @@ export function NotificationBell({
           )}
         />
       ) : (
-        <Bell className={cn(sizeClasses[size], 'text-text-light')} />
+        <Bell className={cn(sizeClasses[size], 'text-ink-secondary')} />
       )}
 
       {unreadCount > 0 && (

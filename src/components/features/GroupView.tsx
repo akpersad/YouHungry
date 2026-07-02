@@ -208,7 +208,7 @@ export function GroupView({
                     }
                     placeholder="Group description"
                     rows={3}
-                    className="w-full px-3 py-2 border border-quinary rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                    className="w-full px-3 py-2 border border-border-strong rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-tomato focus:border-tomato"
                   />
                 </div>
                 <div className="flex space-x-2">
@@ -238,13 +238,13 @@ export function GroupView({
               </form>
             ) : (
               <div>
-                <h1 className="text-2xl font-bold text-primary mb-2">
+                <h1 className="text-2xl font-bold text-ink mb-2">
                   {group.name}
                 </h1>
                 {group.description && (
-                  <p className="text-secondary mb-4">{group.description}</p>
+                  <p className="text-ink-secondary mb-4">{group.description}</p>
                 )}
-                <div className="flex items-center space-x-4 text-sm text-tertiary">
+                <div className="flex items-center space-x-4 text-sm text-ink-muted">
                   <span>
                     {group.memberIds.length} member
                     {group.memberIds.length !== 1 ? 's' : ''}
@@ -267,10 +267,10 @@ export function GroupView({
             <DropdownMenu
               trigger={
                 <button
-                  className="p-2 rounded-lg bg-secondary hover:bg-tertiary transition-colors duration-200"
+                  className="p-2 rounded-lg bg-surface hover:bg-surface-sunken transition-colors duration-200"
                   aria-label="Group options"
                 >
-                  <MoreVertical className="w-5 h-5 text-primary" />
+                  <MoreVertical className="w-5 h-5 text-ink" />
                 </button>
               }
             >
@@ -308,7 +308,7 @@ export function GroupView({
               >
                 Leave Group
               </Button>
-              <span className="text-xs text-tertiary mt-1">
+              <span className="text-xs text-ink-muted mt-1">
                 Cannot leave as the only admin
               </span>
             </div>
@@ -330,7 +330,7 @@ export function GroupView({
       {/* Members Section */}
       <Card className="p-6 !mb-4">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-semibold text-primary">Members</h2>
+          <h2 className="text-lg font-semibold text-ink">Members</h2>
           <Button
             variant="primary"
             size="sm"
@@ -351,7 +351,7 @@ export function GroupView({
             return (
               <div
                 key={member._id.toString()}
-                className="flex items-center justify-between p-4 bg-secondary rounded-lg"
+                className="flex items-center justify-between p-4 bg-surface rounded-lg"
               >
                 <div className="flex items-center space-x-3 min-w-0 flex-1">
                   <UserAvatar
@@ -361,7 +361,7 @@ export function GroupView({
                   />
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center space-x-2 mb-1">
-                      <span className="font-medium text-primary truncate">
+                      <span className="font-medium text-ink truncate">
                         {member.name}
                       </span>
                       {isAdmin && (
@@ -370,7 +370,7 @@ export function GroupView({
                         </Badge>
                       )}
                     </div>
-                    <p className="text-sm text-tertiary truncate">
+                    <p className="text-sm text-ink-muted truncate">
                       {member.email}
                     </p>
                   </div>
@@ -380,10 +380,10 @@ export function GroupView({
                   <DropdownMenu
                     trigger={
                       <button
-                        className="p-2 rounded-lg bg-secondary hover:bg-tertiary transition-colors duration-200 flex-shrink-0"
+                        className="p-2 rounded-lg bg-surface hover:bg-surface-sunken transition-colors duration-200 flex-shrink-0"
                         aria-label={`Manage ${member.name}`}
                       >
-                        <MoreVertical className="w-4 h-4 text-primary" />
+                        <MoreVertical className="w-4 h-4 text-ink" />
                       </button>
                     }
                   >
@@ -425,12 +425,12 @@ export function GroupView({
         </CardHeader>
         <CardContent>
           {isLoadingDecisions ? (
-            <p className="text-text-muted text-center py-8">
+            <p className="text-ink-muted text-center py-8">
               Loading recent activity...
             </p>
           ) : !recentDecisions?.decisions ||
             recentDecisions.decisions.length === 0 ? (
-            <p className="text-text-muted text-center py-8">
+            <p className="text-ink-muted text-center py-8">
               No recent activity yet. Start by creating your first collection!
             </p>
           ) : (
@@ -438,22 +438,22 @@ export function GroupView({
               {recentDecisions.decisions.map((decision, index) => (
                 <div
                   key={decision.id || `decision-${index}`}
-                  className="flex items-start gap-3 p-3 border border-quaternary rounded-lg"
+                  className="flex items-start gap-3 p-3 border border-border rounded-lg"
                 >
                   <div className="flex-shrink-0 mt-1">
-                    <Users className="w-4 h-4 text-primary" />
+                    <Users className="w-4 h-4 text-ink" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="font-medium text-primary">
+                      <span className="font-medium text-ink">
                         {decision.result?.restaurant?.name ||
                           'Restaurant Decision'}
                       </span>
-                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-tertiary text-primary">
+                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-surface-sunken text-ink">
                         {decision.method}
                       </span>
                     </div>
-                    <div className="flex items-center gap-4 text-sm text-secondary">
+                    <div className="flex items-center gap-4 text-sm text-ink-secondary">
                       <div className="flex items-center gap-1">
                         <Calendar className="w-3 h-3" />
                         Visited:{' '}
@@ -465,7 +465,7 @@ export function GroupView({
                         {new Date(decision.createdAt).toLocaleDateString()}
                       </div>
                     </div>
-                    <div className="text-sm text-tertiary mt-1">
+                    <div className="text-sm text-ink-muted mt-1">
                       Group Decision • {decision.collectionName}
                     </div>
                   </div>
@@ -492,7 +492,7 @@ export function GroupView({
         title="Delete Group"
       >
         <div className="space-y-4">
-          <p className="text-secondary">
+          <p className="text-ink-secondary">
             Are you sure you want to delete &quot;{group.name}&quot;? This
             action cannot be undone. All group collections and data will be
             permanently removed.

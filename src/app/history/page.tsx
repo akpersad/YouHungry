@@ -262,10 +262,8 @@ export default function HistoryPage() {
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-primary mb-2">
-            Decision history
-          </h1>
-          <p className="text-secondary">
+          <h1 className="text-3xl font-bold text-ink mb-2">Decision history</h1>
+          <p className="text-ink-secondary">
             Every spot you&apos;ve landed on — search it, price it, or run it
             back.
           </p>
@@ -275,7 +273,7 @@ export default function HistoryPage() {
         <div className="mb-6 space-y-4">
           {/* Search */}
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-text-light" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-ink-secondary" />
             <Input
               type="text"
               placeholder="Search restaurants, collections, or groups"
@@ -339,7 +337,7 @@ export default function HistoryPage() {
                 <div>
                   <label
                     htmlFor="filter-type"
-                    className="block text-sm font-medium text-primary mb-1"
+                    className="block text-sm font-medium text-ink mb-1"
                   >
                     Type
                   </label>
@@ -362,7 +360,7 @@ export default function HistoryPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-primary mb-1">
+                  <label className="block text-sm font-medium text-ink mb-1">
                     Start date
                   </label>
                   <Input
@@ -381,7 +379,7 @@ export default function HistoryPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-primary mb-1">
+                  <label className="block text-sm font-medium text-ink mb-1">
                     End date
                   </label>
                   <Input
@@ -472,7 +470,7 @@ export default function HistoryPage() {
           <div className="space-y-8">
             {groups.map((group) => (
               <section key={group.label} className="space-y-4">
-                <h2 className="sticky top-0 z-10 bg-primary/95 py-1 text-sm font-semibold uppercase tracking-wide text-tertiary backdrop-blur">
+                <h2 className="sticky top-0 z-10 bg-tomato/95 py-1 text-sm font-semibold uppercase tracking-wide text-ink-muted backdrop-blur">
                   {group.label}
                 </h2>
                 {group.items.map((decision) => (
@@ -501,13 +499,13 @@ export default function HistoryPage() {
                       <div className="flex items-start gap-4">
                         <div className="flex-1 min-w-0">
                           {/* Restaurant Name */}
-                          <h3 className="text-xl font-semibold text-primary mb-2">
+                          <h3 className="text-xl font-semibold text-ink mb-2">
                             {decision.result?.restaurant?.name ||
                               'Unknown restaurant'}
                           </h3>
 
                           {/* Details */}
-                          <div className="space-y-2 text-sm text-secondary">
+                          <div className="space-y-2 text-sm text-ink-secondary">
                             {decision.result?.restaurant?.address && (
                               <div className="flex items-center gap-2">
                                 <MapPin className="w-4 h-4 flex-shrink-0" />
@@ -537,7 +535,7 @@ export default function HistoryPage() {
 
                             {decision.result?.restaurant?.cuisine && (
                               <div className="flex items-center gap-2">
-                                <span className="px-2 py-1 bg-primary/10 text-primary rounded-full text-xs">
+                                <span className="px-2 py-1 bg-tomato/10 text-ink rounded-full text-xs">
                                   {decision.result.restaurant.cuisine}
                                 </span>
                                 {decision.result.restaurant.rating && (
@@ -554,7 +552,7 @@ export default function HistoryPage() {
                             )}
 
                             {decision.method && (
-                              <div className="text-xs text-tertiary">
+                              <div className="text-xs text-ink-muted">
                                 Method:{' '}
                                 {decision.method === 'random'
                                   ? 'Random selection'
@@ -605,11 +603,11 @@ export default function HistoryPage() {
                           <DropdownMenu
                             trigger={
                               <button
-                                className="p-2 hover:bg-tertiary rounded-lg transition-colors"
+                                className="p-2 hover:bg-surface-sunken rounded-lg transition-colors"
                                 aria-label="Decision actions"
                               >
                                 <svg
-                                  className="w-5 h-5 text-primary"
+                                  className="w-5 h-5 text-ink"
                                   fill="none"
                                   viewBox="0 0 24 24"
                                   stroke="currentColor"
@@ -655,7 +653,7 @@ export default function HistoryPage() {
             {/* Pagination */}
             {data.pagination.total > (filters.limit || 10) && (
               <div className="flex items-center justify-between pt-4">
-                <div className="text-sm text-secondary tabular-nums">
+                <div className="text-sm text-ink-secondary tabular-nums">
                   Showing {(filters.offset || 0) + 1} to{' '}
                   {Math.min(
                     (filters.offset || 0) + (filters.limit || 10),
@@ -709,7 +707,7 @@ export default function HistoryPage() {
         }
       >
         <div className="space-y-4">
-          <p className="text-sm text-secondary">
+          <p className="text-sm text-ink-secondary">
             {selectedDecision?.result?.restaurant?.name && (
               <>
                 <strong>{selectedDecision.result.restaurant.name}</strong>
@@ -723,7 +721,7 @@ export default function HistoryPage() {
           <div>
             <label
               htmlFor="amount-input"
-              className="block text-sm font-medium text-primary mb-1"
+              className="block text-sm font-medium text-ink mb-1"
             >
               Amount spent (USD)
             </label>
@@ -781,7 +779,7 @@ export default function HistoryPage() {
         title="Delete decision"
       >
         <div className="space-y-4">
-          <p className="text-sm text-secondary">
+          <p className="text-sm text-ink-secondary">
             Are you sure you want to delete this decision? This will affect the
             weight algorithm for future selections, making this restaurant more
             likely to be selected.
@@ -789,15 +787,15 @@ export default function HistoryPage() {
 
           {decisionToDelete && (
             <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
-              <p className="font-medium text-primary">
+              <p className="font-medium text-ink">
                 {decisionToDelete.result?.restaurant?.name ||
                   'Unknown restaurant'}
               </p>
-              <p className="text-sm text-secondary tabular-nums">
+              <p className="text-sm text-ink-secondary tabular-nums">
                 {formatVisitDate(decisionToDelete.visitDate)}
               </p>
               {decisionToDelete.amountSpent && (
-                <p className="text-sm text-secondary mt-1 tabular-nums">
+                <p className="text-sm text-ink-secondary mt-1 tabular-nums">
                   Amount spent: $
                   {decisionToDelete.amountSpent.toLocaleString('en-US', {
                     minimumFractionDigits: 2,

@@ -386,7 +386,7 @@ export function AddressInput({
       {/* Loading indicator */}
       {isLoading && (
         <div className="absolute right-3 top-1/2 transform -translate-y-1/2 z-10">
-          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-tomato"></div>
         </div>
       )}
 
@@ -414,12 +414,12 @@ export function AddressInput({
           {/* Additional validation indicators */}
           {validationState.hasUnconfirmedComponents && (
             <span title="Unconfirmed components">
-              <Lock className="h-3 w-3 text-text-light dark:text-text-light" />
+              <Lock className="h-3 w-3 text-ink-secondary" />
             </span>
           )}
           {validationState.hasInferredComponents && (
             <span title="Inferred components">
-              <Info className="h-3 w-3 text-primary dark:text-primary" />
+              <Info className="h-3 w-3 text-ink" />
             </span>
           )}
           {validationState.hasReplacedComponents && (
@@ -434,7 +434,7 @@ export function AddressInput({
       {showSuggestions && suggestions.length > 0 && (
         <div
           ref={suggestionsRef}
-          className="absolute z-[60] w-full mt-1 bg-white dark:bg-background border border-border dark:border-border rounded-md shadow-xl max-h-60 overflow-y-auto"
+          className="absolute z-[60] w-full mt-1 bg-white border border-border dark:border-border rounded-md shadow-xl max-h-60 overflow-y-auto"
         >
           {suggestions.map((suggestion) => (
             <button
@@ -448,11 +448,11 @@ export function AddressInput({
                 handleSuggestionSelect(suggestion);
               }}
             >
-              <div className="text-sm text-text dark:text-text-light">
+              <div className="text-sm text-ink">
                 {suggestion.formattedAddress}
               </div>
               {suggestion.confidence < 0.8 && (
-                <div className="text-xs text-text-light dark:text-text-light">
+                <div className="text-xs text-ink-secondary">
                   Confidence: {Math.round(suggestion.confidence * 100)}%
                 </div>
               )}

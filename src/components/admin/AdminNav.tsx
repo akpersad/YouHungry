@@ -81,11 +81,11 @@ export function AdminNav({ activeTab, onTabChange }: AdminNavProps) {
     <div
       className="rounded-lg shadow-subtle border"
       style={{
-        background: 'var(--bg-secondary)',
-        borderColor: 'var(--bg-quaternary)',
+        background: 'var(--surface)',
+        borderColor: 'var(--border)',
       }}
     >
-      <div className="border-b" style={{ borderColor: 'var(--bg-quaternary)' }}>
+      <div className="border-b" style={{ borderColor: 'var(--border)' }}>
         <nav
           className="flex space-x-8 px-6 overflow-y-scroll"
           aria-label="Tabs"
@@ -101,8 +101,8 @@ export function AdminNav({ activeTab, onTabChange }: AdminNavProps) {
                 className={cn(
                   'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors flex items-center gap-2',
                   isActive
-                    ? 'border-primary text-primary'
-                    : 'border-transparent text-text-light hover:text-text hover:border-border'
+                    ? 'border-tomato text-ink'
+                    : 'border-transparent text-ink-secondary hover:text-ink hover:border-border'
                 )}
               >
                 <Icon className="h-4 w-4" />
@@ -116,7 +116,7 @@ export function AdminNav({ activeTab, onTabChange }: AdminNavProps) {
       {/* External Links */}
       <div
         className="px-6 py-4 border-t"
-        style={{ borderColor: 'var(--bg-quaternary)' }}
+        style={{ borderColor: 'var(--border)' }}
       >
         <div className="flex items-center gap-2 text-sm">
           <span>External Tools:</span>
@@ -126,10 +126,10 @@ export function AdminNav({ activeTab, onTabChange }: AdminNavProps) {
             rel="noopener noreferrer"
             className="flex items-center gap-1 transition-colors"
             onMouseEnter={(e) => {
-              e.currentTarget.style.color = 'var(--accent-primary-light)';
+              e.currentTarget.style.color = 'var(--tomato-hover)';
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.color = 'var(--accent-primary)';
+              e.currentTarget.style.color = 'var(--tomato)';
             }}
           >
             <BarChart3 className="h-3 w-3" />

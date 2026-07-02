@@ -138,7 +138,7 @@ export function FriendSelectionModal({
           <form onSubmit={handleInviteByEmail} className="space-y-2">
             <label
               htmlFor="invite-email"
-              className="block text-sm font-medium text-text"
+              className="block text-sm font-medium text-ink"
             >
               Invite by email
             </label>
@@ -170,7 +170,7 @@ export function FriendSelectionModal({
         {onInviteByEmail && (
           <div className="flex items-center gap-3">
             <div className="h-px flex-1 bg-border" />
-            <span className="text-xs font-medium uppercase tracking-wide text-text-light">
+            <span className="text-xs font-medium uppercase tracking-wide text-ink-secondary">
               Or pick a friend
             </span>
             <div className="h-px flex-1 bg-border" />
@@ -196,7 +196,9 @@ export function FriendSelectionModal({
           {friendsLoading ? (
             <div className="text-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-border mx-auto"></div>
-              <p className="mt-2 text-sm text-text-light">Loading friends...</p>
+              <p className="mt-2 text-sm text-ink-secondary">
+                Loading friends...
+              </p>
             </div>
           ) : friendsError ? (
             <div className="text-center py-8">
@@ -207,7 +209,7 @@ export function FriendSelectionModal({
             </div>
           ) : paginatedFriends.length === 0 ? (
             <div className="text-center py-8">
-              <p className="text-text-light">
+              <p className="text-ink-secondary">
                 {searchTerm
                   ? 'No friends found matching your search'
                   : 'No friends available'}
@@ -226,10 +228,10 @@ export function FriendSelectionModal({
                     size="sm"
                   />
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-text truncate">
+                    <p className="font-medium text-ink truncate">
                       {friend.name}
                     </p>
-                    <p className="text-sm text-text-light truncate">
+                    <p className="text-sm text-ink-secondary truncate">
                       {friend.email}
                     </p>
                   </div>
@@ -262,7 +264,7 @@ export function FriendSelectionModal({
             >
               Previous
             </Button>
-            <span className="text-sm text-text-light font-medium">
+            <span className="text-sm text-ink-secondary font-medium">
               Page {currentPage} of {totalPages}
             </span>
             <Button

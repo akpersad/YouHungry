@@ -9,13 +9,7 @@ interface ButtonProps extends Omit<
   HTMLMotionProps<'button'>,
   'variant' | 'size' | 'children'
 > {
-  variant?:
-    | 'primary'
-    | 'secondary'
-    | 'accent'
-    | 'warm'
-    | 'outline'
-    | 'outline-accent';
+  variant?: 'primary' | 'secondary' | 'accent' | 'warm' | 'outline';
   size?: 'sm' | 'md' | 'lg';
   isLoading?: boolean;
   loadingText?: string;
@@ -48,7 +42,6 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
             'btn-accent': variant === 'accent',
             'btn-warm': variant === 'warm',
             'btn-outline': variant === 'outline',
-            'btn-outline-accent': variant === 'outline-accent',
             'btn-sm': size === 'sm',
             'btn-md': size === 'md',
             'btn-lg': size === 'lg',

@@ -54,7 +54,7 @@ export function ReportIssueModal({ error, onClose }: ReportIssueModalProps) {
     >
       <div
         className="w-full max-w-md rounded-lg shadow-2xl p-6"
-        style={{ background: 'var(--bg-primary)' }}
+        style={{ background: 'var(--bg)' }}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-4">
@@ -71,7 +71,7 @@ export function ReportIssueModal({ error, onClose }: ReportIssueModalProps) {
           <div className="py-8 text-center">
             <div
               className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-4"
-              style={{ background: 'var(--accent-primary-light)' }}
+              style={{ background: 'var(--tomato-hover)' }}
             >
               <Send className="h-8 w-8" />
             </div>
@@ -95,8 +95,8 @@ export function ReportIssueModal({ error, onClose }: ReportIssueModalProps) {
                 onChange={(e) => setDescription(e.target.value)}
                 className="w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 transition-all"
                 style={{
-                  background: 'var(--bg-secondary)',
-                  borderColor: 'var(--bg-quaternary)',
+                  background: 'var(--surface)',
+                  borderColor: 'var(--border)',
                 }}
                 rows={4}
                 placeholder="e.g., I was trying to add a restaurant to my collection..."

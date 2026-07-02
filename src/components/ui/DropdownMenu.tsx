@@ -62,7 +62,7 @@ export function DropdownMenu({
           <div
             className={cn(
               'absolute top-full mt-2 z-50',
-              'bg-secondary border border-quaternary rounded-xl shadow-neumorphic-elevated',
+              'bg-surface border border-border rounded-xl shadow-medium',
               'py-1 min-w-48',
               align === 'right' ? 'right-0' : 'left-0'
             )}
@@ -88,12 +88,12 @@ export function DropdownMenuItem({
       disabled={disabled}
       className={cn(
         'w-full px-3 py-2 text-left text-sm flex items-center gap-2',
-        'hover:bg-tertiary transition-colors duration-150',
-        'focus:outline-none focus:ring-2 focus:ring-accent/30',
+        'hover:bg-surface-sunken transition-colors duration-150',
+        'focus:outline-none focus:ring-2 focus:ring-tomato/30',
         'disabled:opacity-50 disabled:cursor-not-allowed',
         variant === 'destructive'
           ? 'text-error hover:bg-error/10'
-          : 'text-primary hover:bg-tertiary',
+          : 'text-ink hover:bg-surface-sunken',
         className
       )}
     >

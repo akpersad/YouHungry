@@ -219,7 +219,7 @@ export function ManualDecisionForm({ onSuccess }: ManualDecisionFormProps) {
     <form onSubmit={handleSubmit} className="space-y-4">
       {/* Type Selection */}
       <div>
-        <label className="block text-sm font-medium text-primary mb-2">
+        <label className="block text-sm font-medium text-ink mb-2">
           Decision Type
         </label>
         <div
@@ -238,8 +238,8 @@ export function ManualDecisionForm({ onSuccess }: ManualDecisionFormProps) {
                 'flex-1 cursor-pointer rounded-lg px-4 py-2 text-center text-sm font-medium transition-colors',
                 'focus-within:ring-2 focus-within:ring-[var(--tomato)] focus-within:ring-offset-2',
                 type === option.value
-                  ? 'bg-surface text-primary shadow-sm'
-                  : 'text-secondary hover:text-primary'
+                  ? 'bg-surface text-ink shadow-sm'
+                  : 'text-ink-secondary hover:text-ink'
               )}
             >
               <input
@@ -269,7 +269,7 @@ export function ManualDecisionForm({ onSuccess }: ManualDecisionFormProps) {
         <div>
           <label
             htmlFor="manual-group"
-            className="block text-sm font-medium text-primary mb-2"
+            className="block text-sm font-medium text-ink mb-2"
           >
             Group <span className="text-destructive">*</span>
           </label>
@@ -297,7 +297,7 @@ export function ManualDecisionForm({ onSuccess }: ManualDecisionFormProps) {
       <div>
         <label
           htmlFor="manual-restaurant"
-          className="block text-sm font-medium text-primary mb-2"
+          className="block text-sm font-medium text-ink mb-2"
         >
           Restaurant <span className="text-destructive">*</span>
         </label>
@@ -348,7 +348,7 @@ export function ManualDecisionForm({ onSuccess }: ManualDecisionFormProps) {
       <div>
         <label
           htmlFor="manual-notes"
-          className="block text-sm font-medium text-primary mb-2"
+          className="block text-sm font-medium text-ink mb-2"
         >
           Notes (optional)
         </label>

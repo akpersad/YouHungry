@@ -63,7 +63,7 @@ export function WeightManagement({
   if (isLoading) {
     return (
       <Card className="p-8">
-        <div className="text-center text-text-light">Loading weights...</div>
+        <div className="text-center text-ink-secondary">Loading weights...</div>
       </Card>
     );
   }
@@ -83,10 +83,10 @@ export function WeightManagement({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-text mb-2">
+          <h2 className="text-2xl font-bold text-ink mb-2">
             Weight Management
           </h2>
-          <p className="text-text-light">
+          <p className="text-ink-secondary">
             Collection: {collectionName} • {data.totalDecisions} total decisions
           </p>
         </div>
@@ -102,11 +102,11 @@ export function WeightManagement({
       </div>
 
       {/* Info Card */}
-      <Card className="p-4 bg-tertiary border-border">
+      <Card className="p-4 bg-surface-sunken border-border">
         <div className="flex gap-3">
-          <TrendingUp className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-          <div className="text-sm text-text-light">
-            <p className="font-medium mb-1 text-text">
+          <TrendingUp className="w-5 h-5 text-ink flex-shrink-0 mt-0.5" />
+          <div className="text-sm text-ink-secondary">
+            <p className="font-medium mb-1 text-ink">
               How the 30-Day Weight System Works
             </p>
             <p>
@@ -123,7 +123,7 @@ export function WeightManagement({
       <div className="space-y-3">
         {data.weights.length === 0 ? (
           <Card className="p-8">
-            <div className="text-center text-text-light">
+            <div className="text-center text-ink-secondary">
               No restaurants in this collection
             </div>
           </Card>
@@ -132,11 +132,11 @@ export function WeightManagement({
             <Card key={weight.restaurantId} className="p-4">
               <div className="flex items-center justify-between gap-4">
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-text truncate mb-2">
+                  <h3 className="font-semibold text-ink truncate mb-2">
                     {weight.name}
                   </h3>
 
-                  <div className="flex flex-wrap items-center gap-4 text-sm text-text-light">
+                  <div className="flex flex-wrap items-center gap-4 text-sm text-ink-secondary">
                     <div className="flex items-center gap-1">
                       <Award className="w-4 h-4" />
                       <span>Selected {weight.selectionCount} times</span>
@@ -171,15 +171,15 @@ export function WeightManagement({
                     >
                       {getWeightLabel(weight.currentWeight)}
                     </div>
-                    <div className="text-2xl font-bold text-text">
+                    <div className="text-2xl font-bold text-ink">
                       {weight.currentWeight.toFixed(2)}
                     </div>
-                    <div className="text-xs text-text-light">Weight</div>
+                    <div className="text-xs text-ink-secondary">Weight</div>
                   </div>
 
                   {/* Weight Bar */}
                   <div className="w-32">
-                    <div className="w-full bg-tertiary rounded-full h-3">
+                    <div className="w-full bg-surface-sunken rounded-full h-3">
                       <div
                         className={`h-3 rounded-full ${
                           weight.currentWeight >= 0.8
@@ -217,12 +217,10 @@ export function WeightManagement({
           <Card className="p-6 max-w-md mx-4">
             <div className="flex items-center gap-3 mb-4">
               <AlertTriangle className="w-6 h-6 text-destructive" />
-              <h3 className="text-xl font-bold text-text">
-                Reset All Weights?
-              </h3>
+              <h3 className="text-xl font-bold text-ink">Reset All Weights?</h3>
             </div>
 
-            <p className="text-text-light mb-6">
+            <p className="text-ink-secondary mb-6">
               This will delete all decision history for this collection and
               reset all restaurant weights to 1.0. This action cannot be undone.
             </p>
@@ -255,12 +253,12 @@ export function WeightManagement({
           <Card className="p-6 max-w-md mx-4">
             <div className="flex items-center gap-3 mb-4">
               <AlertTriangle className="w-6 h-6 text-warning" />
-              <h3 className="text-xl font-bold text-text">
+              <h3 className="text-xl font-bold text-ink">
                 Reset Restaurant Weight?
               </h3>
             </div>
 
-            <p className="text-text-light mb-6">
+            <p className="text-ink-secondary mb-6">
               This will delete the decision history for this restaurant and
               reset its weight to 1.0. This action cannot be undone.
             </p>

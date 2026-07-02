@@ -28,10 +28,10 @@ export default function DashboardPage() {
       <div className="max-w-4xl mx-auto">
         {/* Decision-first hero — the product's whole job, one tap away */}
         <section className="mb-10 rounded-3xl border border-border bg-surface p-8 text-center sm:p-12">
-          <h1 className="font-display text-3xl font-semibold text-primary text-balance sm:text-4xl">
+          <h1 className="font-display text-3xl font-semibold text-ink text-balance sm:text-4xl">
             Hungry? Let&apos;s end the debate.
           </h1>
-          <p className="mx-auto mt-3 max-w-md text-secondary text-pretty">
+          <p className="mx-auto mt-3 max-w-md text-ink-secondary text-pretty">
             Pick a collection and let the wheel settle it — weighted so you
             don&apos;t eat the same place twice in a row.
           </p>
@@ -63,7 +63,7 @@ export default function DashboardPage() {
                   {Array.from({ length: 3 }).map((_, i) => (
                     <div
                       key={i}
-                      className="flex items-start gap-3 p-3 border border-quaternary rounded-lg"
+                      className="flex items-start gap-3 p-3 border border-border rounded-lg"
                     >
                       <Skeleton className="h-4 w-4 flex-shrink-0 mt-1 rounded-full" />
                       <div className="flex-1 min-w-0 space-y-2">
@@ -76,7 +76,7 @@ export default function DashboardPage() {
                 </SkeletonGroup>
               ) : !recentDecisions?.decisions ||
                 recentDecisions.decisions.length === 0 ? (
-                <p className="text-text-muted text-center py-8">
+                <p className="text-ink-muted text-center py-8">
                   No recent activity yet. Start by creating your first
                   collection!
                 </p>
@@ -85,26 +85,26 @@ export default function DashboardPage() {
                   {recentDecisions.decisions.map((decision, index) => (
                     <div
                       key={decision.id || `decision-${index}`}
-                      className="flex items-start gap-3 p-3 border border-quaternary rounded-lg"
+                      className="flex items-start gap-3 p-3 border border-border rounded-lg"
                     >
                       <div className="flex-shrink-0 mt-1">
                         {decision.type === 'group' ? (
-                          <Users className="w-4 h-4 text-primary" />
+                          <Users className="w-4 h-4 text-ink" />
                         ) : (
                           <User className="w-4 h-4 text-success" />
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
-                          <span className="font-medium text-primary">
+                          <span className="font-medium text-ink">
                             {decision.result?.restaurant?.name ||
                               'Restaurant Decision'}
                           </span>
-                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-quaternary text-primary">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-border text-ink">
                             {decision.method}
                           </span>
                         </div>
-                        <div className="flex items-center gap-4 text-sm text-secondary">
+                        <div className="flex items-center gap-4 text-sm text-ink-secondary">
                           <div className="flex items-center gap-1">
                             <Calendar className="w-3 h-3" />
                             Visited:{' '}
@@ -116,7 +116,7 @@ export default function DashboardPage() {
                             {new Date(decision.createdAt).toLocaleDateString()}
                           </div>
                         </div>
-                        <div className="text-sm text-secondary mt-1">
+                        <div className="text-sm text-ink-secondary mt-1">
                           {decision.type === 'group'
                             ? `Group: ${decision.groupName}`
                             : 'Personal Decision'}{' '}

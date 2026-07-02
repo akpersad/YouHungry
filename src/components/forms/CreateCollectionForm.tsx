@@ -111,7 +111,7 @@ function CreateCollectionForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {error && (
-        <div className="p-4 bg-error/10 border border-error/20 rounded-xl shadow-neumorphic-light dark:shadow-neumorphic-dark">
+        <div className="p-4 bg-error/10 border border-error/20 rounded-xl shadow-subtle">
           <div className="flex items-start gap-3">
             <svg
               className="w-5 h-5 text-error flex-shrink-0 mt-0.5"
@@ -152,9 +152,9 @@ function CreateCollectionForm({
         <div className="w-full">
           <label
             htmlFor="description"
-            className="block text-sm font-medium text-primary mb-2"
+            className="block text-sm font-medium text-ink mb-2"
           >
-            Description <span className="text-tertiary">(Optional)</span>
+            Description <span className="text-ink-muted">(Optional)</span>
           </label>
           <textarea
             id="description"
@@ -163,10 +163,10 @@ function CreateCollectionForm({
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Describe your collection..."
             maxLength={500}
-            className="input-base min-h-[100px] resize-none shadow-neumorphic-light dark:shadow-neumorphic-dark"
+            className="input-base min-h-[100px] resize-none shadow-subtle"
             rows={4}
           />
-          <p className="mt-1 text-xs text-tertiary">
+          <p className="mt-1 text-xs text-ink-muted">
             {description.length}/500 characters
           </p>
         </div>

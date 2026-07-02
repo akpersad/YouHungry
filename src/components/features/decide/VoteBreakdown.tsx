@@ -48,7 +48,7 @@ export function VoteBreakdown({
 
   if (rows.length === 0) {
     return (
-      <p className={cn('text-sm text-tertiary', className)}>
+      <p className={cn('text-sm text-ink-muted', className)}>
         No ranked votes were recorded.
       </p>
     );
@@ -58,7 +58,7 @@ export function VoteBreakdown({
 
   return (
     <div className={cn('space-y-3', className)}>
-      <h4 className="text-sm font-medium text-secondary">How votes fell</h4>
+      <h4 className="text-sm font-medium text-ink-secondary">How votes fell</h4>
       <ul className="space-y-2.5">
         {rows.map((row) => {
           const isWinner = row.restaurantId === winnerId;
@@ -69,7 +69,7 @@ export function VoteBreakdown({
                 <span
                   className={cn(
                     'text-sm font-medium truncate',
-                    isWinner ? 'text-primary' : 'text-secondary'
+                    isWinner ? 'text-ink' : 'text-ink-secondary'
                   )}
                 >
                   {isWinner && (
@@ -79,7 +79,7 @@ export function VoteBreakdown({
                   )}
                   {row.name}
                 </span>
-                <span className="shrink-0 text-xs font-semibold text-tertiary tabular-nums">
+                <span className="shrink-0 text-xs font-semibold text-ink-muted tabular-nums">
                   {row.total} {row.total === 1 ? 'pt' : 'pts'}
                 </span>
               </div>
@@ -96,7 +96,7 @@ export function VoteBreakdown({
                   }}
                 />
               </div>
-              <p className="text-xs text-tertiary tabular-nums">
+              <p className="text-xs text-ink-muted tabular-nums">
                 {row.first} × 1st · {row.second} × 2nd · {row.third} × 3rd
               </p>
             </li>

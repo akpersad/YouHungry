@@ -77,7 +77,7 @@ export function SpinReveal({ names, winner, onComplete }: SpinRevealProps) {
       className="flex min-h-[8rem] flex-col items-center justify-center text-center"
       aria-live="polite"
     >
-      <p className="mb-2 text-sm font-medium uppercase tracking-wide text-tertiary">
+      <p className="mb-2 text-sm font-medium uppercase tracking-wide text-ink-muted">
         {revealed ? 'Tonight you eat at' : 'Spinning…'}
       </p>
       <motion.span

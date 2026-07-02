@@ -541,7 +541,7 @@ export function RestaurantSearchPage({
         filteredRestaurants.length === 0 &&
         allRestaurants.length > 0 && (
           <div className="bg-info/10 border border-info/20 rounded-lg p-4">
-            <p className="text-text">
+            <p className="text-ink">
               No results within {radiusFilter}{' '}
               {radiusFilter === 1 ? 'mile' : 'miles'}.
               {availableRadii.length > 0 &&
@@ -579,7 +579,7 @@ export function RestaurantSearchPage({
                     availableRadii.find((r) => r > radiusFilter)!
                   )
                 }
-                className="mt-2 text-primary hover:underline font-medium"
+                className="mt-2 text-ink hover:underline font-medium"
               >
                 Expand to {availableRadii.find((r) => r > radiusFilter)}{' '}
                 {availableRadii.find((r) => r > radiusFilter) === 1
@@ -593,7 +593,7 @@ export function RestaurantSearchPage({
       {/* Zero Results (no restaurants at all) */}
       {!isLoading && searchFilters && allRestaurants.length === 0 && (
         <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
-          <p className="text-text">0 Results</p>
+          <p className="text-ink">0 Results</p>
         </div>
       )}
 
@@ -622,36 +622,36 @@ export function RestaurantSearchPage({
         {selectedRestaurant && (
           <div className="space-y-4">
             <div className="p-4 bg-surface rounded-lg">
-              <h3 className="font-medium text-text">
+              <h3 className="font-medium text-ink">
                 {selectedRestaurant.name}
               </h3>
-              <p className="text-sm text-text-light">
+              <p className="text-sm text-ink-secondary">
                 {selectedRestaurant.cuisine}
               </p>
-              <p className="text-sm text-text-light">
+              <p className="text-sm text-ink-secondary">
                 {selectedRestaurant.address}
               </p>
             </div>
 
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-text">
+              <label className="block text-sm font-medium text-ink">
                 Select Collection
               </label>
               {!isLoaded ? (
                 <div className="flex items-center justify-center py-4">
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
-                  <span className="ml-2 text-sm text-text-light">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-tomato"></div>
+                  <span className="ml-2 text-sm text-ink-secondary">
                     Loading...
                   </span>
                 </div>
               ) : !user ? (
-                <p className="text-sm text-text-light">
+                <p className="text-sm text-ink-secondary">
                   Please sign in to add restaurants to collections.
                 </p>
               ) : isLoadingCollections ? (
                 <div className="flex items-center justify-center py-4">
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
-                  <span className="ml-2 text-sm text-text-light">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-tomato"></div>
+                  <span className="ml-2 text-sm text-ink-secondary">
                     Loading collections...
                   </span>
                 </div>
@@ -704,7 +704,7 @@ export function RestaurantSearchPage({
                     <select
                       value={selectedCollectionId}
                       onChange={(e) => setSelectedCollectionId(e.target.value)}
-                      className="w-full p-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                      className="w-full p-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-tomato focus:border-tomato"
                     >
                       <option value="">Select a collection...</option>
                       {effectiveCollections
@@ -768,7 +768,7 @@ export function RestaurantSearchPage({
                   </div>
                 )
               ) : (
-                <p className="text-sm text-text-light">
+                <p className="text-sm text-ink-secondary">
                   No collections available. Create a collection first.
                 </p>
               )}
@@ -793,44 +793,46 @@ export function RestaurantSearchPage({
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
-                <span className="font-medium text-text">Cuisine:</span>
-                <p className="text-text-light">{selectedRestaurant.cuisine}</p>
+                <span className="font-medium text-ink">Cuisine:</span>
+                <p className="text-ink-secondary">
+                  {selectedRestaurant.cuisine}
+                </p>
               </div>
               <div>
-                <span className="font-medium text-text">Rating:</span>
-                <p className="text-text-light">
+                <span className="font-medium text-ink">Rating:</span>
+                <p className="text-ink-secondary">
                   {selectedRestaurant.rating > 0
                     ? selectedRestaurant.rating.toFixed(1)
                     : 'No rating'}
                 </p>
               </div>
               <div>
-                <span className="font-medium text-text">Price Range:</span>
-                <p className="text-text-light">
+                <span className="font-medium text-ink">Price Range:</span>
+                <p className="text-ink-secondary">
                   {selectedRestaurant.priceRange || 'Not available'}
                 </p>
               </div>
               <div>
-                <span className="font-medium text-text">Phone:</span>
-                <p className="text-text-light">
+                <span className="font-medium text-ink">Phone:</span>
+                <p className="text-ink-secondary">
                   {selectedRestaurant.phoneNumber || 'Not available'}
                 </p>
               </div>
             </div>
 
             <div>
-              <span className="font-medium text-text">Address:</span>
-              <p className="text-text-light">{selectedRestaurant.address}</p>
+              <span className="font-medium text-ink">Address:</span>
+              <p className="text-ink-secondary">{selectedRestaurant.address}</p>
             </div>
 
             {selectedRestaurant.website && (
               <div>
-                <span className="font-medium text-text">Website:</span>
+                <span className="font-medium text-ink">Website:</span>
                 <a
                   href={selectedRestaurant.website}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-primary hover:text-blue-800 ml-2"
+                  className="text-ink hover:text-blue-800 ml-2"
                 >
                   Visit Website
                 </a>
@@ -839,11 +841,11 @@ export function RestaurantSearchPage({
 
             {selectedRestaurant.hours && (
               <div>
-                <span className="font-medium text-text">Hours:</span>
+                <span className="font-medium text-ink">Hours:</span>
                 <div className="mt-1 space-y-1">
                   {Object.entries(selectedRestaurant.hours).map(
                     ([day, hours]) => (
-                      <p key={day} className="text-sm text-text-light">
+                      <p key={day} className="text-sm text-ink-secondary">
                         {day}: {hours}
                       </p>
                     )

@@ -17,7 +17,7 @@ export function AppLayout({ children, className }: AppLayoutProps) {
   // For unauthenticated users, show regular layout with header
   if (isLoaded && !isSignedIn) {
     return (
-      <div className={cn('flex flex-col min-h-screen bg-primary', className)}>
+      <div className={cn('flex flex-col min-h-screen bg-bg', className)}>
         <Header />
         <main className="flex-1">{children}</main>
       </div>
@@ -27,7 +27,7 @@ export function AppLayout({ children, className }: AppLayoutProps) {
   // For signed-in users (or loading state), show mobile layout
   // This prevents layout shift and FOUC
   return (
-    <div className="flex flex-col min-h-screen bg-primary">
+    <div className="flex flex-col min-h-screen bg-bg">
       {/* Header - visible on desktop, hidden on mobile */}
       <Header />
 

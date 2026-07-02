@@ -118,21 +118,19 @@ export function RestaurantManagementModal({
             />
           </div>
           <div className="flex-1">
-            <h3 className="text-lg font-semibold text-text dark:text-white">
+            <h3 className="text-lg font-semibold text-ink dark:text-white">
               {restaurant.name}
             </h3>
-            <p className="text-sm text-text-light dark:text-text-light">
+            <p className="text-sm text-ink-secondary">
               {restaurant.cuisine} • {restaurant.rating}⭐
             </p>
-            <p className="text-sm text-text-light dark:text-text-light">
-              {restaurant.address}
-            </p>
+            <p className="text-sm text-ink-secondary">{restaurant.address}</p>
           </div>
         </div>
 
         {/* Collection Info */}
-        <div className="bg-surface dark:bg-background rounded-lg p-3">
-          <p className="text-sm text-text-light dark:text-text-light">
+        <div className="bg-surface rounded-lg p-3">
+          <p className="text-sm text-ink-secondary">
             <span className="font-medium">Collection:</span> {collection.name}
           </p>
         </div>
@@ -142,7 +140,7 @@ export function RestaurantManagementModal({
           <div>
             <label
               htmlFor="priceRange"
-              className="block text-sm font-medium text-text dark:text-text-light mb-1"
+              className="block text-sm font-medium text-ink mb-1"
             >
               Price Range
             </label>
@@ -150,7 +148,7 @@ export function RestaurantManagementModal({
               id="priceRange"
               value={priceRange}
               onChange={(e) => setPriceRange(e.target.value)}
-              className="w-full px-3 py-2 border border-border dark:border-border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary dark:bg-surface dark:text-white"
+              className="w-full px-3 py-2 border border-border dark:border-border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-tomato focus:border-tomato dark:bg-surface dark:text-white"
             >
               {priceRangeOptions.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -163,7 +161,7 @@ export function RestaurantManagementModal({
           <div>
             <label
               htmlFor="timeToPickUp"
-              className="block text-sm font-medium text-text dark:text-text-light mb-1"
+              className="block text-sm font-medium text-ink mb-1"
             >
               Time to Pick Up (minutes)
             </label>
@@ -210,7 +208,7 @@ export function RestaurantManagementModal({
         title="Remove Restaurant?"
       >
         <div className="space-y-4">
-          <p className="text-text">
+          <p className="text-ink">
             Are you sure you want to remove this restaurant from the collection?
           </p>
           <div className="flex justify-end space-x-2">

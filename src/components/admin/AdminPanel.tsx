@@ -100,19 +100,19 @@ export function AdminPanel() {
   };
 
   return (
-    <div className="min-h-screen" style={{ background: 'var(--bg-primary)' }}>
+    <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
       <div
         className="shadow-subtle border-b"
         style={{
-          background: 'var(--bg-secondary)',
-          borderColor: 'var(--bg-quaternary)',
+          background: 'var(--surface)',
+          borderColor: 'var(--border)',
         }}
       >
         <div className="max-w-7xl mx-auto lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div>
-              <h1 className="text-2xl font-bold text-text">Admin Panel</h1>
-              <p className="text-sm text-text-light">
+              <h1 className="text-2xl font-bold text-ink">Admin Panel</h1>
+              <p className="text-sm text-ink-secondary">
                 System administration and monitoring
               </p>
             </div>

@@ -17,10 +17,10 @@ export default function PerformanceDashboardPage() {
       <AdminLayout>
         <div className="max-w-7xl mx-auto">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-text mb-2">
+            <h1 className="text-3xl font-bold text-ink mb-2">
               Performance Dashboard
             </h1>
-            <p className="text-text-light">
+            <p className="text-ink-secondary">
               Monitor application performance metrics, Core Web Vitals, and
               system analytics.
             </p>

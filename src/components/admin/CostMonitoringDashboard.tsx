@@ -175,7 +175,7 @@ export function CostMonitoringDashboard() {
         <div className="flex items-center justify-center h-64">
           <div
             className="animate-spin rounded-full h-8 w-8 border-b-2"
-            style={{ borderColor: 'var(--accent-primary)' }}
+            style={{ borderColor: 'var(--tomato)' }}
             role="status"
             aria-label="Loading"
           ></div>
@@ -259,8 +259,8 @@ export function CostMonitoringDashboard() {
         <div
           className="flex flex-wrap items-end gap-4 p-4 rounded-lg"
           style={{
-            background: 'var(--bg-tertiary)',
-            borderColor: 'var(--bg-quaternary)',
+            background: 'var(--surface-sunken)',
+            borderColor: 'var(--border)',
             border: '1px solid',
           }}
         >
@@ -271,8 +271,8 @@ export function CostMonitoringDashboard() {
               onChange={(e) => setSelectedMonth(Number(e.target.value))}
               className="w-full px-3 py-2 rounded-md text-sm"
               style={{
-                background: 'var(--bg-secondary)',
-                border: '1px solid var(--bg-quaternary)',
+                background: 'var(--surface)',
+                border: '1px solid var(--border)',
               }}
             >
               <option value={1}>January</option>
@@ -297,8 +297,8 @@ export function CostMonitoringDashboard() {
               onChange={(e) => setSelectedYear(Number(e.target.value))}
               className="w-full px-3 py-2 rounded-md text-sm"
               style={{
-                background: 'var(--bg-secondary)',
-                border: '1px solid var(--bg-quaternary)',
+                background: 'var(--surface)',
+                border: '1px solid var(--border)',
               }}
             >
               {availableYears.length > 0 ? (
@@ -321,17 +321,16 @@ export function CostMonitoringDashboard() {
             disabled={loading}
             className="px-6 py-2 rounded-md text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             style={{
-              background: 'var(--accent-primary)',
+              background: 'var(--tomato)',
             }}
             onMouseEnter={(e) => {
               if (!loading) {
-                e.currentTarget.style.background =
-                  'var(--accent-primary-light)';
+                e.currentTarget.style.background = 'var(--tomato-hover)';
               }
             }}
             onMouseLeave={(e) => {
               if (!loading) {
-                e.currentTarget.style.background = 'var(--accent-primary)';
+                e.currentTarget.style.background = 'var(--tomato)';
               }
             }}
           >
@@ -345,8 +344,8 @@ export function CostMonitoringDashboard() {
         <div
           className="rounded-lg shadow-subtle border p-8 text-center"
           style={{
-            background: 'var(--bg-secondary)',
-            borderColor: 'var(--bg-quaternary)',
+            background: 'var(--surface)',
+            borderColor: 'var(--border)',
           }}
         >
           <div className="flex flex-col items-center gap-4">
@@ -364,7 +363,7 @@ export function CostMonitoringDashboard() {
                 <div
                   className="inline-block px-4 py-2 rounded-md text-sm"
                   style={{
-                    background: 'var(--bg-tertiary)',
+                    background: 'var(--surface-sunken)',
                   }}
                 >
                   💡 Data is available from{' '}
@@ -382,8 +381,8 @@ export function CostMonitoringDashboard() {
           <div
             className="rounded-lg shadow-subtle border p-6"
             style={{
-              background: 'var(--bg-secondary)',
-              borderColor: 'var(--bg-quaternary)',
+              background: 'var(--surface)',
+              borderColor: 'var(--border)',
             }}
           >
             <div className="flex items-center justify-between">
@@ -413,8 +412,8 @@ export function CostMonitoringDashboard() {
           <div
             className="rounded-lg shadow-subtle border p-6"
             style={{
-              background: 'var(--bg-secondary)',
-              borderColor: 'var(--bg-quaternary)',
+              background: 'var(--surface)',
+              borderColor: 'var(--border)',
             }}
           >
             <div className="flex items-center justify-between">
@@ -443,8 +442,8 @@ export function CostMonitoringDashboard() {
           <div
             className="rounded-lg shadow-subtle border p-6"
             style={{
-              background: 'var(--bg-secondary)',
-              borderColor: 'var(--bg-quaternary)',
+              background: 'var(--surface)',
+              borderColor: 'var(--border)',
             }}
           >
             <div className="flex items-center justify-between">
@@ -478,8 +477,8 @@ export function CostMonitoringDashboard() {
         <div
           className="rounded-lg shadow-subtle border p-6"
           style={{
-            background: 'var(--bg-secondary)',
-            borderColor: 'var(--bg-quaternary)',
+            background: 'var(--surface)',
+            borderColor: 'var(--border)',
           }}
         >
           <h3 className="text-lg font-semibold mb-4">
@@ -489,7 +488,7 @@ export function CostMonitoringDashboard() {
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             <div
               className="text-center p-4 rounded-lg"
-              style={{ background: 'var(--bg-tertiary)' }}
+              style={{ background: 'var(--surface-sunken)' }}
             >
               <div className="text-2xl font-bold">
                 {formatCostKPI(metrics.estimatedCosts.byService.google)}
@@ -499,7 +498,7 @@ export function CostMonitoringDashboard() {
 
             <div
               className="text-center p-4 rounded-lg"
-              style={{ background: 'var(--bg-tertiary)' }}
+              style={{ background: 'var(--surface-sunken)' }}
             >
               <div className="text-2xl font-bold">
                 {formatCostKPI(metrics.estimatedCosts.byService.twilio)}
@@ -513,7 +512,7 @@ export function CostMonitoringDashboard() {
 
             <div
               className="text-center p-4 rounded-lg"
-              style={{ background: 'var(--bg-tertiary)' }}
+              style={{ background: 'var(--surface-sunken)' }}
             >
               <div className="text-2xl font-bold">
                 {formatCostKPI(metrics.estimatedCosts.byService.resend)}
@@ -523,7 +522,7 @@ export function CostMonitoringDashboard() {
 
             <div
               className="text-center p-4 rounded-lg"
-              style={{ background: 'var(--bg-tertiary)' }}
+              style={{ background: 'var(--surface-sunken)' }}
             >
               <div className="text-2xl font-bold">
                 {formatCostKPI(metrics.estimatedCosts.byService.vercelBlob)}
@@ -533,7 +532,7 @@ export function CostMonitoringDashboard() {
 
             <div
               className="text-center p-4 rounded-lg"
-              style={{ background: 'var(--bg-tertiary)' }}
+              style={{ background: 'var(--surface-sunken)' }}
             >
               <div className="text-2xl font-bold">
                 {formatCostKPI(metrics.estimatedCosts.byService.clerk)}
@@ -549,8 +548,8 @@ export function CostMonitoringDashboard() {
         <div
           className="rounded-lg shadow-subtle border p-6"
           style={{
-            background: 'var(--bg-secondary)',
-            borderColor: 'var(--bg-quaternary)',
+            background: 'var(--surface)',
+            borderColor: 'var(--border)',
           }}
         >
           <h3 className="text-lg font-semibold mb-4">API Usage Breakdown</h3>
@@ -659,7 +658,7 @@ export function CostMonitoringDashboard() {
                 </div>
                 <div
                   className="flex justify-between text-sm font-semibold mt-3 pt-2"
-                  style={{ borderTop: '1px solid var(--bg-quaternary)' }}
+                  style={{ borderTop: '1px solid var(--border)' }}
                 >
                   <span>Verify SMS</span>
                   <span className="font-medium">
@@ -729,8 +728,8 @@ export function CostMonitoringDashboard() {
         <div
           className="rounded-lg shadow-subtle border p-6"
           style={{
-            background: 'var(--bg-secondary)',
-            borderColor: 'var(--bg-quaternary)',
+            background: 'var(--surface)',
+            borderColor: 'var(--border)',
           }}
         >
           <h3 className="text-lg font-semibold mb-4">Cache Performance</h3>
@@ -763,8 +762,8 @@ export function CostMonitoringDashboard() {
         <div
           className="rounded-lg shadow-subtle border p-6"
           style={{
-            background: 'var(--bg-secondary)',
-            borderColor: 'var(--bg-quaternary)',
+            background: 'var(--surface)',
+            borderColor: 'var(--border)',
           }}
         >
           <h3 className="text-lg font-semibold mb-4">
@@ -800,7 +799,7 @@ export function CostMonitoringDashboard() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div
               className="text-center p-3 rounded-lg"
-              style={{ background: 'var(--bg-tertiary)' }}
+              style={{ background: 'var(--surface-sunken)' }}
             >
               <div className="text-xl font-semibold">
                 {metrics.locationCache.averageRestaurantsPerEntry} restaurants
@@ -810,7 +809,7 @@ export function CostMonitoringDashboard() {
             {metrics.locationCache.oldestEntry && (
               <div
                 className="text-center p-3 rounded-lg"
-                style={{ background: 'var(--bg-tertiary)' }}
+                style={{ background: 'var(--surface-sunken)' }}
               >
                 <div className="text-sm font-semibold">
                   {new Date(
@@ -829,8 +828,8 @@ export function CostMonitoringDashboard() {
         <div
           className="rounded-lg shadow-subtle border p-6"
           style={{
-            background: 'var(--bg-secondary)',
-            borderColor: 'var(--bg-quaternary)',
+            background: 'var(--surface)',
+            borderColor: 'var(--border)',
           }}
         >
           <h3 className="text-lg font-semibold mb-4">Recommendations</h3>
@@ -872,16 +871,16 @@ export function CostMonitoringDashboard() {
           disabled={loading}
           className="px-4 py-2 rounded-md text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           style={{
-            background: 'var(--accent-primary)',
+            background: 'var(--tomato)',
           }}
           onMouseEnter={(e) => {
             if (!loading) {
-              e.currentTarget.style.background = 'var(--accent-primary-light)';
+              e.currentTarget.style.background = 'var(--tomato-hover)';
             }
           }}
           onMouseLeave={(e) => {
             if (!loading) {
-              e.currentTarget.style.background = 'var(--accent-primary)';
+              e.currentTarget.style.background = 'var(--tomato)';
             }
           }}
         >

@@ -37,8 +37,8 @@ export function ErrorState({
     <div className="flex items-center justify-center px-6 py-16">
       <div className="max-w-md w-full text-center space-y-6">
         <div className="space-y-2">
-          <h2 className="text-2xl font-semibold text-primary">{title}</h2>
-          <p className="text-secondary">{message}</p>
+          <h2 className="text-2xl font-semibold text-ink">{title}</h2>
+          <p className="text-ink-secondary">{message}</p>
         </div>
 
         {process.env.NODE_ENV === 'development' && (
@@ -48,7 +48,7 @@ export function ErrorState({
             </summary>
             <pre
               className="text-xs p-4 rounded-lg overflow-auto max-h-48"
-              style={{ background: 'var(--bg-secondary)' }}
+              style={{ background: 'var(--surface)' }}
             >
               {error.message}
               {error.digest && `\n\nDigest: ${error.digest}`}

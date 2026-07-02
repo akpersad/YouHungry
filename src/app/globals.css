@@ -9,10 +9,9 @@
    `bg-tomato`, `text-olive`, `bg-surface/60`, `divide-border`, `ring-tomato`
    and every opacity/variant utility generate natively. `inline` makes the
    generated utilities reference the CSS vars directly, so the `.dark`
-   overrides above still flip them. This supersedes the hand-written
-   `.bg-*`/`.text-*` classes further down (kept until the C14 alias cleanup);
-   where names overlap the values are identical, so it's purely additive. */
+   overrides above still flip them. */
 @theme inline {
+  --color-bg: var(--bg);
   --color-tomato: var(--tomato);
   --color-tomato-hover: var(--tomato-hover);
   --color-tomato-tint: var(--tomato-tint);
@@ -29,11 +28,10 @@
   --color-ink: var(--ink);
   --color-ink-secondary: var(--ink-secondary);
   --color-ink-muted: var(--ink-muted);
+  --color-ink-inverse: var(--ink-inverse);
 }
 
-/* Fork In The Road design system — warm & appetizing (see DESIGN.md).
-   Canonical tokens first; legacy-name aliases below them keep every
-   pre-Phase-3 component working until the final cleanup commit. */
+/* Fork In The Road design system — warm & appetizing (see DESIGN.md). */
 
 :root {
   color-scheme: light dark;
@@ -120,25 +118,6 @@
   --z-modal: 1040;
   --z-toast: 1050;
   --z-tooltip: 1060;
-
-  /* ---- Legacy aliases (pre-Phase-3 names; removed in cleanup commit) ---- */
-  --bg-primary: var(--bg);
-  --bg-secondary: var(--surface);
-  --bg-tertiary: var(--surface-sunken);
-  --bg-quaternary: var(--border);
-  --bg-quinary: var(--border-strong);
-  --accent-primary: var(--tomato);
-  --accent-primary-light: var(--tomato-hover);
-  --accent-primary-dark: var(--tomato-hover);
-  --accent-primary-muted: var(--tomato-tint);
-  --text-primary: var(--ink);
-  --text-secondary: var(--ink-secondary);
-  --text-tertiary: var(--ink-muted);
-  --text-inverse: var(--ink-inverse);
-  --shadow-neumorphic-light: var(--shadow-subtle);
-  --shadow-neumorphic-dark: var(--shadow-subtle);
-  --shadow-neumorphic-elevated: var(--shadow-medium);
-  --shadow-neumorphic-pressed: var(--shadow-inset);
 }
 
 /* ---------- Dark mode — warm charcoal, same hue family ---------- */
@@ -417,31 +396,6 @@ h2 {
   --tw-ring-opacity: 0.3;
 }
 
-/* Outline Accent Button - alias of outline */
-.btn-outline-accent {
-  background: var(--surface);
-  color: var(--tomato);
-  border: 1px solid var(--tomato);
-  border-radius: var(--radius-xl);
-  padding: 11px 23px;
-  font-weight: 600;
-  font-size: var(--text-sm);
-}
-
-.btn-outline-accent:hover {
-  background: var(--tomato);
-  color: var(--on-tomato);
-}
-
-.btn-outline-accent:active {
-  box-shadow: var(--shadow-inset);
-}
-
-.btn-outline-accent:focus {
-  --tw-ring-color: var(--tomato);
-  --tw-ring-opacity: 0.3;
-}
-
 /* Button Sizes */
 .btn-sm {
   padding: 8px 16px;
@@ -490,7 +444,7 @@ h2 {
 }
 
 .input-base:focus::placeholder {
-  color: var(--text-secondary);
+  color: var(--ink-secondary);
 }
 
 /* Date input styling */
@@ -522,22 +476,22 @@ h2 {
 
 /* Input Disabled States */
 .input-disabled {
-  background: var(--bg-quaternary) !important;
-  color: var(--text-tertiary) !important;
-  border-color: var(--bg-quinary) !important;
+  background: var(--border) !important;
+  color: var(--ink-muted) !important;
+  border-color: var(--border-strong) !important;
   cursor: not-allowed !important;
   opacity: 0.7;
 }
 
 .input-disabled:hover {
-  border-color: var(--bg-quinary) !important;
+  border-color: var(--border-strong) !important;
   box-shadow: none !important;
 }
 
 .input-disabled:focus {
   outline: none !important;
   box-shadow: none !important;
-  border-color: var(--bg-quinary) !important;
+  border-color: var(--border-strong) !important;
 }
 
 /* Input Success States */
@@ -594,10 +548,10 @@ h2 {
 }
 
 .modal-content {
-  background: var(--bg-secondary);
+  background: var(--surface);
   border-radius: var(--radius-3xl);
   box-shadow: var(--shadow-layered);
-  border: 1px solid var(--bg-quaternary);
+  border: 1px solid var(--border);
   width: 90vw;
   max-width: 600px;
   max-height: 85vh;
@@ -610,10 +564,10 @@ h2 {
 
 /* Clerk Modal Overrides - Neumorphic */
 .cl-modalContent {
-  background: var(--bg-secondary) !important;
+  background: var(--surface) !important;
   border-radius: var(--radius-3xl) !important;
   box-shadow: var(--shadow-layered) !important;
-  border: 1px solid var(--bg-quaternary) !important;
+  border: 1px solid var(--border) !important;
 }
 
 .cl-modalOverlay {
@@ -639,26 +593,6 @@ h2 {
   color: var(--color-info);
 }
 
-.text-primary {
-  color: var(--text-primary);
-}
-
-.text-secondary {
-  color: var(--text-secondary);
-}
-
-.text-tertiary {
-  color: var(--text-tertiary);
-}
-
-.text-inverse {
-  color: var(--text-inverse);
-}
-
-.text-accent {
-  color: var(--accent-primary);
-}
-
 /* Border Color Utilities */
 .border-error {
   border-color: var(--color-error);
@@ -676,95 +610,17 @@ h2 {
   border-color: var(--color-info);
 }
 
-.border-accent {
-  border-color: var(--accent-primary);
-}
-
-/* Background Color Utilities */
-.bg-primary {
-  background: var(--bg-primary);
-}
-
-.bg-secondary {
-  background: var(--bg-secondary);
-}
-
-.bg-tertiary {
-  background: var(--bg-tertiary);
-}
-
-.bg-accent {
-  background: var(--accent-primary);
-}
-
-.bg-quaternary {
-  background: var(--bg-quaternary);
-}
-
-/* Additional Background Utilities - Aliases for Consistency */
-.bg-background {
-  background: var(--bg-primary);
-}
-
-.bg-surface {
-  background: var(--bg-secondary);
-}
-
 .bg-destructive {
   background: var(--color-error);
-}
-
-/* Additional Text Color Utilities - Aliases for Consistency */
-.text-text {
-  color: var(--text-primary);
-}
-
-.text-text-light {
-  color: var(--text-secondary);
-}
-
-.text-muted {
-  color: var(--text-tertiary);
 }
 
 .text-destructive {
   color: var(--color-error);
 }
 
-/* Foreground Text Colors for Component Libraries (e.g., Badge) */
-.text-foreground {
-  color: var(--text-primary);
-}
-
-.text-primary-foreground {
-  color: var(--text-inverse);
-}
-
-.text-secondary-foreground {
-  color: var(--text-primary);
-}
-
-.text-destructive-foreground {
-  color: var(--text-inverse);
-}
-
-.text-muted-foreground {
-  color: var(--text-tertiary);
-}
-
 /* Additional Border Color Utilities */
-.border-border {
-  border-color: var(--bg-quaternary);
-}
-
 .border-destructive {
   border-color: var(--color-error);
-}
-
-/* Focus Ring Utilities */
-.focus\:ring-ring:focus {
-  --tw-ring-color: var(--accent-primary);
-  --tw-ring-opacity: 0.3;
 }
 
 /* Address Input Validation Icons */
@@ -803,24 +659,7 @@ h2 {
   }
 }
 
-/* Alias for background-secondary used in some components */
-.bg-background-secondary {
-  background: var(--bg-secondary);
-}
-
 /* Shadow Utilities */
-.shadow-neumorphic-light {
-  box-shadow: var(--shadow-neumorphic-light);
-}
-
-.shadow-neumorphic-elevated {
-  box-shadow: var(--shadow-neumorphic-elevated);
-}
-
-.shadow-neumorphic-pressed {
-  box-shadow: var(--shadow-neumorphic-pressed);
-}
-
 .shadow-subtle {
   box-shadow: var(--shadow-subtle);
 }
@@ -831,6 +670,10 @@ h2 {
 
 .shadow-strong {
   box-shadow: var(--shadow-strong);
+}
+
+.shadow-inset {
+  box-shadow: var(--shadow-inset);
 }
 
 .shadow-glow {
@@ -1276,7 +1119,7 @@ h2 {
 /* Focus States for Accessibility */
 .focus-visible {
   @apply focus:outline-none focus:ring-2 focus:ring-offset-2;
-  --tw-ring-color: var(--accent-primary);
+  --tw-ring-color: var(--tomato);
   --tw-ring-opacity: 0.3;
 }
 
@@ -1287,7 +1130,7 @@ h2 {
 
 .hover-lift:hover {
   transform: translateY(-2px);
-  box-shadow: var(--shadow-neumorphic-elevated);
+  box-shadow: var(--shadow-medium);
 }
 
 /* Active States */
@@ -1465,10 +1308,10 @@ h2 {
 .shimmer {
   background: linear-gradient(
     90deg,
-    var(--bg-tertiary) 0%,
-    var(--bg-quaternary) 20%,
-    var(--bg-tertiary) 40%,
-    var(--bg-tertiary) 100%
+    var(--surface-sunken) 0%,
+    var(--border) 20%,
+    var(--surface-sunken) 40%,
+    var(--surface-sunken) 100%
   );
   background-size: 1000px 100%;
   animation: shimmer 2s linear infinite;
@@ -1478,8 +1321,8 @@ h2 {
 .focus-ring-enhanced:focus-visible {
   outline: none;
   box-shadow:
-    0 0 0 3px var(--bg-primary),
-    0 0 0 5px var(--accent-primary);
+    0 0 0 3px var(--bg),
+    0 0 0 5px var(--tomato);
 }
 
 /* Interactive Card Lift */
@@ -1624,7 +1467,7 @@ h2 {
   top: 0;
   left: 0;
   right: 0;
-  background: var(--bg-tertiary);
+  background: var(--surface-sunken);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1645,7 +1488,7 @@ h2 {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--text-tertiary);
+  color: var(--ink-muted);
   transition: color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -1656,7 +1499,7 @@ h2 {
 .pull-to-refresh-text {
   font-size: 0.875rem;
   font-weight: 400;
-  color: var(--text-tertiary);
+  color: var(--ink-muted);
   white-space: nowrap;
   transition: color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -1679,11 +1522,11 @@ h2 {
 /* Dark mode adjustments */
 @media (prefers-color-scheme: dark) {
   .pull-to-refresh-indicator {
-    background: var(--bg-tertiary);
+    background: var(--surface-sunken);
   }
 
   .pull-to-refresh-icon,
   .pull-to-refresh-text {
-    color: var(--text-tertiary);
+    color: var(--ink-muted);
   }
 }

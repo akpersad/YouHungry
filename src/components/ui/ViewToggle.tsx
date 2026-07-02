@@ -108,13 +108,13 @@ export function ViewToggle({
   return (
     <div
       className={cn(
-        'bg-secondary rounded-xl shadow-neumorphic-elevated',
-        'border border-quaternary p-1 flex gap-1',
+        'bg-surface rounded-xl shadow-medium',
+        'border border-border p-1 flex gap-1',
         getPositionClasses(),
         className
       )}
       style={{
-        borderColor: 'var(--bg-quaternary)',
+        borderColor: 'var(--border)',
       }}
     >
       {/* List View Button */}
@@ -126,16 +126,15 @@ export function ViewToggle({
           'focus:outline-none focus:ring-2 focus:ring-offset-2',
           'active:scale-95',
           {
-            'bg-accent text-inverse shadow-neumorphic-pressed':
-              currentView === 'list',
-            'text-secondary hover:bg-tertiary hover:text-primary hover:scale-105':
+            'bg-tomato text-ink-inverse shadow-inset': currentView === 'list',
+            'text-ink-secondary hover:bg-surface-sunken hover:text-ink hover:scale-105':
               currentView !== 'list',
           },
           getSizeClasses()
         )}
         style={
           {
-            '--tw-ring-color': 'var(--accent-primary)',
+            '--tw-ring-color': 'var(--tomato)',
             '--tw-ring-opacity': '0.3',
           } as React.CSSProperties
         }
@@ -153,16 +152,15 @@ export function ViewToggle({
           'focus:outline-none focus:ring-2 focus:ring-offset-2',
           'active:scale-95',
           {
-            'bg-accent text-inverse shadow-neumorphic-pressed':
-              currentView === 'map',
-            'text-secondary hover:bg-tertiary hover:text-primary hover:scale-105':
+            'bg-tomato text-ink-inverse shadow-inset': currentView === 'map',
+            'text-ink-secondary hover:bg-surface-sunken hover:text-ink hover:scale-105':
               currentView !== 'map',
           },
           getSizeClasses()
         )}
         style={
           {
-            '--tw-ring-color': 'var(--accent-primary)',
+            '--tw-ring-color': 'var(--tomato)',
             '--tw-ring-opacity': '0.3',
           } as React.CSSProperties
         }
@@ -180,16 +178,15 @@ export function ViewToggle({
           'focus:outline-none focus:ring-2 focus:ring-offset-2',
           'active:scale-95',
           {
-            'bg-accent text-inverse shadow-neumorphic-pressed':
-              currentView === 'grid',
-            'text-secondary hover:bg-tertiary hover:text-primary hover:scale-105':
+            'bg-tomato text-ink-inverse shadow-inset': currentView === 'grid',
+            'text-ink-secondary hover:bg-surface-sunken hover:text-ink hover:scale-105':
               currentView !== 'grid',
           },
           getSizeClasses()
         )}
         style={
           {
-            '--tw-ring-color': 'var(--accent-primary)',
+            '--tw-ring-color': 'var(--tomato)',
             '--tw-ring-opacity': '0.3',
           } as React.CSSProperties
         }
@@ -253,13 +250,13 @@ export function ViewToggleWithLabels({
   return (
     <div
       className={cn(
-        'bg-secondary rounded-xl shadow-neumorphic-elevated',
-        'border border-quaternary flex gap-1',
+        'bg-surface rounded-xl shadow-medium',
+        'border border-border flex gap-1',
         getPositionClasses(),
         className
       )}
       style={{
-        borderColor: 'var(--bg-quaternary)',
+        borderColor: 'var(--border)',
       }}
     >
       {/* List View Button */}
@@ -271,16 +268,15 @@ export function ViewToggleWithLabels({
           'focus:outline-none focus:ring-2 focus:ring-offset-2',
           'active:scale-95',
           {
-            'bg-accent text-inverse shadow-neumorphic-pressed':
-              currentView === 'list',
-            'text-secondary hover:bg-tertiary hover:text-primary hover:scale-105':
+            'bg-tomato text-ink-inverse shadow-inset': currentView === 'list',
+            'text-ink-secondary hover:bg-surface-sunken hover:text-ink hover:scale-105':
               currentView !== 'list',
           },
           getSizeClasses()
         )}
         style={
           {
-            '--tw-ring-color': 'var(--accent-primary)',
+            '--tw-ring-color': 'var(--tomato)',
             '--tw-ring-opacity': '0.3',
           } as React.CSSProperties
         }
@@ -311,16 +307,15 @@ export function ViewToggleWithLabels({
           'focus:outline-none focus:ring-2 focus:ring-offset-2',
           'active:scale-95',
           {
-            'bg-accent text-inverse shadow-neumorphic-pressed':
-              currentView === 'map',
-            'text-secondary hover:bg-tertiary hover:text-primary hover:scale-105':
+            'bg-tomato text-ink-inverse shadow-inset': currentView === 'map',
+            'text-ink-secondary hover:bg-surface-sunken hover:text-ink hover:scale-105':
               currentView !== 'map',
           },
           getSizeClasses()
         )}
         style={
           {
-            '--tw-ring-color': 'var(--accent-primary)',
+            '--tw-ring-color': 'var(--tomato)',
             '--tw-ring-opacity': '0.3',
           } as React.CSSProperties
         }

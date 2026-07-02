@@ -68,7 +68,7 @@ export function RestaurantCard({
             />
             {/* Distance badge overlay */}
             {restaurant.distance && (
-              <div className="absolute top-2 right-2 bg-secondary/90 backdrop-blur-sm text-primary text-xs font-medium px-2 py-1 rounded-lg shadow-neumorphic-light">
+              <div className="absolute top-2 right-2 bg-surface/90 backdrop-blur-sm text-ink text-xs font-medium px-2 py-1 rounded-lg shadow-subtle">
                 📍 {formatDistance(restaurant.distance)}
               </div>
             )}
@@ -77,22 +77,22 @@ export function RestaurantCard({
           {/* Content - Use flex to ensure consistent height */}
           <div className="p-4 flex flex-col flex-1">
             {/* 2. NAME - Clear, readable restaurant name */}
-            <h3 className="text-lg font-semibold text-primary leading-tight mb-3">
+            <h3 className="text-lg font-semibold text-ink leading-tight mb-3">
               {restaurant.name}
             </h3>
 
             {/* 3. PRICE/RATING - Quick reference info */}
             <div className="flex items-center justify-between text-sm mb-3">
               <div className="flex items-center gap-3">
-                <span className="flex items-center gap-1 text-accent font-medium">
+                <span className="flex items-center gap-1 text-tomato font-medium">
                   ⭐ {formatRating(restaurant.rating)}
                 </span>
-                <span className="flex items-center gap-1 text-secondary">
+                <span className="flex items-center gap-1 text-ink-secondary">
                   💰 {formatPriceRange(restaurant.priceRange)}
                 </span>
               </div>
               {restaurant.timeToPickUp && (
-                <span className="flex items-center gap-1 text-secondary text-xs">
+                <span className="flex items-center gap-1 text-ink-secondary text-xs">
                   ⏱️ {formatTimeToPickUp(restaurant.timeToPickUp)}
                 </span>
               )}
@@ -101,7 +101,7 @@ export function RestaurantCard({
             {/* 4. ADDRESS - Fixed height to prevent variation */}
             <div className="h-10 mb-3">
               {restaurant.address && (
-                <div className="text-sm text-secondary line-clamp-2">
+                <div className="text-sm text-ink-secondary line-clamp-2">
                   📍 {restaurant.address}
                 </div>
               )}
@@ -109,16 +109,16 @@ export function RestaurantCard({
 
             {/* 5. TAGS - Fixed height to prevent variation */}
             <div className="h-8 mb-3 flex flex-wrap gap-2 overflow-hidden">
-              <span className="inline-flex items-center px-2 py-1 rounded-lg bg-tertiary text-secondary text-xs font-medium">
+              <span className="inline-flex items-center px-2 py-1 rounded-lg bg-surface-sunken text-ink-secondary text-xs font-medium">
                 {restaurant.cuisine}
               </span>
               {restaurant.phoneNumber && (
-                <span className="inline-flex items-center px-2 py-1 rounded-lg bg-tertiary text-secondary text-xs font-medium">
+                <span className="inline-flex items-center px-2 py-1 rounded-lg bg-surface-sunken text-ink-secondary text-xs font-medium">
                   📞 Available
                 </span>
               )}
               {restaurant.website && (
-                <span className="inline-flex items-center px-2 py-1 rounded-lg bg-tertiary text-secondary text-xs font-medium">
+                <span className="inline-flex items-center px-2 py-1 rounded-lg bg-surface-sunken text-ink-secondary text-xs font-medium">
                   🌐 Website
                 </span>
               )}
@@ -182,10 +182,10 @@ export function RestaurantCard({
 
             {/* Content */}
             <div className="flex-1 min-w-0">
-              <h3 className="text-base font-medium text-primary truncate">
+              <h3 className="text-base font-medium text-ink truncate">
                 {restaurant.name}
               </h3>
-              <div className="flex items-center gap-3 text-sm text-secondary mt-1">
+              <div className="flex items-center gap-3 text-sm text-ink-secondary mt-1">
                 <span>⭐ {formatRating(restaurant.rating)}</span>
                 <span>💰 {formatPriceRange(restaurant.priceRange)}</span>
                 {restaurant.distance && (
@@ -226,10 +226,10 @@ export function RestaurantCard({
           {/* Restaurant Header */}
           <div className="flex justify-between items-start">
             <div className="flex-1">
-              <h3 className="text-lg font-semibold text-primary mb-1">
+              <h3 className="text-lg font-semibold text-ink mb-1">
                 {restaurant.name}
               </h3>
-              <p className="text-sm text-secondary mb-2">
+              <p className="text-sm text-ink-secondary mb-2">
                 {restaurant.cuisine}
               </p>
             </div>
@@ -243,9 +243,11 @@ export function RestaurantCard({
 
           {/* Restaurant Details */}
           <div className="space-y-2">
-            <p className="text-sm text-secondary">📍 {restaurant.address}</p>
+            <p className="text-sm text-ink-secondary">
+              📍 {restaurant.address}
+            </p>
 
-            <div className="flex items-center space-x-4 text-sm text-secondary">
+            <div className="flex items-center space-x-4 text-sm text-ink-secondary">
               <span className="flex items-center">
                 ⭐ {formatRating(restaurant.rating)}
               </span>
@@ -265,7 +267,7 @@ export function RestaurantCard({
             </div>
 
             {restaurant.phoneNumber && (
-              <p className="text-sm text-secondary">
+              <p className="text-sm text-ink-secondary">
                 📞 {restaurant.phoneNumber}
               </p>
             )}
@@ -275,7 +277,7 @@ export function RestaurantCard({
                 href={restaurant.website}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-sm text-accent hover:opacity-80"
+                className="text-sm text-tomato hover:opacity-80"
               >
                 🌐 Visit Website
               </a>
@@ -285,17 +287,17 @@ export function RestaurantCard({
           {/* Hours */}
           {restaurant.hours && (
             <div className="text-sm">
-              <p className="font-medium text-primary mb-1">Hours:</p>
+              <p className="font-medium text-ink mb-1">Hours:</p>
               <div className="space-y-1">
                 {Object.entries(restaurant.hours)
                   .slice(0, 3)
                   .map(([day, hours]) => (
-                    <p key={day} className="text-secondary">
+                    <p key={day} className="text-ink-secondary">
                       {day}: {hours}
                     </p>
                   ))}
                 {Object.keys(restaurant.hours).length > 3 && (
-                  <p className="text-secondary text-xs">
+                  <p className="text-ink-secondary text-xs">
                     +{Object.keys(restaurant.hours).length - 3} more days
                   </p>
                 )}

@@ -113,7 +113,7 @@ export function DecisionStatistics({
             role="status"
             aria-label="Loading"
           >
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-tomato"></div>
           </div>
         </CardContent>
       </Card>
@@ -143,7 +143,7 @@ export function DecisionStatistics({
     <Card>
       <CardContent className="p-6">
         <div className="flex items-center justify-between mb-6">
-          <h3 className="text-lg font-semibold text-text">
+          <h3 className="text-lg font-semibold text-ink">
             Decision Statistics
           </h3>
           {onClose && (
@@ -155,12 +155,12 @@ export function DecisionStatistics({
 
         <div className="space-y-4">
           {/* Summary */}
-          <div className="bg-primary/10 border border-primary rounded-lg p-4">
+          <div className="bg-tomato/10 border border-tomato rounded-lg p-4">
             <div className="flex items-center justify-between">
               <span className="font-medium text-blue-900">
                 Total Decisions Made
               </span>
-              <span className="text-2xl font-bold text-primary">
+              <span className="text-2xl font-bold text-ink">
                 {statistics.totalDecisions}
               </span>
             </div>
@@ -168,12 +168,12 @@ export function DecisionStatistics({
 
           {/* Restaurant Statistics */}
           <div className="space-y-3">
-            <h4 className="font-medium text-text">
+            <h4 className="font-medium text-ink">
               Restaurant Selection History
             </h4>
 
             {statistics.restaurantStats.length === 0 ? (
-              <p className="text-text-light text-center py-4">
+              <p className="text-ink-secondary text-center py-4">
                 No decisions have been made yet for this collection.
               </p>
             ) : (
@@ -184,10 +184,10 @@ export function DecisionStatistics({
                     className="flex items-center justify-between p-3 bg-surface rounded-lg"
                   >
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-text truncate">
+                      <p className="font-medium text-ink truncate">
                         {stat.name}
                       </p>
-                      <div className="flex items-center gap-4 text-sm text-text-light">
+                      <div className="flex items-center gap-4 text-sm text-ink-secondary">
                         <span>Selected {stat.selectionCount} times</span>
                         <span>
                           Last: {formatLastSelected(stat.lastSelected)}
@@ -202,10 +202,10 @@ export function DecisionStatistics({
                         {getWeightLabel(stat.currentWeight)}
                       </div>
                       <div className="text-right">
-                        <div className="text-sm font-medium text-text">
+                        <div className="text-sm font-medium text-ink">
                           {stat.currentWeight.toFixed(2)}
                         </div>
-                        <div className="text-xs text-text-light">Weight</div>
+                        <div className="text-xs text-ink-secondary">Weight</div>
                       </div>
                     </div>
                   </div>
@@ -216,10 +216,10 @@ export function DecisionStatistics({
 
           {/* Explanation */}
           <div className="bg-surface border border-border rounded-lg p-4">
-            <h4 className="font-medium text-text mb-2">
+            <h4 className="font-medium text-ink mb-2">
               How the Weight System Works
             </h4>
-            <div className="text-sm text-text space-y-1">
+            <div className="text-sm text-ink space-y-1">
               <p>
                 • Restaurants selected recently have lower weights (less likely
                 to be chosen again)

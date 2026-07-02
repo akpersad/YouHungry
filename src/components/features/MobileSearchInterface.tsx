@@ -181,9 +181,11 @@ export function MobileSearchInterface({
 
         {/* Quick Search Suggestions - Only show when focused and no query */}
         {showSearchBar && !searchQuery && (
-          <div className="absolute top-full left-0 right-0 mt-1 bg-secondary border border-quaternary rounded-xl shadow-neumorphic-elevated z-10">
+          <div className="absolute top-full left-0 right-0 mt-1 bg-surface border border-border rounded-xl shadow-medium z-10">
             <div className="p-2">
-              <p className="text-xs text-tertiary mb-2 px-2">Quick searches:</p>
+              <p className="text-xs text-ink-muted mb-2 px-2">
+                Quick searches:
+              </p>
               <div className="space-y-1">
                 {['Pizza near me', 'Sushi', 'Breakfast', 'Coffee'].map(
                   (suggestion) => (
@@ -193,7 +195,7 @@ export function MobileSearchInterface({
                         onSearchChange(suggestion);
                         searchInputRef.current?.focus();
                       }}
-                      className="w-full text-left px-3 py-2 rounded-lg hover:bg-tertiary text-sm text-primary transition-colors"
+                      className="w-full text-left px-3 py-2 rounded-lg hover:bg-surface-sunken text-sm text-ink transition-colors"
                     >
                       {suggestion}
                     </button>
@@ -214,7 +216,7 @@ export function MobileSearchInterface({
           {filters.cuisine?.map((cuisine) => (
             <span
               key={cuisine}
-              className="inline-flex items-center gap-1 px-2 py-1 bg-accent/10 text-accent text-xs rounded-full"
+              className="inline-flex items-center gap-1 px-2 py-1 bg-tomato/10 text-tomato text-xs rounded-full"
             >
               {cuisine}
               <button
@@ -224,7 +226,7 @@ export function MobileSearchInterface({
                   );
                   onFiltersChange?.({ ...filters, cuisine: newCuisine });
                 }}
-                className="ml-1 hover:bg-accent/20 rounded-full p-0.5"
+                className="ml-1 hover:bg-tomato/20 rounded-full p-0.5"
               >
                 <svg
                   className="w-3 h-3"
@@ -245,7 +247,7 @@ export function MobileSearchInterface({
           {filters.priceRange?.map((price) => (
             <span
               key={price}
-              className="inline-flex items-center gap-1 px-2 py-1 bg-accent/10 text-accent text-xs rounded-full"
+              className="inline-flex items-center gap-1 px-2 py-1 bg-tomato/10 text-tomato text-xs rounded-full"
             >
               {price}
               <button
@@ -255,7 +257,7 @@ export function MobileSearchInterface({
                   );
                   onFiltersChange?.({ ...filters, priceRange: newPriceRange });
                 }}
-                className="ml-1 hover:bg-accent/20 rounded-full p-0.5"
+                className="ml-1 hover:bg-tomato/20 rounded-full p-0.5"
               >
                 <svg
                   className="w-3 h-3"
@@ -274,13 +276,13 @@ export function MobileSearchInterface({
             </span>
           ))}
           {filters.rating && (
-            <span className="inline-flex items-center gap-1 px-2 py-1 bg-accent/10 text-accent text-xs rounded-full">
+            <span className="inline-flex items-center gap-1 px-2 py-1 bg-tomato/10 text-tomato text-xs rounded-full">
               ⭐ {filters.rating}+ stars
               <button
                 onClick={() =>
                   onFiltersChange?.({ ...filters, rating: undefined })
                 }
-                className="ml-1 hover:bg-accent/20 rounded-full p-0.5"
+                className="ml-1 hover:bg-tomato/20 rounded-full p-0.5"
               >
                 <svg
                   className="w-3 h-3"
@@ -299,13 +301,13 @@ export function MobileSearchInterface({
             </span>
           )}
           {filters.distance && (
-            <span className="inline-flex items-center gap-1 px-2 py-1 bg-accent/10 text-accent text-xs rounded-full">
+            <span className="inline-flex items-center gap-1 px-2 py-1 bg-tomato/10 text-tomato text-xs rounded-full">
               📍 {filters.distance} mi
               <button
                 onClick={() =>
                   onFiltersChange?.({ ...filters, distance: undefined })
                 }
-                className="ml-1 hover:bg-accent/20 rounded-full p-0.5"
+                className="ml-1 hover:bg-tomato/20 rounded-full p-0.5"
               >
                 <svg
                   className="w-3 h-3"
@@ -350,7 +352,7 @@ export function MobileSearchInterface({
         title="Set Location"
       >
         <div className="space-y-4">
-          <p className="text-secondary text-sm">
+          <p className="text-ink-secondary text-sm">
             Allow location access to find restaurants near you, or enter a
             custom address.
           </p>

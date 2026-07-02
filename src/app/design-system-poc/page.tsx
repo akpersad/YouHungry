@@ -358,7 +358,7 @@ function DesignSystemPOCContent() {
                     {restaurant.tags.map((tag) => (
                       <span
                         key={tag}
-                        className="px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 hover:bg-accent hover:text-white"
+                        className="px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 hover:bg-tomato hover:text-white"
                         style={{
                           backgroundColor: currentColors.bgTertiary,
                           color: currentColors.textSecondary,

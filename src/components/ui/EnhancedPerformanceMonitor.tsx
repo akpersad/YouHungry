@@ -301,7 +301,7 @@ export function EnhancedPerformanceMonitor() {
       {/* Toggle Button */}
       <button
         onClick={() => setIsVisible(!isVisible)}
-        className="bg-primary text-white p-2 rounded-full shadow-lg hover:bg-primary/90 transition-colors"
+        className="bg-tomato text-white p-2 rounded-full shadow-lg hover:bg-tomato/90 transition-colors"
         title="Performance Monitor"
       >
         {isVisible ? '📊' : '⚡'}
@@ -314,14 +314,14 @@ export function EnhancedPerformanceMonitor() {
 
       {/* Monitor Panel */}
       {isVisible && (
-        <div className="absolute bottom-16 right-0 w-80 bg-white dark:bg-background rounded-lg shadow-xl border border-border dark:border-border p-4 max-h-96 overflow-y-auto">
+        <div className="absolute bottom-16 right-0 w-80 bg-white rounded-lg shadow-xl border border-border dark:border-border p-4 max-h-96 overflow-y-auto">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-text dark:text-white">
+            <h3 className="text-lg font-semibold text-ink dark:text-white">
               Performance Monitor
             </h3>
             <button
               onClick={() => setIsVisible(false)}
-              className="text-text-light hover:text-text dark:text-text-light dark:hover:text-text-light"
+              className="text-ink-secondary hover:text-ink"
             >
               ✕
             </button>
@@ -330,7 +330,7 @@ export function EnhancedPerformanceMonitor() {
           {/* Alerts */}
           {alerts.length > 0 && (
             <div className="mb-4">
-              <h4 className="text-sm font-medium text-text dark:text-text-light mb-2">
+              <h4 className="text-sm font-medium text-ink mb-2">
                 Alerts ({alerts.length})
               </h4>
               <div className="space-y-2">
@@ -342,7 +342,7 @@ export function EnhancedPerformanceMonitor() {
                         ? 'bg-destructive/10 text-red-800 dark:bg-destructive/20 dark:text-red-200'
                         : alert.type === 'warning'
                           ? 'bg-warning/20 text-warning dark:bg-warning/90 dark:text-yellow-200'
-                          : 'bg-primary/10 text-blue-800 dark:bg-primary/20 dark:text-blue-200'
+                          : 'bg-tomato/10 text-blue-800 dark:text-blue-200'
                     }`}
                   >
                     {alert.message}
@@ -354,9 +354,7 @@ export function EnhancedPerformanceMonitor() {
 
           {/* Metrics */}
           <div className="space-y-2">
-            <h4 className="text-sm font-medium text-text dark:text-text-light">
-              Current Metrics
-            </h4>
+            <h4 className="text-sm font-medium text-ink">Current Metrics</h4>
 
             {metrics.fcp && (
               <div className="flex justify-between text-xs">
@@ -454,7 +452,7 @@ export function EnhancedPerformanceMonitor() {
 
             <div className="flex justify-between text-xs">
               <span>Renders:</span>
-              <span className="text-text-light">{renderCount}</span>
+              <span className="text-ink-secondary">{renderCount}</span>
             </div>
           </div>
 
@@ -463,7 +461,7 @@ export function EnhancedPerformanceMonitor() {
             <button
               onClick={collectMetrics}
               disabled={isCollecting}
-              className="w-full bg-primary text-white py-2 px-4 rounded text-sm hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-tomato text-white py-2 px-4 rounded text-sm hover:bg-tomato/90 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isCollecting ? 'Collecting...' : 'Collect Metrics'}
             </button>

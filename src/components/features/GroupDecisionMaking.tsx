@@ -522,7 +522,7 @@ export function GroupDecisionMaking({
           >
             ← Back
           </Button>
-          <h2 className="font-display text-2xl font-semibold text-primary">
+          <h2 className="font-display text-2xl font-semibold text-ink">
             Rank your top {MAX_RANKINGS}
           </h2>
         </div>
@@ -541,7 +541,7 @@ export function GroupDecisionMaking({
           </div>
         )}
 
-        <p className="text-secondary">
+        <p className="text-ink-secondary">
           Tap up to {MAX_RANKINGS} restaurants in order of preference. Your 1st
           choice is worth 3 points, 2nd worth 2, and 3rd worth 1 — the highest
           total wins.
@@ -550,7 +550,7 @@ export function GroupDecisionMaking({
         {/* Current ranking */}
         {rankings.length > 0 && (
           <div className="space-y-2">
-            <h3 className="text-sm font-medium text-secondary">
+            <h3 className="text-sm font-medium text-ink-secondary">
               Your ranking ({rankings.length}/{MAX_RANKINGS})
             </h3>
             <ul className="space-y-2">
@@ -574,16 +574,16 @@ export function GroupDecisionMaking({
                     onDrop={(e) => handleDrop(e, index)}
                   >
                     <span
-                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold text-inverse"
+                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold text-ink-inverse"
                       style={{ background: 'var(--tomato)' }}
                     >
                       {index + 1}
                     </span>
                     <div className="min-w-0 flex-1">
-                      <p className="truncate font-medium text-primary">
+                      <p className="truncate font-medium text-ink">
                         {restaurant.name}
                       </p>
-                      <p className="truncate text-sm text-tertiary">
+                      <p className="truncate text-sm text-ink-muted">
                         {restaurant.cuisine}
                       </p>
                     </div>
@@ -593,7 +593,7 @@ export function GroupDecisionMaking({
                         onClick={() => moveRanking(index, -1)}
                         disabled={index === 0}
                         aria-label={`Move ${restaurant.name} up`}
-                        className="touch-target rounded px-2 py-1 text-secondary disabled:opacity-30"
+                        className="touch-target rounded px-2 py-1 text-ink-secondary disabled:opacity-30"
                       >
                         ↑
                       </button>
@@ -602,7 +602,7 @@ export function GroupDecisionMaking({
                         onClick={() => moveRanking(index, 1)}
                         disabled={index === rankings.length - 1}
                         aria-label={`Move ${restaurant.name} down`}
-                        className="touch-target rounded px-2 py-1 text-secondary disabled:opacity-30"
+                        className="touch-target rounded px-2 py-1 text-ink-secondary disabled:opacity-30"
                       >
                         ↓
                       </button>
@@ -624,7 +624,7 @@ export function GroupDecisionMaking({
 
         {/* Available restaurants */}
         <div className="space-y-2">
-          <h3 className="text-sm font-medium text-secondary">
+          <h3 className="text-sm font-medium text-ink-secondary">
             {rankings.length >= MAX_RANKINGS
               ? 'Ranking full — remove one to swap'
               : 'Tap to add to your ranking'}
@@ -658,7 +658,9 @@ export function GroupDecisionMaking({
                       <span
                         className={cn(
                           'flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-sm',
-                          isSelected ? 'text-inverse' : 'border border-border'
+                          isSelected
+                            ? 'text-ink-inverse'
+                            : 'border border-border'
                         )}
                         style={
                           isSelected
@@ -670,20 +672,20 @@ export function GroupDecisionMaking({
                         {isSelected ? '✓' : ''}
                       </span>
                       <div className="min-w-0">
-                        <p className="truncate font-medium text-primary">
+                        <p className="truncate font-medium text-ink">
                           {restaurant.name}
                         </p>
-                        <p className="truncate text-sm text-tertiary">
+                        <p className="truncate text-sm text-ink-muted">
                           {restaurant.cuisine}
                         </p>
                       </div>
                     </div>
                     <div className="shrink-0 text-right">
-                      <p className="text-sm font-medium text-secondary">
+                      <p className="text-sm font-medium text-ink-secondary">
                         ⭐ {restaurant.rating}
                       </p>
                       {restaurant.priceRange && (
-                        <p className="text-sm text-tertiary">
+                        <p className="text-sm text-ink-muted">
                           {restaurant.priceRange}
                         </p>
                       )}
@@ -716,10 +718,10 @@ export function GroupDecisionMaking({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="font-display text-2xl font-semibold text-primary">
+          <h2 className="font-display text-2xl font-semibold text-ink">
             Group Decisions
           </h2>
-          <span className="mt-1 inline-flex items-center gap-1.5 text-xs text-tertiary">
+          <span className="mt-1 inline-flex items-center gap-1.5 text-xs text-ink-muted">
             <span
               className={cn(
                 'h-2 w-2 rounded-full',
@@ -752,7 +754,7 @@ export function GroupDecisionMaking({
             <div className="block md:flex md:items-start md:justify-between">
               <div className="w-full md:w-auto">
                 <div className="mb-4 flex items-center justify-between gap-3 md:mb-2 md:justify-start">
-                  <h3 className="text-lg font-semibold text-primary">
+                  <h3 className="text-lg font-semibold text-ink">
                     {decision.method === 'tiered'
                       ? 'Tiered Choice'
                       : 'Random Selection'}
@@ -771,11 +773,11 @@ export function GroupDecisionMaking({
                 </div>
 
                 <div className="mb-6 space-y-2 md:mb-0 md:space-y-0">
-                  <p className="text-secondary">
+                  <p className="text-ink-secondary">
                     Visit Date:{' '}
                     {new Date(decision.visitDate).toLocaleDateString()}
                   </p>
-                  <p className="text-secondary">
+                  <p className="text-ink-secondary">
                     Deadline: {new Date(decision.deadline).toLocaleDateString()}{' '}
                     {new Date(decision.deadline).toLocaleTimeString([], {
                       hour: '2-digit',
@@ -783,7 +785,7 @@ export function GroupDecisionMaking({
                     })}
                   </p>
                   {/* Presence line — quiet live status (O6/V6) */}
-                  <p className="inline-flex items-center gap-1.5 text-sm font-medium text-secondary">
+                  <p className="inline-flex items-center gap-1.5 text-sm font-medium text-ink-secondary">
                     <span
                       className={cn(
                         'h-2 w-2 rounded-full',
@@ -866,10 +868,10 @@ export function GroupDecisionMaking({
                 🎉
               </span>
               <div>
-                <h3 className="text-lg font-semibold text-primary">
+                <h3 className="text-lg font-semibold text-ink">
                   Decision Completed!
                 </h3>
-                <p className="text-sm text-tertiary">
+                <p className="text-sm text-ink-muted">
                   {decision.method === 'tiered'
                     ? 'Tiered Choice'
                     : 'Random Selection'}{' '}
@@ -880,17 +882,19 @@ export function GroupDecisionMaking({
 
             {winner ? (
               <div className="mb-4">
-                <p className="text-sm text-tertiary">Selected Restaurant</p>
-                <p className="font-display text-xl font-semibold text-primary">
+                <p className="text-sm text-ink-muted">Selected Restaurant</p>
+                <p className="font-display text-xl font-semibold text-ink">
                   {winner.name}
                 </p>
                 {winner.address && (
-                  <p className="text-sm text-secondary">📍 {winner.address}</p>
+                  <p className="text-sm text-ink-secondary">
+                    📍 {winner.address}
+                  </p>
                 )}
               </div>
             ) : (
               decision.result && (
-                <p className="mb-4 text-secondary">Restaurant not found</p>
+                <p className="mb-4 text-ink-secondary">Restaurant not found</p>
               )
             )}
 
@@ -903,7 +907,7 @@ export function GroupDecisionMaking({
             )}
 
             {decision.result?.reasoning && (
-              <p className="mt-3 border-t border-border pt-2 text-sm text-tertiary">
+              <p className="mt-3 border-t border-border pt-2 text-sm text-ink-muted">
                 <span className="font-medium">Reasoning:</span>{' '}
                 {decision.result.reasoning}
               </p>
@@ -915,7 +919,7 @@ export function GroupDecisionMaking({
       {/* Past decisions — no more 24h history cliff (O8) */}
       {pastDecisions.length > 0 && (
         <section className="space-y-3">
-          <h3 className="font-display text-xl font-semibold text-primary">
+          <h3 className="font-display text-xl font-semibold text-ink">
             Past decisions
           </h3>
           {pastDecisions.slice(0, 10).map((decision) => {
@@ -924,13 +928,13 @@ export function GroupDecisionMaking({
               <Card key={`past-${decision.id}`} className="p-5">
                 <div className="mb-2 flex items-center justify-between gap-3">
                   <div>
-                    <p className="font-medium text-primary">
+                    <p className="font-medium text-ink">
                       {winner?.name ??
                         (decision.status === 'closed'
                           ? 'Closed without a pick'
                           : 'No selection')}
                     </p>
-                    <p className="text-sm text-tertiary">
+                    <p className="text-sm text-ink-muted">
                       {decision.method === 'tiered'
                         ? 'Tiered Choice'
                         : 'Random Selection'}{' '}
@@ -941,7 +945,7 @@ export function GroupDecisionMaking({
                     className="shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium capitalize"
                     style={{
                       background: 'var(--surface-sunken)',
-                      color: 'var(--text-tertiary)',
+                      color: 'var(--ink-muted)',
                     }}
                   >
                     {decision.status}
@@ -977,7 +981,7 @@ export function GroupDecisionMaking({
           />
 
           <div>
-            <label className="mb-2 block text-sm font-medium text-primary">
+            <label className="mb-2 block text-sm font-medium text-ink">
               Decision Method
             </label>
             <div className="space-y-2">
@@ -1024,7 +1028,7 @@ export function GroupDecisionMaking({
         title="Close Decision?"
       >
         <div className="space-y-4">
-          <p className="text-secondary">
+          <p className="text-ink-secondary">
             Are you sure you want to close this decision? This will end voting
             without selecting a restaurant.
           </p>

@@ -23,7 +23,7 @@ interface SkeletonProps {
 export function Skeleton({ className }: SkeletonProps) {
   return (
     <motion.div
-      className={cn('bg-tertiary rounded', className)}
+      className={cn('bg-surface-sunken rounded', className)}
       variants={skeletonVariants}
       animate="animate"
       aria-hidden="true"

@@ -18,7 +18,7 @@ export function FriendsManagement() {
   if (!user) {
     return (
       <div className="text-center py-8">
-        <p className="text-sm text-text-light">
+        <p className="text-sm text-ink-secondary">
           Please sign in to manage friends
         </p>
       </div>
@@ -35,14 +35,14 @@ export function FriendsManagement() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-text">Friends</h1>
-          <p className="text-sm text-text-light">
+          <h1 className="text-2xl font-bold text-ink">Friends</h1>
+          <p className="text-sm text-ink-secondary">
             Manage your friends and friend requests
           </p>
         </div>
         <Button
           onClick={() => setShowSearchModal(true)}
-          className="bg-accent hover:bg-accent text-white"
+          className="bg-tomato hover:bg-tomato text-white"
         >
           Add Friends
         </Button>
@@ -57,13 +57,13 @@ export function FriendsManagement() {
               onClick={() => setActiveTab(tab.id)}
               className={`py-2 px-1 border-b-2 font-medium text-sm ${
                 activeTab === tab.id
-                  ? 'border-primary text-primary'
-                  : 'border-transparent text-text-light hover:text-text hover:border-border'
+                  ? 'border-tomato text-ink'
+                  : 'border-transparent text-ink-secondary hover:text-ink hover:border-border'
               }`}
             >
               {tab.label}
               {tab.count !== null && (
-                <span className="ml-2 bg-surface text-text-light py-0.5 px-2 rounded-full text-xs">
+                <span className="ml-2 bg-surface text-ink-secondary py-0.5 px-2 rounded-full text-xs">
                   {tab.count}
                 </span>
               )}

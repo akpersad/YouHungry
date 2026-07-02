@@ -419,7 +419,7 @@ export function CollectionView({ collectionId }: CollectionViewProps) {
                 {isCurrentUserAdmin && (
                   <Button
                     onClick={handleStartGroupDecision}
-                    className="bg-accent hover:bg-accent text-white"
+                    className="bg-tomato hover:bg-tomato text-white"
                   >
                     Start Group Decision
                   </Button>
@@ -486,7 +486,7 @@ export function CollectionView({ collectionId }: CollectionViewProps) {
       <div className="max-w-6xl mx-auto">
         <div className="flex items-center justify-center py-8">
           <div
-            className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"
+            className="animate-spin rounded-full h-8 w-8 border-b-2 border-tomato"
             role="status"
             aria-label="Loading collection"
           ></div>
@@ -527,7 +527,7 @@ export function CollectionView({ collectionId }: CollectionViewProps) {
         <Card>
           <CardContent className="p-6">
             <div className="text-center">
-              <p className="text-text-muted mb-4">Collection not found</p>
+              <p className="text-ink-muted mb-4">Collection not found</p>
               <Button onClick={() => router.back()} variant="outline">
                 Go Back
               </Button>
@@ -544,11 +544,11 @@ export function CollectionView({ collectionId }: CollectionViewProps) {
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-3xl font-bold text-text mb-2">
+            <h1 className="text-3xl font-bold text-ink mb-2">
               {collection.name}
             </h1>
             {collection.description && (
-              <p className="text-text-light">{collection.description}</p>
+              <p className="text-ink-secondary">{collection.description}</p>
             )}
           </div>
           <div className="flex space-x-2">
@@ -558,7 +558,7 @@ export function CollectionView({ collectionId }: CollectionViewProps) {
           </div>
         </div>
 
-        <div className="flex items-center space-x-4 text-sm text-text-muted">
+        <div className="flex items-center space-x-4 text-sm text-ink-muted">
           <span>{collection.restaurantIds.length} restaurants</span>
           <span>•</span>
           <span>

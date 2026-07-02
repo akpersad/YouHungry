@@ -33,7 +33,7 @@ export function ConfirmDialog({
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={title}>
       <div className="space-y-4">
-        <p className="text-secondary">{message}</p>
+        <p className="text-ink-secondary">{message}</p>
 
         <div className="flex justify-end space-x-3 pt-4">
           <Button variant="secondary" onClick={onClose} disabled={isLoading}>

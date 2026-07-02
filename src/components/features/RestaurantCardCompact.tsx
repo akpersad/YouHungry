@@ -29,11 +29,11 @@ export function RestaurantCardCompact({
       <div className="flex flex-col h-full">
         {/* Restaurant Basic Info */}
         <div className="mb-3">
-          <h3 className="text-sm font-semibold text-primary truncate mb-1">
+          <h3 className="text-sm font-semibold text-ink truncate mb-1">
             {restaurant.name}
           </h3>
           <div className="h-8">
-            <p className="text-xs text-secondary line-clamp-2">
+            <p className="text-xs text-ink-secondary line-clamp-2">
               {restaurant.address}
             </p>
           </div>
@@ -41,7 +41,7 @@ export function RestaurantCardCompact({
 
         {/* Key Details */}
         <div className="space-y-1 mb-3 flex-1">
-          <div className="flex items-center justify-between text-xs text-secondary">
+          <div className="flex items-center justify-between text-xs text-ink-secondary">
             <span className="flex items-center">
               ⭐ {formatRating(restaurant.rating)}
             </span>
@@ -51,13 +51,13 @@ export function RestaurantCardCompact({
           </div>
 
           {restaurant.distance && (
-            <p className="text-xs text-secondary truncate">
+            <p className="text-xs text-ink-secondary truncate">
               📍 {restaurant.distance.toFixed(1)} mi
             </p>
           )}
 
           {restaurant.timeToPickUp && (
-            <p className="text-xs text-secondary">
+            <p className="text-xs text-ink-secondary">
               ⏱️ {restaurant.timeToPickUp} min
             </p>
           )}

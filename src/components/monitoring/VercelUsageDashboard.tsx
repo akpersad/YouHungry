@@ -162,7 +162,7 @@ export function VercelUsageDashboard() {
               Refresh
             </Button>
             {lastUpdated && (
-              <span className="text-sm text-muted-foreground">
+              <span className="text-sm text-ink-muted">
                 Last updated: {lastUpdated.toLocaleTimeString()}
               </span>
             )}
@@ -204,7 +204,7 @@ export function VercelUsageDashboard() {
                 }}
               />
             </div>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-ink-muted">
               {formatBytes(usageData.bandwidth.used)} /{' '}
               {formatBytes(usageData.bandwidth.limit)}
             </p>
@@ -245,7 +245,7 @@ export function VercelUsageDashboard() {
                 }}
               />
             </div>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-ink-muted">
               {usageData.functionExecution.used.toFixed(1)} /{' '}
               {usageData.functionExecution.limit} GB-hours
             </p>
@@ -271,8 +271,8 @@ export function VercelUsageDashboard() {
               </Badge>
             </div>
             <div className="flex items-center space-x-2">
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">
+              <TrendingUp className="h-4 w-4 text-ink-muted" />
+              <span className="text-sm text-ink-muted">
                 Current hour: {usageData.requests.count} requests
               </span>
             </div>
@@ -284,21 +284,21 @@ export function VercelUsageDashboard() {
             <div className="grid grid-cols-3 gap-4 text-sm">
               <div>
                 <p className="font-medium">Bandwidth</p>
-                <p className="text-muted-foreground">
+                <p className="text-ink-muted">
                   Warning: {thresholds.bandwidth.warning}%<br />
                   Critical: {thresholds.bandwidth.critical}%
                 </p>
               </div>
               <div>
                 <p className="font-medium">Function Execution</p>
-                <p className="text-muted-foreground">
+                <p className="text-ink-muted">
                   Warning: {thresholds.functionExecution.warning}%<br />
                   Critical: {thresholds.functionExecution.critical}%
                 </p>
               </div>
               <div>
                 <p className="font-medium">Requests</p>
-                <p className="text-muted-foreground">
+                <p className="text-ink-muted">
                   Warning: {thresholds.requests.warning}/hr
                   <br />
                   Critical: {thresholds.requests.critical}/hr

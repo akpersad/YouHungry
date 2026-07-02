@@ -50,13 +50,13 @@ export function DecideResult({
           className="h-32 w-full rounded-xl object-cover sm:w-32"
         />
         <div className="flex-1 space-y-2">
-          <h3 className="font-display text-2xl font-semibold text-primary">
+          <h3 className="font-display text-2xl font-semibold text-ink">
             {restaurant.name}
           </h3>
           {restaurant.address && (
-            <p className="text-sm text-secondary">{restaurant.address}</p>
+            <p className="text-sm text-ink-secondary">{restaurant.address}</p>
           )}
-          <div className="flex flex-wrap gap-3 text-sm text-secondary">
+          <div className="flex flex-wrap gap-3 text-sm text-ink-secondary">
             {restaurant.rating != null && (
               <span style={{ color: 'var(--saffron)' }}>
                 ★ {restaurant.rating}
@@ -65,7 +65,7 @@ export function DecideResult({
             {restaurant.priceRange && <span>{restaurant.priceRange}</span>}
             {restaurant.cuisine && <span>{restaurant.cuisine}</span>}
           </div>
-          <p className="text-sm text-tertiary">Planned for {formattedDate}</p>
+          <p className="text-sm text-ink-muted">Planned for {formattedDate}</p>
         </div>
       </div>
 
@@ -88,7 +88,7 @@ export function DecideResult({
           <RotateCw className="mr-2 h-4 w-4" />
           Spin again
           {remainingCount > 0 && (
-            <span className="ml-1 text-tertiary">({remainingCount} more)</span>
+            <span className="ml-1 text-ink-muted">({remainingCount} more)</span>
           )}
         </Button>
         <a

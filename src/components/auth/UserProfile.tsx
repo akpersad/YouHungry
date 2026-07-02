@@ -13,7 +13,7 @@ export function UserProfile() {
               'focus:outline-none focus:ring-2 focus:ring-offset-2 rounded-full transition-all duration-200 hover:scale-105 active:scale-95',
           },
           variables: {
-            colorPrimary: 'var(--accent-primary)',
+            colorPrimary: 'var(--tomato)',
           },
         }}
       />

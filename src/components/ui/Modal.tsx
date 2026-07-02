@@ -171,13 +171,10 @@ export function Modal({
             {(title || showCloseButton) && (
               <div
                 className="flex items-center justify-between p-lg pb-4 border-b flex-shrink-0"
-                style={{ borderColor: 'var(--bg-quaternary)' }}
+                style={{ borderColor: 'var(--border)' }}
               >
                 {title && (
-                  <h2
-                    id={titleId}
-                    className="text-xl font-semibold text-primary"
-                  >
+                  <h2 id={titleId} className="text-xl font-semibold text-ink">
                     {title}
                   </h2>
                 )}
@@ -203,7 +200,7 @@ export function Modal({
             )}
 
             {/* Content - Scrollable area */}
-            <div className="text-primary p-lg overflow-y-auto flex-1">
+            <div className="text-ink p-lg overflow-y-auto flex-1">
               {children}
             </div>
           </motion.div>

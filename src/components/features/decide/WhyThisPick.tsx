@@ -60,13 +60,11 @@ export function WhyThisPick({ collectionId, restaurantId }: WhyThisPickProps) {
 
   return (
     <div className="rounded-xl border border-border bg-surface-sunken p-4">
-      <h4 className="mb-3 text-sm font-semibold text-primary">
-        Why this pick?
-      </h4>
+      <h4 className="mb-3 text-sm font-semibold text-ink">Why this pick?</h4>
 
-      <div className="mb-2 flex items-center justify-between text-xs text-secondary">
+      <div className="mb-2 flex items-center justify-between text-xs text-ink-secondary">
         <span>Chance relative to the field</span>
-        <span className="font-medium text-primary">{pct}%</span>
+        <span className="font-medium text-ink">{pct}%</span>
       </div>
       <div
         className="h-2 w-full overflow-hidden rounded-full"
@@ -80,7 +78,7 @@ export function WhyThisPick({ collectionId, restaurantId }: WhyThisPickProps) {
         />
       </div>
 
-      <p className="mt-3 text-sm text-secondary">
+      <p className="mt-3 text-sm text-ink-secondary">
         {lastVisitedLabel(mine.lastSelected)}
         {mine.selectionCount > 0 &&
           ` Picked ${mine.selectionCount} ${

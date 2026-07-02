@@ -19,9 +19,9 @@ export function Header({ children }: HeaderProps) {
 
   return (
     <header
-      className="hidden md:block border-b shadow-neumorphic-light bg-secondary"
+      className="hidden md:block border-b shadow-subtle bg-surface"
       style={{
-        borderColor: 'var(--bg-quaternary)',
+        borderColor: 'var(--border)',
       }}
     >
       <div className="container mx-auto px-4 py-4">
@@ -31,7 +31,7 @@ export function Header({ children }: HeaderProps) {
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 96 96"
-                className="w-8 h-8 text-accent group-hover:opacity-80 transition-opacity"
+                className="w-8 h-8 text-tomato group-hover:opacity-80 transition-opacity"
                 role="img"
                 aria-label="Fork In The Road logo"
               >
@@ -98,7 +98,7 @@ export function Header({ children }: HeaderProps) {
                   d="M30 86 Q45 80 62 86 Q45 82 30 86"
                 />
               </svg>
-              <h1 className="text-xl font-bold group-hover:opacity-80 transition-opacity text-accent">
+              <h1 className="text-xl font-bold group-hover:opacity-80 transition-opacity text-tomato">
                 Fork In The Road
               </h1>
             </Link>
@@ -106,31 +106,31 @@ export function Header({ children }: HeaderProps) {
               <nav className="hidden md:flex items-center space-x-6">
                 <Link
                   href="/dashboard"
-                  className="text-sm font-medium hover:opacity-80 transition-opacity text-primary"
+                  className="text-sm font-medium hover:opacity-80 transition-opacity text-ink"
                 >
                   Dashboard
                 </Link>
                 <Link
                   href="/restaurants"
-                  className="text-sm font-medium hover:opacity-80 transition-opacity text-primary"
+                  className="text-sm font-medium hover:opacity-80 transition-opacity text-ink"
                 >
                   Search Restaurants
                 </Link>
                 <Link
                   href="/groups"
-                  className="text-sm font-medium hover:opacity-80 transition-opacity text-primary"
+                  className="text-sm font-medium hover:opacity-80 transition-opacity text-ink"
                 >
                   Groups
                 </Link>
                 <Link
                   href="/friends"
-                  className="text-sm font-medium hover:opacity-80 transition-opacity text-primary"
+                  className="text-sm font-medium hover:opacity-80 transition-opacity text-ink"
                 >
                   Friends
                 </Link>
                 <Link
                   href="/history"
-                  className="text-sm font-medium hover:opacity-80 transition-opacity text-primary"
+                  className="text-sm font-medium hover:opacity-80 transition-opacity text-ink"
                 >
                   History
                 </Link>

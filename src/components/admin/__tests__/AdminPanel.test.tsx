@@ -281,12 +281,12 @@ describe('AdminPanel', () => {
     render(<AdminPanel />);
 
     const header = screen.getByText('Admin Panel');
-    expect(header).toHaveClass('text-2xl', 'font-bold', 'text-text');
+    expect(header).toHaveClass('text-2xl', 'font-bold', 'text-ink');
 
     const description = screen.getByText(
       'System administration and monitoring'
     );
-    expect(description).toHaveClass('text-sm', 'text-text-light');
+    expect(description).toHaveClass('text-sm', 'text-ink-secondary');
   });
 
   it('should render with proper layout structure', () => {

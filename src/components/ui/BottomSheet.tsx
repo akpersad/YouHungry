@@ -147,12 +147,12 @@ export function BottomSheet({
             ref={sheetRef}
             className={cn(
               'fixed bottom-0 left-0 right-0 z-[10001]',
-              'bg-secondary border-t border-quaternary',
-              'rounded-t-3xl shadow-neumorphic-elevated',
+              'bg-surface border-t border-border',
+              'rounded-t-3xl shadow-medium',
               className
             )}
             style={{
-              borderColor: 'var(--bg-quaternary)',
+              borderColor: 'var(--border)',
               borderRadius: 'var(--radius-3xl) var(--radius-3xl) 0 0',
               maxHeight: '90vh',
             }}
@@ -170,14 +170,14 @@ export function BottomSheet({
                 onTouchEnd={handleTouchEnd}
                 onMouseDown={handleMouseDownWithListeners}
               >
-                <div className="w-12 h-1 bg-quaternary rounded-full" />
+                <div className="w-12 h-1 bg-border rounded-full" />
               </div>
             )}
 
             {/* Header */}
             {title && (
-              <div className="px-4 py-3 border-b border-quaternary">
-                <h3 className="text-lg font-semibold text-primary text-center">
+              <div className="px-4 py-3 border-b border-border">
+                <h3 className="text-lg font-semibold text-ink text-center">
                   {title}
                 </h3>
               </div>
@@ -230,7 +230,7 @@ export function QuickActionSheet({
               'focus:outline-none focus:ring-2 focus:ring-offset-2',
               action.variant === 'destructive'
                 ? 'text-error hover:bg-error/10 focus:ring-error/30'
-                : 'text-primary hover:bg-tertiary focus:ring-accent/30'
+                : 'text-ink hover:bg-surface-sunken focus:ring-tomato/30'
             )}
           >
             <div className="flex-shrink-0">{action.icon}</div>

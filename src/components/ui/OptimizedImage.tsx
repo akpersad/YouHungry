@@ -102,7 +102,7 @@ export function OptimizedImage({
     return (
       <div
         ref={imgRef}
-        className={cn('bg-tertiary animate-pulse', className)}
+        className={cn('bg-surface-sunken animate-pulse', className)}
         style={{ width, height }}
       />
     );
@@ -113,13 +113,13 @@ export function OptimizedImage({
       <AnimatePresence>
         {isLoading && (
           <motion.div
-            className="absolute inset-0 bg-tertiary flex items-center justify-center"
+            className="absolute inset-0 bg-surface-sunken flex items-center justify-center"
             initial={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
           >
             <motion.div
-              className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full"
+              className="w-8 h-8 border-2 border-tomato border-t-transparent rounded-full"
               animate={{ rotate: 360 }}
               transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
             />
@@ -154,14 +154,14 @@ export function OptimizedImage({
 
       {hasError && (
         <motion.div
-          className="absolute inset-0 bg-tertiary flex items-center justify-center"
+          className="absolute inset-0 bg-surface-sunken flex items-center justify-center"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.3 }}
         >
           <div className="text-center">
             <div className="text-4xl mb-2">🍽️</div>
-            <p className="text-xs text-secondary">Image unavailable</p>
+            <p className="text-xs text-ink-secondary">Image unavailable</p>
           </div>
         </motion.div>
       )}
@@ -219,7 +219,7 @@ export function RestaurantImage({
     return (
       <div
         className={cn(
-          'bg-tertiary flex items-center justify-center text-4xl',
+          'bg-surface-sunken flex items-center justify-center text-4xl',
           className
         )}
       >
@@ -278,7 +278,7 @@ export function AvatarImage({
     return (
       <div
         className={cn(
-          'bg-tertiary flex items-center justify-center text-secondary font-medium',
+          'bg-surface-sunken flex items-center justify-center text-ink-secondary font-medium',
           sizeClasses[size],
           className
         )}

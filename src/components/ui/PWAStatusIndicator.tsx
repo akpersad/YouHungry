@@ -70,7 +70,7 @@ export function PWAStatusIndicator({
           }`}
           title={status.isOnline ? 'Online' : 'Offline'}
         />
-        <span className="text-xs text-text-light dark:text-text-light">
+        <span className="text-xs text-ink-secondary">
           {status.isOnline ? 'Online' : 'Offline'}
         </span>
       </div>
@@ -79,7 +79,7 @@ export function PWAStatusIndicator({
       {showOfflineActions && status.offlineActionsCount > 0 && (
         <div className="flex items-center gap-1">
           <div className="w-2 h-2 rounded-full bg-warning" />
-          <span className="text-xs text-text-light dark:text-text-light">
+          <span className="text-xs text-ink-secondary">
             {status.offlineActionsCount} pending
           </span>
         </div>
@@ -100,10 +100,8 @@ export function PWAStatusIndicator({
       {/* Installed Indicator */}
       {status.isInstalled && (
         <div className="flex items-center gap-1">
-          <div className="w-2 h-2 rounded-full bg-accent" />
-          <span className="text-xs text-text-light dark:text-text-light">
-            Installed
-          </span>
+          <div className="w-2 h-2 rounded-full bg-tomato" />
+          <span className="text-xs text-ink-secondary">Installed</span>
         </div>
       )}
     </div>
@@ -297,7 +295,7 @@ export function PWAInstallPrompt({
             width="80"
             height="120"
             viewBox="0 0 300 300"
-            className="text-accent dark:text-accent"
+            className="text-tomato"
             style={{
               filter: 'drop-shadow(0 3px 6px rgba(0,0,0,0.4))',
             }}
@@ -320,25 +318,25 @@ export function PWAInstallPrompt({
         </div>
 
         <div
-          className="fixed top-60 left-4 right-4 z-[101] bg-secondary rounded-lg p-4 md:top-auto md:left-auto md:right-4 md:max-w-md md:bottom-4 md:z-50"
+          className="fixed top-60 left-4 right-4 z-[101] bg-surface rounded-lg p-4 md:top-auto md:left-auto md:right-4 md:max-w-md md:bottom-4 md:z-50"
           style={{
             boxShadow: 'var(--shadow-strong)',
-            border: '1px solid var(--bg-quaternary)',
+            border: '1px solid var(--border)',
           }}
         >
           {/* Mobile Layout: Stacked */}
           <div className="flex flex-col gap-3 sm:hidden">
             <div className="flex items-start gap-3">
               <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center">
+                <div className="w-8 h-8 bg-tomato rounded-lg flex items-center justify-center">
                   <span className="text-white text-lg">🍽️</span>
                 </div>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-primary">
+                <p className="text-sm font-medium text-ink">
                   Install Fork In The Road
                 </p>
-                <p className="text-xs text-secondary mt-1">
+                <p className="text-xs text-ink-secondary mt-1">
                   Tap Share{' '}
                   <span className="inline-flex items-center mx-1">
                     {isIOS() ? (
@@ -348,7 +346,7 @@ export function PWAInstallPrompt({
                         height="12"
                         viewBox="0 0 24 24"
                         fill="currentColor"
-                        className="text-accent"
+                        className="text-tomato"
                       >
                         <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z" />
                       </svg>
@@ -359,7 +357,7 @@ export function PWAInstallPrompt({
                         height="12"
                         viewBox="0 0 24 24"
                         fill="currentColor"
-                        className="text-accent"
+                        className="text-tomato"
                       >
                         <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z" />
                       </svg>
@@ -391,16 +389,16 @@ export function PWAInstallPrompt({
           {/* Desktop/Tablet Layout: Horizontal */}
           <div className="hidden sm:flex items-start gap-3">
             <div className="flex-shrink-0">
-              <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-tomato rounded-lg flex items-center justify-center">
                 <span className="text-white text-lg">🍽️</span>
               </div>
             </div>
 
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-primary">
+              <p className="text-sm font-medium text-ink">
                 Install Fork In The Road
               </p>
-              <p className="text-xs text-secondary mt-1">
+              <p className="text-xs text-ink-secondary mt-1">
                 Tap Share{' '}
                 <span className="inline-flex items-center mx-1">
                   {isIOS() ? (
@@ -410,7 +408,7 @@ export function PWAInstallPrompt({
                       height="12"
                       viewBox="0 0 24 24"
                       fill="currentColor"
-                      className="text-accent"
+                      className="text-tomato"
                     >
                       <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z" />
                     </svg>
@@ -421,7 +419,7 @@ export function PWAInstallPrompt({
                       height="12"
                       viewBox="0 0 24 24"
                       fill="currentColor"
-                      className="text-accent"
+                      className="text-tomato"
                     >
                       <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z" />
                     </svg>
@@ -462,7 +460,7 @@ export function PWAInstallPrompt({
           width="80"
           height="120"
           viewBox="0 0 300 300"
-          className="text-accent dark:text-accent"
+          className="text-tomato"
           style={{
             filter: 'drop-shadow(0 3px 6px rgba(0,0,0,0.4))',
           }}
@@ -485,25 +483,25 @@ export function PWAInstallPrompt({
       </div>
 
       <div
-        className="fixed top-60 left-4 right-4 z-[101] bg-secondary rounded-lg p-4 md:top-auto md:left-auto md:right-4 md:max-w-md md:bottom-4 md:z-50"
+        className="fixed top-60 left-4 right-4 z-[101] bg-surface rounded-lg p-4 md:top-auto md:left-auto md:right-4 md:max-w-md md:bottom-4 md:z-50"
         style={{
           boxShadow: 'var(--shadow-strong)',
-          border: '1px solid var(--bg-quaternary)',
+          border: '1px solid var(--border)',
         }}
       >
         {/* Mobile Layout: Stacked */}
         <div className="flex flex-col gap-3 sm:hidden">
           <div className="flex items-start gap-3">
             <div className="flex-shrink-0">
-              <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-tomato rounded-lg flex items-center justify-center">
                 <span className="text-white text-lg">🍽️</span>
               </div>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-primary">
+              <p className="text-sm font-medium text-ink">
                 Install Fork In The Road
               </p>
-              <p className="text-xs text-secondary mt-1">
+              <p className="text-xs text-ink-secondary mt-1">
                 Install this app on your device for a better experience and
                 offline access.
               </p>
@@ -531,16 +529,16 @@ export function PWAInstallPrompt({
         {/* Desktop/Tablet Layout: Horizontal */}
         <div className="hidden sm:flex items-start gap-3">
           <div className="flex-shrink-0">
-            <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-tomato rounded-lg flex items-center justify-center">
               <span className="text-white text-lg">🍽️</span>
             </div>
           </div>
 
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-primary">
+            <p className="text-sm font-medium text-ink">
               Install Fork In The Road
             </p>
-            <p className="text-xs text-secondary mt-1">
+            <p className="text-xs text-ink-secondary mt-1">
               Install this app on your device for a better experience and
               offline access.
             </p>
@@ -685,7 +683,7 @@ export function PWADebugPanel() {
         <button
           onClick={handleManualInstall}
           disabled={!canInstall}
-          className="w-full bg-accent text-white px-2 py-2 rounded text-xs disabled:bg-surface"
+          className="w-full bg-tomato text-white px-2 py-2 rounded text-xs disabled:bg-surface"
           style={{
             minHeight: '44px',
             fontSize: '12px',
@@ -774,7 +772,7 @@ URL: ${location.href}`;
 
             <div className="border-t pt-3 mt-3">
               <div className="font-medium mb-2">Environment:</div>
-              <div className="text-xs space-y-1 text-text-light">
+              <div className="text-xs space-y-1 text-ink-secondary">
                 <div>
                   <strong>URL:</strong> {requirementsData.url}
                 </div>
@@ -787,7 +785,7 @@ URL: ${location.href}`;
               </div>
             </div>
 
-            <p className="text-xs text-text-light">
+            <p className="text-xs text-ink-secondary">
               Check console for full details.
             </p>
           </div>
@@ -822,7 +820,7 @@ URL: ${location.href}`;
 
             <div className="border-t pt-3 mt-3">
               <div className="font-medium mb-2">Device Info:</div>
-              <div className="text-xs space-y-1 text-text-light">
+              <div className="text-xs space-y-1 text-ink-secondary">
                 <div>
                   <strong>Mobile:</strong>{' '}
                   {serverStatusData.mobile?.isMobile ? 'Yes' : 'No'}
@@ -842,7 +840,7 @@ URL: ${location.href}`;
               </div>
             </div>
 
-            <p className="text-xs text-text-light">
+            <p className="text-xs text-ink-secondary">
               Check server logs for full details.
             </p>
           </div>

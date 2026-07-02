@@ -16,7 +16,7 @@ function CollectionPicker() {
   const { data: collections, isLoading } = useCollections(user?.id);
 
   if (isLoading) {
-    return <Card className="p-8 text-center text-secondary">Loading…</Card>;
+    return <Card className="p-8 text-center text-ink-secondary">Loading…</Card>;
   }
 
   if (!collections || collections.length === 0) {
@@ -36,7 +36,7 @@ function CollectionPicker() {
 
   return (
     <div className="space-y-3">
-      <p className="text-center text-secondary">
+      <p className="text-center text-ink-secondary">
         Which collection are we deciding from?
       </p>
       <div className="grid gap-3">
@@ -46,8 +46,8 @@ function CollectionPicker() {
             href={`/decide?collectionId=${c._id.toString()}`}
             className="flex items-center justify-between rounded-xl border border-border bg-surface px-4 py-3 transition-colors hover:border-[var(--border-strong)]"
           >
-            <span className="font-medium text-primary">{c.name}</span>
-            <span className="text-sm text-tertiary">
+            <span className="font-medium text-ink">{c.name}</span>
+            <span className="text-sm text-ink-muted">
               {c.restaurantIds.length}{' '}
               {c.restaurantIds.length === 1 ? 'spot' : 'spots'}
             </span>
@@ -64,7 +64,7 @@ function DecideContent() {
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-6">
-      <h1 className="mb-6 text-center font-display text-3xl font-semibold text-primary">
+      <h1 className="mb-6 text-center font-display text-3xl font-semibold text-ink">
         Let&apos;s decide
       </h1>
       {collectionId ? (
@@ -81,7 +81,7 @@ export default function DecidePage() {
     <ProtectedRoute>
       <Suspense
         fallback={
-          <div className="mx-auto max-w-2xl px-4 py-6 text-center text-secondary">
+          <div className="mx-auto max-w-2xl px-4 py-6 text-center text-ink-secondary">
             Loading…
           </div>
         }

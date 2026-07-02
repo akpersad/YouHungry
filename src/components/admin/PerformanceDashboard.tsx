@@ -516,11 +516,11 @@ export function PerformanceDashboard() {
                 disabled={collecting}
                 style={{
                   backgroundColor: collecting
-                    ? 'var(--bg-tertiary)'
-                    : 'var(--accent-primary)',
+                    ? 'var(--surface-sunken)'
+                    : 'var(--tomato)',
                   color: collecting
-                    ? 'var(--text-secondary)'
-                    : 'var(--text-inverse)',
+                    ? 'var(--ink-secondary)'
+                    : 'var(--ink-inverse)',
                 }}
               >
                 <RefreshCw
@@ -724,7 +724,7 @@ export function PerformanceDashboard() {
                           <div
                             key={metric}
                             className="flex items-center justify-between p-2 rounded"
-                            style={{ background: 'var(--bg-tertiary)' }}
+                            style={{ background: 'var(--surface-sunken)' }}
                           >
                             <span className="text-sm font-medium">
                               {formatMetricName(metric)}

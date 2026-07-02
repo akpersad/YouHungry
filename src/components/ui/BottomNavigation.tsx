@@ -61,14 +61,14 @@ export function BottomNavigation({
       {/* Floating tab bar container with neumorphic styling */}
       <div
         className={cn(
-          'relative bg-secondary/80 backdrop-blur-xl',
+          'relative bg-surface/80 backdrop-blur-xl',
           'rounded-2xl mx-auto max-w-sm',
-          'shadow-neumorphic-elevated',
-          'border border-quaternary/20',
+          'shadow-medium',
+          'border border-border/20',
           'px-2 py-2'
         )}
         style={{
-          borderColor: 'var(--bg-quaternary)',
+          borderColor: 'var(--border)',
         }}
       >
         {/* Sliding background for active tab */}
@@ -76,7 +76,7 @@ export function BottomNavigation({
           ref={sliderRef}
           className={cn(
             'absolute top-2 bottom-2 rounded-xl',
-            'bg-accent shadow-neumorphic-pressed',
+            'bg-tomato shadow-inset',
             'transition-all duration-300 ease-out',
             'opacity-0'
           )}
@@ -96,11 +96,11 @@ export function BottomNavigation({
                 'relative flex flex-col items-center justify-center',
                 'min-w-0 flex-1 py-3 px-4 rounded-xl',
                 'transition-all duration-200 touch-target',
-                'focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent',
+                'focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-tomato',
                 'active:scale-95',
                 {
-                  'text-inverse': item.isActive,
-                  'text-secondary hover:text-primary hover:scale-105':
+                  'text-ink-inverse': item.isActive,
+                  'text-ink-secondary hover:text-ink hover:scale-105':
                     !item.isActive,
                 }
               )}

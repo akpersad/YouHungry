@@ -138,7 +138,7 @@ export function RestaurantSearchForm({
     <Card className="p-6">
       <form onSubmit={handleSubmit} className="space-y-4">
         {error && (
-          <div className="p-3 bg-error/10 border border-error/20 rounded-lg shadow-neumorphic-light dark:shadow-neumorphic-dark">
+          <div className="p-3 bg-error/10 border border-error/20 rounded-lg shadow-subtle">
             <p className="text-error text-sm" role="alert">
               {error}
             </p>
@@ -149,7 +149,7 @@ export function RestaurantSearchForm({
         <div>
           <label
             htmlFor="location"
-            className="block text-sm font-medium text-primary mb-2"
+            className="block text-sm font-medium text-ink mb-2"
           >
             Location (required)
           </label>
@@ -186,7 +186,7 @@ export function RestaurantSearchForm({
         <div>
           <label
             htmlFor="distance"
-            className="block text-sm font-medium text-primary mb-1"
+            className="block text-sm font-medium text-ink mb-1"
           >
             Search Radius
           </label>
@@ -194,7 +194,7 @@ export function RestaurantSearchForm({
             id="distance"
             value={distance}
             onChange={(e) => setDistance(Number(e.target.value))}
-            className="input-base shadow-neumorphic-light dark:shadow-neumorphic-dark"
+            className="input-base shadow-subtle"
             disabled={isLoading}
           >
             <option value={1}>1 mile</option>
@@ -209,7 +209,7 @@ export function RestaurantSearchForm({
         <div>
           <label
             htmlFor="query"
-            className="block text-sm font-medium text-primary mb-1"
+            className="block text-sm font-medium text-ink mb-1"
           >
             Restaurant name or cuisine (optional)
           </label>
@@ -238,11 +238,11 @@ export function RestaurantSearchForm({
 
         {/* Filters */}
         {showFilters && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-secondary/50 rounded-lg shadow-neumorphic-light dark:shadow-neumorphic-dark">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-surface/50 rounded-lg shadow-subtle">
             <div>
               <label
                 htmlFor="cuisine"
-                className="block text-sm font-medium text-primary mb-1"
+                className="block text-sm font-medium text-ink mb-1"
               >
                 Cuisine Type
               </label>
@@ -259,7 +259,7 @@ export function RestaurantSearchForm({
             <div>
               <label
                 htmlFor="minRating"
-                className="block text-sm font-medium text-primary mb-1"
+                className="block text-sm font-medium text-ink mb-1"
               >
                 Minimum Rating
               </label>
@@ -279,7 +279,7 @@ export function RestaurantSearchForm({
             <div>
               <label
                 htmlFor="minPrice"
-                className="block text-sm font-medium text-primary mb-1"
+                className="block text-sm font-medium text-ink mb-1"
               >
                 Min Price Level
               </label>
@@ -287,7 +287,7 @@ export function RestaurantSearchForm({
                 id="minPrice"
                 value={minPrice}
                 onChange={(e) => setMinPrice(Number(e.target.value))}
-                className="input-base shadow-neumorphic-light dark:shadow-neumorphic-dark"
+                className="input-base shadow-subtle"
                 disabled={isLoading}
               >
                 <option value={0}>Any</option>
@@ -301,7 +301,7 @@ export function RestaurantSearchForm({
             <div>
               <label
                 htmlFor="maxPrice"
-                className="block text-sm font-medium text-primary mb-1"
+                className="block text-sm font-medium text-ink mb-1"
               >
                 Max Price Level
               </label>
@@ -309,7 +309,7 @@ export function RestaurantSearchForm({
                 id="maxPrice"
                 value={maxPrice}
                 onChange={(e) => setMaxPrice(Number(e.target.value))}
-                className="input-base shadow-neumorphic-light dark:shadow-neumorphic-dark"
+                className="input-base shadow-subtle"
                 disabled={isLoading}
               >
                 <option value={0}>Any</option>

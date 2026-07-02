@@ -16,7 +16,7 @@ export default function PrivacyPolicyPage() {
   const router = useRouter();
 
   return (
-    <div className="min-h-screen bg-primary py-8 px-4 lg:px-8">
+    <div className="min-h-screen bg-bg py-8 px-4 lg:px-8">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-6">
@@ -28,10 +28,10 @@ export default function PrivacyPolicyPage() {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back
           </Button>
-          <h1 className="text-4xl font-bold text-primary mb-2">
+          <h1 className="text-4xl font-bold text-ink mb-2">
             Privacy Policy & Terms of Service
           </h1>
-          <p className="text-secondary">Last Updated: October 16, 2025</p>
+          <p className="text-ink-secondary">Last Updated: October 16, 2025</p>
         </div>
 
         <div className="space-y-6">
@@ -44,14 +44,14 @@ export default function PrivacyPolicyPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <p className="text-secondary">
+              <p className="text-ink-secondary">
                 Welcome to Fork In The Road! This application is a personal
                 project created and maintained by Andrew Persad. This Privacy
                 Policy & Terms of Service describes how we collect, use, and
                 protect your information when you use our restaurant discovery
                 and group decision platform.
               </p>
-              <p className="text-secondary">
+              <p className="text-ink-secondary">
                 By creating an account and using Fork In The Road, you agree to
                 the terms outlined in this policy. If you do not agree with
                 these terms, please do not use our service.
@@ -69,15 +69,15 @@ export default function PrivacyPolicyPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <h3 className="font-semibold text-primary mb-2">
+                <h3 className="font-semibold text-ink mb-2">
                   How SMS Notifications Work
                 </h3>
-                <p className="text-secondary">
+                <p className="text-ink-secondary">
                   When you opt-in to SMS notifications, you consent to receive
                   transactional text messages from Fork In The Road. These
                   messages are sent via Twilio and include:
                 </p>
-                <ul className="list-disc list-inside ml-4 mt-2 space-y-1 text-secondary">
+                <ul className="list-disc list-inside ml-4 mt-2 space-y-1 text-ink-secondary">
                   <li>
                     Group decision notifications (when decisions start or
                     complete)
@@ -88,10 +88,10 @@ export default function PrivacyPolicyPage() {
               </div>
 
               <div>
-                <h3 className="font-semibold text-primary mb-2">
+                <h3 className="font-semibold text-ink mb-2">
                   Message Frequency & Costs
                 </h3>
-                <p className="text-secondary">
+                <p className="text-ink-secondary">
                   Message frequency varies based on your activity and
                   participation in groups. Some users may receive no messages if
                   they are not part of any groups, while others may receive
@@ -102,10 +102,10 @@ export default function PrivacyPolicyPage() {
               </div>
 
               <div>
-                <h3 className="font-semibold text-primary mb-2">
+                <h3 className="font-semibold text-ink mb-2">
                   Consent & Opt-Out
                 </h3>
-                <p className="text-secondary">
+                <p className="text-ink-secondary">
                   Consent to receive SMS messages is{' '}
                   <strong>not required</strong> to create an account or use Fork
                   In The Road. You can opt-in during registration or at any time
@@ -117,13 +117,13 @@ export default function PrivacyPolicyPage() {
               </div>
 
               <div>
-                <h3 className="font-semibold text-primary mb-2">SMS Support</h3>
-                <p className="text-secondary">
+                <h3 className="font-semibold text-ink mb-2">SMS Support</h3>
+                <p className="text-ink-secondary">
                   For help with SMS notifications or to report issues, please
                   contact us at{' '}
                   <a
                     href="mailto:nodemailer_persad@yahoo.com"
-                    className="text-primary hover:underline"
+                    className="text-ink hover:underline"
                   >
                     nodemailer_persad@yahoo.com
                   </a>
@@ -142,14 +142,14 @@ export default function PrivacyPolicyPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <h3 className="font-semibold text-primary mb-2">
+                <h3 className="font-semibold text-ink mb-2">
                   Information We Collect
                 </h3>
-                <p className="text-secondary mb-2">
+                <p className="text-ink-secondary mb-2">
                   We collect the following types of information to provide and
                   improve our services:
                 </p>
-                <ul className="list-disc list-inside ml-4 space-y-1 text-secondary">
+                <ul className="list-disc list-inside ml-4 space-y-1 text-ink-secondary">
                   <li>
                     <strong>Account Information:</strong> Name, email address,
                     username, password (encrypted), and optional profile picture
@@ -185,13 +185,13 @@ export default function PrivacyPolicyPage() {
               </div>
 
               <div>
-                <h3 className="font-semibold text-primary mb-2">
+                <h3 className="font-semibold text-ink mb-2">
                   How We Use Your Information
                 </h3>
-                <p className="text-secondary mb-2">
+                <p className="text-ink-secondary mb-2">
                   We use your information to:
                 </p>
-                <ul className="list-disc list-inside ml-4 space-y-1 text-secondary">
+                <ul className="list-disc list-inside ml-4 space-y-1 text-ink-secondary">
                   <li>Provide and maintain our services</li>
                   <li>
                     Send you notifications about group activities and social
@@ -213,10 +213,10 @@ export default function PrivacyPolicyPage() {
               </div>
 
               <div>
-                <h3 className="font-semibold text-primary mb-2">
+                <h3 className="font-semibold text-ink mb-2">
                   Data Storage & Security
                 </h3>
-                <p className="text-secondary">
+                <p className="text-ink-secondary">
                   Your data is securely stored in MongoDB Atlas with encryption
                   at rest and in transit. We implement industry-standard
                   security measures to protect your information, including
@@ -238,38 +238,38 @@ export default function PrivacyPolicyPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <p className="text-secondary mb-2">
+              <p className="text-ink-secondary mb-2">
                 We use the following third-party services to provide our
                 functionality:
               </p>
 
               <div className="space-y-3">
                 <div>
-                  <h4 className="font-medium text-primary">Clerk</h4>
-                  <p className="text-sm text-secondary">
+                  <h4 className="font-medium text-ink">Clerk</h4>
+                  <p className="text-sm text-ink-secondary">
                     Authentication and user management platform. Handles secure
                     login, registration, and session management.
                   </p>
                 </div>
 
                 <div>
-                  <h4 className="font-medium text-primary">Twilio</h4>
-                  <p className="text-sm text-secondary">
+                  <h4 className="font-medium text-ink">Twilio</h4>
+                  <p className="text-sm text-ink-secondary">
                     SMS messaging service for sending text notifications to
                     users who opt-in.
                   </p>
                 </div>
 
                 <div>
-                  <h4 className="font-medium text-primary">
+                  <h4 className="font-medium text-ink">
                     Google Analytics 4 (GA4)
                   </h4>
-                  <p className="text-sm text-secondary mb-2">
+                  <p className="text-sm text-ink-secondary mb-2">
                     We use Google Analytics 4 to collect and analyze usage data
                     to improve our application. GA4 collects information about
                     how you interact with our app, including:
                   </p>
-                  <ul className="list-disc list-inside ml-4 space-y-1 text-sm text-secondary">
+                  <ul className="list-disc list-inside ml-4 space-y-1 text-sm text-ink-secondary">
                     <li>
                       Pages visited and features used (with timestamps and
                       frequency)
@@ -284,7 +284,7 @@ export default function PrivacyPolicyPage() {
                     </li>
                     <li>Performance metrics and error occurrences</li>
                   </ul>
-                  <p className="text-sm text-secondary mt-2">
+                  <p className="text-sm text-ink-secondary mt-2">
                     <strong>Privacy Protection:</strong> Your actual user ID is
                     never sent to Google Analytics. Instead, we use a
                     cryptographic hash (SHA-256) of your user ID, which allows
@@ -293,14 +293,14 @@ export default function PrivacyPolicyPage() {
                     collect personally identifiable information (PII) through
                     GA4.
                   </p>
-                  <p className="text-sm text-secondary mt-2">
+                  <p className="text-sm text-ink-secondary mt-2">
                     <strong>Opting Out:</strong> You can opt out of Google
                     Analytics tracking by installing the{' '}
                     <a
                       href="https://tools.google.com/dlpage/gaoptout"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-primary underline hover:opacity-80"
+                      className="text-ink underline hover:opacity-80"
                     >
                       Google Analytics Opt-out Browser Add-on
                     </a>
@@ -309,7 +309,7 @@ export default function PrivacyPolicyPage() {
                       href="https://policies.google.com/privacy"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-primary underline hover:opacity-80"
+                      className="text-ink underline hover:opacity-80"
                     >
                       Privacy Policy
                     </a>
@@ -318,10 +318,10 @@ export default function PrivacyPolicyPage() {
                 </div>
 
                 <div>
-                  <h4 className="font-medium text-primary">
+                  <h4 className="font-medium text-ink">
                     Google Maps & Places API
                   </h4>
-                  <p className="text-sm text-secondary">
+                  <p className="text-sm text-ink-secondary">
                     Google Analytics (anonymized usage analytics), Google Maps
                     API (location services), and Google Places API (restaurant
                     search and information).
@@ -329,29 +329,29 @@ export default function PrivacyPolicyPage() {
                 </div>
 
                 <div>
-                  <h4 className="font-medium text-primary">Yelp Fusion API</h4>
-                  <p className="text-sm text-secondary">
+                  <h4 className="font-medium text-ink">Yelp Fusion API</h4>
+                  <p className="text-sm text-ink-secondary">
                     Restaurant data, ratings, reviews, and business information.
                   </p>
                 </div>
 
                 <div>
-                  <h4 className="font-medium text-primary">Sentry</h4>
-                  <p className="text-sm text-secondary">
+                  <h4 className="font-medium text-ink">Sentry</h4>
+                  <p className="text-sm text-ink-secondary">
                     Error tracking and performance monitoring to help us
                     identify and fix issues quickly.
                   </p>
                 </div>
 
                 <div>
-                  <h4 className="font-medium text-primary">MongoDB Atlas</h4>
-                  <p className="text-sm text-secondary">
+                  <h4 className="font-medium text-ink">MongoDB Atlas</h4>
+                  <p className="text-sm text-ink-secondary">
                     Cloud database service for secure data storage.
                   </p>
                 </div>
               </div>
 
-              <p className="text-secondary text-sm mt-4">
+              <p className="text-ink-secondary text-sm mt-4">
                 Each of these services has their own privacy policies and terms
                 of service. We encourage you to review their policies to
                 understand how they handle your data.
@@ -368,10 +368,10 @@ export default function PrivacyPolicyPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <p className="text-secondary mb-2">
+              <p className="text-ink-secondary mb-2">
                 You have the following rights regarding your data:
               </p>
-              <ul className="list-disc list-inside ml-4 space-y-2 text-secondary">
+              <ul className="list-disc list-inside ml-4 space-y-2 text-ink-secondary">
                 <li>
                   <strong>Access:</strong> You can view and access your account
                   information at any time through your Profile Settings.
@@ -406,7 +406,7 @@ export default function PrivacyPolicyPage() {
               <CardTitle>Children&apos;s Privacy</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-secondary">
+              <p className="text-ink-secondary">
                 Fork In The Road is not intended for use by children under the
                 age of 13. We do not knowingly collect personal information from
                 children under 13. If we become aware that we have collected
@@ -424,7 +424,7 @@ export default function PrivacyPolicyPage() {
               <CardTitle>Changes to This Policy</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-secondary">
+              <p className="text-ink-secondary">
                 We may update this Privacy Policy & Terms of Service from time
                 to time to reflect changes in our practices or for legal,
                 operational, or regulatory reasons. When we make changes, we
@@ -446,21 +446,21 @@ export default function PrivacyPolicyPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-secondary mb-4">
+              <p className="text-ink-secondary mb-4">
                 If you have any questions, concerns, or requests regarding this
                 Privacy Policy & Terms of Service, or about how we handle your
                 data, please contact us:
               </p>
-              <div className="bg-primary/5 p-4 rounded-lg">
-                <p className="font-medium text-primary">Email:</p>
+              <div className="bg-tomato/5 p-4 rounded-lg">
+                <p className="font-medium text-ink">Email:</p>
                 <a
                   href="mailto:nodemailer_persad@yahoo.com"
-                  className="text-primary hover:underline text-lg"
+                  className="text-ink hover:underline text-lg"
                 >
                   nodemailer_persad@yahoo.com
                 </a>
               </div>
-              <p className="text-secondary text-sm mt-4">
+              <p className="text-ink-secondary text-sm mt-4">
                 We will respond to your inquiry as soon as possible, typically
                 within 5-7 business days.
               </p>

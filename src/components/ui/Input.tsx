@@ -21,7 +21,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label
             htmlFor={inputId}
-            className="block text-sm font-medium text-primary mb-1"
+            className="block text-sm font-medium text-ink mb-1"
           >
             {label}
             {required && (
@@ -61,7 +61,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           </p>
         )}
         {helperText && !hasError && (
-          <p id={helperId} className="mt-1 text-sm text-tertiary">
+          <p id={helperId} className="mt-1 text-sm text-ink-muted">
             {helperText}
           </p>
         )}

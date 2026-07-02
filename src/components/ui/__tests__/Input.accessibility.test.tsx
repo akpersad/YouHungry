@@ -335,7 +335,7 @@ describe('Switch Accessibility', () => {
       const { container } = render(<Switch label="Toggle" checked={true} />);
       const visualSwitch = container.querySelector('[aria-hidden="true"]');
       expect(visualSwitch).toHaveStyle({
-        backgroundColor: 'var(--accent-primary)',
+        backgroundColor: 'var(--tomato)',
       });
     });
   });

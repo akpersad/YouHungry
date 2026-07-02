@@ -156,7 +156,7 @@ export function NotificationPanel({
             role="dialog"
             aria-modal="true"
             aria-labelledby={titleId}
-            className="absolute right-0 top-0 flex h-full w-full max-w-md flex-col bg-surface shadow-neumorphic-elevated"
+            className="absolute right-0 top-0 flex h-full w-full max-w-md flex-col bg-surface shadow-medium"
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
@@ -167,7 +167,7 @@ export function NotificationPanel({
               <div className="flex items-center gap-2">
                 <h2
                   id={titleId}
-                  className="font-display text-xl font-semibold text-primary"
+                  className="font-display text-xl font-semibold text-ink"
                 >
                   Notifications
                 </h2>
@@ -183,7 +183,7 @@ export function NotificationPanel({
                   <button
                     onClick={markAllAsRead}
                     disabled={isMarkingAllAsRead}
-                    className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium text-secondary transition-colors hover:bg-tertiary hover:text-primary disabled:opacity-50"
+                    className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium text-ink-secondary transition-colors hover:bg-surface-sunken hover:text-ink disabled:opacity-50"
                   >
                     <CheckCheck className="h-4 w-4" />
                     <span className="hidden sm:inline">Mark all read</span>
@@ -193,7 +193,7 @@ export function NotificationPanel({
                 <button
                   ref={closeButtonRef}
                   onClick={onClose}
-                  className="rounded-full p-2 text-secondary transition-colors hover:bg-tertiary hover:text-primary focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2"
+                  className="rounded-full p-2 text-ink-secondary transition-colors hover:bg-surface-sunken hover:text-ink focus:outline-none focus:ring-2 focus:ring-tomato focus:ring-offset-2"
                   aria-label="Close notifications"
                 >
                   <X className="h-5 w-5" />
@@ -219,8 +219,8 @@ export function NotificationPanel({
                     className={cn(
                       'relative flex-1 px-4 py-3 text-sm font-medium capitalize transition-colors',
                       isSelected
-                        ? 'text-primary'
-                        : 'text-secondary hover:text-primary'
+                        ? 'text-ink'
+                        : 'text-ink-secondary hover:text-ink'
                     )}
                   >
                     {tab} ({count})
@@ -281,9 +281,9 @@ export function NotificationPanel({
                         <button
                           onClick={() => handleNotificationClick(notification)}
                           className={cn(
-                            'w-full p-4 text-left transition-colors focus:outline-none focus:ring-2 focus:ring-inset focus:ring-accent',
+                            'w-full p-4 text-left transition-colors focus:outline-none focus:ring-2 focus:ring-inset focus:ring-tomato',
                             notification.read
-                              ? 'hover:bg-tertiary'
+                              ? 'hover:bg-surface-sunken'
                               : 'bg-tomato-tint'
                           )}
                         >
@@ -300,7 +300,7 @@ export function NotificationPanel({
 
                             <div className="min-w-0 flex-1">
                               <div className="flex items-start justify-between gap-2">
-                                <h3 className="text-sm font-semibold text-primary">
+                                <h3 className="text-sm font-semibold text-ink">
                                   {notification.title}
                                 </h3>
                                 {!notification.read && (
@@ -311,11 +311,11 @@ export function NotificationPanel({
                                 )}
                               </div>
 
-                              <p className="mt-1 line-clamp-2 text-sm text-secondary">
+                              <p className="mt-1 line-clamp-2 text-sm text-ink-secondary">
                                 {notification.message}
                               </p>
 
-                              <p className="mt-2 text-xs text-tertiary tabular-nums">
+                              <p className="mt-2 text-xs text-ink-muted tabular-nums">
                                 {getNotificationTimeAgo(notification.createdAt)}
                               </p>
                             </div>

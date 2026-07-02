@@ -93,7 +93,7 @@ export function RestaurantSearchResults({
   // so the control no longer pops in only after the first page arrives.
   const sortControl = onSortChange ? (
     <div className="flex items-center gap-2">
-      <label htmlFor="sort" className="text-sm text-text-light">
+      <label htmlFor="sort" className="text-sm text-ink-secondary">
         Sort by:
       </label>
       <select
@@ -101,7 +101,7 @@ export function RestaurantSearchResults({
         value={sortBy}
         onChange={(e) => onSortChange(e.target.value as SortOption)}
         disabled={isLoading}
-        className="input-base shadow-neumorphic-light dark:shadow-neumorphic-dark py-2 px-3 text-sm disabled:opacity-60"
+        className="input-base shadow-subtle py-2 px-3 text-sm disabled:opacity-60"
       >
         {SORT_OPTIONS.map((option) => (
           <option key={option.value} value={option.value}>
@@ -123,7 +123,7 @@ export function RestaurantSearchResults({
       <div className="space-y-4">
         <div className="flex flex-col gap-3">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <h2 className="text-xl font-semibold text-text">
+            <h2 className="text-xl font-semibold text-ink">
               {searchQuery ? `Results for "${searchQuery}"` : 'Restaurants'}
             </h2>
             <div className="hidden sm:flex justify-end">
@@ -151,11 +151,11 @@ export function RestaurantSearchResults({
   if (restaurants.length === 0) {
     return (
       <div className="text-center py-8">
-        <div className="text-text-light text-6xl mb-4">🍽️</div>
-        <h3 className="text-lg font-medium text-text mb-2">
+        <div className="text-ink-secondary text-6xl mb-4">🍽️</div>
+        <h3 className="text-lg font-medium text-ink mb-2">
           No restaurants found
         </h3>
-        <p className="text-text-light">
+        <p className="text-ink-secondary">
           {searchQuery
             ? `No restaurants found for "${searchQuery}". Try a different search term.`
             : 'Try searching for restaurants in your area.'}
@@ -170,10 +170,10 @@ export function RestaurantSearchResults({
       <div className="flex flex-col gap-3">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4">
-            <h2 className="text-xl font-semibold text-text">
+            <h2 className="text-xl font-semibold text-ink">
               {searchQuery ? `Results for "${searchQuery}"` : 'Restaurants'}
             </h2>
-            <span className="text-sm text-text-light">
+            <span className="text-sm text-ink-secondary">
               {totalResults} restaurant{totalResults !== 1 ? 's' : ''}{' '}
               {totalResults !== restaurants.length &&
                 `(showing ${restaurants.length})`}
@@ -235,13 +235,13 @@ export function RestaurantSearchResults({
             className="rounded-lg overflow-hidden shadow-lg"
           />
           {mapSelectedRestaurant && (
-            <div className="bg-accent/10 border border-accent/20 rounded-lg p-4">
+            <div className="bg-tomato/10 border border-tomato/20 rounded-lg p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className="font-semibold text-text">
+                  <h4 className="font-semibold text-ink">
                     {mapSelectedRestaurant.name}
                   </h4>
-                  <p className="text-sm text-text-secondary">
+                  <p className="text-sm text-ink-secondary">
                     {mapSelectedRestaurant.address}
                   </p>
                 </div>
@@ -252,7 +252,7 @@ export function RestaurantSearchResults({
                     }
                     size="sm"
                     variant="outline"
-                    className="border-accent text-accent hover:bg-accent/10"
+                    className="border-tomato text-tomato hover:bg-tomato/10"
                   >
                     View Details
                   </Button>
@@ -260,7 +260,7 @@ export function RestaurantSearchResults({
                     onClick={() => setMapSelectedRestaurant(null)}
                     size="sm"
                     variant="outline"
-                    className="text-accent hover:bg-accent/10"
+                    className="text-tomato hover:bg-tomato/10"
                   >
                     Clear
                   </Button>
@@ -283,7 +283,7 @@ export function RestaurantSearchResults({
       {/* Pagination Controls */}
       {onPageChange && totalPages > 1 && restaurants.length > 0 && (
         <div className="flex flex-col gap-4 pt-6 border-t border-border">
-          <div className="text-sm text-text-light text-center">
+          <div className="text-sm text-ink-secondary text-center">
             Page {currentPage} of {totalPages}
           </div>
 
@@ -329,8 +329,8 @@ export function RestaurantSearchResults({
                       size="sm"
                       className={`min-w-[2rem] sm:min-w-[2.5rem] text-xs sm:text-sm px-2 sm:px-3 ${
                         currentPage === pageNum
-                          ? 'bg-primary !text-white border-accent'
-                          : 'bg-transparent text-text hover:bg-primary hover:text-white hover:border-accent'
+                          ? 'bg-bg !text-white border-tomato'
+                          : 'bg-transparent text-ink hover:bg-tomato hover:text-white hover:border-tomato'
                       }`}
                     >
                       {pageNum}
@@ -343,7 +343,7 @@ export function RestaurantSearchResults({
                   return (
                     <span
                       key={pageNum}
-                      className="px-1 sm:px-2 py-1 text-xs sm:text-sm text-text-light"
+                      className="px-1 sm:px-2 py-1 text-xs sm:text-sm text-ink-secondary"
                     >
                       ...
                     </span>

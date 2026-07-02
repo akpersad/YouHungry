@@ -116,10 +116,10 @@ function CollectionList({
       {showHeader && (
         <div className="space-y-4 md:space-y-0 md:flex md:items-center md:justify-between">
           <div className="space-y-1">
-            <h2 className="text-xl md:text-2xl font-bold text-primary">
+            <h2 className="text-xl md:text-2xl font-bold text-ink">
               My Collections
             </h2>
-            <p className="text-secondary text-sm md:text-base">
+            <p className="text-ink-secondary text-sm md:text-base">
               Manage your personal restaurant collections
             </p>
           </div>
@@ -165,7 +165,7 @@ function CollectionList({
               >
                 <div className="relative">
                   <button
-                    className="p-2 hover:bg-tertiary rounded-lg transition-colors bg-secondary/50 backdrop-blur-sm border border-border"
+                    className="p-2 hover:bg-surface-sunken rounded-lg transition-colors bg-surface/50 backdrop-blur-sm border border-border"
                     aria-label="Collection actions"
                     onClick={(e) => {
                       e.stopPropagation();
@@ -177,7 +177,7 @@ function CollectionList({
                     }}
                   >
                     <svg
-                      className="w-5 h-5 text-primary"
+                      className="w-5 h-5 text-ink"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -201,7 +201,7 @@ function CollectionList({
                       />
 
                       {/* Dropdown Menu */}
-                      <div className="absolute top-full right-0 mt-2 z-50 bg-secondary border border-quaternary rounded-xl shadow-neumorphic-elevated py-1 min-w-48">
+                      <div className="absolute top-full right-0 mt-2 z-50 bg-surface border border-border rounded-xl shadow-medium py-1 min-w-48">
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -209,7 +209,7 @@ function CollectionList({
                             handleDeleteCollection(collection._id.toString());
                           }}
                           disabled={deleteCollectionMutation.isPending}
-                          className="w-full px-3 py-2 text-left text-sm flex items-center gap-2 hover:bg-tertiary transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-accent/30 disabled:opacity-50 disabled:cursor-not-allowed text-error hover:bg-error/10"
+                          className="w-full px-3 py-2 text-left text-sm flex items-center gap-2 hover:bg-surface-sunken transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-tomato/30 disabled:opacity-50 disabled:cursor-not-allowed text-error hover:bg-error/10"
                         >
                           Delete Collection
                         </button>
@@ -220,11 +220,11 @@ function CollectionList({
               </div>
 
               <CardHeader className="pb-3">
-                <CardTitle className="text-lg text-primary truncate pr-12 md:pr-0">
+                <CardTitle className="text-lg text-ink truncate pr-12 md:pr-0">
                   {collection.name}
                 </CardTitle>
                 {collection.description && (
-                  <CardDescription className="text-secondary text-sm line-clamp-2">
+                  <CardDescription className="text-ink-secondary text-sm line-clamp-2">
                     {collection.description}
                   </CardDescription>
                 )}
@@ -232,7 +232,7 @@ function CollectionList({
               <CardContent className="pt-0">
                 <div className="space-y-4">
                   {/* Card stats: restaurant count + last decided */}
-                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-secondary">
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-ink-secondary">
                     <div className="flex items-center gap-2">
                       <svg
                         className="w-4 h-4 flex-shrink-0"
@@ -359,7 +359,7 @@ function CollectionList({
         title="Delete Collection?"
       >
         <div className="space-y-4">
-          <p className="text-text">
+          <p className="text-ink">
             Are you sure you want to delete this collection? This action cannot
             be undone.
           </p>

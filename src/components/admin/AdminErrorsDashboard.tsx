@@ -188,7 +188,7 @@ export function AdminErrorsDashboard() {
       case 'warning':
         return <AlertCircle className="h-4 w-4 text-warning" />;
       default:
-        return <Info className="h-4 w-4 text-primary" />;
+        return <Info className="h-4 w-4 text-ink" />;
     }
   };
 
@@ -201,7 +201,7 @@ export function AdminErrorsDashboard() {
       case 'warning':
         return 'bg-warning/20 text-warning border-warning';
       default:
-        return 'bg-primary/10 text-blue-800 border-primary';
+        return 'bg-tomato/10 text-blue-800 border-tomato';
     }
   };
 
@@ -252,8 +252,8 @@ export function AdminErrorsDashboard() {
       <div
         className="rounded-lg p-4 border"
         style={{
-          background: 'var(--bg-secondary)',
-          borderColor: 'var(--bg-quaternary)',
+          background: 'var(--surface)',
+          borderColor: 'var(--border)',
         }}
       >
         <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
@@ -265,8 +265,8 @@ export function AdminErrorsDashboard() {
               onChange={(e) => setStatusFilter(e.target.value)}
               className="px-3 py-1 rounded border text-sm"
               style={{
-                background: 'var(--bg-primary)',
-                borderColor: 'var(--bg-quaternary)',
+                background: 'var(--bg)',
+                borderColor: 'var(--border)',
               }}
             >
               <option value="">All Statuses</option>
@@ -281,8 +281,8 @@ export function AdminErrorsDashboard() {
               onChange={(e) => setSeverityFilter(e.target.value)}
               className="px-3 py-1 rounded border text-sm"
               style={{
-                background: 'var(--bg-primary)',
-                borderColor: 'var(--bg-quaternary)',
+                background: 'var(--bg)',
+                borderColor: 'var(--border)',
               }}
             >
               <option value="">All Severities</option>
@@ -297,8 +297,8 @@ export function AdminErrorsDashboard() {
               onChange={(e) => setCategoryFilter(e.target.value)}
               className="px-3 py-1 rounded border text-sm"
               style={{
-                background: 'var(--bg-primary)',
-                borderColor: 'var(--bg-quaternary)',
+                background: 'var(--bg)',
+                borderColor: 'var(--border)',
               }}
             >
               <option value="">All Categories</option>
@@ -342,11 +342,11 @@ export function AdminErrorsDashboard() {
                   className={cn(
                     'p-4 rounded-lg border cursor-pointer transition-all hover:shadow-md',
                     selectedGroup?.fingerprint === group.fingerprint &&
-                      'ring-2 ring-primary'
+                      'ring-2 ring-tomato'
                   )}
                   style={{
-                    background: 'var(--bg-secondary)',
-                    borderColor: 'var(--bg-quaternary)',
+                    background: 'var(--surface)',
+                    borderColor: 'var(--border)',
                   }}
                   onClick={() => fetchGroupDetails(group.fingerprint)}
                 >
@@ -365,8 +365,8 @@ export function AdminErrorsDashboard() {
                         <span
                           className="text-xs px-2 py-1 rounded border"
                           style={{
-                            background: 'var(--bg-tertiary)',
-                            borderColor: 'var(--bg-quaternary)',
+                            background: 'var(--surface-sunken)',
+                            borderColor: 'var(--border)',
                           }}
                         >
                           {group.category}
@@ -374,8 +374,8 @@ export function AdminErrorsDashboard() {
                         <span
                           className="text-xs px-2 py-1 rounded border"
                           style={{
-                            background: 'var(--bg-tertiary)',
-                            borderColor: 'var(--bg-quaternary)',
+                            background: 'var(--surface-sunken)',
+                            borderColor: 'var(--border)',
                           }}
                         >
                           {group.status}
@@ -418,8 +418,8 @@ export function AdminErrorsDashboard() {
               <div
                 className="p-4 rounded-lg border"
                 style={{
-                  background: 'var(--bg-secondary)',
-                  borderColor: 'var(--bg-quaternary)',
+                  background: 'var(--surface)',
+                  borderColor: 'var(--border)',
                 }}
               >
                 <div className="space-y-4">
@@ -436,7 +436,7 @@ export function AdminErrorsDashboard() {
                       <pre
                         className="text-xs p-3 rounded mt-2 overflow-auto max-h-40"
                         style={{
-                          background: 'var(--bg-quaternary)',
+                          background: 'var(--border)',
                         }}
                       >
                         {selectedGroup.stack}
@@ -514,8 +514,8 @@ export function AdminErrorsDashboard() {
                       key={log._id}
                       className="p-3 rounded border text-sm"
                       style={{
-                        background: 'var(--bg-tertiary)',
-                        borderColor: 'var(--bg-quaternary)',
+                        background: 'var(--surface-sunken)',
+                        borderColor: 'var(--border)',
                       }}
                     >
                       <div className="flex items-start justify-between gap-2 mb-2">
@@ -541,7 +541,7 @@ export function AdminErrorsDashboard() {
                       {log.userReport && (
                         <div
                           className="mt-2 p-2 rounded"
-                          style={{ background: 'var(--bg-secondary)' }}
+                          style={{ background: 'var(--surface)' }}
                         >
                           <p className="text-xs font-medium mb-1">
                             User Report:
@@ -581,7 +581,7 @@ function StatCard({ title, value, icon, color }: StatCardProps) {
   const colorClasses = {
     orange: 'bg-orange-100 text-orange-600',
     red: 'bg-destructive/10 text-destructive',
-    blue: 'bg-primary/10 text-primary',
+    blue: 'bg-tomato/10 text-ink',
     purple: 'bg-purple-100 text-purple-600',
   };
 
@@ -589,8 +589,8 @@ function StatCard({ title, value, icon, color }: StatCardProps) {
     <div
       className="p-4 rounded-lg border"
       style={{
-        background: 'var(--bg-secondary)',
-        borderColor: 'var(--bg-quaternary)',
+        background: 'var(--surface)',
+        borderColor: 'var(--border)',
       }}
     >
       <div className="flex items-center justify-between">
