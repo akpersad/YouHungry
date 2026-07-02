@@ -20,8 +20,11 @@ export default clerkMiddleware(async (auth, req) => {
     // redirect. Calling it un-awaited in a sync callback leaves the rejected
     // promise floating, which Node reports as `unhandledRejection` on every
     // protected request while signed out (the NEXT_REDIRECT log flood).
+    // unauthenticatedUrl must be ABSOLUTE — with a relative path,
+    // NextResponse.redirect throws ERR_INVALID_URL and every signed-out
+    // visit to a protected route 500s instead of redirecting.
     await auth.protect({
-      unauthenticatedUrl: '/sign-in',
+      unauthenticatedUrl: new URL('/sign-in', req.url).toString(),
     });
   }
 });
