@@ -55,7 +55,9 @@
     "prod:build": "node scripts/run-production.js build",
     "prod:start": "node scripts/run-production.js start",
     "prod:https": "node scripts/run-production.js all https",
-    "prod:https:start": "node scripts/run-production.js start https"
+    "prod:https:start": "node scripts/run-production.js start https",
+    "seed:v2-dev": "tsx scripts/v2/seed-dev.ts",
+    "demo:v2-foundations": "tsx scripts/v2/demo-foundations.ts"
   },
   "dependencies": {
     "@clerk/nextjs": "^7.5.2",
@@ -115,6 +117,7 @@
     "lint-staged": "^17.0.7",
     "prettier": "^3.8.4",
     "tailwindcss": "^4.3.0",
+    "tsx": "^4.22.5",
     "typescript": "^6.0.3"
   },
   "lint-staged": {
