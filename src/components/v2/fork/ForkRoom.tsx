@@ -254,7 +254,7 @@ export function ForkRoom({ initial }: { initial: ForkView }) {
 
           {rankings.length === 3 && (
             <p className="text-sm text-ink-muted">
-              Ballot full — tap a pick to swap it out.
+              Ballot full. Tap a pick to swap it out.
             </p>
           )}
 
@@ -279,7 +279,7 @@ export function ForkRoom({ initial }: { initial: ForkView }) {
             )}
             {fork.myRankings && (
               <p className="text-sm text-ink-muted">
-                Your ballot is in — revote until it closes.
+                Your ballot is in. Revote until it closes.
               </p>
             )}
           </div>

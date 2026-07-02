@@ -53,9 +53,9 @@ function getPosition(): Promise<GeolocationPosition> {
 function whyThisPick(data: SpinData): string {
   const penalized = Object.values(data.weights).filter((w) => w < 1).length;
   const count = data.places.length;
-  if (count === 1) return 'The only spot in range — fate had it easy.';
+  if (count === 1) return 'The only spot in range. Fate had it easy.';
   if (penalized === 0) return `All ${count} nearby spots had an equal shot.`;
-  return `${count} spots in the running — recent picks got a smaller slice.`;
+  return `${count} spots in the running. Recent picks got a smaller slice.`;
 }
 
 export function QuickSpin() {

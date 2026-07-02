@@ -338,8 +338,8 @@ export function NewFork() {
                     </SkeletonGroup>
                   ) : lists.length === 0 ? (
                     <p className="text-sm text-ink-secondary">
-                      No lists yet — lists arrive with Places. Near me and
-                      search work today.
+                      No lists yet. Lists arrive with Places. Near me and search
+                      work today.
                     </p>
                   ) : (
                     <>
@@ -450,14 +450,14 @@ export function NewFork() {
                     <span aria-hidden="true" className="text-ink-muted">
                       ×
                     </span>
-                    <span className="sr-only">— remove</span>
+                    <span className="sr-only">(remove)</span>
                   </button>
                 </li>
               ))}
             </ul>
             {selections.length < 2 && (
               <p className="text-sm text-ink-muted">
-                Add at least one more — a fork needs two ways to go.
+                Add at least one more. A fork needs two ways to go.
               </p>
             )}
           </div>
@@ -481,7 +481,7 @@ export function NewFork() {
               {
                 value: 'spin',
                 title: 'Spin',
-                body: 'Fate decides, weighted by history — recent picks get a smaller slice.',
+                body: 'Fate decides, weighted by history. Recent picks get a smaller slice.',
               },
               {
                 value: 'vote',
@@ -547,7 +547,7 @@ export function NewFork() {
           ))}
         </div>
         <p className="text-sm text-ink-muted">
-          Forks end themselves — when the timer runs out, the decision lands.
+          Forks end themselves. When the timer runs out, the decision lands.
         </p>
       </fieldset>
 

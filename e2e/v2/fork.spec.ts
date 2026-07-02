@@ -130,7 +130,7 @@ test.describe('3-user vote', () => {
       }
       await memberPage.getByRole('button', { name: 'Cast your vote' }).click();
       await expect(
-        memberPage.getByText('Your ballot is in — revote until it closes.')
+        memberPage.getByText('Your ballot is in. Revote until it closes.')
       ).toBeVisible();
     };
 
