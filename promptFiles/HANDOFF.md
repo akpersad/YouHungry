@@ -1,7 +1,47 @@
 # Session Handoff — Fork In The Road portfolio upgrade
 
-**Last updated:** 2026-07-02 (C14 complete — **Phase 3 UI refresh DONE, all C-tasks ✅** — plus C15 bug-fix follow-ups landed on the same branch; NOT pushed, owner go-ahead pending)
-**Read this first, then:** `promptFiles/phased-execution-plan.md` (the authoritative plan), `CLAUDE.md` (repo guide).
+**Last updated:** 2026-07-02 (Phase 3 MERGED ✅ as PR #73 `31487c9`; Phase 4/v2 planning session in progress on `phase4/readme-v2-plan`)
+**Read this first, then:** `promptFiles/v2/CHARTER.md` + `promptFiles/v2/WORKPLAN.md` (the authoritative plan for all v2 work — supersedes `phased-execution-plan.md` phases 4–8), `CLAUDE.md` (repo guide).
+
+## CURRENT: Phase 4 / v2 planning (branch `phase4/readme-v2-plan`, 2026-07-02)
+
+Owner directive: v2 is a **full product re-imagination** owned by Fable —
+original thesis, new visual identity, decision-first IA with guest voting
+via share links. PRODUCT.md/DESIGN.md describe v1 and are reference only.
+Owner answers on record: full re-imagination ✅; rebuild mode left to Fable
+(chosen: greenfield `(v2)` route tree at `/beta` in this repo, cutover at
+the end — "v1 must not get in the way of v2; no use for v1 afterwards");
+new identity from scratch ✅; test access = Clerk dev-instance test squad ✅.
+
+This session's deliverables (all on this branch):
+
+- README.md rewritten — honest, accurate (Next 16/TS 6/Node 22, real route
+  counts, no fabricated metrics), ~280 lines.
+- `promptFiles/v2/CHARTER.md` — Fable's v2 product thesis (three lanes:
+  Fork / Places / Crew; Fork Links + guest voting; SMS + URL shortener +
+  homegrown observability deleted; keep Next/Vercel/Mongo/Clerk).
+- `promptFiles/v2/WORKPLAN.md` — 9-phase plan (0 planning → 1 foundations →
+  2 identity → 3 fork core → 4 fork links → 5 places → 6 crews → 7 cutover →
+  8 launch), one branch/PR/review per phase.
+- This HANDOFF refresh.
+
+Exploration findings feeding the plan (from 3 parallel audits this session):
+group decisions buried 4 levels deep; `decision_result` notifications 404
+(route doesn't exist); onboarding lands in a 1,351-line settings page; ~31KB
+of zero-import infra libs; duplicate Places clients (41KB); 9-file/130KB
+notification stack; ~21 admin routes of homegrown observability; design
+tokens good but only ~60% adopted; `Collection.restaurantIds` is a 3-shape
+union; mixed Clerk-id/ObjectId identity model.
+
+**Next session:** Phase 1 (`v2/foundations`) per WORKPLAN.md, cut from main
+after this PR merges. Owner action needed: confirm dev Clerk keys in
+`.env.local`.
+
+**Owner decision 2026-07-02 (auth):** NO Google/Apple social login — Apple
+sign-in requires a paid Apple Developer account (owner won't pay yet) and
+owner won't ship Google without Apple. v2 auth = Clerk **email/password
+only** (2 fields, no phone/username). Revisit social providers only if the
+Apple economics change.
 
 ## Workflow rules (owner-set 2026-06-11 — do not deviate)
 
