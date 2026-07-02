@@ -1,6 +1,10 @@
 import webpush from 'web-push';
 import { logger } from '@/lib/logger';
 import {
+  isExternalSendAllowed,
+  warnSuppressed,
+} from '@/lib/notification-suppression';
+import {
   trackPushNotificationSent,
   trackPushNotificationBatch,
 } from '@/lib/analytics';
@@ -87,6 +91,13 @@ class PushService {
           auth: subscription.keys.auth,
         },
       };
+
+      if (!isExternalSendAllowed()) {
+        warnSuppressed('push', {
+          endpoint: subscription.endpoint.substring(0, 50) + '...',
+        });
+        return true;
+      }
 
       await webpush.sendNotification(
         pushSubscription,

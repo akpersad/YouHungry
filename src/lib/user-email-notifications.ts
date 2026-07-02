@@ -1,5 +1,9 @@
 import { logger } from './logger';
 import { emailNotificationService } from './email-notifications';
+import {
+  isExternalSendAllowed,
+  warnSuppressed,
+} from './notification-suppression';
 
 // User email notification types
 export type UserEmailType =
@@ -339,6 +343,14 @@ export class UserEmailNotificationService {
         subject,
         html: template.template(data),
       };
+
+      if (!isExternalSendAllowed()) {
+        warnSuppressed('email', {
+          type: data.type,
+          recipient: data.recipientEmail,
+        });
+        return { success: true, timestamp: new Date() };
+      }
 
       const response = await fetch('https://api.resend.com/emails', {
         method: 'POST',

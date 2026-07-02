@@ -32,6 +32,9 @@ describe('SMS Notifications', () => {
       TWILIO_ACCOUNT_SID: 'AC1234567890abcdef1234567890abcdef', // Fake Twilio SID
       TWILIO_AUTH_TOKEN: 'test_auth_token',
       TWILIO_PHONE_NUMBER: '+18663101886',
+      // These suites unit-test the send path against the mocked Twilio
+      // client, so opt past the hard non-production suppression seam.
+      ALLOW_REAL_NOTIFICATIONS: 'true',
     };
   });
 
@@ -77,6 +80,17 @@ describe('SMS Notifications', () => {
   });
 
   describe('SMS Sending', () => {
+    it('suppresses the send outside production (hard seam)', async () => {
+      delete process.env.ALLOW_REAL_NOTIFICATIONS;
+      const result = await smsNotifications.sendSMS({
+        to: '+18777804236',
+        body: 'Test message',
+      });
+
+      expect(result.success).toBe(true);
+      expect(result.messageId).toBe('suppressed-non-production');
+    });
+
     it('should send SMS successfully', async () => {
       const result = await smsNotifications.sendSMS({
         to: '+18777804236',

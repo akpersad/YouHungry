@@ -8,6 +8,10 @@ import {
   ipRateLimitKey,
   rateLimitResponse,
 } from '@/lib/rate-limit';
+import {
+  isExternalSendAllowed,
+  warnSuppressed,
+} from '@/lib/notification-suppression';
 import twilio from 'twilio';
 
 // Initialize Twilio client
@@ -209,7 +213,10 @@ export async function POST(request: NextRequest) {
 
       // If SMS opt-in and phone number provided, send Twilio verification
       let phoneVerificationSent = false;
-      if (smsOptIn && phoneNumber && TWILIO_VERIFY_SERVICE_SID) {
+      if (smsOptIn && phoneNumber && !isExternalSendAllowed()) {
+        // Registration proceeds; the phone simply stays unverified.
+        warnSuppressed('sms-verify', { clerkId: clerkUser.id });
+      } else if (smsOptIn && phoneNumber && TWILIO_VERIFY_SERVICE_SID) {
         try {
           const verification = await twilioClient.verify.v2
             .services(TWILIO_VERIFY_SERVICE_SID)

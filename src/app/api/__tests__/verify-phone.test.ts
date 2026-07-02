@@ -135,23 +135,41 @@ describe('/api/user/verify-phone', () => {
       expect(mockVerifications.create).not.toHaveBeenCalled();
     });
 
-    it('should send a verification SMS when under the limit', async () => {
-      mockVerifications.create.mockResolvedValue({
-        sid: 'VE123',
-        status: 'pending',
-      });
-
+    it('suppresses the verification SMS outside production (hard seam)', async () => {
       const response = await POST(
         makeRequest('POST', { phoneNumber: '5551234567' })
       );
       const data = await response.json();
 
-      expect(response.status).toBe(200);
-      expect(data.success).toBe(true);
-      expect(mockVerifications.create).toHaveBeenCalledWith({
-        to: '+15551234567',
-        channel: 'sms',
-      });
+      expect(response.status).toBe(503);
+      expect(data.error).toBe(
+        'SMS verification is unavailable outside production'
+      );
+      expect(mockVerifications.create).not.toHaveBeenCalled();
+    });
+
+    it('should send a verification SMS when under the limit (sends allowed)', async () => {
+      process.env.ALLOW_REAL_NOTIFICATIONS = 'true';
+      try {
+        mockVerifications.create.mockResolvedValue({
+          sid: 'VE123',
+          status: 'pending',
+        });
+
+        const response = await POST(
+          makeRequest('POST', { phoneNumber: '5551234567' })
+        );
+        const data = await response.json();
+
+        expect(response.status).toBe(200);
+        expect(data.success).toBe(true);
+        expect(mockVerifications.create).toHaveBeenCalledWith({
+          to: '+15551234567',
+          channel: 'sms',
+        });
+      } finally {
+        delete process.env.ALLOW_REAL_NOTIFICATIONS;
+      }
     });
   });
 

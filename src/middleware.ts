@@ -10,6 +10,9 @@ const isPublicRoute = createRouteMatcher([
   '/api/auth/check-username',
   '/api/pwa-status',
   '/api/cron(.*)', // Vercel cron jobs — each handler must verify CRON_SECRET
+  // v2 (greenfield tree, Phase 1+): cold-open value with no account. Routes
+  // that need auth call requireAuth-style guards in their handlers/pages.
+  '/beta(.*)',
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
