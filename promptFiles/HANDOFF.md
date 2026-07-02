@@ -1,15 +1,73 @@
 # Session Handoff — Fork In The Road portfolio upgrade
 
-**Last updated:** 2026-07-02 (v2 Phase 0 MERGED ✅ as PR #74 `b0fa86d`; **v2 Phase 1 BUILT on `v2/foundations`, all 6 commits local, pre-push green, awaiting owner push go-ahead**)
-**Read this first, then:** `promptFiles/v2/CHARTER.md` + `promptFiles/v2/WORKPLAN.md` (the authoritative plan for all v2 work — supersedes `phased-execution-plan.md` phases 4–8), `CLAUDE.md` (repo guide).
+**Last updated:** 2026-07-02 (v2 Phase 1 MERGED ✅ as PR #75 `3cbaa3c`; **v2 Phase 2 BUILT on `v2/identity`, pre-push + v2 e2e green, awaiting owner push go-ahead**)
+**Read this first, then:** `promptFiles/v2/CHARTER.md` + `promptFiles/v2/WORKPLAN.md` (the authoritative plan for all v2 work — supersedes `phased-execution-plan.md` phases 4–8), `promptFiles/v2/IDENTITY.md` (the committed v2 design direction), `CLAUDE.md` (repo guide).
 
-## CURRENT: v2 Phase 1 — Foundations & test rig (branch `v2/foundations`, 2026-07-02)
+## CURRENT: v2 Phase 2 — Identity & design system (branch `v2/identity`, 2026-07-02)
 
-All WORKPLAN Phase 1 deliverables are DONE in 6 commits (`ed60956..2cd5b6a`);
+All WORKPLAN Phase 2 deliverables are DONE — see the commit list below.
+**The owner gate is `/beta/gallery`: browse it on a phone and desktop, both
+modes ("do we love it?").** Ready to push on the owner's word — not pushed.
+
+What landed (one commit each, in order):
+
+1. `4c904d3` **IDENTITY.md — the committed direction: "Tonight's board."**
+   Departure-board-for-dinner: calm green-tinted paper frame (bottle-green
+   ink, H 120–155 tinted neutrals), ONE rationed gold accent that appears
+   only at decision moments, and a mode-invariant dark board — the reveal
+   surface is always a lit sign, in both modes. Type: Archivo variable
+   (wght+wdth — the width axis IS the display register, `.type-board`
+   condensed-caps) + Spline Sans Mono for codes/tallies/timers. Motion:
+   "decisive snap" (100–360ms ease-out-quint, zero bounce; the reveal is
+   the one sanctioned long moment). Voice: "Fork it / Lock it in / We're
+   going here." Every palette pair WCAG-verified numerically (OKLCH→sRGB
+   script) BEFORE adoption; light-mode gold is fill-only (1.8:1 — never
+   text/edge), brass is its text-safe shade. Explored-and-rejected
+   directions recorded in the doc (incl. why not v1-warm, not the three
+   AI-default looks).
+2. `6d1af4f` **Token system + fonts.** v2.css: semantic custom properties
+   flipped by `.dark` (system default via pre-hydration script, v2's own
+   localStorage key `fitr-v2-theme`), registered via `@theme inline` so all
+   utilities self-flip; board tokens mode-invariant; tinted layered
+   elevation (`shadow-lift/float`); `--ease-snap`; global reduced-motion
+   collapse. Fonts via next/font in the (v2) layout only.
+3. `a978dea` **Primitive set** (`src/components/v2/ui/`, self-contained, no
+   v1 imports): Button (gold "taxi light" primary / quiet / ghost /
+   destructive; loading + aria-busy), Input (visible label, error/success
+   with icon + aria-describedby, never color-alone), Card (raised XOR
+   outline — one elevation story), Skeleton (decorative) + SkeletonGroup
+   (announces once), EmptyState (invitation + one action), Dialog + Sheet
+   (native `<dialog>`: platform focus trap/Esc/focus-return; discrete
+   transitions + @starting-style), Tabs (roving tabindex, arrow/Home/End).
+   22 unit tests.
+4. `8c619ab` **The reveal** (`Reveal.tsx`) — the signature: names flap on
+   the board through a decelerating ~2.1s schedule, lock, tile floods gold.
+   Never teases the winner mid-spin; tap-to-skip; reduced-motion goes
+   straight to the result; SR hears the outcome, not the theater. 4 tests.
+5. `c3d5d23` **/beta/gallery** — the Phase 2 gate: palette, type,
+   every primitive in every state, dialog/sheet live, voice do/never,
+   the reveal with "Spin again", light/dark toggle (hydration-safe
+   useSyncExternalStore, same shape as v1's ThemeProvider). e2e:
+   `e2e/v2/gallery.spec.ts` (@smoke reveal lock, dialog/sheet platform
+   affordances, reduced-motion variant, axe WCAG 2.x AA scan in BOTH modes).
+
+**Craft bug caught by the dark-mode axe scan (worth remembering):** the gold
+tile/button used `text-ink`, which flips near-white in dark mode → white on
+gold ≈1.3:1. Fix: mode-invariant `--gold-ink` token (bottle green in both
+modes, 8.1:1/8.7:1) — labels on gold never follow the theme. IDENTITY.md
+updated to record it as law.
+
+**Next session:** Phase 3 (`v2/fork`) per WORKPLAN.md — the Fork core loop
+(near-me spin ≤2 taps, fork creation, vote mode, minimal Clerk
+email/password) — cut from main after this PR merges. Build on the gallery'd
+primitives; read IDENTITY.md + DESIGN-UI-UX-SKILLS.md first.
+
+## Previous: v2 Phase 1 — Foundations & test rig (MERGED ✅ as PR #75 `3cbaa3c`)
+
+All WORKPLAN Phase 1 deliverables landed in 6 commits;
 full pre-push green (type/lint/format/jest 1677 passed incl. 62 new v2-area
 tests/build), exit demo green, v2 e2e 3/3 green, v1 e2e:fast at baseline
-(43 passed + 2 flaky-passed-on-retry). **Ready to push on the owner's word —
-not pushed.**
+(43 passed + 2 flaky-passed-on-retry).
 
 What landed (one commit each, in order):
 

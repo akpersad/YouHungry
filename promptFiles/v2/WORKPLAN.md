@@ -31,8 +31,8 @@ Status: ☐ not started · ▶ in progress · ✅ merged
 | #   | Phase                     | Branch                  | Status                    |
 | --- | ------------------------- | ----------------------- | ------------------------- |
 | 0   | README + v2 charter/plan  | `phase4/readme-v2-plan` | ✅ #74                    |
-| 1   | Foundations & test rig    | `v2/foundations`        | ▶ built, awaiting push/PR |
-| 2   | Identity & design system  | `v2/identity`           | ☐                         |
+| 1   | Foundations & test rig    | `v2/foundations`        | ✅ #75                    |
+| 2   | Identity & design system  | `v2/identity`           | ▶ built, awaiting push/PR |
 | 3   | The Fork (core loop)      | `v2/fork`               | ☐                         |
 | 4   | Fork Links & guest voting | `v2/fork-links`         | ☐                         |
 | 5   | Places & Lists            | `v2/places`             | ☐                         |

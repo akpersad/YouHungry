@@ -1,28 +1,166 @@
 @import 'tailwindcss';
 
 /*
- * v2 placeholder tokens — Phase 1 scaffold only.
- * The real identity (palette, type, motion, voice) is originated in Phase 2;
- * nothing here is a design decision. Values are deliberately plain so any
- * accidental dependency on them is visible and cheap to replace.
+ * v2 tokens — "Tonight's board" (promptFiles/v2/IDENTITY.md is the intent
+ * doc; every color pair here was WCAG-verified numerically before adoption).
+ *
+ * Two registers: a calm green-tinted paper frame, and one rationed gold
+ * accent that appears only at decision moments. The board tokens are
+ * mode-invariant — the reveal surface is always dark, a lit sign in the page.
+ *
+ * Semantic layer = plain custom properties (flipped by .dark);
+ * @theme inline registers them as Tailwind utilities so `bg-canvas`,
+ * `text-ink-muted`, `ring-focus`, `font-display` etc. all generate and
+ * still self-flip in dark mode.
  */
-@theme {
-  --color-v2-bg: oklch(0.99 0 0);
-  --color-v2-ink: oklch(0.22 0 0);
-  --color-v2-ink-muted: oklch(0.5 0 0);
-  --color-v2-accent: oklch(0.55 0.15 250);
-  --color-v2-surface: oklch(0.96 0 0);
+
+:root {
+  color-scheme: light;
+
+  /* frame — light ("daytime menu") */
+  --canvas: oklch(0.985 0.006 120);
+  --surface: oklch(1 0 0);
+  --sunken: oklch(0.955 0.01 120);
+  --ink: oklch(0.26 0.04 155);
+  --ink-secondary: oklch(0.42 0.03 155);
+  --ink-muted: oklch(0.5 0.025 155);
+  --line: oklch(0.88 0.012 130);
+  --line-strong: oklch(0.62 0.02 145);
+
+  /* accent — gold is fill-only in light mode; brass is its text-safe shade.
+   * gold-ink is the label ON a gold fill (the "taxi light") — mode-invariant
+   * like the board: dark bottle green in both modes (8.1:1 / 8.7:1). */
+  --gold: oklch(0.8 0.16 85);
+  --gold-tint: oklch(0.96 0.04 90);
+  --gold-ink: oklch(0.26 0.04 155);
+  --brass: oklch(0.52 0.11 75);
+  --focus: var(--brass);
+
+  /* status — danger only; success speaks in the frame's own green */
+  --danger: oklch(0.5 0.19 25);
+  --danger-tint: oklch(0.95 0.03 25);
+
+  /* the board — mode-invariant (no .dark override, by design) */
+  --board: oklch(0.21 0.03 155);
+  --board-raised: oklch(0.26 0.032 155);
+  --board-ink: oklch(0.95 0.012 110);
+  --board-muted: oklch(0.7 0.02 130);
+
+  /* elevation — tinted toward the frame hue, layered, low-opacity */
+  --elevation-lift:
+    0 1px 1px oklch(0.26 0.04 155 / 0.05),
+    0 2px 4px oklch(0.26 0.04 155 / 0.05), 0 4px 8px oklch(0.26 0.04 155 / 0.04);
+  --elevation-float:
+    0 2px 4px oklch(0.26 0.04 155 / 0.06),
+    0 8px 16px oklch(0.26 0.04 155 / 0.08),
+    0 16px 32px oklch(0.26 0.04 155 / 0.07);
 }
 
 .dark {
-  --color-v2-bg: oklch(0.18 0 0);
-  --color-v2-ink: oklch(0.95 0 0);
-  --color-v2-ink-muted: oklch(0.65 0 0);
-  --color-v2-accent: oklch(0.7 0.13 250);
-  --color-v2-surface: oklch(0.24 0 0);
+  color-scheme: dark;
+
+  /* frame — dark ("the board at night"); elevation by lightness, not shadow */
+  --canvas: oklch(0.19 0.02 155);
+  --surface: oklch(0.23 0.02 155);
+  --sunken: oklch(0.27 0.022 155);
+  --ink: oklch(0.96 0.01 110);
+  --ink-secondary: oklch(0.8 0.015 130);
+  --ink-muted: oklch(0.72 0.02 130);
+  --line: oklch(1 0 0 / 0.09);
+  --line-strong: oklch(0.56 0.02 145);
+
+  /* gold is text-capable in dark; brass collapses into gold */
+  --gold: oklch(0.82 0.15 85);
+  --gold-tint: oklch(0.28 0.05 90);
+  --brass: var(--gold);
+  --focus: var(--gold);
+
+  --danger: oklch(0.7 0.16 25);
+  --danger-tint: oklch(0.3 0.06 25);
+
+  --elevation-lift: 0 1px 2px oklch(0 0 0 / 0.3);
+  --elevation-float: 0 8px 24px oklch(0 0 0 / 0.45);
+}
+
+@theme inline {
+  /* colors */
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-sunken: var(--sunken);
+  --color-ink: var(--ink);
+  --color-ink-secondary: var(--ink-secondary);
+  --color-ink-muted: var(--ink-muted);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-gold: var(--gold);
+  --color-gold-tint: var(--gold-tint);
+  --color-gold-ink: var(--gold-ink);
+  --color-brass: var(--brass);
+  --color-focus: var(--focus);
+  --color-danger: var(--danger);
+  --color-danger-tint: var(--danger-tint);
+  --color-board: var(--board);
+  --color-board-raised: var(--board-raised);
+  --color-board-ink: var(--board-ink);
+  --color-board-muted: var(--board-muted);
+
+  /* type — Archivo carries UI and display; Spline Sans Mono carries data */
+  --font-sans: var(--font-archivo), system-ui, sans-serif;
+  --font-mono: var(--font-spline-mono), ui-monospace, monospace;
+  /* identity scale is Tailwind's except 4xl (38px, hand-tuned) */
+  --text-4xl: 2.375rem;
+  --text-4xl--line-height: 1.1;
+
+  /* elevation */
+  --shadow-lift: var(--elevation-lift);
+  --shadow-float: var(--elevation-float);
+
+  /* motion — "decisive snap" */
+  --ease-snap: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* one flap tick of the reveal board (Reveal.tsx re-keys per tick) */
+  --animate-flap: v2-flap 130ms var(--ease-snap) both;
+}
+
+@keyframes v2-flap {
+  from {
+    transform: rotateX(-85deg);
+  }
+  to {
+    transform: rotateX(0deg);
+  }
+}
+
+/* The departure-board display register: condensed, heavy, tracked caps.
+ * A component class (not a utility) because these four properties only
+ * make sense together; size comes from the type scale at the call site. */
+.type-board {
+  font-family: var(--font-sans);
+  font-stretch: 72%;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 body {
-  background: var(--color-v2-bg);
-  color: var(--color-v2-ink);
+  background: var(--canvas);
+  color: var(--ink);
+  font-family: var(--font-sans);
+}
+
+/* Data never jitters. */
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Motion discipline: spatial animation is opt-in per component via
+ * `motion-safe:`; this collapses anything that slips through. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
 }
