@@ -557,24 +557,34 @@ export function calculateTieredConsensus(
     voteBreakdown[id] = { first: 0, second: 0, third: 0, total: 0 };
   });
 
-  // Calculate scores from votes
+  // Calculate scores from votes. Only the top three ranks score (3/2/1) so
+  // the score always matches the breakdown shown to voters.
   votes.forEach((vote) => {
     vote.rankings.forEach((restaurantId, index) => {
+      if (index > 2) return;
       const id = restaurantId.toString();
-      const points = index === 0 ? 3 : index === 1 ? 2 : 1;
+      // A ranked restaurant may have been removed from the collection after
+      // the ballot was cast; skip it rather than scoring a ghost entry.
+      if (!(id in scores)) return;
+      const points = 3 - index;
       scores[id] += points;
 
-      if (index < 3) {
-        if (index === 0) voteBreakdown[id].first++;
-        else if (index === 1) voteBreakdown[id].second++;
-        else if (index === 2) voteBreakdown[id].third++;
-        voteBreakdown[id].total += points;
-      }
+      if (index === 0) voteBreakdown[id].first++;
+      else if (index === 1) voteBreakdown[id].second++;
+      else voteBreakdown[id].third++;
+      voteBreakdown[id].total += points;
     });
   });
 
   // Find the winner
   const sortedScores = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+  if (sortedScores.length === 0) {
+    return {
+      winner: null,
+      reasoning: 'No restaurants available to choose from',
+      voteBreakdown,
+    };
+  }
   const winnerId = sortedScores[0][0];
   const winnerScore = sortedScores[0][1];
 

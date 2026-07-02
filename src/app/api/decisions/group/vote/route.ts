@@ -32,6 +32,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Tiered voting scores only the top three ranks (3/2/1)
+    if (rankings.length > 3) {
+      return NextResponse.json(
+        { error: 'rankings may contain at most 3 choices' },
+        { status: 400 }
+      );
+    }
+
     const result = await submitGroupVote(decisionId, userId, rankings);
 
     return NextResponse.json({

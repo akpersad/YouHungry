@@ -117,7 +117,8 @@ export const decisionSchema = z.object({
 });
 
 export const voteSchema = z.object({
-  rankings: z.array(z.string()).min(1),
+  // Tiered voting scores only the top three ranks (3/2/1)
+  rankings: z.array(z.string()).min(1).max(3),
 });
 
 // Friendship validation schemas
