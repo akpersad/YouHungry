@@ -35,19 +35,20 @@ no flat gray, no warm-cream cliché. Values are law; derive, don't improvise.
 
 ### Light ("daytime menu")
 
-| Token           | Value                    | ≈ Hex     | Role                                                |
-| --------------- | ------------------------ | --------- | --------------------------------------------------- |
-| `canvas`        | `oklch(0.985 0.006 120)` | `#f9fbf6` | page background                                     |
-| `surface`       | `oklch(1 0 0)`           | `#ffffff` | cards, sheets, inputs                               |
-| `sunken`        | `oklch(0.955 0.01 120)`  | `#eff1ea` | wells, hover fills, skeleton base                   |
-| `ink`           | `oklch(0.26 0.04 155)`   | `#132a1b` | primary text — bottle green, not black              |
-| `ink-secondary` | `oklch(0.42 0.03 155)`   | `#405246` | supporting text (8.0:1)                             |
-| `ink-muted`     | `oklch(0.5 0.025 155)`   | `#58685d` | captions, placeholders (5.7:1 — passes 4.5)         |
-| `line`          | `oklch(0.88 0.012 130)`  | `#d5d9d1` | decorative hairlines only (non-semantic)            |
-| `line-strong`   | `oklch(0.62 0.02 145)`   | `#7f8a7f` | input borders — 3.5:1, passes 1.4.11                |
-| `gold`          | `oklch(0.8 0.16 85)`     | `#edb417` | **fill only** in light mode, ink text on it (8.1:1) |
-| `brass`         | `oklch(0.52 0.11 75)`    | `#8d5e00` | gold's text-safe shade: links, focus ring (5.4:1)   |
-| `danger`        | `oklch(0.5 0.19 25)`     | `#b71824` | destructive only (6.4:1)                            |
+| Token           | Value                    | ≈ Hex     | Role                                                                                                           |
+| --------------- | ------------------------ | --------- | -------------------------------------------------------------------------------------------------------------- |
+| `canvas`        | `oklch(0.985 0.006 120)` | `#f9fbf6` | page background                                                                                                |
+| `surface`       | `oklch(1 0 0)`           | `#ffffff` | cards, sheets, inputs                                                                                          |
+| `sunken`        | `oklch(0.955 0.01 120)`  | `#eff1ea` | wells, hover fills, skeleton base                                                                              |
+| `ink`           | `oklch(0.26 0.04 155)`   | `#132a1b` | primary text — bottle green, not black                                                                         |
+| `ink-secondary` | `oklch(0.42 0.03 155)`   | `#405246` | supporting text (8.0:1)                                                                                        |
+| `ink-muted`     | `oklch(0.5 0.025 155)`   | `#58685d` | captions, placeholders (5.7:1 — passes 4.5)                                                                    |
+| `line`          | `oklch(0.88 0.012 130)`  | `#d5d9d1` | decorative hairlines only (non-semantic)                                                                       |
+| `line-strong`   | `oklch(0.62 0.02 145)`   | `#7f8a7f` | input borders — 3.5:1, passes 1.4.11                                                                           |
+| `gold`          | `oklch(0.8 0.16 85)`     | `#edb417` | **fill only** in light mode, gold-ink text on it (8.1:1)                                                       |
+| `gold-ink`      | `oklch(0.26 0.04 155)`   | `#132a1b` | the label ON gold — **mode-invariant** (8.1:1 light, 8.7:1 dark; plain `ink` flips to white in dark and fails) |
+| `brass`         | `oklch(0.52 0.11 75)`    | `#8d5e00` | gold's text-safe shade: links, focus ring (5.4:1)                                                              |
+| `danger`        | `oklch(0.5 0.19 25)`     | `#b71824` | destructive only (6.4:1)                                                                                       |
 
 ### Dark ("the board at night")
 

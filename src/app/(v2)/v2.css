@@ -27,9 +27,12 @@
   --line: oklch(0.88 0.012 130);
   --line-strong: oklch(0.62 0.02 145);
 
-  /* accent — gold is fill-only in light mode; brass is its text-safe shade */
+  /* accent — gold is fill-only in light mode; brass is its text-safe shade.
+   * gold-ink is the label ON a gold fill (the "taxi light") — mode-invariant
+   * like the board: dark bottle green in both modes (8.1:1 / 8.7:1). */
   --gold: oklch(0.8 0.16 85);
   --gold-tint: oklch(0.96 0.04 90);
+  --gold-ink: oklch(0.26 0.04 155);
   --brass: oklch(0.52 0.11 75);
   --focus: var(--brass);
 
@@ -91,6 +94,7 @@
   --color-line-strong: var(--line-strong);
   --color-gold: var(--gold);
   --color-gold-tint: var(--gold-tint);
+  --color-gold-ink: var(--gold-ink);
   --color-brass: var(--brass);
   --color-focus: var(--focus);
   --color-danger: var(--danger);

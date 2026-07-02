@@ -3,6 +3,7 @@ export { Card, type CardProps } from './Card';
 export { Dialog } from './Dialog';
 export { EmptyState } from './EmptyState';
 export { Input, type InputProps } from './Input';
+export { Reveal } from './Reveal';
 export { Sheet } from './Sheet';
 export { Skeleton, SkeletonGroup } from './Skeleton';
 export { Tabs, type Tab } from './Tabs';

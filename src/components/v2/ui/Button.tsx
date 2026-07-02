@@ -26,7 +26,7 @@ const base =
   'active:enabled:scale-97 touch-manipulation';
 
 const variants: Record<NonNullable<ButtonProps['variant']>, string> = {
-  primary: 'bg-gold text-ink hover:enabled:bg-gold/85',
+  primary: 'bg-gold text-gold-ink hover:enabled:bg-gold/85',
   quiet:
     'bg-surface text-ink border border-line-strong hover:enabled:bg-sunken',
   ghost: 'bg-transparent text-brass hover:enabled:bg-gold-tint',
