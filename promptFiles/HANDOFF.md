@@ -1,6 +1,6 @@
 # Session Handoff — Fork In The Road portfolio upgrade
 
-**Last updated:** 2026-07-02 (C14 complete — **Phase 3 UI refresh DONE, all C-tasks ✅**; C15 bug-fix follow-ups in progress on the same branch)
+**Last updated:** 2026-07-02 (C14 complete — **Phase 3 UI refresh DONE, all C-tasks ✅** — plus C15 bug-fix follow-ups landed on the same branch; NOT pushed, owner go-ahead pending)
 **Read this first, then:** `promptFiles/phased-execution-plan.md` (the authoritative plan), `CLAUDE.md` (repo guide).
 
 ## Workflow rules (owner-set 2026-06-11 — do not deviate)
@@ -384,7 +384,33 @@ desktop fix).
    update this ledger (status + hash) AND the USER-STORIES "Phase 3 action"
    column for the rows it resolved — documentation must stay lossless across a
    context clear.
-3. Later candidates recorded from the Phase 2 honesty pass: tiered-consensus crash edge, voteBreakdown >3-rank scoring, getCurrentUser placeholder auto-create, ADMIN_USER_IDS id-form footgun, hardcoded admin phone, proxy.ts rename when clerk#8302 closes, eslint 10 retest.
+3. ~~Later candidates recorded from the Phase 2 honesty pass~~ **FIXED 2026-07-02
+   as "C15" follow-ups on this branch** (all five code candidates; each with
+   tests, full pre-push + axe green):
+   - `d0bf8ac` — tiered-consensus crash when a voted restaurant left the
+     collection (NaN/TypeError → ghost rankings skipped; empty candidate set
+     returns null winner) AND >3-rank scoring divergence (scores now strictly
+     top-3 3/2/1, matching the visible breakdown; vote API + voteSchema
+     reject >3 rankings).
+   - `d4ffeab` — getCurrentUser auto-create now uses the real Clerk profile
+     (email/name via currentUser(); defers to the webhook when no email) —
+     no more 'user@example.com' placeholders in prod; ADMIN_USER_IDS accepts
+     BOTH the Mongo \_id and the Clerk id; six routes that hand-parsed
+     ADMIN_USER_IDS consolidated onto isAdminUser(); api-auth-matrix updated.
+   - `8e91a29` — admin alert phone moved off the hardcoded +18777804236 onto
+     **`ADMIN_ALERT_PHONE`** (service skips SMS channel w/ warning when unset;
+     admin/sms route 400s for test/alert actions; route also moved onto
+     requireAdminAuth). **OWNER ACTION: set `ADMIN_ALERT_PHONE` in Vercel +
+     local env files if admin-alert SMS should keep firing** — until then the
+     SMS channel is silently (warn-logged) skipped. Note: the admin-gated
+     `/notification-test` page still hardcodes the number client-side
+     (can't read server env) — cosmetic, admin-only, left as is.
+   - Still open (unchanged): proxy.ts rename when clerk#8302 closes, eslint 10
+     retest.
+     Also fixed en route (`7a0993b`, found by C14 visual spot-check): middleware
+     `unauthenticatedUrl` must be absolute — relative '/sign-in' 500'd every
+     signed-out protected request (bug was branch-local from `1859f81`, never
+     deployed).
 
 ## C14 completion notes (2026-07-02, `bb67f6c`) — Phase 3 complete
 
