@@ -624,23 +624,64 @@ describe('Decision System edge cases', () => {
       expect(second.winner?.name).toBe('Beta');
     });
 
-    it('should score rankings beyond third place without counting them in the breakdown', () => {
+    it('should ignore rankings beyond third place in both score and breakdown', () => {
       const fourRestaurants = [...restaurants, makeRestaurant(HEX_D, 'Delta')];
       const result = calculateTieredConsensus(
-        [vote('user_1', [HEX_A, HEX_B, HEX_C, HEX_D])],
+        [
+          vote('user_1', [HEX_A, HEX_B, HEX_C, HEX_D]),
+          vote('user_2', [HEX_A, HEX_B, HEX_C, HEX_D]),
+        ],
         fourRestaurants
       );
 
       expect(result.winner?.name).toBe('Alpha');
-      // 4th-ranked restaurant earns a point in scoring but the breakdown
-      // only tracks the top three ranks.
+      // Only the top three ranks score (3/2/1); a 4th-ranked restaurant earns
+      // nothing, so the score can never diverge from the visible breakdown.
       expect(result.voteBreakdown[HEX_D]).toEqual({
         first: 0,
         second: 0,
         third: 0,
         total: 0,
       });
-      expect(result.voteBreakdown[HEX_C].total).toBe(1);
+      expect(result.reasoning).toBe(
+        'Clear winner with 6 points (2 votes total)'
+      );
+      expect(result.voteBreakdown[HEX_C].total).toBe(2);
+    });
+
+    it('should skip ranked restaurants that have left the collection instead of crashing', () => {
+      // user voted for A, B, C but B was removed from the collection before
+      // the decision completed — previously a TypeError/NaN.
+      const remaining = [restaurants[0], restaurants[2]];
+      const result = calculateTieredConsensus(
+        [vote('user_1', [HEX_A, HEX_B, HEX_C])],
+        remaining
+      );
+
+      expect(result.winner?.name).toBe('Alpha');
+      expect(result.voteBreakdown[HEX_B]).toBeUndefined();
+      expect(result.voteBreakdown[HEX_A]).toEqual({
+        first: 1,
+        second: 0,
+        third: 0,
+        total: 3,
+      });
+      // C keeps its third-place slot (ranks are positional, not re-packed)
+      expect(result.voteBreakdown[HEX_C]).toEqual({
+        first: 0,
+        second: 0,
+        third: 1,
+        total: 1,
+      });
+    });
+
+    it('should return no winner when every restaurant has left the collection', () => {
+      const result = calculateTieredConsensus(
+        [vote('user_1', [HEX_A, HEX_B])],
+        []
+      );
+      expect(result.winner).toBeNull();
+      expect(result.reasoning).toBe('No restaurants available to choose from');
     });
   });
 

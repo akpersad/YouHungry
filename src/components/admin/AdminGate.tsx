@@ -70,7 +70,7 @@ export function AdminGate({ children }: AdminGateProps) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div
-          className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"
+          className="animate-spin rounded-full h-8 w-8 border-b-2 border-tomato"
           role="status"
           aria-label="Loading"
         ></div>
@@ -89,12 +89,12 @@ export function AdminGate({ children }: AdminGateProps) {
           <h1 className="text-2xl font-bold text-destructive mb-4">
             Access Denied
           </h1>
-          <p className="text-text-light">
+          <p className="text-ink-secondary">
             You don&apos;t have permission to access this area.
           </p>
           <button
             onClick={() => router.push('/dashboard')}
-            className="mt-4 px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark transition-colors"
+            className="mt-4 px-4 py-2 bg-tomato text-white rounded-md hover:bg-tomato-hover transition-colors"
           >
             Go to Dashboard
           </button>
@@ -111,7 +111,7 @@ export function AdminGate({ children }: AdminGateProps) {
   return (
     <div className="flex items-center justify-center min-h-screen">
       <div
-        className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"
+        className="animate-spin rounded-full h-8 w-8 border-b-2 border-tomato"
         role="status"
         aria-label="Loading"
       ></div>

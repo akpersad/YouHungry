@@ -1,7 +1,11 @@
 import { logger } from '@/lib/logger';
 import { NextRequest } from 'next/server';
 import { getCurrentUser } from '@/lib/auth';
-import { getActiveGroupDecisions, getGroupDecision } from '@/lib/decisions';
+import {
+  getActiveGroupDecisions,
+  getGroupDecision,
+  serializeGroupDecision,
+} from '@/lib/decisions';
 import { isGroupMemberOrAdmin } from '@/lib/groups';
 
 export async function GET(request: NextRequest) {
@@ -65,61 +69,18 @@ export async function GET(request: NextRequest) {
           try {
             if (groupId) {
               const decisions = await getActiveGroupDecisions(groupId);
-              const transformedDecisions = decisions.map((decision) => ({
-                id: decision._id.toString(),
-                type: decision.type,
-                collectionId: decision.collectionId.toString(),
-                groupId: decision.groupId?.toString(),
-                method: decision.method,
-                status: decision.status,
-                deadline: decision.deadline.toISOString(),
-                visitDate: decision.visitDate.toISOString(),
-                participants: decision.participants,
-                votes: decision.votes?.map((vote) => ({
-                  userId: vote.userId,
-                  submittedAt: vote.submittedAt.toISOString(),
-                  hasRankings: vote.rankings.length > 0,
-                })),
-                result: decision.result
-                  ? {
-                      restaurantId: decision.result.restaurantId.toString(),
-                      selectedAt: decision.result.selectedAt.toISOString(),
-                      reasoning: decision.result.reasoning,
-                    }
-                  : null,
-                createdAt: decision.createdAt.toISOString(),
-                updatedAt: decision.updatedAt.toISOString(),
-              }));
+              const transformedDecisions = decisions.map((decision) =>
+                serializeGroupDecision(decision, userId)
+              );
               sendData({ type: 'groupDecisions', data: transformedDecisions });
             }
             if (decisionId) {
               const decision = await getGroupDecision(decisionId);
               if (decision) {
-                const transformedDecision = {
-                  id: decision._id.toString(),
-                  type: decision.type,
-                  collectionId: decision.collectionId.toString(),
-                  groupId: decision.groupId?.toString(),
-                  method: decision.method,
-                  status: decision.status,
-                  deadline: decision.deadline.toISOString(),
-                  visitDate: decision.visitDate.toISOString(),
-                  participants: decision.participants,
-                  votes: decision.votes?.map((vote) => ({
-                    userId: vote.userId,
-                    submittedAt: vote.submittedAt.toISOString(),
-                    hasRankings: vote.rankings.length > 0,
-                  })),
-                  result: decision.result
-                    ? {
-                        restaurantId: decision.result.restaurantId.toString(),
-                        selectedAt: decision.result.selectedAt.toISOString(),
-                        reasoning: decision.result.reasoning,
-                      }
-                    : null,
-                  createdAt: decision.createdAt.toISOString(),
-                  updatedAt: decision.updatedAt.toISOString(),
-                };
+                const transformedDecision = serializeGroupDecision(
+                  decision,
+                  userId
+                );
                 sendData({ type: 'decisionUpdate', data: transformedDecision });
               }
             }
@@ -145,61 +106,18 @@ export async function GET(request: NextRequest) {
           try {
             if (groupId) {
               const decisions = await getActiveGroupDecisions(groupId);
-              const transformedDecisions = decisions.map((decision) => ({
-                id: decision._id.toString(),
-                type: decision.type,
-                collectionId: decision.collectionId.toString(),
-                groupId: decision.groupId?.toString(),
-                method: decision.method,
-                status: decision.status,
-                deadline: decision.deadline.toISOString(),
-                visitDate: decision.visitDate.toISOString(),
-                participants: decision.participants,
-                votes: decision.votes?.map((vote) => ({
-                  userId: vote.userId,
-                  submittedAt: vote.submittedAt.toISOString(),
-                  hasRankings: vote.rankings.length > 0,
-                })),
-                result: decision.result
-                  ? {
-                      restaurantId: decision.result.restaurantId.toString(),
-                      selectedAt: decision.result.selectedAt.toISOString(),
-                      reasoning: decision.result.reasoning,
-                    }
-                  : null,
-                createdAt: decision.createdAt.toISOString(),
-                updatedAt: decision.updatedAt.toISOString(),
-              }));
+              const transformedDecisions = decisions.map((decision) =>
+                serializeGroupDecision(decision, userId)
+              );
               sendData({ type: 'groupDecisions', data: transformedDecisions });
             }
             if (decisionId) {
               const decision = await getGroupDecision(decisionId);
               if (decision) {
-                const transformedDecision = {
-                  id: decision._id.toString(),
-                  type: decision.type,
-                  collectionId: decision.collectionId.toString(),
-                  groupId: decision.groupId?.toString(),
-                  method: decision.method,
-                  status: decision.status,
-                  deadline: decision.deadline.toISOString(),
-                  visitDate: decision.visitDate.toISOString(),
-                  participants: decision.participants,
-                  votes: decision.votes?.map((vote) => ({
-                    userId: vote.userId,
-                    submittedAt: vote.submittedAt.toISOString(),
-                    hasRankings: vote.rankings.length > 0,
-                  })),
-                  result: decision.result
-                    ? {
-                        restaurantId: decision.result.restaurantId.toString(),
-                        selectedAt: decision.result.selectedAt.toISOString(),
-                        reasoning: decision.result.reasoning,
-                      }
-                    : null,
-                  createdAt: decision.createdAt.toISOString(),
-                  updatedAt: decision.updatedAt.toISOString(),
-                };
+                const transformedDecision = serializeGroupDecision(
+                  decision,
+                  userId
+                );
                 sendData({ type: 'decisionUpdate', data: transformedDecision });
               }
             }

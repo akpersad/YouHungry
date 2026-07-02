@@ -1,18 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAuth } from '@/lib/auth';
+import { requireAdminAuth } from '@/lib/auth';
 import { smsNotifications } from '@/lib/sms-notifications';
 import { logger } from '@/lib/logger';
 
-// Get admin user IDs from environment variable (MongoDB user IDs)
-const ADMIN_USER_IDS =
-  process.env.ADMIN_USER_IDS?.split(',').map((id) => id.trim()) || [];
-
 export async function POST(req: NextRequest) {
   try {
-    const user = await requireAuth();
-
-    // Check if user is admin (using MongoDB user ID for consistency)
-    if (!ADMIN_USER_IDS.includes(user._id.toString())) {
+    try {
+      await requireAdminAuth();
+    } catch {
       return NextResponse.json(
         { error: 'Admin access required' },
         { status: 403 }
@@ -29,12 +24,19 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const adminPhone = process.env.ADMIN_ALERT_PHONE;
+    if ((action === 'test' || action === 'admin_alert') && !adminPhone) {
+      return NextResponse.json(
+        { error: 'ADMIN_ALERT_PHONE is not configured' },
+        { status: 400 }
+      );
+    }
+
     let result;
 
     switch (action) {
       case 'test':
-        // Send test SMS to development number
-        result = await smsNotifications.sendTestSMS('+18777804236');
+        result = await smsNotifications.sendTestSMS(adminPhone as string);
         break;
 
       case 'admin_alert':
@@ -45,7 +47,7 @@ export async function POST(req: NextRequest) {
           );
         }
         result = await smsNotifications.sendAdminAlert(
-          '+18777804236',
+          adminPhone as string,
           alertType,
           details
         );
@@ -97,10 +99,9 @@ export async function POST(req: NextRequest) {
 
 export async function GET() {
   try {
-    const user = await requireAuth();
-
-    // Check if user is admin (using MongoDB user ID for consistency)
-    if (!ADMIN_USER_IDS.includes(user._id.toString())) {
+    try {
+      await requireAdminAuth();
+    } catch {
       return NextResponse.json(
         { error: 'Admin access required' },
         { status: 403 }

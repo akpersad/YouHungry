@@ -83,7 +83,7 @@ function VerifyEmailContent() {
         )}
 
         {/* Info Box */}
-        <div className="bg-primary/10 dark:bg-blue-950/30 rounded-lg p-4 border border-primary dark:border-primary">
+        <div className="bg-tomato/10 dark:bg-blue-950/30 rounded-lg p-4 border border-tomato">
           <p className="text-sm text-blue-900 dark:text-blue-100">
             <strong>💡 Tip:</strong> The verification link will expire after 24
             hours. If you need a new one, try signing in and we&apos;ll send

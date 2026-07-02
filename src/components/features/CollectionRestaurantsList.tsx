@@ -234,7 +234,7 @@ export function CollectionRestaurantsList({
     return (
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-primary">
+          <h3 className="text-lg font-semibold text-ink">
             Restaurants in {collection.name}
           </h3>
           {/* View Toggle - Hidden on mobile during loading for now */}
@@ -252,7 +252,7 @@ export function CollectionRestaurantsList({
               className="animate-pulse"
               data-testid="animate-pulse"
             >
-              <div className="bg-quaternary dark:bg-surface rounded-lg h-48"></div>
+              <div className="bg-border dark:bg-surface rounded-lg h-48"></div>
             </div>
           ))}
         </div>
@@ -263,7 +263,7 @@ export function CollectionRestaurantsList({
   if (error) {
     return (
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-primary">
+        <h3 className="text-lg font-semibold text-ink">
           Restaurants in {collection.name}
         </h3>
         <div className="bg-destructive/10 dark:bg-destructive/20/20 border border-destructive dark:border-destructive rounded-md p-4">
@@ -285,10 +285,10 @@ export function CollectionRestaurantsList({
       <div className="flex flex-col gap-3">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4">
-            <h3 className="text-lg font-semibold text-primary">
+            <h3 className="text-lg font-semibold text-ink">
               Restaurants in {collection.name}
             </h3>
-            <span className="text-sm text-secondary">
+            <span className="text-sm text-ink-secondary">
               {restaurants.length} restaurant
               {restaurants.length !== 1 ? 's' : ''}
             </span>
@@ -305,11 +305,11 @@ export function CollectionRestaurantsList({
         {/* Sort Controls */}
         {restaurants.length > 0 && (
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-sm text-text-muted">Sort by:</span>
+            <span className="text-sm text-ink-muted">Sort by:</span>
             <select
               value={sortBy}
               onChange={(e) => handleSortChange(e.target.value as SortOption)}
-              className="px-3 py-1.5 rounded-md border border-border bg-background text-text text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              className="px-3 py-1.5 rounded-md border border-border bg-bg text-ink text-sm focus:outline-none focus:ring-2 focus:ring-tomato"
             >
               <option value="rating-desc">Rating (Highest First)</option>
               <option value="name-asc">Name (A-Z)</option>
@@ -321,10 +321,10 @@ export function CollectionRestaurantsList({
 
       {restaurants.length === 0 ? (
         <div className="text-center py-8">
-          <p className="text-tertiary dark:text-text-light mb-4">
+          <p className="text-ink-muted mb-4">
             No restaurants in this collection yet.
           </p>
-          <p className="text-sm text-text-light dark:text-tertiary">
+          <p className="text-sm text-ink-secondary">
             Search for restaurants and add them to this collection to get
             started.
           </p>
@@ -351,7 +351,7 @@ export function CollectionRestaurantsList({
                         onClick={() => onViewDetails(restaurant)}
                         size="sm"
                         variant="outline"
-                        className="bg-white/90 dark:bg-secondary/90 backdrop-blur-sm shadow-sm border border-border/50"
+                        className="bg-white/90 backdrop-blur-sm shadow-sm border border-border/50"
                       >
                         View
                       </Button>
@@ -363,7 +363,7 @@ export function CollectionRestaurantsList({
                       }
                       size="sm"
                       variant="outline"
-                      className="bg-white dark:bg-background shadow-sm"
+                      className="bg-white shadow-sm"
                     >
                       Manage
                     </Button>
@@ -374,11 +374,11 @@ export function CollectionRestaurantsList({
                     <DropdownMenu
                       trigger={
                         <button
-                          className="p-2 bg-white/90 dark:bg-secondary/90 backdrop-blur-sm shadow-sm rounded-lg transition-colors border border-border/50"
+                          className="p-2 bg-white/90 backdrop-blur-sm shadow-sm rounded-lg transition-colors border border-border/50"
                           aria-label="Restaurant actions"
                         >
                           <svg
-                            className="w-4 h-4 text-primary"
+                            className="w-4 h-4 text-ink"
                             fill="none"
                             viewBox="0 0 24 24"
                             stroke="currentColor"
@@ -444,13 +444,13 @@ export function CollectionRestaurantsList({
                 className="rounded-lg overflow-hidden shadow-lg"
               />
               {mapSelectedRestaurant && (
-                <div className="bg-primary/10 dark:bg-primary/20/20 border border-primary dark:border-primary rounded-lg p-4">
+                <div className="bg-tomato/10 border border-tomato rounded-lg p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h4 className="font-semibold text-blue-900 dark:text-blue-100">
+                      <h4 className="font-semibold text-ink">
                         {mapSelectedRestaurant.name}
                       </h4>
-                      <p className="text-sm text-primary dark:text-primary">
+                      <p className="text-sm text-ink">
                         {mapSelectedRestaurant.address}
                       </p>
                     </div>
@@ -461,7 +461,7 @@ export function CollectionRestaurantsList({
                         }
                         size="sm"
                         variant="outline"
-                        className="border-primary text-primary hover:bg-primary/10 dark:border-primary dark:text-primary dark:hover:bg-primary/20/30"
+                        className="border-tomato text-ink hover:bg-tomato/10"
                       >
                         View Details
                       </Button>
@@ -469,7 +469,7 @@ export function CollectionRestaurantsList({
                         onClick={() => setMapSelectedRestaurant(null)}
                         size="sm"
                         variant="outline"
-                        className="text-primary hover:bg-primary/10 dark:text-primary dark:hover:bg-primary/20/30"
+                        className="text-ink hover:bg-tomato/10"
                       >
                         Clear
                       </Button>
@@ -507,7 +507,7 @@ export function CollectionRestaurantsList({
 
                     if (showEllipsis) {
                       return (
-                        <span key={page} className="px-2 text-text-muted">
+                        <span key={page} className="px-2 text-ink-muted">
                           ...
                         </span>
                       );

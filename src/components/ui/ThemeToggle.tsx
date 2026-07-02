@@ -115,17 +115,17 @@ export function ThemeToggle({
         }}
         className={cn(
           'inline-flex items-center justify-center rounded-xl',
-          'bg-secondary text-primary shadow-neumorphic-light',
-          'hover:shadow-neumorphic-elevated hover:scale-105',
-          'active:shadow-neumorphic-pressed active:scale-95',
+          'bg-surface text-ink shadow-subtle',
+          ' hover:scale-105',
+          ' active:scale-95',
           'transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2',
-          'border border-quaternary',
+          'border border-border',
           getSizeClasses(),
           className
         )}
         style={
           {
-            '--tw-ring-color': 'var(--accent-primary)',
+            '--tw-ring-color': 'var(--tomato)',
             '--tw-ring-opacity': '0.3',
           } as React.CSSProperties
         }
@@ -151,16 +151,16 @@ export function ThemeToggle({
         className={cn(
           'relative inline-flex items-center rounded-full transition-colors duration-200',
           'focus:outline-none focus:ring-2 focus:ring-offset-2',
-          'border border-quaternary',
+          'border border-border',
           resolvedTheme === 'dark'
-            ? 'bg-accent shadow-neumorphic-elevated'
-            : 'bg-tertiary shadow-neumorphic-light',
+            ? 'bg-tomato shadow-medium'
+            : 'bg-surface-sunken shadow-subtle',
           getSizeClasses(),
           className
         )}
         style={
           {
-            '--tw-ring-color': 'var(--accent-primary)',
+            '--tw-ring-color': 'var(--tomato)',
             '--tw-ring-opacity': '0.3',
           } as React.CSSProperties
         }
@@ -169,7 +169,7 @@ export function ThemeToggle({
         <div
           className={cn(
             'absolute top-0.5 left-0.5 rounded-full transition-transform duration-200',
-            'bg-secondary shadow-neumorphic-pressed flex items-center justify-center',
+            'bg-surface shadow-inset flex items-center justify-center',
             resolvedTheme === 'dark' ? 'translate-x-5' : 'translate-x-0',
             size === 'sm' ? 'w-7 h-7' : size === 'lg' ? 'w-11 h-11' : 'w-9 h-9'
           )}
@@ -202,16 +202,16 @@ export function ThemeToggle({
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
           'inline-flex items-center justify-center rounded-xl',
-          'bg-secondary text-primary shadow-neumorphic-light',
-          'hover:shadow-neumorphic-elevated',
+          'bg-surface text-ink shadow-subtle',
+          '',
           'transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2',
-          'border border-quaternary',
+          'border border-border',
           getSizeClasses(),
           className
         )}
         style={
           {
-            '--tw-ring-color': 'var(--accent-primary)',
+            '--tw-ring-color': 'var(--tomato)',
             '--tw-ring-opacity': '0.3',
           } as React.CSSProperties
         }
@@ -236,7 +236,7 @@ export function ThemeToggle({
           <div
             className={cn(
               'absolute right-0 top-full mt-2 z-50',
-              'bg-secondary border border-quaternary rounded-xl shadow-neumorphic-elevated',
+              'bg-surface border border-border rounded-xl shadow-medium',
               'py-1 min-w-32'
             )}
           >
@@ -248,8 +248,10 @@ export function ThemeToggle({
               }}
               className={cn(
                 'w-full px-3 py-2 text-left text-sm flex items-center gap-2',
-                'hover:bg-tertiary transition-colors duration-150',
-                theme === 'light' ? 'text-accent font-medium' : 'text-secondary'
+                'hover:bg-surface-sunken transition-colors duration-150',
+                theme === 'light'
+                  ? 'text-tomato font-medium'
+                  : 'text-ink-secondary'
               )}
             >
               <SunIcon className={getIconSize()} />
@@ -264,8 +266,10 @@ export function ThemeToggle({
               }}
               className={cn(
                 'w-full px-3 py-2 text-left text-sm flex items-center gap-2',
-                'hover:bg-tertiary transition-colors duration-150',
-                theme === 'dark' ? 'text-accent font-medium' : 'text-secondary'
+                'hover:bg-surface-sunken transition-colors duration-150',
+                theme === 'dark'
+                  ? 'text-tomato font-medium'
+                  : 'text-ink-secondary'
               )}
             >
               <MoonIcon className={getIconSize()} />
@@ -279,10 +283,10 @@ export function ThemeToggle({
               }}
               className={cn(
                 'w-full px-3 py-2 text-left text-sm flex items-center gap-2',
-                'hover:bg-tertiary transition-colors duration-150',
+                'hover:bg-surface-sunken transition-colors duration-150',
                 theme === 'system'
-                  ? 'text-accent font-medium'
-                  : 'text-secondary'
+                  ? 'text-tomato font-medium'
+                  : 'text-ink-secondary'
               )}
             >
               <SystemIcon className={getIconSize()} />

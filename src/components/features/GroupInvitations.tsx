@@ -74,7 +74,9 @@ export function GroupInvitations({
       <Card className="p-6">
         <div className="text-center py-8">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-border mx-auto"></div>
-          <p className="mt-2 text-sm text-text-light">Loading invitations...</p>
+          <p className="mt-2 text-sm text-ink-secondary">
+            Loading invitations...
+          </p>
         </div>
       </Card>
     );
@@ -84,7 +86,7 @@ export function GroupInvitations({
     return (
       <Card className="p-6">
         <div className="text-center py-8">
-          <p className="text-text-light">No pending group invitations</p>
+          <p className="text-ink-secondary">No pending group invitations</p>
         </div>
       </Card>
     );
@@ -93,24 +95,27 @@ export function GroupInvitations({
   return (
     <div className="space-y-4">
       {invitations.map((invitation) => (
-        <Card key={invitation._id} className="p-6">
+        <Card
+          key={invitation._id}
+          className="p-6 transition-shadow hover:shadow-md"
+        >
           <div className="flex items-start space-x-4">
             <UserAvatar name={invitation.inviterName} size="md" />
             <div className="flex-1">
-              <h3 className="text-lg font-semibold text-text">
+              <h3 className="text-lg font-semibold text-ink">
                 {invitation.groupName}
               </h3>
               {invitation.groupDescription && (
-                <p className="text-sm text-text-light mt-1">
+                <p className="text-sm text-ink-secondary mt-1">
                   {invitation.groupDescription}
                 </p>
               )}
-              <p className="text-sm text-text-light mt-2">
+              <p className="text-sm text-ink-secondary mt-2">
                 Invited by{' '}
                 <span className="font-medium">{invitation.inviterName}</span> (
                 {invitation.inviterEmail})
               </p>
-              <p className="text-xs text-text-light mt-1">
+              <p className="text-xs text-ink-secondary mt-1">
                 {new Date(invitation.createdAt).toLocaleDateString()}
               </p>
             </div>
@@ -141,11 +146,11 @@ export function GroupInvitations({
               <DropdownMenu
                 trigger={
                   <button
-                    className="p-2 hover:bg-tertiary rounded-lg transition-colors"
+                    className="p-2 hover:bg-surface-sunken rounded-lg transition-colors"
                     aria-label="Invitation actions"
                   >
                     <svg
-                      className="w-5 h-5 text-primary"
+                      className="w-5 h-5 text-ink"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"

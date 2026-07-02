@@ -827,14 +827,14 @@ export function CityStateInput({
               key={`${option.city}-${option.state}`}
               className={`px-4 py-2 cursor-pointer text-sm ${
                 index === currentIndex
-                  ? 'bg-primary/10 text-blue-900'
-                  : 'text-text hover:bg-surface'
+                  ? 'bg-tomato/10 text-blue-900'
+                  : 'text-ink hover:bg-surface'
               }`}
               onClick={() => handleSuggestionSelect(option)}
               onMouseEnter={() => setCurrentIndex(index)}
             >
               <div className="font-medium">{option.city}</div>
-              <div className="text-text-light text-xs">{option.state}</div>
+              <div className="text-ink-secondary text-xs">{option.state}</div>
             </div>
           ))}
         </div>
@@ -843,7 +843,7 @@ export function CityStateInput({
       {/* Loading indicator */}
       {isLoading && (
         <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-tomato"></div>
         </div>
       )}
     </div>

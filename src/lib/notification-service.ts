@@ -674,8 +674,15 @@ export class NotificationService {
     details?: Record<string, unknown>
   ): Promise<void> {
     try {
-      // Send SMS to admin (development number)
-      await smsNotifications.sendAdminAlert('+18777804236', alertType, message);
+      // Send SMS to the configured admin number; skip the channel when unset
+      const adminPhone = process.env.ADMIN_ALERT_PHONE;
+      if (adminPhone) {
+        await smsNotifications.sendAdminAlert(adminPhone, alertType, message);
+      } else {
+        logger.warn(
+          'ADMIN_ALERT_PHONE is not set; skipping admin alert SMS channel'
+        );
+      }
 
       // Create in-app notification
       await inAppNotifications.createAdminAlertNotification(

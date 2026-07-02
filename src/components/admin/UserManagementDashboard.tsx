@@ -154,7 +154,7 @@ export function UserManagementDashboard() {
         role="status"
         aria-label="Loading user data"
       >
-        <RefreshCw className="h-8 w-8 animate-spin text-primary" />
+        <RefreshCw className="h-8 w-8 animate-spin text-ink" />
         <span className="sr-only">Loading user data...</span>
       </div>
     );
@@ -179,14 +179,14 @@ export function UserManagementDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <Card className="p-6">
             <div className="flex items-center">
-              <div className="p-2 bg-primary/10 rounded-lg">
-                <Users className="h-6 w-6 text-primary" />
+              <div className="p-2 bg-tomato/10 rounded-lg">
+                <Users className="h-6 w-6 text-ink" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-text-light">
+                <p className="text-sm font-medium text-ink-secondary">
                   Total Users
                 </p>
-                <p className="text-2xl font-bold text-text">
+                <p className="text-2xl font-bold text-ink">
                   {stats.overview.totalUsers}
                 </p>
               </div>
@@ -199,10 +199,10 @@ export function UserManagementDashboard() {
                 <UserPlus className="h-6 w-6 text-success" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-text-light">
+                <p className="text-sm font-medium text-ink-secondary">
                   New This Week
                 </p>
-                <p className="text-2xl font-bold text-text">
+                <p className="text-2xl font-bold text-ink">
                   {stats.overview.weeklyUsers}
                 </p>
               </div>
@@ -215,10 +215,10 @@ export function UserManagementDashboard() {
                 <TrendingUp className="h-6 w-6 text-purple-600" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-text-light">
+                <p className="text-sm font-medium text-ink-secondary">
                   Active Users
                 </p>
-                <p className="text-2xl font-bold text-text">
+                <p className="text-2xl font-bold text-ink">
                   {stats.overview.usersWithCollections +
                     stats.overview.usersWithGroups}
                 </p>
@@ -232,10 +232,10 @@ export function UserManagementDashboard() {
                 <UserCheck className="h-6 w-6 text-warning" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-text-light">
+                <p className="text-sm font-medium text-ink-secondary">
                   With Collections
                 </p>
-                <p className="text-2xl font-bold text-text">
+                <p className="text-2xl font-bold text-ink">
                   {stats.overview.usersWithCollections}
                 </p>
               </div>
@@ -248,8 +248,10 @@ export function UserManagementDashboard() {
                 <Users className="h-6 w-6 text-indigo-600" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-text-light">In Groups</p>
-                <p className="text-2xl font-bold text-text">
+                <p className="text-sm font-medium text-ink-secondary">
+                  In Groups
+                </p>
+                <p className="text-2xl font-bold text-ink">
                   {stats.overview.usersWithGroups}
                 </p>
               </div>
@@ -262,10 +264,10 @@ export function UserManagementDashboard() {
                 <Mail className="h-6 w-6 text-destructive" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-text-light">
+                <p className="text-sm font-medium text-ink-secondary">
                   Pending Requests
                 </p>
-                <p className="text-2xl font-bold text-text">
+                <p className="text-2xl font-bold text-ink">
                   {stats.social.pendingFriendRequests +
                     stats.social.pendingGroupInvitations}
                 </p>
@@ -332,9 +334,9 @@ export function UserManagementDashboard() {
             <div className="overflow-x-auto">
               <table
                 className="min-w-full divide-y"
-                style={{ borderColor: 'var(--bg-quaternary)' }}
+                style={{ borderColor: 'var(--border)' }}
               >
-                <thead style={{ background: 'var(--bg-tertiary)' }}>
+                <thead style={{ background: 'var(--surface-sunken)' }}>
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
                       User
@@ -356,20 +358,20 @@ export function UserManagementDashboard() {
                 <tbody
                   className="divide-y"
                   style={{
-                    background: 'var(--bg-secondary)',
-                    borderColor: 'var(--bg-quaternary)',
+                    background: 'var(--surface)',
+                    borderColor: 'var(--border)',
                   }}
                 >
                   {searchResults.users.map((user) => (
                     <tr
                       key={user.id}
-                      style={{ background: 'var(--bg-secondary)' }}
+                      style={{ background: 'var(--surface)' }}
                       onMouseEnter={(e) => {
-                        e.currentTarget.style.background = 'var(--bg-tertiary)';
+                        e.currentTarget.style.background =
+                          'var(--surface-sunken)';
                       }}
                       onMouseLeave={(e) => {
-                        e.currentTarget.style.background =
-                          'var(--bg-secondary)';
+                        e.currentTarget.style.background = 'var(--surface)';
                       }}
                     >
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -443,17 +445,19 @@ export function UserManagementDashboard() {
                 className="flex items-center justify-between p-3 bg-surface rounded-lg"
               >
                 <div className="flex items-center">
-                  <div className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-medium">
+                  <div className="w-8 h-8 bg-tomato text-white rounded-full flex items-center justify-center text-sm font-medium">
                     {index + 1}
                   </div>
                   <div className="ml-3">
-                    <div className="text-sm font-medium text-text">
+                    <div className="text-sm font-medium text-ink">
                       {user.name}
                     </div>
-                    <div className="text-xs text-text-light">{user.email}</div>
+                    <div className="text-xs text-ink-secondary">
+                      {user.email}
+                    </div>
                   </div>
                 </div>
-                <div className="flex gap-4 text-sm text-text-light">
+                <div className="flex gap-4 text-sm text-ink-secondary">
                   <span>{user.collectionCount} collections</span>
                   <span>{user.groupCount} groups</span>
                 </div>

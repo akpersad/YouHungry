@@ -12,8 +12,18 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/Card';
+import { AdminGate } from '@/components/admin/AdminGate';
 
+// Push-subscription test console — admin only.
 export default function PushTestPage() {
+  return (
+    <AdminGate>
+      <PushTestContent />
+    </AdminGate>
+  );
+}
+
+function PushTestContent() {
   const {
     status,
     loading,
@@ -170,14 +180,14 @@ export default function PushTestPage() {
   };
 
   return (
-    <div className="min-h-screen bg-primary p-4">
+    <div className="min-h-screen bg-bg p-4">
       <div className="container mx-auto max-w-4xl">
         {/* Header */}
         <div className="mb-8 text-center">
-          <h1 className="text-4xl font-bold text-inverse mb-2">
+          <h1 className="text-4xl font-bold text-ink-inverse mb-2">
             🔔 Push Notifications
           </h1>
-          <p className="text-lg text-inverse/80">
+          <p className="text-lg text-ink-inverse/80">
             Test and configure push notifications for Fork In The Road
           </p>
         </div>
@@ -193,33 +203,41 @@ export default function PushTestPage() {
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-3">
-                <div className="flex items-center justify-between p-3 rounded-xl bg-tertiary">
-                  <span className="text-secondary font-medium">Supported</span>
+                <div className="flex items-center justify-between p-3 rounded-xl bg-surface-sunken">
+                  <span className="text-ink-secondary font-medium">
+                    Supported
+                  </span>
                   <span className="text-lg">
                     {getStatusIcon(status.supported)}
                   </span>
                 </div>
-                <div className="flex items-center justify-between p-3 rounded-xl bg-tertiary">
-                  <span className="text-secondary font-medium">Permission</span>
+                <div className="flex items-center justify-between p-3 rounded-xl bg-surface-sunken">
+                  <span className="text-ink-secondary font-medium">
+                    Permission
+                  </span>
                   <span className="text-lg">
                     {getPermissionIcon(status.permission)}
                   </span>
                 </div>
-                <div className="flex items-center justify-between p-3 rounded-xl bg-tertiary">
-                  <span className="text-secondary font-medium">Subscribed</span>
+                <div className="flex items-center justify-between p-3 rounded-xl bg-surface-sunken">
+                  <span className="text-ink-secondary font-medium">
+                    Subscribed
+                  </span>
                   <span className="text-lg">
                     {getStatusIcon(status.subscribed)}
                   </span>
                 </div>
               </div>
               <div className="space-y-3">
-                <div className="flex items-center justify-between p-3 rounded-xl bg-tertiary">
-                  <span className="text-secondary font-medium">iOS Device</span>
+                <div className="flex items-center justify-between p-3 rounded-xl bg-surface-sunken">
+                  <span className="text-ink-secondary font-medium">
+                    iOS Device
+                  </span>
                   <span className="text-lg">{status.isIOS ? '📱' : '💻'}</span>
                 </div>
                 {status.isIOS && (
-                  <div className="flex items-center justify-between p-3 rounded-xl bg-tertiary">
-                    <span className="text-secondary font-medium">
+                  <div className="flex items-center justify-between p-3 rounded-xl bg-surface-sunken">
+                    <span className="text-ink-secondary font-medium">
                       iOS Support
                     </span>
                     <span className="text-lg">
@@ -227,8 +245,8 @@ export default function PushTestPage() {
                     </span>
                   </div>
                 )}
-                <div className="flex items-center justify-between p-3 rounded-xl bg-tertiary">
-                  <span className="text-secondary font-medium">
+                <div className="flex items-center justify-between p-3 rounded-xl bg-surface-sunken">
+                  <span className="text-ink-secondary font-medium">
                     Display Mode
                   </span>
                   <span className="text-lg">
@@ -253,7 +271,7 @@ export default function PushTestPage() {
                   <h3 className="font-semibold text-warning mb-2">
                     iOS Limitation
                   </h3>
-                  <p className="text-sm text-secondary">
+                  <p className="text-sm text-ink-secondary">
                     Push notifications require iOS 16.4 or later. Your device
                     may not support push notifications for PWAs.
                   </p>
@@ -272,15 +290,15 @@ export default function PushTestPage() {
                   <h3 className="font-semibold text-success mb-2">
                     iOS Push Notifications Supported!
                   </h3>
-                  <p className="text-sm text-secondary mb-3">
+                  <p className="text-sm text-ink-secondary mb-3">
                     Your iOS version supports push notifications. Make sure to:
                   </p>
-                  <ul className="text-sm text-secondary space-y-1 list-disc list-inside">
+                  <ul className="text-sm text-ink-secondary space-y-1 list-disc list-inside">
                     <li>App is added to Home Screen (Installed)</li>
                     <li>You opened the app from Home Screen (not Safari)</li>
                     <li>Grant notification permission when prompted</li>
                   </ul>
-                  <p className="text-xs text-tertiary mt-3">
+                  <p className="text-xs text-ink-muted mt-3">
                     Note: iOS notifications have some limitations compared to
                     Android (e.g., no action buttons, limited customization).
                   </p>
@@ -292,39 +310,39 @@ export default function PushTestPage() {
 
         {/* Debug Info */}
         {mounted && (
-          <Card className="mb-6 bg-tertiary">
+          <Card className="mb-6 bg-surface-sunken">
             <CardHeader>
               <CardTitle className="text-lg">Debug Information</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-tertiary">Service Worker:</span>
+                  <span className="text-ink-muted">Service Worker:</span>
                   <span>{'serviceWorker' in navigator ? '✅' : '❌'}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-tertiary">PushManager:</span>
+                  <span className="text-ink-muted">PushManager:</span>
                   <span>{'PushManager' in window ? '✅' : '❌'}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-tertiary">Notification:</span>
+                  <span className="text-ink-muted">Notification:</span>
                   <span>{'Notification' in window ? '✅' : '❌'}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-tertiary">Loading:</span>
+                  <span className="text-ink-muted">Loading:</span>
                   <span>{loading ? '⏳' : '✅'}</span>
                 </div>
               </div>
 
               {!('serviceWorker' in navigator) && (
-                <div className="mt-4 p-3 bg-accent/10 rounded-xl border border-accent/20">
+                <div className="mt-4 p-3 bg-tomato/10 rounded-xl border border-tomato/20">
                   <div className="flex items-center space-x-2">
-                    <span className="text-accent">ℹ️</span>
+                    <span className="text-tomato">ℹ️</span>
                     <div>
-                      <div className="font-medium text-accent text-sm">
+                      <div className="font-medium text-tomato text-sm">
                         Local Development Limitation
                       </div>
-                      <div className="text-xs text-tertiary mt-1">
+                      <div className="text-xs text-ink-muted mt-1">
                         Service Workers require HTTPS. This will work in
                         production!
                       </div>
@@ -346,11 +364,11 @@ export default function PushTestPage() {
                   <h3 className="font-semibold text-warning mb-2">
                     Limited Notification Support
                   </h3>
-                  <p className="text-sm text-secondary mb-2">
+                  <p className="text-sm text-ink-secondary mb-2">
                     Push notifications (background/server-sent) aren&apos;t
                     available, but you can test basic notifications below.
                   </p>
-                  <p className="text-xs text-tertiary">
+                  <p className="text-xs text-ink-muted">
                     <strong>iOS Chrome Limitation:</strong> Service Worker and
                     PushManager APIs aren&apos;t available.
                   </p>
@@ -369,7 +387,7 @@ export default function PushTestPage() {
                   <h3 className="font-semibold text-error mb-2">
                     Notifications Not Available
                   </h3>
-                  <p className="text-sm text-secondary">
+                  <p className="text-sm text-ink-secondary">
                     Your browser doesn&apos;t support any notification APIs.
                   </p>
                 </div>
@@ -462,7 +480,7 @@ export default function PushTestPage() {
                 <span className="text-2xl">❌</span>
                 <div>
                   <h3 className="font-semibold text-error mb-2">Error</h3>
-                  <p className="text-sm text-secondary">{error}</p>
+                  <p className="text-sm text-ink-secondary">{error}</p>
                 </div>
               </div>
             </CardContent>
@@ -476,7 +494,7 @@ export default function PushTestPage() {
                 <span className="text-2xl">✅</span>
                 <div>
                   <h3 className="font-semibold text-success mb-2">Success</h3>
-                  <p className="text-sm text-secondary">{success}</p>
+                  <p className="text-sm text-ink-secondary">{success}</p>
                 </div>
               </div>
             </CardContent>
@@ -492,9 +510,9 @@ export default function PushTestPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <ol className="space-y-3 text-sm text-secondary">
+            <ol className="space-y-3 text-sm text-ink-secondary">
               <li className="flex items-start space-x-3">
-                <span className="flex-shrink-0 w-6 h-6 bg-accent text-inverse rounded-full flex items-center justify-center text-xs font-bold">
+                <span className="flex-shrink-0 w-6 h-6 bg-tomato text-ink-inverse rounded-full flex items-center justify-center text-xs font-bold">
                   1
                 </span>
                 <span>
@@ -503,7 +521,7 @@ export default function PushTestPage() {
                 </span>
               </li>
               <li className="flex items-start space-x-3">
-                <span className="flex-shrink-0 w-6 h-6 bg-accent text-inverse rounded-full flex items-center justify-center text-xs font-bold">
+                <span className="flex-shrink-0 w-6 h-6 bg-tomato text-ink-inverse rounded-full flex items-center justify-center text-xs font-bold">
                   2
                 </span>
                 <span>
@@ -512,7 +530,7 @@ export default function PushTestPage() {
                 </span>
               </li>
               <li className="flex items-start space-x-3">
-                <span className="flex-shrink-0 w-6 h-6 bg-accent text-inverse rounded-full flex items-center justify-center text-xs font-bold">
+                <span className="flex-shrink-0 w-6 h-6 bg-tomato text-ink-inverse rounded-full flex items-center justify-center text-xs font-bold">
                   3
                 </span>
                 <span>
@@ -537,10 +555,8 @@ export default function PushTestPage() {
               <div className="flex items-start space-x-3">
                 <span className="text-2xl">✅</span>
                 <div>
-                  <h4 className="font-semibold text-primary mb-1">
-                    Full Support
-                  </h4>
-                  <p className="text-sm text-secondary">
+                  <h4 className="font-semibold text-ink mb-1">Full Support</h4>
+                  <p className="text-sm text-ink-secondary">
                     Android Chrome, Desktop Chrome/Edge/Firefox
                   </p>
                 </div>
@@ -548,10 +564,8 @@ export default function PushTestPage() {
               <div className="flex items-start space-x-3">
                 <span className="text-2xl">📱</span>
                 <div>
-                  <h4 className="font-semibold text-primary mb-1">
-                    iOS Support
-                  </h4>
-                  <p className="text-sm text-secondary">
+                  <h4 className="font-semibold text-ink mb-1">iOS Support</h4>
+                  <p className="text-sm text-ink-secondary">
                     iOS 16.4+ (most users on iOS 17+) - requires Home Screen
                     installation
                   </p>
@@ -560,16 +574,14 @@ export default function PushTestPage() {
               <div className="flex items-start space-x-3">
                 <span className="text-2xl">❌</span>
                 <div>
-                  <h4 className="font-semibold text-primary mb-1">
-                    No Support
-                  </h4>
-                  <p className="text-sm text-secondary">
+                  <h4 className="font-semibold text-ink mb-1">No Support</h4>
+                  <p className="text-sm text-ink-secondary">
                     iOS &lt; 16.4 (older devices only)
                   </p>
                 </div>
               </div>
-              <div className="mt-4 p-3 bg-accent/10 rounded-xl">
-                <p className="text-xs text-tertiary italic">
+              <div className="mt-4 p-3 bg-tomato/10 rounded-xl">
+                <p className="text-xs text-ink-muted italic">
                   💡 Most of your users on iOS 17 or iOS 18 will have push
                   notification support!
                 </p>

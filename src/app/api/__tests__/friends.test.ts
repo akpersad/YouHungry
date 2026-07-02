@@ -4,7 +4,10 @@ import {
   GET as getFriendRequests,
   POST as sendFriendRequest,
 } from '../friends/requests/route';
-import { PUT as updateFriendRequest } from '../friends/requests/[id]/route';
+import {
+  PUT as updateFriendRequest,
+  DELETE as cancelFriendRequest,
+} from '../friends/requests/[id]/route';
 import { GET as getFriends, DELETE as removeFriend } from '../friends/route';
 import { getCurrentUser } from '@/lib/auth';
 import * as friendsLib from '@/lib/friends';
@@ -21,6 +24,7 @@ jest.mock('@/lib/friends', () => ({
   sendFriendRequest: jest.fn(),
   acceptFriendRequest: jest.fn(),
   declineFriendRequest: jest.fn(),
+  cancelFriendRequest: jest.fn(),
   getFriends: jest.fn(),
   removeFriend: jest.fn(),
 }));
@@ -502,6 +506,66 @@ describe('/api/friends/requests/[id]', () => {
     expect(response.status).toBe(400);
     expect(data.success).toBe(false);
     expect(data.error).toBe('Action is required');
+  });
+
+  describe('DELETE (cancel sent request)', () => {
+    it('should cancel a sent request as the session user', async () => {
+      mockFriendsLib.cancelFriendRequest.mockResolvedValue(true);
+
+      const request = new NextRequest(
+        'http://localhost:3000/api/friends/requests/507f1f77bcf86cd799439013',
+        { method: 'DELETE' }
+      );
+      const response = await cancelFriendRequest(request, {
+        params: Promise.resolve({ id: '507f1f77bcf86cd799439013' }),
+      });
+      const data = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(data.success).toBe(true);
+      expect(data.message).toBe('Friend request cancelled');
+      expect(mockFriendsLib.cancelFriendRequest).toHaveBeenCalledWith(
+        '507f1f77bcf86cd799439013',
+        mockSessionUser.clerkId
+      );
+    });
+
+    it('should return 401 if not authenticated', async () => {
+      (getCurrentUser as jest.Mock).mockResolvedValue(null);
+
+      const request = new NextRequest(
+        'http://localhost:3000/api/friends/requests/507f1f77bcf86cd799439013',
+        { method: 'DELETE' }
+      );
+      const response = await cancelFriendRequest(request, {
+        params: Promise.resolve({ id: '507f1f77bcf86cd799439013' }),
+      });
+      const data = await response.json();
+
+      expect(response.status).toBe(401);
+      expect(data.success).toBe(false);
+      expect(data.error).toBe('Unauthorized');
+      expect(mockFriendsLib.cancelFriendRequest).not.toHaveBeenCalled();
+    });
+
+    it('should surface a not-found error as 400', async () => {
+      mockFriendsLib.cancelFriendRequest.mockRejectedValue(
+        new Error('Friend request not found or already processed')
+      );
+
+      const request = new NextRequest(
+        'http://localhost:3000/api/friends/requests/507f1f77bcf86cd799439013',
+        { method: 'DELETE' }
+      );
+      const response = await cancelFriendRequest(request, {
+        params: Promise.resolve({ id: '507f1f77bcf86cd799439013' }),
+      });
+      const data = await response.json();
+
+      expect(response.status).toBe(400);
+      expect(data.success).toBe(false);
+      expect(data.error).toBe('Friend request not found or already processed');
+    });
   });
 });
 

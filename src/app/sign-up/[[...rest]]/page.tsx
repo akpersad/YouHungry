@@ -23,19 +23,19 @@ export default function SignUpPage() {
           <h3 className="font-semibold mb-3">What you&apos;ll get</h3>
           <ul className="space-y-2 text-sm">
             <li className="flex items-start">
-              <span className="text-primary mr-2">✓</span>
+              <span className="text-ink mr-2">✓</span>
               Create personal restaurant collections
             </li>
             <li className="flex items-start">
-              <span className="text-primary mr-2">✓</span>
+              <span className="text-ink mr-2">✓</span>
               Make group decisions with friends
             </li>
             <li className="flex items-start">
-              <span className="text-primary mr-2">✓</span>
+              <span className="text-ink mr-2">✓</span>
               Get smart recommendations
             </li>
             <li className="flex items-start">
-              <span className="text-primary mr-2">✓</span>
+              <span className="text-ink mr-2">✓</span>
               Never argue about where to eat
             </li>
           </ul>
@@ -58,7 +58,7 @@ export default function SignUpPage() {
         </div>
 
         {/* SMS Benefits Info */}
-        <div className="bg-primary/10 dark:bg-primary/20 rounded-lg p-4 border border-primary dark:border-primary">
+        <div className="bg-tomato/10 rounded-lg p-4 border border-tomato">
           <h4 className="font-medium mb-2 text-blue-900 dark:text-blue-100">
             📱 SMS Notifications
           </h4>

@@ -63,12 +63,12 @@ describe('RestaurantSearchResults', () => {
       />
     );
 
+    // Loading now renders an accessible skeleton region (single announcement)
+    const region = screen.getByRole('status');
+    expect(region).toHaveAttribute('aria-label', 'Searching for restaurants');
     expect(
-      screen.getByText('Searching for restaurants...')
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText('Searching for restaurants...')
-    ).toBeInTheDocument();
+      screen.getAllByTestId('restaurant-card-skeleton').length
+    ).toBeGreaterThan(0);
   });
 
   it('renders empty state when no restaurants found', () => {
@@ -217,9 +217,10 @@ describe('RestaurantSearchResults', () => {
       />
     );
 
-    expect(
-      screen.getByText('Searching for restaurants...')
-    ).toBeInTheDocument();
+    expect(screen.getByRole('status')).toHaveAttribute(
+      'aria-label',
+      'Searching for restaurants'
+    );
   });
 
   it('does not render Load More button when hasMore is false', () => {

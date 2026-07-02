@@ -1,8 +1,18 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { AdminGate } from '@/components/admin/AdminGate';
 
+// PWA capability test console — admin only.
 export default function PWAExplorerPage() {
+  return (
+    <AdminGate>
+      <PWAExplorerContent />
+    </AdminGate>
+  );
+}
+
+function PWAExplorerContent() {
   const [results, setResults] = useState<Record<string, unknown>>({});
   const [testResults, setTestResults] = useState<string[]>([]);
 
@@ -172,16 +182,13 @@ export default function PWAExplorerPage() {
   };
 
   return (
-    <div
-      className="min-h-screen p-4"
-      style={{ backgroundColor: 'var(--bg-primary)' }}
-    >
+    <div className="min-h-screen p-4" style={{ backgroundColor: 'var(--bg)' }}>
       <div className="max-w-4xl mx-auto">
         <div
           className="rounded-lg shadow-lg"
           style={{
-            backgroundColor: 'var(--bg-secondary)',
-            border: '1px solid var(--bg-quaternary)',
+            backgroundColor: 'var(--surface)',
+            border: '1px solid var(--border)',
             boxShadow: 'var(--shadow-medium)',
           }}
         >
@@ -194,16 +201,15 @@ export default function PWAExplorerPage() {
               onClick={runAllTests}
               className="px-4 py-2 rounded transition-colors"
               style={{
-                backgroundColor: 'var(--accent-primary)',
-                boxShadow: 'var(--shadow-neumorphic-elevated)',
+                backgroundColor: 'var(--tomato)',
+                boxShadow: 'var(--shadow-medium)',
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor =
-                  'var(--accent-primary-light)';
+                e.currentTarget.style.backgroundColor = 'var(--tomato-hover)';
                 e.currentTarget.style.transform = 'translateY(-1px)';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'var(--accent-primary)';
+                e.currentTarget.style.backgroundColor = 'var(--tomato)';
                 e.currentTarget.style.transform = 'translateY(0)';
               }}
             >
@@ -217,8 +223,8 @@ export default function PWAExplorerPage() {
                 key={test}
                 className="rounded-lg p-4"
                 style={{
-                  border: '1px solid var(--bg-quaternary)',
-                  backgroundColor: 'var(--bg-secondary)',
+                  border: '1px solid var(--border)',
+                  backgroundColor: 'var(--surface)',
                 }}
               >
                 <div className="flex items-center justify-between mb-2">
@@ -230,8 +236,8 @@ export default function PWAExplorerPage() {
                 <div
                   className="rounded p-3 overflow-auto"
                   style={{
-                    backgroundColor: 'var(--bg-tertiary)',
-                    border: '1px solid var(--bg-quaternary)',
+                    backgroundColor: 'var(--surface-sunken)',
+                    border: '1px solid var(--border)',
                   }}
                 >
                   <pre className="text-xs font-mono">
@@ -247,7 +253,7 @@ export default function PWAExplorerPage() {
           )}
         </div>
 
-        <div className="mt-6 bg-primary/10 dark:bg-primary/20 rounded-lg p-4">
+        <div className="mt-6 bg-tomato/10 rounded-lg p-4">
           <h2 className="font-semibold text-blue-900 dark:text-blue-100 mb-2">
             📱 iOS PWA Installation Instructions
           </h2>

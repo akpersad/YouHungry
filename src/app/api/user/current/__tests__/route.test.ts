@@ -5,6 +5,12 @@ import { requireAuth } from '@/lib/auth';
 // Mock the auth module
 jest.mock('@/lib/auth', () => ({
   requireAuth: jest.fn(),
+  isAdminUser: jest.fn((user: { _id: { toString(): string } }) =>
+    (process.env.ADMIN_USER_IDS ?? '')
+      .split(',')
+      .map((id) => id.trim())
+      .includes(user._id.toString())
+  ),
 }));
 
 const mockRequireAuth = requireAuth as jest.MockedFunction<typeof requireAuth>;

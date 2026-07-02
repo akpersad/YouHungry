@@ -8,6 +8,7 @@ import { RestaurantSearchForm } from '../forms/RestaurantSearchForm';
 import { RestaurantSearchResults } from './RestaurantSearchResults';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
+import { normalizeRestaurantId, restaurantIdsMatch } from '@/lib/utils';
 import { useRestaurantSearch, useAddRestaurantToCollection } from '@/hooks/api';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMemo } from 'react';
@@ -259,9 +260,11 @@ export function RestaurantSearchPage({
   }, [propCollections, collections]);
 
   // Derive which search results are already in collections (pure derivation
-  // via useMemo instead of state synced from an effect)
+  // via useMemo instead of state synced from an effect). Keyed by the
+  // canonical restaurant id so `RestaurantSearchResults` can look up the same
+  // value — `normalizeRestaurantId`/`restaurantIdsMatch` own the legacy/new
+  // id-shape reconciliation (see src/lib/utils.ts).
   const restaurantInCollections = useMemo(() => {
-    // Check each collection for these restaurants
     const inCollections = new Set<string>();
 
     if (restaurants.length === 0 || effectiveCollections.length === 0) {
@@ -269,42 +272,18 @@ export function RestaurantSearchPage({
     }
 
     try {
-      // Get all restaurant IDs from search results (use googlePlaceId if _id not available)
-      const restaurantIds = restaurants
-        .filter((r) => r._id || r.googlePlaceId)
-        .map((r) => (r._id || r.googlePlaceId).toString());
+      for (const restaurant of restaurants) {
+        const key = normalizeRestaurantId(restaurant);
+        if (!key) continue;
 
-      for (const collection of effectiveCollections as Collection[]) {
-        for (const restaurantId of restaurantIds) {
-          if (
-            collection.restaurantIds.some((restaurantData) => {
-              // Handle both old format (string IDs) and new format (objects with _id and googlePlaceId)
-              if (typeof restaurantData === 'string') {
-                return restaurantData === restaurantId;
-              } else if (
-                restaurantData &&
-                typeof restaurantData === 'object' &&
-                'toString' in restaurantData
-              ) {
-                return restaurantData.toString() === restaurantId;
-              } else if (restaurantData && typeof restaurantData === 'object') {
-                // New format: object with _id and/or googlePlaceId
-                const obj = restaurantData as Record<string, unknown>;
-                return (
-                  ('_id' in obj &&
-                    obj._id &&
-                    obj._id.toString() === restaurantId) ||
-                  ('googlePlaceId' in obj &&
-                    obj.googlePlaceId &&
-                    obj.googlePlaceId === restaurantId)
-                );
-              }
-              return false;
-            })
-          ) {
-            inCollections.add(restaurantId);
-          }
-        }
+        const isInAnyCollection = (effectiveCollections as Collection[]).some(
+          (collection) =>
+            collection.restaurantIds.some((entry) =>
+              restaurantIdsMatch(entry, restaurant)
+            )
+        );
+
+        if (isInAnyCollection) inCollections.add(key);
       }
     } catch (error) {
       logger.error('Error checking restaurants in collections:', error);
@@ -380,86 +359,25 @@ export function RestaurantSearchPage({
     restaurant: Restaurant,
     collections: Collection[]
   ) => {
-    // Use googlePlaceId if _id is not available (for search results)
-    const restaurantId = restaurant._id || restaurant.googlePlaceId;
-    if (!restaurantId) return new Set<string>();
+    const inCollections = new Set<string>();
+
+    if (!normalizeRestaurantId(restaurant)) return inCollections;
 
     // Safety check: ensure collections is an array
     if (!Array.isArray(collections)) {
       logger.error('collections is not an array:', collections);
-      return new Set<string>();
+      return inCollections;
     }
 
-    const inCollections = new Set<string>();
-    logger.debug('Checking restaurant:', restaurantId.toString());
-    logger.debug(
-      'Available collections:',
-      collections.map((c) => ({
-        id: c._id.toString(),
-        name: c.name,
-        restaurantIds: c.restaurantIds,
-      }))
-    );
-
     for (const collection of collections) {
-      logger.debug(
-        `Checking collection ${collection.name} with restaurantIds:`,
-        collection.restaurantIds
-      );
-      const hasRestaurant = collection.restaurantIds.some((restaurantData) => {
-        // Handle both old format (string IDs) and new format (objects with _id and googlePlaceId)
-        if (typeof restaurantData === 'string') {
-          const idStr = restaurantData;
-          const restaurantIdStr = restaurantId.toString();
-          logger.debug(
-            `Comparing old format ${idStr} with ${restaurantIdStr}:`,
-            idStr === restaurantIdStr
-          );
-          return idStr === restaurantIdStr;
-        } else if (restaurantData && typeof restaurantData === 'object') {
-          const obj = restaurantData as Record<string, unknown>;
-          // Check if it's the new format with _id and googlePlaceId properties first
-          if ('_id' in obj || 'googlePlaceId' in obj) {
-            // New format: object with _id and/or googlePlaceId
-            const matchesId =
-              '_id' in obj &&
-              obj._id &&
-              String(obj._id) === String(restaurantId);
-            const matchesGooglePlaceId =
-              'googlePlaceId' in obj &&
-              obj.googlePlaceId &&
-              obj.googlePlaceId === restaurantId;
-            logger.debug(
-              `Comparing new format ${JSON.stringify(restaurantData)} with ${restaurantId}:`,
-              `_id match: ${matchesId}, googlePlaceId match: ${matchesGooglePlaceId}`
-            );
-            return matchesId || matchesGooglePlaceId;
-          } else if ('toString' in restaurantData) {
-            // ObjectId format
-            const idStr = restaurantData.toString();
-            const restaurantIdStr = restaurantId.toString();
-            logger.debug(
-              `Comparing ObjectId format ${idStr} with ${restaurantIdStr}:`,
-              idStr === restaurantIdStr
-            );
-            // Also try comparing the string representation
-            return (
-              idStr === restaurantIdStr || idStr === restaurantId.toString()
-            );
-          }
-        }
-        return false;
-      });
-      logger.debug(
-        `Collection ${collection.name} has restaurant:`,
-        hasRestaurant
+      const hasRestaurant = collection.restaurantIds.some((entry) =>
+        restaurantIdsMatch(entry, restaurant)
       );
       if (hasRestaurant) {
         inCollections.add(collection._id.toString());
       }
     }
 
-    logger.debug('Restaurant is in collections:', Array.from(inCollections));
     return inCollections;
   };
 
@@ -623,7 +541,7 @@ export function RestaurantSearchPage({
         filteredRestaurants.length === 0 &&
         allRestaurants.length > 0 && (
           <div className="bg-info/10 border border-info/20 rounded-lg p-4">
-            <p className="text-text">
+            <p className="text-ink">
               No results within {radiusFilter}{' '}
               {radiusFilter === 1 ? 'mile' : 'miles'}.
               {availableRadii.length > 0 &&
@@ -661,7 +579,7 @@ export function RestaurantSearchPage({
                     availableRadii.find((r) => r > radiusFilter)!
                   )
                 }
-                className="mt-2 text-primary hover:underline font-medium"
+                className="mt-2 text-ink hover:underline font-medium"
               >
                 Expand to {availableRadii.find((r) => r > radiusFilter)}{' '}
                 {availableRadii.find((r) => r > radiusFilter) === 1
@@ -675,7 +593,7 @@ export function RestaurantSearchPage({
       {/* Zero Results (no restaurants at all) */}
       {!isLoading && searchFilters && allRestaurants.length === 0 && (
         <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
-          <p className="text-text">0 Results</p>
+          <p className="text-ink">0 Results</p>
         </div>
       )}
 
@@ -704,36 +622,36 @@ export function RestaurantSearchPage({
         {selectedRestaurant && (
           <div className="space-y-4">
             <div className="p-4 bg-surface rounded-lg">
-              <h3 className="font-medium text-text">
+              <h3 className="font-medium text-ink">
                 {selectedRestaurant.name}
               </h3>
-              <p className="text-sm text-text-light">
+              <p className="text-sm text-ink-secondary">
                 {selectedRestaurant.cuisine}
               </p>
-              <p className="text-sm text-text-light">
+              <p className="text-sm text-ink-secondary">
                 {selectedRestaurant.address}
               </p>
             </div>
 
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-text">
+              <label className="block text-sm font-medium text-ink">
                 Select Collection
               </label>
               {!isLoaded ? (
                 <div className="flex items-center justify-center py-4">
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
-                  <span className="ml-2 text-sm text-text-light">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-tomato"></div>
+                  <span className="ml-2 text-sm text-ink-secondary">
                     Loading...
                   </span>
                 </div>
               ) : !user ? (
-                <p className="text-sm text-text-light">
+                <p className="text-sm text-ink-secondary">
                   Please sign in to add restaurants to collections.
                 </p>
               ) : isLoadingCollections ? (
                 <div className="flex items-center justify-center py-4">
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
-                  <span className="ml-2 text-sm text-text-light">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-tomato"></div>
+                  <span className="ml-2 text-sm text-ink-secondary">
                     Loading collections...
                   </span>
                 </div>
@@ -786,7 +704,7 @@ export function RestaurantSearchPage({
                     <select
                       value={selectedCollectionId}
                       onChange={(e) => setSelectedCollectionId(e.target.value)}
-                      className="w-full p-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                      className="w-full p-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-tomato focus:border-tomato"
                     >
                       <option value="">Select a collection...</option>
                       {effectiveCollections
@@ -850,7 +768,7 @@ export function RestaurantSearchPage({
                   </div>
                 )
               ) : (
-                <p className="text-sm text-text-light">
+                <p className="text-sm text-ink-secondary">
                   No collections available. Create a collection first.
                 </p>
               )}
@@ -875,44 +793,46 @@ export function RestaurantSearchPage({
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
-                <span className="font-medium text-text">Cuisine:</span>
-                <p className="text-text-light">{selectedRestaurant.cuisine}</p>
+                <span className="font-medium text-ink">Cuisine:</span>
+                <p className="text-ink-secondary">
+                  {selectedRestaurant.cuisine}
+                </p>
               </div>
               <div>
-                <span className="font-medium text-text">Rating:</span>
-                <p className="text-text-light">
+                <span className="font-medium text-ink">Rating:</span>
+                <p className="text-ink-secondary">
                   {selectedRestaurant.rating > 0
                     ? selectedRestaurant.rating.toFixed(1)
                     : 'No rating'}
                 </p>
               </div>
               <div>
-                <span className="font-medium text-text">Price Range:</span>
-                <p className="text-text-light">
+                <span className="font-medium text-ink">Price Range:</span>
+                <p className="text-ink-secondary">
                   {selectedRestaurant.priceRange || 'Not available'}
                 </p>
               </div>
               <div>
-                <span className="font-medium text-text">Phone:</span>
-                <p className="text-text-light">
+                <span className="font-medium text-ink">Phone:</span>
+                <p className="text-ink-secondary">
                   {selectedRestaurant.phoneNumber || 'Not available'}
                 </p>
               </div>
             </div>
 
             <div>
-              <span className="font-medium text-text">Address:</span>
-              <p className="text-text-light">{selectedRestaurant.address}</p>
+              <span className="font-medium text-ink">Address:</span>
+              <p className="text-ink-secondary">{selectedRestaurant.address}</p>
             </div>
 
             {selectedRestaurant.website && (
               <div>
-                <span className="font-medium text-text">Website:</span>
+                <span className="font-medium text-ink">Website:</span>
                 <a
                   href={selectedRestaurant.website}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-primary hover:text-blue-800 ml-2"
+                  className="text-ink hover:text-blue-800 ml-2"
                 >
                   Visit Website
                 </a>
@@ -921,11 +841,11 @@ export function RestaurantSearchPage({
 
             {selectedRestaurant.hours && (
               <div>
-                <span className="font-medium text-text">Hours:</span>
+                <span className="font-medium text-ink">Hours:</span>
                 <div className="mt-1 space-y-1">
                   {Object.entries(selectedRestaurant.hours).map(
                     ([day, hours]) => (
-                      <p key={day} className="text-sm text-text-light">
+                      <p key={day} className="text-sm text-ink-secondary">
                         {day}: {hours}
                       </p>
                     )

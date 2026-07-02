@@ -127,11 +127,9 @@ describe('CollectionList', () => {
       </TestQueryProvider>
     );
 
+    expect(screen.getByText("Let's find your first spot")).toBeInTheDocument();
     expect(
-      screen.getByText("You don't have any collections yet.")
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText('Create Your First Collection')
+      screen.getByText('Create your first collection')
     ).toBeInTheDocument();
   });
 
@@ -170,10 +168,10 @@ describe('CollectionList', () => {
     );
 
     expect(
-      screen.getByText('Create Your First Collection')
+      screen.getByText('Create your first collection')
     ).toBeInTheDocument();
 
-    fireEvent.click(screen.getByText('Create Your First Collection'));
+    fireEvent.click(screen.getByText('Create your first collection'));
 
     expect(screen.getByText('Create New Collection')).toBeInTheDocument();
   });

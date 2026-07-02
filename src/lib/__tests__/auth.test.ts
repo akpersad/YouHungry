@@ -13,7 +13,7 @@ jest.mock('@/lib/logger', () => ({
   },
 }));
 
-import { auth } from '@clerk/nextjs/server';
+import { auth, currentUser } from '@clerk/nextjs/server';
 import { ObjectId } from 'mongodb';
 import {
   getCurrentUser,
@@ -26,6 +26,7 @@ import { logger } from '@/lib/logger';
 import type { User } from '@/types/database';
 
 const mockAuth = auth as unknown as jest.Mock;
+const mockCurrentUser = currentUser as unknown as jest.Mock;
 const mockGetUserByClerkId = getUserByClerkId as jest.Mock;
 const mockCreateUser = createUser as jest.Mock;
 
@@ -76,8 +77,8 @@ describe('auth', () => {
       expect(mockCreateUser).not.toHaveBeenCalled();
     });
 
-    it('auto-creates a placeholder DB user when none exists', async () => {
-      const createdUser = { ...mockUser, email: 'user@example.com' };
+    it('auto-creates the DB user from the real Clerk profile when none exists', async () => {
+      const createdUser = { ...mockUser, email: 'test@example.com' };
       mockGetUserByClerkId.mockResolvedValue(null);
       mockCreateUser.mockResolvedValue(createdUser);
 
@@ -88,8 +89,8 @@ describe('auth', () => {
       expect(mockCreateUser).toHaveBeenCalledWith(
         expect.objectContaining({
           clerkId: 'clerk_user_123',
-          email: 'user@example.com',
-          name: 'User',
+          email: 'test@example.com',
+          name: 'Test User',
           smsOptIn: false,
           preferences: expect.objectContaining({
             notificationSettings: expect.objectContaining({
@@ -97,6 +98,20 @@ describe('auth', () => {
             }),
           }),
         })
+      );
+    });
+
+    it('defers creation to the webhook when Clerk exposes no email', async () => {
+      mockGetUserByClerkId.mockResolvedValue(null);
+      mockCurrentUser.mockReturnValueOnce(null);
+
+      const result = await getCurrentUser();
+
+      expect(result).toBeNull();
+      expect(mockCreateUser).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('deferring user creation to the webhook'),
+        { clerkId: 'clerk_user_123' }
       );
     });
 
@@ -173,6 +188,12 @@ describe('auth', () => {
 
     it('returns false when ADMIN_USER_IDS is unset', () => {
       expect(isAdminUser(mockUser)).toBe(false);
+    });
+
+    it('accepts the Clerk id form as well as the Mongo _id form', () => {
+      process.env.ADMIN_USER_IDS = mockUser.clerkId;
+
+      expect(isAdminUser(mockUser)).toBe(true);
     });
   });
 });

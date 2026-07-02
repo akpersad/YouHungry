@@ -45,12 +45,12 @@ export const UserAvatar = memo(function UserAvatar({
   // Generate a consistent background color based on name
   const getBackgroundColor = (name: string) => {
     const colors = [
-      'bg-accent',
+      'bg-tomato',
       'bg-success',
       'bg-info',
       'bg-warning',
       'bg-destructive',
-      'bg-primary',
+      'bg-bg',
     ];
 
     if (!name || typeof name !== 'string') {

@@ -30,7 +30,7 @@ describe('UserProfile', () => {
     );
 
     expect(appearance.elements?.userButtonAvatarBox).toBe('w-10 h-10');
-    expect(appearance.variables?.colorPrimary).toBe('var(--accent-primary)');
+    expect(appearance.variables?.colorPrimary).toBe('var(--tomato)');
   });
 
   it('renders within a container with proper styling', () => {

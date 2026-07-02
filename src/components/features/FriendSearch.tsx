@@ -58,8 +58,8 @@ export function FriendSearch({ userId, onClose }: FriendSearchProps) {
   return (
     <div className="space-y-4">
       <div>
-        <h2 className="text-xl font-semibold text-text mb-2">Add Friends</h2>
-        <p className="text-sm text-text-light mb-4">
+        <h2 className="text-xl font-semibold text-ink mb-2">Add Friends</h2>
+        <p className="text-sm text-ink-secondary mb-4">
           Search for friends by email, name, or username to send them a friend
           request.
         </p>
@@ -76,8 +76,8 @@ export function FriendSearch({ userId, onClose }: FriendSearchProps) {
 
         {isLoading && (
           <div className="text-center py-4">
-            <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
-            <p className="text-sm text-text-light mt-2">Searching...</p>
+            <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-tomato"></div>
+            <p className="text-sm text-ink-secondary mt-2">Searching...</p>
           </div>
         )}
 
@@ -99,7 +99,7 @@ export function FriendSearch({ userId, onClose }: FriendSearchProps) {
 
         {searchResults && searchResults.length > 0 && (
           <div className="space-y-2">
-            <h3 className="text-sm font-medium text-text">Search Results</h3>
+            <h3 className="text-sm font-medium text-ink">Search Results</h3>
             {searchResults.map((user) => (
               <Card key={user._id} className="p-4">
                 <div className="flex items-center space-x-3">
@@ -111,19 +111,19 @@ export function FriendSearch({ userId, onClose }: FriendSearchProps) {
                     />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-text truncate">
+                    <p className="text-sm font-medium text-ink truncate">
                       {user.name}
                     </p>
-                    <p className="text-sm text-text-light truncate">
+                    <p className="text-sm text-ink-secondary truncate">
                       {user.email}
                     </p>
                     {user.username && (
-                      <p className="text-xs text-text-light truncate">
+                      <p className="text-xs text-ink-secondary truncate">
                         @{user.username}
                       </p>
                     )}
                     {user.city && (
-                      <p className="text-xs text-text-light truncate">
+                      <p className="text-xs text-ink-secondary truncate">
                         {user.city}
                       </p>
                     )}
@@ -134,7 +134,7 @@ export function FriendSearch({ userId, onClose }: FriendSearchProps) {
                         Already Friends
                       </span>
                     ) : user.relationshipStatus === 'pending_sent' ? (
-                      <span className="text-sm text-primary font-medium">
+                      <span className="text-sm text-ink font-medium">
                         Request Sent
                       </span>
                     ) : user.relationshipStatus === 'pending_received' ? (
@@ -157,7 +157,7 @@ export function FriendSearch({ userId, onClose }: FriendSearchProps) {
                         size="sm"
                         onClick={() => handleSendRequest(user.clerkId)}
                         disabled={sendFriendRequestMutation.isPending}
-                        className="bg-accent hover:bg-accent text-white"
+                        className="bg-tomato hover:bg-tomato text-white"
                       >
                         {sendFriendRequestMutation.isPending
                           ? 'Sending...'
@@ -173,7 +173,7 @@ export function FriendSearch({ userId, onClose }: FriendSearchProps) {
 
         {searchResults && searchResults.length === 0 && searchQuery && (
           <div className="text-center py-4">
-            <p className="text-sm text-text-light">
+            <p className="text-sm text-ink-secondary">
               No users found matching &quot;{searchQuery}&quot;
             </p>
           </div>
@@ -181,7 +181,7 @@ export function FriendSearch({ userId, onClose }: FriendSearchProps) {
 
         {!searchQuery && (
           <div className="text-center py-8">
-            <p className="text-sm text-text-light">
+            <p className="text-sm text-ink-secondary">
               Enter an email or name to search for friends
             </p>
           </div>
@@ -193,7 +193,7 @@ export function FriendSearch({ userId, onClose }: FriendSearchProps) {
           <Button
             variant="outline"
             onClick={onClose}
-            className="text-text-light hover:text-text"
+            className="text-ink-secondary hover:text-ink"
           >
             Close
           </Button>

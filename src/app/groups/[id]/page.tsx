@@ -161,10 +161,10 @@ export default function GroupPage({ params }: GroupPageProps) {
       <ProtectedRoute>
         <div className="max-w-4xl mx-auto">
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-text mb-4">
+            <h1 className="text-2xl font-bold text-ink mb-4">
               Group Not Found
             </h1>
-            <p className="text-text-light mb-4">
+            <p className="text-ink-secondary mb-4">
               The group you&apos;re looking for doesn&apos;t exist or you
               don&apos;t have access to it.
             </p>

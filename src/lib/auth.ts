@@ -1,5 +1,5 @@
 import { logger } from '@/lib/logger';
-import { auth } from '@clerk/nextjs/server';
+import { auth, currentUser } from '@clerk/nextjs/server';
 import { getUserByClerkId, createUser } from './users';
 import { User } from '@/types/database';
 
@@ -20,12 +20,32 @@ export async function getCurrentUser(): Promise<User | null> {
     let user = await getUserByClerkId(userId);
 
     if (!user) {
-      // User doesn't exist in our database, create them
-      // For development, we'll create a basic user record
+      // The Clerk webhook normally creates the DB user; this fallback covers
+      // the gap before it fires (or a missed delivery). Pull the real profile
+      // from Clerk rather than persisting placeholder values.
+      const clerkUser = await currentUser();
+      const email =
+        clerkUser?.primaryEmailAddress?.emailAddress ||
+        clerkUser?.emailAddresses?.[0]?.emailAddress;
+      const name =
+        [clerkUser?.firstName, clerkUser?.lastName].filter(Boolean).join(' ') ||
+        clerkUser?.username ||
+        undefined;
+
+      if (!email) {
+        // Never persist a fabricated email — without one we can't create a
+        // coherent user record; let the webhook (which has it) do it.
+        logger.warn(
+          'getCurrentUser: no email available from Clerk; deferring user creation to the webhook',
+          { clerkId: userId }
+        );
+        return null;
+      }
+
       user = await createUser({
         clerkId: userId,
-        email: 'user@example.com', // Placeholder for development
-        name: 'User', // Placeholder for development
+        email,
+        name: name || email.split('@')[0],
         smsOptIn: false,
         preferences: {
           locationSettings: {
@@ -67,16 +87,20 @@ export async function requireAuth(): Promise<User> {
 }
 
 export function isAdminUser(user: User): boolean {
-  return getAdminUserIds().includes(user._id.toString());
+  // ADMIN_USER_IDS may hold either form of a user's id — the Mongo _id or the
+  // Clerk id. Accepting both removes the silent id-form footgun (a Clerk id
+  // in the env var used to never match, locking the admin out).
+  const adminUserIds = getAdminUserIds();
+  return (
+    adminUserIds.includes(user._id.toString()) ||
+    adminUserIds.includes(user.clerkId)
+  );
 }
 
 export async function requireAdminAuth(): Promise<User> {
   const user = await requireAuth();
 
-  const userIdString = user._id.toString();
-  const adminUserIds = getAdminUserIds();
-
-  if (!adminUserIds.includes(userIdString)) {
+  if (!isAdminUser(user)) {
     throw new Error('Admin access required');
   }
 

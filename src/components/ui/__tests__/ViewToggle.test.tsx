@@ -22,8 +22,8 @@ describe('ViewToggle', () => {
     const listButton = screen.getByLabelText('Switch to list view');
     const gridButton = screen.getByLabelText('Switch to grid view');
 
-    expect(listButton).toHaveClass('bg-accent');
-    expect(gridButton).toHaveClass('text-secondary');
+    expect(listButton).toHaveClass('bg-tomato');
+    expect(gridButton).toHaveClass('text-ink-secondary');
   });
 
   it('shows grid button as active when currentView is grid', () => {
@@ -32,8 +32,8 @@ describe('ViewToggle', () => {
     const listButton = screen.getByLabelText('Switch to list view');
     const gridButton = screen.getByLabelText('Switch to grid view');
 
-    expect(gridButton).toHaveClass('bg-accent');
-    expect(listButton).toHaveClass('text-secondary');
+    expect(gridButton).toHaveClass('bg-tomato');
+    expect(listButton).toHaveClass('text-ink-secondary');
   });
 
   it('calls onToggle with "list" when list button is clicked', () => {

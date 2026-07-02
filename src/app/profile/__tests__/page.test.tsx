@@ -192,7 +192,7 @@ describe('ProfilePage', () => {
 
     renderWithProviders(<ProfilePage />);
 
-    expect(screen.getByText('Loading profile...')).toBeInTheDocument();
+    expect(screen.getByText('Loading profile settings')).toBeInTheDocument();
   });
 
   it('should show error state when profile fails to load', () => {

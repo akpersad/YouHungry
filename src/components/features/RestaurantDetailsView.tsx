@@ -70,10 +70,10 @@ export function RestaurantDetailsView({
             />
           </div>
           <div className="flex-1">
-            <h2 className="text-2xl font-bold text-text dark:text-white mb-2">
+            <h2 className="text-2xl font-bold text-ink dark:text-white mb-2">
               {restaurant.name}
             </h2>
-            <div className="flex items-center gap-4 text-sm text-text-light dark:text-text-light mb-2">
+            <div className="flex items-center gap-4 text-sm text-ink-secondary mb-2">
               <span className="flex items-center gap-1">
                 <span className="text-warning">⭐</span>
                 {restaurant.rating}
@@ -86,24 +86,20 @@ export function RestaurantDetailsView({
                 </span>
               )}
             </div>
-            <p className="text-text dark:text-text-light">
-              {restaurant.address}
-            </p>
+            <p className="text-ink">{restaurant.address}</p>
           </div>
         </div>
 
         {/* Custom Fields */}
         {(restaurant.priceRange || restaurant.timeToPickUp) && (
-          <div className="bg-surface dark:bg-background rounded-lg p-4">
-            <h3 className="font-semibold text-text dark:text-white mb-2">
+          <div className="bg-surface rounded-lg p-4">
+            <h3 className="font-semibold text-ink dark:text-white mb-2">
               Custom Information
             </h3>
             <div className="space-y-2">
               {restaurant.priceRange && (
                 <div className="flex justify-between">
-                  <span className="text-text-light dark:text-text-light">
-                    Price Range:
-                  </span>
+                  <span className="text-ink-secondary">Price Range:</span>
                   <span className="font-medium">
                     {restaurant.priceRange} (
                     {getPriceRangeText(restaurant.priceRange)})
@@ -112,9 +108,7 @@ export function RestaurantDetailsView({
               )}
               {restaurant.timeToPickUp && (
                 <div className="flex justify-between">
-                  <span className="text-text-light dark:text-text-light">
-                    Time to Pick Up:
-                  </span>
+                  <span className="text-ink-secondary">Time to Pick Up:</span>
                   <span className="font-medium">
                     {restaurant.timeToPickUp} minutes
                   </span>
@@ -127,18 +121,16 @@ export function RestaurantDetailsView({
         {/* Contact Information */}
         {(restaurant.phoneNumber || restaurant.website) && (
           <div>
-            <h3 className="font-semibold text-text dark:text-white mb-2">
+            <h3 className="font-semibold text-ink dark:text-white mb-2">
               Contact Information
             </h3>
             <div className="space-y-2">
               {restaurant.phoneNumber && (
                 <div className="flex items-center gap-2">
-                  <span className="text-text-light dark:text-text-light">
-                    Phone:
-                  </span>
+                  <span className="text-ink-secondary">Phone:</span>
                   <a
                     href={`tel:${restaurant.phoneNumber}`}
-                    className="text-primary dark:text-primary hover:underline"
+                    className="text-ink hover:underline"
                   >
                     {restaurant.phoneNumber}
                   </a>
@@ -146,14 +138,12 @@ export function RestaurantDetailsView({
               )}
               {restaurant.website && (
                 <div className="flex items-center gap-2">
-                  <span className="text-text-light dark:text-text-light">
-                    Website:
-                  </span>
+                  <span className="text-ink-secondary">Website:</span>
                   <a
                     href={restaurant.website}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-primary dark:text-primary hover:underline"
+                    className="text-ink hover:underline"
                   >
                     Visit Website
                   </a>
@@ -166,7 +156,7 @@ export function RestaurantDetailsView({
         {/* Hours */}
         {restaurant.hours && (
           <div>
-            <h3 className="font-semibold text-text dark:text-white mb-2">
+            <h3 className="font-semibold text-ink dark:text-white mb-2">
               Hours
             </h3>
             <div className="space-y-1 text-sm">

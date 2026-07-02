@@ -3,6 +3,7 @@ import {
   sendFriendRequest,
   acceptFriendRequest,
   declineFriendRequest,
+  cancelFriendRequest,
   removeFriend,
   getFriends,
   getFriendRequests,
@@ -248,6 +249,40 @@ describe('declineFriendRequest', () => {
       { returnDocument: 'after' }
     );
     expect(result).toEqual(mockFriendship);
+  });
+});
+
+describe('cancelFriendRequest', () => {
+  it('should delete a pending request the user sent', async () => {
+    mockCollection.findOne.mockResolvedValueOnce({ _id: 'user1' }); // User exists
+    mockCollection.deleteOne.mockResolvedValue({ deletedCount: 1 });
+
+    const result = await cancelFriendRequest('friendship1', 'user1');
+
+    expect(mockCollection.findOne).toHaveBeenCalledWith({ clerkId: 'user1' });
+    expect(mockCollection.deleteOne).toHaveBeenCalledWith({
+      _id: expect.any(Object),
+      requesterId: 'user1',
+      status: 'pending',
+    });
+    expect(result).toBe(true);
+  });
+
+  it('should throw if no matching pending request exists', async () => {
+    mockCollection.findOne.mockResolvedValueOnce({ _id: 'user1' }); // User exists
+    mockCollection.deleteOne.mockResolvedValue({ deletedCount: 0 });
+
+    await expect(cancelFriendRequest('friendship1', 'user1')).rejects.toThrow(
+      'Friend request not found or already processed'
+    );
+  });
+
+  it('should throw if the user does not exist', async () => {
+    mockCollection.findOne.mockResolvedValueOnce(null);
+
+    await expect(cancelFriendRequest('friendship1', 'user1')).rejects.toThrow(
+      'User not found'
+    );
   });
 });
 

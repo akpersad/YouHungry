@@ -41,8 +41,8 @@ describe('AdminNav', () => {
 
     const costsButton = screen.getByText('Cost Monitoring');
     expect(costsButton.closest('button')).toHaveClass(
-      'border-primary',
-      'text-primary'
+      'border-tomato',
+      'text-ink'
     );
   });
 
@@ -52,7 +52,7 @@ describe('AdminNav', () => {
     const costsButton = screen.getByText('Cost Monitoring');
     expect(costsButton.closest('button')).toHaveClass(
       'border-transparent',
-      'text-text-light'
+      'text-ink-secondary'
     );
   });
 
@@ -118,7 +118,7 @@ describe('AdminNav', () => {
 
     const costsButton = screen.getByText('Cost Monitoring');
     expect(costsButton.closest('button')).toHaveClass(
-      'hover:text-text',
+      'hover:text-ink',
       'hover:border-border'
     );
   });
@@ -164,8 +164,8 @@ describe('AdminNav', () => {
     // Initially analytics should be active
     let analyticsButton = screen.getByText('Analytics');
     expect(analyticsButton.closest('button')).toHaveClass(
-      'border-primary',
-      'text-primary'
+      'border-tomato',
+      'text-ink'
     );
 
     // Change active tab to costs
@@ -173,15 +173,15 @@ describe('AdminNav', () => {
 
     const costsButton = screen.getByText('Cost Monitoring');
     expect(costsButton.closest('button')).toHaveClass(
-      'border-primary',
-      'text-primary'
+      'border-tomato',
+      'text-ink'
     );
 
     // Analytics should no longer be active
     analyticsButton = screen.getByText('Analytics');
     expect(analyticsButton.closest('button')).toHaveClass(
       'border-transparent',
-      'text-text-light'
+      'text-ink-secondary'
     );
   });
 });

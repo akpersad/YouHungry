@@ -5,12 +5,14 @@ import { FriendRequests } from '../FriendRequests';
 import {
   useFriendRequests,
   useUpdateFriendRequest,
+  useCancelFriendRequest,
 } from '@/hooks/api/useFriends';
 
 // Mock the hooks
 jest.mock('@/hooks/api/useFriends', () => ({
   useFriendRequests: jest.fn(),
   useUpdateFriendRequest: jest.fn(),
+  useCancelFriendRequest: jest.fn(),
 }));
 
 const mockUseFriendRequests = useFriendRequests as jest.MockedFunction<
@@ -18,6 +20,8 @@ const mockUseFriendRequests = useFriendRequests as jest.MockedFunction<
 >;
 const mockUseUpdateFriendRequest =
   useUpdateFriendRequest as jest.MockedFunction<typeof useUpdateFriendRequest>;
+const mockUseCancelFriendRequest =
+  useCancelFriendRequest as jest.MockedFunction<typeof useCancelFriendRequest>;
 
 const createTestQueryClient = () =>
   new QueryClient({
@@ -40,6 +44,7 @@ const TestWrapper = ({ children }: { children: React.ReactNode }) => {
 
 describe('FriendRequests', () => {
   const mockUpdateFriendRequest = jest.fn();
+  const mockCancelFriendRequest = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -55,6 +60,14 @@ describe('FriendRequests', () => {
 
     mockUseUpdateFriendRequest.mockReturnValue({
       mutateAsync: mockUpdateFriendRequest,
+      isPending: false,
+      isError: false,
+      isSuccess: false,
+      error: null,
+    } as any);
+
+    mockUseCancelFriendRequest.mockReturnValue({
+      mutateAsync: mockCancelFriendRequest,
       isPending: false,
       isError: false,
       isSuccess: false,
@@ -229,6 +242,61 @@ describe('FriendRequests', () => {
     expect(screen.getByText('John Doe')).toBeInTheDocument();
     expect(screen.getByText('john@example.com')).toBeInTheDocument();
     expect(screen.getByText('Pending')).toBeInTheDocument();
+    expect(screen.getByText('Cancel')).toBeInTheDocument();
+  });
+
+  it('cancels a sent request when Cancel is clicked', async () => {
+    const mockRequests = {
+      sent: [
+        {
+          _id: 'request1',
+          requester: {
+            _id: 'user1',
+            clerkId: 'clerk1',
+            email: 'jane@example.com',
+            name: 'Jane Smith',
+            profilePicture: null,
+          },
+          addressee: {
+            _id: 'user2',
+            clerkId: 'clerk2',
+            email: 'john@example.com',
+            name: 'John Doe',
+            profilePicture: null,
+          },
+          status: 'pending',
+          createdAt: new Date('2023-01-01'),
+          updatedAt: new Date('2023-01-01'),
+        },
+      ],
+      received: [],
+    };
+
+    mockUseFriendRequests.mockReturnValue({
+      data: mockRequests,
+      isLoading: false,
+      error: null,
+      isError: false,
+      isSuccess: true,
+      refetch: jest.fn(),
+    } as any);
+
+    mockCancelFriendRequest.mockResolvedValue(undefined);
+
+    render(
+      <TestWrapper>
+        <FriendRequests userId="user1" />
+      </TestWrapper>
+    );
+
+    fireEvent.click(screen.getByText('Cancel'));
+
+    await waitFor(() => {
+      expect(mockCancelFriendRequest).toHaveBeenCalledWith({
+        friendshipId: 'request1',
+        userId: 'user1',
+      });
+    });
   });
 
   it('handles accepting friend request', async () => {

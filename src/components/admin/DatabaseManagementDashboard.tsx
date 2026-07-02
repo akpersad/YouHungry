@@ -115,17 +115,14 @@ export function DatabaseManagementDashboard() {
       case 'error':
         return <XCircle className="h-4 w-4 text-destructive" />;
       default:
-        return <CheckCircle className="h-4 w-4 text-primary" />;
+        return <CheckCircle className="h-4 w-4 text-ink" />;
     }
   };
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <RefreshCw
-          className="h-8 w-8 animate-spin text-primary"
-          role="status"
-        />
+        <RefreshCw className="h-8 w-8 animate-spin text-ink" role="status" />
       </div>
     );
   }
@@ -152,7 +149,7 @@ export function DatabaseManagementDashboard() {
               {getConnectionStatusIcon(stats.connection.status)}
               <div className="ml-3">
                 <h3 className="text-lg font-semibold">Database Connection</h3>
-                <p className="text-text-light">
+                <p className="text-ink-secondary">
                   Status:{' '}
                   <span className="capitalize font-medium">
                     {stats.connection.status}
@@ -161,7 +158,7 @@ export function DatabaseManagementDashboard() {
               </div>
             </div>
             <div className="text-right">
-              <p className="text-sm text-text-light">Response Time</p>
+              <p className="text-sm text-ink-secondary">Response Time</p>
               <p className="text-lg font-semibold">
                 {stats.connection.latency}ms
               </p>
@@ -175,14 +172,14 @@ export function DatabaseManagementDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <Card className="p-6">
             <div className="flex items-center">
-              <div className="p-2 bg-primary/10 rounded-lg">
-                <Database className="h-6 w-6 text-primary" />
+              <div className="p-2 bg-tomato/10 rounded-lg">
+                <Database className="h-6 w-6 text-ink" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-text-light">
+                <p className="text-sm font-medium text-ink-secondary">
                   Collections
                 </p>
-                <p className="text-2xl font-bold text-text">
+                <p className="text-2xl font-bold text-ink">
                   {stats.overview.totalCollections}
                 </p>
               </div>
@@ -195,10 +192,10 @@ export function DatabaseManagementDashboard() {
                 <BarChart3 className="h-6 w-6 text-success" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-text-light">
+                <p className="text-sm font-medium text-ink-secondary">
                   Total Documents
                 </p>
-                <p className="text-2xl font-bold text-text">
+                <p className="text-2xl font-bold text-ink">
                   {stats.overview.totalDocuments.toLocaleString()}
                 </p>
               </div>
@@ -211,10 +208,10 @@ export function DatabaseManagementDashboard() {
                 <HardDrive className="h-6 w-6 text-purple-600" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-text-light">
+                <p className="text-sm font-medium text-ink-secondary">
                   Storage Size
                 </p>
-                <p className="text-2xl font-bold text-text">
+                <p className="text-2xl font-bold text-ink">
                   {formatBytes(stats.overview.totalStorageSize)}
                 </p>
               </div>
@@ -227,10 +224,10 @@ export function DatabaseManagementDashboard() {
                 <Activity className="h-6 w-6 text-warning" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-text-light">
+                <p className="text-sm font-medium text-ink-secondary">
                   Index Size
                 </p>
-                <p className="text-2xl font-bold text-text">
+                <p className="text-2xl font-bold text-ink">
                   {formatBytes(stats.overview.totalIndexSize)}
                 </p>
               </div>
@@ -246,9 +243,9 @@ export function DatabaseManagementDashboard() {
           <div className="overflow-x-auto">
             <table
               className="min-w-full divide-y"
-              style={{ borderColor: 'var(--bg-quaternary)' }}
+              style={{ borderColor: 'var(--border)' }}
             >
-              <thead style={{ background: 'var(--bg-tertiary)' }}>
+              <thead style={{ background: 'var(--surface-sunken)' }}>
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
                     Collection
@@ -273,19 +270,20 @@ export function DatabaseManagementDashboard() {
               <tbody
                 className="divide-y"
                 style={{
-                  background: 'var(--bg-secondary)',
-                  borderColor: 'var(--bg-quaternary)',
+                  background: 'var(--surface)',
+                  borderColor: 'var(--border)',
                 }}
               >
                 {stats.collections.map((collection) => (
                   <tr
                     key={collection.name}
-                    style={{ background: 'var(--bg-secondary)' }}
+                    style={{ background: 'var(--surface)' }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.background = 'var(--bg-tertiary)';
+                      e.currentTarget.style.background =
+                        'var(--surface-sunken)';
                     }}
                     onMouseLeave={(e) => {
-                      e.currentTarget.style.background = 'var(--bg-secondary)';
+                      e.currentTarget.style.background = 'var(--surface)';
                     }}
                   >
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -339,7 +337,7 @@ export function DatabaseManagementDashboard() {
             <h3 className="text-lg font-semibold mb-4">Performance Metrics</h3>
             <div className="space-y-4">
               <div className="flex justify-between items-center">
-                <span className="text-sm text-text-light">
+                <span className="text-sm text-ink-secondary">
                   Average Response Time
                 </span>
                 <span className="font-semibold">
@@ -347,13 +345,15 @@ export function DatabaseManagementDashboard() {
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-text-light">Slow Queries</span>
+                <span className="text-sm text-ink-secondary">Slow Queries</span>
                 <span className="font-semibold">
                   {stats.performance.slowQueries}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-text-light">Total Queries</span>
+                <span className="text-sm text-ink-secondary">
+                  Total Queries
+                </span>
                 <span className="font-semibold">
                   {stats.performance.totalQueries.toLocaleString()}
                 </span>
@@ -367,37 +367,41 @@ export function DatabaseManagementDashboard() {
             </h3>
             <div className="space-y-4">
               <div className="flex justify-between items-center">
-                <span className="text-sm text-text-light">New Users</span>
+                <span className="text-sm text-ink-secondary">New Users</span>
                 <span className="font-semibold">
                   {stats.performance.recentActivity.newUsers}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-text-light">New Collections</span>
+                <span className="text-sm text-ink-secondary">
+                  New Collections
+                </span>
                 <span className="font-semibold">
                   {stats.performance.recentActivity.newCollections}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-text-light">New Groups</span>
+                <span className="text-sm text-ink-secondary">New Groups</span>
                 <span className="font-semibold">
                   {stats.performance.recentActivity.newGroups}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-text-light">New Decisions</span>
+                <span className="text-sm text-ink-secondary">
+                  New Decisions
+                </span>
                 <span className="font-semibold">
                   {stats.performance.recentActivity.newDecisions}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-text-light">New Errors</span>
+                <span className="text-sm text-ink-secondary">New Errors</span>
                 <span className="font-semibold">
                   {stats.performance.recentActivity.newErrors}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-text-light">
+                <span className="text-sm text-ink-secondary">
                   New Error Groups
                 </span>
                 <span className="font-semibold">

@@ -15,29 +15,29 @@ export function MobileLayout({ children, className }: MobileLayoutProps) {
     useMobileNavigation();
 
   return (
-    <div className={cn('flex flex-col flex-1 bg-primary', className)}>
+    <div className={cn('flex flex-col flex-1 bg-bg', className)}>
       {/* Mobile Header - hidden since we use bottom navigation */}
-      {/* <div className="md:hidden bg-secondary border-b border-quaternary px-4 py-3">
+      {/* <div className="md:hidden bg-surface border-b border-border px-4 py-3">
         <div className="flex items-center justify-between">
-          <h1 className="text-lg font-bold text-accent">Fork In The Road</h1>
+          <h1 className="text-lg font-bold text-tomato">Fork In The Road</h1>
           {isLoaded && (
             <div className="flex items-center gap-2">
               {isSignedIn ? (
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-accent rounded-full flex items-center justify-center">
-                    <span className="text-inverse text-sm font-medium">
+                  <div className="w-8 h-8 bg-tomato rounded-full flex items-center justify-center">
+                    <span className="text-ink-inverse text-sm font-medium">
                       {user?.firstName?.charAt(0) ||
                         user?.emailAddresses[0]?.emailAddress?.charAt(0) ||
                         'U'}
                     </span>
                   </div>
-                  <span className="text-sm text-primary hidden sm:block">
+                  <span className="text-sm text-ink hidden sm:block">
                     {user?.firstName || 'User'}
                   </span>
                 </div>
               ) : (
-                <div className="w-8 h-8 bg-quaternary rounded-full flex items-center justify-center">
-                  <span className="text-secondary text-sm">?</span>
+                <div className="w-8 h-8 bg-border rounded-full flex items-center justify-center">
+                  <span className="text-ink-secondary text-sm">?</span>
                 </div>
               )}
             </div>
@@ -51,9 +51,9 @@ export function MobileLayout({ children, className }: MobileLayoutProps) {
       </main>
 
       {/* Desktop Footer */}
-      <footer className="hidden md:block border-t border-quaternary bg-primary mt-auto">
+      <footer className="hidden md:block border-t border-border bg-bg mt-auto">
         <div className="max-w-7xl mx-auto px-6 py-6">
-          <div className="text-center text-sm text-tertiary">
+          <div className="text-center text-sm text-ink-muted">
             <p>
               © {new Date().getFullYear()} Fork In The Road - Making food
               decisions easier

@@ -147,7 +147,7 @@ export function CreateGroupForm({
         <div>
           <label
             htmlFor="group-name"
-            className="block text-sm font-medium text-primary mb-1"
+            className="block text-sm font-medium text-ink mb-1"
           >
             Group Name *
           </label>
@@ -167,7 +167,7 @@ export function CreateGroupForm({
         <div>
           <label
             htmlFor="group-description"
-            className="block text-sm font-medium text-primary mb-1"
+            className="block text-sm font-medium text-ink mb-1"
           >
             Description (Optional)
           </label>
@@ -178,11 +178,11 @@ export function CreateGroupForm({
             onChange={(e) => handleInputChange('description', e.target.value)}
             placeholder="Describe your group..."
             rows={3}
-            className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary ${
+            className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-tomato focus:border-tomato ${
               errors.description
                 ? 'border-destructive focus:ring-destructive focus:border-destructive'
-                : 'border-quinary'
-            } ${isSubmitting ? 'bg-secondary cursor-not-allowed' : ''}`}
+                : 'border-border-strong'
+            } ${isSubmitting ? 'bg-surface cursor-not-allowed' : ''}`}
             disabled={isSubmitting || isLoading}
           />
           {errors.description && (
@@ -190,17 +190,17 @@ export function CreateGroupForm({
               {errors.description}
             </p>
           )}
-          <p className="mt-1 text-sm text-tertiary">
+          <p className="mt-1 text-sm text-ink-muted">
             {formData.description.length}/500 characters
           </p>
         </div>
 
         {/* Member Invitation Section */}
         <div>
-          <label className="block text-sm font-medium text-primary mb-1">
+          <label className="block text-sm font-medium text-ink mb-1">
             Invite Members (Optional)
           </label>
-          <p className="text-sm text-tertiary mb-3">
+          <p className="text-sm text-ink-muted mb-3">
             Add email addresses of people you want to invite to this group
           </p>
 
@@ -233,16 +233,14 @@ export function CreateGroupForm({
 
           {memberEmails.length > 0 && (
             <div className="space-y-2">
-              <p className="text-sm font-medium text-primary">
-                Invited Members:
-              </p>
+              <p className="text-sm font-medium text-ink">Invited Members:</p>
               <div className="space-y-1">
                 {memberEmails.map((email) => (
                   <div
                     key={email}
-                    className="flex items-center justify-between bg-secondary px-3 py-2 rounded-md"
+                    className="flex items-center justify-between bg-surface px-3 py-2 rounded-md"
                   >
-                    <span className="text-sm text-primary">{email}</span>
+                    <span className="text-sm text-ink">{email}</span>
                     <button
                       type="button"
                       onClick={() => handleRemoveEmail(email)}

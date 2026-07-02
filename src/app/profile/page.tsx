@@ -7,6 +7,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { Skeleton, SkeletonGroup } from '@/components/ui/Skeleton';
 import { Label } from '@/components/ui/Label';
 import { Switch } from '@/components/ui/Switch';
 import { UserAvatar } from '@/components/ui/UserAvatar';
@@ -25,6 +26,39 @@ import {
   Check,
   AlertCircle,
 } from 'lucide-react';
+
+/**
+ * Loading placeholder that mirrors the settings-card layout so the page
+ * reserves its space (no CLS) and reads as "loading these settings" once
+ * (X1) rather than a bare full-screen spinner.
+ */
+function ProfileSkeleton() {
+  return (
+    <div className="min-h-screen bg-bg py-8">
+      <div className="max-w-4xl mx-auto lg:px-8">
+        <div className="mb-8 space-y-2">
+          <Skeleton className="h-8 w-56" />
+          <Skeleton className="h-4 w-80 max-w-full" />
+        </div>
+        <SkeletonGroup label="Loading profile settings" className="space-y-6">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Card key={i}>
+              <CardHeader>
+                <Skeleton className="h-5 w-40" />
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-11 w-full rounded-xl" />
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-11 w-full rounded-xl" />
+              </CardContent>
+            </Card>
+          ))}
+        </SkeletonGroup>
+      </div>
+    </div>
+  );
+}
 
 function ProfilePageContent() {
   const { user: clerkUser, isLoaded } = useUser();
@@ -507,24 +541,17 @@ function ProfilePageContent() {
   };
 
   if (!isLoaded || isLoading) {
-    return (
-      <div className="min-h-screen bg-primary flex items-center justify-center">
-        <div className="flex items-center space-x-2">
-          <Loader2 className="h-6 w-6 animate-spin" />
-          <span>Loading profile...</span>
-        </div>
-      </div>
-    );
+    return <ProfileSkeleton />;
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-primary flex items-center justify-center">
+      <div className="min-h-screen bg-bg flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-xl font-semibold text-primary mb-2">
+          <h2 className="text-xl font-semibold text-ink mb-2">
             Error Loading Profile
           </h2>
-          <p className="text-secondary mb-4">
+          <p className="text-ink-secondary mb-4">
             There was an error loading your profile.
           </p>
           <Button onClick={() => window.location.reload()}>Try Again</Button>
@@ -535,18 +562,18 @@ function ProfilePageContent() {
 
   if (!clerkUser) {
     return (
-      <div className="min-h-screen bg-primary flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <div className="min-h-screen bg-bg flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-tomato"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-primary py-8">
+    <div className="min-h-screen bg-bg py-8">
       <div className="max-w-4xl mx-auto lg:px-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-primary">Profile Settings</h1>
-          <p className="mt-2 text-secondary">
+          <h1 className="text-3xl font-bold text-ink">Profile Settings</h1>
+          <p className="mt-2 text-ink-secondary">
             Manage your account settings and preferences.
           </p>
         </div>
@@ -570,7 +597,7 @@ function ProfilePageContent() {
                   size="lg"
                 />
                 <div className="flex-1">
-                  <p className="text-sm text-tertiary">
+                  <p className="text-sm text-ink-muted">
                     Profile picture is managed through your Clerk account.
                   </p>
                 </div>
@@ -588,14 +615,14 @@ function ProfilePageContent() {
                 <div>
                   <Label htmlFor="name">Full Name</Label>
                   <Input id="name" value={formData.name} disabled />
-                  <p className="text-sm text-tertiary mt-1">
+                  <p className="text-sm text-ink-muted mt-1">
                     Name is managed through your Clerk account.
                   </p>
                 </div>
                 <div>
                   <Label htmlFor="username">Username</Label>
                   <Input id="username" value={formData.username} disabled />
-                  <p className="text-sm text-tertiary mt-1">
+                  <p className="text-sm text-ink-muted mt-1">
                     Username is managed through your Clerk account.
                   </p>
                 </div>
@@ -603,7 +630,7 @@ function ProfilePageContent() {
               <div>
                 <Label htmlFor="email">Email Address</Label>
                 <Input id="email" value={profile?.email || ''} disabled />
-                <p className="text-sm text-tertiary mt-1">
+                <p className="text-sm text-ink-muted mt-1">
                   Email is managed through your Clerk account.
                 </p>
               </div>
@@ -640,7 +667,7 @@ function ProfilePageContent() {
                   onValidationChange={setIsDefaultLocationValid}
                   placeholder="Enter your default location for restaurant searches"
                 />
-                <p className="text-sm text-tertiary mt-1">
+                <p className="text-sm text-ink-muted mt-1">
                   This will be used as the default location for restaurant
                   searches.
                 </p>
@@ -767,7 +794,7 @@ function ProfilePageContent() {
                   {/* Show verification code input when pending or verifying */}
                   {(phoneValidationStatus === 'pending' ||
                     phoneValidationStatus === 'verifying') && (
-                    <div className="mt-4 p-4 bg-primary/10 border border-primary rounded-lg">
+                    <div className="mt-4 p-4 bg-tomato/10 border border-tomato rounded-lg">
                       <Label htmlFor="verificationCode">
                         Verification Code
                       </Label>
@@ -822,7 +849,7 @@ function ProfilePageContent() {
                       </div>
                       {/* Mobile: Stack vertically, Desktop: Horizontal layout */}
                       <div className="flex flex-col space-y-2 mt-2 md:flex-row md:space-y-0 md:justify-between md:items-center">
-                        <p className="text-sm text-primary">
+                        <p className="text-sm text-ink">
                           Enter the 6-digit code sent to your phone.
                         </p>
                         <Button
@@ -847,7 +874,7 @@ function ProfilePageContent() {
                     </p>
                   )}
                   {phoneValidationStatus !== 'pending' && (
-                    <p className="text-sm text-tertiary mt-1">
+                    <p className="text-sm text-ink-muted mt-1">
                       {(() => {
                         const phoneMatches =
                           normalizePhoneNumber(formData.phoneNumber) ===
@@ -877,7 +904,7 @@ function ProfilePageContent() {
                     disabled
                     placeholder="No verified phone number"
                   />
-                  <p className="text-sm text-tertiary mt-1">
+                  <p className="text-sm text-ink-muted mt-1">
                     No verified phone number yet. Enable SMS notifications below
                     to verify a number.
                   </p>
@@ -965,7 +992,7 @@ function ProfilePageContent() {
                   {/* Show verification code input when pending or verifying */}
                   {(phoneValidationStatus === 'pending' ||
                     phoneValidationStatus === 'verifying') && (
-                    <div className="mt-4 p-4 bg-primary/10 border border-primary rounded-lg">
+                    <div className="mt-4 p-4 bg-tomato/10 border border-tomato rounded-lg">
                       <Label htmlFor="verificationCodeSMS">
                         Verification Code
                       </Label>
@@ -1020,7 +1047,7 @@ function ProfilePageContent() {
                       </div>
                       {/* Mobile: Stack vertically, Desktop: Horizontal layout */}
                       <div className="flex flex-col space-y-2 mt-2 md:flex-row md:space-y-0 md:justify-between md:items-center">
-                        <p className="text-sm text-primary">
+                        <p className="text-sm text-ink">
                           Enter the 6-digit code sent to your phone.
                         </p>
                         <Button
@@ -1051,7 +1078,7 @@ function ProfilePageContent() {
                   )}
                   {phoneValidationStatus !== 'pending' &&
                     phoneValidationStatus !== 'verified' && (
-                      <p className="text-sm text-tertiary mt-1">
+                      <p className="text-sm text-ink-muted mt-1">
                         Enter your mobile phone number to receive SMS
                         notifications. Verification is required.
                       </p>
@@ -1071,14 +1098,14 @@ function ProfilePageContent() {
             </CardHeader>
             <CardContent className="space-y-6">
               <div>
-                <h4 className="text-sm font-medium text-primary mb-3">
+                <h4 className="text-sm font-medium text-ink mb-3">
                   Notification Channels
                 </h4>
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
                       <Label htmlFor="emailEnabled">Email Notifications</Label>
-                      <p className="text-sm text-tertiary">
+                      <p className="text-sm text-ink-muted">
                         {formData.phoneNumber
                           ? 'Receive notifications via email'
                           : 'Verify a phone number to disable email notifications'}
@@ -1099,7 +1126,7 @@ function ProfilePageContent() {
                     <div className="flex items-center justify-between">
                       <div className="flex-1">
                         <Label htmlFor="pushEnabled">Push Notifications</Label>
-                        <p className="text-sm text-tertiary">
+                        <p className="text-sm text-ink-muted">
                           Receive push notifications on your device
                         </p>
                       </div>
@@ -1121,9 +1148,9 @@ function ProfilePageContent() {
                       </div>
                     )}
                     {!pushStatus.supported && formData.pushEnabled && (
-                      <div className="mt-2 p-3 bg-accent/10 border border-primary/20 rounded-lg flex items-start gap-2">
-                        <AlertCircle className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                        <p className="text-sm text-primary">
+                      <div className="mt-2 p-3 bg-tomato/10 border border-tomato/20 rounded-lg flex items-start gap-2">
+                        <AlertCircle className="h-4 w-4 text-ink mt-0.5 flex-shrink-0" />
+                        <p className="text-sm text-ink">
                           Push notifications are not supported on this
                           device/browser, but your preference has been saved and
                           will apply to other devices where you&apos;re logged
@@ -1135,17 +1162,17 @@ function ProfilePageContent() {
                   <div className="flex items-center justify-between">
                     <div className="flex-1 mr-4">
                       <Label htmlFor="smsEnabled">SMS Notifications</Label>
-                      <p className="text-sm text-tertiary">
+                      <p className="text-sm text-ink-muted">
                         Receive notifications via SMS
                       </p>
-                      <p className="text-xs text-tertiary mt-1">
+                      <p className="text-xs text-ink-muted mt-1">
                         By enabling, you consent to receive transactional
                         messages. Msg & data rates may apply.{' '}
                         <a
                           href="/privacy-policy"
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="underline hover:text-primary"
+                          className="underline hover:text-ink"
                         >
                           Privacy Policy & Terms
                         </a>
@@ -1163,7 +1190,7 @@ function ProfilePageContent() {
               </div>
 
               <div>
-                <h4 className="text-sm font-medium text-primary mb-3">
+                <h4 className="text-sm font-medium text-ink mb-3">
                   Notification Types
                 </h4>
                 <div className="space-y-3">
@@ -1172,7 +1199,7 @@ function ProfilePageContent() {
                       <Label htmlFor="groupDecisionsStarted">
                         Decision Started
                       </Label>
-                      <p className="text-sm text-tertiary">
+                      <p className="text-sm text-ink-muted">
                         Get notified when a group decision is started
                       </p>
                     </div>
@@ -1189,7 +1216,7 @@ function ProfilePageContent() {
                       <Label htmlFor="groupDecisionsCompleted">
                         Decision Completed
                       </Label>
-                      <p className="text-sm text-tertiary">
+                      <p className="text-sm text-ink-muted">
                         Get notified when a group decision is finalized
                       </p>
                     </div>
@@ -1204,7 +1231,7 @@ function ProfilePageContent() {
                   <div className="flex items-center justify-between">
                     <div>
                       <Label htmlFor="friendRequests">Friend Requests</Label>
-                      <p className="text-sm text-tertiary">
+                      <p className="text-sm text-ink-muted">
                         Notifications about friend requests
                       </p>
                     </div>
@@ -1219,7 +1246,7 @@ function ProfilePageContent() {
                   <div className="flex items-center justify-between">
                     <div>
                       <Label htmlFor="groupInvites">Group Invitations</Label>
-                      <p className="text-sm text-tertiary">
+                      <p className="text-sm text-ink-muted">
                         Notifications about group invitations
                       </p>
                     </div>
@@ -1245,7 +1272,7 @@ function ProfilePageContent() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-secondary mb-4">
+              <p className="text-sm text-ink-secondary mb-4">
                 Manage your password, two-factor authentication, and other
                 security settings.
               </p>
@@ -1271,7 +1298,7 @@ function ProfilePageContent() {
                   <p className="font-medium">
                     Click your avatar to manage security settings
                   </p>
-                  <p className="text-tertiary">
+                  <p className="text-ink-muted">
                     Password, 2FA, connected accounts, and more
                   </p>
                 </div>
@@ -1316,16 +1343,7 @@ function ProfilePageContent() {
 
 export default function ProfilePage() {
   return (
-    <Suspense
-      fallback={
-        <div className="min-h-screen bg-primary flex items-center justify-center">
-          <div className="flex items-center space-x-2">
-            <Loader2 className="h-6 w-6 animate-spin" />
-            <span>Loading profile...</span>
-          </div>
-        </div>
-      }
-    >
+    <Suspense fallback={<ProfileSkeleton />}>
       <ProfilePageContent />
     </Suspense>
   );

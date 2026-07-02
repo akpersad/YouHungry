@@ -2,8 +2,18 @@
 
 import { useState } from 'react';
 import { Modal } from '@/components/ui/Modal';
+import { AdminGate } from '@/components/admin/AdminGate';
 
+// Internal design-system preview — admin only.
 export default function DesignSystemPOC() {
+  return (
+    <AdminGate>
+      <DesignSystemPOCContent />
+    </AdminGate>
+  );
+}
+
+function DesignSystemPOCContent() {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [selectedRestaurants, setSelectedRestaurants] = useState<string[]>([]);
   const [dragOverSlot, setDragOverSlot] = useState<number | null>(null);
@@ -348,7 +358,7 @@ export default function DesignSystemPOC() {
                     {restaurant.tags.map((tag) => (
                       <span
                         key={tag}
-                        className="px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 hover:bg-accent hover:text-white"
+                        className="px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 hover:bg-tomato hover:text-white"
                         style={{
                           backgroundColor: currentColors.bgTertiary,
                           color: currentColors.textSecondary,

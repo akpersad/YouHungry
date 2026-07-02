@@ -14,15 +14,15 @@ const LazyCollections = lazy(() => import('@/app/collections/[id]/page'));
 function PageSkeleton() {
   return (
     <div className="animate-pulse space-y-4 p-4">
-      <div className="h-8 bg-tertiary rounded-lg w-1/3" />
+      <div className="h-8 bg-surface-sunken rounded-lg w-1/3" />
       <div className="space-y-3">
-        <div className="h-4 bg-tertiary rounded w-2/3" />
-        <div className="h-4 bg-tertiary rounded w-1/2" />
-        <div className="h-4 bg-tertiary rounded w-3/4" />
+        <div className="h-4 bg-surface-sunken rounded w-2/3" />
+        <div className="h-4 bg-surface-sunken rounded w-1/2" />
+        <div className="h-4 bg-surface-sunken rounded w-3/4" />
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
         {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className="h-32 bg-tertiary rounded-lg" />
+          <div key={i} className="h-32 bg-surface-sunken rounded-lg" />
         ))}
       </div>
     </div>
@@ -32,11 +32,11 @@ function PageSkeleton() {
 function CollectionSkeleton() {
   return (
     <div className="animate-pulse space-y-4 p-4">
-      <div className="h-8 bg-tertiary rounded-lg w-1/4" />
-      <div className="h-6 bg-tertiary rounded w-1/3" />
+      <div className="h-8 bg-surface-sunken rounded-lg w-1/4" />
+      <div className="h-6 bg-surface-sunken rounded w-1/3" />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
         {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="h-48 bg-tertiary rounded-lg" />
+          <div key={i} className="h-48 bg-surface-sunken rounded-lg" />
         ))}
       </div>
     </div>

@@ -7,7 +7,7 @@ interface GroupDecision {
   collectionId: string;
   groupId?: string;
   method: 'tiered' | 'random';
-  status: 'active' | 'completed' | 'expired';
+  status: 'active' | 'completed' | 'expired' | 'closed';
   deadline: string;
   visitDate: string;
   participants: string[];
@@ -16,11 +16,16 @@ interface GroupDecision {
     submittedAt: string;
     hasRankings: boolean;
   }>;
+  voteBreakdown?: Record<
+    string,
+    { first: number; second: number; third: number; total: number }
+  >;
+  myRankings?: string[];
   result?: {
     restaurantId: string;
     selectedAt: string;
     reasoning: string;
-  };
+  } | null;
   createdAt: string;
   updatedAt: string;
 }

@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Restaurant } from '@/types/database';
 import { logger } from '@/lib/logger';
 import { Button } from '@/components/ui/Button';
-import { Skeleton } from '@/components/ui/Skeleton';
+import { Skeleton, SkeletonGroup } from '@/components/ui/Skeleton';
 import { useGoogleMaps } from '@/hooks/useGoogleMaps';
 
 interface MapViewProps {
@@ -98,7 +98,7 @@ class RestaurantMarker {
             onerror="this.src='/icons/icon-96x96.svg'"
           />
           <div class="flex-1 min-w-0">
-            <h3 class="font-semibold text-text dark:text-text-light text-sm leading-tight mb-1">
+            <h3 class="font-semibold text-ink text-sm leading-tight mb-1">
               ${restaurant.name}
             </h3>
             <div class="flex items-center gap-2 mb-2">
@@ -106,23 +106,23 @@ class RestaurantMarker {
                 <svg class="w-4 h-4 text-warning" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                 </svg>
-                <span class="text-sm text-text-light dark:text-text-light ml-1">${rating.toFixed(1)}</span>
+                <span class="text-sm text-ink-secondary ml-1">${rating.toFixed(1)}</span>
               </div>
-              <span class="text-sm text-text-light dark:text-text-light">${priceText}</span>
+              <span class="text-sm text-ink-secondary">${priceText}</span>
             </div>
-            <p class="text-xs text-text-light dark:text-text-light mb-2 line-clamp-2">
+            <p class="text-xs text-ink-secondary mb-2 line-clamp-2">
               ${restaurant.address || 'Address not available'}
             </p>
             <div class="flex gap-1">
               <button 
                 onclick="window.selectRestaurant('${restaurant._id}')"
-                class="px-2 py-1 bg-accent dark:bg-accent text-white text-xs rounded hover:bg-accent dark:hover:bg-accent transition-colors"
+                class="px-2 py-1 bg-tomato text-white text-xs rounded hover:bg-tomato transition-colors"
               >
                 Select
               </button>
               <button 
                 onclick="window.viewRestaurantDetails('${restaurant._id}')"
-                class="px-2 py-1 bg-surface dark:bg-surface text-text dark:text-text-light text-xs rounded hover:bg-surface dark:hover:bg-surface transition-colors"
+                class="px-2 py-1 bg-surface dark:bg-surface text-ink text-xs rounded hover:bg-surface dark:hover:bg-surface transition-colors"
               >
                 Details
               </button>
@@ -439,12 +439,12 @@ function MapComponent({
 // Loading component
 function MapLoading() {
   return (
-    <div className="w-full h-full flex items-center justify-center bg-surface dark:bg-background rounded-lg">
-      <div className="text-center">
+    <div className="w-full h-full flex items-center justify-center bg-surface rounded-lg">
+      <SkeletonGroup label="Loading map" className="text-center">
         <Skeleton className="w-16 h-16 rounded-full mx-auto mb-4" />
         <Skeleton className="w-32 h-4 mx-auto mb-2" />
         <Skeleton className="w-24 h-3 mx-auto" />
-      </div>
+      </SkeletonGroup>
     </div>
   );
 }
@@ -469,10 +469,10 @@ function MapError({ retry }: { retry: () => void }) {
             />
           </svg>
         </div>
-        <h3 className="text-lg font-semibold text-text dark:text-white mb-2">
+        <h3 className="text-lg font-semibold text-ink dark:text-white mb-2">
           Map Loading Failed
         </h3>
-        <p className="text-text-light dark:text-text-light mb-4">
+        <p className="text-ink-secondary mb-4">
           Unable to load the map. Please check your internet connection and try
           again.
         </p>
@@ -523,10 +523,10 @@ export function MapView({
               />
             </svg>
           </div>
-          <h3 className="text-lg font-semibold text-text dark:text-white mb-2">
+          <h3 className="text-lg font-semibold text-ink dark:text-white mb-2">
             Google Maps API Key Required
           </h3>
-          <p className="text-text-light dark:text-text-light">
+          <p className="text-ink-secondary">
             Please configure NEXT_PUBLIC_GOOGLE_PLACES_API_KEY in your
             environment variables.
           </p>

@@ -65,7 +65,7 @@ const CardTitle = forwardRef<HTMLParagraphElement, CardTitleProps>(
     return (
       <h3
         className={cn(
-          'text-lg font-semibold leading-none tracking-tight text-primary',
+          'text-lg font-semibold leading-none tracking-tight text-ink',
           className
         )}
         ref={ref}
@@ -83,7 +83,7 @@ const CardDescription = forwardRef<HTMLParagraphElement, CardDescriptionProps>(
   ({ className, ...props }, ref) => {
     return (
       <p
-        className={cn('text-sm text-tertiary', className)}
+        className={cn('text-sm text-ink-muted', className)}
         ref={ref}
         {...props}
       />

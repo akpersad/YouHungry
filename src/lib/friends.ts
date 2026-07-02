@@ -287,6 +287,36 @@ export async function declineFriendRequest(
 }
 
 /**
+ * Cancel (withdraw) a pending friend request the user sent.
+ * Only the original requester can cancel, and only while still pending.
+ */
+export async function cancelFriendRequest(
+  friendshipId: string,
+  userId: string
+): Promise<boolean> {
+  const db = await connectToDatabase();
+
+  // First find the user by their Clerk ID to get their MongoDB ObjectId
+  const user = await db.collection('users').findOne({ clerkId: userId });
+  if (!user) {
+    throw new Error('User not found');
+  }
+
+  // Only delete a request this user sent and that is still pending
+  const result = await db.collection('friendships').deleteOne({
+    _id: new ObjectId(friendshipId),
+    requesterId: user._id,
+    status: 'pending',
+  });
+
+  if (result.deletedCount === 0) {
+    throw new Error('Friend request not found or already processed');
+  }
+
+  return true;
+}
+
+/**
  * Remove a friend (delete friendship)
  */
 export async function removeFriend(

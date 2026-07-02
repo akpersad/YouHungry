@@ -92,6 +92,10 @@ describe('Collections API Functions', () => {
                 toArray: jest.fn().mockResolvedValue([mockCollection]),
               }),
             }),
+            // decisions.aggregate for the lastDecisionAt enrichment
+            aggregate: jest.fn().mockReturnValue({
+              toArray: jest.fn().mockResolvedValue([]),
+            }),
           };
         }),
       };
@@ -102,7 +106,7 @@ describe('Collections API Functions', () => {
       const result = await getCollectionsByUserId('507f1f77bcf86cd799439012');
 
       expect(mockDb.connectToDatabase).toHaveBeenCalled();
-      expect(result).toEqual([mockCollection]);
+      expect(result).toEqual([{ ...mockCollection, lastDecisionAt: null }]);
     });
 
     it('should get collections by user ID (string)', async () => {
@@ -119,6 +123,10 @@ describe('Collections API Functions', () => {
                 toArray: jest.fn().mockResolvedValue([mockCollection]),
               }),
             }),
+            // decisions.aggregate for the lastDecisionAt enrichment
+            aggregate: jest.fn().mockReturnValue({
+              toArray: jest.fn().mockResolvedValue([]),
+            }),
           };
         }),
       };
@@ -129,7 +137,48 @@ describe('Collections API Functions', () => {
       const result = await getCollectionsByUserId('invalid-objectid');
 
       expect(mockDb.connectToDatabase).toHaveBeenCalled();
-      expect(result).toEqual([mockCollection]);
+      expect(result).toEqual([{ ...mockCollection, lastDecisionAt: null }]);
+    });
+
+    it('attaches lastDecisionAt from the most recent completed decision', async () => {
+      const lastDecisionAt = new Date('2024-03-15T12:00:00Z');
+      const mockDbInstance = {
+        collection: jest.fn().mockImplementation((collectionName) => {
+          if (collectionName === 'users') {
+            return {
+              findOne: jest.fn().mockResolvedValue({
+                _id: new ObjectId('507f1f77bcf86cd799439012'),
+                clerkId: '507f1f77bcf86cd799439012',
+              }),
+            };
+          }
+          if (collectionName === 'decisions') {
+            return {
+              aggregate: jest.fn().mockReturnValue({
+                toArray: jest
+                  .fn()
+                  .mockResolvedValue([
+                    { _id: mockCollection._id, lastDecisionAt },
+                  ]),
+              }),
+            };
+          }
+          return {
+            find: jest.fn().mockReturnValue({
+              sort: jest.fn().mockReturnValue({
+                toArray: jest.fn().mockResolvedValue([mockCollection]),
+              }),
+            }),
+          };
+        }),
+      };
+      mockDb.connectToDatabase.mockResolvedValue(
+        mockDbInstance as unknown as ReturnType<typeof db.connectToDatabase>
+      );
+
+      const result = await getCollectionsByUserId('507f1f77bcf86cd799439012');
+
+      expect(result).toEqual([{ ...mockCollection, lastDecisionAt }]);
     });
   });
 

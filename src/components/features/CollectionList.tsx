@@ -13,6 +13,10 @@ import {
 } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { CollectionListSkeleton } from '@/components/ui/Skeleton';
+import { UtensilsCrossed, Clock } from 'lucide-react';
+import { formatRelativeDate } from '@/lib/utils';
 import { CreateCollectionForm } from '../forms/CreateCollectionForm';
 import { Collection } from '@/types/database';
 import { useCollections, useDeleteCollection } from '@/hooks/api';
@@ -84,15 +88,7 @@ function CollectionList({
   };
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-8">
-        <div
-          className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"
-          role="status"
-          aria-label="Loading collections"
-        ></div>
-      </div>
-    );
+    return <CollectionListSkeleton />;
   }
 
   if (error) {
@@ -120,10 +116,10 @@ function CollectionList({
       {showHeader && (
         <div className="space-y-4 md:space-y-0 md:flex md:items-center md:justify-between">
           <div className="space-y-1">
-            <h2 className="text-xl md:text-2xl font-bold text-primary">
+            <h2 className="text-xl md:text-2xl font-bold text-ink">
               My Collections
             </h2>
-            <p className="text-secondary text-sm md:text-base">
+            <p className="text-ink-secondary text-sm md:text-base">
               Manage your personal restaurant collections
             </p>
           </div>
@@ -138,34 +134,15 @@ function CollectionList({
 
       {collections.length === 0 ? (
         <Card className="p-6">
-          <div className="text-center py-8">
-            <div className="mb-4">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-tertiary flex items-center justify-center">
-                <svg
-                  className="w-8 h-8 text-secondary"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-                  />
-                </svg>
-              </div>
-            </div>
-            <p className="text-secondary mb-6 text-sm md:text-base">
-              You don&apos;t have any collections yet.
-            </p>
-            <Button
-              onClick={() => setIsCreateModalOpen(true)}
-              className="touch-target"
-            >
-              Create Your First Collection
-            </Button>
-          </div>
+          <EmptyState
+            icon={<UtensilsCrossed className="h-7 w-7" aria-hidden="true" />}
+            title="Let's find your first spot"
+            description="Build a collection, add a few restaurants you love, and we'll spin to settle where you eat."
+            action={{
+              label: 'Create your first collection',
+              onClick: () => setIsCreateModalOpen(true),
+            }}
+          />
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -188,7 +165,7 @@ function CollectionList({
               >
                 <div className="relative">
                   <button
-                    className="p-2 hover:bg-tertiary rounded-lg transition-colors bg-secondary/50 backdrop-blur-sm border border-border"
+                    className="p-2 hover:bg-surface-sunken rounded-lg transition-colors bg-surface/50 backdrop-blur-sm border border-border"
                     aria-label="Collection actions"
                     onClick={(e) => {
                       e.stopPropagation();
@@ -200,7 +177,7 @@ function CollectionList({
                     }}
                   >
                     <svg
-                      className="w-5 h-5 text-primary"
+                      className="w-5 h-5 text-ink"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -224,7 +201,7 @@ function CollectionList({
                       />
 
                       {/* Dropdown Menu */}
-                      <div className="absolute top-full right-0 mt-2 z-50 bg-secondary border border-quaternary rounded-xl shadow-neumorphic-elevated py-1 min-w-48">
+                      <div className="absolute top-full right-0 mt-2 z-50 bg-surface border border-border rounded-xl shadow-medium py-1 min-w-48">
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -232,7 +209,7 @@ function CollectionList({
                             handleDeleteCollection(collection._id.toString());
                           }}
                           disabled={deleteCollectionMutation.isPending}
-                          className="w-full px-3 py-2 text-left text-sm flex items-center gap-2 hover:bg-tertiary transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-accent/30 disabled:opacity-50 disabled:cursor-not-allowed text-error hover:bg-error/10"
+                          className="w-full px-3 py-2 text-left text-sm flex items-center gap-2 hover:bg-surface-sunken transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-tomato/30 disabled:opacity-50 disabled:cursor-not-allowed text-error hover:bg-error/10"
                         >
                           Delete Collection
                         </button>
@@ -243,33 +220,51 @@ function CollectionList({
               </div>
 
               <CardHeader className="pb-3">
-                <CardTitle className="text-lg text-primary truncate pr-12 md:pr-0">
+                <CardTitle className="text-lg text-ink truncate pr-12 md:pr-0">
                   {collection.name}
                 </CardTitle>
                 {collection.description && (
-                  <CardDescription className="text-secondary text-sm line-clamp-2">
+                  <CardDescription className="text-ink-secondary text-sm line-clamp-2">
                     {collection.description}
                   </CardDescription>
                 )}
               </CardHeader>
               <CardContent className="pt-0">
                 <div className="space-y-4">
-                  {/* Restaurant count with icon */}
-                  <div className="flex items-center gap-2 text-sm text-secondary">
-                    <svg
-                      className="w-4 h-4 flex-shrink-0"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                  {/* Card stats: restaurant count + last decided */}
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-ink-secondary">
+                    <div className="flex items-center gap-2">
+                      <svg
+                        className="w-4 h-4 flex-shrink-0"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                        />
+                      </svg>
+                      <span>
+                        {collection.restaurantIds.length}{' '}
+                        {collection.restaurantIds.length === 1
+                          ? 'restaurant'
+                          : 'restaurants'}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Clock
+                        className="w-4 h-4 flex-shrink-0"
+                        aria-hidden="true"
                       />
-                    </svg>
-                    <span>{collection.restaurantIds.length} restaurants</span>
+                      <span>
+                        {formatRelativeDate(collection.lastDecisionAt)
+                          ? `Decided ${formatRelativeDate(collection.lastDecisionAt)}`
+                          : 'Not decided yet'}
+                      </span>
+                    </div>
                   </div>
 
                   {/* Desktop: Show buttons directly */}
@@ -364,7 +359,7 @@ function CollectionList({
         title="Delete Collection?"
       >
         <div className="space-y-4">
-          <p className="text-text">
+          <p className="text-ink">
             Are you sure you want to delete this collection? This action cannot
             be undone.
           </p>

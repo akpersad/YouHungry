@@ -12,12 +12,19 @@ const isPublicRoute = createRouteMatcher([
   '/api/cron(.*)', // Vercel cron jobs — each handler must verify CRON_SECRET
 ]);
 
-export default clerkMiddleware((auth, req) => {
+export default clerkMiddleware(async (auth, req) => {
   if (!isPublicRoute(req)) {
-    // Protect the route and redirect to our custom sign-in page
-    // with the original URL as a redirect_url parameter
-    auth.protect({
-      unauthenticatedUrl: '/sign-in',
+    // Protect the route and redirect to our custom sign-in page.
+    // `auth.protect()` is async and rejects with a NEXT_REDIRECT when the
+    // request is unauthenticated — it MUST be awaited so Next consumes the
+    // redirect. Calling it un-awaited in a sync callback leaves the rejected
+    // promise floating, which Node reports as `unhandledRejection` on every
+    // protected request while signed out (the NEXT_REDIRECT log flood).
+    // unauthenticatedUrl must be ABSOLUTE — with a relative path,
+    // NextResponse.redirect throws ERR_INVALID_URL and every signed-out
+    // visit to a protected route 500s instead of redirecting.
+    await auth.protect({
+      unauthenticatedUrl: new URL('/sign-in', req.url).toString(),
     });
   }
 });

@@ -212,10 +212,10 @@ export function PushNotificationTestDashboard() {
       {/* Header */}
       <div className="flex justify-between items-start">
         <div>
-          <h2 className="text-2xl font-bold text-text mb-2">
+          <h2 className="text-2xl font-bold text-ink mb-2">
             🔔 Push Notification Testing
           </h2>
-          <p className="text-text-light">
+          <p className="text-ink-secondary">
             Test push notification functionality and device eligibility
           </p>
         </div>
@@ -274,32 +274,40 @@ export function PushNotificationTestDashboard() {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-3">
-              <div className="flex items-center justify-between p-3 rounded-xl bg-tertiary">
-                <span className="text-secondary font-medium">Supported</span>
+              <div className="flex items-center justify-between p-3 rounded-xl bg-surface-sunken">
+                <span className="text-ink-secondary font-medium">
+                  Supported
+                </span>
                 <span className="text-lg">
                   {mounted
                     ? getStatusIcon(getRealTimeCapabilities().supported)
                     : '⏳'}
                 </span>
               </div>
-              <div className="flex items-center justify-between p-3 rounded-xl bg-tertiary">
-                <span className="text-secondary font-medium">Permission</span>
+              <div className="flex items-center justify-between p-3 rounded-xl bg-surface-sunken">
+                <span className="text-ink-secondary font-medium">
+                  Permission
+                </span>
                 <span className="text-lg">
                   {mounted
                     ? getPermissionIcon(getRealTimeCapabilities().permission)
                     : '⏳'}
                 </span>
               </div>
-              <div className="flex items-center justify-between p-3 rounded-xl bg-tertiary">
-                <span className="text-secondary font-medium">Subscribed</span>
+              <div className="flex items-center justify-between p-3 rounded-xl bg-surface-sunken">
+                <span className="text-ink-secondary font-medium">
+                  Subscribed
+                </span>
                 <span className="text-lg">
                   {getStatusIcon(status.subscribed)}
                 </span>
               </div>
             </div>
             <div className="space-y-3">
-              <div className="flex items-center justify-between p-3 rounded-xl bg-tertiary">
-                <span className="text-secondary font-medium">iOS Device</span>
+              <div className="flex items-center justify-between p-3 rounded-xl bg-surface-sunken">
+                <span className="text-ink-secondary font-medium">
+                  iOS Device
+                </span>
                 <span className="text-lg">
                   {mounted
                     ? getRealTimeCapabilities().isIOS
@@ -309,8 +317,8 @@ export function PushNotificationTestDashboard() {
                 </span>
               </div>
               {mounted && getRealTimeCapabilities().isIOS && (
-                <div className="flex items-center justify-between p-3 rounded-xl bg-tertiary">
-                  <span className="text-secondary font-medium">
+                <div className="flex items-center justify-between p-3 rounded-xl bg-surface-sunken">
+                  <span className="text-ink-secondary font-medium">
                     iOS Support
                   </span>
                   <span className="text-lg">
@@ -318,8 +326,10 @@ export function PushNotificationTestDashboard() {
                   </span>
                 </div>
               )}
-              <div className="flex items-center justify-between p-3 rounded-xl bg-tertiary">
-                <span className="text-secondary font-medium">Display Mode</span>
+              <div className="flex items-center justify-between p-3 rounded-xl bg-surface-sunken">
+                <span className="text-ink-secondary font-medium">
+                  Display Mode
+                </span>
                 <span className="text-lg">
                   {mounted &&
                   window.matchMedia('(display-mode: standalone)').matches
@@ -342,7 +352,7 @@ export function PushNotificationTestDashboard() {
                 <h3 className="font-semibold text-warning mb-2">
                   iOS Limitation
                 </h3>
-                <p className="text-sm text-secondary">
+                <p className="text-sm text-ink-secondary">
                   Push notifications require iOS 16.4 or later. Your device may
                   not support push notifications for PWAs, or the APIs may not
                   be available. Try accessing the app from a standalone PWA
@@ -363,10 +373,10 @@ export function PushNotificationTestDashboard() {
                 <h3 className="font-semibold text-success mb-2">
                   iOS Push Notifications Supported!
                 </h3>
-                <p className="text-sm text-secondary mb-3">
+                <p className="text-sm text-ink-secondary mb-3">
                   Your iOS version supports push notifications. Make sure to:
                 </p>
-                <ul className="text-sm text-secondary space-y-1 list-disc list-inside">
+                <ul className="text-sm text-ink-secondary space-y-1 list-disc list-inside">
                   <li>App is added to Home Screen (Installed)</li>
                   <li>You opened the app from Home Screen (not Safari)</li>
                   <li>Grant notification permission when prompted</li>
@@ -379,20 +389,20 @@ export function PushNotificationTestDashboard() {
 
       {/* Debug Info */}
       {mounted && (
-        <Card className="bg-tertiary">
+        <Card className="bg-surface-sunken">
           <CardHeader>
             <CardTitle className="text-lg">Debug Information</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
               <div className="flex justify-between">
-                <span className="text-tertiary">Service Worker:</span>
+                <span className="text-ink-muted">Service Worker:</span>
                 <span className="font-mono">
                   {'serviceWorker' in navigator ? '✅' : '❌'}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-tertiary">SW Ready:</span>
+                <span className="text-ink-muted">SW Ready:</span>
                 <span className="font-mono">
                   {mounted && 'serviceWorker' in navigator
                     ? navigator.serviceWorker.controller
@@ -402,25 +412,25 @@ export function PushNotificationTestDashboard() {
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-tertiary">PushManager:</span>
+                <span className="text-ink-muted">PushManager:</span>
                 <span className="font-mono">
                   {'PushManager' in window ? '✅' : '❌'}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-tertiary">Notification:</span>
+                <span className="text-ink-muted">Notification:</span>
                 <span className="font-mono">
                   {'Notification' in window ? '✅' : '❌'}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-tertiary">Secure Context:</span>
+                <span className="text-ink-muted">Secure Context:</span>
                 <span className="font-mono">
                   {window.isSecureContext ? '✅' : '❌'}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-tertiary">Display Mode:</span>
+                <span className="text-ink-muted">Display Mode:</span>
                 <span className="font-mono">
                   {window.matchMedia('(display-mode: standalone)').matches
                     ? 'PWA'
@@ -428,7 +438,7 @@ export function PushNotificationTestDashboard() {
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-tertiary">isSupported():</span>
+                <span className="text-ink-muted">isSupported():</span>
                 <span className="font-mono">
                   {status.supported ? '✅' : '❌'}
                 </span>
@@ -436,9 +446,9 @@ export function PushNotificationTestDashboard() {
             </div>
 
             {/* Raw Debug Values */}
-            <div className="mt-4 p-3 bg-quaternary rounded-lg">
+            <div className="mt-4 p-3 bg-border rounded-lg">
               <h4 className="text-sm font-semibold mb-2">Raw Debug Values:</h4>
-              <pre className="text-xs text-tertiary overflow-x-auto">
+              <pre className="text-xs text-ink-muted overflow-x-auto">
                 {JSON.stringify(
                   {
                     supported: status.supported,
@@ -544,7 +554,7 @@ export function PushNotificationTestDashboard() {
               <span className="text-2xl">❌</span>
               <div>
                 <h3 className="font-semibold text-error mb-2">Error</h3>
-                <p className="text-sm text-secondary">{error}</p>
+                <p className="text-sm text-ink-secondary">{error}</p>
               </div>
             </div>
           </CardContent>
@@ -558,7 +568,7 @@ export function PushNotificationTestDashboard() {
               <span className="text-2xl">✅</span>
               <div>
                 <h3 className="font-semibold text-success mb-2">Success</h3>
-                <p className="text-sm text-secondary">{success}</p>
+                <p className="text-sm text-ink-secondary">{success}</p>
               </div>
             </div>
           </CardContent>

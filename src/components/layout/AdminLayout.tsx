@@ -9,7 +9,7 @@ interface AdminLayoutProps {
 
 export function AdminLayout({ children }: AdminLayoutProps) {
   return (
-    <div className="flex h-screen bg-background">
+    <div className="flex h-screen bg-bg">
       <Sidebar>
         <AdminNav activeTab="analytics" onTabChange={() => {}} />
       </Sidebar>

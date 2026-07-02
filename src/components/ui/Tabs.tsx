@@ -38,8 +38,8 @@ export function Tabs({
                   whitespace-nowrap
                   ${
                     isActive
-                      ? 'text-primary border-b-2 border-primary'
-                      : 'text-text-muted hover:text-text border-b-2 border-transparent'
+                      ? 'text-ink border-b-2 border-tomato'
+                      : 'text-ink-muted hover:text-ink border-b-2 border-transparent'
                   }
                 `}
                 aria-selected={isActive}
@@ -53,8 +53,8 @@ export function Tabs({
                         px-2 py-0.5 text-xs rounded-full
                         ${
                           isActive
-                            ? 'bg-primary/10 text-primary'
-                            : 'bg-background-secondary text-text-muted'
+                            ? 'bg-tomato/10 text-ink'
+                            : 'bg-surface text-ink-muted'
                         }
                       `}
                     >

@@ -11,6 +11,10 @@ dist
 .github/skills/
 .cursor/
 
+# Portable design reference manual — hand-formatted, carried across projects;
+# Prettier mangles its emphasis style and table-of-contents (bold-then-list).
+DESIGN-UI-UX-SKILLS.md
+
 # Generated artifacts
 coverage/
 playwright-report/

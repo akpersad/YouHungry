@@ -106,7 +106,7 @@ export default function GroupsPage() {
     return (
       <div className="max-w-4xl mx-auto">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-text mb-4">Groups</h1>
+          <h1 className="text-2xl font-bold text-ink mb-4">Groups</h1>
           <div className="bg-destructive/10 border border-destructive rounded-md p-4">
             <p className="text-destructive font-medium">
               Failed to load groups. Please try again later.
@@ -122,8 +122,8 @@ export default function GroupsPage() {
       <div className="mb-8">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-text">Groups</h1>
-            <p className="mt-2 text-text-light">
+            <h1 className="text-3xl font-bold text-ink">Groups</h1>
+            <p className="mt-2 text-ink-secondary">
               Collaborate with friends on restaurant decisions
             </p>
           </div>
@@ -145,8 +145,8 @@ export default function GroupsPage() {
               onClick={() => setActiveTab('groups')}
               className={`py-2 px-1 border-b-2 font-medium text-sm ${
                 activeTab === 'groups'
-                  ? 'border-primary text-primary'
-                  : 'border-transparent text-text-light hover:text-text hover:border-border'
+                  ? 'border-tomato text-ink'
+                  : 'border-transparent text-ink-secondary hover:text-ink hover:border-border'
               }`}
             >
               My Groups ({groups.length})
@@ -155,8 +155,8 @@ export default function GroupsPage() {
               onClick={() => setActiveTab('invitations')}
               className={`py-2 px-1 border-b-2 font-medium text-sm ${
                 activeTab === 'invitations'
-                  ? 'border-primary text-primary'
-                  : 'border-transparent text-text-light hover:text-text hover:border-border'
+                  ? 'border-tomato text-ink'
+                  : 'border-transparent text-ink-secondary hover:text-ink hover:border-border'
               }`}
             >
               Invitations ({groupInvitations.length})

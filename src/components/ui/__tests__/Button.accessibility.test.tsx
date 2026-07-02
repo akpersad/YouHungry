@@ -171,7 +171,6 @@ describe('Button Accessibility', () => {
         'accent',
         'warm',
         'outline',
-        'outline-accent',
       ] as const;
 
       variants.forEach((variant) => {
@@ -212,7 +211,6 @@ describe('Button Accessibility', () => {
         'accent',
         'warm',
         'outline',
-        'outline-accent',
       ] as const;
 
       variants.forEach((variant) => {

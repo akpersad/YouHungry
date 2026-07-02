@@ -257,9 +257,9 @@ export function AdminAlertsDashboard() {
       case 'medium':
         return 'text-warning bg-warning/20';
       case 'low':
-        return 'text-primary bg-primary/10';
+        return 'text-ink bg-tomato/10';
       default:
-        return 'text-text-light bg-surface';
+        return 'text-ink-secondary bg-surface';
     }
   };
 
@@ -343,21 +343,21 @@ export function AdminAlertsDashboard() {
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-text">Admin Alerts</h2>
-          <p className="text-sm text-text-light">
+          <h2 className="text-2xl font-bold text-ink">Admin Alerts</h2>
+          <p className="text-sm text-ink-secondary">
             Monitor system alerts and notifications
           </p>
         </div>
         <div className="flex space-x-3">
           <button
             onClick={validateEmailConfig}
-            className="px-4 py-2 border border-border rounded-md text-sm font-medium text-text hover:bg-surface"
+            className="px-4 py-2 border border-border rounded-md text-sm font-medium text-ink hover:bg-surface"
           >
             Validate Email Config
           </button>
           <button
             onClick={() => fetchAlerts(activeFilter)}
-            className="px-4 py-2 bg-accent text-white rounded-md text-sm font-medium hover:bg-accent"
+            className="px-4 py-2 bg-tomato text-white rounded-md text-sm font-medium hover:bg-tomato"
           >
             Refresh
           </button>
@@ -366,17 +366,17 @@ export function AdminAlertsDashboard() {
 
       {/* Email Test Section */}
       <div className="mb-6 bg-surface rounded-lg p-4">
-        <h3 className="text-lg font-medium text-text mb-3">Email Test</h3>
+        <h3 className="text-lg font-medium text-ink mb-3">Email Test</h3>
         <div className="flex space-x-3 items-end">
           <div className="flex-1">
-            <label className="block text-sm font-medium text-text mb-1">
+            <label className="block text-sm font-medium text-ink mb-1">
               Test Email Address
             </label>
             <input
               type="email"
               value={testEmail}
               onChange={(e) => setTestEmail(e.target.value)}
-              className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-primary focus:border-primary"
+              className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-tomato focus:border-tomato"
               placeholder="akpersad@gmail.com"
             />
           </div>
@@ -408,8 +408,8 @@ export function AdminAlertsDashboard() {
           <div
             className="rounded-lg shadow-subtle p-4"
             style={{
-              background: 'var(--bg-secondary)',
-              borderColor: 'var(--bg-quaternary)',
+              background: 'var(--surface)',
+              borderColor: 'var(--border)',
               border: '1px solid',
             }}
           >
@@ -419,8 +419,8 @@ export function AdminAlertsDashboard() {
           <div
             className="rounded-lg shadow-subtle p-4"
             style={{
-              background: 'var(--bg-secondary)',
-              borderColor: 'var(--bg-quaternary)',
+              background: 'var(--surface)',
+              borderColor: 'var(--border)',
               border: '1px solid',
             }}
           >
@@ -430,8 +430,8 @@ export function AdminAlertsDashboard() {
           <div
             className="rounded-lg shadow-subtle p-4"
             style={{
-              background: 'var(--bg-secondary)',
-              borderColor: 'var(--bg-quaternary)',
+              background: 'var(--surface)',
+              borderColor: 'var(--border)',
               border: '1px solid',
             }}
           >
@@ -441,8 +441,8 @@ export function AdminAlertsDashboard() {
           <div
             className="rounded-lg shadow-subtle p-4"
             style={{
-              background: 'var(--bg-secondary)',
-              borderColor: 'var(--bg-quaternary)',
+              background: 'var(--surface)',
+              borderColor: 'var(--border)',
               border: '1px solid',
             }}
           >
@@ -452,8 +452,8 @@ export function AdminAlertsDashboard() {
           <div
             className="rounded-lg shadow-subtle p-4"
             style={{
-              background: 'var(--bg-secondary)',
-              borderColor: 'var(--bg-quaternary)',
+              background: 'var(--surface)',
+              borderColor: 'var(--border)',
               border: '1px solid',
             }}
           >
@@ -463,8 +463,8 @@ export function AdminAlertsDashboard() {
           <div
             className="rounded-lg shadow-subtle p-4"
             style={{
-              background: 'var(--bg-secondary)',
-              borderColor: 'var(--bg-quaternary)',
+              background: 'var(--surface)',
+              borderColor: 'var(--border)',
               border: '1px solid',
             }}
           >
@@ -474,8 +474,8 @@ export function AdminAlertsDashboard() {
           <div
             className="rounded-lg shadow-subtle p-4"
             style={{
-              background: 'var(--bg-secondary)',
-              borderColor: 'var(--bg-quaternary)',
+              background: 'var(--surface)',
+              borderColor: 'var(--border)',
               border: '1px solid',
             }}
           >
@@ -505,20 +505,18 @@ export function AdminAlertsDashboard() {
                 background:
                   activeFilter === filter.key
                     ? 'rgba(255, 51, 102, 0.1)'
-                    : 'var(--bg-tertiary)',
+                    : 'var(--surface-sunken)',
                 color:
-                  activeFilter === filter.key
-                    ? 'var(--accent-primary)'
-                    : 'var(--text-primary)',
+                  activeFilter === filter.key ? 'var(--tomato)' : 'var(--ink)',
               }}
               onMouseEnter={(e) => {
                 if (activeFilter !== filter.key) {
-                  e.currentTarget.style.background = 'var(--bg-quaternary)';
+                  e.currentTarget.style.background = 'var(--border)';
                 }
               }}
               onMouseLeave={(e) => {
                 if (activeFilter !== filter.key) {
-                  e.currentTarget.style.background = 'var(--bg-tertiary)';
+                  e.currentTarget.style.background = 'var(--surface-sunken)';
                 }
               }}
             >
@@ -532,8 +530,8 @@ export function AdminAlertsDashboard() {
       <div
         className="rounded-lg shadow-subtle"
         style={{
-          background: 'var(--bg-secondary)',
-          borderColor: 'var(--bg-quaternary)',
+          background: 'var(--surface)',
+          borderColor: 'var(--border)',
           border: '1px solid',
         }}
       >
@@ -562,10 +560,7 @@ export function AdminAlertsDashboard() {
             </div>
           </div>
         ) : (
-          <div
-            className="divide-y"
-            style={{ borderColor: 'var(--bg-quaternary)' }}
-          >
+          <div className="divide-y" style={{ borderColor: 'var(--border)' }}>
             {alerts.map((alert) => (
               <div
                 key={alert.id}
@@ -579,7 +574,7 @@ export function AdminAlertsDashboard() {
                 onClick={() => setSelectedAlert(alert)}
                 onMouseEnter={(e) => {
                   if (selectedAlert?.id !== alert.id) {
-                    e.currentTarget.style.background = 'var(--bg-tertiary)';
+                    e.currentTarget.style.background = 'var(--surface-sunken)';
                   }
                 }}
                 onMouseLeave={(e) => {
@@ -651,11 +646,10 @@ export function AdminAlertsDashboard() {
                         }}
                         className="px-3 py-1 text-xs font-medium"
                         onMouseEnter={(e) => {
-                          e.currentTarget.style.color =
-                            'var(--accent-primary-dark)';
+                          e.currentTarget.style.color = 'var(--tomato-hover)';
                         }}
                         onMouseLeave={(e) => {
-                          e.currentTarget.style.color = 'var(--accent-primary)';
+                          e.currentTarget.style.color = 'var(--tomato)';
                         }}
                       >
                         Acknowledge
@@ -706,10 +700,10 @@ export function AdminAlertsDashboard() {
         <div className="fixed inset-0 bg-surface bg-opacity-50 overflow-y-auto h-full w-full z-50">
           <div className="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-medium text-text">Alert Details</h3>
+              <h3 className="text-lg font-medium text-ink">Alert Details</h3>
               <button
                 onClick={() => setSelectedAlert(null)}
-                className="text-text-light hover:text-text-light"
+                className="text-ink-secondary hover:text-ink-secondary"
               >
                 <svg
                   className="h-6 w-6"
@@ -733,7 +727,7 @@ export function AdminAlertsDashboard() {
                   <span className="text-2xl">
                     {getSeverityIcon(selectedAlert.severity)}
                   </span>
-                  <h4 className="text-lg font-medium text-text">
+                  <h4 className="text-lg font-medium text-ink">
                     {selectedAlert.title}
                   </h4>
                   <span
@@ -742,31 +736,31 @@ export function AdminAlertsDashboard() {
                     {selectedAlert.severity}
                   </span>
                 </div>
-                <p className="text-sm text-text-light">
+                <p className="text-sm text-ink-secondary">
                   {selectedAlert.message}
                 </p>
               </div>
 
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <span className="font-medium text-text">Timestamp:</span>
-                  <p className="text-text-light">
+                  <span className="font-medium text-ink">Timestamp:</span>
+                  <p className="text-ink-secondary">
                     {new Date(selectedAlert.timestamp).toLocaleString()}
                   </p>
                 </div>
                 <div>
-                  <span className="font-medium text-text">Type:</span>
-                  <p className="text-text-light">{selectedAlert.type}</p>
+                  <span className="font-medium text-ink">Type:</span>
+                  <p className="text-ink-secondary">{selectedAlert.type}</p>
                 </div>
                 <div>
-                  <span className="font-medium text-text">Acknowledged:</span>
-                  <p className="text-text-light">
+                  <span className="font-medium text-ink">Acknowledged:</span>
+                  <p className="text-ink-secondary">
                     {selectedAlert.acknowledged ? 'Yes' : 'No'}
                   </p>
                 </div>
                 <div>
-                  <span className="font-medium text-text">Resolved:</span>
-                  <p className="text-text-light">
+                  <span className="font-medium text-ink">Resolved:</span>
+                  <p className="text-ink-secondary">
                     {selectedAlert.resolved ? 'Yes' : 'No'}
                   </p>
                 </div>
@@ -775,10 +769,10 @@ export function AdminAlertsDashboard() {
               {selectedAlert.affectedServices &&
                 selectedAlert.affectedServices.length > 0 && (
                   <div>
-                    <span className="font-medium text-text">
+                    <span className="font-medium text-ink">
                       Affected Services:
                     </span>
-                    <ul className="mt-1 text-sm text-text-light">
+                    <ul className="mt-1 text-sm text-ink-secondary">
                       {selectedAlert.affectedServices.map((service, index) => (
                         <li key={index}>• {service}</li>
                       ))}
@@ -789,10 +783,10 @@ export function AdminAlertsDashboard() {
               {selectedAlert.metadata &&
                 Object.keys(selectedAlert.metadata).length > 0 && (
                   <div>
-                    <span className="font-medium text-text">
+                    <span className="font-medium text-ink">
                       Additional Information:
                     </span>
-                    <div className="mt-1 text-sm text-text-light">
+                    <div className="mt-1 text-sm text-ink-secondary">
                       {Object.entries(selectedAlert.metadata).map(
                         ([key, value]) => (
                           <div key={key}>
@@ -807,10 +801,10 @@ export function AdminAlertsDashboard() {
               {selectedAlert.recommendedActions &&
                 selectedAlert.recommendedActions.length > 0 && (
                   <div>
-                    <span className="font-medium text-text">
+                    <span className="font-medium text-ink">
                       Recommended Actions:
                     </span>
-                    <ul className="mt-1 text-sm text-text-light">
+                    <ul className="mt-1 text-sm text-ink-secondary">
                       {selectedAlert.recommendedActions.map((action, index) => (
                         <li key={index}>• {action}</li>
                       ))}
@@ -825,7 +819,7 @@ export function AdminAlertsDashboard() {
                       acknowledgeAlert(selectedAlert.id);
                       setSelectedAlert(null);
                     }}
-                    className="px-4 py-2 bg-accent text-white rounded-md text-sm font-medium hover:bg-accent"
+                    className="px-4 py-2 bg-tomato text-white rounded-md text-sm font-medium hover:bg-tomato"
                   >
                     Acknowledge
                   </button>
@@ -866,7 +860,7 @@ export function AdminAlertsDashboard() {
         title="Delete Alert?"
       >
         <div className="space-y-4">
-          <p className="text-text">
+          <p className="text-ink">
             Are you sure you want to delete this alert? This action cannot be
             undone.
           </p>

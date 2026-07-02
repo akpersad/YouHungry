@@ -1,12 +1,15 @@
 'use client';
 
+import { useState } from 'react';
 import { logger } from '@/lib/logger';
 import {
   useFriendRequests,
   useUpdateFriendRequest,
+  useCancelFriendRequest,
 } from '@/hooks/api/useFriends';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import { Badge } from '@/components/ui/Badge';
 import { UserAvatar } from '@/components/ui/UserAvatar';
 import { DropdownMenu, DropdownMenuItem } from '@/components/ui/DropdownMenu';
 
@@ -17,6 +20,8 @@ interface FriendRequestsProps {
 export function FriendRequests({ userId }: FriendRequestsProps) {
   const { data: requests, isLoading, error } = useFriendRequests(userId);
   const updateRequestMutation = useUpdateFriendRequest();
+  const cancelRequestMutation = useCancelFriendRequest();
+  const [cancelingId, setCancelingId] = useState<string | null>(null);
 
   const handleRequestAction = async (
     friendshipId: string,
@@ -33,13 +38,24 @@ export function FriendRequests({ userId }: FriendRequestsProps) {
     }
   };
 
+  const handleCancelRequest = async (friendshipId: string) => {
+    setCancelingId(friendshipId);
+    try {
+      await cancelRequestMutation.mutateAsync({ friendshipId, userId });
+    } catch (error) {
+      logger.error('Failed to cancel friend request:', error);
+    } finally {
+      setCancelingId(null);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="space-y-4">
-        <h2 className="text-xl font-semibold text-text">Friend Requests</h2>
+        <h2 className="text-xl font-semibold text-ink">Friend Requests</h2>
         <div className="text-center py-8">
-          <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
-          <p className="text-sm text-text-light mt-2">Loading requests...</p>
+          <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-tomato"></div>
+          <p className="text-sm text-ink-secondary mt-2">Loading requests...</p>
         </div>
       </div>
     );
@@ -48,7 +64,7 @@ export function FriendRequests({ userId }: FriendRequestsProps) {
   if (error) {
     return (
       <div className="space-y-4">
-        <h2 className="text-xl font-semibold text-text">Friend Requests</h2>
+        <h2 className="text-xl font-semibold text-ink">Friend Requests</h2>
         <div className="text-center py-8">
           <p className="text-sm text-destructive">
             {error instanceof Error
@@ -67,15 +83,15 @@ export function FriendRequests({ userId }: FriendRequestsProps) {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-text">Friend Requests</h2>
-        <span className="text-sm text-text-light">
+        <h2 className="text-xl font-semibold text-ink">Friend Requests</h2>
+        <span className="text-sm text-ink-secondary">
           {totalRequests} request{totalRequests !== 1 ? 's' : ''}
         </span>
       </div>
 
       {totalRequests === 0 ? (
         <div className="text-center py-8">
-          <div className="text-text-light mb-2">
+          <div className="text-ink-secondary mb-2">
             <svg
               className="mx-auto h-12 w-12"
               fill="none"
@@ -90,14 +106,16 @@ export function FriendRequests({ userId }: FriendRequestsProps) {
               />
             </svg>
           </div>
-          <p className="text-sm text-text-light">No pending friend requests</p>
+          <p className="text-sm text-ink-secondary">
+            No pending friend requests
+          </p>
         </div>
       ) : (
         <div className="space-y-6">
           {/* Received Requests */}
           {receivedRequests.length > 0 && (
             <div className="space-y-3">
-              <h3 className="text-sm font-medium text-text">
+              <h3 className="text-sm font-medium text-ink">
                 Received Requests ({receivedRequests.length})
               </h3>
               <div className="space-y-2">
@@ -113,13 +131,13 @@ export function FriendRequests({ userId }: FriendRequestsProps) {
                           />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-text truncate">
+                          <p className="text-sm font-medium text-ink truncate">
                             {request.requester.name}
                           </p>
-                          <p className="text-sm text-text-light truncate">
+                          <p className="text-sm text-ink-secondary truncate">
                             {request.requester.email}
                           </p>
-                          <p className="text-xs text-text-light">
+                          <p className="text-xs text-ink-secondary">
                             Sent{' '}
                             {new Date(request.createdAt).toLocaleDateString()}
                           </p>
@@ -156,11 +174,11 @@ export function FriendRequests({ userId }: FriendRequestsProps) {
                         <DropdownMenu
                           trigger={
                             <button
-                              className="p-2 hover:bg-tertiary rounded-lg transition-colors"
+                              className="p-2 hover:bg-surface-sunken rounded-lg transition-colors"
                               aria-label="Request actions"
                             >
                               <svg
-                                className="w-5 h-5 text-primary"
+                                className="w-5 h-5 text-ink"
                                 fill="none"
                                 viewBox="0 0 24 24"
                                 stroke="currentColor"
@@ -231,7 +249,7 @@ export function FriendRequests({ userId }: FriendRequestsProps) {
           {/* Sent Requests */}
           {sentRequests.length > 0 && (
             <div className="space-y-3">
-              <h3 className="text-sm font-medium text-text">
+              <h3 className="text-sm font-medium text-ink">
                 Sent Requests ({sentRequests.length})
               </h3>
               <div className="space-y-2">
@@ -247,22 +265,30 @@ export function FriendRequests({ userId }: FriendRequestsProps) {
                           />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-text truncate">
+                          <p className="text-sm font-medium text-ink truncate">
                             {request.addressee.name}
                           </p>
-                          <p className="text-sm text-text-light truncate">
+                          <p className="text-sm text-ink-secondary truncate">
                             {request.addressee.email}
                           </p>
-                          <p className="text-xs text-text-light">
+                          <p className="text-xs text-ink-secondary">
                             Sent{' '}
                             {new Date(request.createdAt).toLocaleDateString()}
                           </p>
                         </div>
                       </div>
-                      <div className="flex-shrink-0">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-warning/20 text-warning">
-                          Pending
-                        </span>
+                      <div className="flex flex-shrink-0 items-center gap-2">
+                        <Badge variant="warning">Pending</Badge>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleCancelRequest(request._id)}
+                          isLoading={cancelingId === request._id}
+                          disabled={cancelRequestMutation.isPending}
+                          className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                        >
+                          Cancel
+                        </Button>
                       </div>
                     </div>
                   </Card>

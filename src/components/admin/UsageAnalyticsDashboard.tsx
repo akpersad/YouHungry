@@ -141,16 +141,13 @@ export function UsageAnalyticsDashboard() {
     } else if (trend.startsWith('-')) {
       return <ArrowDownRight className="h-4 w-4 text-destructive" />;
     }
-    return <Activity className="h-4 w-4 text-text-light" />;
+    return <Activity className="h-4 w-4 text-ink-secondary" />;
   };
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <RefreshCw
-          className="h-8 w-8 animate-spin text-primary"
-          role="status"
-        />
+        <RefreshCw className="h-8 w-8 animate-spin text-ink" role="status" />
       </div>
     );
   }
@@ -160,8 +157,8 @@ export function UsageAnalyticsDashboard() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-text">Usage Analytics</h2>
-          <p className="text-text-light">
+          <h2 className="text-2xl font-bold text-ink">Usage Analytics</h2>
+          <p className="text-ink-secondary">
             Track API usage, user behavior, and feature adoption
           </p>
         </div>
@@ -187,17 +184,17 @@ export function UsageAnalyticsDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <Card className="p-6">
             <div className="flex items-center">
-              <div className="p-2 bg-primary/10 rounded-lg">
-                <Zap className="h-6 w-6 text-primary" />
+              <div className="p-2 bg-tomato/10 rounded-lg">
+                <Zap className="h-6 w-6 text-ink" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-text-light">
+                <p className="text-sm font-medium text-ink-secondary">
                   Google Places API
                 </p>
-                <p className="text-2xl font-bold text-text">
+                <p className="text-2xl font-bold text-ink">
                   {formatNumber(analytics.apiUsage.googlePlaces.calls)}
                 </p>
-                <p className="text-xs text-text-light">
+                <p className="text-xs text-ink-secondary">
                   ${analytics.apiUsage.googlePlaces.cost.toFixed(2)} cost
                 </p>
               </div>
@@ -210,13 +207,13 @@ export function UsageAnalyticsDashboard() {
                 <BarChart3 className="h-6 w-6 text-success" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-text-light">
+                <p className="text-sm font-medium text-ink-secondary">
                   Google Maps API
                 </p>
-                <p className="text-2xl font-bold text-text">
+                <p className="text-2xl font-bold text-ink">
                   {formatNumber(analytics.apiUsage.googleMaps.calls)}
                 </p>
-                <p className="text-xs text-text-light">
+                <p className="text-xs text-ink-secondary">
                   ${analytics.apiUsage.googleMaps.cost.toFixed(2)} cost
                 </p>
               </div>
@@ -229,13 +226,13 @@ export function UsageAnalyticsDashboard() {
                 <Activity className="h-6 w-6 text-purple-600" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-text-light">
+                <p className="text-sm font-medium text-ink-secondary">
                   Internal API
                 </p>
-                <p className="text-2xl font-bold text-text">
+                <p className="text-2xl font-bold text-ink">
                   {formatNumber(analytics.apiUsage.internal.calls)}
                 </p>
-                <p className="text-xs text-text-light">Total calls</p>
+                <p className="text-xs text-ink-secondary">Total calls</p>
               </div>
             </div>
           </Card>
@@ -246,15 +243,15 @@ export function UsageAnalyticsDashboard() {
                 <AlertCircle className="h-6 w-6 text-destructive" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-text-light">
+                <p className="text-sm font-medium text-ink-secondary">
                   API Errors
                 </p>
-                <p className="text-2xl font-bold text-text">
+                <p className="text-2xl font-bold text-ink">
                   {analytics.apiUsage.googlePlaces.errors +
                     analytics.apiUsage.googleMaps.errors +
                     analytics.apiUsage.internal.errors}
                 </p>
-                <p className="text-xs text-text-light">Total errors</p>
+                <p className="text-xs text-ink-secondary">Total errors</p>
               </div>
             </div>
           </Card>
@@ -270,12 +267,12 @@ export function UsageAnalyticsDashboard() {
               <div key={feature} className="p-4 bg-surface rounded-lg">
                 <div className="flex justify-between items-center">
                   <div>
-                    <p className="text-sm font-medium text-text capitalize">
+                    <p className="text-sm font-medium text-ink capitalize">
                       {feature.replace(/([A-Z])/g, ' $1').trim()}
                     </p>
-                    <p className="text-2xl font-bold text-primary">{usage}</p>
+                    <p className="text-2xl font-bold text-ink">{usage}</p>
                   </div>
-                  <div className="text-sm text-text-light">
+                  <div className="text-sm text-ink-secondary">
                     {selectedPeriod === '7d'
                       ? 'This week'
                       : selectedPeriod === '30d'
@@ -296,25 +293,27 @@ export function UsageAnalyticsDashboard() {
             <h3 className="text-lg font-semibold mb-4">User Engagement</h3>
             <div className="space-y-4">
               <div className="flex justify-between items-center">
-                <span className="text-sm text-text-light">Total Users</span>
+                <span className="text-sm text-ink-secondary">Total Users</span>
                 <span className="font-semibold">
                   {analytics.userBehavior.totalUsers.toLocaleString()}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-text-light">Active Users</span>
+                <span className="text-sm text-ink-secondary">Active Users</span>
                 <span className="font-semibold">
                   {analytics.userBehavior.activeUsers.toLocaleString()}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-text-light">Engagement Rate</span>
+                <span className="text-sm text-ink-secondary">
+                  Engagement Rate
+                </span>
                 <span className="font-semibold text-success">
                   {analytics.userBehavior.engagementRate.toFixed(1)}%
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-text-light">
+                <span className="text-sm text-ink-secondary">
                   Avg Collections/User
                 </span>
                 <span className="font-semibold">
@@ -322,13 +321,15 @@ export function UsageAnalyticsDashboard() {
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-text-light">Avg Groups/User</span>
+                <span className="text-sm text-ink-secondary">
+                  Avg Groups/User
+                </span>
                 <span className="font-semibold">
                   {analytics.userBehavior.avgGroupsPerUser.toFixed(1)}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-text-light">
+                <span className="text-sm text-ink-secondary">
                   Avg Decisions/User
                 </span>
                 <span className="font-semibold">
@@ -342,27 +343,33 @@ export function UsageAnalyticsDashboard() {
             <h3 className="text-lg font-semibold mb-4">Capacity Planning</h3>
             <div className="space-y-4">
               <div className="flex justify-between items-center">
-                <span className="text-sm text-text-light">Current Users</span>
+                <span className="text-sm text-ink-secondary">
+                  Current Users
+                </span>
                 <span className="font-semibold">
                   {analytics.capacityPlanning.currentUsers.toLocaleString()}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-text-light">
+                <span className="text-sm text-ink-secondary">
                   Projected Growth
                 </span>
-                <span className="font-semibold text-primary">
+                <span className="font-semibold text-ink">
                   {analytics.capacityPlanning.projectedGrowth.toLocaleString()}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-text-light">Storage Usage</span>
+                <span className="text-sm text-ink-secondary">
+                  Storage Usage
+                </span>
                 <span className="font-semibold">
                   {analytics.capacityPlanning.storageUsage.toFixed(1)}%
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-text-light">API Quota Usage</span>
+                <span className="text-sm text-ink-secondary">
+                  API Quota Usage
+                </span>
                 <span className="font-semibold">
                   {analytics.capacityPlanning.apiQuotaUsage.toFixed(1)}%
                 </span>
@@ -383,14 +390,14 @@ export function UsageAnalyticsDashboard() {
                 className="flex items-center justify-between p-3 bg-surface rounded-lg"
               >
                 <div className="flex items-center">
-                  <div className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-medium">
+                  <div className="w-8 h-8 bg-tomato text-white rounded-full flex items-center justify-center text-sm font-medium">
                     {index + 1}
                   </div>
                   <div className="ml-3">
-                    <div className="text-sm font-medium text-text">
+                    <div className="text-sm font-medium text-ink">
                       {feature.name}
                     </div>
-                    <div className="text-xs text-text-light">
+                    <div className="text-xs text-ink-secondary">
                       {feature.usage} uses
                     </div>
                   </div>
@@ -403,7 +410,7 @@ export function UsageAnalyticsDashboard() {
                         ? 'text-success'
                         : feature.trend.startsWith('-')
                           ? 'text-destructive'
-                          : 'text-text-light'
+                          : 'text-ink-secondary'
                     }`}
                   >
                     {feature.trend}
@@ -426,12 +433,12 @@ export function UsageAnalyticsDashboard() {
                 className="flex items-center justify-between p-3 bg-surface rounded-lg"
               >
                 <div className="flex items-center">
-                  <Clock className="h-4 w-4 text-text-light mr-2" />
-                  <span className="text-sm font-medium text-text">
+                  <Clock className="h-4 w-4 text-ink-secondary mr-2" />
+                  <span className="text-sm font-medium text-ink">
                     {new Date(day.date).toLocaleDateString()}
                   </span>
                 </div>
-                <div className="flex gap-4 text-sm text-text-light">
+                <div className="flex gap-4 text-sm text-ink-secondary">
                   <span>{day.decisions} decisions</span>
                   <span>{day.uniqueUsers} users</span>
                 </div>
@@ -452,10 +459,10 @@ export function UsageAnalyticsDashboard() {
               (recommendation, index) => (
                 <div
                   key={index}
-                  className="flex items-start p-3 bg-primary/10 rounded-lg"
+                  className="flex items-start p-3 bg-tomato/10 rounded-lg"
                 >
                   <div className="flex-shrink-0 mt-0.5">
-                    <CheckCircle className="h-4 w-4 text-primary" />
+                    <CheckCircle className="h-4 w-4 text-ink" />
                   </div>
                   <div className="ml-3">
                     <p className="text-sm text-blue-800">{recommendation}</p>

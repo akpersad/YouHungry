@@ -4,6 +4,41 @@ import { Collection, Restaurant, User } from '@/types/database';
 import { ObjectId } from 'mongodb';
 import { getUserByClerkId } from './users';
 
+/**
+ * Attach the `lastDecisionAt` derived field (most recent completed decision)
+ * to a list of collections via a single grouped aggregation. Returns the
+ * collections unchanged when the list is empty.
+ */
+async function withLastDecision(
+  db: Awaited<ReturnType<typeof connectToDatabase>>,
+  collections: Collection[]
+): Promise<Collection[]> {
+  if (collections.length === 0) return collections;
+
+  const ids = collections.map((c) => c._id);
+  const rows = await db
+    .collection('decisions')
+    .aggregate<{ _id: ObjectId; lastDecisionAt: Date }>([
+      { $match: { collectionId: { $in: ids }, status: 'completed' } },
+      {
+        $group: {
+          _id: '$collectionId',
+          lastDecisionAt: { $max: '$createdAt' },
+        },
+      },
+    ])
+    .toArray();
+
+  const lastByCollection = new Map(
+    rows.map((row) => [row._id.toString(), row.lastDecisionAt])
+  );
+
+  return collections.map((collection) => ({
+    ...collection,
+    lastDecisionAt: lastByCollection.get(collection._id.toString()) ?? null,
+  }));
+}
+
 export async function getCollectionsByUserId(
   userId: string
 ): Promise<Collection[]> {
@@ -69,7 +104,7 @@ export async function getCollectionsByUserId(
   }
 
   logger.debug('Final collections result:', collections);
-  return collections as Collection[];
+  return withLastDecision(db, collections as Collection[]);
 }
 
 export async function getGroupCollectionsByUserId(
@@ -135,7 +170,7 @@ export async function getGroupCollectionsByUserId(
     .sort({ createdAt: -1 })
     .toArray();
 
-  return collections as Collection[];
+  return withLastDecision(db, collections as Collection[]);
 }
 
 export async function getAllCollectionsByUserId(

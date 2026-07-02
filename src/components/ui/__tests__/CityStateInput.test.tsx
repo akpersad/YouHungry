@@ -83,7 +83,7 @@ describe('CityStateInput', () => {
     const suggestion = screen
       .getByText('Los Angeles')
       .closest('div[class*="cursor-pointer"]');
-    expect(suggestion).toHaveClass('bg-primary/10');
+    expect(suggestion).toHaveClass('bg-tomato/10');
 
     // Test enter
     fireEvent.keyDown(input, { key: 'Enter' });

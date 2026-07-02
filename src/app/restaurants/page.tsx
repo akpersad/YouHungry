@@ -47,7 +47,7 @@ export default function RestaurantsPage() {
       <div className="max-w-6xl mx-auto py-6">
         <div className="mb-8">
           <div className="flex items-center justify-between mb-2">
-            <h1 className="text-3xl font-bold text-text">Restaurant Search</h1>
+            <h1 className="text-3xl font-bold text-ink">Restaurant Search</h1>
             {isAdmin && (
               <Button
                 onClick={handleRefreshCache}
@@ -60,7 +60,7 @@ export default function RestaurantsPage() {
               </Button>
             )}
           </div>
-          <p className="text-text-light">
+          <p className="text-ink-secondary">
             Discover and explore restaurants in your area or search by name.
           </p>
         </div>

@@ -1,19 +1,12 @@
 import { logger } from '@/lib/logger';
 import { NextResponse } from 'next/server';
-import { requireAuth } from '@/lib/auth';
-
-// Get admin user IDs from environment variable
-const getAdminUserIds = (): string[] => {
-  return process.env.ADMIN_USER_IDS?.split(',').map((id) => id.trim()) || [];
-};
-
+import { requireAuth, isAdminUser } from '@/lib/auth';
 export async function GET() {
   try {
     const user = await requireAuth();
 
     // Check if user is admin (server-side check)
-    const adminUserIds = getAdminUserIds();
-    const isAdmin = adminUserIds.includes(user._id.toString());
+    const isAdmin = isAdminUser(user);
 
     return NextResponse.json({
       user: {

@@ -1,18 +1,37 @@
 'use client';
 
-import { useState } from 'react';
-import { X, Check, CheckCheck, Bell, BellOff } from 'lucide-react';
+import { useEffect, useId, useRef, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { X, CheckCheck, Bell } from 'lucide-react';
 import { useInAppNotifications } from '@/hooks/useInAppNotifications';
 import { InAppNotification } from '@/types/database';
 import { cn } from '@/lib/utils';
 import { ToastNotificationService } from '@/lib/toast-notifications';
 import { trackNotificationClicked } from '@/lib/analytics';
+import { EASING, ANIMATION_DURATION } from '@/lib/animations';
+import { EmptyState } from './EmptyState';
+import { Skeleton, SkeletonGroup } from './Skeleton';
 
 interface NotificationPanelProps {
   isOpen: boolean;
   onClose: () => void;
   className?: string;
 }
+
+// Warm tinted chip per notification type — replaces the raw floating emoji.
+// `chip` pairs a tint background with its accent foreground (design tokens
+// registered as Tailwind colors in globals.css).
+const NOTIFICATION_STYLES: Record<
+  InAppNotification['type'] | 'default',
+  { emoji: string; chip: string }
+> = {
+  group_decision: { emoji: '🍽️', chip: 'bg-tomato-tint text-tomato' },
+  friend_request: { emoji: '👋', chip: 'bg-saffron-tint text-saffron' },
+  group_invitation: { emoji: '👥', chip: 'bg-olive-tint text-olive' },
+  decision_result: { emoji: '🎯', chip: 'bg-tomato-tint text-tomato' },
+  admin_alert: { emoji: '🚨', chip: 'bg-tomato-tint text-tomato' },
+  default: { emoji: '🔔', chip: 'bg-saffron-tint text-saffron' },
+};
 
 export function NotificationPanel({
   isOpen,
@@ -29,13 +48,32 @@ export function NotificationPanel({
   } = useInAppNotifications({ limit: 20 });
 
   const [selectedTab, setSelectedTab] = useState<'all' | 'unread'>('all');
+  const titleId = useId();
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
 
   const filteredNotifications = notifications.filter(
     (notification) => selectedTab === 'all' || !notification.read
   );
 
+  // Escape to close, lock body scroll, and move focus into the drawer.
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handleEscape);
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    closeButtonRef.current?.focus();
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [isOpen, onClose]);
+
   const handleNotificationClick = (notification: InAppNotification) => {
-    // Track notification click
     trackNotificationClicked({
       notificationId: notification._id.toString(),
       notificationType: notification.type,
@@ -45,28 +83,23 @@ export function NotificationPanel({
       markAsRead(notification._id.toString());
     }
 
-    // Handle navigation based on notification type
     handleNotificationAction(notification);
   };
 
   const handleNotificationAction = (notification: InAppNotification) => {
     switch (notification.type) {
       case 'friend_request':
-        // Navigate to friends page
         window.location.assign('/friends');
         break;
       case 'group_invitation':
-        // Navigate to groups page
         window.location.assign('/groups');
         break;
       case 'group_decision':
-        // Navigate to specific group
         if (notification.data?.groupId) {
           window.location.assign(`/groups/${notification.data.groupId}`);
         }
         break;
       case 'decision_result':
-        // Navigate to decision result
         if (notification.data?.groupId && notification.data?.decisionId) {
           window.location.assign(
             `/groups/${notification.data.groupId}/decisions/${notification.data.decisionId}`
@@ -77,23 +110,6 @@ export function NotificationPanel({
         ToastNotificationService.info('Notification clicked', {
           description: notification.title,
         });
-    }
-  };
-
-  const getNotificationIcon = (type: InAppNotification['type']) => {
-    switch (type) {
-      case 'group_decision':
-        return '🍽️';
-      case 'friend_request':
-        return '👋';
-      case 'group_invitation':
-        return '👥';
-      case 'decision_result':
-        return '🎯';
-      case 'admin_alert':
-        return '🚨';
-      default:
-        return '🔔';
     }
   };
 
@@ -113,145 +129,207 @@ export function NotificationPanel({
     return `${diffInDays}d ago`;
   };
 
-  if (!isOpen) return null;
+  const drawerTransition = {
+    duration: ANIMATION_DURATION.normal,
+    ease: EASING.easeOut,
+  };
 
   return (
-    <div className={cn('fixed inset-0 z-50 overflow-hidden', className)}>
-      {/* Backdrop */}
-      <div
-        className="absolute inset-0 bg-black bg-opacity-50"
-        onClick={onClose}
-      />
+    <AnimatePresence>
+      {isOpen && (
+        <div
+          className={cn('fixed inset-0 overflow-hidden', className)}
+          style={{ zIndex: 'var(--z-modal)' }}
+        >
+          {/* Backdrop */}
+          <motion.div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={onClose}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: ANIMATION_DURATION.fast }}
+          />
 
-      {/* Panel */}
-      <div className="absolute right-0 top-0 h-full w-full max-w-md bg-white shadow-xl">
-        {/* Header */}
-        <div className="flex items-center justify-between border-b border-border p-4">
-          <div className="flex items-center gap-2">
-            <Bell className="h-5 w-5 text-text-light" />
-            <h2 className="text-lg font-semibold">Notifications</h2>
-            {stats.unreadCount > 0 && (
-              <span className="rounded-full bg-destructive px-2 py-1 text-xs text-white">
-                {stats.unreadCount}
-              </span>
-            )}
-          </div>
-
-          <div className="flex items-center gap-2">
-            {stats.unreadCount > 0 && (
-              <button
-                onClick={markAllAsRead}
-                disabled={isMarkingAllAsRead}
-                className="rounded-full p-1.5 text-text-light hover:bg-surface hover:text-text disabled:opacity-50"
-                title="Mark all as read"
-              >
-                <CheckCheck className="h-4 w-4" />
-              </button>
-            )}
-
-            <button
-              onClick={onClose}
-              className="rounded-full p-1.5 text-text-light hover:bg-surface hover:text-text"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          </div>
-        </div>
-
-        {/* Tabs */}
-        <div className="border-b border-border">
-          <div className="flex">
-            <button
-              onClick={() => setSelectedTab('all')}
-              className={cn(
-                'flex-1 px-4 py-2 text-sm font-medium transition-colors',
-                selectedTab === 'all'
-                  ? 'border-b-2 border-destructive text-destructive'
-                  : 'text-text-light hover:text-text'
-              )}
-            >
-              All ({stats.total})
-            </button>
-            <button
-              onClick={() => setSelectedTab('unread')}
-              className={cn(
-                'flex-1 px-4 py-2 text-sm font-medium transition-colors',
-                selectedTab === 'unread'
-                  ? 'border-b-2 border-destructive text-destructive'
-                  : 'text-text-light hover:text-text'
-              )}
-            >
-              Unread ({stats.unreadCount})
-            </button>
-          </div>
-        </div>
-
-        {/* Notifications List */}
-        <div className="flex-1 overflow-y-auto">
-          {isLoading ? (
-            <div className="flex items-center justify-center p-8">
-              <div className="h-6 w-6 animate-spin rounded-full border-2 border-border border-t-red-500" />
-            </div>
-          ) : filteredNotifications.length === 0 ? (
-            <div className="flex flex-col items-center justify-center p-8 text-center">
-              <BellOff className="h-12 w-12 text-text-light" />
-              <p className="mt-2 text-text-light">
-                {selectedTab === 'unread'
-                  ? 'No unread notifications'
-                  : 'No notifications yet'}
-              </p>
-            </div>
-          ) : (
-            <div className="divide-y divide-gray-100">
-              {filteredNotifications.map((notification) => (
-                <button
-                  key={notification._id.toString()}
-                  onClick={() => handleNotificationClick(notification)}
-                  className={cn(
-                    'w-full p-4 text-left transition-colors hover:bg-surface',
-                    !notification.read && 'bg-primary/10'
-                  )}
+          {/* Drawer */}
+          <motion.div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={titleId}
+            className="absolute right-0 top-0 flex h-full w-full max-w-md flex-col bg-surface shadow-medium"
+            initial={{ x: '100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '100%' }}
+            transition={drawerTransition}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-border px-5 py-4">
+              <div className="flex items-center gap-2">
+                <h2
+                  id={titleId}
+                  className="font-display text-xl font-semibold text-ink"
                 >
-                  <div className="flex items-start gap-3">
-                    <div className="text-lg">
-                      {getNotificationIcon(notification.type)}
-                    </div>
+                  Notifications
+                </h2>
+                {stats.unreadCount > 0 && (
+                  <span className="rounded-full bg-tomato-tint px-2 py-0.5 text-xs font-medium tabular-nums text-tomato">
+                    {stats.unreadCount} new
+                  </span>
+                )}
+              </div>
 
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between">
-                        <h3
+              <div className="flex items-center gap-1">
+                {stats.unreadCount > 0 && (
+                  <button
+                    onClick={markAllAsRead}
+                    disabled={isMarkingAllAsRead}
+                    className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium text-ink-secondary transition-colors hover:bg-surface-sunken hover:text-ink disabled:opacity-50"
+                  >
+                    <CheckCheck className="h-4 w-4" />
+                    <span className="hidden sm:inline">Mark all read</span>
+                  </button>
+                )}
+
+                <button
+                  ref={closeButtonRef}
+                  onClick={onClose}
+                  className="rounded-full p-2 text-ink-secondary transition-colors hover:bg-surface-sunken hover:text-ink focus:outline-none focus:ring-2 focus:ring-tomato focus:ring-offset-2"
+                  aria-label="Close notifications"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Tabs */}
+            <div
+              className="flex border-b border-border px-2"
+              role="tablist"
+              aria-label="Filter notifications"
+            >
+              {(['all', 'unread'] as const).map((tab) => {
+                const isSelected = selectedTab === tab;
+                const count = tab === 'all' ? stats.total : stats.unreadCount;
+                return (
+                  <button
+                    key={tab}
+                    role="tab"
+                    aria-selected={isSelected}
+                    onClick={() => setSelectedTab(tab)}
+                    className={cn(
+                      'relative flex-1 px-4 py-3 text-sm font-medium capitalize transition-colors',
+                      isSelected
+                        ? 'text-ink'
+                        : 'text-ink-secondary hover:text-ink'
+                    )}
+                  >
+                    {tab} ({count})
+                    {isSelected && (
+                      <motion.span
+                        layoutId="notification-tab-underline"
+                        className="absolute inset-x-3 -bottom-px h-0.5 rounded-full bg-tomato"
+                      />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* List */}
+            <div className="flex-1 overflow-y-auto">
+              {isLoading ? (
+                <SkeletonGroup label="Loading notifications">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <div
+                      key={i}
+                      className="flex items-start gap-3 border-b border-border p-4"
+                    >
+                      <Skeleton className="h-10 w-10 rounded-full" />
+                      <div className="flex-1 space-y-2">
+                        <Skeleton className="h-4 w-2/3" />
+                        <Skeleton className="h-3 w-full" />
+                        <Skeleton className="h-3 w-16" />
+                      </div>
+                    </div>
+                  ))}
+                </SkeletonGroup>
+              ) : filteredNotifications.length === 0 ? (
+                <EmptyState
+                  icon={<Bell className="h-6 w-6" />}
+                  title={
+                    selectedTab === 'unread'
+                      ? "You're all caught up"
+                      : 'No notifications yet'
+                  }
+                  description={
+                    selectedTab === 'unread'
+                      ? 'Nothing unread right now — check back after your next decision.'
+                      : "When friends invite you or a group settles on a spot, you'll see it here."
+                  }
+                />
+              ) : (
+                <ul>
+                  {filteredNotifications.map((notification) => {
+                    const style =
+                      NOTIFICATION_STYLES[notification.type] ??
+                      NOTIFICATION_STYLES.default;
+                    return (
+                      <li
+                        key={notification._id.toString()}
+                        className="border-b border-border"
+                      >
+                        <button
+                          onClick={() => handleNotificationClick(notification)}
                           className={cn(
-                            'text-sm font-medium',
-                            !notification.read ? 'text-text' : 'text-text'
+                            'w-full p-4 text-left transition-colors focus:outline-none focus:ring-2 focus:ring-inset focus:ring-tomato',
+                            notification.read
+                              ? 'hover:bg-surface-sunken'
+                              : 'bg-tomato-tint'
                           )}
                         >
-                          {notification.title}
-                        </h3>
+                          <div className="flex items-start gap-3">
+                            <span
+                              className={cn(
+                                'flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full text-lg',
+                                style.chip
+                              )}
+                              aria-hidden="true"
+                            >
+                              {style.emoji}
+                            </span>
 
-                        {!notification.read && (
-                          <div className="ml-2 h-2 w-2 rounded-full bg-destructive" />
-                        )}
-                      </div>
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-start justify-between gap-2">
+                                <h3 className="text-sm font-semibold text-ink">
+                                  {notification.title}
+                                </h3>
+                                {!notification.read && (
+                                  <span
+                                    className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-tomato"
+                                    aria-label="Unread"
+                                  />
+                                )}
+                              </div>
 
-                      <p className="mt-1 text-sm text-text-light line-clamp-2">
-                        {notification.message}
-                      </p>
+                              <p className="mt-1 line-clamp-2 text-sm text-ink-secondary">
+                                {notification.message}
+                              </p>
 
-                      <p className="mt-2 text-xs text-text-light">
-                        {getNotificationTimeAgo(notification.createdAt)}
-                      </p>
-                    </div>
-
-                    {notification.read && (
-                      <Check className="h-4 w-4 text-text-light" />
-                    )}
-                  </div>
-                </button>
-              ))}
+                              <p className="mt-2 text-xs text-ink-muted tabular-nums">
+                                {getNotificationTimeAgo(notification.createdAt)}
+                              </p>
+                            </div>
+                          </div>
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
             </div>
-          )}
+          </motion.div>
         </div>
-      </div>
-    </div>
+      )}
+    </AnimatePresence>
   );
 }

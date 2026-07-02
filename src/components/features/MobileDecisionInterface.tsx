@@ -94,9 +94,9 @@ export function MobileDecisionInterface({
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] space-y-6">
         <div className="text-center">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-tertiary flex items-center justify-center">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-surface-sunken flex items-center justify-center">
             <svg
-              className="w-8 h-8 text-secondary"
+              className="w-8 h-8 text-ink-secondary"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -109,10 +109,10 @@ export function MobileDecisionInterface({
               />
             </svg>
           </div>
-          <h3 className="text-xl font-semibold text-primary mb-2">
+          <h3 className="text-xl font-semibold text-ink mb-2">
             Decision Complete!
           </h3>
-          <p className="text-secondary">
+          <p className="text-ink-secondary">
             You&apos;ve voted on all {totalCount} restaurants.
           </p>
         </div>
@@ -141,18 +141,18 @@ export function MobileDecisionInterface({
       {/* Progress Header */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-primary">
+          <h3 className="text-lg font-semibold text-ink">
             Restaurant {currentRestaurantIndex + 1} of {totalCount}
           </h3>
-          <span className="text-sm text-secondary">
+          <span className="text-sm text-ink-secondary">
             {votedCount}/{totalCount} voted
           </span>
         </div>
 
         {/* Progress Bar */}
-        <div className="w-full bg-tertiary rounded-full h-2">
+        <div className="w-full bg-surface-sunken rounded-full h-2">
           <motion.div
-            className="bg-accent h-2 rounded-full"
+            className="bg-tomato h-2 rounded-full"
             variants={progressVariants}
             initial="initial"
             animate="animate"
@@ -179,8 +179,8 @@ export function MobileDecisionInterface({
 
         {/* Vote Overlay */}
         {hasVoted && (
-          <div className="absolute inset-0 bg-primary/20 rounded-xl flex items-center justify-center">
-            <div className="bg-secondary rounded-full p-4 shadow-neumorphic-elevated">
+          <div className="absolute inset-0 bg-tomato/20 rounded-xl flex items-center justify-center">
+            <div className="bg-surface rounded-full p-4 shadow-medium">
               {votes[currentRestaurant._id.toString()] === 'yes' ? (
                 <div className="text-success text-center">
                   <svg
@@ -224,8 +224,8 @@ export function MobileDecisionInterface({
       {/* Swipe Instructions */}
       {!hasVoted && (
         <div className="text-center space-y-2">
-          <p className="text-sm text-secondary">Swipe to vote:</p>
-          <div className="flex justify-center gap-6 text-xs text-tertiary">
+          <p className="text-sm text-ink-secondary">Swipe to vote:</p>
+          <div className="flex justify-center gap-6 text-xs text-ink-muted">
             <div className="flex items-center gap-1">
               <svg
                 className="w-4 h-4"
@@ -440,39 +440,37 @@ export function MobileDecisionInterface({
       >
         <div className="space-y-6">
           <div className="grid grid-cols-3 gap-4 text-center">
-            <div className="p-4 bg-tertiary rounded-xl">
-              <div className="text-2xl font-bold text-accent">{yesVotes}</div>
-              <div className="text-sm text-secondary">Yes Votes</div>
+            <div className="p-4 bg-surface-sunken rounded-xl">
+              <div className="text-2xl font-bold text-tomato">{yesVotes}</div>
+              <div className="text-sm text-ink-secondary">Yes Votes</div>
             </div>
-            <div className="p-4 bg-tertiary rounded-xl">
+            <div className="p-4 bg-surface-sunken rounded-xl">
               <div className="text-2xl font-bold text-error">{noVotes}</div>
-              <div className="text-sm text-secondary">No Votes</div>
+              <div className="text-sm text-ink-secondary">No Votes</div>
             </div>
-            <div className="p-4 bg-tertiary rounded-xl">
-              <div className="text-2xl font-bold text-secondary">
+            <div className="p-4 bg-surface-sunken rounded-xl">
+              <div className="text-2xl font-bold text-ink-secondary">
                 {totalCount - votedCount}
               </div>
-              <div className="text-sm text-secondary">Remaining</div>
+              <div className="text-sm text-ink-secondary">Remaining</div>
             </div>
           </div>
 
           <div className="space-y-3">
-            <h4 className="font-medium text-primary">Top Picks</h4>
+            <h4 className="font-medium text-ink">Top Picks</h4>
             {topRestaurants.length > 0 ? (
               <div className="space-y-2">
                 {topRestaurants.map((restaurant, index) => (
                   <div
                     key={restaurant._id.toString()}
-                    className="flex items-center gap-3 p-3 bg-tertiary rounded-lg"
+                    className="flex items-center gap-3 p-3 bg-surface-sunken rounded-lg"
                   >
-                    <div className="w-8 h-8 bg-accent text-inverse rounded-full flex items-center justify-center text-sm font-bold">
+                    <div className="w-8 h-8 bg-tomato text-ink-inverse rounded-full flex items-center justify-center text-sm font-bold">
                       {index + 1}
                     </div>
                     <div className="flex-1">
-                      <p className="font-medium text-primary">
-                        {restaurant.name}
-                      </p>
-                      <p className="text-sm text-secondary">
+                      <p className="font-medium text-ink">{restaurant.name}</p>
+                      <p className="text-sm text-ink-secondary">
                         {restaurant.cuisine}
                       </p>
                     </div>
@@ -480,7 +478,7 @@ export function MobileDecisionInterface({
                 ))}
               </div>
             ) : (
-              <p className="text-secondary text-sm">No yes votes yet!</p>
+              <p className="text-ink-secondary text-sm">No yes votes yet!</p>
             )}
           </div>
         </div>
@@ -494,35 +492,35 @@ export function MobileDecisionInterface({
       >
         <div className="space-y-6">
           <div className="text-center">
-            <h3 className="text-xl font-bold text-primary mb-2">
+            <h3 className="text-xl font-bold text-ink mb-2">
               Decision Complete!
             </h3>
-            <p className="text-secondary">
+            <p className="text-ink-secondary">
               You voted on {totalCount} restaurants with {yesVotes} yes votes.
             </p>
           </div>
 
           {topRestaurants.length > 0 ? (
             <div className="space-y-4">
-              <h4 className="font-medium text-primary">Your Top Picks:</h4>
+              <h4 className="font-medium text-ink">Your Top Picks:</h4>
               <div className="space-y-3">
                 {topRestaurants.map((restaurant, index) => (
                   <div
                     key={restaurant._id.toString()}
-                    className="p-4 bg-tertiary rounded-xl"
+                    className="p-4 bg-surface-sunken rounded-xl"
                   >
                     <div className="flex items-start gap-3">
-                      <div className="w-8 h-8 bg-accent text-inverse rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">
+                      <div className="w-8 h-8 bg-tomato text-ink-inverse rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">
                         {index + 1}
                       </div>
                       <div className="flex-1">
-                        <h5 className="font-medium text-primary">
+                        <h5 className="font-medium text-ink">
                           {restaurant.name}
                         </h5>
-                        <p className="text-sm text-secondary">
+                        <p className="text-sm text-ink-secondary">
                           {restaurant.cuisine}
                         </p>
-                        <p className="text-xs text-tertiary mt-1">
+                        <p className="text-xs text-ink-muted mt-1">
                           {restaurant.address}
                         </p>
                       </div>
@@ -533,7 +531,7 @@ export function MobileDecisionInterface({
             </div>
           ) : (
             <div className="text-center py-8">
-              <p className="text-secondary mb-4">
+              <p className="text-ink-secondary mb-4">
                 No restaurants received yes votes.
               </p>
               <Button onClick={onRandomSelect} className="touch-target">

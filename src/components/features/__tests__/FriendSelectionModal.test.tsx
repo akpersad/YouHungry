@@ -71,18 +71,45 @@ describe('FriendSelectionModal', () => {
   it('renders modal when open', () => {
     render(<FriendSelectionModal {...defaultProps} />);
 
-    expect(screen.getByText('Invite Friends to Group')).toBeInTheDocument();
+    expect(screen.getByText('Invite to Group')).toBeInTheDocument();
     expect(
       screen.getByPlaceholderText('Search friends by name or email...')
     ).toBeInTheDocument();
   });
 
+  it('hides the email affordance when onInviteByEmail is not provided', () => {
+    render(<FriendSelectionModal {...defaultProps} />);
+
+    expect(screen.queryByText('Invite by email')).not.toBeInTheDocument();
+  });
+
+  it('invites by email when onInviteByEmail is provided', async () => {
+    const mockOnInviteByEmail = jest.fn().mockResolvedValue(undefined);
+    render(
+      <FriendSelectionModal
+        {...defaultProps}
+        onInviteByEmail={mockOnInviteByEmail}
+      />
+    );
+
+    const emailInput = screen.getByPlaceholderText('name@example.com');
+    fireEvent.change(emailInput, {
+      target: { value: 'newperson@example.com' },
+    });
+    fireEvent.click(screen.getByText('Send Invite'));
+
+    await waitFor(() => {
+      expect(mockOnInviteByEmail).toHaveBeenCalledWith('newperson@example.com');
+      expect(mockToast.success).toHaveBeenCalledWith(
+        'Invitation sent to newperson@example.com!'
+      );
+    });
+  });
+
   it('does not render when closed', () => {
     render(<FriendSelectionModal {...defaultProps} isOpen={false} />);
 
-    expect(
-      screen.queryByText('Invite Friends to Group')
-    ).not.toBeInTheDocument();
+    expect(screen.queryByText('Invite to Group')).not.toBeInTheDocument();
   });
 
   it('displays friends list', () => {
@@ -383,6 +410,6 @@ describe('FriendSelectionModal', () => {
     fireEvent.click(closeButton);
 
     // Modal should still be open
-    expect(screen.getByText('Invite Friends to Group')).toBeInTheDocument();
+    expect(screen.getByText('Invite to Group')).toBeInTheDocument();
   });
 });

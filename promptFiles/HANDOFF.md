@@ -1,6 +1,6 @@
 # Session Handoff — Fork In The Road portfolio upgrade
 
-**Last updated:** 2026-06-12
+**Last updated:** 2026-07-02 (C14 complete — **Phase 3 UI refresh DONE, all C-tasks ✅** — plus C15 bug-fix follow-ups landed on the same branch; NOT pushed, owner go-ahead pending)
 **Read this first, then:** `promptFiles/phased-execution-plan.md` (the authoritative plan), `CLAUDE.md` (repo guide).
 
 ## Workflow rules (owner-set 2026-06-11 — do not deviate)
@@ -169,21 +169,291 @@ status section above and `docs/api-auth-matrix.md`. Still true:
 - Production is LIVE (fork-in-the-road.vercel.app) with real Clerk/Mongo/Twilio/Resend/push integrations. Suppress real sends in any test/demo work; don't rotate credentials without flagging the owner.
 - The Oct 2025 "ios app prep" epic was docs-only — no Swift code exists anywhere.
 - Tailwind is ALREADY on 4.0.14 — Phase 2's "Tailwind → 4" item reduces to a minor-version bump at most; the real Phase 2 framework work is Next 15 → 16.
+- **LOCAL-DEV GOTCHA — always browse `http://localhost:3000`, NOT
+  `forkintheroad.local:3000`.** `/etc/hosts` maps `127.0.0.1
+forkintheroad.local` and `.env.local` uses a Clerk **dev** instance
+  (`pk_test`) with `NEXT_PUBLIC_APP_URL=http://localhost:3000`. Clerk dev
+  instances only trust `localhost`/`127.0.0.1`, so on the custom host the
+  client shows you signed-in (Clerk FAPI cookies on accounts.dev) but the
+  **server** can't validate the session → `auth.protect()` redirects **every**
+  request to `/sign-in`, flooding the log with `NEXT_REDIRECT` /
+  `CLERK_PROTECT_REDIRECT_TO_URL` unhandled rejections and 500-ing every data
+  fetch (dashboard shows "Internal server error"). This looks like a Mongo or
+  app bug and is neither — it's purely the domain mismatch. Making
+  `forkintheroad.local` work would need a `pk_live`/satellite domain +
+  `allowedDevOrigins` + Clerk-dashboard config; not worth it for local dev.
+  Diagnosed 2026-06-30. Separately, `src/middleware.ts` now `await`s
+  `auth.protect()` (`1859f81`) — the callback was sync + un-awaited, which by
+  itself leaked the rejection as `unhandledRejection` on every protected
+  request even on localhost when signed out.
+
+## Housekeeping completed 2026-06-12 (after Phase 2)
+
+- `housekeeping/post-phase2-verification` merged (PR #63).
+- All ~10 reopened dependabot PRs consolidated into one rollup
+  (`chore/deps-rollup`, PR #64, `11aab7d`): the 18-package minor/patch group
+  - majors twilio 6 / glob 13 / lint-staged 17 / @vercel/analytics 2 /
+    @vercel/speed-insights 2 + 4 GitHub Actions bumps + the prettier 3.8
+    repo reformat. Lockfile verified clean of corporate-registry URLs.
+    Dependabot auto-closes its PRs/branches now that main satisfies them.
+- All 58 stale remote branches deleted (epic/_, phase1/_ stack, phase2,
+  housekeeping, feature/fix branches). Remote is now `main` + `badges` +
+  live dependabot branches only.
+
+## Phase 3 — UI/UX refresh: IN PROGRESS (branch `phase3/ui-refresh`)
+
+Design-direction discussion with the owner held 2026-06-12; decisions:
+
+- **Personality: fresh, playful, social** on a **warm & appetizing**
+  foundation. References: Airbnb (warm human product craft) + Resy (dining
+  culture editorial). Anti-references: delivery-app generic, corporate SaaS
+  dashboard, cartoonish/over-gamified, AI-template slop.
+- **Palette: warm trio** — tomato/terracotta primary, saffron + olive
+  support; **whole canvas warms** (blush-tinted neutrals, hue ~35, both
+  modes; dark = warm charcoal). Replaces `#e3005a` infrared.
+- **Typography: Fraunces** display serif over existing Geist Sans UI.
+- **Both modes ship, light-led.**
+
+`/impeccable init` prerequisite DONE: `PRODUCT.md` (register: product) and
+`DESIGN.md` (full token spec, OKLCH) written at repo root — read both before
+any design work. Live-mode config at `.impeccable/live/config.json`. The token
+system landed in C3 (OKLCH values WCAG-verified as they hit `globals.css`; axe
+
+- Lighthouse a11y gate stays at error level in CI). `manifest.json`
+  theme_color + `sw.js` cache were bumped with C3.
+
+### C-task ledger (Phase 3 commit sequence — KEEP CURRENT each checkpoint)
+
+Phase 3 is sequenced as numbered commits **C1–C14**, each resolving a set of
+USER-STORIES.md rows (see that doc's "Phase 3 action" column). Status legend:
+✅ done · ◧ partial · ▶ in progress / next · ☐ not started. Non-C-task
+commits this branch: `be787c6` (design docs), `2a3b623` (PWA install-banner
+desktop fix).
+
+| C   | Scope (stories)                                                                                                                                                                                                                                                                                                     | Status   | Commit    |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | --------- |
+| C1  | Hazard sweep: gate test consoles, ConfirmDialog on destructive actions, segment error boundaries (X3,X4,O3,R7)                                                                                                                                                                                                      | ✅       | `f29e852` |
+| C2  | USER-STORIES.md code-derived story audit                                                                                                                                                                                                                                                                            | ✅       | `2c1ece2` |
+| C3  | Warm OKLCH token system + Fraunces + class-driven theming; legacy names aliased; manifest/sw bump (X5)                                                                                                                                                                                                              | ✅       | `835d5af` |
+| C4  | `ui/EmptyState` primitive, accent-tint Badge variants, semantic z-index scale (X2 primitive)                                                                                                                                                                                                                        | ✅       | `b566e55` |
+| C5  | Landing/marketing restyle (N1–N3) — **no dedicated commit**: page.tsx inherits the warm palette via C3 aliases ("restyle only"). Revisit only if it reads off after the sweep.                                                                                                                                      | (folded) | —         |
+| C6  | Decision-first dashboard hero + `/decide` route + SpinReveal + WhyThisPick (N7,S1,S2,S3,S4)                                                                                                                                                                                                                         | ✅       | `61d7e04` |
+| C7  | **Loading & empty states (dashboard)**: skeleton lib already existed → made base `Skeleton` decorative + new `SkeletonGroup` (announce once); `CollectionList` loading→skeleton, zero-state→`EmptyState`; activity-feed loading→skeleton rows (N4 done, X1 dashboard). C9–C12 apply skeletons to remaining surfaces | ✅       | `f0ed224` |
+| C8  | Group decision full-page flow: VoteBreakdown, localStorage draft, presence line, tap-to-rank, past-decisions (O4,O6,O7,O8,V3,V4,V5,V6,V7)                                                                                                                                                                           | ✅       | `dd9c232` |
+| C9  | Restaurant search: skeletons, sort affordance, `normalizeRestaurantId` correctness fix (N6)                                                                                                                                                                                                                         | ✅       | `9472e2e` |
+| C10 | Collection cards + restyle: card stats (count/last decided), weight-viz recolor, create-collection (N5,R3,S6)                                                                                                                                                                                                       | ✅       | `7b4628e` |
+| C11 | Groups & friends: single Invite flow, cancel sent request via sender DELETE on `api/friends/requests/[id]` (O1,O2,V1,R4)                                                                                                                                                                                            | ✅       | `fae0832` |
+| C12 | History + profile restyle: re-decide from history, date grouping, remove fake calendar, manual/confirm/prefs (R1,R2,R5,S5,S7)                                                                                                                                                                                       | ✅       | `0a42114` |
+| C13 | Notification center (V2): desktop bell (`6be3bd5`) + shared `NotificationCenterProvider`, mobile More-menu entry w/ unread badge, drawer restyle (Fraunces, warm type-tinted chips, dialog semantics, skeleton, EmptyState)                                                                                         | ✅       | `7ac03a9` |
+| C14 | Cleanup: FULL legacy-alias retirement (owner decision A), Mascot removed + error/404 rebuilt on-brand (owner decision B), final USER-STORIES action-column pass                                                                                                                                                     | ✅       | `bb67f6c` |
 
 ## Next actions
 
-1. **Owner: push go-ahead for `housekeeping/post-phase2-verification`**
-   (badges-branch Vercel fix + this handoff update), then merge.
-2. **Owner one-time GitHub UI setup (still pending):** branch protection on
+1. **Owner one-time GitHub UI setup (still pending):** branch protection on
    `main` — required PR checks per `docs/ci-quality-gates.md`
    (Types/Lint/Format, Unit Tests, Build, E2E Smoke, Accessibility,
-   Lighthouse).
-3. Owner housekeeping (non-blocking): review/merge the ~10 open dependabot
-   PRs (all majors or grouped minors — CI gates them now); delete stale
-   remote branches (12 Phase 1 stack branches, `phase2/ci-quality-gates`,
-   `feature/upgrade-plan-rework`, `fix/dependabot-major-bumps`).
-4. Then **Phase 3 — UI/UX refresh** per `phased-execution-plan.md`: starts with the design-direction discussion with the owner (palette/typography/style; owner NOT tied to `#e3005a`), `/impeccable init` prerequisite.
-5. Later candidates recorded from the Phase 2 honesty pass: tiered-consensus crash edge, voteBreakdown >3-rank scoring, getCurrentUser placeholder auto-create, ADMIN_USER_IDS id-form footgun, hardcoded admin phone, proxy.ts rename when clerk#8302 closes, eslint 10 retest.
+   Lighthouse). Also still pending: `gh auth login -h github.com` as
+   akpersad (CLI can't create PRs until then).
+2. **Phase 3 COMPLETE (C1–C14 all ✅, `bb67f6c`)** — see the ledger above and
+   the C14 completion notes below. Owner to review + push/PR when ready
+   (never push without the owner's go-ahead). Next phase per plan: Phase 4
+   (README) — regroup with the owner first.
+   Validate each commit against the axe lane + full pre-push.
+   C13 notes (`7ac03a9`): **V2** was the last ❌ story — the in-app channel
+   existed (Bell/Panel components + `/api/notifications`) but had no
+   user-facing entry on mobile and only a bare desktop bell. New
+   `src/components/providers/NotificationCenterProvider.tsx` (mounted in
+   `layout.tsx` inside `QueryProvider`, wrapping both `AppLayout` and
+   `RootNavigation`) holds one `NotificationPanel` + its open state and exposes
+   `useNotificationCenter() → { isOpen, open, close }` (safe no-op default so
+   consumers never crash without the provider). The panel mounts **only for
+   signed-in users** so its polling `useInAppNotifications` hook doesn't run
+   otherwise. `Header` dropped its local `useState` + mounted panel and calls
+   `open()`; `useMobileNavigation` adds a "Notifications" More-menu action
+   (heroicons `BellIcon`) with an unread-count badge, and `QuickActionSheet`
+   gained an optional trailing `badge` slot to render it. The panel was
+   restyled from a plain white sheet into a drawer: framer-motion slide-in +
+   fading backdrop, dialog semantics (`role="dialog"`, `aria-modal`,
+   `aria-labelledby`, Escape-to-close, body-scroll lock, focus moved to the
+   close control on open), a Fraunces (`font-display`) title, warm
+   type-tinted icon chips (tomato/saffron/olive `--*-tint`) replacing the
+   floating emoji, `SkeletonGroup` loading rows instead of a spinner, and the
+   `EmptyState` primitive with caught-up vs never-had-any copy. Cold hardcoded
+   colors removed (`divide-gray-100`, `bg-white`, `bg-black bg-opacity-50`).
+   **Token-system root fix (`globals.css`):** the canonical design tokens were
+   only CSS vars + hand-written `.bg-*/.text-*` classes, never registered with
+   Tailwind — so opacity modifiers (`bg-surface/60`), `divide-*`, `ring-*` and
+   utility classes for the accent tints did NOT generate, which is why the
+   first cut of the panel used inline `style` props. Fixed properly by adding
+   an **`@theme inline`** block that registers the canonical tokens as Tailwind
+   colors (`--color-tomato`/`-tint`, `saffron`/`-tint`, `olive`/`-tint`,
+   `surface`/`-sunken`, `border`/`-strong`, `ink`/`-secondary`/`-muted`).
+   `inline` makes the generated utilities reference the CSS vars directly, so
+   the `.dark` overrides still flip them; verified in the compiled CSS
+   (`.bg-tomato-tint{background-color:var(--tomato-tint)}`). Purely additive —
+   where a name overlaps a hand-written class the values are identical and the
+   hand-written (unlayered) rule still wins; the legacy `bg-primary`/`-text`
+   aliases (which DO still collide on the `primary` name and stay no-op for
+   opacity) are the C14 alias-retirement job. The panel now uses `bg-tomato`,
+   `text-olive`, `bg-*-tint` etc. — zero inline color styles remain (only the
+   `--z-modal` z-index token, which has no utility equivalent by design).
+   No test renders Header/nav/panel, so no suite needed updating. Validation:
+   full pre-push green (129 suites, 1612 passed / 12 skipped, build OK) **and
+   the axe lane** `test:accessibility` green (22 passed / 9 skipped / 0 failed;
+   the `[WebServer]` `/sign-in` redirect noise is the documented harmless Clerk
+   dev-instance behavior, clerk#8302 territory).
+   C12 notes (`0a42114`): **R2** — `/history` flat list is now
+   `groupDecisionsByDate` sections (Today / Yesterday / Earlier this week /
+   This month / then `Month YYYY`) with sticky per-group headers; the
+   `viewMode` list/calendar toggle and the "Calendar view coming soon"
+   placeholder are **gone** (the fake calendar was an anti-slop dead-end).
+   Loading is a layout-mirroring `SkeletonGroup` (X1); the zero-state is the
+   `EmptyState` primitive with **filter-aware** copy (distinguishes "no
+   matches" from "no decisions yet") + a CTA (X2). The redundant duplicate
+   mobile/desktop search inputs were collapsed to one. **R1** — every card
+   has a "Decide again" action (desktop action column + mobile dropdown);
+   `handleDecideAgain` routes personal decisions → `/decide?collectionId=`
+   and group decisions → `/groups/[id]`. **S5** — `ManualDecisionForm`
+   selects/textarea moved onto `input-base` (dropped `border-quinary`); the
+   personal/group radios became a **segmented control** (kept real radio
+   inputs + label text "Personal"/"Group" + `role="radiogroup"` so the
+   existing `getByLabelText`/`getByRole('combobox')` tests stay green); group
+   & restaurant selects gained `htmlFor` labels (1.3.1). **S7** —
+   `DecisionResultModal` "Planned visit" box moved off cold
+   `text-blue-900/800` onto a warm tomato tint (fill only, no border+shadow);
+   reasoning box onto warm ink tokens; `tabular-nums` on dates/amounts. Two
+   `DecisionResultModal.test` string assertions were updated for the
+   sentence-cased "Planned visit" / "Selection reasoning". **R5/X1** —
+   `/profile` full-screen spinner → `ProfileSkeleton` that mirrors the
+   settings-card layout; the amount input gained `aria-invalid` +
+   `aria-describedby`. The profile loading-state test now asserts the
+   skeleton's "Loading profile settings" region. **Note:** the design
+   manual (`DESIGN-UI-UX-SKILLS.md`) was expanded and added to
+   `.prettierignore` (commit `cfc5063`) — it is hand-formatted and Prettier
+   mangles its emphasis + TOC; treat it as a vendored reference doc.
+   Validation: full pre-push green (1612 passed / 12 skipped, build OK); axe
+   lane `test:accessibility` green (20 passed, 0 failed, 2 flaky = the
+   documented dashboard Clerk dev-instance flake, passed on retry).
+   C11 notes (`fae0832`): **O2** folded the two competing group-invite
+   paths into one — `FriendSelectionModal` gained an optional
+   `onInviteByEmail` prop (email field + divider + friend list in one
+   "Invite to Group" modal); `GroupView`'s header dropdown is now Edit-only
+   and the Members section shows a single primary **Invite** button (the old
+   standalone email Modal + `showInviteModal`/`inviteEmail` state/handler are
+   gone). **R4** added withdraw-a-sent-request: `cancelFriendRequest` in
+   `lib/friends.ts` (deletes only a _pending_ request where `requesterId ===`
+   the caller), `DELETE /api/friends/requests/[id]`, `useCancelFriendRequest`,
+   and a Cancel button on sent-request cards. **O1/V1** moved the
+   Admin/member-count badges off the cold leftover `text-blue-800` onto the
+   warm `Badge` primitive (`default` for Admin, `secondary` for the count) and
+   gave invitation cards a hover affordance. Pre-push green (1612 passed).
+   Note: the GroupView close-modal test asserts the Close control is present
+   rather than that the modal unmounts — framer-motion's `AnimatePresence`
+   defers unmount in jsdom (the old test only ever checked a never-mounted
+   title); actual dismissal is covered in the `FriendSelectionModal` unit test.
+   C9 notes (`9472e2e`): search loading now renders a view-aware
+   `SkeletonGroup` grid (announces once) instead of a spinner; the sort
+   `<select>` is rendered during loading and beside results so it no longer
+   pops in only after the first page; the duplicated, brittle restaurant-id
+   comparison in `RestaurantSearchPage` (two paths) was replaced by
+   `normalizeRestaurantId` / `restaurantIdentityKeys` / `restaurantIdsMatch`
+   in `lib/utils` (googlePlaceId-preferred canonical key + key-set
+   intersection that still matches legacy bare-ObjectId entries). `lib/utils`
+   also gained a shared `formatRelativeDate` consumed by C10.
+   C10 notes (`7b4628e`): `getCollectionsByUserId` /
+   `getGroupCollectionsByUserId` attach a derived (not persisted)
+   `lastDecisionAt` via one grouped aggregation over **completed** decisions;
+   dashboard collection cards show restaurant count + "Decided N ago" /
+   "Not decided yet". WeightManagement viz moved onto warm tokens (dropped a
+   hardcoded cold `text-blue-900` info card; sunk the weight-bar track for
+   contrast — the High/Medium/Low bars already alias to olive/saffron/tomato).
+   CreateCollectionForm was already token-based, so N5 needed no restyle.
+   C8 notes: group-decision voting moved out of the cramped modal into a
+   full-page tap-to-rank view (up/down reorder; drag kept for pointers);
+   localStorage draft per decision (`fitr-vote-draft:<id>`); re-vote preloads
+   the user's own ballot via a new `myRankings` field; quiet live-dot presence
+   ("Live · N of M voted") replaces the Connected/Disconnected jargon;
+   `VoteBreakdown` (new `decide/VoteBreakdown.tsx`) renders on the completed
+   card and in a new Past decisions section (no more 24h history cliff). API:
+   `serializeGroupDecision`/`buildVoteBreakdown` in `decisions.ts` now back
+   both the REST and SSE group routes (individual ballots stay private — only
+   an aggregated breakdown + the requester's own rankings are exposed).
+   **All active group-decision e2e specs are `test.skip`** (Google Places /
+   multi-session), so behavior changes carried no e2e lane risk.
+   **Checkpoint discipline (owner-set 2026-06-12):** at each C-task commit,
+   update this ledger (status + hash) AND the USER-STORIES "Phase 3 action"
+   column for the rows it resolved — documentation must stay lossless across a
+   context clear.
+3. ~~Later candidates recorded from the Phase 2 honesty pass~~ **FIXED 2026-07-02
+   as "C15" follow-ups on this branch** (all five code candidates; each with
+   tests, full pre-push + axe green):
+   - `d0bf8ac` — tiered-consensus crash when a voted restaurant left the
+     collection (NaN/TypeError → ghost rankings skipped; empty candidate set
+     returns null winner) AND >3-rank scoring divergence (scores now strictly
+     top-3 3/2/1, matching the visible breakdown; vote API + voteSchema
+     reject >3 rankings).
+   - `d4ffeab` — getCurrentUser auto-create now uses the real Clerk profile
+     (email/name via currentUser(); defers to the webhook when no email) —
+     no more 'user@example.com' placeholders in prod; ADMIN_USER_IDS accepts
+     BOTH the Mongo \_id and the Clerk id; six routes that hand-parsed
+     ADMIN_USER_IDS consolidated onto isAdminUser(); api-auth-matrix updated.
+   - `8e91a29` — admin alert phone moved off the hardcoded +18777804236 onto
+     **`ADMIN_ALERT_PHONE`** (service skips SMS channel w/ warning when unset;
+     admin/sms route 400s for test/alert actions; route also moved onto
+     requireAdminAuth). **OWNER ACTION: set `ADMIN_ALERT_PHONE` in Vercel +
+     local env files if admin-alert SMS should keep firing** — until then the
+     SMS channel is silently (warn-logged) skipped. Note: the admin-gated
+     `/notification-test` page still hardcodes the number client-side
+     (can't read server env) — cosmetic, admin-only, left as is.
+   - Still open (unchanged): proxy.ts rename when clerk#8302 closes, eslint 10
+     retest.
+     Also fixed en route (`7a0993b`, found by C14 visual spot-check): middleware
+     `unauthenticatedUrl` must be absolute — relative '/sign-in' 500'd every
+     signed-out protected request (bug was branch-local from `1859f81`, never
+     deployed).
+
+## C14 completion notes (2026-07-02, `bb67f6c`) — Phase 3 complete
+
+Executed the pin below exactly; the pin's step list is kept for the record in
+git history only (section replaced). What matters going forward:
+
+- **`@theme inline` now registers `--color-bg` + `--color-ink-inverse`** on top
+  of the C13 set — every utility (incl. `bg-bg`, `text-ink-inverse`,
+  `accent-tomato`) generates from canonical tokens; compiled CSS contains ZERO
+  legacy names.
+- **~113 files renamed to canonical tokens.** Key discovery during execution:
+  pre-C3 there was NO Tailwind color registration at all, so every
+  variant-prefixed legacy class (`hover:bg-tertiary`, `focus:ring-primary`,
+  `dark:text-text-light`, ~250 sites) had been generating **no CSS ever**.
+  Policy applied: hand-written-class names → pure rename (pixel-identical);
+  inert `hover:`/`focus:` states → renamed canonical (ACTIVATES the intended
+  affordances: tomato focus rings/borders on inputs, sunken hovers, brand
+  spinners); inert `dark:` legacy overrides → DELETED (canonical tokens
+  self-flip in dark mode; deletion is the pixel-preserving move).
+- **`bg-primary` disambiguated by author intent**: plain = canvas → `bg-bg`;
+  `/alpha` + `text-white` pairings = brand → `bg-tomato...`; native checkboxes
+  `text-primary focus:ring-primary` → `accent-tomato focus:ring-tomato`.
+- **Dead code deleted:** unused Button `outline-accent` variant +
+  `.btn-outline-accent` CSS (byte-identical duplicate of `.btn-outline`),
+  never-imported `src/components/ui/Tabs.css` (referenced vars that never
+  existed), unused `.focus\:ring-ring` / `.text-destructive-foreground` rules.
+- **Mascot ("Nibbles") removed** per owner decision B; `error.tsx` /
+  `not-found.tsx` rebuilt as on-brand typographic pages (Fraunces headline,
+  tomato-tint icon chip / giant Fraunces 404 numeral, warm tokens, honest
+  copy-led text, quiet `hover:text-tomato` links). Visually verified light +
+  dark via production-server screenshots.
+- **Bug found & fixed during the visual spot-check (`7a0993b`):**
+  `auth.protect({ unauthenticatedUrl: '/sign-in' })` (from `1859f81`, this
+  branch only, never deployed) throws ERR_INVALID_URL inside
+  NextResponse.redirect — every signed-out visit to a protected route
+  **500'd instead of redirecting**. Fixed with
+  `new URL('/sign-in', req.url).toString()`; verified 307 → /sign-in.
+- Validation: type-check / eslint --max-warnings=0 / prettier / Jest
+  (128 suites, 1607 passed / 12 skipped) / production build all green; axe
+  lane `test:accessibility` green (22 passed / 9 skipped / 0 failed);
+  landing + 404 + sign-in screenshots checked in both modes.
+- USER-STORIES.md action column finalized (all rows resolved or explicitly
+  deferred with phase); X5 now ✅ C3–C14.
 
 ## Owner context
 

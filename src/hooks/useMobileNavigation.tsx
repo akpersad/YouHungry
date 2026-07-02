@@ -17,6 +17,7 @@ import {
   SunIcon,
   MoonIcon,
   ShieldCheckIcon,
+  BellIcon,
 } from '@heroicons/react/24/outline';
 import {
   HomeIcon as HomeIconSolid,
@@ -25,6 +26,8 @@ import {
 } from '@heroicons/react/24/solid';
 import { useTheme } from '@/components/providers/ThemeProvider';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
+import { useNotificationCenter } from '@/components/providers/NotificationCenterProvider';
+import { useUnreadNotificationCount } from '@/hooks/useInAppNotifications';
 
 export interface NavigationItem {
   id: string;
@@ -43,6 +46,8 @@ export function useMobileNavigation() {
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
   const { resolvedTheme, toggleTheme } = useTheme();
   const { isAdmin, isChecking: isCheckingAdmin } = useIsAdmin();
+  const { open: openNotifications } = useNotificationCenter();
+  const { unreadCount } = useUnreadNotificationCount();
 
   // Determine active tab based on current path
   const getActiveTab = (path: string): string => {
@@ -102,13 +107,26 @@ export function useMobileNavigation() {
   const moreMenuActions =
     isLoaded && isSignedIn
       ? [
-          // User info section
+          // User info section — doubles as the profile/settings entry
           {
             id: 'user-info',
             label: user?.firstName ? `Hi, ${user.firstName}` : 'Account',
-            icon: <UserIcon className="w-5 h-5" />,
+            icon: <Cog6ToothIcon className="w-5 h-5" />,
             onClick: () => router.push('/profile'),
             variant: 'default' as const,
+          },
+          // Notifications — mobile entry point to the shared notification center
+          {
+            id: 'notifications',
+            label: 'Notifications',
+            icon: <BellIcon className="w-5 h-5" />,
+            onClick: openNotifications,
+            badge:
+              unreadCount > 0 ? (
+                <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 py-0.5 text-xs font-medium text-white tabular-nums">
+                  {unreadCount > 99 ? '99+' : unreadCount}
+                </span>
+              ) : undefined,
           },
           // Separator (we'll handle this in the UI)
           {
@@ -128,12 +146,6 @@ export function useMobileNavigation() {
             label: 'Analytics',
             icon: <ChartBarIcon className="w-5 h-5" />,
             onClick: () => router.push('/analytics'),
-          },
-          {
-            id: 'profile',
-            label: 'Profile Settings',
-            icon: <Cog6ToothIcon className="w-5 h-5" />,
-            onClick: () => router.push('/profile'),
           },
           // Admin Dashboard - only show for authorized admins
           ...(isAdmin && !isCheckingAdmin
