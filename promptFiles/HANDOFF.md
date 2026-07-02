@@ -1,9 +1,69 @@
 # Session Handoff — Fork In The Road portfolio upgrade
 
-**Last updated:** 2026-07-02 (Phase 3 MERGED ✅ as PR #73 `31487c9`; Phase 4/v2 planning session in progress on `phase4/readme-v2-plan`)
+**Last updated:** 2026-07-02 (v2 Phase 0 MERGED ✅ as PR #74 `b0fa86d`; **v2 Phase 1 BUILT on `v2/foundations`, all 6 commits local, pre-push green, awaiting owner push go-ahead**)
 **Read this first, then:** `promptFiles/v2/CHARTER.md` + `promptFiles/v2/WORKPLAN.md` (the authoritative plan for all v2 work — supersedes `phased-execution-plan.md` phases 4–8), `CLAUDE.md` (repo guide).
 
-## CURRENT: Phase 4 / v2 planning (branch `phase4/readme-v2-plan`, 2026-07-02)
+## CURRENT: v2 Phase 1 — Foundations & test rig (branch `v2/foundations`, 2026-07-02)
+
+All WORKPLAN Phase 1 deliverables are DONE in 6 commits (`ed60956..2cd5b6a`);
+full pre-push green (type/lint/format/jest 1677 passed incl. 62 new v2-area
+tests/build), exit demo green, v2 e2e 3/3 green, v1 e2e:fast at baseline
+(43 passed + 2 flaky-passed-on-retry). **Ready to push on the owner's word —
+not pushed.**
+
+What landed (one commit each, in order):
+
+1. `ed60956` **Dual root layouts.** v1 app tree moved wholesale into
+   `src/app/(v1)/` (pure git mv, zero URL changes; `api/`, `favicon.ico`,
+   `sitemap.ts` stay at app root). `src/app/(v2)/` is a second ROOT layout
+   (own `<html>/<body>` + `v2.css` placeholder tokens — real identity is
+   Phase 2). `/beta` placeholder page; middleware makes `/beta(.*)` public.
+   Unknown public paths still 404 cleanly (verified).
+2. `e717495` **v2 data model** (`src/lib/v2/schema.ts` + `db.ts` +
+   `tokens.ts`): forks/places/lists/crews/guests docs; ONE identity rule
+   (Participant = userId XOR guestId, guests carry zero PII);
+   `ensureV2Indexes()` is the single index authority (unique fork `code`,
+   2dsphere places, flat participant arrays). Guest cookie + fork vote
+   token = HMAC-SHA256 under `V2_TOKEN_SECRET` (new env var, in .env.local
+   - env.example); share codes: 10 chars, unambiguous 31-char alphabet.
+3. `9d6d81d` **Decision math ported PURE** (`decision-engine.ts`): decay
+   weight (30-day, floor-days, 10% floor), weighted spin, 3/2/1 ranked
+   consensus w/ ghost-skip + random tie-break — history/clock/rng all
+   injected. `forks.ts`: createFork/getSelectionHistory/spinFork (enough
+   for the exit demo; vote orchestration is Phase 3/4). 57 tests pin v1
+   parity (decay curve, bucket boundaries, tie-breaks) + lifecycle guards.
+4. `0445145` **Hard notification-suppression seam**
+   (`src/lib/notification-suppression.ts`): external sends (Twilio SMS +
+   Verify, Resend, web push) only when `VERCEL_ENV=production` or explicit
+   `ALLOW_REAL_NOTIFICATIONS=true`; guarded at ALL 7 provider call sites
+   incl. both Twilio Verify starts and Resend's validateConfiguration
+   (which really POSTs). Replaces v1's dev "redirect SMS to test number"
+   (which still billed Twilio).
+5. `bb5efae` **Dev DB + seed + squad.** `npm run seed:v2-dev` (idempotent):
+   creates the 5-user Clerk DEV-instance squad (`fitr.<role>+clerk_test@example.com`,
+   OTP 424242, password in `scripts/v2/test-squad.ts`, username
+   `fitr_<role>` — the dev instance still requires usernames), seeds
+   `you-hungry-v2-dev` with 12 fictional `dev-*` places (Places API never
+   billed), starter list, staggered history (2/6/12/40 days), one guest;
+   applies indexes. Refuses prod DB name + non-sk_test Clerk keys.
+   `npm run demo:v2-foundations` = Phase 1 exit demo (asserting weights
+   0.16/0.46/1.00 + persistence) — PASSING. `tsx` added as devDep
+   (lockfile verified clean of elilillyco).
+6. `2cd5b6a` **Playwright v2 lane.** `v2-setup` + `v2-beta` projects
+   (`npm run test:e2e:v2`); organizer storage state at
+   `playwright/.auth/v2-organizer.json`; v1 `setup` project pinned to
+   `e2e/auth.setup.ts` (v1 lanes frozen, not extended).
+
+**⚠️ Owner-visible env change:** `.env.local` `MONGODB_DATABASE` switched
+`you-hungry` → **`you-hungry-v2-dev`** — local dev (v1 AND v2) no longer
+touches the production database (it previously wrote straight to prod
+Atlas). Flip it back temporarily if you need local v1 against real data.
+`V2_TOKEN_SECRET` was also added to `.env.local` (random, dev-only).
+
+**Next session:** Phase 2 (`v2/identity`) per WORKPLAN.md, cut from main
+after this PR merges. Read DESIGN-UI-UX-SKILLS.md first (design-work rule).
+
+## Previous: Phase 4 / v2 planning (branch `phase4/readme-v2-plan`, MERGED as PR #74)
 
 Owner directive: v2 is a **full product re-imagination** owned by Fable —
 original thesis, new visual identity, decision-first IA with guest voting
