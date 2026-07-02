@@ -91,6 +91,33 @@ signed-out + signed-in lock-in + vibe filter, the full 3-user vote
 gallery specs incl. both-mode axe scans — all against the seeded dev DB
 (`npm run seed:v2-dev` re-run first; Places API never billed).
 
+**Adversarial review + hardening commit (same session):** a 28-agent
+workflow code review of the branch confirmed 10 findings; ALL were fixed at
+the root in the closing commit:
+
+- **Vote integrity under concurrency** (the serious cluster): the ballot
+  upsert is now a single atomic in-place replace (revotes have no delete
+  window) or a presence-guarded push (double-submits can't duplicate
+  ballots); closes now **seal** the fork (status flip) first and compute
+  consensus from the sealed document, so the persisted result always
+  agrees with the persisted ballots, a crashed closer's seal gets finished
+  by the next settle, and a rival's result is never overwritten
+  (result-absent guard); the zero-ballot expire is guarded on `'votes.0'`
+  so a ballot that beats the deadline closes the fork instead of being
+  discarded; `spinFork` refuses to report an outcome that lost the
+  persistence race.
+- **Honest failure classification:** new `V2DomainError` carries
+  user-facing messages + status; everything else is a real 500 with a
+  generic body (raw driver/internal messages never reach clients);
+  `getV2User` no longer swallows DB errors into null (an Atlas blip used
+  to read as "Unauthorized").
+- **Validation/authorization:** duplicate `optionPlaceIds` rejected
+  (one place twice is not a choice); fork creation verifies the caller
+  OWNS a `list` source; `places/nearby` no longer coerces absent lat/lng
+  to 0,0 (Number(null) footgun); `getOpenForksForUser` now settles each
+  candidate, so dead forks can't haunt the "Live now" rail as
+  "Closes in 0:00" forever.
+
 **Known deferred items:** result place details (address/rating) on the fork
 room use option names only — place-detail enrichment lands with Phase 5;
 "keep this one" (save winner to a list) is Phase 5 per WORKPLAN; per-IP

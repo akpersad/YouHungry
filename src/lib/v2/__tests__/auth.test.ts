@@ -101,10 +101,10 @@ describe('getV2User', () => {
     expect(users.findOneAndUpdate).not.toHaveBeenCalled();
   });
 
-  it('returns null instead of throwing on DB errors', async () => {
+  it('propagates DB errors — an outage must never masquerade as signed-out', async () => {
     (auth as jest.Mock).mockResolvedValue({ userId: 'user_x' });
     (getV2Db as jest.Mock).mockRejectedValue(new Error('atlas down'));
-    expect(await getV2User()).toBeNull();
+    await expect(getV2User()).rejects.toThrow('atlas down');
   });
 });
 

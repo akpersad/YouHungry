@@ -1,5 +1,6 @@
 import { ObjectId } from 'mongodb';
 import { getV2Db } from './db';
+import { V2DomainError, notFound } from './errors';
 import { mintForkCode } from './tokens';
 import {
   resolveConsensus,
@@ -30,9 +31,14 @@ import type {
  *
  * Lifespan enforcement is lazy — there is no cron. Every read path funnels
  * through `settleFork`, which closes an overdue vote (consensus over
- * whatever ballots exist) or expires an overdue fork with none. All
- * status-changing writes are guarded on `status: 'open'`, so concurrent
- * settlers/voters can't double-close.
+ * whatever ballots exist) or expires an overdue fork with none.
+ *
+ * Concurrency model: ballot writes are single atomic updateOnes guarded on
+ * `status: 'open'` (in-place replace for revotes, presence-guarded push for
+ * first ballots — no delete window, no duplicates), and a close SEALS the
+ * fork by flipping that status before computing the outcome from the sealed
+ * document — so the persisted result always agrees with the persisted
+ * ballots (see closeForkWithConsensus).
  */
 
 /** Default lifespan when the caller doesn't set one (~30 min per charter). */
@@ -179,7 +185,7 @@ export async function quickSpin(
   participant: Participant | null,
   opts: { now?: Date; rng?: Rng } = {}
 ): Promise<QuickSpinOutcome> {
-  if (options.length === 0) throw new Error('No options to spin');
+  if (options.length === 0) throw new V2DomainError('No options to spin');
   const now = opts.now ?? new Date();
 
   const history = participant ? await getSelectionHistory({ participant }) : [];
@@ -213,7 +219,7 @@ export async function lockInQuickSpin(input: {
   const now = input.now ?? new Date();
   const optionIds = input.options.map((option) => option.placeId.toString());
   if (!optionIds.includes(input.winnerPlaceId.toString())) {
-    throw new Error('Winner is not one of the options');
+    throw new V2DomainError('Winner is not one of the options');
   }
 
   const history = await getSelectionHistory({ participant: input.organizer });
@@ -259,10 +265,10 @@ export async function spinFork(
   const now = opts.now ?? new Date();
 
   const fork = await forks.findOne({ _id: forkId });
-  if (!fork) throw new Error('Fork not found');
-  if (fork.mode !== 'spin') throw new Error('Fork is not in spin mode');
-  if (fork.status !== 'open') throw new Error('Fork is no longer open');
-  if (fork.options.length === 0) throw new Error('Fork has no options');
+  if (!fork) throw notFound('Fork');
+  if (fork.mode !== 'spin') throw new V2DomainError('Fork is not in spin mode');
+  if (fork.status !== 'open') throw new V2DomainError('Fork is no longer open');
+  if (fork.options.length === 0) throw new V2DomainError('Fork has no options');
 
   const history = await getSelectionHistory(
     fork.crewId ? { crewId: fork.crewId } : { participant: fork.organizer }
@@ -282,10 +288,15 @@ export async function spinFork(
     weights: outcome.weights,
   };
 
-  await forks.updateOne(
+  const spun = await forks.updateOne(
     { _id: forkId, status: 'open' },
     { $set: { result, status: 'closed', updatedAt: now } }
   );
+  if (spun.matchedCount === 0) {
+    // A concurrent spin or settle won — never report an outcome that
+    // wasn't the one persisted.
+    throw new V2DomainError('Fork is no longer open');
+  }
 
   return result;
 }
@@ -297,8 +308,9 @@ export async function spinFork(
 /**
  * Enforce `closesAt` on read. An overdue vote fork with ballots closes with
  * a consensus result; an overdue fork with nothing to decide on expires.
- * Concurrency-safe: the write is guarded on `status: 'open'`, and on a lost
- * race we re-read and return whatever the winner persisted.
+ * Concurrency-safe: every status write is guarded, and the vote branch
+ * seals the ballot box before deciding (see closeForkWithConsensus), so a
+ * ballot that beat the deadline is never discarded.
  */
 export async function settleFork(
   fork: ForkDoc,
@@ -309,11 +321,35 @@ export async function settleFork(
     return fork;
   }
 
-  if (fork.mode === 'vote' && fork.votes.length > 0) {
-    return closeForkWithConsensus(fork, { now, rng: opts.rng });
+  const { forks } = await getV2Db();
+
+  if (fork.mode === 'vote') {
+    if (fork.votes.length > 0) {
+      return closeForkWithConsensus(fork, { now, rng: opts.rng });
+    }
+    // Snapshot says no ballots — expire only if that is STILL true at
+    // write time ('votes.0' guard); a ballot that lands in between wins
+    // and the fork closes with a result instead.
+    const expired = await forks.findOneAndUpdate(
+      {
+        _id: fork._id,
+        status: 'open',
+        'votes.0': { $exists: false },
+      },
+      { $set: { status: 'expired' satisfies ForkStatus, updatedAt: now } },
+      { returnDocument: 'after' }
+    );
+    if (expired) return expired;
+    const current = await forks.findOne({ _id: fork._id });
+    if (!current) return fork;
+    if (current.status === 'open') {
+      // A late ballot blocked the expiry — settle it as a real close.
+      return closeForkWithConsensus(current, { now, rng: opts.rng });
+    }
+    return current;
   }
 
-  const { forks } = await getV2Db();
+  // Spin forks carry no ballots, so the plain guarded expire is race-free.
   const settled = await forks.findOneAndUpdate(
     { _id: fork._id, status: 'open' },
     { $set: { status: 'expired' satisfies ForkStatus, updatedAt: now } },
@@ -333,21 +369,55 @@ export async function getSettledForkByCode(
 }
 
 /**
- * Resolve consensus over the fork's ballots and close it. Guarded on
- * `status: 'open'` — exactly one concurrent closer wins; losers re-read.
+ * Close a vote fork in two atomic steps:
+ *
+ * 1. **Seal** — flip `status` open→closed. Exactly one concurrent closer
+ *    wins the flip, and because every ballot write is guarded on
+ *    `status: 'open'`, the sealed document's votes array is final. The
+ *    consensus is computed from THAT array, never from the caller's
+ *    (possibly stale) snapshot — a ballot accepted before the seal always
+ *    counts; one after it is rejected outright.
+ * 2. **Finish** — persist the result, guarded on `result` being absent so
+ *    a rival closer's outcome is never overwritten. If a previous closer
+ *    sealed and crashed before finishing, the next settle completes it.
+ *
+ * A fork sealed with zero ballots resolves to `expired`, not a decision.
  */
 export async function closeForkWithConsensus(
   fork: ForkDoc,
   opts: { now?: Date; rng?: Rng } = {}
 ): Promise<ForkDoc> {
   const now = opts.now ?? new Date();
+  const { forks } = await getV2Db();
+
+  let sealed = await forks.findOneAndUpdate(
+    { _id: fork._id, status: 'open' },
+    { $set: { status: 'closed' satisfies ForkStatus, updatedAt: now } },
+    { returnDocument: 'after' }
+  );
+  if (!sealed) {
+    const current = await forks.findOne({ _id: fork._id });
+    if (!current) return fork;
+    // Someone else settled it — done, unless they sealed without
+    // finishing (crash between the two steps): then finish for them.
+    if (current.status !== 'closed' || current.result) return current;
+    sealed = current;
+  }
+
   const outcome = resolveConsensus(
-    ballotsFromVotes(fork),
-    fork.options.map((option) => option.placeId.toString()),
+    ballotsFromVotes(sealed),
+    sealed.options.map((option) => option.placeId.toString()),
     opts.rng
   );
+
   if (!outcome.winnerId) {
-    throw new Error('Cannot close a vote with no ballots');
+    // Sealed with no ballots — an expiry, not a decision.
+    const expired = await forks.findOneAndUpdate(
+      { _id: sealed._id, result: { $exists: false } },
+      { $set: { status: 'expired' satisfies ForkStatus, updatedAt: now } },
+      { returnDocument: 'after' }
+    );
+    return expired ?? (await forks.findOne({ _id: sealed._id })) ?? sealed;
   }
 
   const result: ForkResult = {
@@ -357,13 +427,12 @@ export async function closeForkWithConsensus(
     weights: outcome.scores,
   };
 
-  const { forks } = await getV2Db();
-  const closed = await forks.findOneAndUpdate(
-    { _id: fork._id, status: 'open' },
-    { $set: { result, status: 'closed' satisfies ForkStatus, updatedAt: now } },
+  const finished = await forks.findOneAndUpdate(
+    { _id: sealed._id, result: { $exists: false } },
+    { $set: { result, updatedAt: now } },
     { returnDocument: 'after' }
   );
-  return closed ?? (await forks.findOne({ _id: fork._id })) ?? fork;
+  return finished ?? (await forks.findOne({ _id: sealed._id })) ?? sealed;
 }
 
 // ---------------------------------------------------------------------------
@@ -384,55 +453,76 @@ export async function submitVote(
 ): Promise<ForkDoc> {
   const now = opts.now ?? new Date();
   const fork = await getSettledForkByCode(code, opts);
-  if (!fork) throw new Error('Fork not found');
-  if (fork.mode !== 'vote') throw new Error('Fork is not in vote mode');
-  if (fork.status !== 'open') throw new Error('Fork is no longer open');
+  if (!fork) throw notFound('Fork');
+  if (fork.mode !== 'vote') throw new V2DomainError('Fork is not in vote mode');
+  if (fork.status !== 'open') throw new V2DomainError('Fork is no longer open');
 
   if (rankings.length === 0 || rankings.length > 3) {
-    throw new Error('Rank between one and three options');
+    throw new V2DomainError('Rank between one and three options');
   }
   const optionIds = new Set(
     fork.options.map((option) => option.placeId.toString())
   );
   const rankingIds = rankings.map((id) => id.toString());
   if (new Set(rankingIds).size !== rankingIds.length) {
-    throw new Error('Rankings must be distinct');
+    throw new V2DomainError('Rankings must be distinct');
   }
   if (rankingIds.some((id) => !optionIds.has(id))) {
-    throw new Error('Ranking references an option not on this fork');
+    throw new V2DomainError('Ranking references an option not on this fork');
   }
 
   const { forks } = await getV2Db();
-  // Dotted-path $pull condition — valid MongoDB the driver types can't
-  // express against an embedded-document array, hence the cast.
-  const voterFilter = (voter.userId
-    ? { 'voter.userId': voter.userId }
-    : { 'voter.guestId': voter.guestId }) as unknown as Partial<ForkVote>;
+  // Dotted paths into the embedded votes array — valid MongoDB the driver
+  // types can't express, hence the casts.
+  const voterPath = voter.userId ? 'votes.voter.userId' : 'votes.voter.guestId';
+  const voterId = voter.userId ?? voter.guestId;
+  const ballot: ForkVote = { voter, rankings, submittedAt: now };
 
-  // Two guarded writes, not one: Mongo can't $pull and $push the same array
-  // field in a single update. The only overlap risk is the same voter
-  // double-submitting concurrently, which at worst re-runs the $pull.
-  await forks.updateOne(
-    { _id: fork._id, status: 'open' },
-    { $pull: { votes: voterFilter } }
-  );
-  const pushed = await forks.updateOne(
-    { _id: fork._id, status: 'open' },
-    {
-      $push: { votes: { voter, rankings, submittedAt: now } },
-      $set: { updatedAt: now },
-      ...(voter.userId
-        ? { $addToSet: { participantUserIds: voter.userId } }
-        : { $addToSet: { participantGuestIds: voter.guestId ?? '' } }),
+  // Atomic upsert without a delete window: a revote is an in-place $set of
+  // the voter's existing array element (their old ballot is never removed
+  // ahead of the replacement), and a first ballot is a $push guarded on
+  // the voter NOT already being present — so a double-submit can't create
+  // duplicate ballots, and losing a race to a closer leaves the previous
+  // ballot intact. Each updateOne is atomic per document.
+  let stored = false;
+  for (let attempt = 0; attempt < 2 && !stored; attempt++) {
+    const replaced = await forks.updateOne(
+      { _id: fork._id, status: 'open', [voterPath]: voterId } as object,
+      { $set: { 'votes.$': ballot, updatedAt: now } as object }
+    );
+    if (replaced.matchedCount > 0) {
+      stored = true;
+      break;
     }
-  );
-  if (pushed.modifiedCount === 0) {
-    // Lost a race with a closer between the settle check and the write.
-    throw new Error('Fork is no longer open');
+    const pushed = await forks.updateOne(
+      {
+        _id: fork._id,
+        status: 'open',
+        [voterPath]: { $ne: voterId },
+      } as object,
+      {
+        $push: { votes: ballot },
+        $set: { updatedAt: now },
+        ...(voter.userId
+          ? { $addToSet: { participantUserIds: voter.userId } }
+          : { $addToSet: { participantGuestIds: voter.guestId ?? '' } }),
+      }
+    );
+    if (pushed.matchedCount > 0) {
+      stored = true;
+      break;
+    }
+    // Neither matched: the fork closed, or a concurrent submit from this
+    // same voter pushed first — re-check and let the replace path retry.
+    const current = await forks.findOne({ _id: fork._id });
+    if (!current || current.status !== 'open') {
+      throw new V2DomainError('Fork is no longer open');
+    }
   }
+  if (!stored) throw new V2DomainError('Fork is no longer open');
 
   const updated = await forks.findOne({ _id: fork._id });
-  if (!updated) throw new Error('Fork not found');
+  if (!updated) throw notFound('Fork');
 
   if (
     updated.status === 'open' &&
@@ -448,17 +538,27 @@ export async function submitVote(
 // Queries for the lane home
 // ---------------------------------------------------------------------------
 
-/** Open forks a user is part of, newest first — the home "live now" rail. */
+/**
+ * Open forks a user is part of, newest first — the home "live now" rail.
+ * Each candidate goes through the settling read (the lazy-close contract):
+ * an overdue fork resolves right here instead of haunting the rail as
+ * "Closes in 0:00" forever, and only genuinely open ones are returned.
+ */
 export async function getOpenForksForUser(
   userId: ObjectId,
-  limit: number = 10
+  limit: number = 10,
+  opts: { now?: Date; rng?: Rng } = {}
 ): Promise<ForkDoc[]> {
   const { forks } = await getV2Db();
-  return forks
+  const candidates = await forks
     .find({ participantUserIds: userId, status: 'open' })
     .sort({ createdAt: -1 })
     .limit(limit)
     .toArray();
+  const settled = await Promise.all(
+    candidates.map((candidate) => settleFork(candidate, opts))
+  );
+  return settled.filter((fork) => fork.status === 'open');
 }
 
 // ---------------------------------------------------------------------------

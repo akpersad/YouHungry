@@ -14,13 +14,17 @@ export async function GET(request: NextRequest) {
   try {
     await requireV2User();
     const searchParams = request.nextUrl.searchParams;
+    // Absent params stay absent — Number(null) is 0, which would pass
+    // validation and silently search the Gulf of Guinea.
+    const numberParam = (name: string) => {
+      const raw = searchParams.get(name);
+      return raw === null || raw.trim() === '' ? undefined : Number(raw);
+    };
     const input = quickSpinSchema.parse({
-      lat: Number(searchParams.get('lat')),
-      lng: Number(searchParams.get('lng')),
+      lat: numberParam('lat'),
+      lng: numberParam('lng'),
       vibe: searchParams.get('vibe') ?? undefined,
-      radiusM: searchParams.get('radiusM')
-        ? Number(searchParams.get('radiusM'))
-        : undefined,
+      radiusM: numberParam('radiusM'),
     });
 
     const places = await findNearbyPlaces(

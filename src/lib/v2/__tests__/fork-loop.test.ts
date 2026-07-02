@@ -57,12 +57,33 @@ function mockForks(overrides: Partial<ForksStub> = {}): ForksStub {
       limit: jest.fn().mockReturnThis(),
       toArray: jest.fn().mockResolvedValue([]),
     }),
-    updateOne: jest.fn().mockResolvedValue({ modifiedCount: 1 }),
+    updateOne: jest
+      .fn()
+      .mockResolvedValue({ matchedCount: 1, modifiedCount: 1 }),
     findOneAndUpdate: jest.fn().mockResolvedValue(null),
     ...overrides,
   };
   (getV2Db as jest.Mock).mockResolvedValue({ forks });
   return forks;
+}
+
+/**
+ * findOneAndUpdate stub that applies each call's $set cumulatively onto a
+ * mutable copy of `base` — mirrors the seal-then-finish close sequence.
+ * Queue exceptions first with `jest.fn().mockResolvedValueOnce(null)`.
+ */
+function cumulativeUpdates(
+  base: ForkDoc,
+  fn: jest.Mock = jest.fn()
+): jest.Mock {
+  let doc: ForkDoc = { ...base };
+  fn.mockImplementation(
+    (_filter: unknown, update: { $set?: Partial<ForkDoc> }) => {
+      doc = { ...doc, ...update.$set };
+      return Promise.resolve(doc);
+    }
+  );
+  return fn;
 }
 
 function historyReturning(docs: Partial<ForkDoc>[]) {
@@ -225,7 +246,7 @@ describe('settleFork', () => {
     expect(forks.findOneAndUpdate).not.toHaveBeenCalled();
   });
 
-  it('expires an overdue fork with no ballots', async () => {
+  it('expires an overdue vote fork only while it is STILL ballot-free', async () => {
     const fork = voteFork({ closesAt: OVERDUE });
     const expired = { ...fork, status: 'expired' as const };
     const forks = mockForks({
@@ -235,22 +256,42 @@ describe('settleFork', () => {
     const settled = await settleFork(fork, { now: NOW });
 
     expect(settled.status).toBe('expired');
+    // The 'votes.0' guard is the fix for the discarded-deadline-ballot race.
     expect(forks.findOneAndUpdate).toHaveBeenCalledWith(
-      { _id: fork._id, status: 'open' },
+      { _id: fork._id, status: 'open', 'votes.0': { $exists: false } },
       { $set: { status: 'expired', updatedAt: NOW } },
       { returnDocument: 'after' }
     );
+  });
+
+  it('closes instead of expiring when a ballot lands right at the deadline', async () => {
+    const fork = voteFork({ closesAt: OVERDUE }); // snapshot: no ballots
+    const lateBallot = vote(voter1, [fork.options[0].placeId]);
+    const withLateBallot = { ...fork, votes: [lateBallot] };
+    const forks = mockForks({
+      // Expire attempt fails its votes-empty guard…
+      findOneAndUpdate: cumulativeUpdates(
+        withLateBallot,
+        jest.fn().mockResolvedValueOnce(null)
+      ),
+      // …re-read shows the fork still open with the late ballot.
+      findOne: jest.fn().mockResolvedValue(withLateBallot),
+    });
+
+    const settled = await settleFork(fork, { now: NOW, rng: () => 0 });
+
+    expect(settled.status).toBe('closed');
+    expect(settled.result?.placeId.toString()).toBe(
+      fork.options[0].placeId.toString()
+    );
+    expect(forks.findOneAndUpdate).toHaveBeenCalledTimes(3); // expire, seal, finish
   });
 
   it('closes an overdue vote fork with ballots via consensus', async () => {
     const fork = voteFork({ closesAt: OVERDUE });
     fork.votes = [vote(voter1, [fork.options[1].placeId])];
     const forks = mockForks({
-      findOneAndUpdate: jest
-        .fn()
-        .mockImplementation((_filter, update) =>
-          Promise.resolve({ ...fork, ...update.$set })
-        ),
+      findOneAndUpdate: cumulativeUpdates(fork),
     });
 
     const settled = await settleFork(fork, { now: NOW, rng: () => 0 });
@@ -259,7 +300,9 @@ describe('settleFork', () => {
     expect(settled.result?.placeId.toString()).toBe(
       fork.options[1].placeId.toString()
     );
-    expect(forks.findOneAndUpdate).toHaveBeenCalledWith(
+    // Step 1 seals the ballot box before any outcome is computed.
+    expect(forks.findOneAndUpdate).toHaveBeenNthCalledWith(
+      1,
       { _id: fork._id, status: 'open' },
       expect.objectContaining({
         $set: expect.objectContaining({ status: 'closed' }),
@@ -318,39 +361,104 @@ describe('getSettledForkByCode', () => {
 });
 
 describe('closeForkWithConsensus', () => {
-  it('refuses to close with zero ballots', async () => {
-    mockForks();
-    await expect(closeForkWithConsensus(voteFork())).rejects.toThrow(
-      'no ballots'
-    );
+  it('resolves a zero-ballot seal to expired, never a fabricated winner', async () => {
+    const fork = voteFork(); // no ballots
+    mockForks({ findOneAndUpdate: cumulativeUpdates(fork) });
+
+    const settled = await closeForkWithConsensus(fork, { now: NOW });
+
+    expect(settled.status).toBe('expired');
+    expect(settled.result).toBeUndefined();
   });
 
-  it('persists the 3/2/1 winner as the result', async () => {
+  it('seals first, then persists the 3/2/1 winner from the sealed ballots', async () => {
     const fork = voteFork();
     const [a, b] = fork.options;
-    fork.votes = [
+    // The caller's snapshot is STALE (empty) — the sealed document carries
+    // the real ballots, and those are what must decide the winner.
+    const sealedVotes = [
       vote(voter1, [a.placeId, b.placeId]),
       vote(voter2, [a.placeId]),
     ];
     const forks = mockForks({
-      findOneAndUpdate: jest
-        .fn()
-        .mockImplementation((_filter, update) =>
-          Promise.resolve({ ...fork, ...update.$set })
-        ),
+      findOneAndUpdate: cumulativeUpdates({ ...fork, votes: sealedVotes }),
+    });
+
+    const closed = await closeForkWithConsensus(
+      { ...fork, votes: [] },
+      { now: NOW }
+    );
+
+    expect(closed.status).toBe('closed');
+    expect(closed.result?.placeId.toString()).toBe(a.placeId.toString());
+    // Scores land in result.weights — the "why this pick" data for votes.
+    expect(closed.result?.weights[a.placeId.toString()]).toBe(6);
+    expect(closed.result?.weights[b.placeId.toString()]).toBe(2);
+    // Seal (status guard), then finish (result-absent guard).
+    expect(forks.findOneAndUpdate).toHaveBeenNthCalledWith(
+      1,
+      { _id: fork._id, status: 'open' },
+      expect.anything(),
+      { returnDocument: 'after' }
+    );
+    expect(forks.findOneAndUpdate).toHaveBeenNthCalledWith(
+      2,
+      { _id: fork._id, result: { $exists: false } },
+      expect.anything(),
+      { returnDocument: 'after' }
+    );
+  });
+
+  it('finishes a seal a crashed closer left behind, and never overwrites a rival result', async () => {
+    const fork = voteFork();
+    const [a] = fork.options;
+    // Seal loses (fork already closed) but the winner never persisted a
+    // result — this closer completes the job.
+    const orphaned = {
+      ...fork,
+      status: 'closed' as const,
+      votes: [vote(voter1, [a.placeId])],
+    };
+    const forks = mockForks({
+      findOneAndUpdate: cumulativeUpdates(
+        orphaned,
+        jest.fn().mockResolvedValueOnce(null)
+      ),
+      findOne: jest.fn().mockResolvedValue(orphaned),
     });
 
     const closed = await closeForkWithConsensus(fork, { now: NOW });
 
     expect(closed.result?.placeId.toString()).toBe(a.placeId.toString());
-    // Scores land in result.weights — the "why this pick" data for votes.
-    expect(closed.result?.weights[a.placeId.toString()]).toBe(6);
-    expect(closed.result?.weights[b.placeId.toString()]).toBe(2);
-    expect(forks.findOneAndUpdate).toHaveBeenCalledWith(
-      { _id: fork._id, status: 'open' },
+    expect(forks.findOneAndUpdate).toHaveBeenLastCalledWith(
+      { _id: fork._id, result: { $exists: false } },
       expect.anything(),
       { returnDocument: 'after' }
     );
+  });
+
+  it('returns a rival closer’s finished fork untouched', async () => {
+    const fork = voteFork();
+    const rivalResult = {
+      placeId: fork.options[2].placeId,
+      decidedAt: NOW,
+      reasoning: 'rival',
+      weights: {},
+    };
+    const finished = {
+      ...fork,
+      status: 'closed' as const,
+      result: rivalResult,
+    };
+    const forks = mockForks({
+      findOneAndUpdate: jest.fn().mockResolvedValue(null),
+      findOne: jest.fn().mockResolvedValue(finished),
+    });
+
+    const closed = await closeForkWithConsensus(fork, { now: NOW });
+
+    expect(closed.result).toBe(rivalResult);
+    expect(forks.findOneAndUpdate).toHaveBeenCalledTimes(1); // seal only
   });
 });
 
@@ -411,23 +519,42 @@ describe('submitVote', () => {
     ).rejects.toThrow('not on this fork');
   });
 
-  it('upserts the ballot ($pull then $push) and tracks the participant', async () => {
+  it('stores a first ballot with a presence-guarded push and tracks the participant', async () => {
     const fork = voteFork();
     const ranking = [fork.options[0].placeId];
     const afterPush = { ...fork, votes: [vote(voter1, ranking)] };
     const forks = mockVoteFlow(fork, afterPush);
+    forks.updateOne
+      .mockResolvedValueOnce({ matchedCount: 0, modifiedCount: 0 }) // replace: no ballot yet
+      .mockResolvedValueOnce({ matchedCount: 1, modifiedCount: 1 }); // guarded push wins
 
     const updated = await submitVote(fork.code, voter1, ranking, { now: NOW });
 
     expect(updated.votes).toHaveLength(1);
+    // Attempt 1: in-place replace of an existing ballot (none yet).
     expect(forks.updateOne).toHaveBeenNthCalledWith(
       1,
-      { _id: fork._id, status: 'open' },
-      { $pull: { votes: { 'voter.userId': voter1.userId } } }
+      {
+        _id: fork._id,
+        status: 'open',
+        'votes.voter.userId': voter1.userId,
+      },
+      {
+        $set: {
+          'votes.$': { voter: voter1, rankings: ranking, submittedAt: NOW },
+          updatedAt: NOW,
+        },
+      }
     );
+    // Attempt 2: push, guarded on this voter NOT already having a ballot —
+    // a concurrent double-submit can never create duplicates.
     expect(forks.updateOne).toHaveBeenNthCalledWith(
       2,
-      { _id: fork._id, status: 'open' },
+      {
+        _id: fork._id,
+        status: 'open',
+        'votes.voter.userId': { $ne: voter1.userId },
+      },
       expect.objectContaining({
         $push: {
           votes: { voter: voter1, rankings: ranking, submittedAt: NOW },
@@ -439,6 +566,29 @@ describe('submitVote', () => {
     expect(forks.findOneAndUpdate).not.toHaveBeenCalled();
   });
 
+  it('replaces a revote in place — the old ballot never has a delete window', async () => {
+    const fork = voteFork();
+    const [a, b] = fork.options;
+    fork.votes = [vote(voter1, [a.placeId])];
+    const replaced = { ...fork, votes: [vote(voter1, [b.placeId])] };
+    const forks = mockVoteFlow(fork, replaced);
+    forks.updateOne.mockResolvedValueOnce({
+      matchedCount: 1,
+      modifiedCount: 1,
+    });
+
+    const updated = await submitVote(fork.code, voter1, [b.placeId], {
+      now: NOW,
+    });
+
+    expect(updated.votes).toHaveLength(1);
+    // One atomic $set on the matched array element; no $pull ever happens.
+    expect(forks.updateOne).toHaveBeenCalledTimes(1);
+    const update = forks.updateOne.mock.calls[0][1];
+    expect(update.$set['votes.$'].rankings).toEqual([b.placeId]);
+    expect(update.$pull).toBeUndefined();
+  });
+
   it('closes with consensus the moment quorum is reached', async () => {
     const fork = voteFork({ quorum: 2 });
     const [a, b] = fork.options;
@@ -447,9 +597,10 @@ describe('submitVote', () => {
       votes: [vote(voter1, [a.placeId]), vote(voter2, [a.placeId, b.placeId])],
     };
     const forks = mockVoteFlow(fork, afterPush);
-    forks.findOneAndUpdate.mockImplementation((_filter, update) =>
-      Promise.resolve({ ...afterPush, ...update.$set })
-    );
+    forks.updateOne
+      .mockResolvedValueOnce({ matchedCount: 0, modifiedCount: 0 })
+      .mockResolvedValueOnce({ matchedCount: 1, modifiedCount: 1 });
+    cumulativeUpdates(afterPush, forks.findOneAndUpdate);
 
     const updated = await submitVote(
       fork.code,
@@ -465,18 +616,24 @@ describe('submitVote', () => {
     expect(updated.result?.placeId.toString()).toBe(a.placeId.toString());
   });
 
-  it('fails cleanly when the push loses a race with a closer', async () => {
+  it('fails cleanly (ballot intact) when the write loses a race with a closer', async () => {
     const fork = voteFork();
+    const closed = { ...fork, status: 'closed' as const };
     const forks = mockForks({
-      findOne: jest.fn().mockResolvedValue(fork),
+      findOne: jest
+        .fn()
+        .mockResolvedValueOnce(fork) // settle read: still open
+        .mockResolvedValue(closed), // re-check after both writes miss
     });
-    forks.updateOne
-      .mockResolvedValueOnce({ modifiedCount: 1 }) // $pull
-      .mockResolvedValueOnce({ modifiedCount: 0 }); // $push blocked
+    forks.updateOne.mockResolvedValue({ matchedCount: 0, modifiedCount: 0 });
 
     await expect(
       submitVote(fork.code, voter1, [fork.options[0].placeId], { now: NOW })
     ).rejects.toThrow('no longer open');
+    // Only guarded writes ran — nothing was deleted ahead of the failure.
+    for (const call of forks.updateOne.mock.calls) {
+      expect(call[1].$pull).toBeUndefined();
+    }
   });
 });
 

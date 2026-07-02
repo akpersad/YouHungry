@@ -94,6 +94,24 @@ describe('createForkSchema', () => {
     ).toBe(false);
   });
 
+  it('rejects duplicate options — one place twice is not a choice', () => {
+    expect(
+      createForkSchema.safeParse({
+        mode: 'vote',
+        source: { kind: 'ad-hoc' },
+        optionPlaceIds: [oid(1), oid(1)],
+      }).success
+    ).toBe(false);
+    expect(
+      lockInSchema.safeParse({
+        lat: 0,
+        lng: 0,
+        optionPlaceIds: [oid(1), oid(1)],
+        winnerPlaceId: oid(1),
+      }).success
+    ).toBe(false);
+  });
+
   it('bounds lifespan and quorum', () => {
     const base = {
       mode: 'vote' as const,

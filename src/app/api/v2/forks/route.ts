@@ -1,6 +1,7 @@
 import { ObjectId } from 'mongodb';
 import { NextRequest, NextResponse } from 'next/server';
 import { participantFromUser, requireV2User } from '@/lib/v2/auth';
+import { getV2Db } from '@/lib/v2/db';
 import { createFork, getOpenForksForUser, serializeFork } from '@/lib/v2/forks';
 import {
   getPlacesByIds,
@@ -29,6 +30,20 @@ export async function POST(request: NextRequest) {
         { error: 'One or more places no longer exist' },
         { status: 400 }
       );
+    }
+
+    // A list source must be the caller's own list — provenance is not a
+    // place to reference somebody else's data (repo rule: mutations verify
+    // ownership, not just authentication).
+    if (input.source.kind === 'list') {
+      const { lists } = await getV2Db();
+      const owned = await lists.findOne({
+        _id: new ObjectId(input.source.listId),
+        ownerId: user._id,
+      });
+      if (!owned) {
+        return NextResponse.json({ error: 'List not found' }, { status: 404 });
+      }
     }
 
     const source: ForkSource =

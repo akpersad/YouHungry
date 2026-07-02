@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { logger } from '@/lib/logger';
+import { V2DomainError } from './errors';
 import type { PlaceDoc } from './schema';
 
 /**
@@ -9,8 +10,6 @@ import type { PlaceDoc } from './schema';
  * GeoJSON internals and future Google payload fields stay server-side).
  */
 
-const NOT_FOUND_MESSAGES = new Set(['Fork not found', 'List not found']);
-
 export function v2ErrorResponse(route: string, error: unknown): NextResponse {
   if (error instanceof z.ZodError) {
     return NextResponse.json(
@@ -18,17 +17,20 @@ export function v2ErrorResponse(route: string, error: unknown): NextResponse {
       { status: 400 }
     );
   }
-  if (error instanceof Error) {
-    if (error.message === 'Unauthorized') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-    if (NOT_FOUND_MESSAGES.has(error.message)) {
-      return NextResponse.json({ error: error.message }, { status: 404 });
-    }
-    // Domain rejections (closed fork, bad rankings…) are client errors.
-    logger.warn(`v2 ${route}: rejected`, { message: error.message });
-    return NextResponse.json({ error: error.message }, { status: 400 });
+  // Domain rejections (closed fork, bad rankings, 401/404…) carry a
+  // user-facing message and an explicit status.
+  if (error instanceof V2DomainError) {
+    logger.warn(`v2 ${route}: rejected`, {
+      message: error.message,
+      status: error.status,
+    });
+    return NextResponse.json(
+      { error: error.message },
+      { status: error.status }
+    );
   }
+  // Everything else is an infrastructure failure: a real 500, generic body
+  // (internal messages never reach the client), full detail to the logger.
   logger.error(`v2 ${route}: unexpected error`, { error });
   return NextResponse.json({ error: 'Something went wrong' }, { status: 500 });
 }

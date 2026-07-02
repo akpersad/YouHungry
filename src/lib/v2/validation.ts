@@ -21,6 +21,13 @@ const vibe = z
 /** Radius bounds: below ~200m a city block empties, above 5km "near" lies. */
 const radiusM = z.number().int().min(200).max(5000).optional();
 
+/** A ballot with the same place twice is one choice pretending to be two. */
+const distinctIds = <T extends z.ZodType<string[]>>(schema: T) =>
+  schema.refine(
+    (ids) => new Set(ids).size === ids.length,
+    'Places must be distinct'
+  );
+
 export const quickSpinSchema = z.object({
   lat: latitude,
   lng: longitude,
@@ -40,7 +47,7 @@ export const lockInSchema = z.object({
   lng: longitude,
   vibe,
   radiusM,
-  optionPlaceIds: z.array(objectIdString).min(1).max(24),
+  optionPlaceIds: distinctIds(z.array(objectIdString).min(1).max(24)),
   winnerPlaceId: objectIdString,
 });
 
@@ -59,7 +66,7 @@ const forkSource = z.discriminatedUnion('kind', [
 export const createForkSchema = z.object({
   mode: z.enum(['spin', 'vote']),
   source: forkSource,
-  optionPlaceIds: z.array(objectIdString).min(2).max(24),
+  optionPlaceIds: distinctIds(z.array(objectIdString).min(2).max(24)),
   /** Forks end themselves — 5 minutes to 24 hours, default 30 minutes. */
   lifespanMinutes: z.number().int().min(5).max(1440).default(30),
   quorum: z.number().int().min(2).max(50).optional(),
