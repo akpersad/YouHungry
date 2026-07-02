@@ -1,4 +1,5 @@
-import { forwardRef, type ButtonHTMLAttributes } from 'react';
+import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from 'react';
+import Link from 'next/link';
 import { cx } from './cx';
 
 /**
@@ -39,6 +40,45 @@ const sizes: Record<NonNullable<ButtonProps['size']>, string> = {
   md: 'h-11 px-4 text-base',
   lg: 'h-12 px-6 text-base',
 };
+
+// Anchors never match :enabled, so links carry their own hover/press rules.
+const linkVariants: Record<NonNullable<ButtonProps['variant']>, string> = {
+  primary: 'hover:bg-gold/85',
+  quiet: 'hover:bg-sunken',
+  ghost: 'hover:bg-gold-tint',
+  destructive: 'hover:bg-danger/85',
+};
+
+/** A navigation target dressed as a button — same variants, real <a>. */
+export function ButtonLink({
+  href,
+  variant = 'primary',
+  size = 'md',
+  className,
+  children,
+}: {
+  href: string;
+  variant?: NonNullable<ButtonProps['variant']>;
+  size?: NonNullable<ButtonProps['size']>;
+  className?: string;
+  children: ReactNode;
+}) {
+  return (
+    <Link
+      href={href}
+      className={cx(
+        base,
+        variants[variant],
+        linkVariants[variant],
+        sizes[size],
+        'active:scale-97',
+        className
+      )}
+    >
+      {children}
+    </Link>
+  );
+}
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   function Button(
