@@ -7,7 +7,7 @@ import { OpenForks } from '@/components/v2/fork/OpenForks';
  * chips, and the spin — near-me value in two taps before any account
  * exists. Signed-in users also see their live forks and the group path.
  */
-export default function BetaHome() {
+export default function Home() {
   return (
     <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-12 px-4 py-10 sm:px-6 sm:py-14">
       <section aria-label="Tonight" className="flex flex-col gap-5">

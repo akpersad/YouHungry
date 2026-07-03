@@ -14,74 +14,9 @@ const isUsingWebpack = process.argv.includes('--webpack');
 const nextConfig: NextConfig = {
   outputFileTracingRoot: __dirname,
 
-  // Performance optimizations
-  experimental: {
-    optimizeCss: true,
-    optimizePackageImports: [
-      '@tanstack/react-query',
-      'framer-motion',
-      'sonner',
-    ],
-    // Server Actions configuration to prevent ID mismatch errors
-    serverActions: {
-      bodySizeLimit: '2mb',
-      // Allow server actions from production and development origins
-      allowedOrigins:
-        process.env.NODE_ENV === 'production'
-          ? undefined // In production, use default (allow same origin)
-          : ['localhost:3000'],
-    },
-  },
-
   // Compiler optimizations
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
-  },
-
-  // Image optimization
-  images: {
-    remotePatterns: [
-      {
-        protocol: 'http',
-        hostname: 'localhost',
-        port: '',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'img.clerk.com',
-        port: '',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'maps.googleapis.com',
-        port: '',
-        pathname: '/maps/api/place/photo**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'lh3.googleusercontent.com',
-        port: '',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'maps.gstatic.com',
-        port: '',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'example.com',
-        port: '',
-        pathname: '/**',
-      },
-    ],
-    formats: ['image/webp', 'image/avif'],
-    minimumCacheTTL: 60 * 60 * 24 * 30, // 30 days
-    dangerouslyAllowSVG: true,
-    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
 
   // The /beta prefix retired at the Phase 7 cutover; links shared before
@@ -120,23 +55,6 @@ const nextConfig: NextConfig = {
           {
             key: 'Cache-Control',
             value: 'no-cache, no-store, must-revalidate',
-          },
-        ],
-      },
-      {
-        source: '/api/admin/(.*)',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'no-cache, no-store, must-revalidate, max-age=0',
-          },
-          {
-            key: 'Pragma',
-            value: 'no-cache',
-          },
-          {
-            key: 'Expires',
-            value: '0',
           },
         ],
       },
