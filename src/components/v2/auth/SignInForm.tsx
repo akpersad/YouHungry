@@ -76,7 +76,14 @@ export function SignInForm() {
             {error}
           </p>
         )}
-        <Button type="submit" loading={submitting} className="mt-1">
+        {/* Until Clerk hydrates, handleSubmit would silently drop the
+            intent — disabled is the honest state for that brief window. */}
+        <Button
+          type="submit"
+          loading={submitting}
+          disabled={!isLoaded}
+          className="mt-1"
+        >
           Sign in
         </Button>
       </form>

@@ -25,7 +25,95 @@ everyone sees the reveal. Automated in the v2 e2e lane.
 
 Commit ledger (update at every checkpoint):
 
-- _(none yet — branch just cut from main at `669f497`)_
+1. `16df09a` **docs** — WORKPLAN Phases 5+6 combined (owner decision
+   2026-07-02); ledger opened for Phase 4.
+2. `83ba6fc` **Server core.** `lib/v2/guests.ts` (signed-cookie guest
+   resolution — forged cookies never touch the DB; lazy minting on first
+   vote; rename; claim = one-way pointer, idempotent per user, 409 on
+   transfer). `forks.ts`: history follows the claim pointer; **claim
+   continuity** (a revote after claiming replaces the guest ballot in
+   place — one person never becomes two ballots); `MAX_BALLOTS` 100
+   enforced atomically in the push guard (revotes exempt); serializeFork
+   resolves viewers through claimed guests. `validation.ts`:
+   guestDisplayName (trim/collapse, control+format chars rejected — the
+   only thing a guest ever tells us) + guestVoteSchema.
+3. `20f6847` **API surface.** forks GET + live SSE serve link-bearers
+   (viewer = session → signed guest cookie → anonymous, one resolution
+   order in `lib/v2/viewer.ts`); open vote forks ship a signed fork token;
+   guest vote path layered cheapest-first (token verified BEFORE any DB
+   read → per-IP 12/min + per-fork 30/min limits → cookie/mint);
+   guests/claim endpoint; per-IP brakes on fork GET (60/min), SSE connect
+   (20/min), quick-spin (30/min — closes the deferred Phase 3 item);
+   `/f/[code]` root short link → `/beta/f/[code]`; middleware `/f(.*)`
+   public. Rate limiting REUSES v1's generic `src/lib/rate-limit.ts`
+   (Mongo fixed-window, fails open) — **exempt it from the Phase 7 purge**.
+4. `65a0847` **Guest fork room UI.** Sign-in gate dropped from the fork
+   page; guests rank + vote with just a display name (inline validation,
+   visible label); vote POST carries the fork token; the room keeps a cast
+   ballot when SSE frames from a pre-cookie stream say otherwise; copy
+   link copies the short `/f/` form; one quiet post-vote account nudge;
+   claim banner (offer / honest failure / confirmation) for signed-in
+   viewers with unclaimed guest votes.
+5. (this commit) **e2e exit demo + docs + auth-form fix.**
+   `e2e/v2/fork-links.spec.ts`: the full group-chat simulation (organizer
+   creates a quorum-3 fork; two guests vote from the raw `/f` link in
+   fresh incognito contexts, including the inline name-required check, a
+   revote, and the SSE-frames-don't-clobber-the-ballot regression pin;
+   quorum closes; the guest's still-open page converges on the reveal)
+   PLUS the claim journey (guest votes → signs in as the seeded `claimer`
+   squad user → claim banner → claim → after reload the account owns the
+   guest-era ballot). **Root-cause fix found by the claim e2e:** the v2
+   sign-in/sign-up submit buttons silently dropped the click until Clerk
+   hydrated (`if (!isLoaded) return`) — a fast human hits the same dead
+   button; they are now disabled (the honest state) for that brief window.
+
+**Validation (2026-07-02):** full pre-push green — type-check / eslint
+--max-warnings=0 / prettier / **Jest 148 suites, 1816 passed / 12 skipped
+(~40 new tests this phase)** / production build (`/f/[code]` in the route
+table). **v2 e2e lane 14/14 green** (`npm run test:e2e:v2`, production
+server, seeded dev DB): both Phase 4 journeys + all Phase 2/3 specs incl.
+the both-mode axe scans. Places API never billed; all external sends
+suppressed by the Phase 1 seam.
+
+**Phase-scope decisions (documented, not silent):**
+
+- **Result push/email to account-holders moved to Phase 5+6** — the
+  combined phase already owns "push + email for fork-closed/result"; the
+  fork page showing the winner to everyone (guests included) shipped here.
+- Orphan guest docs when a first vote fails after minting: accepted
+  (inert, zero PII, no retry amplification).
+- Guests are only as unique as their cookies by design (a cookie-clearer
+  can mint identities); the abuse controls BOUND that (per-IP + per-fork
+  rate limits, MAX_BALLOTS 100) rather than pretend to prevent it. The
+  fork link is a group-chat capability, not a public poll.
+
+**Security checklist for the PR description (WORKPLAN requires it):**
+
+- **Token forgery** — fork tokens HMAC-SHA256 under `V2_TOKEN_SECRET`,
+  constant-time compare, bound to the fork code, expiry = closesAt + 2min
+  grace (so an in-flight ballot at close fails with the honest "fork
+  closed" error, not "stale token"). Forged/expired/cross-fork tokens are
+  rejected before any DB read.
+- **Replay** — a replayed vote POST is an idempotent revote for the same
+  guest identity (atomic in-place ballot replace); without the victim's
+  httpOnly cookie a replayer only mints a fresh guest, bounded by the
+  limits below.
+- **Cookie forgery** — guest cookie is signed (httpOnly, SameSite=Lax,
+  secure in prod); invalid signatures resolve to anonymous without a DB
+  hit.
+- **Rate limits** — guest votes 12/min/IP + 30/min/fork; fork GET
+  60/min/IP (also the enumeration brake on top of ~49-bit codes); SSE
+  connects 20/min/IP; claims 10/min/user; quick-spin 30/min/IP. Mongo
+  fixed-window, fails open (availability over strictness).
+- **Vote caps** — MAX_BALLOTS 100/fork, enforced atomically in the push
+  guard; existing voters can still revote at the cap.
+- **Expiry enforcement** — lazy settle on every read path; all ballot
+  writes guarded on `status: 'open'`.
+- **Guest PII** — none: displayName (control/format characters rejected)
+  - timestamps only. Ballots stay private for guests exactly as for
+    members (aggregates + own rankings).
+- **Identity transfer** — claim is one-way and idempotent per user;
+  claiming someone else's guest identity is a 409.
 
 ## Previous: v2 Phase 3 — The Fork, core loop (MERGED ✅ as PR #78 `669f497`)
 
