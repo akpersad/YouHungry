@@ -32,6 +32,12 @@ export function BetaHeader() {
             >
               Places
             </Link>
+            <Link
+              href="/beta/crew"
+              className="rounded-md text-sm font-semibold text-ink-muted outline-none transition-colors hover:text-ink focus-visible:ring-2 focus-visible:ring-focus motion-safe:duration-100"
+            >
+              Crew
+            </Link>
           </nav>
         </div>
 
