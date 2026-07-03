@@ -2,6 +2,7 @@ import { ObjectId } from 'mongodb';
 import { getV2Db } from './db';
 import { V2DomainError, notFound } from './errors';
 import { getClaimedGuestIds } from './guests';
+import { notifyForkClosed } from './notifications';
 import { mintForkCode } from './tokens';
 import {
   resolveConsensus,
@@ -368,6 +369,9 @@ export async function spinFork(
     throw new V2DomainError('Fork is no longer open');
   }
 
+  // Our write landed (guarded above), so we announce it.
+  void notifyForkClosed({ ...fork, result, status: 'closed', updatedAt: now });
+
   return result;
 }
 
@@ -502,7 +506,13 @@ export async function closeForkWithConsensus(
     { $set: { result, updatedAt: now } },
     { returnDocument: 'after' }
   );
-  return finished ?? (await forks.findOne({ _id: sealed._id })) ?? sealed;
+  if (finished) {
+    // Exactly the caller whose result write landed announces it —
+    // rival settlers lost the guarded update above. Fire-and-forget.
+    void notifyForkClosed(finished);
+    return finished;
+  }
+  return (await forks.findOne({ _id: sealed._id })) ?? sealed;
 }
 
 // ---------------------------------------------------------------------------

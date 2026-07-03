@@ -14,6 +14,10 @@ import type { ForkDoc, ForkOption, ForkVote, Participant } from '../schema';
  * cap abuse control.
  */
 
+jest.mock('../notifications', () => ({
+  notifyForkClosed: jest.fn().mockResolvedValue(undefined),
+}));
+
 jest.mock('../db', () => ({
   getV2Db: jest.fn(),
 }));

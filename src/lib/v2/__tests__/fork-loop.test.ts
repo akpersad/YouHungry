@@ -11,6 +11,10 @@ import {
 } from '../forks';
 import type { ForkDoc, ForkOption, ForkVote, Participant } from '../schema';
 
+jest.mock('../notifications', () => ({
+  notifyForkClosed: jest.fn().mockResolvedValue(undefined),
+}));
+
 jest.mock('../db', () => ({
   getV2Db: jest.fn(),
 }));
