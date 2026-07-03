@@ -146,14 +146,13 @@ every CI run since the lanes were built. Repo-side fixes on this branch:
   detected via content-type and skipped with the flake reason instead of
   hard-failing the lane.
 
-**OWNER ACTION (one-time, GitHub → repo Settings → Secrets):** change
-`MONGODB_DATABASE` from `you-hungry` to a dedicated e2e database name
-(suggest `you-hungry-e2e`; same cluster/URI, Atlas creates it on first
-write). This unblocks the v2 lanes AND stops v1 e2e from writing to prod.
-Note: the first run against the fresh DB may surface v1 specs that
-silently depended on accumulated prod data. Separately, prod cleanup of
-the e2e residue (611 groups, clerk_test users) is worth doing but is a
-destructive owner-level pass — not touched from here.
+**RESOLVED 2026-07-03:** the owner flipped the `MONGODB_DATABASE` secret
+to a dedicated e2e database; the next CI run on `f30279b` went fully
+green (E2E Smoke, PR Tests, Accessibility, Lighthouse, Build, Unit,
+Types/Lint/Format all success). v1 e2e no longer writes to production.
+**Still open (owner-level, destructive):** cleanup of the e2e residue
+already in prod (~611 `groups`, 12 `clerk_test` users) — script it with
+a dry-run before touching Atlas.
 
 ## Previous: v2 Phase 2 — Identity & design system (MERGED ✅ as PR #77 `99c4652`)
 
