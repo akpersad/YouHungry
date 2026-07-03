@@ -186,12 +186,18 @@ export default function RootLayout({
             </ThemeProvider>
           </ErrorBoundary>
 
-          {/* Service Worker Registration */}
-          <Script
-            id="sw-register"
-            strategy="lazyOnload"
-            dangerouslySetInnerHTML={{
-              __html: `
+          {/* Service Worker: register in production only. sw.js cache-firsts
+              /_next/static on the content-hashed-filenames assumption, which
+              is false under `next dev` (stable URLs) — a dev-registered SW
+              serves stale chunks and hydration fails against fresh HTML.
+              Dev actively unregisters + evicts, so a browser that picked the
+              SW up from a local production run heals itself. */}
+          {process.env.NODE_ENV === 'production' ? (
+            <Script
+              id="sw-register"
+              strategy="lazyOnload"
+              dangerouslySetInnerHTML={{
+                __html: `
                 if ('serviceWorker' in navigator) {
                   const registerSW = function() {
                     navigator.serviceWorker.register('/sw.js', { scope: '/' })
@@ -213,8 +219,30 @@ export default function RootLayout({
                   });
                 }
               `,
-            }}
-          />
+              }}
+            />
+          ) : (
+            <Script
+              id="sw-unregister-dev"
+              strategy="lazyOnload"
+              dangerouslySetInnerHTML={{
+                __html: `
+                if ('serviceWorker' in navigator) {
+                  navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                    registrations.forEach(function(registration) { registration.unregister(); });
+                  });
+                }
+                if (window.caches) {
+                  caches.keys().then(function(keys) {
+                    keys.forEach(function(key) {
+                      if (key.indexOf('forkintheroad-') === 0) caches.delete(key);
+                    });
+                  });
+                }
+              `,
+              }}
+            />
+          )}
         </body>
       </html>
     </ClerkProvider>

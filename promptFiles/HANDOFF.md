@@ -73,6 +73,20 @@ Commit ledger (update at every checkpoint):
    Field is now "Email or username" (`type=text`,
    `autoComplete="username"`); the claim e2e signs in as `fitr_claimer`
    by USERNAME to pin it. Sign-up stays two-field email/password.
+7. (this commit) **Dev stale-chunk root fix** (owner hit hydration
+   mismatches in dev that `rm -rf .next` couldn't clear — the staleness
+   was CLIENT-side): `next.config.ts` served
+   `Cache-Control: immutable, max-age=1y` on `/_next/static` in dev too
+   (safe only for content-hashed prod filenames; dev URLs are stable, so
+   browsers kept year-old JS and hydrated stale bundles against fresh
+   HTML), and v1's service worker (scope `/`, so it controls `/beta` too)
+   cache-firsts `/_next/static` on the same assumption. Fixes: the
+   immutable header is production-only; SW registration is
+   production-only; BOTH root layouts run a dev-only SW unregister +
+   `forkintheroad-*` cache eviction so any browser that picked the SW up
+   from a local production run heals itself. Affected browsers need one
+   hard reload (Cmd+Shift+R) to flush already-cached chunks out of the
+   HTTP cache; clean thereafter.
 
 **Validation (2026-07-02):** full pre-push green — type-check / eslint
 --max-warnings=0 / prettier / **Jest 148 suites, 1816 passed / 12 skipped

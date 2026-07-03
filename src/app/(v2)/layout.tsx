@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Archivo, Spline_Sans_Mono } from 'next/font/google';
+import Script from 'next/script';
 import { ClerkProvider } from '@clerk/nextjs';
 import './v2.css';
 
@@ -53,7 +54,36 @@ export default function V2RootLayout({
             }}
           />
         </head>
-        <body className="antialiased">{children}</body>
+        <body className="antialiased">
+          {children}
+          {/* v1's service worker registers at scope '/', so it controls
+              /beta too. In dev it would serve stale, non-content-hashed
+              chunks (hydration mismatch vs fresh HTML) — unregister + evict
+              here as well, so a browser heals from either tree. The v2 SW
+              story proper is Phase 8. */}
+          {process.env.NODE_ENV !== 'production' && (
+            <Script
+              id="sw-unregister-dev"
+              strategy="lazyOnload"
+              dangerouslySetInnerHTML={{
+                __html: `
+                if ('serviceWorker' in navigator) {
+                  navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                    registrations.forEach(function(registration) { registration.unregister(); });
+                  });
+                }
+                if (window.caches) {
+                  caches.keys().then(function(keys) {
+                    keys.forEach(function(key) {
+                      if (key.indexOf('forkintheroad-') === 0) caches.delete(key);
+                    });
+                  });
+                }
+              `,
+              }}
+            />
+          )}
+        </body>
       </html>
     </ClerkProvider>
   );
