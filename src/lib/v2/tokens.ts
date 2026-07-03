@@ -79,6 +79,25 @@ interface ForkTokenPayload {
   exp: number;
 }
 
+/**
+ * Issued tokens outlive `closesAt` by this much so a ballot in flight at
+ * close is rejected for the honest reason (fork closed), not a stale token.
+ */
+export const FORK_TOKEN_GRACE_MS = 2 * 60 * 1000;
+
+/** The token issued alongside a fork view (GET response, page render). */
+export function forkTokenFor(
+  forkCode: string,
+  closesAt: Date,
+  secret?: string
+): string {
+  return signForkToken(
+    forkCode,
+    new Date(closesAt.getTime() + FORK_TOKEN_GRACE_MS),
+    secret
+  );
+}
+
 export function signForkToken(
   forkCode: string,
   expiresAt: Date,

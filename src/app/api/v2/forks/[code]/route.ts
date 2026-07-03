@@ -7,7 +7,7 @@ import {
 import { getSettledForkByCode, serializeFork } from '@/lib/v2/forks';
 import { GUEST_COOKIE } from '@/lib/v2/guests';
 import { v2ErrorResponse } from '@/lib/v2/http';
-import { signForkToken } from '@/lib/v2/tokens';
+import { forkTokenFor } from '@/lib/v2/tokens';
 import { resolveForkViewer } from '@/lib/v2/viewer';
 
 /**
@@ -24,10 +24,6 @@ import { resolveForkViewer } from '@/lib/v2/viewer';
 
 /** Scan brake: generous for humans on a fork page, hostile to enumeration. */
 const GET_LIMIT_PER_IP_PER_MIN = 60;
-
-/** Tokens outlive the fork slightly so a ballot in flight at close isn't
- * rejected for the wrong reason (the closed fork already rejects it). */
-const TOKEN_GRACE_MS = 2 * 60 * 1000;
 
 export async function GET(
   request: NextRequest,
@@ -59,12 +55,7 @@ export async function GET(
         kind: viewer.kind,
         displayName: viewer.participant?.displayName ?? null,
       },
-      forkToken: openForVotes
-        ? signForkToken(
-            fork.code,
-            new Date(fork.closesAt.getTime() + TOKEN_GRACE_MS)
-          )
-        : null,
+      forkToken: openForVotes ? forkTokenFor(fork.code, fork.closesAt) : null,
     });
   } catch (error) {
     return v2ErrorResponse('forks:get', error);
