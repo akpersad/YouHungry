@@ -124,6 +124,37 @@ room use option names only — place-detail enrichment lands with Phase 5;
 rate limiting on the public quick-spin endpoint rides with Phase 4's abuse
 controls (it is read-only + geo-bounded today).
 
+**CI e2e failures diagnosed post-push (2026-07-02) — MAJOR FINDING: the
+Playwright CI `MONGODB_DATABASE` secret points at `you-hungry`, i.e. THE
+PRODUCTION DATABASE.** Confirmed via Atlas: prod has no v2 collections (so
+every v2 spec deterministically timed out: `findNearbyPlaces` had no
+places/2dsphere index), and prod contains ~611 `groups` plus 12
+`clerk_test` users — the v1 e2e suite has been writing into production on
+every CI run since the lanes were built. Repo-side fixes on this branch:
+
+- `playwright.yml`: a "Seed v2 e2e data" step (smoke, PR, nightly jobs)
+  runs `npm run seed:v2-dev` before Playwright. The script refuses the
+  prod DB name and non-`sk_test` Clerk keys, so while the secret still
+  says `you-hungry` the job now fails FAST with an explicit message
+  instead of cryptic spec timeouts.
+- `seed-dev.ts`: fully idempotent AND concurrent-safe (smoke + PR jobs
+  seed the same DB in parallel): history forks upsert by code instead of
+  delete-and-reinsert; all unique-key upserts retry once on E11000.
+- `synthetic-monitoring.spec.ts` "Decision history has consistent schema":
+  the one genuinely flaky failure — the documented Clerk dev-instance 401
+  serves the sign-in HTML page which the test fed to JSON.parse. Now
+  detected via content-type and skipped with the flake reason instead of
+  hard-failing the lane.
+
+**OWNER ACTION (one-time, GitHub → repo Settings → Secrets):** change
+`MONGODB_DATABASE` from `you-hungry` to a dedicated e2e database name
+(suggest `you-hungry-e2e`; same cluster/URI, Atlas creates it on first
+write). This unblocks the v2 lanes AND stops v1 e2e from writing to prod.
+Note: the first run against the fresh DB may surface v1 specs that
+silently depended on accumulated prod data. Separately, prod cleanup of
+the e2e residue (611 groups, clerk_test users) is worth doing but is a
+destructive owner-level pass — not touched from here.
+
 ## Previous: v2 Phase 2 — Identity & design system (MERGED ✅ as PR #77 `99c4652`)
 
 The owner gate (`/beta/gallery`, both modes) passed and the PR merged
