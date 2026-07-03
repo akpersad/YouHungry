@@ -100,6 +100,19 @@ Commit ledger (update at every checkpoint):
    3 ballots." / "Dead even at the top between 2 options. The board
    called it."). The 3/2/1 scoring still decides winner and order —
    only the LANGUAGE changed.
+9. (this commit) **CI fixes from the PR's first Playwright run.**
+   (a) `V2_TOKEN_SECRET` was only in `.env.local`; the CI workflow env
+   never had it, so the fork room's server render (which now signs fork
+   tokens) 500'd and all four v2 fork journeys failed. The workflow now
+   sets a LITERAL test value in every env block (deliberate: it signs
+   tokens only on the throwaway in-runner server, and a missing GitHub
+   secret would silently 500 again). (b) The v1 dashboard axe
+   heading-order failure was structural, not flaky: "Recent Activity"
+   was a fixed h3 whose validity depended on CollectionList's h2 being
+   rendered — while collections are loading/erroring there is no h2 and
+   the page reads h1 → h3. CardTitle grew an `as` prop (default h3
+   unchanged) and the dashboard section is now h2, valid in every
+   sibling state.
 
 **Validation (2026-07-02):** full pre-push green — type-check / eslint
 --max-warnings=0 / prettier / **Jest 148 suites, 1816 passed / 12 skipped

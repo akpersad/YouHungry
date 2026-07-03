@@ -49,7 +49,10 @@ export default function DashboardPage() {
         <div className="hidden md:block mt-8">
           <Card>
             <CardHeader>
-              <CardTitle>Recent Activity</CardTitle>
+              {/* h2: a top-level section under the page h1. Leaving the h3
+                  default made heading order depend on CollectionList having
+                  rendered its own h2 (it has none while loading/erroring). */}
+              <CardTitle as="h2">Recent Activity</CardTitle>
               <CardDescription>
                 Your latest restaurant decisions and activities
               </CardDescription>
