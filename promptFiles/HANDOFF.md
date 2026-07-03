@@ -1,9 +1,57 @@
 # Session Handoff — Fork In The Road portfolio upgrade
 
-**Last updated:** 2026-07-02 (v2 Phase 3 MERGED ✅ as PR #78 `669f497`; **Phase 4 Fork Links & guest voting IN PROGRESS on `v2/fork-links`**; WORKPLAN Phases 5+6 combined into one branch/PR per owner decision 2026-07-02)
+**Last updated:** 2026-07-02 (v2 Phase 4 MERGED ✅ as PR #79 `4b03743`; **Phase 5+6 Places, Lists & Crews IN PROGRESS on `v2/places-crews`** — Places half done, Crews half next)
 **Read this first, then:** `promptFiles/v2/CHARTER.md` + `promptFiles/v2/WORKPLAN.md` (the authoritative plan for all v2 work — supersedes `phased-execution-plan.md` phases 4–8), `promptFiles/v2/IDENTITY.md` (the committed v2 design direction), `CLAUDE.md` (repo guide).
 
-## CURRENT: v2 Phase 4 — Fork Links & guest voting (branch `v2/fork-links`, 2026-07-02)
+## CURRENT: v2 Phase 5+6 — Places, Lists & Crews (branch `v2/places-crews`, 2026-07-02)
+
+WORKPLAN Phase 5+6 (combined per owner decision): the Places & Lists half
+plus the Crews & history half, one branch, one PR, HANDOFF checkpoint at
+the halfway line (this update IS that checkpoint).
+
+Commit ledger (C1–C3 = Places half DONE; C4–C7 = Crews half + exit demos):
+
+1. `C1` **Consolidated Google Places client** (`lib/v2/google-places.ts`)
+   filling the Phase 3 cache seam in `places.ts`: legacy REST endpoints
+   (prod key already enabled), single-page fetches, default-closed billing
+   gate (`ALLOW_GOOGLE_PLACES=true` or production only — dev/CI/tests can
+   never bill; new env var documented in env.example). Cache design: place
+   docs keep the 30-day `cachedAt` window; new `place_queries` marker
+   collection throttles search calls (nearby 24h on a ~110m grid, text 7d,
+   TTL index self-cleans) and preserves Google's relevance order for text
+   results. ZERO_RESULTS is cacheable, an outage is not; `dev-*` fixtures
+   never re-fetch. Cost tracking: one `api_usage` row per real call via
+   v1's tracker (**exempt api-usage-tracker from the Phase 7 purge**).
+   Also landed the Phase 3 deferred item: fork results carry winner place
+   details via `enrichForkView` on every result-bearing read path.
+2. `C2` **List CRUD + save/unsave** (`lib/v2/lists.ts` + routes): create/
+   rename/delete, idempotent save/remove, atomic cap guards (100 lists,
+   200 places), ownership enforced in the query filter (foreign id = 404,
+   no existence leak). Saving IS list membership — no separate flag.
+   `placeSummary` consolidated: canonical `toPlaceSummary` in places.ts,
+   http.ts re-exports.
+3. `C3` **Places lane UI**: `/beta/places` (search + save + lists,
+   sign-in round-trip) and `/beta/places/l/[id]` (rename/delete/remove +
+   "Fork this list" → `/beta/new?list=` pre-fills the ballot). Shared
+   `SaveToListDialog` powers "Keep this one" on the QuickSpin reveal AND
+   the fork room result; fork room now shows winner address/rating. No
+   gold on the lane (saving is frame work); "Fork this list" is the
+   detail page's one gold action. BetaHeader grew the Places nav link.
+
+Remaining scope (Crews & history half): C4 crews server core (suggestion
+from repeated co-participants, crew page data, one-tap re-fork honoring
+shared decay weights), C5 crew + history lane UI, C6 push/email result
+notifications to account-holders through the suppression seam (includes
+the item explicitly moved here from Phase 4), C7 seed + e2e exit demos
+(search→save→list→fork-from-list; crew suggestion; crew re-fork weights)
+
+- docs refresh.
+
+**Validation so far:** type-check / eslint --max-warnings=0 / prettier /
+full Jest **1858 passed, 12 skipped (151 suites; ~45 new tests)** /
+production build green with all new routes. e2e lane deferred to C7.
+
+## Previous: v2 Phase 4 — Fork Links & guest voting (MERGED ✅ as PR #79 `4b03743`, branch `v2/fork-links`)
 
 WORKPLAN Phase 4 — the audited unauthenticated-write surface. Scope:
 
