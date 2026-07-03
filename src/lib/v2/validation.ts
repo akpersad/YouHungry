@@ -22,11 +22,10 @@ const vibe = z
 const radiusM = z.number().int().min(200).max(5000).optional();
 
 /** A ballot with the same place twice is one choice pretending to be two. */
-const distinctIds = <T extends z.ZodType<string[]>>(schema: T) =>
-  schema.refine(
-    (ids) => new Set(ids).size === ids.length,
-    'Places must be distinct'
-  );
+const distinctIds = <T extends z.ZodType<string[]>>(
+  schema: T,
+  message = 'Places must be distinct'
+) => schema.refine((ids) => new Set(ids).size === ids.length, message);
 
 export const quickSpinSchema = z.object({
   lat: latitude,
@@ -139,6 +138,19 @@ export const listName = z
 export const createListSchema = z.object({ name: listName });
 export const renameListSchema = z.object({ name: listName });
 export const savePlaceSchema = z.object({ placeId: objectIdString });
+
+/** Crew names share list-name hygiene. */
+export const createCrewSchema = z.object({
+  name: listName,
+  memberIds: distinctIds(
+    z.array(objectIdString).min(2).max(20),
+    'People must be distinct'
+  ),
+});
+export const renameCrewSchema = z.object({ name: listName });
+export const reforkSchema = z.object({
+  mode: z.enum(['spin', 'vote']).optional(),
+});
 
 export type QuickSpinInput = z.infer<typeof quickSpinSchema>;
 export type LockInInput = z.infer<typeof lockInSchema>;
