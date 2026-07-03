@@ -42,16 +42,12 @@ export const UserAvatar = memo(function UserAvatar({
       .slice(0, 2);
   };
 
-  // Generate a consistent background color based on name
+  // Consistent per-name background. Tint fills + ink text: every pair is
+  // WCAG-verified 11.8:1+ in BOTH modes (the old white-on-status-color set
+  // included white-on-canvas at 1.1:1 — caught by the axe lane once CI ran
+  // against a fresh DB where the initials fallback actually rendered).
   const getBackgroundColor = (name: string) => {
-    const colors = [
-      'bg-tomato',
-      'bg-success',
-      'bg-info',
-      'bg-warning',
-      'bg-destructive',
-      'bg-bg',
-    ];
+    const colors = ['bg-tomato-tint', 'bg-saffron-tint', 'bg-olive-tint'];
 
     if (!name || typeof name !== 'string') {
       return colors[0]; // Default to first color
@@ -79,7 +75,7 @@ export const UserAvatar = memo(function UserAvatar({
           items-center
           justify-center
           font-medium
-          text-white
+          text-ink
           overflow-hidden
           ${getBackgroundColor(name)}
           ${className}
@@ -99,7 +95,7 @@ export const UserAvatar = memo(function UserAvatar({
         items-center
         justify-center
         font-medium
-        text-white
+        text-ink
         overflow-hidden
         relative
         ${shouldShowPlaceholder ? getBackgroundColor(name) : ''}
