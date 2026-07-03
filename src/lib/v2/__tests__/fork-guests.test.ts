@@ -1,6 +1,7 @@
 import { ObjectId } from 'mongodb';
 import {
   MAX_BALLOTS,
+  decideForkNow,
   getSelectionHistory,
   serializeFork,
   submitVote,
@@ -236,6 +237,90 @@ describe('submitVote ballot cap', () => {
 
     // In-place replace, no push attempted.
     expect(forks.updateOne).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('decideForkNow', () => {
+  it('rejects everyone but the organizer', async () => {
+    const fork = voteFork({
+      votes: [vote({ guestId: 'g-1', displayName: 'Sam' }, [uniqueId()])],
+    });
+    mockForks({ findOne: jest.fn().mockResolvedValue(fork) });
+
+    await expect(decideForkNow(fork.code, user)).rejects.toMatchObject({
+      name: 'V2DomainError',
+      status: 403,
+    });
+  });
+
+  it('rejects an empty ballot box (that is a cancel, not a decision)', async () => {
+    const fork = voteFork();
+    mockForks({ findOne: jest.fn().mockResolvedValue(fork) });
+
+    await expect(decideForkNow(fork.code, organizer)).rejects.toMatchObject({
+      message: 'No ballots yet. There is nothing to decide.',
+    });
+  });
+
+  it('seals and finishes the fork with the ballots already cast', async () => {
+    const options = [option('Sushi'), option('Tacos')];
+    const fork = voteFork({
+      options,
+      votes: [
+        vote({ guestId: 'g-1', displayName: 'Sam' }, [options[0].placeId]),
+      ],
+    });
+    const sealed = { ...fork, status: 'closed' as const };
+    const finished = {
+      ...sealed,
+      result: {
+        placeId: options[0].placeId,
+        decidedAt: NOW,
+        reasoning: 'Ranked highest across 1 ballot.',
+        weights: {},
+      },
+    };
+    const forks = mockForks({
+      findOne: jest.fn().mockResolvedValue(fork),
+      findOneAndUpdate: jest
+        .fn()
+        .mockResolvedValueOnce(sealed) // the open→closed seal
+        .mockResolvedValueOnce(finished), // the result write
+    });
+
+    const outcome = await decideForkNow(fork.code, organizer, { now: NOW });
+
+    expect(outcome.status).toBe('closed');
+    expect(outcome.result?.placeId).toBe(options[0].placeId);
+    // Step 1 sealed the ballot box before any consensus math.
+    expect(forks.findOneAndUpdate.mock.calls[0][0]).toMatchObject({
+      _id: fork._id,
+      status: 'open',
+    });
+  });
+
+  it('lets an organizer act through a claimed guest identity', async () => {
+    const guestOrganizer: Participant = {
+      guestId: 'g-org',
+      displayName: 'Sam',
+    };
+    const options = [option('Sushi'), option('Tacos')];
+    const fork = voteFork({
+      organizer: guestOrganizer,
+      options,
+      votes: [vote(guestOrganizer, [options[0].placeId])],
+      participantUserIds: [],
+      participantGuestIds: ['g-org'],
+    });
+    const sealed = { ...fork, status: 'closed' as const };
+    mockForks({
+      findOne: jest.fn().mockResolvedValue(fork),
+      findOneAndUpdate: jest.fn().mockResolvedValue(sealed),
+    });
+
+    await expect(
+      decideForkNow(fork.code, user, { claimedGuestIds: ['g-org'], now: NOW })
+    ).resolves.toBeTruthy();
   });
 });
 

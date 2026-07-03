@@ -213,10 +213,15 @@ export function resolveConsensus(
   const topScore = sorted[0][1];
   const tied = sorted.filter(([, score]) => score === topScore);
 
+  // Reasoning strings are user-facing (the line under the reveal). Speak in
+  // ballots and picks — "7 points" reads as "7 people" to anyone who wasn't
+  // in the room when 3/2/1 scoring was designed. The scores still decide.
   if (tied.length === 1) {
     return {
       winnerId: sorted[0][0],
-      reasoning: `Clear winner with ${topScore} points (${ballots.length} votes total)`,
+      reasoning: `Ranked highest across ${ballots.length} ${
+        ballots.length === 1 ? 'ballot' : 'ballots'
+      }.`,
       breakdown,
       scores,
     };
@@ -225,7 +230,7 @@ export function resolveConsensus(
   const winnerId = tied[Math.floor(rng() * tied.length)][0];
   return {
     winnerId,
-    reasoning: `Tie between ${tied.length} options with ${topScore} points each; selected randomly.`,
+    reasoning: `Dead even at the top between ${tied.length} options. The board called it.`,
     breakdown,
     scores,
   };

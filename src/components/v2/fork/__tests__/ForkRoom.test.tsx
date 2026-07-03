@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ForkRoom } from '../ForkRoom';
 import type { ForkView } from '@/lib/v2/forks';
@@ -64,7 +64,7 @@ function closedView(): ForkView {
       placeId: OPTIONS[1].id,
       name: OPTIONS[1].name,
       decidedAt: new Date().toISOString(),
-      reasoning: 'Clear winner with 7 points (3 votes total)',
+      reasoning: 'Ranked highest across 3 ballots.',
       weights: {},
     },
     breakdown: {
@@ -129,7 +129,83 @@ describe('ForkRoom — open vote', () => {
 
     expect(await screen.findByText('The tally')).toBeInTheDocument();
     expect(screen.getByText('Winner')).toBeInTheDocument();
-    expect(screen.getByText('7')).toBeInTheDocument();
+    // The tally speaks in ballots and picks, never points.
+    expect(screen.getByText('3 ballots')).toBeInTheDocument();
+    expect(screen.getByText('first pick ×2 · third ×1')).toBeInTheDocument();
+    expect(screen.queryByText(/pts/)).not.toBeInTheDocument();
+  });
+});
+
+describe('ForkRoom — decide now (organizer ends the vote early)', () => {
+  it('offers the organizer the early close once ballots exist', async () => {
+    const user = userEvent.setup();
+    (global.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ fork: closedView() }),
+    });
+
+    render(
+      <ForkRoom
+        initial={view({
+          isOrganizer: true,
+          voteCount: 2,
+          voterNames: ['A', 'B'],
+        })}
+      />
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Decide now' }));
+    // Confirmation dialog: irreversible, so it asks first.
+    expect(
+      screen.getByText(/The 2 ballots already in pick the winner/)
+    ).toBeInTheDocument();
+
+    const dialog = screen.getByRole('dialog', { hidden: true });
+    await user.click(
+      within(dialog).getByRole('button', { name: 'Decide now' })
+    );
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      '/api/v2/forks/testfork22/decide',
+      { method: 'POST' }
+    );
+    // The close plays the theater like any other close.
+    expect(
+      await screen.findByRole('button', { name: 'Skip to the result' })
+    ).toBeInTheDocument();
+  });
+
+  it('hides the control from non-organizers and empty ballot boxes', () => {
+    const { rerender } = render(
+      <ForkRoom initial={view({ isOrganizer: false, voteCount: 2 })} />
+    );
+    expect(
+      screen.queryByRole('button', { name: 'Decide now' })
+    ).not.toBeInTheDocument();
+
+    rerender(<ForkRoom initial={view({ isOrganizer: true, voteCount: 0 })} />);
+    expect(
+      screen.queryByRole('button', { name: 'Decide now' })
+    ).not.toBeInTheDocument();
+  });
+
+  it('surfaces a failed decide inside the dialog and stays open', async () => {
+    const user = userEvent.setup();
+    (global.fetch as jest.Mock).mockResolvedValue({
+      ok: false,
+      json: () => Promise.resolve({ error: 'Fork is no longer open' }),
+    });
+
+    render(<ForkRoom initial={view({ isOrganizer: true, voteCount: 1 })} />);
+    await user.click(screen.getByRole('button', { name: 'Decide now' }));
+    const dialog = screen.getByRole('dialog', { hidden: true });
+    await user.click(
+      within(dialog).getByRole('button', { name: 'Decide now' })
+    );
+
+    expect(
+      await within(dialog).findByText('Fork is no longer open')
+    ).toBeInTheDocument();
   });
 });
 

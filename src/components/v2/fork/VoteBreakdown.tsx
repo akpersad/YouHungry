@@ -2,8 +2,11 @@ import { cx } from '@/components/v2/ui/cx';
 import type { ForkView } from '@/lib/v2/forks';
 
 /**
- * Post-close tally: points per option (3/2/1), winner marked by word and
- * position, never color alone. Numbers are mono + tabular — ticket energy.
+ * Post-close tally. The 3/2/1 scoring still decides the ORDER (and the
+ * winner), but the display speaks in ballots and picks — a visible
+ * "7 pts" reads as "7 people voted for it" to anyone outside the design
+ * room (owner catch 2026-07-02). Winner marked by word and position,
+ * never color alone; numbers mono + tabular.
  */
 export function VoteBreakdown({ fork }: { fork: ForkView }) {
   if (!fork.breakdown || !fork.result) return null;
@@ -26,17 +29,23 @@ export function VoteBreakdown({ fork }: { fork: ForkView }) {
       aria-label="How the vote broke down"
       className="flex flex-col gap-2"
     >
-      <h2 className="type-board text-sm text-ink-muted">The tally</h2>
+      <div className="flex items-baseline justify-between gap-3">
+        <h2 className="type-board text-sm text-ink-muted">The tally</h2>
+        <p className="tnum font-mono text-sm text-ink-muted">
+          {fork.voteCount} {fork.voteCount === 1 ? 'ballot' : 'ballots'}
+        </p>
+      </div>
       <ol className="divide-y divide-line rounded-2xl border border-line">
         {rows.map((row) => {
           const isWinner = row.id === fork.result!.placeId;
+          const rankedBy = row.entry.first + row.entry.second + row.entry.third;
           const placings = [
-            row.entry.first > 0 ? `${row.entry.first}× first` : null,
-            row.entry.second > 0 ? `${row.entry.second}× second` : null,
-            row.entry.third > 0 ? `${row.entry.third}× third` : null,
+            row.entry.first > 0 ? `first pick ×${row.entry.first}` : null,
+            row.entry.second > 0 ? `second ×${row.entry.second}` : null,
+            row.entry.third > 0 ? `third ×${row.entry.third}` : null,
           ]
             .filter(Boolean)
-            .join(', ');
+            .join(' · ');
           return (
             <li
               key={row.id}
@@ -58,10 +67,14 @@ export function VoteBreakdown({ fork }: { fork: ForkView }) {
                   <p className="text-sm text-ink-muted">{placings}</p>
                 )}
               </div>
-              <p className="tnum shrink-0 font-mono text-lg text-ink">
-                {row.entry.total}
-                <span className="ml-1 text-sm text-ink-muted">pts</span>
-              </p>
+              {rankedBy > 0 ? (
+                <p className="tnum shrink-0 font-mono text-lg text-ink">
+                  {rankedBy}
+                  <span className="ml-1 text-sm text-ink-muted">ranked it</span>
+                </p>
+              ) : (
+                <p className="shrink-0 text-sm text-ink-muted">Not ranked</p>
+              )}
             </li>
           );
         })}

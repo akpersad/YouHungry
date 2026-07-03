@@ -588,6 +588,37 @@ export async function submitVote(
   return updated;
 }
 
+/**
+ * "Decide now" — the organizer ends the vote early and the ballots already
+ * in the box pick the winner (same sealed consensus close as quorum/timer,
+ * so racing ballots are handled identically). Organizer-only, and only
+ * meaningful once at least one ballot exists — an empty early close is a
+ * cancel, not a decision.
+ */
+export async function decideForkNow(
+  code: string,
+  caller: Participant,
+  opts: { now?: Date; rng?: Rng; claimedGuestIds?: string[] } = {}
+): Promise<ForkDoc> {
+  const fork = await getSettledForkByCode(code, opts);
+  if (!fork) throw notFound('Fork');
+  if (fork.mode !== 'vote') throw new V2DomainError('Fork is not in vote mode');
+  if (fork.status !== 'open') throw new V2DomainError('Fork is no longer open');
+
+  const callerKeys = new Set([
+    participantKey(caller),
+    ...(opts.claimedGuestIds ?? []).map((guestId) => `g:${guestId}`),
+  ]);
+  if (!callerKeys.has(participantKey(fork.organizer))) {
+    throw new V2DomainError('Only the organizer can end the vote early', 403);
+  }
+  if (fork.votes.length === 0) {
+    throw new V2DomainError('No ballots yet. There is nothing to decide.');
+  }
+
+  return closeForkWithConsensus(fork, opts);
+}
+
 // ---------------------------------------------------------------------------
 // Queries for the lane home
 // ---------------------------------------------------------------------------

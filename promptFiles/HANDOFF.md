@@ -73,7 +73,7 @@ Commit ledger (update at every checkpoint):
    Field is now "Email or username" (`type=text`,
    `autoComplete="username"`); the claim e2e signs in as `fitr_claimer`
    by USERNAME to pin it. Sign-up stays two-field email/password.
-7. (this commit) **Dev stale-chunk root fix** (owner hit hydration
+7. `22c7e84` **Dev stale-chunk root fix** (owner hit hydration
    mismatches in dev that `rm -rf .next` couldn't clear — the staleness
    was CLIENT-side): `next.config.ts` served
    `Cache-Control: immutable, max-age=1y` on `/_next/static` in dev too
@@ -87,6 +87,19 @@ Commit ledger (update at every checkpoint):
    from a local production run heals itself. Affected browsers need one
    hard reload (Cmd+Shift+R) to flush already-cached chunks out of the
    HTTP cache; clean thereafter.
+8. (this commit) **Decide now + a tally that speaks in ballots** (owner
+   asks 2026-07-02). (a) The organizer can end a vote early: quiet
+   "Decide now" control beside the live line (only when ballots exist),
+   confirm dialog (irreversible), POST `/api/v2/forks/[code]/decide` →
+   `decideForkNow()` reuses the sealed consensus close, organizer-only
+   (403, claim-aware), rejects an empty ballot box. e2e journey added.
+   (b) Points never reach users anymore: "7 pts" reads as "7 people".
+   `VoteBreakdown` now shows ballots ("3 ballots" header, "N ranked it"
+   per row, "first pick ×2 · second ×1" sub-lines; zero rows say "Not
+   ranked"); engine reasoning strings rewritten ("Ranked highest across
+   3 ballots." / "Dead even at the top between 2 options. The board
+   called it."). The 3/2/1 scoring still decides winner and order —
+   only the LANGUAGE changed.
 
 **Validation (2026-07-02):** full pre-push green — type-check / eslint
 --max-warnings=0 / prettier / **Jest 148 suites, 1816 passed / 12 skipped

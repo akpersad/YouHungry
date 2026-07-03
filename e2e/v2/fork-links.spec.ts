@@ -145,6 +145,53 @@ test.describe('guest voting via the fork link', () => {
     await g1.close();
   });
 
+  test('decide now: the organizer ends the vote early and the cast ballots pick the winner', async ({
+    page,
+    browser,
+  }) => {
+    test.setTimeout(120_000);
+
+    // Quorum 3 so nothing closes on its own — the early close must do it.
+    const code = await createQuorumVoteFork(page);
+
+    const guest = await guestContext(browser);
+    const guestPage = await guest.newPage();
+    await guestPage.goto(`/f/${code}`);
+    await guestPage.waitForURL(new RegExp(`/beta/f/${code}`));
+    await rank(guestPage, [0, 1]);
+    await guestPage.getByLabel(/Your name/).fill('Noor');
+    await guestPage.getByRole('button', { name: 'Cast your vote' }).click();
+    await expect(
+      guestPage.getByText('Your ballot is in. Revote until it closes.')
+    ).toBeVisible();
+
+    // Organizer sees the ballot land, then calls it early.
+    await expect(page.getByText(/Noor.*voted/)).toBeVisible({
+      timeout: 15_000,
+    });
+    await page.getByRole('button', { name: 'Decide now' }).click();
+    await expect(
+      page.getByText(/ballot already in picks the winner/)
+    ).toBeVisible();
+    await page
+      .getByRole('dialog')
+      .getByRole('button', { name: 'Decide now' })
+      .click();
+
+    // The early close plays the theater like any other close.
+    await page.getByRole('button', { name: 'Skip to the result' }).click();
+    await expect(page.getByText("We're going here.")).toBeVisible();
+    // The tally speaks in ballots and picks, never points.
+    await expect(page.getByText('1 ballot', { exact: true })).toBeVisible();
+    await expect(page.getByText(/first pick ×1/)).toBeVisible();
+
+    // The guest's still-open page converges over SSE.
+    await expect(
+      guestPage.getByRole('heading', { name: 'It’s decided' })
+    ).toBeVisible({ timeout: 15_000 });
+    await guest.close();
+  });
+
   test('claim your votes: guest ballot follows the account after sign-in', async ({
     page,
     browser,

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Button,
   ButtonLink,
+  Dialog,
   EmptyState,
   Input,
   Reveal,
@@ -82,6 +83,10 @@ export function ForkRoom({
   );
   const [claimError, setClaimError] = useState<string | null>(null);
 
+  const [decideOpen, setDecideOpen] = useState(false);
+  const [deciding, setDeciding] = useState(false);
+  const [decideError, setDecideError] = useState<string | null>(null);
+
   const now = useNow(fork.status === 'open');
 
   const myBallot = fork.myRankings ?? castBallot;
@@ -148,6 +153,29 @@ export function ForkRoom({
       );
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const decideNow = async () => {
+    if (deciding) return;
+    setDeciding(true);
+    setDecideError(null);
+    try {
+      const response = await fetch(`/api/v2/forks/${fork.code}/decide`, {
+        method: 'POST',
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error ?? 'decide failed');
+      setDecideOpen(false);
+      applyUpdate(payload.fork);
+    } catch (err) {
+      setDecideError(
+        err instanceof Error && err.message !== 'decide failed'
+          ? err.message
+          : 'That did not go through. Try again.'
+      );
+    } finally {
+      setDeciding(false);
     }
   };
 
@@ -321,16 +349,23 @@ export function ForkRoom({
       {/* Open: vote mode */}
       {fork.status === 'open' && fork.mode === 'vote' && (
         <div className="flex flex-col gap-5">
-          <p role="status" className="text-sm text-ink-secondary">
-            <span
-              aria-hidden="true"
-              className="mr-1.5 inline-block size-2 rounded-full bg-gold align-middle motion-safe:animate-pulse"
-            />
-            Live ·{' '}
-            {fork.voteCount === 0
-              ? 'no votes yet'
-              : `${fork.voterNames.join(', ')} voted`}
-          </p>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p role="status" className="text-sm text-ink-secondary">
+              <span
+                aria-hidden="true"
+                className="mr-1.5 inline-block size-2 rounded-full bg-gold align-middle motion-safe:animate-pulse"
+              />
+              Live ·{' '}
+              {fork.voteCount === 0
+                ? 'no votes yet'
+                : `${fork.voterNames.join(', ')} voted`}
+            </p>
+            {fork.isOrganizer && fork.voteCount > 0 && (
+              <Button variant="quiet" onClick={() => setDecideOpen(true)}>
+                Decide now
+              </Button>
+            )}
+          </div>
 
           <ul className="flex flex-col gap-2" aria-label="Rank the spots">
             {fork.options.map((option) => {
@@ -437,6 +472,40 @@ export function ForkRoom({
               to keep these votes in your history.
             </p>
           )}
+
+          {/* Ending early is irreversible — confirm before the board flips. */}
+          <Dialog
+            open={decideOpen}
+            onClose={() => {
+              if (!deciding) setDecideOpen(false);
+            }}
+            title="Decide now?"
+          >
+            <p className="text-ink-secondary">
+              Voting stops here. The{' '}
+              {fork.voteCount === 1
+                ? 'one ballot already in picks'
+                : `${fork.voteCount} ballots already in pick`}{' '}
+              the winner.
+            </p>
+            {decideError && (
+              <p role="alert" className="mt-2 text-sm text-danger">
+                {decideError}
+              </p>
+            )}
+            <div className="mt-5 flex justify-end gap-3">
+              <Button
+                variant="ghost"
+                onClick={() => setDecideOpen(false)}
+                disabled={deciding}
+              >
+                Keep voting
+              </Button>
+              <Button onClick={decideNow} loading={deciding}>
+                Decide now
+              </Button>
+            </div>
+          </Dialog>
         </div>
       )}
 
