@@ -17,7 +17,7 @@ export function SignInForm() {
   const nextPath = safeNextPath(searchParams.get('next'));
   const { isLoaded, signIn, setActive } = useSignIn();
 
-  const [email, setEmail] = useState('');
+  const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -28,7 +28,10 @@ export function SignInForm() {
     setError(null);
     setSubmitting(true);
     try {
-      const result = await signIn.create({ identifier: email, password });
+      // Clerk resolves the identifier as email OR username — same account,
+      // same password. v1 accounts carry usernames, so don't gate the
+      // field to type=email.
+      const result = await signIn.create({ identifier, password });
       if (result.status === 'complete') {
         await setActive({ session: result.createdSessionId });
         router.push(nextPath);
@@ -54,13 +57,13 @@ export function SignInForm() {
         noValidate={false}
       >
         <Input
-          label="Email"
-          type="email"
-          name="email"
-          autoComplete="email"
+          label="Email or username"
+          type="text"
+          name="identifier"
+          autoComplete="username"
           required
-          value={email}
-          onChange={(event) => setEmail(event.target.value)}
+          value={identifier}
+          onChange={(event) => setIdentifier(event.target.value)}
         />
         <Input
           label="Password"
@@ -76,7 +79,14 @@ export function SignInForm() {
             {error}
           </p>
         )}
-        <Button type="submit" loading={submitting} className="mt-1">
+        {/* Until Clerk hydrates, handleSubmit would silently drop the
+            intent — disabled is the honest state for that brief window. */}
+        <Button
+          type="submit"
+          loading={submitting}
+          disabled={!isLoaded}
+          className="mt-1"
+        >
           Sign in
         </Button>
       </form>

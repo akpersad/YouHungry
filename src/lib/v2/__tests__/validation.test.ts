@@ -1,5 +1,7 @@
 import {
   createForkSchema,
+  guestDisplayName,
+  guestVoteSchema,
   lockInSchema,
   quickSpinSchema,
   searchQuerySchema,
@@ -158,5 +160,50 @@ describe('searchQuerySchema', () => {
     expect(searchQuerySchema.safeParse({ q: 'x'.repeat(81) }).success).toBe(
       false
     );
+  });
+});
+
+describe('guestDisplayName', () => {
+  it('trims and collapses whitespace', () => {
+    expect(guestDisplayName.parse('  Sam   T  ')).toBe('Sam T');
+  });
+
+  it('rejects empties, over-long names, and control characters', () => {
+    expect(guestDisplayName.safeParse('   ').success).toBe(false);
+    expect(guestDisplayName.safeParse('x'.repeat(25)).success).toBe(false);
+    expect(guestDisplayName.safeParse('Sam\u0007').success).toBe(false);
+    // Zero-widths and bidi overrides are format characters — rejected too.
+    expect(guestDisplayName.safeParse('Sam\u200b').success).toBe(false);
+    expect(guestDisplayName.safeParse('Sam\u202e').success).toBe(false);
+  });
+
+  it('accepts real names, emoji included', () => {
+    expect(guestDisplayName.safeParse('José').success).toBe(true);
+    expect(guestDisplayName.safeParse('Sam 🍜').success).toBe(true);
+  });
+});
+
+describe('guestVoteSchema', () => {
+  it('requires the fork token alongside rankings', () => {
+    expect(
+      guestVoteSchema.safeParse({ rankings: [oid(1)], forkToken: 't.sig' })
+        .success
+    ).toBe(true);
+    expect(guestVoteSchema.safeParse({ rankings: [oid(1)] }).success).toBe(
+      false
+    );
+  });
+
+  it('keeps the display name optional (returning guests keep theirs)', () => {
+    const parsed = guestVoteSchema.parse({
+      rankings: [oid(1)],
+      forkToken: 't.sig',
+      displayName: '  Sam ',
+    });
+    expect(parsed.displayName).toBe('Sam');
+    expect(
+      guestVoteSchema.safeParse({ rankings: [oid(1)], forkToken: 't.sig' })
+        .success
+    ).toBe(true);
   });
 });

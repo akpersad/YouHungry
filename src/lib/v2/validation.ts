@@ -83,6 +83,36 @@ export const voteSchema = z.object({
     ),
 });
 
+/**
+ * A guest's display name: 1–24 visible characters, whitespace collapsed,
+ * no control/format characters (bidi overrides, zero-widths). This is the
+ * ONLY thing a guest ever tells us about themselves.
+ */
+export const guestDisplayName = z
+  .string()
+  .trim()
+  .transform((name) => name.replace(/\s+/g, ' '))
+  .pipe(
+    z
+      .string()
+      .min(1, 'Pick a name so the group knows who voted')
+      .max(24, 'Keep the name under 24 characters')
+      .refine(
+        (name) => !/\p{C}/u.test(name),
+        'That name contains unsupported characters'
+      )
+  );
+
+/**
+ * Guest ballot: rankings + the signed fork token issued with the page
+ * (binds the vote to this fork and its lifespan — see tokens.ts), plus a
+ * display name (required the first time, optional rename after).
+ */
+export const guestVoteSchema = voteSchema.extend({
+  forkToken: z.string().min(1),
+  displayName: guestDisplayName.optional(),
+});
+
 export const searchQuerySchema = z.object({
   q: z.string().trim().min(1).max(80),
 });

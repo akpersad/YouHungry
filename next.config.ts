@@ -87,15 +87,24 @@ const nextConfig: NextConfig = {
   // Headers for caching
   async headers() {
     return [
-      {
-        source: '/_next/static/(.*)',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable',
-          },
-        ],
-      },
+      // Immutable is only true in production, where chunk filenames are
+      // content-hashed. In dev the URLs are stable across edits, so this
+      // header makes browsers serve year-old chunks and hydration fails
+      // with stale-JS-vs-fresh-HTML mismatches (Next warns about exactly
+      // this at dev startup).
+      ...(process.env.NODE_ENV === 'production'
+        ? [
+            {
+              source: '/_next/static/(.*)',
+              headers: [
+                {
+                  key: 'Cache-Control',
+                  value: 'public, max-age=31536000, immutable',
+                },
+              ],
+            },
+          ]
+        : []),
       {
         source: '/api/(.*)',
         headers: [

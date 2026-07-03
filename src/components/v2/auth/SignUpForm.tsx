@@ -154,7 +154,14 @@ export function SignUpForm() {
             {error}
           </p>
         )}
-        <Button type="submit" loading={submitting} className="mt-1">
+        {/* Until Clerk hydrates, handleDetails would silently drop the
+            intent — disabled is the honest state for that brief window. */}
+        <Button
+          type="submit"
+          loading={submitting}
+          disabled={!isLoaded}
+          className="mt-1"
+        >
           Create account
         </Button>
         {/* Clerk smart CAPTCHA mounts here when the instance enables it. */}

@@ -13,6 +13,10 @@ const isPublicRoute = createRouteMatcher([
   // v2 (greenfield tree, Phase 1+): cold-open value with no account. Routes
   // that need auth call requireAuth-style guards in their handlers/pages.
   '/beta(.*)',
+  // v2 short Fork Links (Phase 4): the public guest-voting surface. Redirects
+  // to /beta/f/[code]; guest writes are guarded by signed fork tokens, the
+  // signed guest cookie, and rate limits in the API handlers.
+  '/f(.*)',
   // v2 API: every handler guards itself via requireV2User (JSON 401, not an
   // HTML sign-in redirect — these are fetch/EventSource targets). quick-spin
   // is genuinely public; the rest 401 without a session.

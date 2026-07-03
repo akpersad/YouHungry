@@ -58,12 +58,17 @@ const CardHeader = forwardRef<HTMLDivElement, CardHeaderProps>(
 
 CardHeader.displayName = 'CardHeader';
 
-type CardTitleProps = HTMLAttributes<HTMLHeadingElement>;
+type CardTitleProps = HTMLAttributes<HTMLHeadingElement> & {
+  /** Heading level must fit the PAGE outline, not the card — a card that is
+   * a top-level section under the h1 needs h2, or heading order breaks
+   * whenever sibling sections are loading/empty (axe heading-order). */
+  as?: 'h2' | 'h3' | 'h4';
+};
 
-const CardTitle = forwardRef<HTMLParagraphElement, CardTitleProps>(
-  ({ className, ...props }, ref) => {
+const CardTitle = forwardRef<HTMLHeadingElement, CardTitleProps>(
+  ({ className, as: Heading = 'h3', ...props }, ref) => {
     return (
-      <h3
+      <Heading
         className={cn(
           'text-lg font-semibold leading-none tracking-tight text-ink',
           className

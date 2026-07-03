@@ -154,7 +154,8 @@ describe('resolveConsensus', () => {
     const outcome = resolveConsensus([ballot('u1', ['a', 'b', 'c'])], OPTIONS);
     expect(outcome.scores).toEqual({ a: 3, b: 2, c: 1, d: 0 });
     expect(outcome.winnerId).toBe('a');
-    expect(outcome.reasoning).toContain('Clear winner with 3 points');
+    // Reasoning speaks in ballots, never points (points read as headcounts).
+    expect(outcome.reasoning).toBe('Ranked highest across 1 ballot.');
     expect(outcome.breakdown.a).toEqual({
       first: 1,
       second: 0,
@@ -196,7 +197,7 @@ describe('resolveConsensus', () => {
     );
     expect(outcome.scores).toEqual({ a: 8, b: 6, c: 4, d: 0 });
     expect(outcome.winnerId).toBe('a');
-    expect(outcome.reasoning).toContain('3 votes total');
+    expect(outcome.reasoning).toBe('Ranked highest across 3 ballots.');
   });
 
   it('breaks ties randomly via the injected rng', () => {
@@ -205,7 +206,9 @@ describe('resolveConsensus', () => {
     const pickSecond = resolveConsensus(ballots, OPTIONS, () => 0.99);
     expect(pickFirst.winnerId).toBe('a');
     expect(pickSecond.winnerId).toBe('b');
-    expect(pickFirst.reasoning).toContain('Tie between 2 options');
+    expect(pickFirst.reasoning).toBe(
+      'Dead even at the top between 2 options. The board called it.'
+    );
   });
 
   it('a tie among a subset still excludes lower scorers', () => {

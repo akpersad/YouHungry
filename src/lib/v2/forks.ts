@@ -1,6 +1,7 @@
 import { ObjectId } from 'mongodb';
 import { getV2Db } from './db';
 import { V2DomainError, notFound } from './errors';
+import { getClaimedGuestIds } from './guests';
 import { mintForkCode } from './tokens';
 import {
   resolveConsensus,
@@ -43,6 +44,15 @@ import type {
 
 /** Default lifespan when the caller doesn't set one (~30 min per charter). */
 const DEFAULT_LIFESPAN_MS = 30 * 60 * 1000;
+
+/**
+ * Hard ballot cap per fork (Phase 4 abuse control). Guests are only as
+ * unique as their cookies, so an attacker who clears cookies can mint
+ * identities — the cap bounds what ballot-stuffing can ever amount to,
+ * alongside the per-IP rate limits at the route layer. Generously above
+ * the max quorum (50) plus stragglers; no honest dinner gets near it.
+ */
+export const MAX_BALLOTS = 100;
 
 // ---------------------------------------------------------------------------
 // Identity
@@ -142,12 +152,25 @@ export async function getSelectionHistory(
 ): Promise<SelectionEvent[]> {
   const { forks } = await getV2Db();
 
-  const filter =
-    'crewId' in scope
-      ? { crewId: scope.crewId }
-      : scope.participant.userId
-        ? { participantUserIds: scope.participant.userId }
-        : { participantGuestIds: scope.participant.guestId ?? '' };
+  let filter: object;
+  if ('crewId' in scope) {
+    filter = { crewId: scope.crewId };
+  } else if (scope.participant.userId) {
+    // Follow the claim pointer: forks a user took part in as a guest (before
+    // "Claim your votes") count toward their decay history too.
+    const claimedGuestIds = await getClaimedGuestIds(scope.participant.userId);
+    filter =
+      claimedGuestIds.length > 0
+        ? {
+            $or: [
+              { participantUserIds: scope.participant.userId },
+              { participantGuestIds: { $in: claimedGuestIds } },
+            ],
+          }
+        : { participantUserIds: scope.participant.userId };
+  } else {
+    filter = { participantGuestIds: scope.participant.guestId ?? '' };
+  }
 
   const docs = await forks
     .find({ ...filter, status: 'closed', result: { $exists: true } })
@@ -449,13 +472,30 @@ export async function submitVote(
   code: string,
   voter: Participant,
   rankings: ObjectId[],
-  opts: { now?: Date; rng?: Rng } = {}
+  opts: { now?: Date; rng?: Rng; claimedGuestIds?: string[] } = {}
 ): Promise<ForkDoc> {
   const now = opts.now ?? new Date();
   const fork = await getSettledForkByCode(code, opts);
   if (!fork) throw notFound('Fork');
   if (fork.mode !== 'vote') throw new V2DomainError('Fork is not in vote mode');
   if (fork.status !== 'open') throw new V2DomainError('Fork is no longer open');
+
+  // Claim continuity: a signed-in voter who already balloted this fork as a
+  // (now claimed) guest keeps that single ballot — the revote replaces it
+  // under the guest identity instead of minting a second, double-counting
+  // one. New display name still wins; it's the same person.
+  if (voter.userId && opts.claimedGuestIds?.length) {
+    const claimed = new Set(opts.claimedGuestIds);
+    const priorGuestVote = fork.votes.find(
+      (vote) => vote.voter.guestId && claimed.has(vote.voter.guestId)
+    );
+    if (priorGuestVote) {
+      voter = {
+        guestId: priorGuestVote.voter.guestId,
+        displayName: voter.displayName,
+      };
+    }
+  }
 
   if (rankings.length === 0 || rankings.length > 3) {
     throw new V2DomainError('Rank between one and three options');
@@ -476,6 +516,7 @@ export async function submitVote(
   // types can't express, hence the casts.
   const voterPath = voter.userId ? 'votes.voter.userId' : 'votes.voter.guestId';
   const voterId = voter.userId ?? voter.guestId;
+  const voterKey = participantKey(voter);
   const ballot: ForkVote = { voter, rankings, submittedAt: now };
 
   // Atomic upsert without a delete window: a revote is an in-place $set of
@@ -499,6 +540,10 @@ export async function submitVote(
         _id: fork._id,
         status: 'open',
         [voterPath]: { $ne: voterId },
+        // Ballot cap, enforced atomically: a first ballot only lands while
+        // slot MAX_BALLOTS-1 is empty. Revotes (the $set path above) never
+        // grow the array, so existing voters are unaffected at the cap.
+        [`votes.${MAX_BALLOTS - 1}`]: { $exists: false },
       } as object,
       {
         $push: { votes: ballot },
@@ -512,11 +557,20 @@ export async function submitVote(
       stored = true;
       break;
     }
-    // Neither matched: the fork closed, or a concurrent submit from this
-    // same voter pushed first — re-check and let the replace path retry.
+    // Neither matched: the fork closed, hit its ballot cap, or a concurrent
+    // submit from this same voter pushed first — re-check and let the
+    // replace path retry.
     const current = await forks.findOne({ _id: fork._id });
     if (!current || current.status !== 'open') {
       throw new V2DomainError('Fork is no longer open');
+    }
+    if (
+      current.votes.length >= MAX_BALLOTS &&
+      !current.votes.some((vote) => participantKey(vote.voter) === voterKey)
+    ) {
+      throw new V2DomainError(
+        'This fork already has the maximum number of votes'
+      );
     }
   }
   if (!stored) throw new V2DomainError('Fork is no longer open');
@@ -532,6 +586,37 @@ export async function submitVote(
     return closeForkWithConsensus(updated, opts);
   }
   return updated;
+}
+
+/**
+ * "Decide now" — the organizer ends the vote early and the ballots already
+ * in the box pick the winner (same sealed consensus close as quorum/timer,
+ * so racing ballots are handled identically). Organizer-only, and only
+ * meaningful once at least one ballot exists — an empty early close is a
+ * cancel, not a decision.
+ */
+export async function decideForkNow(
+  code: string,
+  caller: Participant,
+  opts: { now?: Date; rng?: Rng; claimedGuestIds?: string[] } = {}
+): Promise<ForkDoc> {
+  const fork = await getSettledForkByCode(code, opts);
+  if (!fork) throw notFound('Fork');
+  if (fork.mode !== 'vote') throw new V2DomainError('Fork is not in vote mode');
+  if (fork.status !== 'open') throw new V2DomainError('Fork is no longer open');
+
+  const callerKeys = new Set([
+    participantKey(caller),
+    ...(opts.claimedGuestIds ?? []).map((guestId) => `g:${guestId}`),
+  ]);
+  if (!callerKeys.has(participantKey(fork.organizer))) {
+    throw new V2DomainError('Only the organizer can end the vote early', 403);
+  }
+  if (fork.votes.length === 0) {
+    throw new V2DomainError('No ballots yet. There is nothing to decide.');
+  }
+
+  return closeForkWithConsensus(fork, opts);
 }
 
 // ---------------------------------------------------------------------------
@@ -596,15 +681,25 @@ export interface ForkView {
 /**
  * The fork as a viewer may see it. Individual ballots are never exposed —
  * only the aggregate breakdown (post-close) and the viewer's own rankings.
+ * `claimedGuestIds` lets a signed-in viewer see ballots they cast as a
+ * guest before claiming (identity continuity, forks.ts claim contract).
  */
 export function serializeFork(
   fork: ForkDoc,
-  viewer: Participant | null
+  viewer: Participant | null,
+  claimedGuestIds: string[] = []
 ): ForkView {
-  const viewerKey = viewer ? participantKey(viewer) : null;
-  const myVote = viewerKey
-    ? fork.votes.find((vote) => participantKey(vote.voter) === viewerKey)
-    : undefined;
+  const viewerKeys = new Set(
+    viewer
+      ? [
+          participantKey(viewer),
+          ...claimedGuestIds.map((guestId) => `g:${guestId}`),
+        ]
+      : []
+  );
+  const myVote = fork.votes.find((vote) =>
+    viewerKeys.has(participantKey(vote.voter))
+  );
 
   const optionName = new Map(
     fork.options.map((option) => [option.placeId.toString(), option.name])
@@ -619,8 +714,7 @@ export function serializeFork(
     sourceKind: fork.source.kind,
     vibe: fork.source.kind === 'near-me' ? fork.source.vibe : undefined,
     organizerName: fork.organizer.displayName,
-    isOrganizer:
-      viewerKey !== null && participantKey(fork.organizer) === viewerKey,
+    isOrganizer: viewerKeys.has(participantKey(fork.organizer)),
     options: fork.options.map((option) => ({
       id: option.placeId.toString(),
       name: option.name,

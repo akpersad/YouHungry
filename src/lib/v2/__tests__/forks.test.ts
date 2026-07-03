@@ -11,6 +11,12 @@ jest.mock('../db', () => ({
   getV2Db: jest.fn(),
 }));
 
+// These suites exercise fork logic for plain users/guests — no claims. The
+// claim-pointer behavior has its own suite (fork-guests.test.ts).
+jest.mock('../guests', () => ({
+  getClaimedGuestIds: jest.fn().mockResolvedValue([]),
+}));
+
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { getV2Db } = require('../db');
 
