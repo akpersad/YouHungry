@@ -44,7 +44,7 @@ export function CrewRoom({ initial }: { initial: CrewView }) {
       });
       const payload = await response.json().catch(() => null);
       if (!response.ok) throw new Error(payload?.error ?? 'refork failed');
-      router.push(`/beta/f/${payload.fork.code}`);
+      router.push(`/f/${payload.fork.code}`);
     } catch (err) {
       setReforking(false);
       setError(
@@ -92,7 +92,7 @@ export function CrewRoom({ initial }: { initial: CrewView }) {
       <div className="flex flex-col gap-2">
         <p className="type-board text-sm text-ink-muted">
           <Link
-            href="/beta/crew"
+            href="/crew"
             className="rounded outline-none hover:text-ink focus-visible:ring-2 focus-visible:ring-focus"
           >
             Crew
@@ -180,7 +180,7 @@ export function CrewRoom({ initial }: { initial: CrewView }) {
             {initial.recentForks.map((fork) => (
               <li key={fork.code}>
                 <Link
-                  href={`/beta/f/${fork.code}`}
+                  href={`/f/${fork.code}`}
                   className="flex items-center justify-between gap-3 rounded-lg py-3 outline-none transition-colors hover:bg-sunken focus-visible:ring-2 focus-visible:ring-focus motion-safe:duration-100"
                 >
                   <p className="truncate font-semibold text-ink">

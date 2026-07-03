@@ -80,7 +80,7 @@ export function CrewLane({
         current.filter((s) => s.memberIds.join(':') !== key)
       );
       setCrews((current) => [payload.crew, ...current]);
-      router.push(`/beta/crew/${payload.crew.id}`);
+      router.push(`/crew/${payload.crew.id}`);
     } catch (err) {
       setAcceptingKey(null);
       setError(
@@ -146,7 +146,7 @@ export function CrewLane({
             title="No crews yet"
             body="Close a few forks with the same people and the offer shows up here."
             action={
-              <ButtonLink href="/beta/new" variant="quiet">
+              <ButtonLink href="/new" variant="quiet">
                 Start a fork
               </ButtonLink>
             }
@@ -156,7 +156,7 @@ export function CrewLane({
             {crews.map((crew) => (
               <li key={crew.id}>
                 <Link
-                  href={`/beta/crew/${crew.id}`}
+                  href={`/crew/${crew.id}`}
                   className="flex items-center justify-between gap-3 rounded-xl border border-line bg-surface px-4 py-3 outline-none transition-colors hover:bg-sunken focus-visible:ring-2 focus-visible:ring-focus motion-safe:duration-100"
                 >
                   <span className="truncate font-semibold text-ink">
@@ -195,7 +195,7 @@ export function CrewLane({
             title="Nothing decided yet"
             body="Spin near you or start a fork. Every result lands here."
             action={
-              <ButtonLink href="/beta" variant="quiet">
+              <ButtonLink href="/" variant="quiet">
                 Decide something
               </ButtonLink>
             }
@@ -205,7 +205,7 @@ export function CrewLane({
             {history.map((entry) => (
               <li key={entry.code}>
                 <Link
-                  href={`/beta/f/${entry.code}`}
+                  href={`/f/${entry.code}`}
                   className="flex items-center justify-between gap-3 rounded-lg py-3 outline-none transition-colors hover:bg-sunken focus-visible:ring-2 focus-visible:ring-focus motion-safe:duration-100"
                 >
                   <div className="min-w-0">

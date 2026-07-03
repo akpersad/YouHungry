@@ -42,12 +42,12 @@ describe('deriveUsername', () => {
 });
 
 describe('safeNextPath', () => {
-  it('honors /beta paths and rejects everything else', () => {
-    expect(safeNextPath('/beta/f/abc123defg')).toBe('/beta/f/abc123defg');
-    expect(safeNextPath('/beta')).toBe('/beta');
-    expect(safeNextPath('/dashboard')).toBe('/beta');
-    expect(safeNextPath('https://evil.example')).toBe('/beta');
-    expect(safeNextPath('//evil.example')).toBe('/beta');
-    expect(safeNextPath(null)).toBe('/beta');
+  it('honors same-app paths and rejects everything else', () => {
+    expect(safeNextPath('/f/abc123defg')).toBe('/f/abc123defg');
+    expect(safeNextPath('/')).toBe('/');
+    expect(safeNextPath('/places')).toBe('/places');
+    expect(safeNextPath('https://evil.example')).toBe('/');
+    expect(safeNextPath('//evil.example')).toBe('/');
+    expect(safeNextPath(null)).toBe('/');
   });
 });

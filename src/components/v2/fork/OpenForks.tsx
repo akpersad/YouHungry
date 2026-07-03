@@ -61,7 +61,7 @@ export function OpenForks() {
         {forks.map((fork) => (
           <li key={fork.code}>
             <Link
-              href={`/beta/f/${fork.code}`}
+              href={`/f/${fork.code}`}
               className="block rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-canvas"
             >
               <Card

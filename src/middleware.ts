@@ -1,22 +1,22 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 
+// Since the Phase 7 cutover the whole page tree is public at the middleware
+// layer: cold-open value needs no account, guest voting on /f/[code] is the
+// core mechanic, and pages that DO need an account (new/places/crew) gate
+// themselves server-side with a sign-in round-trip that preserves ?next=.
 const isPublicRoute = createRouteMatcher([
   '/',
+  '/new',
+  // Fork rooms + short links: the public guest-voting surface. Guest writes
+  // are guarded by signed fork tokens, the signed guest cookie, and rate
+  // limits in the API handlers.
+  '/f(.*)',
+  '/places(.*)',
+  '/crew(.*)',
+  '/gallery', // the living design-system page
   '/sign-in(.*)',
   '/sign-up(.*)',
   '/api/webhooks/clerk', // svix-signature verified in the handler
-  // Called by the sign-up form before any session exists; protected by
-  // per-IP rate limiting + strict input validation in the handler.
-  '/api/auth/check-username',
-  '/api/pwa-status',
-  '/api/cron(.*)', // Vercel cron jobs — each handler must verify CRON_SECRET
-  // v2 (greenfield tree, Phase 1+): cold-open value with no account. Routes
-  // that need auth call requireAuth-style guards in their handlers/pages.
-  '/beta(.*)',
-  // v2 short Fork Links (Phase 4): the public guest-voting surface. Redirects
-  // to /beta/f/[code]; guest writes are guarded by signed fork tokens, the
-  // signed guest cookie, and rate limits in the API handlers.
-  '/f(.*)',
   // v2 API: every handler guards itself via requireV2User (JSON 401, not an
   // HTML sign-in redirect — these are fetch/EventSource targets). quick-spin
   // is genuinely public; the rest 401 without a session.

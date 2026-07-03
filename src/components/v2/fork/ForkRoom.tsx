@@ -322,7 +322,7 @@ export function ForkRoom({
           title="The timer ran out before anyone decided"
           body="No harm done. Start another and let the board call it."
           action={
-            <ButtonLink href="/beta/new" variant="quiet">
+            <ButtonLink href="/new" variant="quiet">
               Start another fork
             </ButtonLink>
           }
@@ -361,7 +361,7 @@ export function ForkRoom({
           {revealDone && fork.mode === 'vote' && <VoteBreakdown fork={fork} />}
           {revealDone && (
             <div className="flex flex-wrap items-center gap-3">
-              <ButtonLink href="/beta" variant="quiet">
+              <ButtonLink href="/" variant="quiet">
                 Back to tonight
               </ButtonLink>
               {viewer.kind === 'user' &&
@@ -506,7 +506,7 @@ export function ForkRoom({
             <p className="text-sm text-ink-muted">
               Voting as {viewer.displayName ?? name}.{' '}
               <a
-                href={`/beta/sign-up?next=${encodeURIComponent(`/beta/f/${fork.code}`)}`}
+                href={`/sign-up?next=${encodeURIComponent(`/f/${fork.code}`)}`}
                 className="font-semibold text-brass underline-offset-2 hover:underline"
               >
                 Create an account

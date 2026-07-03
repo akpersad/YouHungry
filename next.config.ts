@@ -84,6 +84,15 @@ const nextConfig: NextConfig = {
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
 
+  // The /beta prefix retired at the Phase 7 cutover; links shared before
+  // it (fork links in group chats especially) must keep working.
+  async redirects() {
+    return [
+      { source: '/beta', destination: '/', permanent: true },
+      { source: '/beta/:path*', destination: '/:path*', permanent: true },
+    ];
+  },
+
   // Headers for caching
   async headers() {
     return [

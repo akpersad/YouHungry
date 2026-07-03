@@ -82,7 +82,7 @@ export function ListDetail({ initial }: { initial: ListDetailData }) {
         method: 'DELETE',
       });
       if (!response.ok) throw new Error('delete failed');
-      router.push('/beta/places');
+      router.push('/places');
       router.refresh();
     } catch {
       setDeleting(false);
@@ -114,7 +114,7 @@ export function ListDetail({ initial }: { initial: ListDetailData }) {
       <div className="flex flex-col gap-2">
         <p className="type-board text-sm text-ink-muted">
           <Link
-            href="/beta/places"
+            href="/places"
             className="rounded outline-none hover:text-ink focus-visible:ring-2 focus-visible:ring-focus"
           >
             Places
@@ -131,7 +131,7 @@ export function ListDetail({ initial }: { initial: ListDetailData }) {
 
       <div className="flex flex-wrap items-center gap-3">
         {places.length >= 2 && (
-          <ButtonLink href={`/beta/new?list=${initial.id}`}>
+          <ButtonLink href={`/new?list=${initial.id}`}>
             Fork this list
           </ButtonLink>
         )}
@@ -161,7 +161,7 @@ export function ListDetail({ initial }: { initial: ListDetailData }) {
           title="Nothing on this list yet"
           body="Find spots in Places and keep them here."
           action={
-            <ButtonLink href="/beta/places" variant="quiet">
+            <ButtonLink href="/places" variant="quiet">
               Find places
             </ButtonLink>
           }
