@@ -77,10 +77,11 @@ Commit ledger (C1–C3 = Places half DONE; C4–C7 = Crews half + exit demos):
 
 **Validation (2026-07-02):** full pre-push green (type-check / eslint
 --max-warnings=0 / prettier / Jest 1875 passed, 12 skipped / production
-build with all new routes); **v2 e2e lane 17 passed + 1
-flaky-passed-on-retry** (the pre-existing 3-user vote spec's documented
-Clerk dev-instance flake) on the production server against the reseeded
-dev DB. Google never billed (default-closed gate); all external sends
+build with all new routes); **v2 e2e lane 22/22 green** (production
+server, reseeded dev DB), including both Phase 5+6 exit demos and
+both-mode axe scans of the two new lanes (reduced-motion emulated so
+the scan never reads a half-flipped theme — v1 axe-lane precedent).
+Google never billed (default-closed gate); all external sends
 suppressed by the Phase 1 seam.
 
 **Phase-scope decisions (documented, not silent):**

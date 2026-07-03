@@ -14,6 +14,7 @@
  * by entering through the crews list instead of the suggestion card.
  */
 import { test, expect, type Page } from '@playwright/test';
+import AxeBuilder from '@axe-core/playwright';
 
 test.describe('Places lane: search → save → list → fork-from-list', () => {
   test('the full accelerant loop, then the list retires', async ({ page }) => {
@@ -149,4 +150,33 @@ test.describe('Crew lane: suggestion → shared board → run it back', () => {
     await page.getByRole('button', { name: 'Skip to the result' }).click();
     await expect(page.getByText("We're going here.")).toBeVisible();
   });
+});
+
+test.describe('new lanes pass axe (WCAG 2.x AA), both modes', () => {
+  for (const lane of [
+    { path: '/beta/places', heading: 'Your spots, on file' },
+    { path: '/beta/crew', heading: 'Your people, your record' },
+  ]) {
+    for (const mode of ['light', 'dark'] as const) {
+      test(`${lane.path} in ${mode} mode`, async ({ page }) => {
+        // Collapse color transitions so the scan never reads a half-flipped
+        // theme (v1 axe-lane precedent: mid-fade contrast reads as failing).
+        await page.emulateMedia({ reducedMotion: 'reduce' });
+        await page.goto(lane.path);
+        await expect(
+          page.getByRole('heading', { name: lane.heading })
+        ).toBeVisible();
+        await page
+          .getByRole('group', { name: 'Color mode' })
+          .getByRole('button', { name: mode === 'dark' ? 'Dark' : 'Light' })
+          .click();
+        await expect(page.locator('html')).toHaveClass(new RegExp(mode));
+
+        const results = await new AxeBuilder({ page })
+          .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+          .analyze();
+        expect(results.violations).toEqual([]);
+      });
+    }
+  }
 });
