@@ -35,8 +35,8 @@ Status: ☐ not started · ▶ in progress · ✅ merged
 | 2   | Identity & design system  | `v2/identity`           | ✅ #77        |
 | 3   | The Fork (core loop)      | `v2/fork`               | ✅ #78        |
 | 4   | Fork Links & guest voting | `v2/fork-links`         | ✅ #79        |
-| 5+6 | Places, Lists & Crews     | `v2/places-crews`       | ▶ in progress |
-| 7   | Cutover & purge           | `v2/cutover`            | ☐             |
+| 5+6 | Places, Lists & Crews     | `v2/places-crews`       | ✅ #80        |
+| 7   | Cutover & purge           | `v2/cutover`            | ▶ in progress |
 | 8   | Polish, PWA & launch      | `v2/launch`             | ☐             |
 
 _(Phases 5 and 6 combined per owner decision 2026-07-02: both are additive,

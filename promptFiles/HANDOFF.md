@@ -1,9 +1,23 @@
 # Session Handoff — Fork In The Road portfolio upgrade
 
-**Last updated:** 2026-07-02 (v2 Phase 4 MERGED ✅ as PR #79 `4b03743`; **Phase 5+6 Places, Lists & Crews IN PROGRESS on `v2/places-crews`** — Places half done, Crews half next)
+**Last updated:** 2026-07-03 (v2 Phase 5+6 MERGED ✅ as PR #80 `7c88f84`; **Phase 7 Cutover & purge IN PROGRESS on `v2/cutover`**)
 **Read this first, then:** `promptFiles/v2/CHARTER.md` + `promptFiles/v2/WORKPLAN.md` (the authoritative plan for all v2 work — supersedes `phased-execution-plan.md` phases 4–8), `promptFiles/v2/IDENTITY.md` (the committed v2 design direction), `CLAUDE.md` (repo guide).
 
-## CURRENT: v2 Phase 5+6 — Places, Lists & Crews (branch `v2/places-crews`, 2026-07-02)
+## CURRENT: v2 Phase 7 — Cutover & purge (branch `v2/cutover`, 2026-07-03)
+
+WORKPLAN Phase 7 — the sign-off-gated migration + wholesale v1 deletion.
+Scope: route v2 to `/` (retire `/beta` with redirects), one-time v1→v2
+data migration script (dry-run against a snapshot; **owner approves before
+it touches Atlas — this PR merges only with explicit owner sign-off on the
+dry-run**), delete v1 (route tree, components, dead libs, SMS/shortener/
+observability stacks, deps), adopt Vercel Analytics/Speed Insights +
+minimal admin, rebuild e2e around v2.
+
+Commit ledger (update at every checkpoint):
+
+1. `C1` docs — ledger opened (5+6 marked merged, Phase 7 in progress).
+
+## Previous: v2 Phase 5+6 — Places, Lists & Crews (MERGED ✅ as PR #80 `7c88f84`, branch `v2/places-crews`)
 
 WORKPLAN Phase 5+6 (combined per owner decision): the Places & Lists half
 plus the Crews & history half, one branch, one PR, HANDOFF checkpoint at
