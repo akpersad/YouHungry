@@ -23,8 +23,12 @@ test.describe('v2 /beta shell', () => {
       ).toBeVisible();
       // Cold open shows the way into an account, not a wall.
       await expect(page.getByRole('link', { name: 'Sign in' })).toBeVisible();
-      // The v1 shell must not leak into the v2 root layout.
-      await expect(page.locator('nav')).toHaveCount(0);
+      // The v1 shell must not leak into the v2 root layout: the only nav
+      // is v2's own lanes nav (Places/Crew, Phase 5+6).
+      await expect(page.locator('nav')).toHaveCount(1);
+      await expect(
+        page.getByRole('navigation', { name: 'Lanes' })
+      ).toBeVisible();
     });
   });
 

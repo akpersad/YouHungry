@@ -34,8 +34,8 @@ Status: ☐ not started · ▶ in progress · ✅ merged
 | 1   | Foundations & test rig    | `v2/foundations`        | ✅ #75        |
 | 2   | Identity & design system  | `v2/identity`           | ✅ #77        |
 | 3   | The Fork (core loop)      | `v2/fork`               | ✅ #78        |
-| 4   | Fork Links & guest voting | `v2/fork-links`         | ▶ in progress |
-| 5+6 | Places, Lists & Crews     | `v2/places-crews`       | ☐             |
+| 4   | Fork Links & guest voting | `v2/fork-links`         | ✅ #79        |
+| 5+6 | Places, Lists & Crews     | `v2/places-crews`       | ▶ in progress |
 | 7   | Cutover & purge           | `v2/cutover`            | ☐             |
 | 8   | Polish, PWA & launch      | `v2/launch`             | ☐             |
 

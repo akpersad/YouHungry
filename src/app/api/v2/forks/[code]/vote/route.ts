@@ -8,6 +8,7 @@ import {
 import { getV2User, participantFromUser } from '@/lib/v2/auth';
 import { V2DomainError } from '@/lib/v2/errors';
 import { serializeFork, submitVote } from '@/lib/v2/forks';
+import { enrichForkView } from '@/lib/v2/places';
 import {
   GUEST_COOKIE,
   GUEST_COOKIE_OPTIONS,
@@ -67,7 +68,7 @@ export async function POST(
         { claimedGuestIds }
       );
       return NextResponse.json({
-        fork: serializeFork(fork, voter, claimedGuestIds),
+        fork: await enrichForkView(serializeFork(fork, voter, claimedGuestIds)),
       });
     }
 
@@ -124,7 +125,7 @@ export async function POST(
     );
 
     const response = NextResponse.json({
-      fork: serializeFork(fork, voter),
+      fork: await enrichForkView(serializeFork(fork, voter)),
       viewer: { kind: 'guest', displayName: voter.displayName },
     });
     if (cookieToSet) {

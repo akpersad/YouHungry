@@ -18,12 +18,28 @@ export function BetaHeader() {
   return (
     <header className="border-b border-line">
       <div className="mx-auto flex h-14 max-w-3xl items-center justify-between gap-3 px-4 sm:px-6">
-        <Link
-          href="/beta"
-          className="type-board rounded-md text-sm text-ink outline-none focus-visible:ring-2 focus-visible:ring-focus"
-        >
-          Fork in the road
-        </Link>
+        <div className="flex min-w-0 items-center gap-4">
+          <Link
+            href="/beta"
+            className="type-board rounded-md text-sm text-ink outline-none focus-visible:ring-2 focus-visible:ring-focus"
+          >
+            Fork in the road
+          </Link>
+          <nav aria-label="Lanes" className="flex items-center gap-3">
+            <Link
+              href="/beta/places"
+              className="rounded-md text-sm font-semibold text-ink-muted outline-none transition-colors hover:text-ink focus-visible:ring-2 focus-visible:ring-focus motion-safe:duration-100"
+            >
+              Places
+            </Link>
+            <Link
+              href="/beta/crew"
+              className="rounded-md text-sm font-semibold text-ink-muted outline-none transition-colors hover:text-ink focus-visible:ring-2 focus-visible:ring-focus motion-safe:duration-100"
+            >
+              Crew
+            </Link>
+          </nav>
+        </div>
 
         <div className="flex items-center gap-3">
           <ThemeToggle />

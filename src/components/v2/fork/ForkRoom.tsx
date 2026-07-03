@@ -10,6 +10,7 @@ import {
   Reveal,
 } from '@/components/v2/ui';
 import { cx } from '@/components/v2/ui/cx';
+import { SaveToListDialog } from '@/components/v2/places/SaveToListDialog';
 import type { ForkView } from '@/lib/v2/forks';
 import { formatRemaining, useNow } from './countdown';
 import { rankOf, toggleRank } from './ranking';
@@ -86,6 +87,9 @@ export function ForkRoom({
   const [decideOpen, setDecideOpen] = useState(false);
   const [deciding, setDeciding] = useState(false);
   const [decideError, setDecideError] = useState<string | null>(null);
+
+  const [keepOpen, setKeepOpen] = useState(false);
+  const [keptOn, setKeptOn] = useState<string | null>(null);
 
   const now = useNow(fork.status === 'open');
 
@@ -335,13 +339,51 @@ export function ForkRoom({
             reduceMotion={showTheater ? undefined : true}
             onDone={() => setRevealDone(true)}
           />
+          {revealDone && fork.result.place && (
+            <div className="text-sm text-ink-secondary">
+              <p>{fork.result.place.address}</p>
+              {(fork.result.place.rating || fork.result.place.priceLevel) && (
+                <p className="tnum mt-0.5 text-ink-muted">
+                  {[
+                    fork.result.place.rating
+                      ? `${fork.result.place.rating.toFixed(1)} ★`
+                      : null,
+                    fork.result.place.priceLevel
+                      ? '$'.repeat(fork.result.place.priceLevel)
+                      : null,
+                  ]
+                    .filter(Boolean)
+                    .join(' · ')}
+                </p>
+              )}
+            </div>
+          )}
           {revealDone && fork.mode === 'vote' && <VoteBreakdown fork={fork} />}
           {revealDone && (
-            <div>
+            <div className="flex flex-wrap items-center gap-3">
               <ButtonLink href="/beta" variant="quiet">
                 Back to tonight
               </ButtonLink>
+              {viewer.kind === 'user' &&
+                (keptOn ? (
+                  <p role="status" className="text-sm text-ink-muted">
+                    Kept on {keptOn}
+                  </p>
+                ) : (
+                  <Button variant="ghost" onClick={() => setKeepOpen(true)}>
+                    Keep this one
+                  </Button>
+                ))}
             </div>
+          )}
+          {viewer.kind === 'user' && (
+            <SaveToListDialog
+              open={keepOpen}
+              placeId={fork.result.placeId}
+              placeName={fork.result.name}
+              onClose={() => setKeepOpen(false)}
+              onSaved={(listName) => setKeptOn(listName)}
+            />
           )}
         </div>
       )}

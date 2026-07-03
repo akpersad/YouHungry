@@ -2,6 +2,7 @@ import { ObjectId } from 'mongodb';
 import { getV2Db } from './db';
 import { V2DomainError, notFound } from './errors';
 import { getClaimedGuestIds } from './guests';
+import { notifyForkClosed } from './notifications';
 import { mintForkCode } from './tokens';
 import {
   resolveConsensus,
@@ -146,6 +147,22 @@ export async function getForkByCode(code: string): Promise<ForkDoc | null> {
  * `crewId`; personal forks use everything the participant has been part of
  * (v1 precedent: weights span all of a user's personal collections).
  */
+/**
+ * Everything a user has taken part in, following the claim pointer: forks
+ * they joined as a guest (before "Claim your votes") count too.
+ */
+async function participantHistoryFilter(userId: ObjectId): Promise<object> {
+  const claimedGuestIds = await getClaimedGuestIds(userId);
+  return claimedGuestIds.length > 0
+    ? {
+        $or: [
+          { participantUserIds: userId },
+          { participantGuestIds: { $in: claimedGuestIds } },
+        ],
+      }
+    : { participantUserIds: userId };
+}
+
 export async function getSelectionHistory(
   scope: { crewId: ObjectId } | { participant: Participant },
   limit: number = 100
@@ -156,18 +173,7 @@ export async function getSelectionHistory(
   if ('crewId' in scope) {
     filter = { crewId: scope.crewId };
   } else if (scope.participant.userId) {
-    // Follow the claim pointer: forks a user took part in as a guest (before
-    // "Claim your votes") count toward their decay history too.
-    const claimedGuestIds = await getClaimedGuestIds(scope.participant.userId);
-    filter =
-      claimedGuestIds.length > 0
-        ? {
-            $or: [
-              { participantUserIds: scope.participant.userId },
-              { participantGuestIds: { $in: claimedGuestIds } },
-            ],
-          }
-        : { participantUserIds: scope.participant.userId };
+    filter = await participantHistoryFilter(scope.participant.userId);
   } else {
     filter = { participantGuestIds: scope.participant.guestId ?? '' };
   }
@@ -182,6 +188,48 @@ export async function getSelectionHistory(
     optionId: doc.result!.placeId.toString(),
     decidedAt: doc.result!.decidedAt,
   }));
+}
+
+/** One row of the history lane — a decision that happened. */
+export interface HistoryEntry {
+  code: string;
+  mode: ForkMode;
+  winnerName: string;
+  decidedAt: string;
+  optionCount: number;
+  voteCount: number;
+}
+
+/**
+ * The user's past forks (claim pointer honored), newest first — the
+ * history lane's data. Winner names come off the denormalized options.
+ */
+export async function getHistoryForUser(
+  userId: ObjectId,
+  limit: number = 50
+): Promise<HistoryEntry[]> {
+  const { forks } = await getV2Db();
+  const filter = await participantHistoryFilter(userId);
+  const docs = await forks
+    .find({ ...filter, status: 'closed', result: { $exists: true } })
+    .sort({ createdAt: -1 })
+    .limit(limit)
+    .toArray();
+
+  return docs.map((doc) => {
+    const winnerId = doc.result!.placeId.toString();
+    const winner = doc.options.find(
+      (option) => option.placeId.toString() === winnerId
+    );
+    return {
+      code: doc.code,
+      mode: doc.mode,
+      winnerName: winner?.name ?? 'Somewhere good',
+      decidedAt: doc.result!.decidedAt.toISOString(),
+      optionCount: doc.options.length,
+      voteCount: doc.votes.length,
+    };
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -321,6 +369,9 @@ export async function spinFork(
     throw new V2DomainError('Fork is no longer open');
   }
 
+  // Our write landed (guarded above), so we announce it.
+  void notifyForkClosed({ ...fork, result, status: 'closed', updatedAt: now });
+
   return result;
 }
 
@@ -455,7 +506,13 @@ export async function closeForkWithConsensus(
     { $set: { result, updatedAt: now } },
     { returnDocument: 'after' }
   );
-  return finished ?? (await forks.findOne({ _id: sealed._id })) ?? sealed;
+  if (finished) {
+    // Exactly the caller whose result write landed announces it —
+    // rival settlers lost the guarded update above. Fire-and-forget.
+    void notifyForkClosed(finished);
+    return finished;
+  }
+  return (await forks.findOne({ _id: sealed._id })) ?? sealed;
 }
 
 // ---------------------------------------------------------------------------
@@ -673,6 +730,19 @@ export interface ForkView {
     decidedAt: string;
     reasoning: string;
     weights: Record<string, number>;
+    /**
+     * Place details for the winner (address/rating/price), attached by
+     * `enrichForkView` (places.ts) on read paths — serializeFork itself
+     * stays sync and join-free. Absent when the cache has no doc.
+     */
+    place?: {
+      id: string;
+      name: string;
+      address: string;
+      categories: string[];
+      priceLevel?: number;
+      rating?: number;
+    };
   } | null;
   /** Aggregated 3/2/1 tally per option — only exposed once closed. */
   breakdown: Record<string, BreakdownEntry> | null;

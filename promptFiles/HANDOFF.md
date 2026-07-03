@@ -1,9 +1,105 @@
 # Session Handoff — Fork In The Road portfolio upgrade
 
-**Last updated:** 2026-07-02 (v2 Phase 3 MERGED ✅ as PR #78 `669f497`; **Phase 4 Fork Links & guest voting IN PROGRESS on `v2/fork-links`**; WORKPLAN Phases 5+6 combined into one branch/PR per owner decision 2026-07-02)
+**Last updated:** 2026-07-02 (v2 Phase 4 MERGED ✅ as PR #79 `4b03743`; **Phase 5+6 Places, Lists & Crews IN PROGRESS on `v2/places-crews`** — Places half done, Crews half next)
 **Read this first, then:** `promptFiles/v2/CHARTER.md` + `promptFiles/v2/WORKPLAN.md` (the authoritative plan for all v2 work — supersedes `phased-execution-plan.md` phases 4–8), `promptFiles/v2/IDENTITY.md` (the committed v2 design direction), `CLAUDE.md` (repo guide).
 
-## CURRENT: v2 Phase 4 — Fork Links & guest voting (branch `v2/fork-links`, 2026-07-02)
+## CURRENT: v2 Phase 5+6 — Places, Lists & Crews (branch `v2/places-crews`, 2026-07-02)
+
+WORKPLAN Phase 5+6 (combined per owner decision): the Places & Lists half
+plus the Crews & history half, one branch, one PR, HANDOFF checkpoint at
+the halfway line (this update IS that checkpoint).
+
+Commit ledger (C1–C3 = Places half DONE; C4–C7 = Crews half + exit demos):
+
+1. `C1` **Consolidated Google Places client** (`lib/v2/google-places.ts`)
+   filling the Phase 3 cache seam in `places.ts`: legacy REST endpoints
+   (prod key already enabled), single-page fetches, default-closed billing
+   gate (`ALLOW_GOOGLE_PLACES=true` or production only — dev/CI/tests can
+   never bill; new env var documented in env.example). Cache design: place
+   docs keep the 30-day `cachedAt` window; new `place_queries` marker
+   collection throttles search calls (nearby 24h on a ~110m grid, text 7d,
+   TTL index self-cleans) and preserves Google's relevance order for text
+   results. ZERO_RESULTS is cacheable, an outage is not; `dev-*` fixtures
+   never re-fetch. Cost tracking: one `api_usage` row per real call via
+   v1's tracker (**exempt api-usage-tracker from the Phase 7 purge**).
+   Also landed the Phase 3 deferred item: fork results carry winner place
+   details via `enrichForkView` on every result-bearing read path.
+2. `C2` **List CRUD + save/unsave** (`lib/v2/lists.ts` + routes): create/
+   rename/delete, idempotent save/remove, atomic cap guards (100 lists,
+   200 places), ownership enforced in the query filter (foreign id = 404,
+   no existence leak). Saving IS list membership — no separate flag.
+   `placeSummary` consolidated: canonical `toPlaceSummary` in places.ts,
+   http.ts re-exports.
+3. `C3` **Places lane UI**: `/beta/places` (search + save + lists,
+   sign-in round-trip) and `/beta/places/l/[id]` (rename/delete/remove +
+   "Fork this list" → `/beta/new?list=` pre-fills the ballot). Shared
+   `SaveToListDialog` powers "Keep this one" on the QuickSpin reveal AND
+   the fork room result; fork room now shows winner address/rating. No
+   gold on the lane (saving is frame work); "Fork this list" is the
+   detail page's one gold action. BetaHeader grew the Places nav link.
+
+4. `C4` **Crews server core** (`lib/v2/crews.ts`): suggestions derived
+   from repeated co-participation (exact account set, 3+ closed crew-less
+   forks; guests never count toward the set but don't disqualify a fork);
+   `createCrew` BACK-ATTACHES matching history (closed forks with exactly
+   that member set get the crewId) so shared decay weights are live from
+   day one, idempotent on the member set; `getCrewView` (members, recent
+   results, shared weight board lightest-first); `reforkCrew` re-runs the
+   last crew ballot under the crewId (spinFork already scopes history by
+   crewId). API: GET/POST /api/v2/crews, GET/PATCH /api/v2/crews/[id],
+   POST /api/v2/crews/[id]/refork — all member-gated in the query filter.
+5. `C5` **Crew lane UI**: `/beta/crew` (suggestion cards → one gold tap
+   makes the crew; crews list; history section with a stats line) and
+   `/beta/crew/[id]` ("Run it back" gold, rename, shared weight board as
+   text + bar, crew receipts). `getHistoryForUser` added to forks.ts
+   (claim pointer honored). BetaHeader: Crew nav link.
+6. `C6` **Result notifications** (`lib/v2/notifications.ts`): push +
+   email "We're going here." to account-holder participants when a fork
+   closes with a result (the item moved here from Phase 4). Fired exactly
+   once, by whichever caller's guarded result write landed; fire-and-
+   forget (a notification failure can never fail, slow, or double a
+   close). Solo decisions stay quiet; guests unreachable by design; v1
+   preference opt-outs honored; expired push endpoints pruned. Push gates
+   inside push-service, the lean Resend sender gates on the suppression
+   seam here — dev/CI/tests never reach a provider.
+7. `C7` **Seed + e2e exit demos.** seed-dev.ts: 3 old crew-history forks
+   for organizer+member1 (winners 45+ days stale = weight-neutral, so
+   existing weight assertions hold) and a per-run reset ($unset crewId on
+   seed forks, delete the accepted pair crew) so the suggestion derives
+   fresh every run. `e2e/v2/places-crews.spec.ts`: the full accelerant
+   loop (search → save into a fresh list via the dialog → second place →
+   list detail → "Fork this list" pre-fills the ballot → fork room →
+   list deleted) AND the crew journey (pair suggestion accepted → crew
+   page shows the back-attached shared board with decayed + recovered
+   weights → "Run it back" → spin → reveal; tolerates a pre-accepted
+   crew on local reruns). beta.spec's "no v1 chrome" nav assertion
+   updated for v2's own lanes nav.
+
+**Validation (2026-07-02):** full pre-push green (type-check / eslint
+--max-warnings=0 / prettier / Jest 1875 passed, 12 skipped / production
+build with all new routes); **v2 e2e lane 22/22 green** (production
+server, reseeded dev DB), including both Phase 5+6 exit demos and
+both-mode axe scans of the two new lanes (reduced-motion emulated so
+the scan never reads a half-flipped theme — v1 axe-lane precedent).
+Google never billed (default-closed gate); all external sends
+suppressed by the Phase 1 seam.
+
+**Phase-scope decisions (documented, not silent):**
+
+- **Legacy Places REST endpoints, not the new Places API** — the prod
+  key is enabled for them today; migrating needs an owner-level console
+  change. Revisit at/after cutover.
+- **No photos anywhere in v2** — the legacy photo URL embeds the API key
+  client-side, and the paper-and-ink identity is text-forward. photoRef
+  is persisted for the future; nothing renders it.
+- **No in-app notification center** (WORKPLAN bias honored): push +
+  email only, one trigger (fork closed with a result).
+- **Saving IS list membership** — no separate global "saved" flag to
+  drift out of sync.
+- **Crew suggestions require the exact same account set 3+ times** — a
+  superset or subset does not count (deliberate: "the same people").
+
+## Previous: v2 Phase 4 — Fork Links & guest voting (MERGED ✅ as PR #79 `4b03743`, branch `v2/fork-links`)
 
 WORKPLAN Phase 4 — the audited unauthenticated-write surface. Scope:
 

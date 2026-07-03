@@ -22,6 +22,8 @@ import type { Db, IndexDescription } from 'mongodb';
 export const V2_COLLECTIONS = {
   forks: 'forks',
   places: 'places',
+  /** Google query markers — "this area/search was fetched at T" (Phase 5). */
+  placeQueries: 'place_queries',
   lists: 'lists',
   crews: 'crews',
   guests: 'guests',
@@ -94,6 +96,22 @@ export interface PlaceDoc {
   cachedAt: Date;
   createdAt: Date;
   updatedAt: Date;
+}
+
+/**
+ * A Google query marker (Phase 5): records that a specific nearby area or
+ * text search was fetched from Google at `fetchedAt`, so repeat queries
+ * serve the place cache instead of re-billing. Place docs themselves carry
+ * the 30-day `cachedAt` staleness; markers only throttle SEARCH calls
+ * (nearby ~24h, text ~7d — the consolidated client owns the numbers).
+ * For text searches `googlePlaceIds` preserves Google's relevance order,
+ * which a name-regex over the cache cannot reproduce.
+ */
+export interface PlaceQueryDoc {
+  _id: ObjectId;
+  key: string;
+  googlePlaceIds: string[];
+  fetchedAt: Date;
 }
 
 /** v1's "collection", renamed and reduced to ONE id shape (ObjectId[]). */
@@ -213,6 +231,11 @@ const V2_INDEXES: Record<string, IndexDescription[]> = {
   [V2_COLLECTIONS.places]: [
     { key: { googlePlaceId: 1 }, unique: true },
     { key: { location: '2dsphere' } },
+  ],
+  [V2_COLLECTIONS.placeQueries]: [
+    { key: { key: 1 }, unique: true },
+    // Self-cleaning: markers older than 30 days are dead weight either way.
+    { key: { fetchedAt: 1 }, expireAfterSeconds: 60 * 60 * 24 * 30 },
   ],
   [V2_COLLECTIONS.lists]: [{ key: { ownerId: 1, updatedAt: -1 } }],
   [V2_COLLECTIONS.crews]: [{ key: { memberIds: 1 } }],

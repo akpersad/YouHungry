@@ -22,11 +22,10 @@ const vibe = z
 const radiusM = z.number().int().min(200).max(5000).optional();
 
 /** A ballot with the same place twice is one choice pretending to be two. */
-const distinctIds = <T extends z.ZodType<string[]>>(schema: T) =>
-  schema.refine(
-    (ids) => new Set(ids).size === ids.length,
-    'Places must be distinct'
-  );
+const distinctIds = <T extends z.ZodType<string[]>>(
+  schema: T,
+  message = 'Places must be distinct'
+) => schema.refine((ids) => new Set(ids).size === ids.length, message);
 
 export const quickSpinSchema = z.object({
   lat: latitude,
@@ -115,6 +114,42 @@ export const guestVoteSchema = voteSchema.extend({
 
 export const searchQuerySchema = z.object({
   q: z.string().trim().min(1).max(80),
+});
+
+/**
+ * A list name: same hygiene as a guest display name (trim, collapse
+ * whitespace, no control/format characters), a touch more room.
+ */
+export const listName = z
+  .string()
+  .trim()
+  .transform((name) => name.replace(/\s+/g, ' '))
+  .pipe(
+    z
+      .string()
+      .min(1, 'Give the list a name')
+      .max(40, 'Keep the name under 40 characters')
+      .refine(
+        (name) => !/\p{C}/u.test(name),
+        'That name contains unsupported characters'
+      )
+  );
+
+export const createListSchema = z.object({ name: listName });
+export const renameListSchema = z.object({ name: listName });
+export const savePlaceSchema = z.object({ placeId: objectIdString });
+
+/** Crew names share list-name hygiene. */
+export const createCrewSchema = z.object({
+  name: listName,
+  memberIds: distinctIds(
+    z.array(objectIdString).min(2).max(20),
+    'People must be distinct'
+  ),
+});
+export const renameCrewSchema = z.object({ name: listName });
+export const reforkSchema = z.object({
+  mode: z.enum(['spin', 'vote']).optional(),
 });
 
 export type QuickSpinInput = z.infer<typeof quickSpinSchema>;

@@ -3,6 +3,7 @@ import { logger } from '@/lib/logger';
 import { checkRateLimit, ipRateLimitKey } from '@/lib/rate-limit';
 import { getSettledForkByCode, serializeFork } from '@/lib/v2/forks';
 import { GUEST_COOKIE } from '@/lib/v2/guests';
+import { enrichForkView } from '@/lib/v2/places';
 import { resolveForkViewer } from '@/lib/v2/viewer';
 
 /**
@@ -85,10 +86,8 @@ export async function GET(
             cleanup();
             return;
           }
-          const view = serializeFork(
-            fork,
-            viewer.participant,
-            viewer.claimedGuestIds
+          const view = await enrichForkView(
+            serializeFork(fork, viewer.participant, viewer.claimedGuestIds)
           );
           if (send({ type: 'fork', fork: view }) && view.status !== 'open') {
             cleanup();
