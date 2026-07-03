@@ -1,11 +1,11 @@
 /**
- * /beta shell wiring: the Fork lane home serves its own root layout,
+ * App shell wiring: the Fork lane home serves its own root layout,
  * publicly on a cold open and with a test-squad session attached.
  * The journeys themselves live in fork.spec.ts.
  */
 import { test, expect } from '@playwright/test';
 
-test.describe('v2 /beta shell', () => {
+test.describe('app shell', () => {
   test.describe('signed out (cold open)', () => {
     // Fresh context — no squad storage state.
     test.use({ storageState: { cookies: [], origins: [] } });
@@ -13,7 +13,7 @@ test.describe('v2 /beta shell', () => {
     test('@smoke serves the Fork lane publicly with no v1 chrome', async ({
       page,
     }) => {
-      await page.goto('/beta');
+      await page.goto('/');
 
       await expect(
         page.getByRole('heading', { name: 'Where are we eating?' })
@@ -33,11 +33,11 @@ test.describe('v2 /beta shell', () => {
   });
 
   test.describe('signed in as squad organizer', () => {
-    test('loads /beta with an active Clerk session and shell auth state', async ({
+    test('loads / with an active Clerk session and shell auth state', async ({
       page,
       context,
     }) => {
-      await page.goto('/beta');
+      await page.goto('/');
       await expect(
         page.getByRole('heading', { name: 'Where are we eating?' })
       ).toBeVisible();

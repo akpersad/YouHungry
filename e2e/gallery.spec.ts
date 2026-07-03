@@ -1,5 +1,5 @@
 /**
- * Phase 2 gate coverage: /beta/gallery renders the full identity — every
+ * Phase 2 gate coverage: /gallery renders the full identity — every
  * primitive, the reveal, both modes — and passes an axe WCAG 2.x AA scan in
  * each. Runs signed-out: the gallery is public by design (the owner reviews
  * it on a phone without ceremony).
@@ -9,11 +9,11 @@ import AxeBuilder from '@axe-core/playwright';
 
 test.use({ storageState: { cookies: [], origins: [] } });
 
-test.describe('v2 /beta/gallery', () => {
+test.describe('v2 /gallery', () => {
   test('@smoke shows the identity and the reveal locks gold', async ({
     page,
   }) => {
-    await page.goto('/beta/gallery');
+    await page.goto('/gallery');
 
     await expect(
       page.getByRole('heading', { name: "Tonight's board" })
@@ -44,7 +44,7 @@ test.describe('v2 /beta/gallery', () => {
 
   test('reduced motion goes straight to the result', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
-    await page.goto('/beta/gallery');
+    await page.goto('/gallery');
     const reveal = page
       .locator('section')
       .filter({ has: page.getByRole('heading', { name: 'The reveal' }) });
@@ -57,7 +57,7 @@ test.describe('v2 /beta/gallery', () => {
   test('dialog and sheet open and close on the platform affordances', async ({
     page,
   }) => {
-    await page.goto('/beta/gallery');
+    await page.goto('/gallery');
 
     await page.getByRole('button', { name: 'Open dialog' }).click();
     const dialog = page.getByRole('dialog', { name: 'Delete this list?' });
@@ -74,7 +74,7 @@ test.describe('v2 /beta/gallery', () => {
 
   for (const mode of ['light', 'dark'] as const) {
     test(`axe scan passes in ${mode} mode`, async ({ page }) => {
-      await page.goto('/beta/gallery');
+      await page.goto('/gallery');
       // Let the reveal settle so the scan sees the locked result state.
       await expect(page.getByText("We're going here.")).toBeVisible({
         timeout: 5_000,

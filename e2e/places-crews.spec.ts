@@ -22,7 +22,7 @@ test.describe('Places lane: search → save → list → fork-from-list', () => 
     const listName = `E2E keeps ${Date.now().toString(36)}`;
 
     // Search the seeded cache and keep a first place on a brand-new list.
-    await page.goto('/beta/places');
+    await page.goto('/places');
     await expect(
       page.getByRole('heading', { name: 'Your spots, on file' })
     ).toBeVisible();
@@ -56,11 +56,11 @@ test.describe('Places lane: search → save → list → fork-from-list', () => 
 
     // Fork this list → the ballot arrives pre-filled from the list.
     await page.getByRole('link', { name: 'Fork this list' }).click();
-    await expect(page).toHaveURL(/\/beta\/new\?list=/);
+    await expect(page).toHaveURL(/\/new\?list=/);
     await expect(page.getByText('On the ballot (2)')).toBeVisible();
 
     await page.getByRole('button', { name: 'Fork it' }).click();
-    await expect(page).toHaveURL(/\/beta\/f\/[a-z0-9]+/i, {
+    await expect(page).toHaveURL(/\/f\/[a-z0-9]+/i, {
       timeout: 15_000,
     });
     await expect(page.getByText('Sushi Yama')).toBeVisible();
@@ -69,14 +69,14 @@ test.describe('Places lane: search → save → list → fork-from-list', () => 
     ).toBeVisible();
 
     // Retire the list; places stay in the shared cache.
-    await page.goto('/beta/places');
+    await page.goto('/places');
     await page.getByRole('link', { name: new RegExp(listName) }).click();
     await page.getByRole('button', { name: 'Delete list' }).click();
     await page
       .getByRole('dialog')
       .getByRole('button', { name: 'Delete it' })
       .click();
-    await expect(page).toHaveURL(/\/beta\/places$/);
+    await expect(page).toHaveURL(/\/places$/);
   });
 });
 
@@ -84,7 +84,7 @@ test.describe('Crew lane: suggestion → shared board → run it back', () => {
   test.describe.configure({ mode: 'serial' });
 
   async function openPairCrew(page: Page): Promise<void> {
-    await page.goto('/beta/crew');
+    await page.goto('/crew');
     await expect(
       page.getByRole('heading', { name: 'Your people, your record' })
     ).toBeVisible();
@@ -101,7 +101,7 @@ test.describe('Crew lane: suggestion → shared board → run it back', () => {
     } else {
       await page.getByRole('link', { name: /Olivia & Marco/ }).click();
     }
-    await expect(page).toHaveURL(/\/beta\/crew\/[0-9a-f]{24}/);
+    await expect(page).toHaveURL(/\/crew\/[0-9a-f]{24}/);
     await expect(
       page.getByRole('heading', { name: 'Olivia & Marco' })
     ).toBeVisible();
@@ -135,7 +135,7 @@ test.describe('Crew lane: suggestion → shared board → run it back', () => {
     await openPairCrew(page);
 
     await page.getByRole('button', { name: 'Run it back' }).click();
-    await expect(page).toHaveURL(/\/beta\/f\/[a-z0-9]+/i, {
+    await expect(page).toHaveURL(/\/f\/[a-z0-9]+/i, {
       timeout: 15_000,
     });
     // The copied ballot (seeded fixture options) and the organizer's lever.
@@ -154,8 +154,8 @@ test.describe('Crew lane: suggestion → shared board → run it back', () => {
 
 test.describe('new lanes pass axe (WCAG 2.x AA), both modes', () => {
   for (const lane of [
-    { path: '/beta/places', heading: 'Your spots, on file' },
-    { path: '/beta/crew', heading: 'Your people, your record' },
+    { path: '/places', heading: 'Your spots, on file' },
+    { path: '/crew', heading: 'Your people, your record' },
   ]) {
     for (const mode of ['light', 'dark'] as const) {
       test(`${lane.path} in ${mode} mode`, async ({ page }) => {

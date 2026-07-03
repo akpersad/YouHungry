@@ -1,90 +1,42 @@
-# E2E Tests - Tagging Guide
+# E2E Tests
 
-## Test Tags
+Playwright journeys for the Fork In The Road app (rebuilt around v2 at the
+Phase 7 cutover).
 
-We use Playwright's test tags to organize and filter tests:
+## Prerequisites
 
-### Available Tags
+1. `.env.local` pointing `MONGODB_DATABASE` at a dev database (the seed
+   script refuses `you-hungry`) with dev-instance Clerk keys (`sk_test_`).
+2. `npm run seed:v2-dev` — creates the Clerk test squad
+   (scripts/v2/test-squad.ts) and seeds fixture places, a starter list,
+   weight history, and a guest. Idempotent; run any time.
+3. Kill any dev server on :3000 — the config builds and runs a
+   **production** server (the Next dev overlay breaks dialog tests), but
+   reuses an existing server locally.
 
-- **`@smoke`** - Quick smoke tests for critical functionality
+## Suites
 
-  - Run time: ~2-3 minutes
-  - Run on: Every PR
-  - Tests: 5 core tests
+| Spec                 | Journey                                                             |
+| -------------------- | ------------------------------------------------------------------- |
+| app-shell.spec.ts    | Cold-open shell, signed-in shell state                              |
+| fork.spec.ts         | Solo quick spin (2 taps, no account), 3-user vote with SSE reveal   |
+| fork-links.spec.ts   | Guest voting from the raw /f link, revote, quorum close, claim flow |
+| places-crews.spec.ts | Search → save → list → fork-from-list; crew suggestion → re-fork    |
+| gallery.spec.ts      | Design-system states, the reveal, axe scans in both color modes     |
 
-- **`@critical`** - Critical path tests that must never break
-  - Run time: ~5-10 minutes
-  - Tests: ~8 important user journeys
+`auth.setup.ts` signs in the squad (organizer/member1/member2) once per run
+and saves storage states under `playwright/.auth/`.
 
-## How to Add Tags
-
-Add tags to test names:
-
-```typescript
-// Smoke test (fast, critical)
-test('User can login @smoke @critical', async ({ page }) => {
-  // test code
-});
-
-// Critical test only
-test('User can complete tiered decision @critical', async ({ page }) => {
-  // test code
-});
-
-// Regular test (no tags)
-test('User can view decision history', async ({ page }) => {
-  // test code
-});
-```
-
-## Running Tagged Tests
+## Commands
 
 ```bash
-# Run smoke tests only
-npm run test:e2e:smoke
-
-# Run critical tests only
-npm run test:e2e:critical
-
-# Run all tests
-npm run test:e2e
+npm run test:e2e            # everything (chromium + mobile-chrome @smoke)
+npm run test:e2e:smoke      # @smoke cuts only
+npm run test:accessibility  # every axe scan, chromium
+npm run test:e2e:mobile     # mobile-chrome project
 ```
 
-## Current Tagged Tests
+## Tags
 
-### Smoke Tests (@smoke)
-
-1. ✅ User login (authentication.spec.ts)
-2. ✅ Restaurant search (restaurant-search.spec.ts)
-3. ✅ Tiered decision - clear winner (group-decision-tiered.spec.ts)
-4. ✅ Create group (group-collaboration.spec.ts)
-5. ✅ Dashboard accessibility (accessibility.spec.ts)
-
-### Critical Tests (@critical)
-
-1. ✅ User login (authentication.spec.ts)
-2. ✅ Restaurant search (restaurant-search.spec.ts)
-3. ✅ Tiered decision - clear winner (group-decision-tiered.spec.ts)
-4. ✅ Tiered decision - single voter (group-decision-tiered.spec.ts)
-5. ✅ Create group (group-collaboration.spec.ts)
-
-## Adding More Tags
-
-To add tags to more tests:
-
-1. Identify tests that should be smoke/critical
-2. Add `@smoke` and/or `@critical` to test name
-3. Update this README
-
-**Smoke test criteria**:
-
-- Fast (<30 seconds)
-- Tests core functionality
-- No external dependencies
-- High value if it catches issues
-
-**Critical test criteria**:
-
-- Tests must-have features
-- Core user journeys
-- High impact if broken
+- `@smoke` — the fastest critical-path cuts; run as a required PR check and
+  re-run on Mobile Chrome.

@@ -37,7 +37,7 @@ test.describe('solo quick spin', () => {
     });
     const page = await context.newPage();
 
-    await page.goto('/beta');
+    await page.goto('/');
     await expect(
       page.getByRole('heading', { name: 'Where are we eating?' })
     ).toBeVisible();
@@ -60,7 +60,7 @@ test.describe('solo quick spin', () => {
   });
 
   test('signed in: spin, lock it in, history records it', async ({ page }) => {
-    await page.goto('/beta');
+    await page.goto('/');
     await spinAndSkip(page);
 
     // Winner card carries real place details from the fixture cache.
@@ -73,7 +73,7 @@ test.describe('solo quick spin', () => {
   });
 
   test('vibe filter narrows the wheel', async ({ page }) => {
-    await page.goto('/beta');
+    await page.goto('/');
     await page.getByRole('button', { name: 'Cheap eats' }).click();
     await spinAndSkip(page);
     // Every cheap-eats fixture is priceLevel 1 → "$" (never "$$").
@@ -89,7 +89,7 @@ test.describe('3-user vote', () => {
     test.setTimeout(120_000);
 
     // --- Organizer creates the fork ---------------------------------------
-    await page.goto('/beta/new');
+    await page.goto('/new');
     await expect(
       page.getByRole('heading', { name: "What's in the running?" })
     ).toBeVisible();
@@ -112,7 +112,7 @@ test.describe('3-user vote', () => {
     await page.getByLabel('Close early after this many votes').fill('3');
     await page.getByRole('button', { name: 'Fork it' }).click();
 
-    await page.waitForURL(/\/beta\/f\/[a-z2-9]{10}/);
+    await page.waitForURL(/\/f\/[a-z2-9]{10}/);
     const forkUrl = page.url();
     await expect(
       page.getByRole('heading', { name: 'Rank your top 3' })

@@ -10,7 +10,7 @@
  *    votes into the account (the ballot follows them).
  */
 import { test, expect, type Browser, type Page } from '@playwright/test';
-import { TEST_SQUAD, SQUAD_PASSWORD } from '../../scripts/v2/test-squad';
+import { TEST_SQUAD, SQUAD_PASSWORD } from '../scripts/v2/test-squad';
 
 // Center of the seeded fixture cluster (scripts/v2/seed-dev.ts).
 const ASTORIA = { latitude: 40.763, longitude: -73.921 };
@@ -22,7 +22,7 @@ test.use({
 
 /** Organizer builds a near-me quorum-3 vote fork; returns the share code. */
 async function createQuorumVoteFork(page: Page): Promise<string> {
-  await page.goto('/beta/new');
+  await page.goto('/new');
   await expect(
     page.getByRole('heading', { name: "What's in the running?" })
   ).toBeVisible();
@@ -42,8 +42,8 @@ async function createQuorumVoteFork(page: Page): Promise<string> {
   await page.getByLabel('Close early after this many votes').fill('3');
   await page.getByRole('button', { name: 'Fork it' }).click();
 
-  await page.waitForURL(/\/beta\/f\/[a-z2-9]{10}/);
-  return page.url().match(/\/beta\/f\/([a-z2-9]{10})/)![1];
+  await page.waitForURL(/\/f\/[a-z2-9]{10}/);
+  return page.url().match(/\/f\/([a-z2-9]{10})/)![1];
 }
 
 /** A signed-out browser, cookie jar empty — someone tapping a chat link. */
@@ -72,7 +72,7 @@ test.describe('guest voting via the fork link', () => {
     const g1Page = await g1.newPage();
     await g1Page.goto(`/f/${code}`);
     // The short link resolves to the fork room.
-    await g1Page.waitForURL(new RegExp(`/beta/f/${code}`));
+    await g1Page.waitForURL(new RegExp(`/f/${code}`));
     await expect(
       g1Page.getByRole('heading', { name: 'Rank your top 3' })
     ).toBeVisible();
@@ -113,7 +113,7 @@ test.describe('guest voting via the fork link', () => {
     const g2 = await guestContext(browser);
     const g2Page = await g2.newPage();
     await g2Page.goto(`/f/${code}`);
-    await g2Page.waitForURL(new RegExp(`/beta/f/${code}`));
+    await g2Page.waitForURL(new RegExp(`/f/${code}`));
     await rank(g2Page, [0, 2]);
     await g2Page.getByLabel(/Your name/).fill('Jordan');
     await g2Page.getByRole('button', { name: 'Cast your vote' }).click();
@@ -157,7 +157,7 @@ test.describe('guest voting via the fork link', () => {
     const guest = await guestContext(browser);
     const guestPage = await guest.newPage();
     await guestPage.goto(`/f/${code}`);
-    await guestPage.waitForURL(new RegExp(`/beta/f/${code}`));
+    await guestPage.waitForURL(new RegExp(`/f/${code}`));
     await rank(guestPage, [0, 1]);
     await guestPage.getByLabel(/Your name/).fill('Noor');
     await guestPage.getByRole('button', { name: 'Cast your vote' }).click();
@@ -205,7 +205,7 @@ test.describe('guest voting via the fork link', () => {
     const guest = await guestContext(browser);
     const guestPage = await guest.newPage();
     await guestPage.goto(`/f/${code}`);
-    await guestPage.waitForURL(new RegExp(`/beta/f/${code}`));
+    await guestPage.waitForURL(new RegExp(`/f/${code}`));
     await rank(guestPage, [1, 0]);
     await guestPage.getByLabel(/Your name/).fill('Casey');
     await guestPage.getByRole('button', { name: 'Cast your vote' }).click();
@@ -216,15 +216,13 @@ test.describe('guest voting via the fork link', () => {
     // Sign in from the same browser (the guest cookie rides along) — by
     // USERNAME, not email: Clerk resolves either to the same account, and
     // this pins that the v2 form doesn't gate the identifier to emails.
-    await guestPage.goto(
-      `/beta/sign-in?next=${encodeURIComponent(`/beta/f/${code}`)}`
-    );
+    await guestPage.goto(`/sign-in?next=${encodeURIComponent(`/f/${code}`)}`);
     await guestPage
       .getByLabel('Email or username')
       .fill(`fitr_${claimer.role}`);
     await guestPage.getByLabel('Password').fill(SQUAD_PASSWORD);
     await guestPage.getByRole('button', { name: 'Sign in' }).click();
-    await guestPage.waitForURL(new RegExp(`/beta/f/${code}`), {
+    await guestPage.waitForURL(new RegExp(`/f/${code}`), {
       timeout: 30_000,
     });
 
