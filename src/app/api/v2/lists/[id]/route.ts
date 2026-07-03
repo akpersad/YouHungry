@@ -1,31 +1,32 @@
 import { ObjectId } from 'mongodb';
 import { NextRequest, NextResponse } from 'next/server';
 import { requireV2User } from '@/lib/v2/auth';
-import { getV2Db } from '@/lib/v2/db';
-import { getPlacesByIds } from '@/lib/v2/places';
 import { placeSummary, v2ErrorResponse } from '@/lib/v2/http';
-import { objectIdString } from '@/lib/v2/validation';
+import { deleteList, getListWithPlaces, renameList } from '@/lib/v2/lists';
+import { objectIdString, renameListSchema } from '@/lib/v2/validation';
 
 /**
- * GET /api/v2/lists/[id] — one list with its places resolved, for the
- * creation flow's option review. Owner-gated.
+ * One list. GET resolves its places (creation-flow option review + the
+ * Places lane detail); PATCH renames; DELETE removes the list — places
+ * themselves live in the shared cache and are untouched. All owner-gated
+ * inside the lib layer (a foreign id 404s like a missing one).
  */
+
+async function listIdFrom(params: Promise<{ id: string }>): Promise<ObjectId> {
+  const { id } = await params;
+  return new ObjectId(objectIdString.parse(id));
+}
+
 export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const user = await requireV2User();
-    const { id } = await params;
-    const listId = new ObjectId(objectIdString.parse(id));
-
-    const { lists } = await getV2Db();
-    const list = await lists.findOne({ _id: listId, ownerId: user._id });
-    if (!list) {
-      return NextResponse.json({ error: 'List not found' }, { status: 404 });
-    }
-
-    const places = await getPlacesByIds(list.placeIds);
+    const { list, places } = await getListWithPlaces(
+      user._id,
+      await listIdFrom(params)
+    );
     return NextResponse.json({
       list: {
         id: list._id.toString(),
@@ -35,5 +36,42 @@ export async function GET(
     });
   } catch (error) {
     return v2ErrorResponse('lists:get', error);
+  }
+}
+
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const user = await requireV2User();
+    const input = renameListSchema.parse(await request.json());
+    const list = await renameList(
+      user._id,
+      await listIdFrom(params),
+      input.name
+    );
+    return NextResponse.json({
+      list: {
+        id: list._id.toString(),
+        name: list.name,
+        placeCount: list.placeIds.length,
+      },
+    });
+  } catch (error) {
+    return v2ErrorResponse('lists:rename', error);
+  }
+}
+
+export async function DELETE(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const user = await requireV2User();
+    await deleteList(user._id, await listIdFrom(params));
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    return v2ErrorResponse('lists:delete', error);
   }
 }

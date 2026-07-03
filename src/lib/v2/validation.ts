@@ -117,6 +117,29 @@ export const searchQuerySchema = z.object({
   q: z.string().trim().min(1).max(80),
 });
 
+/**
+ * A list name: same hygiene as a guest display name (trim, collapse
+ * whitespace, no control/format characters), a touch more room.
+ */
+export const listName = z
+  .string()
+  .trim()
+  .transform((name) => name.replace(/\s+/g, ' '))
+  .pipe(
+    z
+      .string()
+      .min(1, 'Give the list a name')
+      .max(40, 'Keep the name under 40 characters')
+      .refine(
+        (name) => !/\p{C}/u.test(name),
+        'That name contains unsupported characters'
+      )
+  );
+
+export const createListSchema = z.object({ name: listName });
+export const renameListSchema = z.object({ name: listName });
+export const savePlaceSchema = z.object({ placeId: objectIdString });
+
 export type QuickSpinInput = z.infer<typeof quickSpinSchema>;
 export type LockInInput = z.infer<typeof lockInSchema>;
 export type CreateForkApiInput = z.infer<typeof createForkSchema>;

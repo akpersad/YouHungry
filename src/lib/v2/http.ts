@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { logger } from '@/lib/logger';
 import { V2DomainError } from './errors';
-import type { PlaceDoc } from './schema';
 
 /**
  * Shared plumbing for the /api/v2 routes: one error-mapping policy and the
@@ -35,22 +34,8 @@ export function v2ErrorResponse(route: string, error: unknown): NextResponse {
   return NextResponse.json({ error: 'Something went wrong' }, { status: 500 });
 }
 
-export interface PlaceSummary {
-  id: string;
-  name: string;
-  address: string;
-  categories: string[];
-  priceLevel?: number;
-  rating?: number;
-}
-
-export function placeSummary(place: PlaceDoc): PlaceSummary {
-  return {
-    id: place._id.toString(),
-    name: place.name,
-    address: place.address,
-    categories: place.categories,
-    priceLevel: place.priceLevel,
-    rating: place.rating,
-  };
-}
+// The canonical place serializer lives with the domain (places.ts, where
+// Phase 5's Google client and enrichment also use it); routes keep their
+// established import path.
+export type { PlaceSummary } from './places';
+export { toPlaceSummary as placeSummary } from './places';
