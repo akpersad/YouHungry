@@ -58,6 +58,7 @@
     "prod:https:start": "node scripts/run-production.js start https",
     "seed:v2-dev": "tsx scripts/v2/seed-dev.ts",
     "demo:v2-foundations": "tsx scripts/v2/demo-foundations.ts",
+    "migrate:v1": "tsx scripts/v2/migrate-v1.ts",
     "test:e2e:v2": "playwright test --project=v2-beta"
   },
   "dependencies": {
