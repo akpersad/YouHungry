@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useUser } from '@clerk/nextjs';
 import { Button, ButtonLink, EmptyState, Reveal } from '@/components/v2/ui';
 import { cx } from '@/components/v2/ui/cx';
+import { SaveToListDialog } from '@/components/v2/places/SaveToListDialog';
 import type { PlaceSummary } from '@/lib/v2/http';
 
 /**
@@ -67,6 +68,8 @@ export function QuickSpin() {
   const [error, setError] = useState<string | null>(null);
   const [empty, setEmpty] = useState(false);
   const [locking, setLocking] = useState(false);
+  const [keepOpen, setKeepOpen] = useState(false);
+  const [keptOn, setKeptOn] = useState<string | null>(null);
 
   const spin = async (coords?: { lat: number; lng: number }) => {
     setError(null);
@@ -120,6 +123,7 @@ export function QuickSpin() {
         return;
       }
 
+      setKeptOn(null);
       setData({
         coords: at,
         places: payload.places,
@@ -237,6 +241,16 @@ export function QuickSpin() {
                 >
                   Spin again
                 </Button>
+                {isSignedIn &&
+                  (keptOn ? (
+                    <p role="status" className="text-sm text-ink-muted">
+                      Kept on {keptOn}
+                    </p>
+                  ) : (
+                    <Button variant="ghost" onClick={() => setKeepOpen(true)}>
+                      Keep this one
+                    </Button>
+                  ))}
               </div>
 
               {!isSignedIn && (
@@ -273,6 +287,16 @@ export function QuickSpin() {
         <p role="alert" className="text-sm text-danger">
           {error}
         </p>
+      )}
+
+      {winner && (
+        <SaveToListDialog
+          open={keepOpen}
+          placeId={winner.id}
+          placeName={winner.name}
+          onClose={() => setKeepOpen(false)}
+          onSaved={(listName) => setKeptOn(listName)}
+        />
       )}
     </section>
   );

@@ -1,6 +1,7 @@
 'use client';
 
-import { useRef, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
   Button,
@@ -94,7 +95,7 @@ function PlaceRow({
   );
 }
 
-export function NewFork() {
+export function NewFork({ initialListId }: { initialListId?: string }) {
   const router = useRouter();
 
   // Ballot
@@ -124,6 +125,45 @@ export function NewFork() {
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const listsLoaded = useRef(false);
+
+  // "Fork this list" (Places lane): arrive with the list open and its
+  // places already on the ballot — the ballot fills itself.
+  useEffect(() => {
+    if (!initialListId) return;
+    listsLoaded.current = true;
+    void (async () => {
+      try {
+        const [listsResponse, listResponse] = await Promise.all([
+          fetch('/api/v2/lists'),
+          fetch(`/api/v2/lists/${initialListId}`),
+        ]);
+        if (listsResponse.ok) {
+          const payload: { lists: ListSummary[] } = await listsResponse.json();
+          setLists(payload.lists);
+        } else {
+          setLists([]);
+        }
+        if (!listResponse.ok) return;
+        const payload: { list: { places: PlaceSummary[] } } =
+          await listResponse.json();
+        setListPlaces((current) => ({
+          ...current,
+          [initialListId]: payload.list.places,
+        }));
+        setActiveListId(initialListId);
+        setSelections((current) =>
+          current.length > 0
+            ? current
+            : payload.list.places.slice(0, 24).map((place) => ({
+                place,
+                origin: `list:${initialListId}` as Origin,
+              }))
+        );
+      } catch {
+        // The lists tab still works by hand; nothing to announce.
+      }
+    })();
+  }, [initialListId]);
 
   const isSelected = (id: string) =>
     selections.some((selection) => selection.place.id === id);
@@ -276,6 +316,7 @@ export function NewFork() {
       {/* Spots */}
       <section aria-label="Spots" className="flex flex-col gap-4">
         <Tabs
+          defaultTab={initialListId ? 'lists' : undefined}
           tabs={[
             {
               id: 'near-me',
@@ -338,8 +379,14 @@ export function NewFork() {
                     </SkeletonGroup>
                   ) : lists.length === 0 ? (
                     <p className="text-sm text-ink-secondary">
-                      No lists yet. Lists arrive with Places. Near me and search
-                      work today.
+                      No lists yet. Save spots in{' '}
+                      <Link
+                        href="/beta/places"
+                        className="rounded font-semibold text-brass underline-offset-4 outline-none hover:underline focus-visible:ring-2 focus-visible:ring-focus"
+                      >
+                        Places
+                      </Link>{' '}
+                      and they show up here.
                     </p>
                   ) : (
                     <>
