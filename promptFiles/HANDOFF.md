@@ -38,18 +38,65 @@ Commit ledger (C1–C3 = Places half DONE; C4–C7 = Crews half + exit demos):
    gold on the lane (saving is frame work); "Fork this list" is the
    detail page's one gold action. BetaHeader grew the Places nav link.
 
-Remaining scope (Crews & history half): C4 crews server core (suggestion
-from repeated co-participants, crew page data, one-tap re-fork honoring
-shared decay weights), C5 crew + history lane UI, C6 push/email result
-notifications to account-holders through the suppression seam (includes
-the item explicitly moved here from Phase 4), C7 seed + e2e exit demos
-(search→save→list→fork-from-list; crew suggestion; crew re-fork weights)
+4. `C4` **Crews server core** (`lib/v2/crews.ts`): suggestions derived
+   from repeated co-participation (exact account set, 3+ closed crew-less
+   forks; guests never count toward the set but don't disqualify a fork);
+   `createCrew` BACK-ATTACHES matching history (closed forks with exactly
+   that member set get the crewId) so shared decay weights are live from
+   day one, idempotent on the member set; `getCrewView` (members, recent
+   results, shared weight board lightest-first); `reforkCrew` re-runs the
+   last crew ballot under the crewId (spinFork already scopes history by
+   crewId). API: GET/POST /api/v2/crews, GET/PATCH /api/v2/crews/[id],
+   POST /api/v2/crews/[id]/refork — all member-gated in the query filter.
+5. `C5` **Crew lane UI**: `/beta/crew` (suggestion cards → one gold tap
+   makes the crew; crews list; history section with a stats line) and
+   `/beta/crew/[id]` ("Run it back" gold, rename, shared weight board as
+   text + bar, crew receipts). `getHistoryForUser` added to forks.ts
+   (claim pointer honored). BetaHeader: Crew nav link.
+6. `C6` **Result notifications** (`lib/v2/notifications.ts`): push +
+   email "We're going here." to account-holder participants when a fork
+   closes with a result (the item moved here from Phase 4). Fired exactly
+   once, by whichever caller's guarded result write landed; fire-and-
+   forget (a notification failure can never fail, slow, or double a
+   close). Solo decisions stay quiet; guests unreachable by design; v1
+   preference opt-outs honored; expired push endpoints pruned. Push gates
+   inside push-service, the lean Resend sender gates on the suppression
+   seam here — dev/CI/tests never reach a provider.
+7. `C7` **Seed + e2e exit demos.** seed-dev.ts: 3 old crew-history forks
+   for organizer+member1 (winners 45+ days stale = weight-neutral, so
+   existing weight assertions hold) and a per-run reset ($unset crewId on
+   seed forks, delete the accepted pair crew) so the suggestion derives
+   fresh every run. `e2e/v2/places-crews.spec.ts`: the full accelerant
+   loop (search → save into a fresh list via the dialog → second place →
+   list detail → "Fork this list" pre-fills the ballot → fork room →
+   list deleted) AND the crew journey (pair suggestion accepted → crew
+   page shows the back-attached shared board with decayed + recovered
+   weights → "Run it back" → spin → reveal; tolerates a pre-accepted
+   crew on local reruns). beta.spec's "no v1 chrome" nav assertion
+   updated for v2's own lanes nav.
 
-- docs refresh.
+**Validation (2026-07-02):** full pre-push green (type-check / eslint
+--max-warnings=0 / prettier / Jest 1875 passed, 12 skipped / production
+build with all new routes); **v2 e2e lane 17 passed + 1
+flaky-passed-on-retry** (the pre-existing 3-user vote spec's documented
+Clerk dev-instance flake) on the production server against the reseeded
+dev DB. Google never billed (default-closed gate); all external sends
+suppressed by the Phase 1 seam.
 
-**Validation so far:** type-check / eslint --max-warnings=0 / prettier /
-full Jest **1858 passed, 12 skipped (151 suites; ~45 new tests)** /
-production build green with all new routes. e2e lane deferred to C7.
+**Phase-scope decisions (documented, not silent):**
+
+- **Legacy Places REST endpoints, not the new Places API** — the prod
+  key is enabled for them today; migrating needs an owner-level console
+  change. Revisit at/after cutover.
+- **No photos anywhere in v2** — the legacy photo URL embeds the API key
+  client-side, and the paper-and-ink identity is text-forward. photoRef
+  is persisted for the future; nothing renders it.
+- **No in-app notification center** (WORKPLAN bias honored): push +
+  email only, one trigger (fork closed with a result).
+- **Saving IS list membership** — no separate global "saved" flag to
+  drift out of sync.
+- **Crew suggestions require the exact same account set 3+ times** — a
+  superset or subset does not count (deliberate: "the same people").
 
 ## Previous: v2 Phase 4 — Fork Links & guest voting (MERGED ✅ as PR #79 `4b03743`, branch `v2/fork-links`)
 

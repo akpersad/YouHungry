@@ -392,12 +392,85 @@ async function main() {
       await retryOnDuplicate(() =>
         forks.updateOne(
           { code: spec.code },
-          { $set: doc, $setOnInsert: { code: spec.code } },
+          {
+            $set: doc,
+            $setOnInsert: { code: spec.code },
+            // Reset: a previous e2e run may have accepted a crew, which
+            // back-attaches crewId to matching seed forks. Detach so the
+            // suggestion derives fresh every run.
+            $unset: { crewId: '' },
+          },
           { upsert: true }
         )
       );
     }
     console.log(`mongo: ${historySpec.length} history forks inserted`);
+
+    // Crew-suggestion history (Phase 5+6): organizer + member1 share three
+    // old closed forks, so /beta/crew offers "make it a crew" for the pair.
+    // Winners are 45+ days old picks of a place no other seed fork picks —
+    // fully decayed back to weight 1.0, so existing weight assertions
+    // (demo:v2-foundations, fork e2e) are untouched.
+    const crewPairRoles = ['organizer', 'member1'];
+    const crewPairIds = crewPairRoles.map((role) => userIdByRole.get(role)!);
+    const crewHistorySpec = [
+      { code: 'seed-crew-1', placeKey: 'trattoria-nonna', ageDays: 45 },
+      { code: 'seed-crew-2', placeKey: 'trattoria-nonna', ageDays: 50 },
+      { code: 'seed-crew-3', placeKey: 'trattoria-nonna', ageDays: 55 },
+    ];
+    for (const spec of crewHistorySpec) {
+      const decidedAt = new Date(Date.now() - spec.ageDays * DAY_MS);
+      const placeId = placeIdByKey.get(spec.placeKey)!;
+      const doc: Omit<ForkDoc, '_id' | 'code'> = {
+        organizer: {
+          userId: userIdByRole.get('organizer')!,
+          displayName: organizer.displayName,
+        },
+        source: { kind: 'ad-hoc' },
+        mode: 'spin',
+        options: PLACE_FIXTURES.slice(0, 6).map((f) => ({
+          placeId: placeIdByKey.get(f.key)!,
+          googlePlaceId: `dev-${f.key}`,
+          name: f.name,
+        })),
+        status: 'closed',
+        closesAt: decidedAt,
+        votes: [],
+        result: {
+          placeId,
+          decidedAt,
+          reasoning: `Seeded crew history: picked ${spec.ageDays} days ago.`,
+          weights: {},
+        },
+        participantUserIds: crewPairIds,
+        participantGuestIds: [],
+        createdAt: decidedAt,
+        updatedAt: decidedAt,
+      };
+      await retryOnDuplicate(() =>
+        forks.updateOne(
+          { code: spec.code },
+          {
+            $set: doc,
+            $setOnInsert: { code: spec.code },
+            $unset: { crewId: '' },
+          },
+          { upsert: true }
+        )
+      );
+    }
+    // Reset the crew a previous e2e run accepted for this exact pair, so
+    // the suggestion is offered fresh every run.
+    const crews = db.collection(V2_COLLECTIONS.crews);
+    const removed = await crews.deleteMany({
+      memberIds: { $all: crewPairIds, $size: 2 },
+    });
+    console.log(
+      `mongo: ${crewHistorySpec.length} crew-history forks upserted` +
+        (removed.deletedCount > 0
+          ? ` (${removed.deletedCount} prior pair crew reset)`
+          : '')
+    );
 
     // One unclaimed guest for guest-identity flows.
     const guests = db.collection<GuestDoc>(V2_COLLECTIONS.guests);
