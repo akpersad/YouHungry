@@ -27,6 +27,25 @@ import { TEST_SQUAD, SQUAD_PASSWORD } from './test-squad';
 const PROD_DB_NAME = 'you-hungry';
 const DAY_MS = 24 * 60 * 60 * 1000;
 
+/**
+ * Two CI jobs (smoke + PR tests) seed the same e2e database concurrently.
+ * Every write here is an idempotent upsert, but concurrent upserts against
+ * the same unique key can still race to an E11000 — the loser just retries
+ * once and finds the winner's document.
+ */
+async function retryOnDuplicate<T>(op: () => Promise<T>): Promise<T> {
+  try {
+    return await op();
+  } catch (error) {
+    const isDuplicate =
+      typeof error === 'object' &&
+      error !== null &&
+      (error as { code?: unknown }).code === 11000;
+    if (!isDuplicate) throw error;
+    return op();
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Environment + safety rails
 // ---------------------------------------------------------------------------
@@ -230,17 +249,19 @@ async function main() {
     for (const member of TEST_SQUAD) {
       const clerkId = clerkIdByRole.get(member.role)!;
       const now = new Date();
-      const result = await users.findOneAndUpdate(
-        { clerkId },
-        {
-          $set: {
-            email: member.email,
-            name: `${member.firstName} ${member.lastName}`,
-            updatedAt: now,
+      const result = await retryOnDuplicate(() =>
+        users.findOneAndUpdate(
+          { clerkId },
+          {
+            $set: {
+              email: member.email,
+              name: `${member.firstName} ${member.lastName}`,
+              updatedAt: now,
+            },
+            $setOnInsert: { clerkId, createdAt: now },
           },
-          $setOnInsert: { clerkId, createdAt: now },
-        },
-        { upsert: true, returnDocument: 'after' }
+          { upsert: true, returnDocument: 'after' }
+        )
       );
       userIdByRole.set(member.role, result!._id as ObjectId);
     }
@@ -252,25 +273,30 @@ async function main() {
     const placeIdByKey = new Map<string, ObjectId>();
     for (const fixture of PLACE_FIXTURES) {
       const now = new Date();
-      const result = await places.findOneAndUpdate(
-        { googlePlaceId: `dev-${fixture.key}` },
-        {
-          $set: {
-            name: fixture.name,
-            address: `Fixture Ave, Astoria, NY (${fixture.key})`,
-            location: {
-              type: 'Point',
-              coordinates: [fixture.lng, fixture.lat],
+      const result = await retryOnDuplicate(() =>
+        places.findOneAndUpdate(
+          { googlePlaceId: `dev-${fixture.key}` },
+          {
+            $set: {
+              name: fixture.name,
+              address: `Fixture Ave, Astoria, NY (${fixture.key})`,
+              location: {
+                type: 'Point',
+                coordinates: [fixture.lng, fixture.lat],
+              },
+              categories: fixture.categories,
+              priceLevel: fixture.priceLevel,
+              rating: fixture.rating,
+              cachedAt: now,
+              updatedAt: now,
             },
-            categories: fixture.categories,
-            priceLevel: fixture.priceLevel,
-            rating: fixture.rating,
-            cachedAt: now,
-            updatedAt: now,
+            $setOnInsert: {
+              googlePlaceId: `dev-${fixture.key}`,
+              createdAt: now,
+            },
           },
-          $setOnInsert: { googlePlaceId: `dev-${fixture.key}`, createdAt: now },
-        },
-        { upsert: true, returnDocument: 'after' }
+          { upsert: true, returnDocument: 'after' }
+        )
       );
       placeIdByKey.set(fixture.key, result!._id as ObjectId);
     }
@@ -294,10 +320,9 @@ async function main() {
 
     // Decision history — closed forks with results at staggered ages so
     // weight decay is observable: 2d ago (heavy penalty), 12d ago (partial),
-    // 40d ago (fully recovered). Deterministic seed-* codes → idempotent
-    // delete-and-reinsert.
+    // 40d ago (fully recovered). Deterministic seed-* codes, upserted in
+    // place (concurrent-safe: parallel CI jobs seed the same database).
     const forks = db.collection<ForkDoc>(V2_COLLECTIONS.forks);
-    await forks.deleteMany({ code: /^seed-/ });
 
     const organizer = TEST_SQUAD.find((m) => m.role === 'organizer')!;
     const member1 = TEST_SQUAD.find((m) => m.role === 'member1')!;
@@ -338,8 +363,7 @@ async function main() {
       const placeId = placeIdByKey.get(spec.placeKey)!;
       const fixture = PLACE_FIXTURES.find((f) => f.key === spec.placeKey)!;
       const lead = spec.roles[0] === 'member1' ? member1 : organizer;
-      const doc: Omit<ForkDoc, '_id'> = {
-        code: spec.code,
+      const doc: Omit<ForkDoc, '_id' | 'code'> = {
         organizer: {
           userId: userIdByRole.get(lead.role)!,
           displayName: lead.displayName,
@@ -365,19 +389,27 @@ async function main() {
         createdAt: decidedAt,
         updatedAt: decidedAt,
       };
-      await forks.insertOne(doc as ForkDoc);
+      await retryOnDuplicate(() =>
+        forks.updateOne(
+          { code: spec.code },
+          { $set: doc, $setOnInsert: { code: spec.code } },
+          { upsert: true }
+        )
+      );
     }
     console.log(`mongo: ${historySpec.length} history forks inserted`);
 
     // One unclaimed guest for guest-identity flows.
     const guests = db.collection<GuestDoc>(V2_COLLECTIONS.guests);
-    await guests.updateOne(
-      { guestId: 'seed-guest-gabi' },
-      {
-        $set: { displayName: 'Gabi', lastSeenAt: new Date() },
-        $setOnInsert: { guestId: 'seed-guest-gabi', createdAt: new Date() },
-      },
-      { upsert: true }
+    await retryOnDuplicate(() =>
+      guests.updateOne(
+        { guestId: 'seed-guest-gabi' },
+        {
+          $set: { displayName: 'Gabi', lastSeenAt: new Date() },
+          $setOnInsert: { guestId: 'seed-guest-gabi', createdAt: new Date() },
+        },
+        { upsert: true }
+      )
     );
     console.log('mongo: guest upserted');
 

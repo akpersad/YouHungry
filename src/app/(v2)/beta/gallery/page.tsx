@@ -1,11 +1,6 @@
 'use client';
 
-import {
-  useEffect,
-  useState,
-  useSyncExternalStore,
-  type ReactNode,
-} from 'react';
+import { useState, type ReactNode } from 'react';
 import {
   Button,
   Card,
@@ -26,81 +21,6 @@ import {
  * promptFiles/v2/IDENTITY.md decides what's here; the design manual decides
  * how well.
  */
-
-// Same hydration-safe shape as v1's ThemeProvider: external state comes in
-// through useSyncExternalStore (server snapshot = light), the session choice
-// wins, and the DOM class is synced in an effect — no setState-in-effect.
-const subscribeToSystem = (cb: () => void) => {
-  const mq = window.matchMedia('(prefers-color-scheme: dark)');
-  mq.addEventListener('change', cb);
-  return () => mq.removeEventListener('change', cb);
-};
-const noopSubscribe = () => () => {};
-
-function ThemeToggle() {
-  const stored = useSyncExternalStore(
-    noopSubscribe,
-    () => {
-      try {
-        return localStorage.getItem('fitr-v2-theme');
-      } catch {
-        return null;
-      }
-    },
-    () => null
-  );
-  const system = useSyncExternalStore(
-    subscribeToSystem,
-    () =>
-      window.matchMedia('(prefers-color-scheme: dark)').matches
-        ? 'dark'
-        : 'light',
-    () => 'light' as const
-  );
-  const [session, setSession] = useState<'light' | 'dark' | null>(null);
-  const mode: 'light' | 'dark' =
-    session ?? (stored === 'light' || stored === 'dark' ? stored : system);
-
-  useEffect(() => {
-    document.documentElement.classList.remove('light', 'dark');
-    document.documentElement.classList.add(mode);
-  }, [mode]);
-
-  const apply = (next: 'light' | 'dark') => {
-    setSession(next);
-    try {
-      localStorage.setItem('fitr-v2-theme', next);
-    } catch {
-      // private mode — the toggle still works for this visit
-    }
-  };
-
-  return (
-    <div
-      role="group"
-      aria-label="Color mode"
-      className="flex rounded-lg border border-line-strong p-0.5"
-    >
-      {(['light', 'dark'] as const).map((m) => (
-        <button
-          key={m}
-          type="button"
-          aria-pressed={mode === m}
-          onClick={() => apply(m)}
-          className={
-            'h-9 rounded-md px-3 text-sm font-semibold outline-none transition-colors motion-safe:duration-100 ' +
-            'focus-visible:ring-2 focus-visible:ring-focus ' +
-            (mode === m
-              ? 'bg-ink text-canvas'
-              : 'text-ink-muted hover:text-ink')
-          }
-        >
-          {m === 'light' ? 'Light' : 'Dark'}
-        </button>
-      ))}
-    </div>
-  );
-}
 
 function Section({
   title,
@@ -167,26 +87,24 @@ export default function GalleryPage() {
   return (
     <main className="mx-auto flex min-h-dvh max-w-3xl flex-col gap-14 px-4 py-10 sm:px-6 sm:py-14">
       <header className="flex flex-col gap-4">
-        <div className="flex items-start justify-between gap-4">
-          <p className="type-board text-sm text-ink-muted">
-            Fork In The Road · v2 identity
-          </p>
-          <ThemeToggle />
-        </div>
+        {/* The color-mode toggle lives in the shared shell header. */}
+        <p className="type-board text-sm text-ink-muted">
+          Fork In The Road · v2 identity
+        </p>
         <h1 className="type-board text-4xl text-ink sm:text-5xl">
           Tonight&apos;s board
         </h1>
         <p className="max-w-lg text-ink-secondary">
           A calm paper-and-ink frame, one rationed gold accent, and a board that
           lights up when the decision lands. Everything below is the real
-          component set — press it, tab through it, flip the mode.
+          component set. Press it, tab through it, flip the mode.
         </p>
       </header>
 
       {/* The hero gets designed first: the reveal. */}
       <Section
         title="The reveal"
-        note="The signature moment — decelerating flaps, then gold. Tap the board to skip; reduced motion goes straight to the result."
+        note="The signature moment: decelerating flaps, then gold. Tap the board to skip; reduced motion goes straight to the result."
       >
         <Reveal
           key={spin}
@@ -238,22 +156,22 @@ export default function GalleryPage() {
             className="bg-ink-muted"
           />
           <Swatch
-            name="gold — the decision accent"
+            name="gold: the decision accent"
             value="oklch(0.8 0.16 85)"
             className="bg-gold"
           />
           <Swatch
-            name="brass — gold's text-safe shade"
+            name="brass: gold's text-safe shade"
             value="oklch(0.52 0.11 75)"
             className="bg-brass"
           />
           <Swatch
-            name="danger — destructive only"
+            name="danger: destructive only"
             value="oklch(0.5 0.19 25)"
             className="bg-danger"
           />
           <Swatch
-            name="board — mode-invariant"
+            name="board: mode-invariant"
             value="oklch(0.21 0.03 155)"
             className="bg-board"
           />
@@ -262,7 +180,7 @@ export default function GalleryPage() {
 
       <Section
         title="Type"
-        note="One family, many voices: Archivo's width axis carries the board register. Spline Sans Mono carries data — codes, countdowns, tallies."
+        note="One family, many voices: Archivo's width axis carries the board register. Spline Sans Mono carries data: codes, countdowns, tallies."
       >
         <Card variant="outline" className="flex flex-col gap-4">
           <p className="type-board text-3xl">Golden Duck</p>
@@ -270,7 +188,7 @@ export default function GalleryPage() {
             Ranked. Three points to first choice.
           </p>
           <p className="max-w-md">
-            Body text is Archivo at 16 over 1.5 — the frame stays quiet so the
+            Body text is Archivo at 16 over 1.5. The frame stays quiet so the
             board can be loud. Emphasis is <strong>600</strong>, never a thinner
             weight.
           </p>
@@ -282,7 +200,7 @@ export default function GalleryPage() {
 
       <Section
         title="Buttons"
-        note="Gold belongs to the one decisive action on a screen. Press any of them — 97% scale, 100ms, no bounce."
+        note="Gold belongs to the one decisive action on a screen. Press any of them: 97% scale, 100ms, no bounce."
       >
         <div className="flex flex-wrap items-center gap-3">
           <Button>Fork it</Button>
@@ -302,7 +220,7 @@ export default function GalleryPage() {
 
       <Section
         title="Inputs"
-        note="Labels always visible, messages beside the field, error and success carry an icon — never color alone."
+        note="Labels always visible, messages beside the field, error and success carry an icon, never color alone."
       >
         <div className="grid max-w-md grid-cols-1 gap-5">
           <Input label="Display name" placeholder="How the crew sees you" />
@@ -310,7 +228,7 @@ export default function GalleryPage() {
             label="Email"
             type="email"
             required
-            help="For your fork results — nothing else."
+            help="For your fork results, nothing else."
           />
           <Input
             label="Email"
@@ -354,7 +272,7 @@ export default function GalleryPage() {
         </div>
       </Section>
 
-      <Section title="Tabs" note="Crisp swap — no sliding indicator theater.">
+      <Section title="Tabs" note="Crisp swap, no sliding indicator theater.">
         <Tabs
           tabs={[
             {
@@ -409,7 +327,7 @@ export default function GalleryPage() {
 
       <Section
         title="Empty state"
-        note="An invitation, not an apology — say what goes here and offer one action."
+        note="An invitation, not an apology: say what goes here and offer one action."
       >
         <Card variant="outline">
           <EmptyState
@@ -438,7 +356,7 @@ export default function GalleryPage() {
 
       <Section
         title="Dialog & sheet"
-        note="Native <dialog> underneath — focus trap, Esc, and focus return come from the platform."
+        note="Native <dialog> underneath: focus trap, Esc, and focus return come from the platform."
       >
         <div className="flex flex-wrap gap-3">
           <Button variant="quiet" onClick={() => setDialogOpen(true)}>
@@ -513,7 +431,7 @@ export default function GalleryPage() {
 
       <footer className="border-t border-line pt-6 text-sm text-ink-muted">
         <p>
-          Phase 2 gate — direction and craft rules in{' '}
+          Phase 2 gate. Direction and craft rules in{' '}
           <span className="font-mono">promptFiles/v2/IDENTITY.md</span>. The
           Fork lane builds on this in Phase 3.
         </p>

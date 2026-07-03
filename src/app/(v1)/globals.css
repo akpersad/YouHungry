@@ -68,7 +68,9 @@
 
   /* Status */
   --color-success: var(--olive);
-  --color-warning: oklch(0.6 0.13 70);
+  /* 0.6 -> 0.54: text-warning is used for 14px body text across settings/
+     history; 0.6 measured 3.93:1 on surface (axe, CI). 0.54 = 5.0:1. */
+  --color-warning: oklch(0.54 0.13 70);
   --color-error: oklch(0.5 0.19 25);
   --color-info: oklch(0.55 0.12 250);
 

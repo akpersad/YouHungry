@@ -53,7 +53,9 @@ function mockForksCollection(overrides: Partial<ForksStub> = {}): ForksStub {
       limit: jest.fn().mockReturnThis(),
       toArray: jest.fn().mockResolvedValue([]),
     }),
-    updateOne: jest.fn().mockResolvedValue({ modifiedCount: 1 }),
+    updateOne: jest
+      .fn()
+      .mockResolvedValue({ matchedCount: 1, modifiedCount: 1 }),
     ...overrides,
   };
   (getV2Db as jest.Mock).mockResolvedValue({ forks });

@@ -145,29 +145,22 @@ export interface ConsensusOutcome {
 }
 
 /**
- * Score ranked ballots and resolve a winner. Rankings referencing options
- * not in `optionIds` (removed after the ballot was cast) are skipped, and
- * ties break randomly via `rng` — both v1-proven behaviors.
+ * Score ranked ballots — the deterministic half of consensus. Exposed on its
+ * own so UIs can rebuild the tally/breakdown for display without re-rolling
+ * the random tie-break that `resolveConsensus` layers on top.
  */
-export function resolveConsensus(
+export function scoreBallots(
   ballots: RankedBallot[],
-  optionIds: string[],
-  rng: Rng = Math.random
-): ConsensusOutcome {
+  optionIds: string[]
+): {
+  scores: Record<string, number>;
+  breakdown: Record<string, BreakdownEntry>;
+} {
   const scores: Record<string, number> = {};
   const breakdown: Record<string, BreakdownEntry> = {};
   for (const id of optionIds) {
     scores[id] = 0;
     breakdown[id] = { first: 0, second: 0, third: 0, total: 0 };
-  }
-
-  if (ballots.length === 0) {
-    return {
-      winnerId: null,
-      reasoning: 'No votes submitted',
-      breakdown,
-      scores,
-    };
   }
 
   for (const ballot of ballots) {
@@ -181,6 +174,30 @@ export function resolveConsensus(
       else breakdown[optionId].third++;
       breakdown[optionId].total += points;
     });
+  }
+
+  return { scores, breakdown };
+}
+
+/**
+ * Score ranked ballots and resolve a winner. Rankings referencing options
+ * not in `optionIds` (removed after the ballot was cast) are skipped, and
+ * ties break randomly via `rng` — both v1-proven behaviors.
+ */
+export function resolveConsensus(
+  ballots: RankedBallot[],
+  optionIds: string[],
+  rng: Rng = Math.random
+): ConsensusOutcome {
+  const { scores, breakdown } = scoreBallots(ballots, optionIds);
+
+  if (ballots.length === 0) {
+    return {
+      winnerId: null,
+      reasoning: 'No votes submitted',
+      breakdown,
+      scores,
+    };
   }
 
   const sorted = Object.entries(scores).sort((a, b) => b[1] - a[1]);

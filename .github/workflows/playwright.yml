@@ -31,6 +31,17 @@ jobs:
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps chromium
 
+      # The v2 specs need the fixture places/squad in the e2e database.
+      # The script REFUSES the production DB name and live Clerk keys, so a
+      # misconfigured MONGODB_DATABASE secret fails loudly here instead of
+      # timing out cryptically in the specs.
+      - name: Seed v2 e2e data (idempotent; refuses production)
+        run: npm run seed:v2-dev
+        env:
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
+          MONGODB_DATABASE: ${{ secrets.MONGODB_DATABASE }}
+          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+
       - name: Run smoke tests (@smoke)
         run: npm run test:e2e:smoke
         env:
@@ -81,6 +92,13 @@ jobs:
 
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps chromium
+
+      - name: Seed v2 e2e data (idempotent; refuses production)
+        run: npm run seed:v2-dev
+        env:
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
+          MONGODB_DATABASE: ${{ secrets.MONGODB_DATABASE }}
+          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
 
       - name: Run E2E tests (Chromium + Mobile Chrome)
         run: npm run test:e2e
@@ -140,6 +158,13 @@ jobs:
 
       - name: Install ALL Playwright Browsers
         run: npx playwright install --with-deps
+
+      - name: Seed v2 e2e data (idempotent; refuses production)
+        run: npm run seed:v2-dev
+        env:
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
+          MONGODB_DATABASE: ${{ secrets.MONGODB_DATABASE }}
+          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
 
       - name: Run comprehensive E2E tests (All 5 browsers)
         run: npx playwright test --shard=${{ matrix.shard }}/4

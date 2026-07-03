@@ -1,15 +1,163 @@
 # Session Handoff — Fork In The Road portfolio upgrade
 
-**Last updated:** 2026-07-02 (v2 Phase 1 MERGED ✅ as PR #75 `3cbaa3c`; **v2 Phase 2 BUILT on `v2/identity`, pre-push + v2 e2e green, awaiting owner push go-ahead**)
+**Last updated:** 2026-07-02 (v2 Phase 2 MERGED ✅ as PR #77 `99c4652`; **v2 Phase 3 BUILT on `v2/fork`, pre-push + v2 e2e green, awaiting owner push go-ahead**)
 **Read this first, then:** `promptFiles/v2/CHARTER.md` + `promptFiles/v2/WORKPLAN.md` (the authoritative plan for all v2 work — supersedes `phased-execution-plan.md` phases 4–8), `promptFiles/v2/IDENTITY.md` (the committed v2 design direction), `CLAUDE.md` (repo guide).
 
-## CURRENT: v2 Phase 2 — Identity & design system (branch `v2/identity`, 2026-07-02)
+## CURRENT: v2 Phase 3 — The Fork, core loop (branch `v2/fork`, 2026-07-02)
 
-All WORKPLAN Phase 2 deliverables are DONE — see the commit list below.
-**The owner gate is `/beta/gallery`: browse it on a phone and desktop, both
-modes ("do we love it?").** Ready to push on the owner's word — not pushed.
+All WORKPLAN Phase 3 deliverables are DONE. **The exit demo is automated:
+`npm run test:e2e:v2` drives the solo cold-open journey AND a real 3-user
+signed-in vote end-to-end** (organizer creates a quorum-3 vote fork, both
+members rank from the shared link, the organizer's ballot hits quorum,
+member1's still-open page converges on the reveal over SSE). Owner can also
+click through everything on `/beta` (dev server + seeded dev DB).
 
 What landed (one commit each, in order):
+
+1. `02cba7e` **Server core.** `lib/v2/forks.ts` grew the whole loop:
+   `quickSpin` (ephemeral compute — "Spin again" never poisons the 30-day
+   decay history; nothing persists until lock-in), `lockInQuickSpin`
+   (closed fork, weights recomputed server-side), `submitVote` (revote
+   upsert via guarded $pull+$push, quorum auto-close), `settleFork` /
+   `getSettledForkByCode` (**lazy timer enforcement on every read — no
+   cron**; overdue vote w/ ballots → consensus close, else expired; all
+   status writes guarded on `status:'open'` so racers can't double-close),
+   `serializeFork` (ballots stay private — aggregates + viewer's own
+   rankings only). `decision-engine.ts`: deterministic `scoreBallots()`
+   extracted from `resolveConsensus` so the UI tally never re-rolls the
+   tie-break. New `lib/v2/`: `places.ts` (cache-backed 2dsphere nearby +
+   vibe filters + search — **the seam Phase 5's Google client fills; Phase
+   3 never bills Places**), `auth.ts` (getV2User/requireV2User, webhook-gap
+   auto-create from the real Clerk profile, never fabricated emails),
+   `validation.ts` (zod for the whole API surface). 76 new unit tests.
+2. `43522d6` **`/api/v2` surface.** quick-spin (public, write-free) +
+   quick-spin/lock (authed persist); forks create/list/get-by-code
+   (link-bearer capability — the unguessable ~49-bit code; Phase 4 extends
+   this exact surface to guests with signed tokens)/vote/spin
+   (organizer-only); **forks/[code]/live SSE** (each poll runs the settling
+   read, so the stream IS the timer auto-close); places nearby+search;
+   lists read-only (CRUD is Phase 5). Middleware: `/api/v2(.*)` public —
+   every handler guards itself with JSON 401s (fetch/EventSource targets
+   must not get HTML sign-in redirects).
+3. `2945a4e` **Shell + auth screens.** Shared `ThemeToggle` (gallery now
+   inherits the shell header's toggle), quiet `BetaHeader` (no gold in the
+   frame), `/beta/sign-in` + `/beta/sign-up` — custom **two-field**
+   email/password forms on the v2 primitives (Clerk legacy hooks per the
+   repo's Clerk-7 note; sign-up runs the email_code step inline — squad
+   `+clerk_test` addresses use OTP 424242; if an instance still requires a
+   username, one is derived silently from the email). `?next=` sanitized
+   to /beta-tree paths.
+4. `d51e0e3` **Fork lane home.** `QuickSpin`: vibe chips → geolocate →
+   spin → the reveal; "Lock it in" (signed-in) / "Spin again" (free);
+   signed-out gets the full journey + an honest account nudge. All unhappy
+   paths designed (blocked location with a way forward, no fix, empty
+   cache, failed spin/lock). `OpenForks` "Live now" rail with countdowns
+   (renders nothing when empty). New `ButtonLink` primitive (anchors carry
+   their own hover/press rules — `:enabled` never matches `<a>`).
+5. `32756e4` **Creation flow** (`/beta/new`, server-gated — sign-in
+   round-trips straight back). Three source tabs (near me / my lists /
+   search) feeding one ballot; mixed-source ballots honestly recorded as
+   ad-hoc; mode cards + optional vote quorum; timer chips 15m–2h.
+6. `7788267` **Fork room** (`/beta/f/[code]`). Vote: tap-to-rank top 3
+   (pure `toggleRank`, unit-pinned), revote until close, live voted-names
+   line. Spin: organizer pulls the lever, others watch. SSE drives updates
+   and the close; **the reveal theater plays only for a close witnessed
+   live** — reloading a closed fork goes straight to the result.
+   `VoteBreakdown`: 3/2/1 tally, winner marked by word + position.
+7. (this commit) **e2e + docs.** `e2e/v2/fork.spec.ts` (the exit demo);
+   `auth-v2.setup.ts` now signs in organizer + member1 + member2 (three
+   storage states, sequential — dev-instance rate limits); `beta.spec.ts`
+   updated for the real home. HANDOFF + WORKPLAN ledger refreshed.
+
+**Phase-scope decisions made (documented, not silent):**
+
+- **Zero unauthenticated writes in Phase 3.** The signed-out quick spin is
+  ephemeral (compute-only); "Lock it in" is the only persistence and is
+  authed. Guest writes + rate limits + tokens are Phase 4's audited
+  surface, per the WORKPLAN's risk sequencing.
+- **Near-me/search read the v2 place cache only** (dev fixtures seed it;
+  prod cache fills via Phase 5's consolidated Google client behind the
+  same `lib/v2/places.ts` seam). Empty states say so honestly.
+- Sign-up e2e is deliberately not automated (dev-instance user creation
+  cap); the sign-IN path is covered by the setup project and the sign-up
+  form logic by unit tests.
+
+**Validation (2026-07-02):** full pre-push green — type-check / eslint
+--max-warnings=0 / prettier / **Jest 1774 passed, 12 skipped (137 suites;
+~90 new v2 tests this phase)** / production build. **v2 e2e lane 12/12
+green** (`npm run test:e2e:v2`, production server): solo cold-open
+signed-out + signed-in lock-in + vibe filter, the full 3-user vote
+(quorum close + member1 SSE convergence), shell wiring, and the Phase 2
+gallery specs incl. both-mode axe scans — all against the seeded dev DB
+(`npm run seed:v2-dev` re-run first; Places API never billed).
+
+**Adversarial review + hardening commit (same session):** a 28-agent
+workflow code review of the branch confirmed 10 findings; ALL were fixed at
+the root in the closing commit:
+
+- **Vote integrity under concurrency** (the serious cluster): the ballot
+  upsert is now a single atomic in-place replace (revotes have no delete
+  window) or a presence-guarded push (double-submits can't duplicate
+  ballots); closes now **seal** the fork (status flip) first and compute
+  consensus from the sealed document, so the persisted result always
+  agrees with the persisted ballots, a crashed closer's seal gets finished
+  by the next settle, and a rival's result is never overwritten
+  (result-absent guard); the zero-ballot expire is guarded on `'votes.0'`
+  so a ballot that beats the deadline closes the fork instead of being
+  discarded; `spinFork` refuses to report an outcome that lost the
+  persistence race.
+- **Honest failure classification:** new `V2DomainError` carries
+  user-facing messages + status; everything else is a real 500 with a
+  generic body (raw driver/internal messages never reach clients);
+  `getV2User` no longer swallows DB errors into null (an Atlas blip used
+  to read as "Unauthorized").
+- **Validation/authorization:** duplicate `optionPlaceIds` rejected
+  (one place twice is not a choice); fork creation verifies the caller
+  OWNS a `list` source; `places/nearby` no longer coerces absent lat/lng
+  to 0,0 (Number(null) footgun); `getOpenForksForUser` now settles each
+  candidate, so dead forks can't haunt the "Live now" rail as
+  "Closes in 0:00" forever.
+
+**Known deferred items:** result place details (address/rating) on the fork
+room use option names only — place-detail enrichment lands with Phase 5;
+"keep this one" (save winner to a list) is Phase 5 per WORKPLAN; per-IP
+rate limiting on the public quick-spin endpoint rides with Phase 4's abuse
+controls (it is read-only + geo-bounded today).
+
+**CI e2e failures diagnosed post-push (2026-07-02) — MAJOR FINDING: the
+Playwright CI `MONGODB_DATABASE` secret points at `you-hungry`, i.e. THE
+PRODUCTION DATABASE.** Confirmed via Atlas: prod has no v2 collections (so
+every v2 spec deterministically timed out: `findNearbyPlaces` had no
+places/2dsphere index), and prod contains ~611 `groups` plus 12
+`clerk_test` users — the v1 e2e suite has been writing into production on
+every CI run since the lanes were built. Repo-side fixes on this branch:
+
+- `playwright.yml`: a "Seed v2 e2e data" step (smoke, PR, nightly jobs)
+  runs `npm run seed:v2-dev` before Playwright. The script refuses the
+  prod DB name and non-`sk_test` Clerk keys, so while the secret still
+  says `you-hungry` the job now fails FAST with an explicit message
+  instead of cryptic spec timeouts.
+- `seed-dev.ts`: fully idempotent AND concurrent-safe (smoke + PR jobs
+  seed the same DB in parallel): history forks upsert by code instead of
+  delete-and-reinsert; all unique-key upserts retry once on E11000.
+- `synthetic-monitoring.spec.ts` "Decision history has consistent schema":
+  the one genuinely flaky failure — the documented Clerk dev-instance 401
+  serves the sign-in HTML page which the test fed to JSON.parse. Now
+  detected via content-type and skipped with the flake reason instead of
+  hard-failing the lane.
+
+**RESOLVED 2026-07-03:** the owner flipped the `MONGODB_DATABASE` secret
+to a dedicated e2e database; the next CI run on `f30279b` went fully
+green (E2E Smoke, PR Tests, Accessibility, Lighthouse, Build, Unit,
+Types/Lint/Format all success). v1 e2e no longer writes to production.
+**Still open (owner-level, destructive):** cleanup of the e2e residue
+already in prod (~611 `groups`, 12 `clerk_test` users) — script it with
+a dry-run before touching Atlas.
+
+## Previous: v2 Phase 2 — Identity & design system (MERGED ✅ as PR #77 `99c4652`)
+
+The owner gate (`/beta/gallery`, both modes) passed and the PR merged
+2026-07-02. What landed (one commit each, in order):
 
 1. `4c904d3` **IDENTITY.md — the committed direction: "Tonight's board."**
    Departure-board-for-dinner: calm green-tinted paper frame (bottle-green
@@ -57,10 +205,10 @@ gold ≈1.3:1. Fix: mode-invariant `--gold-ink` token (bottle green in both
 modes, 8.1:1/8.7:1) — labels on gold never follow the theme. IDENTITY.md
 updated to record it as law.
 
-**Next session:** Phase 3 (`v2/fork`) per WORKPLAN.md — the Fork core loop
-(near-me spin ≤2 taps, fork creation, vote mode, minimal Clerk
-email/password) — cut from main after this PR merges. Build on the gallery'd
-primitives; read IDENTITY.md + DESIGN-UI-UX-SKILLS.md first.
+_(Phase 3 was built on `v2/fork` cut from main after this merged — see the
+CURRENT section above. Next after Phase 3 merges: Phase 4 `v2/fork-links`
+per WORKPLAN.md — the public Fork Link surface, guest voting, and the
+abuse-control checklist.)_
 
 ## Previous: v2 Phase 1 — Foundations & test rig (MERGED ✅ as PR #75 `3cbaa3c`)
 

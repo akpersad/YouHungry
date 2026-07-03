@@ -131,7 +131,9 @@ do. Sentence case everywhere.
 - Time is concrete: "Closes in 12:40", not "expiring soon".
 - Empty states are invitations with one action ("No lists yet. Save a place
   and start one."); errors say what happened and what to do, no apologies,
-  no exclamation marks. No buzzwords, no em-dash tic, no title case.
+  no exclamation marks. No buzzwords, no title case, and **never an em dash
+  in user-facing copy — not rationed, banned** (owner rule 2026-07-02,
+  applies across all projects; rewrite with a period, comma, or colon).
 
 ## The signature: the split-flap reveal
 
