@@ -1,4 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
+import {
+  checkRateLimit,
+  ipRateLimitKey,
+  rateLimitResponse,
+} from '@/lib/rate-limit';
 import { getV2User, participantFromUser } from '@/lib/v2/auth';
 import { quickSpin } from '@/lib/v2/forks';
 import { findNearbyPlaces, placeToOption } from '@/lib/v2/places';
@@ -12,8 +17,20 @@ import { quickSpinSchema } from '@/lib/v2/validation';
  * route). Signed-in spinners get their decay history applied; signed-out
  * spinners get base weights.
  */
+
+/** Write-free but compute+geo-query backed — brake scripted hammering
+ * (deferred Phase 3 item, landed with Phase 4's abuse controls). */
+const SPINS_PER_IP_PER_MIN = 30;
+
 export async function POST(request: NextRequest) {
   try {
+    const rate = await checkRateLimit({
+      key: ipRateLimitKey('v2-quick-spin', request),
+      limit: SPINS_PER_IP_PER_MIN,
+      windowMs: 60_000,
+    });
+    if (!rate.allowed) return rateLimitResponse(rate.retryAfterSeconds);
+
     const input = quickSpinSchema.parse(await request.json());
 
     const places = await findNearbyPlaces(
