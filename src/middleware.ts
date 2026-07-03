@@ -14,6 +14,7 @@ const isPublicRoute = createRouteMatcher([
   '/places(.*)',
   '/crew(.*)',
   '/gallery', // the living design-system page
+  '/admin', // gates itself: sign-in round-trip + 404 for non-admins
   '/sign-in(.*)',
   '/sign-up(.*)',
   '/api/webhooks/clerk', // svix-signature verified in the handler

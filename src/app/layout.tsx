@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from 'next';
 import { Archivo, Spline_Sans_Mono } from 'next/font/google';
 import Script from 'next/script';
 import { ClerkProvider } from '@clerk/nextjs';
+import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 import { AppHeader } from '@/components/v2/AppHeader';
 import './v2.css';
 
@@ -58,6 +60,10 @@ export default function V2RootLayout({
             <AppHeader />
             {children}
           </div>
+          {/* Hosted observability (charter: no homegrown platform). Both
+              no-op outside Vercel deployments. */}
+          <Analytics />
+          <SpeedInsights />
           {/* v1's service worker registered at scope '/'; a browser that
               picked it up before cutover would serve stale v1 chunks
               forever. Unregister + evict in dev; the v2 SW story (and a
