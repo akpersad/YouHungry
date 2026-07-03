@@ -1,9 +1,33 @@
 # Session Handoff — Fork In The Road portfolio upgrade
 
-**Last updated:** 2026-07-02 (v2 Phase 2 MERGED ✅ as PR #77 `99c4652`; **v2 Phase 3 BUILT on `v2/fork`, pre-push + v2 e2e green, awaiting owner push go-ahead**)
+**Last updated:** 2026-07-02 (v2 Phase 3 MERGED ✅ as PR #78 `669f497`; **Phase 4 Fork Links & guest voting IN PROGRESS on `v2/fork-links`**; WORKPLAN Phases 5+6 combined into one branch/PR per owner decision 2026-07-02)
 **Read this first, then:** `promptFiles/v2/CHARTER.md` + `promptFiles/v2/WORKPLAN.md` (the authoritative plan for all v2 work — supersedes `phased-execution-plan.md` phases 4–8), `promptFiles/v2/IDENTITY.md` (the committed v2 design direction), `CLAUDE.md` (repo guide).
 
-## CURRENT: v2 Phase 3 — The Fork, core loop (branch `v2/fork`, 2026-07-02)
+## CURRENT: v2 Phase 4 — Fork Links & guest voting (branch `v2/fork-links`, 2026-07-02)
+
+WORKPLAN Phase 4 — the audited unauthenticated-write surface. Scope:
+
+- Public fork page at the existing `/beta/f/[code]` URL: guests see options,
+  pick a display name, rank top 3, watch live results — no account.
+- Guest identity: signed httpOnly cookie (HMAC design from Phase 1
+  `lib/v2/tokens.ts`); revote allowed until close; guest votes merged into
+  consensus scoring (Participant = userId XOR guestId, zero guest PII).
+- Abuse controls: signed fork vote tokens, per-IP + per-fork rate limits,
+  vote caps, expiry enforcement. Security checklist (rate limits, token
+  forgery, replay) goes in the PR description.
+- "Claim your votes": guest converts to account post-vote, keeps history.
+- Result posting: fork page shows winner to everyone; push/email result to
+  account-holders only (through the notification-suppression seam).
+
+**Exit demo:** full group-chat simulation — organizer creates fork, two
+guests vote from the raw link in incognito sessions, quorum closes it,
+everyone sees the reveal. Automated in the v2 e2e lane.
+
+Commit ledger (update at every checkpoint):
+
+- _(none yet — branch just cut from main at `669f497`)_
+
+## Previous: v2 Phase 3 — The Fork, core loop (MERGED ✅ as PR #78 `669f497`)
 
 All WORKPLAN Phase 3 deliverables are DONE. **The exit demo is automated:
 `npm run test:e2e:v2` drives the solo cold-open journey AND a real 3-user

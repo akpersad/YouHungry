@@ -28,17 +28,21 @@ never silently grow._
 
 Status: ☐ not started · ▶ in progress · ✅ merged
 
-| #   | Phase                     | Branch                  | Status                    |
-| --- | ------------------------- | ----------------------- | ------------------------- |
-| 0   | README + v2 charter/plan  | `phase4/readme-v2-plan` | ✅ #74                    |
-| 1   | Foundations & test rig    | `v2/foundations`        | ✅ #75                    |
-| 2   | Identity & design system  | `v2/identity`           | ✅ #77                    |
-| 3   | The Fork (core loop)      | `v2/fork`               | ▶ built, awaiting push/PR |
-| 4   | Fork Links & guest voting | `v2/fork-links`         | ☐                         |
-| 5   | Places & Lists            | `v2/places`             | ☐                         |
-| 6   | Crews & history           | `v2/crews`              | ☐                         |
-| 7   | Cutover & purge           | `v2/cutover`            | ☐                         |
-| 8   | Polish, PWA & launch      | `v2/launch`             | ☐                         |
+| #   | Phase                     | Branch                  | Status        |
+| --- | ------------------------- | ----------------------- | ------------- |
+| 0   | README + v2 charter/plan  | `phase4/readme-v2-plan` | ✅ #74        |
+| 1   | Foundations & test rig    | `v2/foundations`        | ✅ #75        |
+| 2   | Identity & design system  | `v2/identity`           | ✅ #77        |
+| 3   | The Fork (core loop)      | `v2/fork`               | ✅ #78        |
+| 4   | Fork Links & guest voting | `v2/fork-links`         | ▶ in progress |
+| 5+6 | Places, Lists & Crews     | `v2/places-crews`       | ☐             |
+| 7   | Cutover & purge           | `v2/cutover`            | ☐             |
+| 8   | Polish, PWA & launch      | `v2/launch`             | ☐             |
+
+_(Phases 5 and 6 combined per owner decision 2026-07-02: both are additive,
+low-risk feature lanes on the same surface — one branch, one PR. Phases 4, 7,
+and 8 stay isolated: 4 is the audited unauthenticated-write surface, 7 is the
+sign-off-gated migration, 8 depends on 7's slimmed repo.)_
 
 ---
 
@@ -129,7 +133,14 @@ guests vote from the raw link in incognito sessions, quorum closes it,
 everyone sees the reveal. Security checklist (rate limits, token forgery,
 replay) reviewed in the PR description.
 
-### Phase 5 — Places & Lists
+### Phase 5+6 — Places, Lists & Crews (combined)
+
+_Combined from the original Phases 5 and 6 (owner decision 2026-07-02): both
+are additive, low-risk feature work sharing seams (lists feed forks; crews
+and history read fork results). One branch (`v2/places-crews`), one PR, with
+a HANDOFF checkpoint (and context clear if needed) between the two halves._
+
+**Places & Lists half:**
 
 - Places search on a single consolidated Google client (30-day cache,
   cost tracking kept minimal), save/unsave, list CRUD.
@@ -138,10 +149,7 @@ replay) reviewed in the PR description.
 - Empty/loading/error states designed per the manual — no dead ends: every
   empty state carries the next action.
 
-**Exit demo:** search → save → list → fork-from-list journey, automated +
-clickable.
-
-### Phase 6 — Crews & history
+**Crews & history half:**
 
 - Crew suggestion from repeated co-participants; crew page: members, shared
   weight history ("why this pick" transparency), one-tap re-fork.
@@ -150,8 +158,9 @@ clickable.
 - Account-holder notifications: push + email for fork-closed/result, in-app
   center only if push adoption proves insufficient (bias: fewer channels).
 
-**Exit demo:** two seeded users with shared history get a crew suggestion;
-crew re-fork honors shared decay weights; automated coverage.
+**Exit demo:** search → save → list → fork-from-list journey, automated +
+clickable; two seeded users with shared history get a crew suggestion; crew
+re-fork honors shared decay weights; automated coverage.
 
 ### Phase 7 — Cutover & purge
 
