@@ -15,6 +15,12 @@ jest.mock('../db', () => ({
   getV2Db: jest.fn(),
 }));
 
+// These suites exercise fork logic for plain users/guests — no claims. The
+// claim-pointer behavior has its own suite (fork-guests.test.ts).
+jest.mock('../guests', () => ({
+  getClaimedGuestIds: jest.fn().mockResolvedValue([]),
+}));
+
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { getV2Db } = require('../db');
 
@@ -547,13 +553,15 @@ describe('submitVote', () => {
       }
     );
     // Attempt 2: push, guarded on this voter NOT already having a ballot —
-    // a concurrent double-submit can never create duplicates.
+    // a concurrent double-submit can never create duplicates — and on the
+    // ballot-cap slot being empty (Phase 4 abuse control).
     expect(forks.updateOne).toHaveBeenNthCalledWith(
       2,
       {
         _id: fork._id,
         status: 'open',
         'votes.voter.userId': { $ne: voter1.userId },
+        'votes.99': { $exists: false },
       },
       expect.objectContaining({
         $push: {
