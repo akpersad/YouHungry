@@ -166,11 +166,15 @@ test.describe('guest voting via the fork link', () => {
       guestPage.getByText('Your ballot is in. Revote until it closes.')
     ).toBeVisible();
 
-    // Sign in from the same browser (the guest cookie rides along).
+    // Sign in from the same browser (the guest cookie rides along) — by
+    // USERNAME, not email: Clerk resolves either to the same account, and
+    // this pins that the v2 form doesn't gate the identifier to emails.
     await guestPage.goto(
       `/beta/sign-in?next=${encodeURIComponent(`/beta/f/${code}`)}`
     );
-    await guestPage.getByLabel('Email').fill(claimer.email);
+    await guestPage
+      .getByLabel('Email or username')
+      .fill(`fitr_${claimer.role}`);
     await guestPage.getByLabel('Password').fill(SQUAD_PASSWORD);
     await guestPage.getByRole('button', { name: 'Sign in' }).click();
     await guestPage.waitForURL(new RegExp(`/beta/f/${code}`), {

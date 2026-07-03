@@ -66,6 +66,13 @@ Commit ledger (update at every checkpoint):
    sign-in/sign-up submit buttons silently dropped the click until Clerk
    hydrated (`if (!isLoaded) return`) — a fast human hits the same dead
    button; they are now disabled (the honest state) for that brief window.
+6. (this commit) **Sign in by email OR username** (owner catch 2026-07-02):
+   Clerk resolves `signIn.create({ identifier })` as either — same
+   account, same password — and v1 accounts carry usernames, but the v2
+   form's `type="email"` rejected usernames before Clerk ever saw them.
+   Field is now "Email or username" (`type=text`,
+   `autoComplete="username"`); the claim e2e signs in as `fitr_claimer`
+   by USERNAME to pin it. Sign-up stays two-field email/password.
 
 **Validation (2026-07-02):** full pre-push green — type-check / eslint
 --max-warnings=0 / prettier / **Jest 148 suites, 1816 passed / 12 skipped
