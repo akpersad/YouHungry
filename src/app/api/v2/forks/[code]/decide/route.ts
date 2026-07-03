@@ -3,6 +3,7 @@ import { participantFromUser, requireV2User } from '@/lib/v2/auth';
 import { decideForkNow, serializeFork } from '@/lib/v2/forks';
 import { getClaimedGuestIds } from '@/lib/v2/guests';
 import { v2ErrorResponse } from '@/lib/v2/http';
+import { enrichForkView } from '@/lib/v2/places';
 
 /**
  * POST /api/v2/forks/[code]/decide — "Decide now": the organizer ends the
@@ -23,7 +24,7 @@ export async function POST(
     const fork = await decideForkNow(code, caller, { claimedGuestIds });
 
     return NextResponse.json({
-      fork: serializeFork(fork, caller, claimedGuestIds),
+      fork: await enrichForkView(serializeFork(fork, caller, claimedGuestIds)),
     });
   } catch (error) {
     return v2ErrorResponse('forks:decide', error);

@@ -7,6 +7,7 @@ import {
   type GuestDoc,
   type ListDoc,
   type PlaceDoc,
+  type PlaceQueryDoc,
   type V2UserDoc,
 } from './schema';
 
@@ -20,6 +21,7 @@ export interface V2Db {
   db: Db;
   forks: Collection<ForkDoc>;
   places: Collection<PlaceDoc>;
+  placeQueries: Collection<PlaceQueryDoc>;
   lists: Collection<ListDoc>;
   crews: Collection<CrewDoc>;
   guests: Collection<GuestDoc>;
@@ -32,6 +34,7 @@ export async function getV2Db(): Promise<V2Db> {
     db,
     forks: db.collection<ForkDoc>(V2_COLLECTIONS.forks),
     places: db.collection<PlaceDoc>(V2_COLLECTIONS.places),
+    placeQueries: db.collection<PlaceQueryDoc>(V2_COLLECTIONS.placeQueries),
     lists: db.collection<ListDoc>(V2_COLLECTIONS.lists),
     crews: db.collection<CrewDoc>(V2_COLLECTIONS.crews),
     guests: db.collection<GuestDoc>(V2_COLLECTIONS.guests),

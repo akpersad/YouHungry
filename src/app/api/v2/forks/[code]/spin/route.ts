@@ -8,6 +8,7 @@ import {
   spinFork,
 } from '@/lib/v2/forks';
 import { v2ErrorResponse } from '@/lib/v2/http';
+import { enrichForkView } from '@/lib/v2/places';
 
 /**
  * POST /api/v2/forks/[code]/spin — the organizer commits a spin fork to
@@ -38,7 +39,9 @@ export async function POST(
     await spinFork(fork._id);
     const spun = await getForkByCode(code);
 
-    return NextResponse.json({ fork: serializeFork(spun ?? fork, viewer) });
+    return NextResponse.json({
+      fork: await enrichForkView(serializeFork(spun ?? fork, viewer)),
+    });
   } catch (error) {
     return v2ErrorResponse('forks:spin', error);
   }

@@ -7,6 +7,7 @@ import {
 import { getSettledForkByCode, serializeFork } from '@/lib/v2/forks';
 import { GUEST_COOKIE } from '@/lib/v2/guests';
 import { v2ErrorResponse } from '@/lib/v2/http';
+import { enrichForkView } from '@/lib/v2/places';
 import { forkTokenFor } from '@/lib/v2/tokens';
 import { resolveForkViewer } from '@/lib/v2/viewer';
 
@@ -50,7 +51,9 @@ export async function GET(
 
     const openForVotes = fork.status === 'open' && fork.mode === 'vote';
     return NextResponse.json({
-      fork: serializeFork(fork, viewer.participant, viewer.claimedGuestIds),
+      fork: await enrichForkView(
+        serializeFork(fork, viewer.participant, viewer.claimedGuestIds)
+      ),
       viewer: {
         kind: viewer.kind,
         displayName: viewer.participant?.displayName ?? null,

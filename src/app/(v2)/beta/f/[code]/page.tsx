@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { cookies } from 'next/headers';
 import { getSettledForkByCode, serializeFork } from '@/lib/v2/forks';
 import { GUEST_COOKIE, findGuestByCookie } from '@/lib/v2/guests';
+import { enrichForkView } from '@/lib/v2/places';
 import { forkTokenFor } from '@/lib/v2/tokens';
 import { resolveForkViewer } from '@/lib/v2/viewer';
 import { ForkRoom } from '@/components/v2/fork/ForkRoom';
@@ -43,7 +44,9 @@ export default async function ForkPage({
 
   return (
     <ForkRoom
-      initial={serializeFork(fork, viewer.participant, viewer.claimedGuestIds)}
+      initial={await enrichForkView(
+        serializeFork(fork, viewer.participant, viewer.claimedGuestIds)
+      )}
       viewer={{
         kind: viewer.kind,
         displayName: viewer.participant?.displayName ?? null,

@@ -673,6 +673,19 @@ export interface ForkView {
     decidedAt: string;
     reasoning: string;
     weights: Record<string, number>;
+    /**
+     * Place details for the winner (address/rating/price), attached by
+     * `enrichForkView` (places.ts) on read paths — serializeFork itself
+     * stays sync and join-free. Absent when the cache has no doc.
+     */
+    place?: {
+      id: string;
+      name: string;
+      address: string;
+      categories: string[];
+      priceLevel?: number;
+      rating?: number;
+    };
   } | null;
   /** Aggregated 3/2/1 tally per option — only exposed once closed. */
   breakdown: Record<string, BreakdownEntry> | null;
