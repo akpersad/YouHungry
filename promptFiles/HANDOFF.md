@@ -87,6 +87,28 @@ Commit ledger (update at every checkpoint):
    the auth screens), and reachable from a new one-line root-layout
    footer (brass link — the identity's text-safe accent). Verified
    visually in both modes.
+7. `C7` **A11y + perf sweep.** INP review of the two hot interactions
+   came back clean by construction: the reveal is CSS transform ticks
+   re-keyed per flap (never layout), tap-to-rank is a pure array op,
+   every close/vote is a small state update + fetch. New
+   `e2e/launch-surfaces.spec.ts` (9 tests): manifest/icon/sw wiring
+   pins, axe WCAG 2.x AA on /privacy + /offline in BOTH modes, and
+   the full install-prompt journey (first-visit hidden → return-visit
+   offer → axe with the section visible → permanent dismissal).
+   Lighthouse local run vs the CI bars: home 76 perf / 100 a11y,
+   gallery 83/100, sign-in/up 76/100 — all above the enforced floors;
+   /privacy added to the Lighthouse CI URL set. TWO REAL FIXES found
+   by the sweep: (a) the footer privacy Link was prefetching on every
+   pageview in production builds (an extra middleware/Clerk hit per
+   view — it flooded the Clerk dev instance into 429s across the e2e
+   suite); prefetch={false}. (b) seed-dev's per-run reset deleted the
+   accepted pair crew but NOT the forks a prior "run it back" journey
+   closed under it, so the next unseeded local run saw a today-dated
+   winner decay the shared board and the 100% assertion failed — the
+   reset now removes that refork residue too. Full e2e 34/34
+   (4 mobile-chrome smokes flaked on the documented Clerk dev 429 and
+   passed on retry; the new spec navigates through a bounded-retry
+   helper for the same class). Full pre-push green.
 
 ## Previous: v2 Phase 7 — Cutover & purge (MERGED ✅ as PR #81 `3d4551f`, branch `v2/cutover`, 2026-07-03)
 

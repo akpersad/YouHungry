@@ -6,7 +6,8 @@
         "http://localhost:3000",
         "http://localhost:3000/sign-in",
         "http://localhost:3000/sign-up",
-        "http://localhost:3000/gallery"
+        "http://localhost:3000/gallery",
+        "http://localhost:3000/privacy"
       ],
       "startServerReadyPattern": "Local:",
       "startServerReadyTimeout": 120000,

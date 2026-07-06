@@ -89,6 +89,9 @@ export default function V2RootLayout({
                 <span>Fork In The Road</span>
                 <Link
                   href="/privacy"
+                  // A static footer target on every page: prefetching it
+                  // costs a request per pageview for no felt difference.
+                  prefetch={false}
                   className="text-brass underline underline-offset-2 hover:text-ink"
                 >
                   Privacy
