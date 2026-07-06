@@ -62,6 +62,20 @@ Commit ledger (update at every checkpoint):
    postcss-in-next, tmp/uuid-in-@lhci/cli) are transitive dev/build
    tooling with no non-breaking fix. Lockfile verified clean of the
    corporate registry (grep -c elilillyco = 0).
+5. `C5` **In-context install prompt** (`components/v2/InstallPrompt`,
+   home page below the fold). Never on first load: a per-session
+   visit counter gates it to the second visit on. Chromium gets a
+   real "Add to home screen" button driving the stashed
+   `beforeinstallprompt` event (a pre-hydration inline script in the
+   root layout parks the early-firing event on window and suppresses
+   Chrome's own mini-infobar); iOS gets the honest one-liner (Share,
+   then Add to Home Screen — no API exists); everything else gets
+   nothing rather than a dead button. Quiet frame register, zero
+   gold. Dismissal permanent; declining the native prompt only quiets
+   the session; standalone mode hides it. Hydration-safe via
+   useSyncExternalStore (the new react-hooks set-state-in-effect rule
+   rejects the naive effect shape — ThemeToggle idiom followed).
+   9 unit tests.
 
 ## Previous: v2 Phase 7 — Cutover & purge (MERGED ✅ as PR #81 `3d4551f`, branch `v2/cutover`, 2026-07-03)
 

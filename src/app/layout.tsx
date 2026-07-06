@@ -70,6 +70,14 @@ export default function V2RootLayout({
               __html: `(function(){try{var t=localStorage.getItem('fitr-v2-theme');var r=t==='light'||t==='dark'?t:(window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.classList.add(r);}catch(e){}})();`,
             }}
           />
+          {/* beforeinstallprompt fires once and early — usually before
+              hydration subscribes. Stash it (and suppress Chrome's own
+              mini-infobar) so InstallPrompt can offer it in context. */}
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();window.__fitrInstallEvent=e;});`,
+            }}
+          />
         </head>
         <body className="antialiased">
           <div className="flex min-h-dvh flex-col">
