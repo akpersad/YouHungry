@@ -45,7 +45,7 @@
     "migrate:v1": "tsx scripts/v2/migrate-v1.ts"
   },
   "dependencies": {
-    "@clerk/nextjs": "^7.5.12",
+    "@clerk/nextjs": "^7.5.13",
     "@vercel/analytics": "^2.0.1",
     "@vercel/speed-insights": "^2.0.0",
     "mongodb": "^7.4.0",
