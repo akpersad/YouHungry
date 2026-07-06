@@ -15,6 +15,7 @@ const isPublicRoute = createRouteMatcher([
   '/crew(.*)',
   '/gallery', // the living design-system page
   '/offline', // the service worker's navigation fallback (precached)
+  '/privacy',
   '/admin', // gates itself: sign-in round-trip + 404 for non-admins
   '/sign-in(.*)',
   '/sign-up(.*)',

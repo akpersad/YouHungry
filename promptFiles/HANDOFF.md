@@ -76,6 +76,17 @@ Commit ledger (update at every checkpoint):
    useSyncExternalStore (the new react-hooks set-state-in-effect rule
    rejects the naive effect shape — ThemeToggle idiom followed).
    9 unit tests.
+6. `C6` **Privacy page** (`/privacy`, static — the Phase 7 backlog
+   item; v1's policy described SMS/phone practices that died with
+   v1). Honest, concrete, product-true: guest votes carry zero PII,
+   accounts hold email/username/display name (passwords live hashed
+   at Clerk), location used once per near-me spin and cached by
+   neighborhood not by user, the five third parties named, TTLs
+   stated, removal = ask via the GitHub repo. Public in middleware,
+   in the sitemap (the app's only other indexable pages are / and
+   the auth screens), and reachable from a new one-line root-layout
+   footer (brass link — the identity's text-safe accent). Verified
+   visually in both modes.
 
 ## Previous: v2 Phase 7 — Cutover & purge (MERGED ✅ as PR #81 `3d4551f`, branch `v2/cutover`, 2026-07-03)
 

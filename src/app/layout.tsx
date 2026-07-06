@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Archivo, Spline_Sans_Mono } from 'next/font/google';
+import Link from 'next/link';
 import Script from 'next/script';
 import { ClerkProvider } from '@clerk/nextjs';
 import { Analytics } from '@vercel/analytics/react';
@@ -83,6 +84,17 @@ export default function V2RootLayout({
           <div className="flex min-h-dvh flex-col">
             <AppHeader />
             {children}
+            <footer className="border-t border-line px-4 py-6 sm:px-6">
+              <div className="mx-auto flex w-full max-w-3xl items-center justify-between text-xs text-ink-muted">
+                <span>Fork In The Road</span>
+                <Link
+                  href="/privacy"
+                  className="text-brass underline underline-offset-2 hover:text-ink"
+                >
+                  Privacy
+                </Link>
+              </div>
+            </footer>
           </div>
           {/* Hosted observability (charter: no homegrown platform). Both
               no-op outside Vercel deployments. */}
