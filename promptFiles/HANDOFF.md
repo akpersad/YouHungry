@@ -30,6 +30,17 @@ Commit ledger (update at every checkpoint):
    out); root layout now links manifest + icons + appleWebApp and
    ships media-switched themeColor. Deleted: all v1 icons, favicon
    SVGs, Next starter SVGs, v1 screenshots + their placeholder docs.
+3. `C3` **Real service worker.** `public/sw.js` (SAME filename — it
+   takes over from the Phase 7 self-destruct the way that took over
+   from v1's worker) is deliberately conservative given the Phase 4
+   stale-chunk history: cache-first ONLY for content-hashed
+   /\_next/static + the icon set (bounded, FIFO-trimmed), navigations
+   network-first with last-known-copy → `/offline` fallback (new
+   static page, precached at install, added to the middleware public
+   matcher so the precache can't capture a sign-in redirect), /api
+   never intercepted (auth-varying JSON + SSE), /admin never cached.
+   Registration is production-only in the root layout; dev keeps the
+   unregister/evict block (now also evicts `fitr-*`).
 
 ## Previous: v2 Phase 7 — Cutover & purge (MERGED ✅ as PR #81 `3d4551f`, branch `v2/cutover`, 2026-07-03)
 

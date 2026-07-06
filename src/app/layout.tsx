@@ -80,11 +80,24 @@ export default function V2RootLayout({
               no-op outside Vercel deployments. */}
           <Analytics />
           <SpeedInsights />
-          {/* v1's service worker registered at scope '/'; a browser that
-              picked it up before cutover would serve stale v1 chunks
-              forever. Unregister + evict in dev; the v2 SW story (and a
-              prod-side takeover of the old scope) is Phase 8. */}
-          {process.env.NODE_ENV !== 'production' && (
+          {/* The v2 service worker (public/sw.js): production-only, where
+              /_next/static filenames are content-hashed — a dev registration
+              would recreate the exact stale-chunk bug Phase 4 C7 fixed. Dev
+              keeps the unregister + cache eviction so any worker picked up
+              from a local production run heals itself. */}
+          {process.env.NODE_ENV === 'production' ? (
+            <Script
+              id="sw-register"
+              strategy="lazyOnload"
+              dangerouslySetInnerHTML={{
+                __html: `
+                if ('serviceWorker' in navigator) {
+                  navigator.serviceWorker.register('/sw.js');
+                }
+              `,
+              }}
+            />
+          ) : (
             <Script
               id="sw-unregister-dev"
               strategy="lazyOnload"
@@ -98,7 +111,7 @@ export default function V2RootLayout({
                 if (window.caches) {
                   caches.keys().then(function(keys) {
                     keys.forEach(function(key) {
-                      if (key.indexOf('forkintheroad-') === 0) caches.delete(key);
+                      if (key.indexOf('forkintheroad-') === 0 || key.indexOf('fitr-') === 0) caches.delete(key);
                     });
                   });
                 }
