@@ -1931,12 +1931,7 @@ export const getCachedRestaurants = unstable_cache(
  */
 interface ButtonProps {
   variant?:
-    | 'primary'
-    | 'secondary'
-    | 'accent'
-    | 'warm'
-    | 'outline'
-    | 'outline-accent';
+    'primary' | 'secondary' | 'accent' | 'warm' | 'outline' | 'outline-accent';
   size?: 'sm' | 'md' | 'lg';
   isLoading?: boolean;
   children: React.ReactNode;

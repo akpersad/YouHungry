@@ -41,6 +41,27 @@ Commit ledger (update at every checkpoint):
    never intercepted (auth-varying JSON + SSE), /admin never cached.
    Registration is production-only in the root layout; dev keeps the
    unregister/evict block (now also evicts `fitr-*`).
+4. `C4` **Dependency updates** (owner ask 2026-07-05; supersedes
+   dependabot PRs #82/#70/#67/#66 — close them after this merges).
+   Taken: the whole minor/patch group (next/eslint-config-next
+   16.2.10, clerk 7.5.12, tailwind 4.3.2, prettier 3.9.4 — reformats
+   4 files, svix, tsx, axe, lint-staged, bundle-analyzer);
+   **mongodb 6.21→7.4 (major)** — raw-driver usage type-checks clean,
+   full Jest + seed + smoke e2e green (Jest mocks are full-module
+   fakes, driver-version independent); **@playwright/test 1.56→1.61.1**
+   (kept exact-pinned per repo convention, chromium re-downloaded);
+   **actions/checkout v6→v7** in both workflows (setup-node v6,
+   upload-artifact v7, download-artifact v8 already current);
+   `npm audit fix` applied. Deliberate deviations: **@types/node
+   pinned to ^22, NOT the bot's 26** (runtime is Node 22 everywhere:
+   engines, .nvmrc, CI — types must match the runtime; close
+   dependabot #66 unmerged); **eslint 10 tried and reverted**
+   (eslint-plugin-react inside eslint-config-next crashes at lint
+   time; revisit when Next's config catches up) — vestigial
+   @eslint/eslintrc removed while there. Remaining audit findings (7:
+   postcss-in-next, tmp/uuid-in-@lhci/cli) are transitive dev/build
+   tooling with no non-breaking fix. Lockfile verified clean of the
+   corporate registry (grep -c elilillyco = 0).
 
 ## Previous: v2 Phase 7 — Cutover & purge (MERGED ✅ as PR #81 `3d4551f`, branch `v2/cutover`, 2026-07-03)
 

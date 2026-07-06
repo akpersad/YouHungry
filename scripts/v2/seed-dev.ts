@@ -305,8 +305,8 @@ async function main() {
     // Starter list for the organizer.
     const lists = db.collection<ListDoc>(V2_COLLECTIONS.lists);
     const organizerId = userIdByRole.get('organizer')!;
-    const listPlaceIds = PLACE_FIXTURES.slice(0, 6).map(
-      (fixture) => placeIdByKey.get(fixture.key)!
+    const listPlaceIds = PLACE_FIXTURES.slice(0, 6).map((fixture) =>
+      placeIdByKey.get(fixture.key)!
     );
     await lists.updateOne(
       { ownerId: organizerId, name: 'Astoria favorites' },
