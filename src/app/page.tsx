@@ -1,6 +1,7 @@
 import { ButtonLink } from '@/components/v2/ui';
 import { QuickSpin } from '@/components/v2/fork/QuickSpin';
 import { OpenForks } from '@/components/v2/fork/OpenForks';
+import { InstallPrompt } from '@/components/v2/InstallPrompt';
 
 /**
  * The Fork lane home. One decisive block: tonight's question, the vibe
@@ -44,6 +45,8 @@ export default function Home() {
           </ButtonLink>
         </div>
       </section>
+
+      <InstallPrompt />
     </main>
   );
 }

@@ -23,12 +23,7 @@ const VIBE_CHIPS = [
 ] as const;
 
 type Stage =
-  | 'idle'
-  | 'locating'
-  | 'fetching'
-  | 'revealing'
-  | 'revealed'
-  | 'locked';
+  'idle' | 'locating' | 'fetching' | 'revealing' | 'revealed' | 'locked';
 
 interface SpinData {
   coords: { lat: number; lng: number };

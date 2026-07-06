@@ -1,9 +1,149 @@
 # Session Handoff — Fork In The Road portfolio upgrade
 
-**Last updated:** 2026-07-03 (v2 Phase 5+6 MERGED ✅ as PR #80 `7c88f84`; **Phase 7 Cutover & purge IN PROGRESS on `v2/cutover`**)
+**Last updated:** 2026-07-05 (v2 Phase 7 MERGED ✅ as PR #81 `3d4551f`; **Phase 8 Polish, PWA & launch IN PROGRESS on `v2/launch`**)
 **Read this first, then:** `promptFiles/v2/CHARTER.md` + `promptFiles/v2/WORKPLAN.md` (the authoritative plan for all v2 work — supersedes `phased-execution-plan.md` phases 4–8), `promptFiles/v2/IDENTITY.md` (the committed v2 design direction), `CLAUDE.md` (repo guide).
 
-## CURRENT: v2 Phase 7 — Cutover & purge (branch `v2/cutover`, 2026-07-03)
+## CURRENT: v2 Phase 8 — Polish, PWA & launch (branch `v2/launch`, 2026-07-05)
+
+WORKPLAN Phase 8 — the launch pass. Scope: PWA (manifest/icons for the
+"Tonight's board" identity, a real service worker replacing the Phase 7
+self-destruct — SAME `public/sw.js` filename so returning browsers take
+the update, in-context install prompt that never fires on first load),
+accessibility + performance sweep (INP focus: reveal + voting), the
+privacy-policy page (Phase 7 backlog), README/docs/portfolio refresh,
+and backlog triage (keep/kill/later decisions with the owner).
+
+Commit ledger (update at every checkpoint):
+
+1. `C1` docs — ledger opened (Phase 7 marked merged, Phase 8 in
+   progress).
+2. `C2` **PWA identity assets.** New app mark ("Tonight's board" made
+   literal): a split-flap board tile, the road you came in on bending
+   gold toward the chosen branch, the passed-over branch board-muted,
+   the flap seam slicing the glyph. Authored as two SVGs
+   (`public/icons/app-icon{,-maskable}.svg`); PNGs (192/512 any +
+   maskable, apple-touch 180, PNG-in-ICO favicon) rasterized by
+   `scripts/v2/render-icons.ts` (Playwright chromium — no new image
+   deps). manifest.json rewritten for v2 (real routes in shortcuts,
+   canvas splash/theme colors, id/scope, maskable entries split from
+   any per spec); robots.txt rewritten (dead v1 routes + wrong domain
+   out); root layout now links manifest + icons + appleWebApp and
+   ships media-switched themeColor. Deleted: all v1 icons, favicon
+   SVGs, Next starter SVGs, v1 screenshots + their placeholder docs.
+3. `C3` **Real service worker.** `public/sw.js` (SAME filename — it
+   takes over from the Phase 7 self-destruct the way that took over
+   from v1's worker) is deliberately conservative given the Phase 4
+   stale-chunk history: cache-first ONLY for content-hashed
+   /\_next/static + the icon set (bounded, FIFO-trimmed), navigations
+   network-first with last-known-copy → `/offline` fallback (new
+   static page, precached at install, added to the middleware public
+   matcher so the precache can't capture a sign-in redirect), /api
+   never intercepted (auth-varying JSON + SSE), /admin never cached.
+   Registration is production-only in the root layout; dev keeps the
+   unregister/evict block (now also evicts `fitr-*`).
+4. `C4` **Dependency updates** (owner ask 2026-07-05; supersedes
+   dependabot PRs #82/#70/#67/#66 — close them after this merges).
+   Taken: the whole minor/patch group (next/eslint-config-next
+   16.2.10, clerk 7.5.12, tailwind 4.3.2, prettier 3.9.4 — reformats
+   4 files, svix, tsx, axe, lint-staged, bundle-analyzer);
+   **mongodb 6.21→7.4 (major)** — raw-driver usage type-checks clean,
+   full Jest + seed + smoke e2e green (Jest mocks are full-module
+   fakes, driver-version independent); **@playwright/test 1.56→1.61.1**
+   (kept exact-pinned per repo convention, chromium re-downloaded);
+   **actions/checkout v6→v7** in both workflows (setup-node v6,
+   upload-artifact v7, download-artifact v8 already current);
+   `npm audit fix` applied. Deliberate deviations: **@types/node
+   pinned to ^22, NOT the bot's 26** (runtime is Node 22 everywhere:
+   engines, .nvmrc, CI — types must match the runtime; close
+   dependabot #66 unmerged); **eslint 10 tried and reverted**
+   (eslint-plugin-react inside eslint-config-next crashes at lint
+   time; revisit when Next's config catches up) — vestigial
+   @eslint/eslintrc removed while there. Remaining audit findings (7:
+   postcss-in-next, tmp/uuid-in-@lhci/cli) are transitive dev/build
+   tooling with no non-breaking fix. Lockfile verified clean of the
+   corporate registry (grep -c elilillyco = 0).
+5. `C5` **In-context install prompt** (`components/v2/InstallPrompt`,
+   home page below the fold). Never on first load: a per-session
+   visit counter gates it to the second visit on. Chromium gets a
+   real "Add to home screen" button driving the stashed
+   `beforeinstallprompt` event (a pre-hydration inline script in the
+   root layout parks the early-firing event on window and suppresses
+   Chrome's own mini-infobar); iOS gets the honest one-liner (Share,
+   then Add to Home Screen — no API exists); everything else gets
+   nothing rather than a dead button. Quiet frame register, zero
+   gold. Dismissal permanent; declining the native prompt only quiets
+   the session; standalone mode hides it. Hydration-safe via
+   useSyncExternalStore (the new react-hooks set-state-in-effect rule
+   rejects the naive effect shape — ThemeToggle idiom followed).
+   9 unit tests.
+6. `C6` **Privacy page** (`/privacy`, static — the Phase 7 backlog
+   item; v1's policy described SMS/phone practices that died with
+   v1). Honest, concrete, product-true: guest votes carry zero PII,
+   accounts hold email/username/display name (passwords live hashed
+   at Clerk), location used once per near-me spin and cached by
+   neighborhood not by user, the five third parties named, TTLs
+   stated, removal = ask via the GitHub repo. Public in middleware,
+   in the sitemap (the app's only other indexable pages are / and
+   the auth screens), and reachable from a new one-line root-layout
+   footer (brass link — the identity's text-safe accent). Verified
+   visually in both modes.
+7. `C7` **A11y + perf sweep.** INP review of the two hot interactions
+   came back clean by construction: the reveal is CSS transform ticks
+   re-keyed per flap (never layout), tap-to-rank is a pure array op,
+   every close/vote is a small state update + fetch. New
+   `e2e/launch-surfaces.spec.ts` (9 tests): manifest/icon/sw wiring
+   pins, axe WCAG 2.x AA on /privacy + /offline in BOTH modes, and
+   the full install-prompt journey (first-visit hidden → return-visit
+   offer → axe with the section visible → permanent dismissal).
+   Lighthouse local run vs the CI bars: home 76 perf / 100 a11y,
+   gallery 83/100, sign-in/up 76/100 — all above the enforced floors;
+   /privacy added to the Lighthouse CI URL set. TWO REAL FIXES found
+   by the sweep: (a) the footer privacy Link was prefetching on every
+   pageview in production builds (an extra middleware/Clerk hit per
+   view — it flooded the Clerk dev instance into 429s across the e2e
+   suite); prefetch={false}. (b) seed-dev's per-run reset deleted the
+   accepted pair crew but NOT the forks a prior "run it back" journey
+   closed under it, so the next unseeded local run saw a today-dated
+   winner decay the shared board and the 100% assertion failed — the
+   reset now removes that refork residue too. Full e2e 34/34
+   (4 mobile-chrome smokes flaked on the documented Clerk dev 429 and
+   passed on retry; the new spec navigates through a bounded-retry
+   helper for the same class). Full pre-push green.
+8. `C8` **README + portfolio story + backlog triage** (this commit).
+   README rewritten for post-cutover v2 (three lanes, engine, guest
+   security posture, real env/setup/testing, 4 fresh screenshots in
+   docs/screenshots captured off the production build);
+   `docs/portfolio-story.md` tells the v1→v2 story with the numbers
+   (~113k→~20k LOC, 77→20 handlers, 27→10 runtime deps);
+   `promptFiles/v2/BACKLOG.md` is the Phase 8 triage — owner launch
+   checklist (prod v1-collection drop, Vercel env cleanup, dependabot
+   closures), later items (Sentry, WebKit nightly, Node 24, eslint 10,
+   new Places API, manifest screenshots, demo GIF), kill list
+   (notification center, export, SMS, photos, social login), and the
+   root-level v1 reference docs flagged for an owner keep/archive
+   call. Stale v1 operational docs deleted (color audits, URL
+   shortener, v1 PWA/perf notes, quick-reference,
+   features-implemented, troubleshooting-server-actions —
+   git-recoverable). WORKPLAN table: Phase 7 ✅ #81, Phase 8 built.
+
+**Validation (2026-07-05):** full pre-push green (tsc / eslint
+--max-warnings=0 / prettier / Jest 30 suites 358 tests / production
+build with /offline + /privacy static). Full e2e 34/34 against a
+fresh production build + reseeded dev DB (4 mobile-chrome smokes
+flaky-passed-on-retry, the documented Clerk dev-instance 429 class).
+Lighthouse local: all four URLs above every CI floor. Google never
+billed; sends suppressed.
+
+**Owner actions for the Phase 8 gate:**
+
+1. Review the branch; go-ahead to push, then owner merges the PR.
+2. After merge: close dependabot #82/#70/#67 (superseded) and #66
+   (close unmerged — @types/node stays on 22 to match the runtime).
+3. Work the BACKLOG.md owner checklist when convenient (prod v1
+   collection archive+drop, Vercel Twilio/Google-client env removal,
+   keep-or-archive call on the root v1 reference docs).
+
+## Previous: v2 Phase 7 — Cutover & purge (MERGED ✅ as PR #81 `3d4551f`, branch `v2/cutover`, 2026-07-03)
 
 WORKPLAN Phase 7 — the sign-off-gated migration + wholesale v1 deletion.
 Scope: route v2 to `/` (retire `/beta` with redirects), one-time v1→v2

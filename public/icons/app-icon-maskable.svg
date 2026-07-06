@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Fork In The Road app icon (maskable)">
+  <!-- Maskable variant: full-bleed board, glyph scaled into the safe zone
+       (a centered circle of radius 40% survives every adaptive shape). -->
+  <rect width="512" height="512" fill="#0c1c12"/>
+  <g transform="translate(256 256) scale(0.74) translate(-256 -256)">
+    <path d="M256 300 C256 236 176 214 166 132" fill="none" stroke="#9aa194"
+          stroke-width="54" stroke-linecap="round"/>
+    <path d="M256 400 L256 300 C256 236 336 214 346 132" fill="none" stroke="#f0bb3b"
+          stroke-width="54" stroke-linecap="round"/>
+  </g>
+  <rect x="0" y="250" width="512" height="9" fill="#060d08" opacity="0.9"/>
+  <rect x="0" y="259" width="512" height="3" fill="#efefe6" opacity="0.08"/>
+</svg>

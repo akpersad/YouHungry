@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Fork In The Road app icon">
+  <!-- "Tonight's board" mark (IDENTITY.md): a split-flap board tile.
+       The road you came in on bends gold toward the chosen branch; the
+       passed-over branch stays board-muted; the flap seam slices the
+       glyph the way a real departure-board tile slices its character.
+       Colors are the board tokens: board #0c1c12, board-muted #9aa194,
+       dark-register gold #f0bb3b (10:1 on board). -->
+  <rect width="512" height="512" rx="112" fill="#0c1c12"/>
+  <!-- the road not taken -->
+  <path d="M256 300 C256 236 176 214 166 132" fill="none" stroke="#9aa194"
+        stroke-width="54" stroke-linecap="round"/>
+  <!-- the decision: stem + chosen branch, one continuous gold road -->
+  <path d="M256 400 L256 300 C256 236 336 214 346 132" fill="none" stroke="#f0bb3b"
+        stroke-width="54" stroke-linecap="round"/>
+  <!-- flap seam: a dark cut that slices the glyph, with a faint catch-light -->
+  <rect x="0" y="250" width="512" height="9" fill="#060d08" opacity="0.9"/>
+  <rect x="0" y="259" width="512" height="3" fill="#efefe6" opacity="0.08"/>
+</svg>

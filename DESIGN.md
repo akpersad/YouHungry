@@ -52,16 +52,16 @@ tomato, saffron, olive, then tints.
 
 Warm charcoal, same hue family — never a cold gray flip.
 
-| Token              | OKLCH                | ~Hex      |
+| Token | OKLCH | ~Hex |
 | ------------------ | -------------------- | --------- | ----------------------------------------------- |
-| `--bg`             | oklch(0.20 0.012 35) | `#231c18` |
-| `--surface`        | oklch(0.24 0.014 35) | `#2d2420` |
-| `--surface-sunken` | oklch(0.17 0.01 35)  | `#1b1512` |
-| `--border`         | oklch(0.32 0.015 35) | `#453a34` |
-| `--ink`            | oklch(0.95 0.008 40) | `#f4ece7` |
-| `--ink-secondary`  | oklch(0.78 0.015 38) | `#c4b4ab` |
-| `--ink-muted`      | oklch(0.68 0.015 38) | `#a4948b` |
-| `--tomato` (dark)  | oklch(0.68 0.17 35)  | `#f07a55` | Brightened; takes **ink-dark text**, not white. |
+| `--bg` | oklch(0.20 0.012 35) | `#231c18` |
+| `--surface` | oklch(0.24 0.014 35) | `#2d2420` |
+| `--surface-sunken` | oklch(0.17 0.01 35) | `#1b1512` |
+| `--border` | oklch(0.32 0.015 35) | `#453a34` |
+| `--ink` | oklch(0.95 0.008 40) | `#f4ece7` |
+| `--ink-secondary` | oklch(0.78 0.015 38) | `#c4b4ab` |
+| `--ink-muted` | oklch(0.68 0.015 38) | `#a4948b` |
+| `--tomato` (dark) | oklch(0.68 0.17 35) | `#f07a55` | Brightened; takes **ink-dark text**, not white. |
 
 PWA `manifest.json` updates with the system: `theme_color` → tomato,
 `background_color` → light `--bg`. `sw.js` cache version bumps when shipped.

@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Archivo, Spline_Sans_Mono } from 'next/font/google';
+import Link from 'next/link';
 import Script from 'next/script';
 import { ClerkProvider } from '@clerk/nextjs';
 import { Analytics } from '@vercel/analytics/react';
@@ -27,12 +28,28 @@ const splineSansMono = Spline_Sans_Mono({
 export const metadata: Metadata = {
   title: 'Fork In The Road',
   description: 'End the where-should-we-eat debate.',
+  manifest: '/manifest.json',
+  icons: {
+    icon: [{ url: '/icons/app-icon.svg', type: 'image/svg+xml' }],
+    apple: '/apple-touch-icon.png',
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'Fork',
+  },
 };
 
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
+  // Browser chrome follows the OS scheme (the app's own default); the
+  // in-app override key is cosmetic-only here and not worth a client hook.
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#f9fbf6' },
+    { media: '(prefers-color-scheme: dark)', color: '#0c1610' },
+  ],
 };
 
 export default function V2RootLayout({
@@ -54,21 +71,56 @@ export default function V2RootLayout({
               __html: `(function(){try{var t=localStorage.getItem('fitr-v2-theme');var r=t==='light'||t==='dark'?t:(window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.classList.add(r);}catch(e){}})();`,
             }}
           />
+          {/* beforeinstallprompt fires once and early — usually before
+              hydration subscribes. Stash it (and suppress Chrome's own
+              mini-infobar) so InstallPrompt can offer it in context. */}
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();window.__fitrInstallEvent=e;});`,
+            }}
+          />
         </head>
         <body className="antialiased">
           <div className="flex min-h-dvh flex-col">
             <AppHeader />
             {children}
+            <footer className="border-t border-line px-4 py-6 sm:px-6">
+              <div className="mx-auto flex w-full max-w-3xl items-center justify-between text-xs text-ink-muted">
+                <span>Fork In The Road</span>
+                <Link
+                  href="/privacy"
+                  // A static footer target on every page: prefetching it
+                  // costs a request per pageview for no felt difference.
+                  prefetch={false}
+                  className="text-brass underline underline-offset-2 hover:text-ink"
+                >
+                  Privacy
+                </Link>
+              </div>
+            </footer>
           </div>
           {/* Hosted observability (charter: no homegrown platform). Both
               no-op outside Vercel deployments. */}
           <Analytics />
           <SpeedInsights />
-          {/* v1's service worker registered at scope '/'; a browser that
-              picked it up before cutover would serve stale v1 chunks
-              forever. Unregister + evict in dev; the v2 SW story (and a
-              prod-side takeover of the old scope) is Phase 8. */}
-          {process.env.NODE_ENV !== 'production' && (
+          {/* The v2 service worker (public/sw.js): production-only, where
+              /_next/static filenames are content-hashed — a dev registration
+              would recreate the exact stale-chunk bug Phase 4 C7 fixed. Dev
+              keeps the unregister + cache eviction so any worker picked up
+              from a local production run heals itself. */}
+          {process.env.NODE_ENV === 'production' ? (
+            <Script
+              id="sw-register"
+              strategy="lazyOnload"
+              dangerouslySetInnerHTML={{
+                __html: `
+                if ('serviceWorker' in navigator) {
+                  navigator.serviceWorker.register('/sw.js');
+                }
+              `,
+              }}
+            />
+          ) : (
             <Script
               id="sw-unregister-dev"
               strategy="lazyOnload"
@@ -82,7 +134,7 @@ export default function V2RootLayout({
                 if (window.caches) {
                   caches.keys().then(function(keys) {
                     keys.forEach(function(key) {
-                      if (key.indexOf('forkintheroad-') === 0) caches.delete(key);
+                      if (key.indexOf('forkintheroad-') === 0 || key.indexOf('fitr-') === 0) caches.delete(key);
                     });
                   });
                 }

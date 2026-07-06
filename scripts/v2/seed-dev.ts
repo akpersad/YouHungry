@@ -305,8 +305,8 @@ async function main() {
     // Starter list for the organizer.
     const lists = db.collection<ListDoc>(V2_COLLECTIONS.lists);
     const organizerId = userIdByRole.get('organizer')!;
-    const listPlaceIds = PLACE_FIXTURES.slice(0, 6).map(
-      (fixture) => placeIdByKey.get(fixture.key)!
+    const listPlaceIds = PLACE_FIXTURES.slice(0, 6).map((fixture) =>
+      placeIdByKey.get(fixture.key)!
     );
     await lists.updateOne(
       { ownerId: organizerId, name: 'Astoria favorites' },
@@ -460,15 +460,30 @@ async function main() {
       );
     }
     // Reset the crew a previous e2e run accepted for this exact pair, so
-    // the suggestion is offered fresh every run.
+    // the suggestion is offered fresh every run. Forks a prior "run it
+    // back" journey created UNDER that crew go with it: they close with a
+    // today's-date winner, which would decay the shared board and break
+    // the fully-recovered 100% assertion on the next unseeded run. (The
+    // seed-coded crew forks are safe — the upserts above just $unset
+    // their crewId.)
     const crews = db.collection(V2_COLLECTIONS.crews);
-    const removed = await crews.deleteMany({
-      memberIds: { $all: crewPairIds, $size: 2 },
-    });
+    const priorCrews = await crews
+      .find({ memberIds: { $all: crewPairIds, $size: 2 } })
+      .project({ _id: 1 })
+      .toArray();
+    const priorCrewIds = priorCrews.map((crew) => crew._id);
+    let reforkResidue = 0;
+    if (priorCrewIds.length > 0) {
+      await crews.deleteMany({ _id: { $in: priorCrewIds } });
+      const removedForks = await forks.deleteMany({
+        crewId: { $in: priorCrewIds },
+      });
+      reforkResidue = removedForks.deletedCount;
+    }
     console.log(
       `mongo: ${crewHistorySpec.length} crew-history forks upserted` +
-        (removed.deletedCount > 0
-          ? ` (${removed.deletedCount} prior pair crew reset)`
+        (priorCrewIds.length > 0
+          ? ` (${priorCrewIds.length} prior pair crew reset, ${reforkResidue} refork residue removed)`
           : '')
     );
 
