@@ -17,6 +17,19 @@ Commit ledger (update at every checkpoint):
 
 1. `C1` docs — ledger opened (Phase 7 marked merged, Phase 8 in
    progress).
+2. `C2` **PWA identity assets.** New app mark ("Tonight's board" made
+   literal): a split-flap board tile, the road you came in on bending
+   gold toward the chosen branch, the passed-over branch board-muted,
+   the flap seam slicing the glyph. Authored as two SVGs
+   (`public/icons/app-icon{,-maskable}.svg`); PNGs (192/512 any +
+   maskable, apple-touch 180, PNG-in-ICO favicon) rasterized by
+   `scripts/v2/render-icons.ts` (Playwright chromium — no new image
+   deps). manifest.json rewritten for v2 (real routes in shortcuts,
+   canvas splash/theme colors, id/scope, maskable entries split from
+   any per spec); robots.txt rewritten (dead v1 routes + wrong domain
+   out); root layout now links manifest + icons + appleWebApp and
+   ships media-switched themeColor. Deleted: all v1 icons, favicon
+   SVGs, Next starter SVGs, v1 screenshots + their placeholder docs.
 
 ## Previous: v2 Phase 7 — Cutover & purge (MERGED ✅ as PR #81 `3d4551f`, branch `v2/cutover`, 2026-07-03)
 

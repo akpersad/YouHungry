@@ -27,12 +27,28 @@ const splineSansMono = Spline_Sans_Mono({
 export const metadata: Metadata = {
   title: 'Fork In The Road',
   description: 'End the where-should-we-eat debate.',
+  manifest: '/manifest.json',
+  icons: {
+    icon: [{ url: '/icons/app-icon.svg', type: 'image/svg+xml' }],
+    apple: '/apple-touch-icon.png',
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'Fork',
+  },
 };
 
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
+  // Browser chrome follows the OS scheme (the app's own default); the
+  // in-app override key is cosmetic-only here and not worth a client hook.
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#f9fbf6' },
+    { media: '(prefers-color-scheme: dark)', color: '#0c1610' },
+  ],
 };
 
 export default function V2RootLayout({
