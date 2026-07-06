@@ -1,9 +1,102 @@
 # Session Handoff — Fork In The Road portfolio upgrade
 
-**Last updated:** 2026-07-06 (**ALL v2 PHASES MERGED** — Phase 8 = PR #83 `7cff470`; **v1→v2 migration EXECUTED; v1 collections archived + dropped**; see the post-merge addendum below)
+**Last updated:** 2026-07-06 (post-launch gap fix: **`/account` + notification preferences + push opt-in + password reset**, branch `v2/account`, BUILT — awaiting owner review; see CURRENT below)
 **Read this first, then:** `promptFiles/v2/CHARTER.md` + `promptFiles/v2/WORKPLAN.md` (the authoritative plan for all v2 work — supersedes `phased-execution-plan.md` phases 4–8), `promptFiles/v2/IDENTITY.md` (the committed v2 design direction), `promptFiles/v2/BACKLOG.md` (post-launch triage + remaining owner items), `CLAUDE.md` (repo guide).
 
-## CURRENT: post-launch. The WORKPLAN is complete.
+## CURRENT: post-launch gap fix — the account surface (branch `v2/account`, built 2026-07-06)
+
+Owner-identified miss (2026-07-06): the v1 profile section died in the
+Phase 7 purge with no v2 replacement — no way to edit personal info, no
+way to manage push/email preferences, no push opt-in at all (a PWA whose
+service worker had no `push` handler), no forgot-password flow, and the
+result email had no unsubscribe. This branch closes all of it. Untracked
+in BACKLOG.md because it fell through the cracks rather than being a
+decision; treated as a launch-quality gap, not new scope.
+
+Commit ledger:
+
+1. `C1` **Server core.** `lib/v2/account.ts` (identity writes go Clerk →
+   Mongo mirror, never the reverse: `setFirstName` via clerkClient —
+   first name is the only name the product renders; `changePassword` =
+   BAPI verifyPassword → updateUser → revoke other sessions BY HAND
+   (Clerk's signOutOfOtherSessions kills the current session too);
+   `syncAccountFromClerk` for post-email-change mirroring;
+   notification-preference flips + push-subscription add/remove under
+   **v1's exact field names** — `preferences.notificationSettings.*`,
+   `pushSubscriptions[]` — because migrated prod docs already carry that
+   shape and notifications.ts already honors it; token-authorized
+   `unsubscribeEmailByToken`). `tokens.ts` grew the domain-separated
+   (`unsub:` HMAC prefix) 180-day unsubscribe token. Result email now
+   carries a footer unsubscribe link + RFC 8058 List-Unsubscribe
+   one-click headers. Zod schemas for the whole new surface. ~35 new
+   unit tests (account/tokens/validation/notifications).
+2. `C2` **API surface** (`/api/v2/account/*`): PATCH account (rename or
+   empty-body Clerk resync, 10/min/user), POST password (5/min/user —
+   the brake on current-password guessing), PATCH preferences,
+   POST/DELETE push-subscriptions, POST unsubscribe (the one-click
+   target; GET 303s to the page). **`public/sw.js` gained `push` +
+   `notificationclick` handlers** — push was undeliverable end-to-end
+   without them.
+3. `C3` **UI.** New `Switch` primitive (role="switch", busy≠disabled,
+   ON-state is ink NEVER gold — settings are frame register; gallery
+   section added). `/account` (gated with the ?next= round-trip like
+   /crew): first-name form, email change via the inline email_code
+   custom flow, collapsed password form, the two channel switches, and
+   an honest per-device push block (states: unsupported /
+   iOS-needs-Home-Screen / no-worker (dev) / permission-blocked / off /
+   on; permission asked only on the tap; failed server register rolls
+   back the browser subscription; subscribed-but-forgotten devices
+   self-heal by re-POSTing). Public `/unsubscribe` landing (token IS the
+   auth, no sign-in — flip is idempotent). AppHeader first-name is now
+   the door to /account (all widths). **Forgot password** (owner ask
+   mid-session): custom reset_password_email_code flow on the sign-in
+   card — email → code + new password on one card, reset signs you in,
+   other sessions revoked. Privacy page now names the account switches +
+   the one-tap unsubscribe.
+4. `C4` **e2e + docs** (this commit). `e2e/account.spec.ts` (8 tests:
+   @smoke profile render + honest save gating, switch persistence across
+   reload with restore, both-mode axe scans, signed-out gate round-trip,
+   reset-path entry, bad-unsubscribe-link honesty); the Clerk-429
+   `gotoResilient` helper promoted to shared `e2e/clerk-resilience.ts`
+   and adopted by gallery + launch-surfaces + account specs (the account
+   spec's 8 extra parallel loads raised dev-instance 429 pressure).
+   CLAUDE.md + this ledger refreshed.
+
+**Deliberate scope decisions (documented, not silent):**
+
+- **No e2e rename of squad users** — crew-suggestion copy derives from
+  seeded first names and specs run in parallel workers; the rename path
+  is pinned by unit tests instead.
+- **Fork-started push to crew members NOT built** — it contradicts the
+  charter's "the group chat is the notification channel" thesis; raised
+  with the owner as a product question, awaiting a call.
+- **Account deletion stays manual** (privacy-page path) per the existing
+  owner-level decision; /account links to it honestly.
+
+**Validation (2026-07-06):** full pre-push green (tsc / eslint
+--max-warnings=0 / prettier / **Jest 34 suites, 388 tests** (+30) /
+production build with /account + /unsubscribe + 5 account API routes).
+**Full chromium e2e 36/36 green** against a fresh production build +
+reseeded dev DB (1 flaky-passed on the documented Clerk-429 class);
+mobile-chrome smoke lane 6/6. One mid-run failure was the
+HANDOFF-documented unseeded-rerun crew-board decay, cleared by
+reseeding. Google never billed; sends suppressed.
+
+**Owner actions for this gate:**
+
+1. Review the branch; go-ahead to push, then owner merges the PR.
+2. **Verify the Vercel env still has `NEXT_PUBLIC_VAPID_PUBLIC_KEY`,
+   `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`** (v1-era vars — do NOT delete
+   them in the env cleanup; push now genuinely uses them). Set
+   `NEXT_PUBLIC_APP_URL=https://fork-in-the-road.vercel.app` in prod if
+   unset (unsubscribe links derive from it; the code falls back to the
+   right URL either way).
+3. Product call, whenever convenient: should crew members get a push
+   when a fork STARTS (not just closes)? Charter says the group chat
+   carries the invite; adding it would be a deliberate charter
+   amendment.
+
+## Previous: post-launch. The WORKPLAN is complete.
 
 **Post-merge addendum (2026-07-06, owner-approved, executed same day):**
 

@@ -4,26 +4,11 @@
  * install prompt journey. All signed-out — every one of these surfaces is
  * public by design.
  */
-import { test, expect, type Page } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+import { gotoResilient } from './clerk-resilience';
 
 test.use({ storageState: { cookies: [], origins: [] } });
-
-/**
- * The Clerk dev instance rate-limits under full-suite parallelism and the
- * middleware then renders a raw too_many_requests body instead of the page
- * (documented flake class — see synthetic-monitoring precedent in the v1
- * suite). Bounded retry with backoff; a real failure still surfaces.
- */
-async function gotoResilient(page: Page, path: string) {
-  for (let attempt = 0; attempt < 4; attempt++) {
-    await page.goto(path);
-    const body = (await page.textContent('body')) ?? '';
-    if (!body.includes('too_many_requests')) return;
-    await page.waitForTimeout(1500 * (attempt + 1));
-  }
-  throw new Error(`Clerk dev-instance rate limit persisted for ${path}`);
-}
 
 test.describe('PWA wiring', () => {
   test('@smoke manifest is linked and resolves with the v2 identity', async ({
