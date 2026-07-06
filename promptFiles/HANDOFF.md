@@ -1,9 +1,42 @@
 # Session Handoff — Fork In The Road portfolio upgrade
 
-**Last updated:** 2026-07-05 (v2 Phase 7 MERGED ✅ as PR #81 `3d4551f`; **Phase 8 Polish, PWA & launch IN PROGRESS on `v2/launch`**)
-**Read this first, then:** `promptFiles/v2/CHARTER.md` + `promptFiles/v2/WORKPLAN.md` (the authoritative plan for all v2 work — supersedes `phased-execution-plan.md` phases 4–8), `promptFiles/v2/IDENTITY.md` (the committed v2 design direction), `CLAUDE.md` (repo guide).
+**Last updated:** 2026-07-06 (**ALL v2 PHASES MERGED** — Phase 8 = PR #83 `7cff470`; **v1→v2 migration EXECUTED; v1 collections archived + dropped**; see the post-merge addendum below)
+**Read this first, then:** `promptFiles/v2/CHARTER.md` + `promptFiles/v2/WORKPLAN.md` (the authoritative plan for all v2 work — supersedes `phased-execution-plan.md` phases 4–8), `promptFiles/v2/IDENTITY.md` (the committed v2 design direction), `promptFiles/v2/BACKLOG.md` (post-launch triage + remaining owner items), `CLAUDE.md` (repo guide).
 
-## CURRENT: v2 Phase 8 — Polish, PWA & launch (branch `v2/launch`, 2026-07-05)
+## CURRENT: post-launch. The WORKPLAN is complete.
+
+**Post-merge addendum (2026-07-06, owner-approved, executed same day):**
+
+- **Migration executed for real** (`--execute --into you-hungry`):
+  1,432 places upserted (1,430 distinct — two v1 restaurants shared a
+  googlePlaceId and merged correctly), 200 lists, 1 crew, 14 closed
+  forks (4 crew-attached). Dry-run report reviewed and signed off by
+  the owner first (200 lists confirmed right; all skips were e2e
+  residue). First execute attempt failed building the unique clerkId
+  index: prod held 9 duplicate `+clerk_test` squad-user docs
+  (CI-to-prod-era webhook/auto-create race). Owner approved deleting
+  the dupes (earliest doc per clerkId kept; delete double-guarded by
+  explicit ids + test-email pattern); rerun succeeded.
+- **v1 collections archived then DROPPED.** All 14 v1-only collections
+  (api_cache, collections, decisions, errorGroups, errorLogs,
+  friendships, groupInvitations, groups, location_cache, notifications,
+  performanceMetrics, phone_verifications, restaurants, short_urls)
+  dumped to lossless gzipped EJSON with per-collection count
+  verification, then dropped. **The archive is the only rollback:**
+  `~/Documents/Development/PersonalProjects/you-hungry-v1-archive-2026-07-06/`
+  (~1.4 MB, owner's machine — worth copying somewhere backed up).
+  Prod db is now EXACTLY the ten live v2 collections (users 24,
+  places 1430, lists 200, forks 14, crews 1, guests, place_queries,
+  error_logs, rate_limits, api_usage). Live site verified 200 on
+  / /privacy /manifest.json /sw.js /gallery post-drop.
+- **Still open (owner, optional):** close dependabot #82/#70/#67
+  (superseded) + #66 (close unmerged — types stay on Node 22); the
+  remaining clerk_test squad users in prod `users` are harmless and
+  deletable any time; the migrated crew is named "Test Group" (the
+  only v1 group with completed decisions) — remove via the product if
+  unwanted; everything else lives in `promptFiles/v2/BACKLOG.md`.
+
+## Previous: v2 Phase 8 — Polish, PWA & launch (MERGED ✅ as PR #83 `7cff470`, branch `v2/launch`, 2026-07-05)
 
 WORKPLAN Phase 8 — the launch pass. Scope: PWA (manifest/icons for the
 "Tonight's board" identity, a real service worker replacing the Phase 7
