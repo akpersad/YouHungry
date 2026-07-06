@@ -5,7 +5,8 @@ import {
   warnSuppressed,
 } from '../notification-suppression';
 import { getV2Db } from './db';
-import { V2_COLLECTIONS, type ForkDoc } from './schema';
+import { signUnsubscribeToken } from './tokens';
+import { V2_COLLECTIONS, type ForkDoc, type V2UserDoc } from './schema';
 
 /**
  * Account-holder conveniences, per the charter: the group chat is the
@@ -20,27 +21,20 @@ import { V2_COLLECTIONS, type ForkDoc } from './schema';
  * dev/CI/tests never reach a real provider.
  */
 
-/** The raw user fields this module reads off the shared v1/v2 users doc. */
-interface NotifiableUserDoc {
-  _id: ObjectId;
-  email?: string;
-  name?: string;
-  pushSubscriptions?: Array<{
-    endpoint: string;
-    keys: { p256dh: string; auth: string };
-  }>;
-  preferences?: {
-    notificationSettings?: {
-      pushEnabled?: boolean;
-      emailEnabled?: boolean;
-    };
-  };
+/** The user fields this module reads off the users doc (see schema.ts). */
+type NotifiableUserDoc = Pick<V2UserDoc, '_id'> &
+  Partial<
+    Pick<V2UserDoc, 'email' | 'name' | 'pushSubscriptions' | 'preferences'>
+  >;
+
+function appUrl(path: string): string {
+  const base =
+    process.env.NEXT_PUBLIC_APP_URL ?? 'https://fork-in-the-road.vercel.app';
+  return `${base.replace(/\/$/, '')}${path}`;
 }
 
 function forkUrl(code: string): string {
-  const base =
-    process.env.NEXT_PUBLIC_APP_URL ?? 'https://fork-in-the-road.vercel.app';
-  return `${base.replace(/\/$/, '')}/f/${code}`;
+  return appUrl(`/f/${code}`);
 }
 
 function winnerNameOf(fork: ForkDoc): string {
@@ -53,6 +47,7 @@ function winnerNameOf(fork: ForkDoc): string {
 
 async function sendResultEmail(
   to: string,
+  userId: ObjectId,
   winnerName: string,
   code: string
 ): Promise<void> {
@@ -63,6 +58,12 @@ async function sendResultEmail(
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) return;
   const url = forkUrl(code);
+  // One-tap opt-out, no sign-in: the signed token authorizes the flip.
+  // Humans get the /unsubscribe page; the RFC 8058 one-click header points
+  // at the API route, which is what accepts the mail client's POST.
+  const token = encodeURIComponent(signUnsubscribeToken(userId.toString()));
+  const unsubscribeUrl = appUrl(`/unsubscribe?token=${token}`);
+  const oneClickUrl = appUrl(`/api/v2/account/unsubscribe?token=${token}`);
   const response = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: {
@@ -73,12 +74,17 @@ async function sendResultEmail(
       from: process.env.FROM_EMAIL ?? 'onboarding@resend.dev',
       to: [to],
       subject: `We're going here: ${winnerName}`,
+      headers: {
+        'List-Unsubscribe': `<${oneClickUrl}>`,
+        'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+      },
       html: [
         '<div style="font-family: system-ui, sans-serif; max-width: 480px; margin: 0 auto; padding: 24px;">',
         '<p style="font-size: 14px; color: #58685d; margin: 0 0 8px;">Your fork closed</p>',
         `<h1 style="font-size: 24px; color: #132a1b; margin: 0 0 16px;">${winnerName}</h1>`,
         `<p style="margin: 0 0 24px;"><a href="${url}" style="color: #8d5e00;">See the tally</a></p>`,
-        '<p style="font-size: 12px; color: #58685d;">Fork In The Road</p>',
+        '<p style="font-size: 12px; color: #58685d;">Fork In The Road · ',
+        `<a href="${unsubscribeUrl}" style="color: #58685d;">Turn off result emails</a></p>`,
         '</div>',
       ].join(''),
     }),
@@ -158,7 +164,9 @@ export async function notifyForkClosed(fork: ForkDoc): Promise<void> {
           sends.push(sendResultPush(user, winnerName, fork.code));
         }
         if (settings?.emailEnabled !== false && user.email) {
-          sends.push(sendResultEmail(user.email, winnerName, fork.code));
+          sends.push(
+            sendResultEmail(user.email, user._id, winnerName, fork.code)
+          );
         }
         return sends;
       })

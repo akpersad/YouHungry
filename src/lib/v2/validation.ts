@@ -152,6 +152,70 @@ export const reforkSchema = z.object({
   mode: z.enum(['spin', 'vote']).optional(),
 });
 
+/**
+ * A first name for the account page: guest-display-name hygiene (trim,
+ * collapse whitespace, no control/format characters) at the same length —
+ * it renders in exactly the places a guest name does.
+ */
+export const accountFirstName = z
+  .string()
+  .trim()
+  .transform((name) => name.replace(/\s+/g, ' '))
+  .pipe(
+    z
+      .string()
+      .min(1, 'Your crew needs something to call you')
+      .max(24, 'Keep it under 24 characters')
+      .refine(
+        (name) => !/\p{C}/u.test(name),
+        'That name contains unsupported characters'
+      )
+  );
+
+export const updateAccountSchema = z.object({
+  firstName: accountFirstName.optional(),
+});
+
+/** Clerk enforces its own password rules; the bounds here are sanity only. */
+export const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1, 'Enter your current password'),
+  newPassword: z
+    .string()
+    .min(8, 'At least 8 characters')
+    .max(256, 'Keep it under 256 characters'),
+});
+
+export const notificationSettingsSchema = z
+  .object({
+    pushEnabled: z.boolean().optional(),
+    emailEnabled: z.boolean().optional(),
+  })
+  .refine(
+    (settings) =>
+      settings.pushEnabled !== undefined || settings.emailEnabled !== undefined,
+    'Nothing to change'
+  );
+
+/**
+ * A browser PushSubscription.toJSON(). Endpoints are push-service HTTPS
+ * URLs; keys are base64url material the push service hands back verbatim.
+ */
+export const pushSubscriptionSchema = z.object({
+  endpoint: z
+    .string()
+    .url()
+    .max(1024)
+    .refine((url) => url.startsWith('https://'), 'Endpoint must be https'),
+  keys: z.object({
+    p256dh: z.string().min(1).max(512),
+    auth: z.string().min(1).max(512),
+  }),
+});
+
+export const removePushSubscriptionSchema = z.object({
+  endpoint: z.string().min(1).max(1024),
+});
+
 export type QuickSpinInput = z.infer<typeof quickSpinSchema>;
 export type LockInInput = z.infer<typeof lockInSchema>;
 export type CreateForkApiInput = z.infer<typeof createForkSchema>;

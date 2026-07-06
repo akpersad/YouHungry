@@ -134,6 +134,63 @@ export function verifyForkToken(
 }
 
 // ---------------------------------------------------------------------------
+// Email unsubscribe tokens
+// ---------------------------------------------------------------------------
+
+interface UnsubscribeTokenPayload {
+  /** users._id hex string the link acts for. */
+  u: string;
+  /** Unix ms expiry. */
+  exp: number;
+}
+
+/**
+ * A result email's unsubscribe link must keep working long after the send
+ * without a sign-in (the whole point is one tap out), so the token itself
+ * is the authorization: it names the user, is signed, and lives half a
+ * year — far past any compliance floor, short enough that a leaked old
+ * email eventually goes inert.
+ */
+export const UNSUBSCRIBE_TOKEN_TTL_MS = 180 * 24 * 60 * 60 * 1000;
+
+export function signUnsubscribeToken(
+  userId: string,
+  now: Date = new Date(),
+  secret?: string
+): string {
+  const payload: UnsubscribeTokenPayload = {
+    u: userId,
+    exp: now.getTime() + UNSUBSCRIBE_TOKEN_TTL_MS,
+  };
+  const encoded = Buffer.from(JSON.stringify(payload)).toString('base64url');
+  return `${encoded}${SEPARATOR}${hmac(`unsub:${encoded}`, getSecret(secret))}`;
+}
+
+/** Returns the userId hex the token was signed for, or null. */
+export function verifyUnsubscribeToken(
+  token: string,
+  now: Date = new Date(),
+  secret?: string
+): string | null {
+  const idx = token.lastIndexOf(SEPARATOR);
+  if (idx <= 0) return null;
+  const encoded = token.slice(0, idx);
+  const sig = token.slice(idx + 1);
+  if (!safeEqual(sig, hmac(`unsub:${encoded}`, getSecret(secret)))) return null;
+
+  let payload: UnsubscribeTokenPayload;
+  try {
+    payload = JSON.parse(Buffer.from(encoded, 'base64url').toString('utf8'));
+  } catch {
+    return null;
+  }
+  if (typeof payload.u !== 'string' || !/^[0-9a-f]{24}$/i.test(payload.u)) {
+    return null;
+  }
+  return now.getTime() < payload.exp ? payload.u : null;
+}
+
+// ---------------------------------------------------------------------------
 // Fork share codes
 // ---------------------------------------------------------------------------
 

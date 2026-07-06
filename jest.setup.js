@@ -148,6 +148,7 @@ process.env.TWILIO_AUTH_TOKEN = 'test-api-key';
 process.env.TWILIO_PHONE_NUMBER = '+18002562938';
 process.env.NEXT_PUBLIC_APP_URL = 'http://localhost:3000';
 process.env.RESEND_API_KEY = 'test-api-key';
+process.env.V2_TOKEN_SECRET = 'test-secret-do-not-use';
 process.env.NEXTAUTH_SECRET = 'test-secret';
 process.env.NEXTAUTH_URL = 'http://localhost:3000';
 

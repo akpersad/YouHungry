@@ -163,8 +163,17 @@ describe('notifyForkClosed', () => {
     // Marco opted out of both; only Olivia's email goes out.
     expect(global.fetch).toHaveBeenCalledTimes(1);
     const [, init] = (global.fetch as jest.Mock).mock.calls[0];
-    expect(JSON.parse(init.body).to).toEqual(['olivia@example.com']);
+    const body = JSON.parse(init.body);
+    expect(body.to).toEqual(['olivia@example.com']);
     expect(pushService.sendNotification).not.toHaveBeenCalled();
+    // The one-tap opt-out travels with every send: a signed link in the
+    // footer plus the RFC 8058 one-click headers for mail clients.
+    expect(body.html).toContain('/unsubscribe?token=');
+    expect(body.html).toContain('Turn off result emails');
+    expect(body.headers['List-Unsubscribe']).toContain('/unsubscribe?token=');
+    expect(body.headers['List-Unsubscribe-Post']).toBe(
+      'List-Unsubscribe=One-Click'
+    );
     delete process.env.RESEND_API_KEY;
   });
 

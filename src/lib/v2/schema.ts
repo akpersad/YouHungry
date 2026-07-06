@@ -66,12 +66,34 @@ export interface GuestDoc {
   claimedByUserId?: ObjectId;
 }
 
+/**
+ * One browser's web-push registration. The field names are v1's — prod user
+ * docs migrated with subscriptions under exactly this shape, and
+ * notifications.ts already reads/prunes it — so v2 adopts them verbatim.
+ */
+export interface UserPushSubscriptionDoc {
+  endpoint: string;
+  keys: { p256dh: string; auth: string };
+}
+
+/**
+ * Channel opt-outs for the one notification v2 sends ("We're going here.").
+ * Absent means ON — v1 stored explicit false for opt-outs and the send path
+ * (notifications.ts) keeps that reading, so migrated opt-outs stay honored.
+ */
+export interface UserNotificationSettings {
+  pushEnabled?: boolean;
+  emailEnabled?: boolean;
+}
+
 /** Lean v2 view of a user doc (v1 owns the full shape until cutover). */
 export interface V2UserDoc {
   _id: ObjectId;
   clerkId: string;
   email: string;
   name: string;
+  pushSubscriptions?: UserPushSubscriptionDoc[];
+  preferences?: { notificationSettings?: UserNotificationSettings };
   createdAt: Date;
   updatedAt: Date;
 }
