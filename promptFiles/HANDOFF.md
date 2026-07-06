@@ -1,9 +1,24 @@
 # Session Handoff — Fork In The Road portfolio upgrade
 
-**Last updated:** 2026-07-03 (v2 Phase 5+6 MERGED ✅ as PR #80 `7c88f84`; **Phase 7 Cutover & purge IN PROGRESS on `v2/cutover`**)
+**Last updated:** 2026-07-05 (v2 Phase 7 MERGED ✅ as PR #81 `3d4551f`; **Phase 8 Polish, PWA & launch IN PROGRESS on `v2/launch`**)
 **Read this first, then:** `promptFiles/v2/CHARTER.md` + `promptFiles/v2/WORKPLAN.md` (the authoritative plan for all v2 work — supersedes `phased-execution-plan.md` phases 4–8), `promptFiles/v2/IDENTITY.md` (the committed v2 design direction), `CLAUDE.md` (repo guide).
 
-## CURRENT: v2 Phase 7 — Cutover & purge (branch `v2/cutover`, 2026-07-03)
+## CURRENT: v2 Phase 8 — Polish, PWA & launch (branch `v2/launch`, 2026-07-05)
+
+WORKPLAN Phase 8 — the launch pass. Scope: PWA (manifest/icons for the
+"Tonight's board" identity, a real service worker replacing the Phase 7
+self-destruct — SAME `public/sw.js` filename so returning browsers take
+the update, in-context install prompt that never fires on first load),
+accessibility + performance sweep (INP focus: reveal + voting), the
+privacy-policy page (Phase 7 backlog), README/docs/portfolio refresh,
+and backlog triage (keep/kill/later decisions with the owner).
+
+Commit ledger (update at every checkpoint):
+
+1. `C1` docs — ledger opened (Phase 7 marked merged, Phase 8 in
+   progress).
+
+## Previous: v2 Phase 7 — Cutover & purge (MERGED ✅ as PR #81 `3d4551f`, branch `v2/cutover`, 2026-07-03)
 
 WORKPLAN Phase 7 — the sign-off-gated migration + wholesale v1 deletion.
 Scope: route v2 to `/` (retire `/beta` with redirects), one-time v1→v2
