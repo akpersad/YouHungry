@@ -109,6 +109,39 @@ Commit ledger (update at every checkpoint):
    (4 mobile-chrome smokes flaked on the documented Clerk dev 429 and
    passed on retry; the new spec navigates through a bounded-retry
    helper for the same class). Full pre-push green.
+8. `C8` **README + portfolio story + backlog triage** (this commit).
+   README rewritten for post-cutover v2 (three lanes, engine, guest
+   security posture, real env/setup/testing, 4 fresh screenshots in
+   docs/screenshots captured off the production build);
+   `docs/portfolio-story.md` tells the v1→v2 story with the numbers
+   (~113k→~20k LOC, 77→20 handlers, 27→10 runtime deps);
+   `promptFiles/v2/BACKLOG.md` is the Phase 8 triage — owner launch
+   checklist (prod v1-collection drop, Vercel env cleanup, dependabot
+   closures), later items (Sentry, WebKit nightly, Node 24, eslint 10,
+   new Places API, manifest screenshots, demo GIF), kill list
+   (notification center, export, SMS, photos, social login), and the
+   root-level v1 reference docs flagged for an owner keep/archive
+   call. Stale v1 operational docs deleted (color audits, URL
+   shortener, v1 PWA/perf notes, quick-reference,
+   features-implemented, troubleshooting-server-actions —
+   git-recoverable). WORKPLAN table: Phase 7 ✅ #81, Phase 8 built.
+
+**Validation (2026-07-05):** full pre-push green (tsc / eslint
+--max-warnings=0 / prettier / Jest 30 suites 358 tests / production
+build with /offline + /privacy static). Full e2e 34/34 against a
+fresh production build + reseeded dev DB (4 mobile-chrome smokes
+flaky-passed-on-retry, the documented Clerk dev-instance 429 class).
+Lighthouse local: all four URLs above every CI floor. Google never
+billed; sends suppressed.
+
+**Owner actions for the Phase 8 gate:**
+
+1. Review the branch; go-ahead to push, then owner merges the PR.
+2. After merge: close dependabot #82/#70/#67 (superseded) and #66
+   (close unmerged — @types/node stays on 22 to match the runtime).
+3. Work the BACKLOG.md owner checklist when convenient (prod v1
+   collection archive+drop, Vercel Twilio/Google-client env removal,
+   keep-or-archive call on the root v1 reference docs).
 
 ## Previous: v2 Phase 7 — Cutover & purge (MERGED ✅ as PR #81 `3d4551f`, branch `v2/cutover`, 2026-07-03)
 
