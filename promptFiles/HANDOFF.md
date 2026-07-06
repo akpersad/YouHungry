@@ -1,9 +1,117 @@
 # Session Handoff — Fork In The Road portfolio upgrade
 
-**Last updated:** 2026-07-02 (v2 Phase 4 MERGED ✅ as PR #79 `4b03743`; **Phase 5+6 Places, Lists & Crews IN PROGRESS on `v2/places-crews`** — Places half done, Crews half next)
+**Last updated:** 2026-07-03 (v2 Phase 5+6 MERGED ✅ as PR #80 `7c88f84`; **Phase 7 Cutover & purge IN PROGRESS on `v2/cutover`**)
 **Read this first, then:** `promptFiles/v2/CHARTER.md` + `promptFiles/v2/WORKPLAN.md` (the authoritative plan for all v2 work — supersedes `phased-execution-plan.md` phases 4–8), `promptFiles/v2/IDENTITY.md` (the committed v2 design direction), `CLAUDE.md` (repo guide).
 
-## CURRENT: v2 Phase 5+6 — Places, Lists & Crews (branch `v2/places-crews`, 2026-07-02)
+## CURRENT: v2 Phase 7 — Cutover & purge (branch `v2/cutover`, 2026-07-03)
+
+WORKPLAN Phase 7 — the sign-off-gated migration + wholesale v1 deletion.
+Scope: route v2 to `/` (retire `/beta` with redirects), one-time v1→v2
+data migration script (dry-run against a snapshot; **owner approves before
+it touches Atlas — this PR merges only with explicit owner sign-off on the
+dry-run**), delete v1 (route tree, components, dead libs, SMS/shortener/
+observability stacks, deps), adopt Vercel Analytics/Speed Insights +
+minimal admin, rebuild e2e around v2.
+
+Commit ledger (C1–C7 ALL BUILT 2026-07-03; awaiting owner review + the
+migration dry-run sign-off before push):
+
+1. `36569a3` `C1` docs — ledger opened (5+6 marked merged, Phase 7 in
+   progress).
+2. `b5e6c27` `C2` **Migration script.** `scripts/v2/migrate-v1.ts` +
+   pure transforms in `src/lib/v2/migration.ts` (22 unit tests):
+   restaurants→places (GeoJSON, $-signs→priceLevel), collections→lists
+   (group collections → first resolvable admin, group name kept in the
+   list name), groups-with-completed-decisions→crews (crews emerge from
+   decisions; ceremony-only groups reported, not migrated),
+   completed decisions→closed forks (weights re-keyed to place ids,
+   `decidedAt = result.selectedAt` so decay history is bit-identical;
+   group decisions carry the migrated crewId → shared crew weights
+   survive). v2 docs REUSE the v1 `_id` → idempotent upserts, full
+   traceability. `users` untouched (shared collection). Dry run is the
+   default and strictly read-only; `--execute` demands `--into <db>`
+   typed back. **The dry run itself has NOT been executed** — the
+   sandbox blocked Atlas reads; owner runs `npm run migrate:v1`
+   (read-only) against prod/snapshot and reviews the report. That
+   review is the merge gate.
+3. `73809f0` `C3` **Cutover.** v2 IS the app: (v2)/beta/_ → /, /new,
+   /f/[code] (real page, not an alias), /places, /crew, /gallery,
+   /sign-in, /sign-up; single root layout owns the shell (BetaHeader →
+   AppHeader); (v1) route tree deleted; `/beta/:path_` 308→`/:path*`
+   (fork links in old group chats keep working); middleware public
+   matcher rebuilt (pages self-gate with ?next= round-trips); sanitizer
+   accepts any same-app path; **public/sw.js replaced with a
+   self-destructing worker** (returning prod browsers unregister v1's
+   cache-first SW and drop forkintheroad-* caches — real PWA worker is
+   Phase 8); sitemap trimmed; root not-found added; app now indexable.
+4. `b20f6e8` `C4` **The purge.** All v1 API families, components,
+   hooks, 35 lib modules, v1 types/tests, perf-metrics platform, audit
+   scripts, public relics. Survivors (v2's only v1 deps): logger, db,
+   rate-limit, notification-suppression, api-usage-tracker,
+   push-service (slimmed to the one send v2 does). Clerk webhook re-fit
+   to the lean v2 user shape. Deps: 17 runtime + 5 dev packages
+   removed (twilio, @googlemaps/_, @tanstack/_, framer-motion, …); 151
+   packages out of node_modules; lockfile clean of the corporate
+   registry (`grep -c elilillyco` = 0). Branch diff vs main:
+   **+2,057 / −124,984 lines**; src+e2e+scripts now ~20k LOC.
+5. `d9f7251` `C5` **Observability + minimal admin.** Vercel Analytics
+   - Speed Insights in the root layout; `/admin` (ADMIN_USER_IDS gate,
+     404 otherwise): 30-day third-party spend from api_usage + recent
+     unexpected 500s; the 500 path in `lib/v2/http.ts` now records
+     {route, message, stack, at} to error_logs (30-day TTL),
+     fire-and-forget — a hosted error tracker can replace the single
+     `recordServerError` call site when the owner picks one.
+6. `898969e` `C6` **e2e + CI rebuilt.** e2e/v2/\* promoted to e2e/ at
+   root URLs; v1 suites/fixtures/helpers/no-auth config deleted;
+   auth.setup rewritten for the v2 sign-in form; playwright projects =
+   setup + chromium (all journeys) + mobile-chrome (@smoke on Pixel 7);
+   playwright.yml: seed step in every server job, nightly de-sharded,
+   v1 env relics dropped, **required check names unchanged**;
+   lighthouserc URLs = / /sign-in /sign-up /gallery; jest coverage
+   floors ratcheted UP to post-purge reality (49S/52B/50F/49L vs old
+   43/38/34/43).
+7. `C7` (this commit) docs — CLAUDE.md rewritten for the post-cutover
+   repo; this ledger.
+
+**Validation (2026-07-03):** full pre-push green (type-check / eslint
+--max-warnings=0 / prettier / Jest 30 suites, 349 tests, raised
+coverage floors / production build — route table is pure v2). **e2e
+25/25 green locally** against a production server + freshly seeded dev
+DB: every journey (guest voting, claim, 3-user vote SSE reveal, places
+accelerant loop, crew re-fork), both-mode axe scans, and the new
+mobile-chrome smoke lane. Google never billed; sends suppressed.
+
+**Owner actions needed before merge (the Phase 7 gate):**
+
+1. Run `npm run migrate:v1` (dry run, strictly read-only) with
+   MONGODB_DATABASE=you-hungry (or a snapshot restore) and review the
+   report — then sign off. The real run (`--execute --into you-hungry`)
+   happens at/after merge, before or right after the deploy.
+2. After cutover verification: archive (mongodump) then drop the v1
+   collections (collections, decisions, restaurants, groups,
+   friendships, group_invitations, in_app_notifications, short_urls,
+   plus the pre-TTL error_logs/api_usage residue and the e2e residue
+   already in prod — ~611 groups, 12 clerk_test users). Owner-level,
+   destructive, scriptable with a dry-run.
+3. Decide the hosted error tracker (Sentry?) — optional; the minimal
+   error_logs capture covers the gap.
+4. Vercel env: no new vars needed (V2_TOKEN_SECRET already set);
+   Twilio/Google-client vars can be deleted from the project after
+   merge.
+
+**Phase-scope decisions (documented, not silent):**
+
+- **/beta redirects are permanent (308)** — old fork links must survive.
+- **Firefox/WebKit e2e dropped** (they only ever ran v1 specs in the
+  nightly); cross-browser for the v2 suite is a Phase 8 decision.
+- **The privacy-policy page went with v1** — it described v1's data
+  practices (SMS, phone). Writing v2's honest policy is Phase 8
+  backlog.
+- **No client Places key, no next/image, no server actions** — the
+  next.config blocks for them are gone.
+- **jest floors ratcheted** per the coverage policy (never lowered).
+
+## Previous: v2 Phase 5+6 — Places, Lists & Crews (MERGED ✅ as PR #80 `7c88f84`, branch `v2/places-crews`)
 
 WORKPLAN Phase 5+6 (combined per owner decision): the Places & Lists half
 plus the Crews & history half, one branch, one PR, HANDOFF checkpoint at

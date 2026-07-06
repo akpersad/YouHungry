@@ -4,11 +4,9 @@
       "startServerCommand": "npm run start",
       "url": [
         "http://localhost:3000",
-        "http://localhost:3000/dashboard",
-        "http://localhost:3000/restaurants",
-        "http://localhost:3000/groups",
-        "http://localhost:3000/friends",
-        "http://localhost:3000/history"
+        "http://localhost:3000/sign-in",
+        "http://localhost:3000/sign-up",
+        "http://localhost:3000/gallery"
       ],
       "startServerReadyPattern": "Local:",
       "startServerReadyTimeout": 120000,

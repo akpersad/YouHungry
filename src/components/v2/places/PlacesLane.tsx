@@ -215,7 +215,7 @@ export function PlacesLane({ initialLists }: { initialLists: ListSummary[] }) {
             {lists.map((list) => (
               <li key={list.id}>
                 <Link
-                  href={`/beta/places/l/${list.id}`}
+                  href={`/places/l/${list.id}`}
                   className="flex items-center justify-between gap-3 rounded-xl border border-line bg-surface px-4 py-3 outline-none transition-colors hover:bg-sunken focus-visible:ring-2 focus-visible:ring-focus motion-safe:duration-100"
                 >
                   <span className="truncate font-semibold text-ink">
@@ -269,7 +269,7 @@ export function PlacesLane({ initialLists }: { initialLists: ListSummary[] }) {
           Lists feed forks. Pick one as the source and the ballot fills itself.
         </p>
         <div>
-          <ButtonLink href="/beta/new" variant="quiet">
+          <ButtonLink href="/new" variant="quiet">
             Start a fork
           </ButtonLink>
         </div>

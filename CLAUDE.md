@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this app is
 
-**Fork In The Road** — the repo is named `you-hungry` for historical reasons, but the product name is Fork In The Road; use it in all user-facing text and docs. A restaurant decision-making PWA deployed on Vercel at https://fork-in-the-road.vercel.app. Users search restaurants via Google Places, organize them into personal/group collections, and decide where to eat via either a weighted-random algorithm with 30-day decay or tiered group voting. **Production is live with real integrations** (Clerk, MongoDB Atlas, Google Places, Twilio SMS, Resend email, web push) — treat env vars and webhooks as live; SMS/email sends cost money and hit real phones.
+**Fork In The Road** — the repo is named `you-hungry` for historical reasons, but the product name is Fork In The Road; use it in all user-facing text and docs. A restaurant decision-making app deployed on Vercel at https://fork-in-the-road.vercel.app. The v2 re-imagination (charter: `promptFiles/v2/CHARTER.md`) IS the app since the Phase 7 cutover: users start a **Fork** (a lightweight decision — source + mode + lifespan), spin a weighted wheel or run a ranked-choice vote, and share a **Fork Link** into the group chat where **guests vote with just a display name, no account**. Places/Lists and Crews (recurring groups that emerge from decision history) are accelerants, never prerequisites. **Production is live with real integrations** (Clerk, MongoDB Atlas, Google Places, Resend email, web push) — treat env vars and webhooks as live; email sends cost money.
 
 ## Commands
 
@@ -19,15 +19,18 @@ npm run test:coverage       # Jest with coverage (ratchet-only thresholds in jes
 npm run pre-push            # type-check + lint(--max-warnings=0) + format:check + jest + build — must pass before every push (husky enforces)
 
 # Run a single Jest test
-npx jest src/lib/__tests__/decisions.test.ts
+npx jest src/lib/v2/__tests__/forks.test.ts
 npx jest -t "test name pattern"
 
-# Playwright e2e (e2e/ directory)
-npm run test:e2e:fast       # chromium-fast + mobile-chrome-fast projects (use before merging behavior changes)
+# Playwright e2e (e2e/ directory; seed the dev DB first)
+npm run seed:v2-dev         # Clerk dev-instance test squad + fixture places/history (idempotent; refuses prod)
+npm run test:e2e            # all journeys (chromium) + @smoke on mobile-chrome
 npm run test:e2e:smoke      # @smoke tagged
-npm run test:e2e:critical   # @critical tagged
-npm run test:accessibility  # axe spec (e2e/accessibility.spec.ts)
-npx playwright test e2e/group-decisions.spec.ts   # single e2e suite
+npm run test:accessibility  # every axe scan (gallery + lanes, both color modes)
+npx playwright test e2e/fork-links.spec.ts   # single suite
+
+# One-time v1 → v2 data migration (Phase 7; owner sign-off gates --execute)
+npm run migrate:v1          # DRY RUN — read-only report
 ```
 
 Husky hooks: pre-commit runs lint-staged (eslint --fix + prettier); pre-push runs the full `pre-push` script. CI: `.github/workflows/ci.yml` (types/lint/format/jest-coverage/build + badge publishing) and `playwright.yml` (smoke/e2e/axe/Lighthouse) run on every PR/push — see `docs/ci-quality-gates.md` for check names and the branch-protection setup.
@@ -36,57 +39,47 @@ Husky hooks: pre-commit runs lint-staged (eslint --fix + prettier); pre-push run
 
 - PR-based workflow; conventional-ish commit messages. **One feature branch per phase/work session with multiple logical commits — do not split work across multiple/stacked branches. The owner personally handles all PR merges; never merge PRs or push to main** (production deploys from main).
 - **Never `git push` — any branch — without the owner's explicit go-ahead.** Commit locally as work completes; announce "ready to push" and wait.
-- Use the structured logger `src/lib/logger.ts` (`logger.debug/info/warn/error`, plus dev-only `perf/api/component/analytics`) — never raw `console.log` in `src/`.
+- Use the structured logger `src/lib/logger.ts` — never raw `console.log` in `src/`.
 - Path alias: `@/*` → `./src/*`.
+- v2 plan documents: `promptFiles/v2/CHARTER.md` (product thesis), `promptFiles/v2/WORKPLAN.md` (phase ledger), `promptFiles/v2/IDENTITY.md` (the committed design direction — "Tonight's board"), `promptFiles/HANDOFF.md` (session state). Read HANDOFF first in a fresh session.
 
 ## Architecture
 
-Next.js 16 App Router + TypeScript + Tailwind. ~113k LOC. MongoDB (raw driver, no ORM), Clerk auth, TanStack Query client state, Zod validation.
+Next.js 16 App Router + TypeScript + Tailwind 4. MongoDB (raw driver, no ORM), Clerk auth (email/password only), Zod validation. ~20k LOC after the Phase 7 purge (was ~113k).
 
-### Core domain: the decision engine
+### Core domain (`src/lib/v2/`)
 
-`src/lib/decisions.ts` is the heart of the app:
+- `decision-engine.ts` — the pure math (v1's proven IP, ported with injected history/clock/rng): 30-day decay weights with a 10% floor, weighted spin, 3/2/1 ranked consensus with random tie-break. `scoreBallots()` is deterministic so the UI tally never re-rolls a tie-break.
+- `forks.ts` — the whole fork lifecycle: `quickSpin` (ephemeral compute; nothing persists until lock-in), `createFork`, `submitVote` (atomic in-place revote, quorum auto-close), `settleFork` (**lazy timer enforcement on every read — no cron**; closes seal status first, then compute consensus from the sealed doc), `getSelectionHistory` (scoped by participant or crewId for shared crew weights), `decideForkNow` (organizer early close).
+- `guests.ts` + `tokens.ts` — guest identity: signed httpOnly cookie (HMAC-SHA256 under `V2_TOKEN_SECRET`), signed per-fork vote tokens, claim = one-way pointer to an account. **Participant = userId XOR guestId; guests carry zero PII.**
+- `places.ts` + `google-places.ts` — cache-backed places (2dsphere nearby, vibe filters, text search) over a consolidated Google client with a **default-closed billing gate** (`ALLOW_GOOGLE_PLACES=true` or production only; dev/CI/tests never bill). 30-day place cache; `place_queries` markers throttle repeat searches.
+- `lists.ts`, `crews.ts` — Lists (saving IS membership, atomic cap guards, ownership in the query filter) and Crews (suggested from 3+ closed forks by the exact same account set; creation back-attaches matching history so shared weights are live from day one).
+- `notifications.ts` — the ONLY notification machinery: push + email "We're going here." to account-holder participants when a fork closes, fire-and-forget, through the suppression seam.
+- `schema.ts` — collections (forks/places/place_queries/lists/crews/guests/users/error_logs) and `ensureV2Indexes()`, the single index authority.
+- `migration.ts` + `scripts/v2/migrate-v1.ts` — one-time v1→v2 data migration (restaurants→places, collections→lists, groups-with-history→crews, decisions→closed forks, weights preserved). Dry-run by default; `--execute --into <db>` after owner sign-off.
+- `http.ts` — one error policy for `/api/v2`: Zod → 400, `V2DomainError` → its status + user-facing message, everything else → generic 500 + `recordServerError` (the admin page reads these).
 
-- **Weighted random**: `calculateRestaurantWeight()` — weight = base × (0.1 + 0.9 × daysSinceSelection/30); recently picked restaurants are penalized for 30 days, floor of 10%. `performRandomSelection()` (personal) and `performGroupRandomSelection()` (group; weights shared across the group's decision history by `groupId`).
-- **Tiered group voting**: ranked-choice votes scored 3/2/1 points; `submitGroupVote()` upserts votes, `calculateTieredConsensus()` resolves the winner (random tie-break), `completeTieredGroupDecision()` finalizes.
-- Decisions have type `personal|group`, method `random|tiered|manual`, status `active|completed|expired`; persisted in the `decisions` Mongo collection.
+### Surviving v1 modules (v2's only v1 dependencies)
 
-### Data layer
-
-- `src/lib/db.ts` — MongoDB connection (`connectToDatabase()`); DB name from `MONGODB_DATABASE`.
-- `src/types/database.ts` — the model definitions (User, Restaurant, Collection, Group, Decision, Friendship, GroupInvitation, InAppNotification, etc.). Mongo collections: users, restaurants, collections, groups, decisions, friendships, group_invitations, in_app_notifications, short_urls, error_logs, api_usage.
-- `src/lib/validation.ts` — Zod schemas + `validateData()` helper; API routes validate input with these.
-- Domain helpers per entity: `src/lib/collections.ts`, `groups.ts`, `restaurants.ts`.
+`src/lib/`: `logger.ts`, `db.ts` (connection singleton), `rate-limit.ts` (Mongo fixed-window, fails open), `notification-suppression.ts` (external sends only in prod or `ALLOW_REAL_NOTIFICATIONS=true` — guards every provider call), `api-usage-tracker.ts` (cost rows in `api_usage`), `push-service.ts` (web-push + VAPID, slimmed).
 
 ### Auth
 
-- `src/middleware.ts` — Clerk `clerkMiddleware` with public-route matcher. (Next 16 deprecates the filename in favor of `proxy.ts`; we deliberately stay on `middleware.ts` until clerk/javascript#8302 — an auth.protect redirect bug in proxy mode — is fixed.)
-- `src/lib/auth.ts` — `getCurrentUser()` (Clerk ID → DB user, auto-creates), `requireAuth()`, `requireAdminAuth()`. **Admin = user ID listed in `ADMIN_USER_IDS` env var.** Route handlers call these at the top; mutation routes must also verify ownership/membership (collection owner, group admin), not just authentication.
-- `api/webhooks/clerk` — svix-signed Clerk user lifecycle events.
+- `src/middleware.ts` — Clerk `clerkMiddleware`; the page tree is public at the middleware layer (cold-open + guest voting are the product); pages that need an account (`/new`, `/places`, `/crew`, `/admin`) gate themselves server-side with a `?next=`-preserving sign-in round-trip. (Next 16 deprecates the filename in favor of `proxy.ts`; deliberately staying on `middleware.ts` until clerk/javascript#8302 is fixed.)
+- `src/lib/v2/auth.ts` — `getV2User()` (Clerk session → lean user doc; webhook-gap auto-create, never fabricated emails), `requireV2User()` (throws 401 `V2DomainError`). `api/webhooks/clerk` (svix-signed) syncs the same lean shape. **Admin** = Mongo `_id` listed in `ADMIN_USER_IDS` (`src/lib/v2/admin.ts`).
+- Custom two-field sign-in/sign-up forms (`src/components/v2/auth/`) on Clerk's legacy hooks; sign-in accepts email OR username.
 
-### API surface (`src/app/api/`, ~80 route handlers)
+### API surface (`src/app/api/v2/`, ~20 handlers)
 
-Major families: `decisions/*` (random-select, group, group/vote, weights, history), `collections/*`, `groups/*`, `restaurants/*` (Google Places search), `friends/*`, `user/*`, `push|email|sms/*` (notification channels), `admin/*` (~15 monitoring/cost routes), `analytics/*`, `cron/*`, `webhooks/*`.
+`quick-spin(/lock)`, `forks` create/get/vote/spin/decide + `forks/[code]/live` (SSE — each poll runs the settling read, so the stream IS the timer), `guests/claim`, `lists` CRUD + membership, `places/nearby|search`, `webhooks/clerk`. Handlers return JSON 401s (never HTML redirects); guest-vote path is layered cheapest-first (token → rate limits → cookie). Rate limits: votes 12/min/IP + 30/min/fork, fork GET 60/min/IP, SSE 20/min/IP, quick-spin 30/min/IP, claims 10/min/user.
 
-### External integrations & resilience
+### UI
 
-- `src/lib/google-places.ts` + `optimized-google-places.ts` (caching/dedup via `api-cache.ts`).
-- `src/lib/circuit-breaker.ts` — CLOSED→OPEN after 5 failures, 30s wait, HALF_OPEN probe; instances wrap each Google API.
-- `src/lib/api-usage-tracker.ts` — cost tracking for every third-party call (Google, Twilio, Resend, Clerk) into the `api_usage` collection; admin panel reads it.
-- **Notification orchestration**: `src/lib/notification-service.ts` is the multi-channel facade (push/email/SMS/in-app/toast routed by user preferences, graceful per-channel degradation). Channel impls: `push-service.ts` (server web-push + VAPID), `push-notifications.ts` (client), `sms-notifications.ts` (Twilio), `email-notifications.ts` (Resend), `in-app-notifications.ts`, `decision-notifications.ts` (decision-triggered). Any test/demo work must suppress real sends — this orchestration layer is the seam.
-
-### Client state & UI
-
-- `src/components/providers/QueryProvider.tsx` — TanStack Query defaults (5min staleTime, no retry on 4xx, exponential backoff).
-- `src/hooks/api/*` — query hooks per domain (useCollections, useDecisions, useGroups, …).
-- `src/components/` — `ui/` design-system primitives, `features/` per-domain modules, `layout/`, `forms/`, `providers/`, `admin/`.
-
-### PWA / offline
-
-- `public/sw.js` — versioned cache name (bump `forkintheroad-vNN` to invalidate); network-first for HTML, cache for static assets, APIs never cached (503 JSON offline fallback).
-- `src/lib/offline-storage.ts` — IndexedDB (`YouHungryOfflineDB`) with stores for restaurants/collections/decisions/votes plus an `offlineActions` queue for replaying mutations on reconnect. Offline support is **partially built** — check what exists before extending.
+- `src/app/` — `/` (fork lane home), `/new`, `/f/[code]` (fork room; `/beta/*` 308-redirects here for pre-cutover links), `/places(/l/[id])`, `/crew(/[id])`, `/gallery` (living design system), `/admin` (owner-only spend + errors), `/sign-in`, `/sign-up`.
+- `src/components/v2/ui/` — the primitive set (Button/ButtonLink, Input, Card, Dialog/Sheet on native `<dialog>`, Tabs, Skeleton, EmptyState, Reveal). Identity: `src/app/v2.css` tokens + `promptFiles/v2/IDENTITY.md` ("Tonight's board": green-tinted paper, ONE rationed gold accent at decision moments, mode-invariant dark board, Archivo + Spline Sans Mono, decisive-snap motion). **Labels on gold never follow the theme** (`--gold-ink`). Read `DESIGN-UI-UX-SKILLS.md` before any design/UI work.
+- No photos rendered anywhere (legacy photo URLs embed the API key; identity is text-forward). `public/sw.js` is a deliberate self-destruct worker until the Phase 8 PWA pass.
 
 ### Testing
 
-- Jest: `src/__tests__/`, `src/lib/__tests__/`, `src/hooks/__tests__/`; mocks for mongodb/clerk/bson in `src/__mocks__/`; jsdom env.
-- Playwright: `e2e/` with `@smoke`/`@critical` grep tags; projects split fast/slow/mobile/auth (`playwright.config.ts`); `playwright.config.no-auth.ts` for public routes; fixtures in `e2e/fixtures/`. The `webServer` builds and runs a **production** server (`next dev`'s Next 16 overlay breaks dialog tests) — but reuses an existing server on :3000 locally, so kill any dev server first for a CI-faithful run.
+- Jest: `src/lib/v2/__tests__/`, `src/components/v2/**/__tests__/`; mongodb/bson/clerk mocks in `src/__mocks__/` (argless mock ObjectIds stringify identically — mint unique hex ids like the existing suites). Coverage thresholds are ratchet-only floors.
+- Playwright: `e2e/` — journeys at root URLs against a **production** server build (dev overlay breaks dialog tests; a dev server on :3000 is reused locally, kill it for CI-faithful runs). `auth.setup.ts` signs in the seeded squad (`scripts/v2/test-squad.ts`, `+clerk_test` emails, OTP 424242). Axe scans emulate reduced motion so mid-transition themes never fail contrast.

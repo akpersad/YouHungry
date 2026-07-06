@@ -256,7 +256,7 @@ export function QuickSpin() {
               {!isSignedIn && (
                 <p className="text-sm text-ink-muted">
                   <Link
-                    href="/beta/sign-up"
+                    href="/sign-up"
                     className="rounded font-semibold text-brass underline-offset-4 outline-none hover:underline focus-visible:ring-2 focus-visible:ring-focus"
                   >
                     Create an account
@@ -272,7 +272,7 @@ export function QuickSpin() {
           title="No spots near you yet"
           body="The place cache is still filling in around here. Start a fork and add spots yourself."
           action={
-            <ButtonLink href="/beta/new" variant="quiet">
+            <ButtonLink href="/new" variant="quiet">
               Start a fork
             </ButtonLink>
           }

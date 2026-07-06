@@ -29,6 +29,8 @@ export const V2_COLLECTIONS = {
   guests: 'guests',
   /** Shared with v1 in prod until cutover; v2 only touches the lean fields. */
   users: 'users',
+  /** Unexpected-500 capture for the minimal admin page (30-day TTL). */
+  errorLogs: 'error_logs',
 } as const;
 
 // ---------------------------------------------------------------------------
@@ -246,6 +248,11 @@ const V2_INDEXES: Record<string, IndexDescription[]> = {
   // users owns a clerkId unique index in v1 already; in a fresh dev database
   // v2 must create it itself.
   [V2_COLLECTIONS.users]: [{ key: { clerkId: 1 }, unique: true }],
+  [V2_COLLECTIONS.errorLogs]: [
+    // Self-cleaning: the admin page reads recent errors only. (v1-era docs
+    // without `at` are untouched; they go with the post-cutover archive.)
+    { key: { at: 1 }, expireAfterSeconds: 60 * 60 * 24 * 30 },
+  ],
 };
 
 /** Idempotent — createIndexes is a no-op for indexes that already exist. */

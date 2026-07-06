@@ -2,9 +2,7 @@ import { defineConfig, devices } from '@playwright/test';
 import dotenv from 'dotenv';
 import path from 'path';
 
-// Determine which browsers to run based on environment
 const isCI = !!process.env.CI;
-const runAllBrowsers = process.env.RUN_ALL_BROWSERS === 'true';
 
 // Load environment variables from .env.local (local development only)
 // In CI, environment variables are already set by GitHub Actions
@@ -13,22 +11,18 @@ if (!isCI) {
 }
 
 /**
- * Playwright E2E Testing Configuration - SMART PARALLELIZATION
- *
- * Local/PR: Chromium + Mobile Chrome only (fast feedback)
- * Main/Nightly: All 5 browsers (comprehensive coverage)
+ * Playwright E2E configuration — rebuilt around the v2 journeys at the
+ * Phase 7 cutover. Chromium desktop drives every journey; Mobile Chrome
+ * re-runs the @smoke cuts (the app is a phone-first surface). Additional
+ * engines are a Phase 8 decision, not a silent claim.
  */
-
 export default defineConfig({
   testDir: './e2e',
   forbidOnly: isCI,
-  // 1 local retry: auth-dependent specs flake under 4-worker load because
+  // 1 local retry: auth-dependent specs flake under parallel load because
   // the Clerk DEV instance (strict usage limits) intermittently fails to
   // resolve the session — passes deterministically in isolation/on retry.
   retries: isCI ? 2 : 1,
-
-  // Use multiple workers - let projects override if needed
-  // Maximize workers for fast tests (slow tests override to 1 per project)
   workers: 4,
 
   reporter: isCI
@@ -48,167 +42,34 @@ export default defineConfig({
   },
 
   projects: [
-    // 1. Setup - runs once, sequentially (pinned to the v1 setup file so it
-    // doesn't pick up e2e/v2 setups — v1 lanes are frozen from Phase 1 on)
+    // Signs in the seeded test squad (scripts/v2/test-squad.ts) and saves
+    // storage states. Sequential inside the file — Clerk dev-instance
+    // rate limits.
     {
       name: 'setup',
       testMatch: /e2e\/auth\.setup\.ts/,
     },
-
-    // v2 (greenfield /beta tree): its own setup + project, authed as the
-    // seeded test-squad organizer (scripts/v2/test-squad.ts).
     {
-      name: 'v2-setup',
-      testMatch: /e2e\/v2\/.*\.setup\.ts/,
-    },
-    {
-      name: 'v2-beta',
-      testMatch: ['**/v2/**/*.spec.ts'],
+      name: 'chromium',
+      testMatch: ['**/*.spec.ts'],
       use: {
         ...devices['Desktop Chrome'],
-        storageState: 'playwright/.auth/v2-organizer.json',
+        storageState: 'playwright/.auth/organizer.json',
       },
-      dependencies: ['v2-setup'],
+      dependencies: ['setup'],
       fullyParallel: true,
     },
-
-    // 2. Auth tests - sequential (Clerk state management)
     {
-      name: 'auth-tests',
-      testMatch: /.*authentication\.spec\.ts/,
-      use: {
-        ...devices['Desktop Chrome'],
-      },
-      fullyParallel: false,
-    },
-
-    // 3. CHROMIUM FAST TESTS - Parallel execution safe
-    {
-      name: 'chromium-fast',
-      testMatch: [
-        '**/accessibility.spec.ts',
-        '**/registration-enhanced.spec.ts',
-        '**/restaurant-search.spec.ts',
-      ],
-      use: {
-        ...devices['Desktop Chrome'],
-        storageState: 'playwright/.auth/user.json',
-      },
-      dependencies: ['setup'],
-      fullyParallel: true, // Safe to run in parallel
-    },
-
-    // 4. CHROMIUM SLOW TESTS - Sequential due to test pollution and performance measurement
-    {
-      name: 'chromium-slow',
-      testMatch: [
-        '**/friend-management.spec.ts',
-        '**/group-collaboration.spec.ts',
-        '**/group-decision-*.spec.ts',
-        '**/performance/**/*.spec.ts', // Performance tests need sequential execution
-      ],
-      use: {
-        ...devices['Desktop Chrome'],
-        storageState: 'playwright/.auth/user.json',
-      },
-      dependencies: ['setup'],
-      fullyParallel: false, // Sequential to avoid test pollution and accurate timing
-    },
-
-    // 5. MOBILE CHROME - Always run (local + CI)
-    {
-      name: 'mobile-chrome-fast',
-      testMatch: [
-        '**/registration-enhanced.spec.ts',
-        // Note: Accessibility already tested in chromium-fast
-      ],
+      name: 'mobile-chrome',
+      testMatch: ['**/*.spec.ts'],
+      grep: /@smoke/,
       use: {
         ...devices['Pixel 7'],
-        storageState: 'playwright/.auth/user.json',
+        storageState: 'playwright/.auth/organizer.json',
       },
       dependencies: ['setup'],
       fullyParallel: true,
     },
-
-    // 6-9. ADDITIONAL BROWSERS - Only in comprehensive mode (main branch/nightly)
-    ...(runAllBrowsers
-      ? [
-          // Mobile Safari
-          {
-            name: 'mobile-safari-fast',
-            testMatch: [
-              '**/accessibility.spec.ts',
-              '**/registration-enhanced.spec.ts',
-            ],
-            use: {
-              ...devices['iPhone 14 Pro'],
-              storageState: 'playwright/.auth/user.json',
-            },
-            dependencies: ['setup'],
-            fullyParallel: true,
-          },
-          // Firefox
-          {
-            name: 'firefox-fast',
-            testMatch: [
-              '**/accessibility.spec.ts',
-              '**/registration-enhanced.spec.ts',
-              '**/restaurant-search.spec.ts',
-            ],
-            use: {
-              ...devices['Desktop Firefox'],
-              storageState: 'playwright/.auth/user.json',
-            },
-            dependencies: ['setup'],
-            fullyParallel: true,
-          },
-          {
-            name: 'firefox-slow',
-            testMatch: [
-              '**/friend-management.spec.ts',
-              '**/group-collaboration.spec.ts',
-              '**/group-decision-*.spec.ts',
-              '**/performance/**/*.spec.ts',
-            ],
-            use: {
-              ...devices['Desktop Firefox'],
-              storageState: 'playwright/.auth/user.json',
-            },
-            dependencies: ['setup'],
-            fullyParallel: false,
-          },
-          // Webkit (Safari)
-          {
-            name: 'webkit-fast',
-            testMatch: [
-              '**/accessibility.spec.ts',
-              '**/registration-enhanced.spec.ts',
-              '**/restaurant-search.spec.ts',
-            ],
-            use: {
-              ...devices['Desktop Safari'],
-              storageState: 'playwright/.auth/user.json',
-            },
-            dependencies: ['setup'],
-            fullyParallel: true,
-          },
-          {
-            name: 'webkit-slow',
-            testMatch: [
-              '**/friend-management.spec.ts',
-              '**/group-collaboration.spec.ts',
-              '**/group-decision-*.spec.ts',
-              '**/performance/**/*.spec.ts',
-            ],
-            use: {
-              ...devices['Desktop Safari'],
-              storageState: 'playwright/.auth/user.json',
-            },
-            dependencies: ['setup'],
-            fullyParallel: false,
-          },
-        ]
-      : []),
   ],
 
   webServer: {

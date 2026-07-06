@@ -93,7 +93,7 @@ export function SignInForm() {
       <p className="text-sm text-ink-secondary">
         New here?{' '}
         <Link
-          href={`/beta/sign-up?next=${encodeURIComponent(nextPath)}`}
+          href={`/sign-up?next=${encodeURIComponent(nextPath)}`}
           className="rounded font-semibold text-brass underline-offset-4 outline-none hover:underline focus-visible:ring-2 focus-visible:ring-focus"
         >
           Create an account

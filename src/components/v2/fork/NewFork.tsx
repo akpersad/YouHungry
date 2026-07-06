@@ -280,7 +280,7 @@ export function NewFork({ initialListId }: { initialListId?: string }) {
       if (!response.ok) {
         throw new Error(payload.error ?? 'create failed');
       }
-      router.push(`/beta/f/${payload.fork.code}`);
+      router.push(`/f/${payload.fork.code}`);
     } catch (err) {
       setError(
         err instanceof Error && err.message !== 'create failed'
@@ -381,7 +381,7 @@ export function NewFork({ initialListId }: { initialListId?: string }) {
                     <p className="text-sm text-ink-secondary">
                       No lists yet. Save spots in{' '}
                       <Link
-                        href="/beta/places"
+                        href="/places"
                         className="rounded font-semibold text-brass underline-offset-4 outline-none hover:underline focus-visible:ring-2 focus-visible:ring-focus"
                       >
                         Places

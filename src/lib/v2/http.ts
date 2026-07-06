@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { logger } from '@/lib/logger';
 import { V2DomainError } from './errors';
+import { recordServerError } from './error-log';
 
 /**
  * Shared plumbing for the /api/v2 routes: one error-mapping policy and the
@@ -29,8 +30,10 @@ export function v2ErrorResponse(route: string, error: unknown): NextResponse {
     );
   }
   // Everything else is an infrastructure failure: a real 500, generic body
-  // (internal messages never reach the client), full detail to the logger.
+  // (internal messages never reach the client), full detail to the logger
+  // and the error log the admin page reads.
   logger.error(`v2 ${route}: unexpected error`, { error });
+  recordServerError(route, error);
   return NextResponse.json({ error: 'Something went wrong' }, { status: 500 });
 }
 

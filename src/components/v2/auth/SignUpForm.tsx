@@ -170,7 +170,7 @@ export function SignUpForm() {
       <p className="text-sm text-ink-secondary">
         Already have one?{' '}
         <Link
-          href={`/beta/sign-in?next=${encodeURIComponent(nextPath)}`}
+          href={`/sign-in?next=${encodeURIComponent(nextPath)}`}
           className="rounded font-semibold text-brass underline-offset-4 outline-none hover:underline focus-visible:ring-2 focus-visible:ring-focus"
         >
           Sign in
