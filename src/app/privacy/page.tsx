@@ -72,7 +72,9 @@ export default function PrivacyPage() {
             If you allow push notifications we store the subscription your
             browser gives us, and we use it for one thing: telling you where the
             group is going when a fork closes. The same result may reach your
-            email. Both stop the moment you revoke permission or opt out.
+            email. Both switches live on your account page, and every result
+            email carries a one-tap unsubscribe link that works without signing
+            in.
           </p>
         </section>
 

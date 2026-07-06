@@ -13,6 +13,8 @@ const isPublicRoute = createRouteMatcher([
   '/f(.*)',
   '/places(.*)',
   '/crew(.*)',
+  '/account', // gates itself: sign-in round-trip preserving ?next=
+  '/unsubscribe', // email opt-out landing: the signed token IS the auth
   '/gallery', // the living design-system page
   '/offline', // the service worker's navigation fallback (precached)
   '/privacy',

@@ -6,5 +6,6 @@ export { Input, type InputProps } from './Input';
 export { Reveal } from './Reveal';
 export { Sheet } from './Sheet';
 export { Skeleton, SkeletonGroup } from './Skeleton';
+export { Switch, type SwitchProps } from './Switch';
 export { Tabs, type Tab } from './Tabs';
 export { cx } from './cx';
