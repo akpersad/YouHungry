@@ -1,6 +1,6 @@
 # Session Handoff — Fork In The Road portfolio upgrade
 
-**Last updated:** 2026-07-06 (post-launch gap fix: **`/account` + notification preferences + push opt-in + password reset**, branch `v2/account`, C1–C4 PUSHED to origin; C5 crew fork-started push BUILT locally awaiting push go-ahead; see CURRENT below)
+**Last updated:** 2026-07-06 (branch `v2/account`: C1–C4 account surface PUSHED; C5 crew fork-started push + C6–C11 **shared lists / home-base search anchor / discovery browse** (owner rework asks, same day) BUILT locally awaiting push go-ahead; see CURRENT below)
 **Read this first, then:** `promptFiles/v2/CHARTER.md` + `promptFiles/v2/WORKPLAN.md` (the authoritative plan for all v2 work — supersedes `phased-execution-plan.md` phases 4–8), `promptFiles/v2/IDENTITY.md` (the committed v2 design direction), `promptFiles/v2/BACKLOG.md` (post-launch triage + remaining owner items), `CLAUDE.md` (repo guide).
 
 ## CURRENT: post-launch gap fix — the account surface (branch `v2/account`, built 2026-07-06)
@@ -81,6 +81,51 @@ Commit ledger:
    never-emails, gone-crew/solo-crew quiet, never-throws); the three
    fork suites' notifications mocks grew the new export.
 
+6. `C6` `1f89c64` **Search anchor + biased search (server).** Owner bug
+   report: "when I type McDonalds it shows me McDs from around the
+   country" — text search sent no location bias. `V2UserDoc.searchAnchor`
+   ({label, GeoJSON point}, geocoded ONCE at save via new
+   `geocodeAddress` — Find Place From Text, the Places family the prod
+   key is known-enabled for, deliberately NOT routed through the place
+   cache so a home address can't become a restaurant). `searchPlaces`
+   takes a bias (explicit lat/lng > saved anchor > none); biased text
+   markers carry an ~11km grid cell (`text:q@40.7:-74.0`) so two cities
+   never share a cached answer. PlaceSummary grew `mapsUrl` (free Maps
+   URLs scheme, `query_place_id` pinned for real ids, never fixtures).
+   `google_places_find_place` added to the cost tracker ($17/1k).
+7. `C7` `d7f73f4` **/account home-base form.** Set/clear the anchor;
+   honest states (gate-closed message in dev, could-not-find guidance,
+   Google's normalized label echoed back).
+8. `C8` `3581ee4` **Shared lists (server).** Owner ask: "groups need
+   shared lists" (his A/B/C + her D/E in one rotation; decision chosen:
+   invite links now, crew-attached lists later). `collaboratorIds` on
+   ListDoc (absent = none, no migration); 7-day `listinv:` HMAC invite
+   tokens (owner-only mint, stateless, revocation = expiry); join is one
+   atomic $addToSet with the 20-collaborator cap guard in the filter,
+   idempotent for re-joins and the owner's own link. Save/remove/read/
+   fork-from-list are member-gated; rename/delete/invite owner-only.
+   Routes: POST lists/[id]/invite, POST lists/join (10/min/user each).
+   Sparse index on collaboratorIds.
+9. `C9` `304510f` **Shared lists (UI).** "Share this list" on list detail
+   (clipboard copy, visible-URL fallback); `/places/join` landing (peeks
+   list name + sharer through the token, honest dead-end for bad links,
+   sign-in round-trip preserves the token; explicit Join tap, never
+   auto-join); collaborator detail view drops owner controls and names
+   the sharer; /places gains "Shared with you"; every place row links
+   out to Google Maps ("See on Google" — menus/photos/hours).
+10. `C10` `71e1ea8` **Discovery browse.** /places browses what's around
+    the saved home base (one tap) or live location (geolocate, honest
+    denied state pointing at /account), filtered by the existing vibe
+    knobs + two radii (1.5km/5km), rendered through the same
+    save-to-list rows. Chips follow QuickSpin's ink idiom (never gold).
+11. `C11` **e2e + docs** (this commit). `e2e/shared-lists.spec.ts`: the
+    couple journey (build list → invite off the wire → member1 joins in
+    a second context → collaborator works the list with no owner
+    controls → owner sees it → cleanup), bad-invite dead-end, @smoke
+    discovery browse (fixture cluster + cheap-eats filter + Google
+    link-out), gate-closed home-base honesty. CLAUDE.md + this ledger +
+    BACKLOG refreshed.
+
 **Deliberate scope decisions (documented, not silent):**
 
 - **No e2e rename of squad users** — crew-suggestion copy derives from
@@ -91,6 +136,17 @@ Commit ledger:
   link), so there is nobody to push to; the link stays the invite.
   No new preference switch — the existing push channel switch governs
   both kinds, and the copy says so.
+- **Photos deferred by owner call ("Later")**: discovery ships with
+  rating/price/cuisine + the Maps link-out; the photo proxy (server
+  route streaming Place Photos, key server-side, CDN-cached, behind the
+  billing gate) is a BACKLOG item. Menus: Google's API has no menu
+  data; owner chose the free Maps link-out over a Yelp integration.
+- **Crew-attached lists are the follow-up half of the owner's "Both"
+  answer** (BACKLOG): invite-link collaborators shipped first because
+  they work before any crew exists.
+- **Address lookup needs production** (or ALLOW_GOOGLE_PLACES=true):
+  the billing gate stays default-closed, so the /account home-base form
+  says so honestly in dev instead of pretending.
 - **Account deletion stays manual** (privacy-page path) per the existing
   owner-level decision; /account links to it honestly.
 
