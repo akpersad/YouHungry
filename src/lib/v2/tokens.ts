@@ -191,6 +191,65 @@ export function verifyUnsubscribeToken(
 }
 
 // ---------------------------------------------------------------------------
+// List invite tokens
+// ---------------------------------------------------------------------------
+
+interface ListInviteTokenPayload {
+  /** lists._id hex string the invite grants collaboration on. */
+  l: string;
+  /** Unix ms expiry. */
+  exp: number;
+}
+
+/**
+ * A shared-list invite is a capability URL, same DNA as a fork link: the
+ * owner mints it, and holding it (signed in) is the authorization. A week
+ * covers "sent in the group chat, opened on the weekend" while keeping a
+ * leaked old link short-lived. Domain-separated from every other token by
+ * the `listinv:` HMAC prefix.
+ */
+export const LIST_INVITE_TOKEN_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+
+export function signListInviteToken(
+  listId: string,
+  now: Date = new Date(),
+  secret?: string
+): string {
+  const payload: ListInviteTokenPayload = {
+    l: listId,
+    exp: now.getTime() + LIST_INVITE_TOKEN_TTL_MS,
+  };
+  const encoded = Buffer.from(JSON.stringify(payload)).toString('base64url');
+  return `${encoded}${SEPARATOR}${hmac(`listinv:${encoded}`, getSecret(secret))}`;
+}
+
+/** Returns the list id hex the token was signed for, or null. */
+export function verifyListInviteToken(
+  token: string,
+  now: Date = new Date(),
+  secret?: string
+): string | null {
+  const idx = token.lastIndexOf(SEPARATOR);
+  if (idx <= 0) return null;
+  const encoded = token.slice(0, idx);
+  const sig = token.slice(idx + 1);
+  if (!safeEqual(sig, hmac(`listinv:${encoded}`, getSecret(secret)))) {
+    return null;
+  }
+
+  let payload: ListInviteTokenPayload;
+  try {
+    payload = JSON.parse(Buffer.from(encoded, 'base64url').toString('utf8'));
+  } catch {
+    return null;
+  }
+  if (typeof payload.l !== 'string' || !/^[0-9a-f]{24}$/i.test(payload.l)) {
+    return null;
+  }
+  return now.getTime() < payload.exp ? payload.l : null;
+}
+
+// ---------------------------------------------------------------------------
 // Fork share codes
 // ---------------------------------------------------------------------------
 

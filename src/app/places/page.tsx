@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { auth } from '@clerk/nextjs/server';
 import { getV2User } from '@/lib/v2/auth';
-import { getListsForOwner } from '@/lib/v2/lists';
+import { getListsForUser } from '@/lib/v2/lists';
 import { PlacesLane } from '@/components/v2/places/PlacesLane';
 
 export const metadata: Metadata = { title: 'Places · Fork In The Road' };
@@ -23,13 +23,17 @@ export default async function PlacesPage() {
     redirect(`/sign-in?next=${encodeURIComponent('/places')}`);
   }
 
-  const lists = await getListsForOwner(user._id);
+  const lists = await getListsForUser(user._id);
   return (
     <PlacesLane
       initialLists={lists.map((list) => ({
         id: list._id.toString(),
         name: list.name,
         placeCount: list.placeIds.length,
+        role:
+          list.ownerId.toString() === user._id.toString()
+            ? ('owner' as const)
+            : ('collaborator' as const),
       }))}
     />
   );

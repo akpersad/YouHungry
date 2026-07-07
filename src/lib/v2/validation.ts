@@ -146,6 +146,7 @@ export const listName = z
 export const createListSchema = z.object({ name: listName });
 export const renameListSchema = z.object({ name: listName });
 export const savePlaceSchema = z.object({ placeId: objectIdString });
+export const joinListSchema = z.object({ token: z.string().min(1).max(512) });
 
 /** Crew names share list-name hygiene. */
 export const createCrewSchema = z.object({

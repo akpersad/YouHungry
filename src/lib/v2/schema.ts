@@ -282,7 +282,12 @@ const V2_INDEXES: Record<string, IndexDescription[]> = {
     // Self-cleaning: markers older than 30 days are dead weight either way.
     { key: { fetchedAt: 1 }, expireAfterSeconds: 60 * 60 * 24 * 30 },
   ],
-  [V2_COLLECTIONS.lists]: [{ key: { ownerId: 1, updatedAt: -1 } }],
+  [V2_COLLECTIONS.lists]: [
+    { key: { ownerId: 1, updatedAt: -1 } },
+    // Shared lists: the collaborator half of the member filter (sparse —
+    // most lists are never shared).
+    { key: { collaboratorIds: 1 }, sparse: true },
+  ],
   [V2_COLLECTIONS.crews]: [{ key: { memberIds: 1 } }],
   [V2_COLLECTIONS.guests]: [
     { key: { guestId: 1 }, unique: true },

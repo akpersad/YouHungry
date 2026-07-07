@@ -1,7 +1,9 @@
 import { ObjectId } from 'mongodb';
+import type { Filter } from 'mongodb';
 import { getV2Db } from './db';
 import { V2DomainError, notFound } from './errors';
 import { getPlacesByIds } from './places';
+import { signListInviteToken, verifyListInviteToken } from './tokens';
 import type { ListDoc, PlaceDoc } from './schema';
 
 /**
@@ -10,13 +12,31 @@ import type { ListDoc, PlaceDoc } from './schema';
  * one. Saving is one concept: a place is saved BY being on a list — there
  * is no separate global "saved" flag to keep in sync.
  *
- * Every mutation is ownership-guarded in the query itself ({_id, ownerId}),
- * so a foreign list id behaves exactly like a missing one (404, no
- * existence leak). Caps are abuse bounds, not product limits.
+ * Shared lists (owner ask 2026-07-06): the owner mints a signed invite
+ * link; whoever opens it signed-in becomes a collaborator. Collaborators
+ * save/remove places and fork the list — the everyday work; rename,
+ * delete, and inviting stay the owner's. Access is guarded in the query
+ * itself (owner-or-collaborator, or owner-only), so a foreign list id
+ * behaves exactly like a missing one (404, no existence leak). Caps are
+ * abuse bounds, not product limits.
  */
 
 export const MAX_LISTS_PER_OWNER = 100;
 export const MAX_PLACES_PER_LIST = 200;
+export const MAX_COLLABORATORS_PER_LIST = 20;
+
+/** Owner or collaborator — the read/save/fork access level. */
+function memberFilter(userId: ObjectId): Filter<ListDoc> {
+  return { $or: [{ ownerId: userId }, { collaboratorIds: userId }] };
+}
+
+export function isListMember(list: ListDoc, userId: ObjectId): boolean {
+  const uid = userId.toString();
+  return (
+    list.ownerId.toString() === uid ||
+    (list.collaboratorIds ?? []).some((id) => id.toString() === uid)
+  );
+}
 
 export async function createList(
   ownerId: ObjectId,
@@ -71,9 +91,10 @@ export async function deleteList(
  * success, not an error (the tap meant "make sure it's on the list").
  * The place must exist in the cache; the cap guard and the insert are one
  * atomic filter+update so racing saves can't blow past the bound.
+ * Collaborator work: any member saves.
  */
 export async function savePlaceToList(
-  ownerId: ObjectId,
+  userId: ObjectId,
   listId: ObjectId,
   placeId: ObjectId
 ): Promise<ListDoc> {
@@ -84,10 +105,14 @@ export async function savePlaceToList(
   const result = await lists.findOneAndUpdate(
     {
       _id: listId,
-      ownerId,
-      $or: [
-        { placeIds: placeId }, // already saved → touch nothing but updatedAt
-        { [`placeIds.${MAX_PLACES_PER_LIST - 1}`]: { $exists: false } },
+      ...memberFilter(userId),
+      $and: [
+        {
+          $or: [
+            { placeIds: placeId }, // already saved → touch only updatedAt
+            { [`placeIds.${MAX_PLACES_PER_LIST - 1}`]: { $exists: false } },
+          ],
+        },
       ],
     },
     { $addToSet: { placeIds: placeId }, $set: { updatedAt: new Date() } },
@@ -96,22 +121,22 @@ export async function savePlaceToList(
   if (result) return result;
 
   // Distinguish "not yours/missing" from "full" for an honest message.
-  const exists = await lists.findOne({ _id: listId, ownerId });
+  const exists = await lists.findOne({ _id: listId, ...memberFilter(userId) });
   if (!exists) throw notFound('List');
   throw new V2DomainError(
     `That list is at ${MAX_PLACES_PER_LIST} places. Start a fresh one.`
   );
 }
 
-/** Remove a place from a list. Idempotent like saving. */
+/** Remove a place from a list. Idempotent like saving; any member. */
 export async function removePlaceFromList(
-  ownerId: ObjectId,
+  userId: ObjectId,
   listId: ObjectId,
   placeId: ObjectId
 ): Promise<ListDoc> {
   const { lists } = await getV2Db();
   const result = await lists.findOneAndUpdate(
-    { _id: listId, ownerId },
+    { _id: listId, ...memberFilter(userId) },
     { $pull: { placeIds: placeId }, $set: { updatedAt: new Date() } },
     { returnDocument: 'after' }
   );
@@ -119,9 +144,10 @@ export async function removePlaceFromList(
   return result;
 }
 
-export async function getListsForOwner(ownerId: ObjectId): Promise<ListDoc[]> {
+/** Every list this user can work with: their own plus shared-with-them. */
+export async function getListsForUser(userId: ObjectId): Promise<ListDoc[]> {
   const { lists } = await getV2Db();
-  return lists.find({ ownerId }).sort({ updatedAt: -1 }).toArray();
+  return lists.find(memberFilter(userId)).sort({ updatedAt: -1 }).toArray();
 }
 
 export interface ListWithPlaces {
@@ -130,11 +156,66 @@ export interface ListWithPlaces {
 }
 
 export async function getListWithPlaces(
-  ownerId: ObjectId,
+  userId: ObjectId,
   listId: ObjectId
 ): Promise<ListWithPlaces> {
   const { lists } = await getV2Db();
-  const list = await lists.findOne({ _id: listId, ownerId });
+  const list = await lists.findOne({ _id: listId, ...memberFilter(userId) });
   if (!list) throw notFound('List');
   return { list, places: await getPlacesByIds(list.placeIds) };
+}
+
+/**
+ * Mint an invite token for a list. Owner-only: sharing a list is the
+ * owner's call, like renaming or deleting it. The token is stateless —
+ * nothing is stored, revocation is the 7-day expiry.
+ */
+export async function createListInvite(
+  ownerId: ObjectId,
+  listId: ObjectId
+): Promise<string> {
+  const { lists } = await getV2Db();
+  const list = await lists.findOne({ _id: listId, ownerId });
+  if (!list) throw notFound('List');
+  return signListInviteToken(listId.toString());
+}
+
+/**
+ * Accept an invite link. The signed token IS the authorization (fork-link
+ * DNA: a capability URL, no user search, no pending-invite state). One
+ * atomic filter+update: the collaborator cap guard rides the query, and
+ * re-joining (or the owner opening their own link) is idempotent success.
+ */
+export async function joinListByToken(
+  userId: ObjectId,
+  token: string
+): Promise<ListDoc> {
+  const listIdHex = verifyListInviteToken(token);
+  if (!listIdHex) {
+    throw new V2DomainError('That invite link is not right or has expired.');
+  }
+  const listId = new ObjectId(listIdHex);
+  const { lists } = await getV2Db();
+
+  const existing = await lists.findOne({ _id: listId });
+  if (!existing) throw notFound('List');
+  if (isListMember(existing, userId)) return existing; // already in
+
+  const result = await lists.findOneAndUpdate(
+    {
+      _id: listId,
+      [`collaboratorIds.${MAX_COLLABORATORS_PER_LIST - 1}`]: {
+        $exists: false,
+      },
+    },
+    {
+      $addToSet: { collaboratorIds: userId },
+      $set: { updatedAt: new Date() },
+    },
+    { returnDocument: 'after' }
+  );
+  if (result) return result;
+  throw new V2DomainError(
+    `That list already has ${MAX_COLLABORATORS_PER_LIST} people. Ask the owner to start another.`
+  );
 }

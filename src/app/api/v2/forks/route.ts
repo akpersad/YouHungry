@@ -32,16 +32,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // A list source must be the caller's own list — provenance is not a
-    // place to reference somebody else's data (repo rule: mutations verify
-    // ownership, not just authentication).
+    // A list source must be a list the caller is on — owner or invited
+    // collaborator (repo rule: mutations verify membership, not just
+    // authentication). "Fork this list" is exactly what collaborators are
+    // invited to do.
     if (input.source.kind === 'list') {
       const { lists } = await getV2Db();
-      const owned = await lists.findOne({
+      const member = await lists.findOne({
         _id: new ObjectId(input.source.listId),
-        ownerId: user._id,
+        $or: [{ ownerId: user._id }, { collaboratorIds: user._id }],
       });
-      if (!owned) {
+      if (!member) {
         return NextResponse.json({ error: 'List not found' }, { status: 404 });
       }
     }
