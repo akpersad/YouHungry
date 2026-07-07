@@ -6,19 +6,28 @@ import {
 } from '../notification-suppression';
 import { getV2Db } from './db';
 import { signUnsubscribeToken } from './tokens';
-import { V2_COLLECTIONS, type ForkDoc, type V2UserDoc } from './schema';
+import {
+  V2_COLLECTIONS,
+  type CrewDoc,
+  type ForkDoc,
+  type V2UserDoc,
+} from './schema';
 
 /**
  * Account-holder conveniences, per the charter: the group chat is the
  * notification channel — the fork page everyone already has open IS the
  * result posting. Push and email exist only so an account-holder who
- * closed the tab still hears "we're going here". Two channels, one
- * trigger (fork closed with a result), no notification center.
+ * closed the tab still hears "we're going here". Two triggers, no
+ * notification center: the result (push + email, any fork with 2+
+ * participants) and — per the owner's 2026-07-06 charter amendment — a
+ * push-only heads-up to crew members when a crew fork starts. Crews are
+ * the one case where the audience is known at creation and the
+ * relationship is already in-app; every other fork's invite is the link.
  *
- * Everything here is fire-and-forget from the close path: a notification
- * failure must never fail, slow, or double a close. Sends honor the
- * Phase 1 suppression seam (push inside push-service, email here), so
- * dev/CI/tests never reach a real provider.
+ * Everything here is fire-and-forget from the create/close paths: a
+ * notification failure must never fail, slow, or double a write. Sends
+ * honor the Phase 1 suppression seam (push inside push-service, email
+ * here), so dev/CI/tests never reach a real provider.
  */
 
 /** The user fields this module reads off the users doc (see schema.ts). */
@@ -97,21 +106,21 @@ async function sendResultEmail(
   await trackAPIUsage('resend_email_sent', false);
 }
 
-async function sendResultPush(
+interface PushPayload {
+  title: string;
+  body: string;
+  tag: string;
+  data: { url: string };
+}
+
+async function sendPush(
   user: NotifiableUserDoc,
-  winnerName: string,
-  code: string
+  payload: PushPayload
 ): Promise<void> {
   const subscriptions = user.pushSubscriptions ?? [];
   if (subscriptions.length === 0) return;
   // push-service honors the suppression seam at the provider call site.
   const { pushService } = await import('../push-service');
-  const payload = {
-    title: "We're going here.",
-    body: `${winnerName}. Tap for the tally.`,
-    tag: `fork-${code}`,
-    data: { url: forkUrl(code) },
-  };
   for (const subscription of subscriptions) {
     const outcome = await pushService.sendNotification(subscription, payload);
     if (outcome === 'expired') {
@@ -156,12 +165,18 @@ export async function notifyForkClosed(fork: ForkDoc): Promise<void> {
       .toArray();
 
     const winnerName = winnerNameOf(fork);
+    const resultPush: PushPayload = {
+      title: "We're going here.",
+      body: `${winnerName}. Tap for the tally.`,
+      tag: `fork-${fork.code}`,
+      data: { url: forkUrl(fork.code) },
+    };
     const results = await Promise.allSettled(
       users.flatMap((user) => {
         const settings = user.preferences?.notificationSettings;
         const sends: Promise<void>[] = [];
         if (settings?.pushEnabled !== false) {
-          sends.push(sendResultPush(user, winnerName, fork.code));
+          sends.push(sendPush(user, resultPush));
         }
         if (settings?.emailEnabled !== false && user.email) {
           sends.push(
@@ -182,5 +197,70 @@ export async function notifyForkClosed(fork: ForkDoc): Promise<void> {
   } catch (error) {
     // Never let a notification take a close down with it.
     logger.error('v2 notifyForkClosed failed', { code: fork.code, error });
+  }
+}
+
+/**
+ * Tell the crew a fork just opened (owner charter amendment 2026-07-06).
+ * Push only — "come vote" email would be noise — and crew forks only,
+ * because a crew is the one audience known at creation time; everyone
+ * else is invited by the link itself. Called fire-and-forget by
+ * createFork. The organizer started it, so they stay quiet. The tag
+ * matches the result push, so one fork occupies one notification slot:
+ * "Where are we going?" is replaced in the tray by "We're going here."
+ */
+export async function notifyForkStarted(fork: ForkDoc): Promise<void> {
+  try {
+    if (!fork.crewId || fork.status !== 'open') return;
+    const { db } = await getV2Db();
+    const crew = await db
+      .collection<CrewDoc>(V2_COLLECTIONS.crews)
+      .findOne({ _id: fork.crewId });
+    if (!crew) return;
+
+    const organizerId = fork.organizer.userId?.toString();
+    const audience = crew.memberIds.filter(
+      (id) => id.toString() !== organizerId
+    );
+    if (audience.length === 0) return;
+
+    const users = await db
+      .collection<NotifiableUserDoc>(V2_COLLECTIONS.users)
+      .find({ _id: { $in: audience } })
+      .project<NotifiableUserDoc>({
+        pushSubscriptions: 1,
+        'preferences.notificationSettings.pushEnabled': 1,
+      })
+      .toArray();
+
+    const starter = fork.organizer.displayName || 'Someone';
+    const payload: PushPayload = {
+      title: 'Where are we going?',
+      body:
+        fork.mode === 'vote'
+          ? `${starter} started a fork for ${crew.name}. Tap to vote.`
+          : `${starter} started a spin for ${crew.name}. Tap to watch.`,
+      tag: `fork-${fork.code}`,
+      data: { url: forkUrl(fork.code) },
+    };
+    const results = await Promise.allSettled(
+      users
+        .filter(
+          (user) =>
+            user.preferences?.notificationSettings?.pushEnabled !== false
+        )
+        .map((user) => sendPush(user, payload))
+    );
+    const failed = results.filter((r) => r.status === 'rejected');
+    if (failed.length > 0) {
+      logger.warn('v2 fork-started notifications partially failed', {
+        code: fork.code,
+        failed: failed.length,
+        of: results.length,
+      });
+    }
+  } catch (error) {
+    // Never let a notification take a fork creation down with it.
+    logger.error('v2 notifyForkStarted failed', { code: fork.code, error });
   }
 }

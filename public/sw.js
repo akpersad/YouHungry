@@ -89,10 +89,11 @@ async function pageNetworkFirst(request) {
   }
 }
 
-// Web push: the server sends exactly one notification kind — the fork
-// result ("We're going here.", lib/v2/notifications.ts). The payload is
-// JSON {title, body, tag, data.url}; the tag collapses duplicate sends for
-// the same fork into one notification.
+// Web push: the server sends two notification kinds — the fork result
+// ("We're going here.") and the crew fork-started heads-up ("Where are we
+// going?"), both from lib/v2/notifications.ts. The payload is JSON
+// {title, body, tag, data.url}; both kinds share the fork's tag, so one
+// fork holds one tray slot and the result replaces the invite.
 self.addEventListener('push', (event) => {
   if (!event.data) return;
   let payload;

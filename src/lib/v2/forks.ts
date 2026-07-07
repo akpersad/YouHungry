@@ -2,7 +2,7 @@ import { ObjectId } from 'mongodb';
 import { getV2Db } from './db';
 import { V2DomainError, notFound } from './errors';
 import { getClaimedGuestIds } from './guests';
-import { notifyForkClosed } from './notifications';
+import { notifyForkClosed, notifyForkStarted } from './notifications';
 import { mintForkCode } from './tokens';
 import {
   resolveConsensus,
@@ -113,7 +113,7 @@ async function insertForkDoc(doc: Omit<ForkDoc, '_id'>): Promise<ForkDoc> {
 
 export async function createFork(input: CreateForkInput): Promise<ForkDoc> {
   const now = new Date();
-  return insertForkDoc({
+  const fork = await insertForkDoc({
     code: mintForkCode(),
     organizer: input.organizer,
     crewId: input.crewId,
@@ -131,6 +131,10 @@ export async function createFork(input: CreateForkInput): Promise<ForkDoc> {
     createdAt: now,
     updatedAt: now,
   });
+  // Crew members hear about it right away (fire-and-forget, push only);
+  // everyone else is invited by the link the organizer shares.
+  if (fork.crewId) void notifyForkStarted(fork);
+  return fork;
 }
 
 export async function getForkByCode(code: string): Promise<ForkDoc | null> {

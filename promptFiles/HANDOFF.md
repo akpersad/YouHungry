@@ -1,6 +1,6 @@
 # Session Handoff — Fork In The Road portfolio upgrade
 
-**Last updated:** 2026-07-06 (post-launch gap fix: **`/account` + notification preferences + push opt-in + password reset**, branch `v2/account`, BUILT — awaiting owner review; see CURRENT below)
+**Last updated:** 2026-07-06 (post-launch gap fix: **`/account` + notification preferences + push opt-in + password reset**, branch `v2/account`, C1–C4 PUSHED to origin; C5 crew fork-started push BUILT locally awaiting push go-ahead; see CURRENT below)
 **Read this first, then:** `promptFiles/v2/CHARTER.md` + `promptFiles/v2/WORKPLAN.md` (the authoritative plan for all v2 work — supersedes `phased-execution-plan.md` phases 4–8), `promptFiles/v2/IDENTITY.md` (the committed v2 design direction), `promptFiles/v2/BACKLOG.md` (post-launch triage + remaining owner items), `CLAUDE.md` (repo guide).
 
 ## CURRENT: post-launch gap fix — the account surface (branch `v2/account`, built 2026-07-06)
@@ -53,23 +53,44 @@ Commit ledger:
    card — email → code + new password on one card, reset signs you in,
    other sessions revoked. Privacy page now names the account switches +
    the one-tap unsubscribe.
-4. `C4` **e2e + docs** (this commit). `e2e/account.spec.ts` (8 tests:
+4. `C4` **e2e + docs**. `e2e/account.spec.ts` (8 tests:
    @smoke profile render + honest save gating, switch persistence across
    reload with restore, both-mode axe scans, signed-out gate round-trip,
    reset-path entry, bad-unsubscribe-link honesty); the Clerk-429
    `gotoResilient` helper promoted to shared `e2e/clerk-resilience.ts`
    and adopted by gallery + launch-surfaces + account specs (the account
    spec's 8 extra parallel loads raised dev-instance 429 pressure).
-   CLAUDE.md + this ledger refreshed.
+   CLAUDE.md + this ledger refreshed. **C1–C4 pushed 2026-07-06 on the
+   owner's go-ahead** (PR creation/merge is the owner's).
+5. `C5` **Crew fork-started push** (owner product call 2026-07-06:
+   "push notifications should absolutely happen when a fork is
+   started" — CHARTER.md amended in place). `notifyForkStarted` in
+   notifications.ts: push-only (email never carries a start notice), to
+   crew members minus the organizer, `pushEnabled` honored, same
+   fire-and-forget/suppression contract as the close path; fired from
+   `createFork` whenever `crewId` is set — today that means "Run it
+   back", plus any future crew-attached creation for free. Crew forks
+   are the only forks with a known audience at creation; every other
+   fork's invite stays the link, per the amended charter. Both push
+   kinds share the `fork-<code>` tag, so the result replaces the invite
+   in the tray. Copy updated everywhere it claimed one notification:
+   /account switches ("Push" switch now names both kinds; e2e-pinned
+   "Email results" label kept), privacy page, sw.js comment. Result-push
+   sender refactored to a payload-generic `sendPush`. 5 new unit tests
+   (audience minus organizer, opt-out honored, spin-mode copy +
+   never-emails, gone-crew/solo-crew quiet, never-throws); the three
+   fork suites' notifications mocks grew the new export.
 
 **Deliberate scope decisions (documented, not silent):**
 
 - **No e2e rename of squad users** — crew-suggestion copy derives from
   seeded first names and specs run in parallel workers; the rename path
   is pinned by unit tests instead.
-- **Fork-started push to crew members NOT built** — it contradicts the
-  charter's "the group chat is the notification channel" thesis; raised
-  with the owner as a product question, awaiting a call.
+- **Fork-started push is crew-only** (C5): non-crew forks have no known
+  audience at creation (participants materialize by voting via the
+  link), so there is nobody to push to; the link stays the invite.
+  No new preference switch — the existing push channel switch governs
+  both kinds, and the copy says so.
 - **Account deletion stays manual** (privacy-page path) per the existing
   owner-level decision; /account links to it honestly.
 
@@ -84,17 +105,16 @@ reseeding. Google never billed; sends suppressed.
 
 **Owner actions for this gate:**
 
-1. Review the branch; go-ahead to push, then owner merges the PR.
+1. C1–C4 are pushed; give the go-ahead to push C5, then create + merge
+   the PR (gh CLI on this machine is still authed as the wrong account).
 2. **Verify the Vercel env still has `NEXT_PUBLIC_VAPID_PUBLIC_KEY`,
    `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`** (v1-era vars — do NOT delete
    them in the env cleanup; push now genuinely uses them). Set
    `NEXT_PUBLIC_APP_URL=https://fork-in-the-road.vercel.app` in prod if
    unset (unsubscribe links derive from it; the code falls back to the
    right URL either way).
-3. Product call, whenever convenient: should crew members get a push
-   when a fork STARTS (not just closes)? Charter says the group chat
-   carries the invite; adding it would be a deliberate charter
-   amendment.
+3. ~~Product call: fork-started push?~~ ANSWERED 2026-07-06 — owner
+   said yes; built as C5, charter amended.
 
 ## Previous: post-launch. The WORKPLAN is complete.
 

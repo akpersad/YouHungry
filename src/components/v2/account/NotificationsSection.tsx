@@ -14,9 +14,10 @@ import {
 /**
  * The notifications half of the account page. Two layers, honestly
  * separated: the channel switches (server-side, apply everywhere) and this
- * device's push registration (browser-side, one per device). Only one
- * notification exists in the product, so the copy names it instead of
- * pretending there is a matrix of options.
+ * device's push registration (browser-side, one per device). Only two
+ * notifications exist in the product (the result, and the crew-fork
+ * start heads-up), so the copy names them instead of pretending there
+ * is a matrix of options.
  */
 
 /** What this browser can do about push, resolved after mount. */
@@ -193,9 +194,10 @@ export function NotificationsSection({
       <div className="flex flex-col gap-1">
         <h2 className="text-xl font-semibold text-ink">Notifications</h2>
         <p className="max-w-lg text-sm text-ink-secondary">
-          There is exactly one: the result. When a fork you are part of closes,
-          we say where the group is going. The fork page always has it either
-          way.
+          There are exactly two. When a fork you are part of closes, we say
+          where the group is going. And when someone in one of your crews starts
+          a fork, this is your heads-up to vote. The fork page always has both
+          either way.
         </p>
       </div>
 
@@ -207,15 +209,15 @@ export function NotificationsSection({
 
       <div className="flex flex-col gap-4 rounded-2xl border border-line bg-surface p-4">
         <Switch
-          label="Push results"
-          description="Sent to every device you turn on below."
+          label="Push"
+          description="Results, plus a heads-up when a crew fork starts. Sent to every device you turn on below."
           checked={settings.pushEnabled}
           busy={savingFlag === 'pushEnabled'}
           onChange={() => saveFlag('pushEnabled')}
         />
         <Switch
           label="Email results"
-          description="One email per closed fork, nothing else."
+          description="One email per closed fork, nothing else. Crew starts never email."
           checked={settings.emailEnabled}
           busy={savingFlag === 'emailEnabled'}
           onChange={() => saveFlag('emailEnabled')}
@@ -236,8 +238,8 @@ export function NotificationsSection({
             {device === 'blocked' &&
               'Notifications are blocked for this site in your browser settings. Allow them there, then come back.'}
             {device === 'off' &&
-              'Turn it on and this device gets the result push.'}
-            {device === 'on' && 'This device gets the result push.'}
+              'Turn it on and this device gets push notifications.'}
+            {device === 'on' && 'This device gets push notifications.'}
           </p>
         </div>
         {device === 'off' && (

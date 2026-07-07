@@ -1,5 +1,5 @@
 import { ObjectId } from 'mongodb';
-import { notifyForkClosed } from '../notifications';
+import { notifyForkClosed, notifyForkStarted } from '../notifications';
 import type { ForkDoc } from '../schema';
 
 jest.mock('../db', () => ({
@@ -195,5 +195,118 @@ describe('notifyForkClosed', () => {
   it('never throws, even when everything is broken', async () => {
     (getV2Db as jest.Mock).mockRejectedValue(new Error('atlas down'));
     await expect(notifyForkClosed(closedFork())).resolves.toBeUndefined();
+  });
+});
+
+const CREW = new ObjectId('c'.repeat(24));
+const THIRD = new ObjectId('d'.repeat(24));
+
+function openCrewFork(overrides: Partial<ForkDoc> = {}): ForkDoc {
+  return closedFork({
+    status: 'open',
+    result: undefined,
+    crewId: CREW,
+    votes: [],
+    participantUserIds: [ORGANIZER],
+    ...overrides,
+  });
+}
+
+/** db.collection routes by name: crews get findOne, users get the cursor. */
+function mockCrewAndUsers(
+  crew: { _id: ObjectId; name: string; memberIds: ObjectId[] } | null,
+  rows: UserRow[]
+) {
+  const users = {
+    find: jest.fn().mockReturnValue({
+      project: jest.fn().mockReturnThis(),
+      toArray: jest.fn().mockResolvedValue(rows),
+    }),
+    updateOne: jest.fn().mockResolvedValue({}),
+  };
+  const crews = { findOne: jest.fn().mockResolvedValue(crew) };
+  (getV2Db as jest.Mock).mockResolvedValue({
+    db: {
+      collection: jest
+        .fn()
+        .mockImplementation((name: string) =>
+          name === 'crews' ? crews : users
+        ),
+    },
+  });
+  return { users, crews };
+}
+
+describe('notifyForkStarted', () => {
+  it('stays quiet for forks without a crew', async () => {
+    mockCrewAndUsers(null, []);
+    await notifyForkStarted(openCrewFork({ crewId: undefined }));
+    expect(getV2Db).not.toHaveBeenCalled();
+  });
+
+  it('pushes to crew members except the organizer, honoring opt-outs', async () => {
+    const { users } = mockCrewAndUsers(
+      { _id: CREW, name: 'Date Night', memberIds: [ORGANIZER, MEMBER, THIRD] },
+      [
+        { _id: MEMBER, pushSubscriptions: [SUB] },
+        {
+          _id: THIRD,
+          pushSubscriptions: [SUB],
+          preferences: { notificationSettings: { pushEnabled: false } },
+        },
+      ]
+    );
+
+    await notifyForkStarted(openCrewFork());
+
+    // The audience query excludes the organizer up front.
+    const filter = users.find.mock.calls[0][0];
+    expect(filter._id.$in.map(String)).toEqual([
+      MEMBER.toString(),
+      THIRD.toString(),
+    ]);
+    // THIRD opted out of push; only MEMBER gets the send.
+    expect(pushService.sendNotification).toHaveBeenCalledTimes(1);
+    const [, payload] = (pushService.sendNotification as jest.Mock).mock
+      .calls[0];
+    expect(payload.title).toBe('Where are we going?');
+    expect(payload.body).toBe(
+      'Olivia started a fork for Date Night. Tap to vote.'
+    );
+    // Same tag as the result push: the result replaces the invite in-tray.
+    expect(payload.tag).toBe('fork-testfork22');
+    expect(payload.data.url).toContain('/f/testfork22');
+  });
+
+  it('speaks spin for spin forks and never emails anyone', async () => {
+    (isExternalSendAllowed as jest.Mock).mockReturnValue(true);
+    mockCrewAndUsers(
+      { _id: CREW, name: 'Date Night', memberIds: [ORGANIZER, MEMBER] },
+      [{ _id: MEMBER, email: 'marco@example.com', pushSubscriptions: [SUB] }]
+    );
+
+    await notifyForkStarted(openCrewFork({ mode: 'spin' }));
+
+    const [, payload] = (pushService.sendNotification as jest.Mock).mock
+      .calls[0];
+    expect(payload.body).toBe(
+      'Olivia started a spin for Date Night. Tap to watch.'
+    );
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
+
+  it('stays quiet when the crew is gone or the organizer is its only member', async () => {
+    mockCrewAndUsers(null, []);
+    await notifyForkStarted(openCrewFork());
+    expect(pushService.sendNotification).not.toHaveBeenCalled();
+
+    mockCrewAndUsers({ _id: CREW, name: 'Solo', memberIds: [ORGANIZER] }, []);
+    await notifyForkStarted(openCrewFork());
+    expect(pushService.sendNotification).not.toHaveBeenCalled();
+  });
+
+  it('never throws, even when everything is broken', async () => {
+    (getV2Db as jest.Mock).mockRejectedValue(new Error('atlas down'));
+    await expect(notifyForkStarted(openCrewFork())).resolves.toBeUndefined();
   });
 });

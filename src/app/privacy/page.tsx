@@ -70,11 +70,12 @@ export default function PrivacyPage() {
           <h2 className="text-xl font-semibold text-ink">Notifications</h2>
           <p className="text-ink-secondary">
             If you allow push notifications we store the subscription your
-            browser gives us, and we use it for one thing: telling you where the
-            group is going when a fork closes. The same result may reach your
-            email. Both switches live on your account page, and every result
-            email carries a one-tap unsubscribe link that works without signing
-            in.
+            browser gives us, and we use it for two things: telling you where
+            the group is going when a fork closes, and a heads-up when someone
+            in one of your crews starts a fork. The result may also reach your
+            email; crew starts never email. Both switches live on your account
+            page, and every result email carries a one-tap unsubscribe link that
+            works without signing in.
           </p>
         </section>
 
