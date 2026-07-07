@@ -43,23 +43,37 @@ test.describe('account page', () => {
   });
 
   test('notification switches persist across a reload', async ({ page }) => {
-    await gotoResilient(page, '/account');
     const email = page.getByRole('switch', { name: 'Email results' });
+    // The switch flips optimistically before the PATCH resolves, so a
+    // reload straight after the click races the server write. Gate every
+    // flip on the preferences response landing (and being a real save).
+    const flip = async () => {
+      const saved = page.waitForResponse(
+        (response) =>
+          response.url().includes('/api/v2/account/preferences') &&
+          response.request().method() === 'PATCH'
+      );
+      await email.click();
+      expect((await saved).ok()).toBe(true);
+    };
+
+    await gotoResilient(page, '/account');
+    // A failed earlier attempt can leave the seeded organizer switched
+    // off; normalize instead of asserting the state a retry inherits.
+    if ((await email.getAttribute('aria-checked')) === 'false') {
+      await flip();
+    }
     await expect(email).toHaveAttribute('aria-checked', 'true');
 
-    await email.click();
+    await flip();
     await expect(email).toHaveAttribute('aria-checked', 'false');
 
     await page.reload();
-    await expect(
-      page.getByRole('switch', { name: 'Email results' })
-    ).toHaveAttribute('aria-checked', 'false');
+    await expect(email).toHaveAttribute('aria-checked', 'false');
 
     // Restore: the seeded organizer keeps notifications on for other specs.
-    await page.getByRole('switch', { name: 'Email results' }).click();
-    await expect(
-      page.getByRole('switch', { name: 'Email results' })
-    ).toHaveAttribute('aria-checked', 'true');
+    await flip();
+    await expect(email).toHaveAttribute('aria-checked', 'true');
   });
 
   for (const mode of ['light', 'dark'] as const) {
