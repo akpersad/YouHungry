@@ -24,6 +24,13 @@ export default async function PlacesPage() {
   }
 
   const lists = await getListsForUser(user._id);
+  const anchor = user.searchAnchor
+    ? {
+        label: user.searchAnchor.label,
+        lat: user.searchAnchor.location.coordinates[1],
+        lng: user.searchAnchor.location.coordinates[0],
+      }
+    : null;
   return (
     <PlacesLane
       initialLists={lists.map((list) => ({
@@ -35,6 +42,7 @@ export default async function PlacesPage() {
             ? ('owner' as const)
             : ('collaborator' as const),
       }))}
+      anchor={anchor}
     />
   );
 }
