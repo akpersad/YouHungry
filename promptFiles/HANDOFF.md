@@ -1,6 +1,6 @@
 # Session Handoff — Fork In The Road portfolio upgrade
 
-**Last updated:** 2026-07-06 (branch `v2/account`: C1–C4 account surface PUSHED; C5 crew fork-started push + C6–C11 **shared lists / home-base search anchor / discovery browse** (owner rework asks, same day) BUILT locally awaiting push go-ahead; see CURRENT below)
+**Last updated:** 2026-07-07 (branch `v2/account`: C1–C12 PUSHED on owner go-ahead 2026-07-07; C13 coverage-gate fix COMMITTED locally awaiting push go-ahead; see CURRENT below)
 **Read this first, then:** `promptFiles/v2/CHARTER.md` + `promptFiles/v2/WORKPLAN.md` (the authoritative plan for all v2 work — supersedes `phased-execution-plan.md` phases 4–8), `promptFiles/v2/IDENTITY.md` (the committed v2 design direction), `promptFiles/v2/BACKLOG.md` (post-launch triage + remaining owner items), `CLAUDE.md` (repo guide).
 
 ## CURRENT: post-launch gap fix — the account surface (branch `v2/account`, built 2026-07-06)
@@ -141,6 +141,20 @@ Commit ledger:
     (aria-expanded/activedescendant, arrow keys + Enter + Escape,
     mousedown-preventDefault so blur doesn't eat the click).
     `google_places_autocomplete` in the cost tracker ($2.83/1k).
+13. `C13` **Coverage-gate fix.** CI's `test:coverage` failed after the
+    C1–C12 push: the branch added ~5k lines of largely untested UI,
+    diluting global coverage below the ratchet floors (44.25S vs 49).
+    Fix = test the new surface, not lower the bar: 51 new tests across
+    six suites in `src/components/v2/account/__tests__/` (push.ts
+    helpers; HomeBaseSection combobox incl. debounce, keyboard nav,
+    picked-vs-free-typed save bodies, clear, silent type-ahead failure;
+    NotificationsSection device-state machine, enable/disable with
+    server-reject rollback, self-heal, optimistic switch rollback;
+    EmailSection code flow incl. expired-pending restart; Password;
+    AccountLane name save). jest.setup.js gained
+    NEXT_PUBLIC_VAPID_PUBLIC_KEY (read at module load, so it must exist
+    before import). Measured coverage rose to 52.7S/55.9B/54.4F/53.3L;
+    floors ratcheted to 51/55/53/52 per the ratchet-only policy.
 
 **Deliberate scope decisions (documented, not silent):**
 
