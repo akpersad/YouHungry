@@ -118,13 +118,29 @@ Commit ledger:
     denied state pointing at /account), filtered by the existing vibe
     knobs + two radii (1.5km/5km), rendered through the same
     save-to-list rows. Chips follow QuickSpin's ink idiom (never gold).
-11. `C11` **e2e + docs** (this commit). `e2e/shared-lists.spec.ts`: the
+11. `C11` `39ffb3f` **e2e + docs.** `e2e/shared-lists.spec.ts`: the
     couple journey (build list → invite off the wire → member1 joins in
     a second context → collaborator works the list with no owner
     controls → owner sees it → cleanup), bad-invite dead-end, @smoke
     discovery browse (fixture cluster + cheap-eats filter + Google
     link-out), gate-closed home-base honesty. CLAUDE.md + this ledger +
     BACKLOG refreshed.
+12. `C12` **Home-base address type-ahead** (owner ask: restore v1's
+    "123 Ma → real 123 Main Streets" so people save geocodable
+    addresses). Server-proxied legacy Places Autocomplete
+    (`types=geocode` so city-level anchors keep working; key never
+    reaches the client) behind the billing gate — dev/CI answer [] and
+    the form degrades to plain typing with the honest save-time
+    message. Google's session-token flow: the client mints a UUID per
+    typing burst, every suggestion request carries it, and a picked
+    suggestion saves by `placeId` through a details call that closes
+    the session (keystrokes bill as one session, not per request);
+    free-typed text keeps the Find Place path. New authed
+    GET /api/v2/places/address-autocomplete (40/min/user on top of the
+    350ms debounce); `HomeBaseSection` is now a real combobox
+    (aria-expanded/activedescendant, arrow keys + Enter + Escape,
+    mousedown-preventDefault so blur doesn't eat the click).
+    `google_places_autocomplete` in the cost tracker ($2.83/1k).
 
 **Deliberate scope decisions (documented, not silent):**
 

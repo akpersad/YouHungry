@@ -191,6 +191,15 @@ export const updateAccountSchema = z.object({
     .max(200, 'Keep the address under 200 characters')
     .nullable()
     .optional(),
+  /** Set when the address came from a type-ahead pick (resolves by id). */
+  placeId: z.string().min(1).max(256).optional(),
+  /** Autocomplete billing-session token, minted client-side per burst. */
+  sessionToken: z.string().min(8).max(64).optional(),
+});
+
+export const addressSuggestQuerySchema = z.object({
+  q: z.string().trim().min(3).max(200),
+  session: z.string().min(8).max(64).optional(),
 });
 
 /** Clerk enforces its own password rules; the bounds here are sanity only. */

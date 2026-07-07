@@ -57,6 +57,8 @@ interface GooglePlacesResponse {
   result?: GooglePlaceResult;
   /** Find Place From Text answers under this key. */
   candidates?: GooglePlaceResult[];
+  /** Autocomplete answers under this key. */
+  predictions?: Array<{ description?: string; place_id?: string }>;
 }
 
 /** Google types that say nothing about what kind of food a place serves. */
@@ -104,7 +106,8 @@ async function callGoogle(
     | 'google_places_nearby_search'
     | 'google_places_text_search'
     | 'google_places_details'
-    | 'google_places_find_place',
+    | 'google_places_find_place'
+    | 'google_places_autocomplete',
   fetchImpl: FetchLike
 ): Promise<GooglePlacesResponse | null> {
   try {
@@ -197,13 +200,92 @@ export async function fetchTextSearchFromGoogle(
   return body ? (body.results ?? []) : null;
 }
 
+/** One address suggestion for the home-base type-ahead. */
+export interface AddressSuggestion {
+  label: string;
+  placeId: string;
+}
+
+/**
+ * Address type-ahead (the v1 behavior, restored by owner ask 2026-07-06):
+ * "123 Ma" offers real "123 Main Street"s. `types=geocode` so city-level
+ * anchors work too (the form's help copy promises "a city and state is
+ * enough"). The session token groups a burst of keystrokes with the
+ * details call that resolves the pick, so Google bills the session, not
+ * every keystroke. Gate-closed (dev/CI) returns [] — the input degrades
+ * to plain typing.
+ */
+export async function fetchAddressSuggestions(
+  input: string,
+  sessionToken?: string,
+  fetchImpl: FetchLike = fetch
+): Promise<AddressSuggestion[]> {
+  const key = process.env.GOOGLE_PLACES_API_KEY;
+  if (!key || !isGooglePlacesEnabled()) return [];
+  const params = new URLSearchParams({
+    input,
+    types: 'geocode',
+    key,
+  });
+  if (sessionToken) params.set('sessiontoken', sessionToken);
+  const body = await callGoogle(
+    `${BASE}/autocomplete/json?${params}`,
+    'google_places_autocomplete',
+    fetchImpl
+  );
+  return (body?.predictions ?? [])
+    .filter(
+      (prediction): prediction is { description: string; place_id: string } =>
+        typeof prediction.description === 'string' &&
+        typeof prediction.place_id === 'string'
+    )
+    .map((prediction) => ({
+      label: prediction.description,
+      placeId: prediction.place_id,
+    }));
+}
+
+/**
+ * Resolve a picked autocomplete suggestion to its point + label via Place
+ * Details (address fields only). Passing the same session token that fed
+ * the suggestions closes the billing session. NOT the cached-restaurant
+ * details fetch — an address must never enter the place pool.
+ */
+export async function geocodePlaceId(
+  placeId: string,
+  sessionToken?: string,
+  fetchImpl: FetchLike = fetch
+): Promise<{ label: string; lat: number; lng: number } | null> {
+  const key = process.env.GOOGLE_PLACES_API_KEY;
+  if (!key || !isGooglePlacesEnabled()) return null;
+  const params = new URLSearchParams({
+    place_id: placeId,
+    fields: 'formatted_address,geometry',
+    key,
+  });
+  if (sessionToken) params.set('sessiontoken', sessionToken);
+  const body = await callGoogle(
+    `${BASE}/details/json?${params}`,
+    'google_places_details',
+    fetchImpl
+  );
+  const lat = body?.result?.geometry?.location?.lat;
+  const lng = body?.result?.geometry?.location?.lng;
+  const label = body?.result?.formatted_address;
+  if (typeof lat !== 'number' || typeof lng !== 'number' || !label) {
+    return null;
+  }
+  return { label, lat, lng };
+}
+
 /**
  * Geocode an address the user typed into a point + normalized label, via
  * Find Place From Text — the Places family the prod key is already enabled
  * for (the standalone Geocoding API may not be). Deliberately NOT routed
  * through the place cache: a home address must never become a restaurant
  * in the pool. Returns null when the gate is closed, the call fails, or
- * Google can't resolve the text.
+ * Google can't resolve the text. (The free-typed fallback: a picked
+ * suggestion goes through geocodePlaceId instead.)
  */
 export async function geocodeAddress(
   address: string,

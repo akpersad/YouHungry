@@ -204,11 +204,14 @@ export async function changePassword(
  * Save (or clear, with null) the address restaurant searches anchor to.
  * Geocoded once here — searches then use the stored point for free. The
  * raw typed string is discarded on success; only Google's normalized label
- * and the point are kept.
+ * and the point are kept. A type-ahead pick resolves by place id (closing
+ * its autocomplete billing session); free-typed text keeps the Find Place
+ * path.
  */
 export async function setSearchAnchor(
   user: V2UserDoc,
-  address: string | null
+  address: string | null,
+  pick?: { placeId: string; sessionToken?: string }
 ): Promise<AccountView> {
   const { users } = await getV2Db();
 
@@ -221,7 +224,7 @@ export async function setSearchAnchor(
     return toAccountView(cleared ?? { ...user, searchAnchor: undefined });
   }
 
-  const { geocodeAddress, isGooglePlacesEnabled } =
+  const { geocodeAddress, geocodePlaceId, isGooglePlacesEnabled } =
     await import('./google-places');
   if (!isGooglePlacesEnabled()) {
     // Dev/CI honesty: the billing gate is closed, so lookups cannot work.
@@ -229,7 +232,9 @@ export async function setSearchAnchor(
       'Address lookup is turned off in this environment.'
     );
   }
-  const geocoded = await geocodeAddress(address);
+  const geocoded = pick
+    ? await geocodePlaceId(pick.placeId, pick.sessionToken)
+    : await geocodeAddress(address);
   if (!geocoded) {
     throw new V2DomainError(
       'Could not find that address. Add a city and state and try again.'

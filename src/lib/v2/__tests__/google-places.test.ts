@@ -1,8 +1,10 @@
 import {
+  fetchAddressSuggestions,
   fetchNearbyFromGoogle,
   fetchPlaceDetailsFromGoogle,
   fetchTextSearchFromGoogle,
   geocodeAddress,
+  geocodePlaceId,
   isGooglePlacesEnabled,
   toPlaceFields,
   type FetchLike,
@@ -228,6 +230,103 @@ describe('geocodeAddress', () => {
         fetchReturning({
           status: 'OK',
           candidates: [{ formatted_address: 'x', geometry: {} }],
+        })
+      )
+    ).toBeNull();
+  });
+});
+
+describe('fetchAddressSuggestions', () => {
+  const PREDICTIONS = {
+    status: 'OK',
+    predictions: [
+      { description: '123 Main St, Astoria, NY, USA', place_id: 'addr-1' },
+      { description: '123 Main St, Flushing, NY, USA', place_id: 'addr-2' },
+      { description: 'skeleton row with no id' },
+    ],
+  };
+
+  it('proxies the type-ahead with the session token and maps predictions', async () => {
+    const fetchImpl = fetchReturning(PREDICTIONS);
+
+    const suggestions = await fetchAddressSuggestions(
+      '123 ma',
+      'session-abc-123',
+      fetchImpl
+    );
+
+    expect(suggestions).toEqual([
+      { label: '123 Main St, Astoria, NY, USA', placeId: 'addr-1' },
+      { label: '123 Main St, Flushing, NY, USA', placeId: 'addr-2' },
+    ]);
+    const url = (fetchImpl as jest.Mock).mock.calls[0][0] as string;
+    expect(url).toContain('/autocomplete/json?');
+    expect(url).toContain('types=geocode');
+    expect(url).toContain('sessiontoken=session-abc-123');
+    expect(trackAPIUsage).toHaveBeenCalledWith(
+      'google_places_autocomplete',
+      false
+    );
+  });
+
+  it('returns [] when the gate is closed, without fetching', async () => {
+    setEnv({ GOOGLE_PLACES_API_KEY: 'test-key' }); // key but no override
+    const fetchImpl = fetchReturning(PREDICTIONS);
+    expect(
+      await fetchAddressSuggestions('123 ma', undefined, fetchImpl)
+    ).toEqual([]);
+    expect(fetchImpl).not.toHaveBeenCalled();
+  });
+
+  it('returns [] on failure — the type-ahead is an assist, not a blocker', async () => {
+    expect(
+      await fetchAddressSuggestions(
+        '123 ma',
+        undefined,
+        fetchReturning({}, false, 500)
+      )
+    ).toEqual([]);
+  });
+});
+
+describe('geocodePlaceId', () => {
+  it('resolves a picked suggestion via details with the session token', async () => {
+    const fetchImpl = fetchReturning({
+      status: 'OK',
+      result: {
+        formatted_address: '123 Main St, Astoria, NY 11103, USA',
+        geometry: { location: { lat: 40.761, lng: -73.925 } },
+      },
+    });
+
+    const result = await geocodePlaceId('addr-1', 'session-abc-123', fetchImpl);
+
+    expect(result).toEqual({
+      label: '123 Main St, Astoria, NY 11103, USA',
+      lat: 40.761,
+      lng: -73.925,
+    });
+    const url = (fetchImpl as jest.Mock).mock.calls[0][0] as string;
+    expect(url).toContain('/details/json?');
+    expect(url).toContain('place_id=addr-1');
+    expect(url).toContain('fields=formatted_address%2Cgeometry');
+    expect(url).toContain('sessiontoken=session-abc-123');
+  });
+
+  it('returns null when the gate is closed or the result is incomplete', async () => {
+    setEnv({ GOOGLE_PLACES_API_KEY: 'test-key' });
+    expect(
+      await geocodePlaceId('addr-1', undefined, fetchReturning({}))
+    ).toBeNull();
+
+    setEnv({ GOOGLE_PLACES_API_KEY: 'test-key', ALLOW_GOOGLE_PLACES: 'true' });
+    expect(
+      await geocodePlaceId(
+        'addr-1',
+        undefined,
+        fetchReturning({
+          status: 'OK',
+          result: { formatted_address: 'x', geometry: {} },
         })
       )
     ).toBeNull();

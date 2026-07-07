@@ -31,10 +31,15 @@ jest.mock('@/lib/logger', () => ({
 jest.mock('../google-places', () => ({
   isGooglePlacesEnabled: jest.fn().mockReturnValue(true),
   geocodeAddress: jest.fn(),
+  geocodePlaceId: jest.fn(),
 }));
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const { isGooglePlacesEnabled, geocodeAddress } = require('../google-places');
+const {
+  isGooglePlacesEnabled,
+  geocodeAddress,
+  geocodePlaceId,
+} = require('../google-places');
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { clerkClient, currentUser } = require('@clerk/nextjs/server');
@@ -322,6 +327,27 @@ describe('setSearchAnchor', () => {
     expect(update.$unset).toEqual({ searchAnchor: '' });
     expect(geocodeAddress).not.toHaveBeenCalled();
     expect(view.searchAnchorLabel).toBeNull();
+  });
+
+  it('a type-ahead pick resolves by place id and closes its session', async () => {
+    (geocodePlaceId as jest.Mock).mockResolvedValue({
+      label: '123 Main St, Astoria, NY 11103, USA',
+      lat: 40.761,
+      lng: -73.925,
+    });
+    const users = mockUsers();
+
+    await setSearchAnchor(userDoc(), '123 Main St, Astoria, NY, USA', {
+      placeId: 'addr-1',
+      sessionToken: 'session-abc-123',
+    });
+
+    expect(geocodePlaceId).toHaveBeenCalledWith('addr-1', 'session-abc-123');
+    expect(geocodeAddress).not.toHaveBeenCalled();
+    const [, update] = users.findOneAndUpdate.mock.calls[0];
+    expect(update.$set.searchAnchor.location.coordinates).toEqual([
+      -73.925, 40.761,
+    ]);
   });
 
   it('is honest when the billing gate is closed (dev/CI)', async () => {

@@ -41,7 +41,13 @@ export async function PATCH(request: NextRequest) {
     const account = input.firstName
       ? await setFirstName(user, input.firstName)
       : input.address !== undefined
-        ? await setSearchAnchor(user, input.address)
+        ? await setSearchAnchor(
+            user,
+            input.address,
+            input.placeId
+              ? { placeId: input.placeId, sessionToken: input.sessionToken }
+              : undefined
+          )
         : await syncAccountFromClerk(user);
     return NextResponse.json({ account });
   } catch (error) {
