@@ -181,6 +181,25 @@ export async function createListInvite(
 }
 
 /**
+ * Resolve an invite token to what the landing page shows BEFORE joining:
+ * the list's name and who shared it. Holding the link is what authorizes
+ * this much (capability-URL semantics, like a fork link); joining still
+ * requires signing in. Null for forged/expired tokens and deleted lists.
+ */
+export async function peekListInvite(
+  token: string
+): Promise<{ list: ListDoc; ownerFirstName: string } | null> {
+  const listIdHex = verifyListInviteToken(token);
+  if (!listIdHex) return null;
+  const { lists, users } = await getV2Db();
+  const list = await lists.findOne({ _id: new ObjectId(listIdHex) });
+  if (!list) return null;
+  const owner = await users.findOne({ _id: list.ownerId });
+  const ownerFirstName = owner?.name.split(' ')[0] || 'Someone';
+  return { list, ownerFirstName };
+}
+
+/**
  * Accept an invite link. The signed token IS the authorization (fork-link
  * DNA: a capability URL, no user search, no pending-invite state). One
  * atomic filter+update: the collaborator cap guard rides the query, and

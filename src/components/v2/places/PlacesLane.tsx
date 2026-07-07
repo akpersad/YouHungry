@@ -23,6 +23,20 @@ import { SaveToListDialog, type ListSummary } from './SaveToListDialog';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
+function ListRow({ list }: { list: ListSummary }) {
+  return (
+    <Link
+      href={`/places/l/${list.id}`}
+      className="flex items-center justify-between gap-3 rounded-xl border border-line bg-surface px-4 py-3 outline-none transition-colors hover:bg-sunken focus-visible:ring-2 focus-visible:ring-focus motion-safe:duration-100"
+    >
+      <span className="truncate font-semibold text-ink">{list.name}</span>
+      <span className="tnum shrink-0 text-sm text-ink-muted">
+        {list.placeCount === 1 ? '1 place' : `${list.placeCount} places`}
+      </span>
+    </Link>
+  );
+}
+
 export function PlacesLane({ initialLists }: { initialLists: ListSummary[] }) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<PlaceSummary[] | null>(null);
@@ -205,31 +219,36 @@ export function PlacesLane({ initialLists }: { initialLists: ListSummary[] }) {
       >
         <h2 className="text-xl font-semibold text-ink">Your lists</h2>
 
-        {lists.length === 0 ? (
+        {lists.filter((list) => list.role === 'owner').length === 0 ? (
           <EmptyState
             title="No lists yet"
             body="Save a place and start one. A list makes the next fork faster."
           />
         ) : (
           <ul className="flex flex-col gap-2">
-            {lists.map((list) => (
-              <li key={list.id}>
-                <Link
-                  href={`/places/l/${list.id}`}
-                  className="flex items-center justify-between gap-3 rounded-xl border border-line bg-surface px-4 py-3 outline-none transition-colors hover:bg-sunken focus-visible:ring-2 focus-visible:ring-focus motion-safe:duration-100"
-                >
-                  <span className="truncate font-semibold text-ink">
-                    {list.name}
-                  </span>
-                  <span className="tnum shrink-0 text-sm text-ink-muted">
-                    {list.placeCount === 1
-                      ? '1 place'
-                      : `${list.placeCount} places`}
-                  </span>
-                </Link>
-              </li>
-            ))}
+            {lists
+              .filter((list) => list.role === 'owner')
+              .map((list) => (
+                <li key={list.id}>
+                  <ListRow list={list} />
+                </li>
+              ))}
           </ul>
+        )}
+
+        {lists.some((list) => list.role === 'collaborator') && (
+          <>
+            <h3 className="pt-2 font-semibold text-ink">Shared with you</h3>
+            <ul className="flex flex-col gap-2">
+              {lists
+                .filter((list) => list.role === 'collaborator')
+                .map((list) => (
+                  <li key={list.id}>
+                    <ListRow list={list} />
+                  </li>
+                ))}
+            </ul>
+          </>
         )}
 
         <form
