@@ -2,6 +2,7 @@ import {
   fetchNearbyFromGoogle,
   fetchPlaceDetailsFromGoogle,
   fetchTextSearchFromGoogle,
+  geocodeAddress,
   isGooglePlacesEnabled,
   toPlaceFields,
   type FetchLike,
@@ -143,21 +144,28 @@ describe('search fetchers', () => {
     expect(
       await fetchTextSearchFromGoogle(
         'sushi',
+        undefined,
         fetchReturning({ status: 'ZERO_RESULTS' })
       )
     ).toEqual([]);
     expect(
       await fetchTextSearchFromGoogle(
         'sushi',
+        undefined,
         fetchReturning({ status: 'OVER_QUERY_LIMIT' })
       )
     ).toBeNull();
     expect(
-      await fetchTextSearchFromGoogle('sushi', fetchReturning({}, false, 500))
+      await fetchTextSearchFromGoogle(
+        'sushi',
+        undefined,
+        fetchReturning({}, false, 500)
+      )
     ).toBeNull();
     expect(
       await fetchTextSearchFromGoogle(
         'sushi',
+        undefined,
         jest.fn().mockRejectedValue(new Error('network down'))
       )
     ).toBeNull();
@@ -171,6 +179,58 @@ describe('search fetchers', () => {
     ).toBeNull();
     expect(fetchImpl).not.toHaveBeenCalled();
     expect(trackAPIUsage).not.toHaveBeenCalled();
+  });
+});
+
+describe('geocodeAddress', () => {
+  const CANDIDATE = {
+    formatted_address: '123 Main St, Astoria, NY 11103, USA',
+    geometry: { location: { lat: 40.761, lng: -73.925 } },
+  };
+
+  it('resolves a typed address to a label and point via Find Place', async () => {
+    const fetchImpl = fetchReturning({ status: 'OK', candidates: [CANDIDATE] });
+
+    const result = await geocodeAddress('123 main st astoria', fetchImpl);
+
+    expect(result).toEqual({
+      label: '123 Main St, Astoria, NY 11103, USA',
+      lat: 40.761,
+      lng: -73.925,
+    });
+    const url = (fetchImpl as jest.Mock).mock.calls[0][0] as string;
+    expect(url).toContain('/findplacefromtext/json?');
+    expect(url).toContain('inputtype=textquery');
+    expect(trackAPIUsage).toHaveBeenCalledWith(
+      'google_places_find_place',
+      false
+    );
+  });
+
+  it('returns null when the gate is closed, without fetching', async () => {
+    setEnv({ GOOGLE_PLACES_API_KEY: 'test-key' }); // key but no override
+    const fetchImpl = fetchReturning({ status: 'OK', candidates: [CANDIDATE] });
+
+    expect(await geocodeAddress('123 main st', fetchImpl)).toBeNull();
+    expect(fetchImpl).not.toHaveBeenCalled();
+  });
+
+  it('returns null when Google has no candidate or no coordinates', async () => {
+    expect(
+      await geocodeAddress(
+        'nowhere',
+        fetchReturning({ status: 'ZERO_RESULTS', candidates: [] })
+      )
+    ).toBeNull();
+    expect(
+      await geocodeAddress(
+        'nowhere',
+        fetchReturning({
+          status: 'OK',
+          candidates: [{ formatted_address: 'x', geometry: {} }],
+        })
+      )
+    ).toBeNull();
   });
 });
 

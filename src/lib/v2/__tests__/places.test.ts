@@ -154,6 +154,38 @@ describe('searchPlaces', () => {
     expect(await searchPlaces('   ')).toEqual([]);
     expect(places.find).not.toHaveBeenCalled();
   });
+
+  it('a bias reshapes the marker key so cities never share cached answers', async () => {
+    (googleClient.isGooglePlacesEnabled as jest.Mock).mockReturnValue(true);
+    (googleClient.fetchTextSearchFromGoogle as jest.Mock).mockResolvedValue([]);
+    const { placeQueries } = mockDb();
+
+    await searchPlaces('mcdonalds', 8, { lat: 40.7128, lng: -74.006 });
+
+    expect(placeQueries.findOne).toHaveBeenCalledWith({
+      key: 'text:mcdonalds@40.7:-74.0',
+    });
+    expect(googleClient.fetchTextSearchFromGoogle).toHaveBeenCalledWith(
+      'mcdonalds',
+      { lat: 40.7128, lng: -74.006, radiusM: 40_000 }
+    );
+  });
+
+  it('an unbiased search keeps the original marker key and no bias', async () => {
+    (googleClient.isGooglePlacesEnabled as jest.Mock).mockReturnValue(true);
+    (googleClient.fetchTextSearchFromGoogle as jest.Mock).mockResolvedValue([]);
+    const { placeQueries } = mockDb();
+
+    await searchPlaces('mcdonalds');
+
+    expect(placeQueries.findOne).toHaveBeenCalledWith({
+      key: 'text:mcdonalds',
+    });
+    expect(googleClient.fetchTextSearchFromGoogle).toHaveBeenCalledWith(
+      'mcdonalds',
+      undefined
+    );
+  });
 });
 
 describe('getPlacesByIds', () => {
@@ -194,10 +226,23 @@ describe('toPlaceSummary', () => {
       name: 'Sushi Yama',
       address: 'Fixture Ave',
       categories: ['test'],
+      mapsUrl: expect.stringContaining('google.com/maps/search/'),
     });
     expect(
       toPlaceSummary({ ...doc, priceLevel: 2, rating: 4.4 })
     ).toMatchObject({ priceLevel: 2, rating: 4.4 });
+  });
+
+  it('pins real listings by place id but never fixture ids', () => {
+    const fixture = toPlaceSummary(place('Sushi Yama'));
+    expect(fixture.mapsUrl).toContain('query=Sushi+Yama+Fixture+Ave');
+    expect(fixture.mapsUrl).not.toContain('query_place_id');
+
+    const real = toPlaceSummary({
+      ...place('Kanoyama'),
+      googlePlaceId: 'gp-real-1',
+    });
+    expect(real.mapsUrl).toContain('query_place_id=gp-real-1');
   });
 });
 

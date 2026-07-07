@@ -6,6 +6,7 @@ import {
   removePushSubscription,
   setFirstName,
   setNotificationSettings,
+  setSearchAnchor,
   syncAccountFromClerk,
   toAccountView,
   unsubscribeEmailByToken,
@@ -26,6 +27,14 @@ jest.mock('../db', () => ({
 jest.mock('@/lib/logger', () => ({
   logger: { warn: jest.fn(), error: jest.fn() },
 }));
+
+jest.mock('../google-places', () => ({
+  isGooglePlacesEnabled: jest.fn().mockReturnValue(true),
+  geocodeAddress: jest.fn(),
+}));
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const { isGooglePlacesEnabled, geocodeAddress } = require('../google-places');
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { clerkClient, currentUser } = require('@clerk/nextjs/server');
@@ -269,6 +278,67 @@ describe('changePassword', () => {
     await expect(changePassword(userDoc(), input)).rejects.toThrow(
       'Password found in a data breach.'
     );
+  });
+});
+
+describe('setSearchAnchor', () => {
+  beforeEach(() => {
+    (isGooglePlacesEnabled as jest.Mock).mockReturnValue(true);
+  });
+
+  it('geocodes once and stores label + GeoJSON point', async () => {
+    (geocodeAddress as jest.Mock).mockResolvedValue({
+      label: '123 Main St, Astoria, NY 11103, USA',
+      lat: 40.761,
+      lng: -73.925,
+    });
+    const users = mockUsers();
+
+    await setSearchAnchor(userDoc(), '123 main st astoria');
+
+    expect(geocodeAddress).toHaveBeenCalledWith('123 main st astoria');
+    const [filter, update] = users.findOneAndUpdate.mock.calls[0];
+    expect(filter).toEqual({ _id: USER_ID });
+    expect(update.$set.searchAnchor).toEqual({
+      label: '123 Main St, Astoria, NY 11103, USA',
+      location: { type: 'Point', coordinates: [-73.925, 40.761] },
+    });
+  });
+
+  it('null clears the anchor and reports a null label', async () => {
+    const users = mockUsers();
+
+    const view = await setSearchAnchor(
+      userDoc({
+        searchAnchor: {
+          label: 'Old Address',
+          location: { type: 'Point', coordinates: [-73.9, 40.7] },
+        },
+      }),
+      null
+    );
+
+    const [, update] = users.findOneAndUpdate.mock.calls[0];
+    expect(update.$unset).toEqual({ searchAnchor: '' });
+    expect(geocodeAddress).not.toHaveBeenCalled();
+    expect(view.searchAnchorLabel).toBeNull();
+  });
+
+  it('is honest when the billing gate is closed (dev/CI)', async () => {
+    (isGooglePlacesEnabled as jest.Mock).mockReturnValue(false);
+    mockUsers();
+    await expect(setSearchAnchor(userDoc(), '123 main st')).rejects.toThrow(
+      V2DomainError
+    );
+    expect(geocodeAddress).not.toHaveBeenCalled();
+  });
+
+  it('is honest when Google cannot resolve the text', async () => {
+    (geocodeAddress as jest.Mock).mockResolvedValue(null);
+    mockUsers();
+    await expect(
+      setSearchAnchor(userDoc(), 'complete nonsense')
+    ).rejects.toThrow('Could not find that address');
   });
 });
 

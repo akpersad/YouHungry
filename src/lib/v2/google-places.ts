@@ -55,6 +55,8 @@ interface GooglePlacesResponse {
   status?: string;
   results?: GooglePlaceResult[];
   result?: GooglePlaceResult;
+  /** Find Place From Text answers under this key. */
+  candidates?: GooglePlaceResult[];
 }
 
 /** Google types that say nothing about what kind of food a place serves. */
@@ -101,7 +103,8 @@ async function callGoogle(
   apiType:
     | 'google_places_nearby_search'
     | 'google_places_text_search'
-    | 'google_places_details',
+    | 'google_places_details'
+    | 'google_places_find_place',
   fetchImpl: FetchLike
 ): Promise<GooglePlacesResponse | null> {
   try {
@@ -158,8 +161,21 @@ export async function fetchNearbyFromGoogle(
   return body ? (body.results ?? []) : null;
 }
 
+/**
+ * Location bias for text searches. Legacy Text Search treats
+ * location+radius as a BIAS, not a fence — an explicit exact-name query
+ * still finds a distant match, but "mcdonalds" answers with the ones near
+ * the anchor instead of the country's most famous ones.
+ */
+export interface TextSearchBias {
+  lat: number;
+  lng: number;
+  radiusM: number;
+}
+
 export async function fetchTextSearchFromGoogle(
   query: string,
+  bias?: TextSearchBias,
   fetchImpl: FetchLike = fetch
 ): Promise<GooglePlaceResult[] | null> {
   const key = process.env.GOOGLE_PLACES_API_KEY;
@@ -169,12 +185,48 @@ export async function fetchTextSearchFromGoogle(
     type: 'restaurant',
     key,
   });
+  if (bias) {
+    params.set('location', `${bias.lat},${bias.lng}`);
+    params.set('radius', String(bias.radiusM));
+  }
   const body = await callGoogle(
     `${BASE}/textsearch/json?${params}`,
     'google_places_text_search',
     fetchImpl
   );
   return body ? (body.results ?? []) : null;
+}
+
+/**
+ * Geocode an address the user typed into a point + normalized label, via
+ * Find Place From Text — the Places family the prod key is already enabled
+ * for (the standalone Geocoding API may not be). Deliberately NOT routed
+ * through the place cache: a home address must never become a restaurant
+ * in the pool. Returns null when the gate is closed, the call fails, or
+ * Google can't resolve the text.
+ */
+export async function geocodeAddress(
+  address: string,
+  fetchImpl: FetchLike = fetch
+): Promise<{ label: string; lat: number; lng: number } | null> {
+  const key = process.env.GOOGLE_PLACES_API_KEY;
+  if (!key || !isGooglePlacesEnabled()) return null;
+  const params = new URLSearchParams({
+    input: address,
+    inputtype: 'textquery',
+    fields: 'formatted_address,geometry',
+    key,
+  });
+  const body = await callGoogle(
+    `${BASE}/findplacefromtext/json?${params}`,
+    'google_places_find_place',
+    fetchImpl
+  );
+  const candidate = body?.candidates?.[0];
+  const lat = candidate?.geometry?.location?.lat;
+  const lng = candidate?.geometry?.location?.lng;
+  if (typeof lat !== 'number' || typeof lng !== 'number') return null;
+  return { label: candidate?.formatted_address ?? address, lat, lng };
 }
 
 export async function fetchPlaceDetailsFromGoogle(

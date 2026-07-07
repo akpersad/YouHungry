@@ -6,6 +6,7 @@ export type APIType =
   | 'google_places_text_search'
   | 'google_places_nearby_search'
   | 'google_places_details'
+  | 'google_places_find_place'
   | 'google_geocoding'
   | 'google_address_validation'
   | 'google_maps_load'
@@ -38,6 +39,7 @@ const API_COSTS: Record<APIType, number> = {
   google_places_text_search: 0.032, // $32 per 1000 requests
   google_places_nearby_search: 0.032, // $32 per 1000 requests
   google_places_details: 0.017, // $17 per 1000 requests (Basic Data)
+  google_places_find_place: 0.017, // $17 per 1000 requests (Basic Data)
   google_geocoding: 0.005, // $5 per 1000 requests
   google_address_validation: 0.005, // $5 per 1000 requests
   google_maps_load: 0.007, // $7 per 1000 loads

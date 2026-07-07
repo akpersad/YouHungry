@@ -86,12 +86,26 @@ export interface UserNotificationSettings {
   emailEnabled?: boolean;
 }
 
+/**
+ * Where this user's restaurant searches anchor when they haven't shared
+ * live location — the v2 answer to v1's city/state profile fields, but
+ * geocoded once at save so search bias is a point, not a string. Without
+ * it a text search for a chain answers with results from anywhere in the
+ * country.
+ */
+export interface UserSearchAnchorDoc {
+  /** Google's normalized formatted address — what the account page shows. */
+  label: string;
+  location: { type: 'Point'; coordinates: [number, number] }; // [lng, lat]
+}
+
 /** Lean v2 view of a user doc (v1 owns the full shape until cutover). */
 export interface V2UserDoc {
   _id: ObjectId;
   clerkId: string;
   email: string;
   name: string;
+  searchAnchor?: UserSearchAnchorDoc;
   pushSubscriptions?: UserPushSubscriptionDoc[];
   preferences?: { notificationSettings?: UserNotificationSettings };
   createdAt: Date;
@@ -144,6 +158,13 @@ export interface ListDoc {
   ownerId: ObjectId;
   name: string;
   placeIds: ObjectId[];
+  /**
+   * Accounts invited by the owner's signed invite link (owner ask
+   * 2026-07-06: "groups need shared lists"). Collaborators save/remove
+   * places and fork the list; rename/delete/share stay owner-only.
+   * Absent means none — existing docs need no migration.
+   */
+  collaboratorIds?: ObjectId[];
   createdAt: Date;
   updatedAt: Date;
 }

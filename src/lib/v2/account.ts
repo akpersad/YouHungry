@@ -35,6 +35,8 @@ export interface AccountView {
   firstName: string;
   name: string;
   email: string;
+  /** Saved search anchor's display label, null when unset. */
+  searchAnchorLabel: string | null;
   notifications: NotificationSettingsView;
   /** Registered push endpoints — lets a device recognize itself. */
   pushEndpoints: string[];
@@ -55,6 +57,7 @@ export function toAccountView(user: V2UserDoc): AccountView {
     firstName: user.name.split(' ')[0] || user.name,
     name: user.name,
     email: user.email,
+    searchAnchorLabel: user.searchAnchor?.label ?? null,
     notifications: toNotificationSettingsView(
       user.preferences?.notificationSettings
     ),
@@ -195,6 +198,57 @@ export async function changePassword(
   } catch (error) {
     logger.warn('account: could not revoke other sessions', { error });
   }
+}
+
+/**
+ * Save (or clear, with null) the address restaurant searches anchor to.
+ * Geocoded once here — searches then use the stored point for free. The
+ * raw typed string is discarded on success; only Google's normalized label
+ * and the point are kept.
+ */
+export async function setSearchAnchor(
+  user: V2UserDoc,
+  address: string | null
+): Promise<AccountView> {
+  const { users } = await getV2Db();
+
+  if (address === null) {
+    const cleared = await users.findOneAndUpdate(
+      { _id: user._id },
+      { $unset: { searchAnchor: '' }, $set: { updatedAt: new Date() } },
+      { returnDocument: 'after' }
+    );
+    return toAccountView(cleared ?? { ...user, searchAnchor: undefined });
+  }
+
+  const { geocodeAddress, isGooglePlacesEnabled } =
+    await import('./google-places');
+  if (!isGooglePlacesEnabled()) {
+    // Dev/CI honesty: the billing gate is closed, so lookups cannot work.
+    throw new V2DomainError(
+      'Address lookup is turned off in this environment.'
+    );
+  }
+  const geocoded = await geocodeAddress(address);
+  if (!geocoded) {
+    throw new V2DomainError(
+      'Could not find that address. Add a city and state and try again.'
+    );
+  }
+
+  const anchor = {
+    label: geocoded.label,
+    location: {
+      type: 'Point' as const,
+      coordinates: [geocoded.lng, geocoded.lat] as [number, number],
+    },
+  };
+  const updated = await users.findOneAndUpdate(
+    { _id: user._id },
+    { $set: { searchAnchor: anchor, updatedAt: new Date() } },
+    { returnDocument: 'after' }
+  );
+  return toAccountView(updated ?? { ...user, searchAnchor: anchor });
 }
 
 export async function setNotificationSettings(

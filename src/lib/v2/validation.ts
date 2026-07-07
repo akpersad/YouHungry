@@ -112,9 +112,17 @@ export const guestVoteSchema = voteSchema.extend({
   displayName: guestDisplayName.optional(),
 });
 
-export const searchQuerySchema = z.object({
-  q: z.string().trim().min(1).max(80),
-});
+export const searchQuerySchema = z
+  .object({
+    q: z.string().trim().min(1).max(80),
+    /** Optional live-location bias — overrides the saved search anchor. */
+    lat: latitude.optional(),
+    lng: longitude.optional(),
+  })
+  .refine(
+    (input) => (input.lat === undefined) === (input.lng === undefined),
+    'lat and lng come together'
+  );
 
 /**
  * A list name: same hygiene as a guest display name (trim, collapse
@@ -174,6 +182,14 @@ export const accountFirstName = z
 
 export const updateAccountSchema = z.object({
   firstName: accountFirstName.optional(),
+  /** Search-anchor address: a string geocodes and saves, null clears. */
+  address: z
+    .string()
+    .trim()
+    .min(3, 'That address is too short')
+    .max(200, 'Keep the address under 200 characters')
+    .nullable()
+    .optional(),
 });
 
 /** Clerk enforces its own password rules; the bounds here are sanity only. */

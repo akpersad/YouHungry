@@ -157,23 +157,46 @@ export async function findNearbyPlaces(
 }
 
 /**
+ * Search bias radius: metro-scale. Legacy Text Search treats it as a bias,
+ * not a fence, so an exact faraway name still resolves — but a chain query
+ * answers with the branches near the anchor.
+ */
+export const SEARCH_BIAS_RADIUS_M = 40_000;
+
+export interface SearchBias {
+  lat: number;
+  lng: number;
+}
+
+/**
  * Search — the ad-hoc fork source and the Places lane. Google-backed
  * searches serve the marker's ids in Google's relevance order (semantic
  * matching: "sushi" finds Kanoyama, which a name-regex cannot); when
  * Google is disabled or has never answered this query, falls back to the
  * Phase 3 name-regex over the cache, which is also what dev/CI exercise.
+ *
+ * `bias` anchors results near a point (the caller passes the viewer's
+ * saved search anchor or live location). Biased and unbiased runs of the
+ * same words are different questions, so the cache marker key carries a
+ * ~11km grid cell — two cities can never poison each other's cached
+ * answer, while neighbors still share one Google fetch.
  */
 export async function searchPlaces(
   query: string,
-  limit: number = 8
+  limit: number = 8,
+  bias?: SearchBias
 ): Promise<PlaceDoc[]> {
   const normalized = query.trim().replace(/\s+/g, ' ').toLowerCase();
   if (!normalized) return [];
   const { places } = await getV2Db();
-  const markerIds = await backfillOnce(
-    `text:${normalized}`,
-    TEXT_FRESH_MS,
-    () => fetchTextSearchFromGoogle(normalized)
+  const markerKey = bias
+    ? `text:${normalized}@${bias.lat.toFixed(1)}:${bias.lng.toFixed(1)}`
+    : `text:${normalized}`;
+  const markerIds = await backfillOnce(markerKey, TEXT_FRESH_MS, () =>
+    fetchTextSearchFromGoogle(
+      normalized,
+      bias ? { ...bias, radiusM: SEARCH_BIAS_RADIUS_M } : undefined
+    )
   );
   if (markerIds !== null) {
     const docs = await places
@@ -219,6 +242,25 @@ export interface PlaceSummary {
   categories: string[];
   priceLevel?: number;
   rating?: number;
+  /** Google Maps listing (menu/photos/hours live there — owner call
+   * 2026-07-06: link out rather than integrate a menu provider). */
+  mapsUrl: string;
+}
+
+/**
+ * The official Maps URLs scheme — free, no API key. `query_place_id` pins
+ * the exact listing; the query text is the human-readable fallback Google
+ * uses when the id is unknown (dev fixtures, retired places).
+ */
+export function mapsUrlFor(place: PlaceDoc): string {
+  const params = new URLSearchParams({
+    api: '1',
+    query: `${place.name} ${place.address}`.trim(),
+  });
+  if (!isFixtureId(place.googlePlaceId)) {
+    params.set('query_place_id', place.googlePlaceId);
+  }
+  return `https://www.google.com/maps/search/?${params}`;
 }
 
 export function toPlaceSummary(place: PlaceDoc): PlaceSummary {
@@ -231,6 +273,7 @@ export function toPlaceSummary(place: PlaceDoc): PlaceSummary {
       ? { priceLevel: place.priceLevel }
       : {}),
     ...(typeof place.rating === 'number' ? { rating: place.rating } : {}),
+    mapsUrl: mapsUrlFor(place),
   };
 }
 
