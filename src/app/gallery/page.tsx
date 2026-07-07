@@ -11,6 +11,7 @@ import {
   Sheet,
   Skeleton,
   SkeletonGroup,
+  Switch,
   Tabs,
 } from '@/components/v2/ui';
 
@@ -39,6 +40,34 @@ function Section({
       </div>
       {children}
     </section>
+  );
+}
+
+function SwitchDemo() {
+  const [push, setPush] = useState(true);
+  const [email, setEmail] = useState(false);
+  return (
+    <div className="flex max-w-md flex-col gap-4 rounded-2xl border border-line bg-surface p-4">
+      <Switch
+        label="Push results"
+        description="Sent to every device you turn on."
+        checked={push}
+        onChange={setPush}
+      />
+      <Switch
+        label="Email results"
+        description="One email per closed fork, nothing else."
+        checked={email}
+        onChange={setEmail}
+      />
+      <Switch
+        label="Disabled"
+        description="Legible, inert, no tooltip games."
+        checked
+        disabled
+        onChange={() => {}}
+      />
+    </div>
   );
 }
 
@@ -270,6 +299,13 @@ export default function GalleryPage() {
             </p>
           </Card>
         </div>
+      </Section>
+
+      <Section
+        title="Switch"
+        note="Settings only. ON is ink, never gold: a preference is upkeep, not a decision."
+      >
+        <SwitchDemo />
       </Section>
 
       <Section title="Tabs" note="Crisp swap, no sliding indicator theater.">

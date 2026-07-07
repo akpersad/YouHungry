@@ -1,9 +1,241 @@
 # Session Handoff — Fork In The Road portfolio upgrade
 
-**Last updated:** 2026-07-05 (v2 Phase 7 MERGED ✅ as PR #81 `3d4551f`; **Phase 8 Polish, PWA & launch IN PROGRESS on `v2/launch`**)
-**Read this first, then:** `promptFiles/v2/CHARTER.md` + `promptFiles/v2/WORKPLAN.md` (the authoritative plan for all v2 work — supersedes `phased-execution-plan.md` phases 4–8), `promptFiles/v2/IDENTITY.md` (the committed v2 design direction), `CLAUDE.md` (repo guide).
+**Last updated:** 2026-07-07 (branch `v2/account`: C1–C12 PUSHED on owner go-ahead 2026-07-07; C13 coverage-gate fix COMMITTED locally awaiting push go-ahead; see CURRENT below)
+**Read this first, then:** `promptFiles/v2/CHARTER.md` + `promptFiles/v2/WORKPLAN.md` (the authoritative plan for all v2 work — supersedes `phased-execution-plan.md` phases 4–8), `promptFiles/v2/IDENTITY.md` (the committed v2 design direction), `promptFiles/v2/BACKLOG.md` (post-launch triage + remaining owner items), `CLAUDE.md` (repo guide).
 
-## CURRENT: v2 Phase 8 — Polish, PWA & launch (branch `v2/launch`, 2026-07-05)
+## CURRENT: post-launch gap fix — the account surface (branch `v2/account`, built 2026-07-06)
+
+Owner-identified miss (2026-07-06): the v1 profile section died in the
+Phase 7 purge with no v2 replacement — no way to edit personal info, no
+way to manage push/email preferences, no push opt-in at all (a PWA whose
+service worker had no `push` handler), no forgot-password flow, and the
+result email had no unsubscribe. This branch closes all of it. Untracked
+in BACKLOG.md because it fell through the cracks rather than being a
+decision; treated as a launch-quality gap, not new scope.
+
+Commit ledger:
+
+1. `C1` **Server core.** `lib/v2/account.ts` (identity writes go Clerk →
+   Mongo mirror, never the reverse: `setFirstName` via clerkClient —
+   first name is the only name the product renders; `changePassword` =
+   BAPI verifyPassword → updateUser → revoke other sessions BY HAND
+   (Clerk's signOutOfOtherSessions kills the current session too);
+   `syncAccountFromClerk` for post-email-change mirroring;
+   notification-preference flips + push-subscription add/remove under
+   **v1's exact field names** — `preferences.notificationSettings.*`,
+   `pushSubscriptions[]` — because migrated prod docs already carry that
+   shape and notifications.ts already honors it; token-authorized
+   `unsubscribeEmailByToken`). `tokens.ts` grew the domain-separated
+   (`unsub:` HMAC prefix) 180-day unsubscribe token. Result email now
+   carries a footer unsubscribe link + RFC 8058 List-Unsubscribe
+   one-click headers. Zod schemas for the whole new surface. ~35 new
+   unit tests (account/tokens/validation/notifications).
+2. `C2` **API surface** (`/api/v2/account/*`): PATCH account (rename or
+   empty-body Clerk resync, 10/min/user), POST password (5/min/user —
+   the brake on current-password guessing), PATCH preferences,
+   POST/DELETE push-subscriptions, POST unsubscribe (the one-click
+   target; GET 303s to the page). **`public/sw.js` gained `push` +
+   `notificationclick` handlers** — push was undeliverable end-to-end
+   without them.
+3. `C3` **UI.** New `Switch` primitive (role="switch", busy≠disabled,
+   ON-state is ink NEVER gold — settings are frame register; gallery
+   section added). `/account` (gated with the ?next= round-trip like
+   /crew): first-name form, email change via the inline email_code
+   custom flow, collapsed password form, the two channel switches, and
+   an honest per-device push block (states: unsupported /
+   iOS-needs-Home-Screen / no-worker (dev) / permission-blocked / off /
+   on; permission asked only on the tap; failed server register rolls
+   back the browser subscription; subscribed-but-forgotten devices
+   self-heal by re-POSTing). Public `/unsubscribe` landing (token IS the
+   auth, no sign-in — flip is idempotent). AppHeader first-name is now
+   the door to /account (all widths). **Forgot password** (owner ask
+   mid-session): custom reset_password_email_code flow on the sign-in
+   card — email → code + new password on one card, reset signs you in,
+   other sessions revoked. Privacy page now names the account switches +
+   the one-tap unsubscribe.
+4. `C4` **e2e + docs**. `e2e/account.spec.ts` (8 tests:
+   @smoke profile render + honest save gating, switch persistence across
+   reload with restore, both-mode axe scans, signed-out gate round-trip,
+   reset-path entry, bad-unsubscribe-link honesty); the Clerk-429
+   `gotoResilient` helper promoted to shared `e2e/clerk-resilience.ts`
+   and adopted by gallery + launch-surfaces + account specs (the account
+   spec's 8 extra parallel loads raised dev-instance 429 pressure).
+   CLAUDE.md + this ledger refreshed. **C1–C4 pushed 2026-07-06 on the
+   owner's go-ahead** (PR creation/merge is the owner's).
+5. `C5` **Crew fork-started push** (owner product call 2026-07-06:
+   "push notifications should absolutely happen when a fork is
+   started" — CHARTER.md amended in place). `notifyForkStarted` in
+   notifications.ts: push-only (email never carries a start notice), to
+   crew members minus the organizer, `pushEnabled` honored, same
+   fire-and-forget/suppression contract as the close path; fired from
+   `createFork` whenever `crewId` is set — today that means "Run it
+   back", plus any future crew-attached creation for free. Crew forks
+   are the only forks with a known audience at creation; every other
+   fork's invite stays the link, per the amended charter. Both push
+   kinds share the `fork-<code>` tag, so the result replaces the invite
+   in the tray. Copy updated everywhere it claimed one notification:
+   /account switches ("Push" switch now names both kinds; e2e-pinned
+   "Email results" label kept), privacy page, sw.js comment. Result-push
+   sender refactored to a payload-generic `sendPush`. 5 new unit tests
+   (audience minus organizer, opt-out honored, spin-mode copy +
+   never-emails, gone-crew/solo-crew quiet, never-throws); the three
+   fork suites' notifications mocks grew the new export.
+
+6. `C6` `1f89c64` **Search anchor + biased search (server).** Owner bug
+   report: "when I type McDonalds it shows me McDs from around the
+   country" — text search sent no location bias. `V2UserDoc.searchAnchor`
+   ({label, GeoJSON point}, geocoded ONCE at save via new
+   `geocodeAddress` — Find Place From Text, the Places family the prod
+   key is known-enabled for, deliberately NOT routed through the place
+   cache so a home address can't become a restaurant). `searchPlaces`
+   takes a bias (explicit lat/lng > saved anchor > none); biased text
+   markers carry an ~11km grid cell (`text:q@40.7:-74.0`) so two cities
+   never share a cached answer. PlaceSummary grew `mapsUrl` (free Maps
+   URLs scheme, `query_place_id` pinned for real ids, never fixtures).
+   `google_places_find_place` added to the cost tracker ($17/1k).
+7. `C7` `d7f73f4` **/account home-base form.** Set/clear the anchor;
+   honest states (gate-closed message in dev, could-not-find guidance,
+   Google's normalized label echoed back).
+8. `C8` `3581ee4` **Shared lists (server).** Owner ask: "groups need
+   shared lists" (his A/B/C + her D/E in one rotation; decision chosen:
+   invite links now, crew-attached lists later). `collaboratorIds` on
+   ListDoc (absent = none, no migration); 7-day `listinv:` HMAC invite
+   tokens (owner-only mint, stateless, revocation = expiry); join is one
+   atomic $addToSet with the 20-collaborator cap guard in the filter,
+   idempotent for re-joins and the owner's own link. Save/remove/read/
+   fork-from-list are member-gated; rename/delete/invite owner-only.
+   Routes: POST lists/[id]/invite, POST lists/join (10/min/user each).
+   Sparse index on collaboratorIds.
+9. `C9` `304510f` **Shared lists (UI).** "Share this list" on list detail
+   (clipboard copy, visible-URL fallback); `/places/join` landing (peeks
+   list name + sharer through the token, honest dead-end for bad links,
+   sign-in round-trip preserves the token; explicit Join tap, never
+   auto-join); collaborator detail view drops owner controls and names
+   the sharer; /places gains "Shared with you"; every place row links
+   out to Google Maps ("See on Google" — menus/photos/hours).
+10. `C10` `71e1ea8` **Discovery browse.** /places browses what's around
+    the saved home base (one tap) or live location (geolocate, honest
+    denied state pointing at /account), filtered by the existing vibe
+    knobs + two radii (1.5km/5km), rendered through the same
+    save-to-list rows. Chips follow QuickSpin's ink idiom (never gold).
+11. `C11` `39ffb3f` **e2e + docs.** `e2e/shared-lists.spec.ts`: the
+    couple journey (build list → invite off the wire → member1 joins in
+    a second context → collaborator works the list with no owner
+    controls → owner sees it → cleanup), bad-invite dead-end, @smoke
+    discovery browse (fixture cluster + cheap-eats filter + Google
+    link-out), gate-closed home-base honesty. CLAUDE.md + this ledger +
+    BACKLOG refreshed.
+12. `C12` **Home-base address type-ahead** (owner ask: restore v1's
+    "123 Ma → real 123 Main Streets" so people save geocodable
+    addresses). Server-proxied legacy Places Autocomplete
+    (`types=geocode` so city-level anchors keep working; key never
+    reaches the client) behind the billing gate — dev/CI answer [] and
+    the form degrades to plain typing with the honest save-time
+    message. Google's session-token flow: the client mints a UUID per
+    typing burst, every suggestion request carries it, and a picked
+    suggestion saves by `placeId` through a details call that closes
+    the session (keystrokes bill as one session, not per request);
+    free-typed text keeps the Find Place path. New authed
+    GET /api/v2/places/address-autocomplete (40/min/user on top of the
+    350ms debounce); `HomeBaseSection` is now a real combobox
+    (aria-expanded/activedescendant, arrow keys + Enter + Escape,
+    mousedown-preventDefault so blur doesn't eat the click).
+    `google_places_autocomplete` in the cost tracker ($2.83/1k).
+13. `C13` **Coverage-gate fix.** CI's `test:coverage` failed after the
+    C1–C12 push: the branch added ~5k lines of largely untested UI,
+    diluting global coverage below the ratchet floors (44.25S vs 49).
+    Fix = test the new surface, not lower the bar: 51 new tests across
+    six suites in `src/components/v2/account/__tests__/` (push.ts
+    helpers; HomeBaseSection combobox incl. debounce, keyboard nav,
+    picked-vs-free-typed save bodies, clear, silent type-ahead failure;
+    NotificationsSection device-state machine, enable/disable with
+    server-reject rollback, self-heal, optimistic switch rollback;
+    EmailSection code flow incl. expired-pending restart; Password;
+    AccountLane name save). jest.setup.js gained
+    NEXT_PUBLIC_VAPID_PUBLIC_KEY (read at module load, so it must exist
+    before import). Measured coverage rose to 52.7S/55.9B/54.4F/53.3L;
+    floors ratcheted to 51/55/53/52 per the ratchet-only policy.
+
+**Deliberate scope decisions (documented, not silent):**
+
+- **No e2e rename of squad users** — crew-suggestion copy derives from
+  seeded first names and specs run in parallel workers; the rename path
+  is pinned by unit tests instead.
+- **Fork-started push is crew-only** (C5): non-crew forks have no known
+  audience at creation (participants materialize by voting via the
+  link), so there is nobody to push to; the link stays the invite.
+  No new preference switch — the existing push channel switch governs
+  both kinds, and the copy says so.
+- **Photos deferred by owner call ("Later")**: discovery ships with
+  rating/price/cuisine + the Maps link-out; the photo proxy (server
+  route streaming Place Photos, key server-side, CDN-cached, behind the
+  billing gate) is a BACKLOG item. Menus: Google's API has no menu
+  data; owner chose the free Maps link-out over a Yelp integration.
+- **Crew-attached lists are the follow-up half of the owner's "Both"
+  answer** (BACKLOG): invite-link collaborators shipped first because
+  they work before any crew exists.
+- **Address lookup needs production** (or ALLOW_GOOGLE_PLACES=true):
+  the billing gate stays default-closed, so the /account home-base form
+  says so honestly in dev instead of pretending.
+- **Account deletion stays manual** (privacy-page path) per the existing
+  owner-level decision; /account links to it honestly.
+
+**Validation (2026-07-06):** full pre-push green (tsc / eslint
+--max-warnings=0 / prettier / **Jest 34 suites, 388 tests** (+30) /
+production build with /account + /unsubscribe + 5 account API routes).
+**Full chromium e2e 36/36 green** against a fresh production build +
+reseeded dev DB (1 flaky-passed on the documented Clerk-429 class);
+mobile-chrome smoke lane 6/6. One mid-run failure was the
+HANDOFF-documented unseeded-rerun crew-board decay, cleared by
+reseeding. Google never billed; sends suppressed.
+
+**Owner actions for this gate:**
+
+1. C1–C4 are pushed; give the go-ahead to push C5, then create + merge
+   the PR (gh CLI on this machine is still authed as the wrong account).
+2. **Verify the Vercel env still has `NEXT_PUBLIC_VAPID_PUBLIC_KEY`,
+   `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`** (v1-era vars — do NOT delete
+   them in the env cleanup; push now genuinely uses them). Set
+   `NEXT_PUBLIC_APP_URL=https://fork-in-the-road.vercel.app` in prod if
+   unset (unsubscribe links derive from it; the code falls back to the
+   right URL either way).
+3. ~~Product call: fork-started push?~~ ANSWERED 2026-07-06 — owner
+   said yes; built as C5, charter amended.
+
+## Previous: post-launch. The WORKPLAN is complete.
+
+**Post-merge addendum (2026-07-06, owner-approved, executed same day):**
+
+- **Migration executed for real** (`--execute --into you-hungry`):
+  1,432 places upserted (1,430 distinct — two v1 restaurants shared a
+  googlePlaceId and merged correctly), 200 lists, 1 crew, 14 closed
+  forks (4 crew-attached). Dry-run report reviewed and signed off by
+  the owner first (200 lists confirmed right; all skips were e2e
+  residue). First execute attempt failed building the unique clerkId
+  index: prod held 9 duplicate `+clerk_test` squad-user docs
+  (CI-to-prod-era webhook/auto-create race). Owner approved deleting
+  the dupes (earliest doc per clerkId kept; delete double-guarded by
+  explicit ids + test-email pattern); rerun succeeded.
+- **v1 collections archived then DROPPED.** All 14 v1-only collections
+  (api_cache, collections, decisions, errorGroups, errorLogs,
+  friendships, groupInvitations, groups, location_cache, notifications,
+  performanceMetrics, phone_verifications, restaurants, short_urls)
+  dumped to lossless gzipped EJSON with per-collection count
+  verification, then dropped. **The archive is the only rollback:**
+  `~/Documents/Development/PersonalProjects/you-hungry-v1-archive-2026-07-06/`
+  (~1.4 MB, owner's machine — worth copying somewhere backed up).
+  Prod db is now EXACTLY the ten live v2 collections (users 24,
+  places 1430, lists 200, forks 14, crews 1, guests, place_queries,
+  error_logs, rate_limits, api_usage). Live site verified 200 on
+  / /privacy /manifest.json /sw.js /gallery post-drop.
+- **Still open (owner, optional):** close dependabot #82/#70/#67
+  (superseded) + #66 (close unmerged — types stay on Node 22); the
+  remaining clerk_test squad users in prod `users` are harmless and
+  deletable any time; the migrated crew is named "Test Group" (the
+  only v1 group with completed decisions) — remove via the product if
+  unwanted; everything else lives in `promptFiles/v2/BACKLOG.md`.
+
+## Previous: v2 Phase 8 — Polish, PWA & launch (MERGED ✅ as PR #83 `7cff470`, branch `v2/launch`, 2026-07-05)
 
 WORKPLAN Phase 8 — the launch pass. Scope: PWA (manifest/icons for the
 "Tonight's board" identity, a real service worker replacing the Phase 7

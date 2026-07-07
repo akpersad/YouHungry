@@ -43,16 +43,16 @@ const customJestConfig = {
     '!src/app/page.tsx',
   ],
   coverageReporters: ['text', 'lcov', 'clover', 'json', 'json-summary'],
-  // Honest floors at measured coverage (re-measured 2026-07-03 after the
-  // Phase 7 purge: 49.9S/53.0B/51.4F/50.2L — deleting untested v1 code
-  // raised every number). Policy: ratchet-only — raise floors when
-  // coverage rises, never lower them to make a change fit.
+  // Honest floors at measured coverage (re-measured 2026-07-07 after the
+  // account-surface tests landed: 52.7S/55.9B/54.4F/53.3L). Policy:
+  // ratchet-only — raise floors when coverage rises, never lower them to
+  // make a change fit.
   coverageThreshold: {
     global: {
-      branches: 52,
-      functions: 50,
-      lines: 49,
-      statements: 49,
+      branches: 55,
+      functions: 53,
+      lines: 52,
+      statements: 51,
     },
   },
 };

@@ -1,10 +1,14 @@
 import {
+  changePasswordSchema,
   createForkSchema,
   guestDisplayName,
   guestVoteSchema,
   lockInSchema,
+  notificationSettingsSchema,
+  pushSubscriptionSchema,
   quickSpinSchema,
   searchQuerySchema,
+  updateAccountSchema,
   voteSchema,
 } from '../validation';
 
@@ -205,5 +209,63 @@ describe('guestVoteSchema', () => {
       guestVoteSchema.safeParse({ rankings: [oid(1)], forkToken: 't.sig' })
         .success
     ).toBe(true);
+  });
+});
+
+describe('account schemas', () => {
+  it('applies guest-name hygiene to the first name', () => {
+    expect(updateAccountSchema.parse({ firstName: '  Liv  ' })).toEqual({
+      firstName: 'Liv',
+    });
+    expect(updateAccountSchema.parse({})).toEqual({});
+    expect(updateAccountSchema.safeParse({ firstName: 'Liv‮' }).success).toBe(
+      false
+    );
+  });
+
+  it('bounds passwords without duplicating Clerk rules', () => {
+    expect(
+      changePasswordSchema.safeParse({
+        currentPassword: 'old-pass',
+        newPassword: 'new-password',
+      }).success
+    ).toBe(true);
+    expect(
+      changePasswordSchema.safeParse({
+        currentPassword: '',
+        newPassword: 'new-password',
+      }).success
+    ).toBe(false);
+    expect(
+      changePasswordSchema.safeParse({
+        currentPassword: 'old-pass',
+        newPassword: 'short',
+      }).success
+    ).toBe(false);
+  });
+
+  it('requires at least one notification flag', () => {
+    expect(
+      notificationSettingsSchema.safeParse({ pushEnabled: false }).success
+    ).toBe(true);
+    expect(notificationSettingsSchema.safeParse({}).success).toBe(false);
+  });
+
+  it('accepts a real browser subscription shape, https only', () => {
+    const sub = {
+      endpoint: 'https://fcm.googleapis.com/fcm/send/abc',
+      keys: { p256dh: 'BPk', auth: 'a2' },
+    };
+    expect(pushSubscriptionSchema.safeParse(sub).success).toBe(true);
+    expect(
+      pushSubscriptionSchema.safeParse({
+        ...sub,
+        endpoint: 'http://insecure.example/1',
+      }).success
+    ).toBe(false);
+    expect(
+      pushSubscriptionSchema.safeParse({ endpoint: sub.endpoint, keys: {} })
+        .success
+    ).toBe(false);
   });
 });

@@ -89,6 +89,54 @@ async function pageNetworkFirst(request) {
   }
 }
 
+// Web push: the server sends two notification kinds — the fork result
+// ("We're going here.") and the crew fork-started heads-up ("Where are we
+// going?"), both from lib/v2/notifications.ts. The payload is JSON
+// {title, body, tag, data.url}; both kinds share the fork's tag, so one
+// fork holds one tray slot and the result replaces the invite.
+self.addEventListener('push', (event) => {
+  if (!event.data) return;
+  let payload;
+  try {
+    payload = event.data.json();
+  } catch {
+    return; // not ours — never show a mystery notification
+  }
+  event.waitUntil(
+    self.registration.showNotification(payload.title || 'Fork In The Road', {
+      body: payload.body || '',
+      tag: payload.tag,
+      icon: '/icons/icon-192.png',
+      badge: '/icons/icon-192.png',
+      data: payload.data || {},
+    })
+  );
+});
+
+// Tap-through: focus an open app window on the fork page, or open one.
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const url = new URL(event.notification.data?.url || '/', self.location.origin)
+    .href;
+  event.waitUntil(
+    (async () => {
+      const windows = await self.clients.matchAll({
+        type: 'window',
+        includeUncontrolled: true,
+      });
+      for (const client of windows) {
+        if (client.url === url && 'focus' in client) return client.focus();
+      }
+      const client = windows.find((c) => 'navigate' in c && 'focus' in c);
+      if (client) {
+        await client.navigate(url);
+        return client.focus();
+      }
+      return self.clients.openWindow(url);
+    })()
+  );
+});
+
 self.addEventListener('fetch', (event) => {
   const request = event.request;
   if (request.method !== 'GET') return;

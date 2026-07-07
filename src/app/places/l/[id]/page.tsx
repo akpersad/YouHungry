@@ -3,6 +3,7 @@ import { notFound as nextNotFound, redirect } from 'next/navigation';
 import { ObjectId } from 'mongodb';
 import { auth } from '@clerk/nextjs/server';
 import { getV2User } from '@/lib/v2/auth';
+import { getV2Db } from '@/lib/v2/db';
 import { V2DomainError } from '@/lib/v2/errors';
 import { getListWithPlaces, type ListWithPlaces } from '@/lib/v2/lists';
 import { toPlaceSummary } from '@/lib/v2/places';
@@ -44,12 +45,26 @@ export default async function ListPage({
     throw error;
   }
 
+  const role =
+    data.list.ownerId.toString() === user._id.toString()
+      ? ('owner' as const)
+      : ('collaborator' as const);
+  let ownerFirstName = user.name.split(' ')[0] || user.name;
+  if (role === 'collaborator') {
+    const { users } = await getV2Db();
+    const owner = await users.findOne({ _id: data.list.ownerId });
+    ownerFirstName = owner?.name.split(' ')[0] || 'Someone';
+  }
+
   return (
     <ListDetail
       initial={{
         id: data.list._id.toString(),
         name: data.list.name,
         places: data.places.map(toPlaceSummary),
+        role,
+        ownerFirstName,
+        collaboratorCount: data.list.collaboratorIds?.length ?? 0,
       }}
     />
   );

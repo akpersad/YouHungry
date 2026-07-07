@@ -9,6 +9,7 @@ import { useSignIn } from '@clerk/nextjs/legacy';
 import { Button, Input } from '@/components/v2/ui';
 import { AuthCard } from './AuthCard';
 import { clerkErrorMessage } from './clerk-errors';
+import { ForgotPasswordForm } from './ForgotPasswordForm';
 import { safeNextPath } from './next-param';
 
 export function SignInForm() {
@@ -21,6 +22,7 @@ export function SignInForm() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [resetting, setResetting] = useState(false);
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
@@ -48,6 +50,16 @@ export function SignInForm() {
       setSubmitting(false);
     }
   };
+
+  if (resetting) {
+    return (
+      <ForgotPasswordForm
+        nextPath={nextPath}
+        initialIdentifier={identifier}
+        onBack={() => setResetting(false)}
+      />
+    );
+  }
 
   return (
     <AuthCard title="Sign in" lede="Your history and lists live here.">
@@ -89,6 +101,16 @@ export function SignInForm() {
         >
           Sign in
         </Button>
+        <button
+          type="button"
+          onClick={() => {
+            setError(null);
+            setResetting(true);
+          }}
+          className="self-start rounded text-sm font-semibold text-brass underline-offset-4 outline-none hover:underline focus-visible:ring-2 focus-visible:ring-focus"
+        >
+          Forgot your password?
+        </button>
       </form>
       <p className="text-sm text-ink-secondary">
         New here?{' '}

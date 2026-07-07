@@ -77,6 +77,13 @@ SMS is deleted outright: it cost real money per send, demanded phone
 verification at signup, and dragged a homegrown URL shortener behind it. The
 Fork Link does its job better for free.
 
+> **Amendment (owner, 2026-07-06):** crew forks additionally send a
+> push-only "fork started" heads-up to crew members. A Crew is an
+> established in-app relationship whose audience is known the moment the
+> fork is created, so that invite doesn't have to wait for the link. All
+> other forks keep the link as their only invite, and email never carries
+> a start notice.
+
 ## Accounts: featherweight, and only when they pay for themselves
 
 - Clerk **email/password only** — email, password, done. No phone number,

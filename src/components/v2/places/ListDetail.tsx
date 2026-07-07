@@ -18,12 +18,20 @@ import { PlaceMeta } from './PlaceMeta';
  * tap (re-saving undoes it); deleting the list is the one irreversible act
  * here and gets the confirm dialog. The primary path out is forking from
  * this list — that button is the screen's one gold moment.
+ *
+ * Shared lists: the owner mints the invite link ("Share this list"), and
+ * everyone on the list saves/removes/forks alike. Rename, delete, and
+ * sharing stay the owner's, so a collaborator's view simply doesn't have
+ * them.
  */
 
 export interface ListDetailData {
   id: string;
   name: string;
   places: PlaceSummary[];
+  role: 'owner' | 'collaborator';
+  ownerFirstName: string;
+  collaboratorCount: number;
 }
 
 export function ListDetail({ initial }: { initial: ListDetailData }) {
@@ -31,6 +39,37 @@ export function ListDetail({ initial }: { initial: ListDetailData }) {
   const [name, setName] = useState(initial.name);
   const [places, setPlaces] = useState<PlaceSummary[]>(initial.places);
   const [error, setError] = useState<string | null>(null);
+
+  const [shareState, setShareState] = useState<
+    'idle' | 'working' | 'copied' | 'shown'
+  >('idle');
+  const [shareUrl, setShareUrl] = useState<string | null>(null);
+  const [shareError, setShareError] = useState<string | null>(null);
+
+  const shareList = async () => {
+    if (shareState === 'working') return;
+    setShareState('working');
+    setShareError(null);
+    try {
+      const response = await fetch(`/api/v2/lists/${initial.id}/invite`, {
+        method: 'POST',
+      });
+      const payload = await response.json().catch(() => null);
+      if (!response.ok) throw new Error('invite failed');
+      const url = `${window.location.origin}${payload.invitePath}`;
+      setShareUrl(url);
+      try {
+        await navigator.clipboard.writeText(url);
+        setShareState('copied');
+      } catch {
+        // Clipboard blocked — show the link so it can be copied by hand.
+        setShareState('shown');
+      }
+    } catch {
+      setShareState('idle');
+      setShareError('Could not make an invite link. Try again.');
+    }
+  };
 
   const [renameOpen, setRenameOpen] = useState(false);
   const [renameValue, setRenameValue] = useState(initial.name);
@@ -127,6 +166,21 @@ export function ListDetail({ initial }: { initial: ListDetailData }) {
             {places.length === 1 ? '1 place' : `${places.length} places`}
           </p>
         </div>
+        {initial.role === 'collaborator' && (
+          <p className="text-sm text-ink-secondary">
+            Shared by {initial.ownerFirstName}. Anything you save here shows up
+            for everyone on it.
+          </p>
+        )}
+        {initial.role === 'owner' && initial.collaboratorCount > 0 && (
+          <p className="text-sm text-ink-secondary">
+            Shared with{' '}
+            {initial.collaboratorCount === 1
+              ? '1 person'
+              : `${initial.collaboratorCount} people`}
+            . They can save and remove places and fork the list.
+          </p>
+        )}
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
@@ -135,20 +189,48 @@ export function ListDetail({ initial }: { initial: ListDetailData }) {
             Fork this list
           </ButtonLink>
         )}
-        <Button
-          variant="quiet"
-          onClick={() => {
-            setRenameValue(name);
-            setRenameError(null);
-            setRenameOpen(true);
-          }}
-        >
-          Rename
-        </Button>
-        <Button variant="quiet" onClick={() => setDeleteOpen(true)}>
-          Delete list
-        </Button>
+        {initial.role === 'owner' && (
+          <>
+            <Button
+              variant="quiet"
+              loading={shareState === 'working'}
+              onClick={shareList}
+            >
+              Share this list
+            </Button>
+            <Button
+              variant="quiet"
+              onClick={() => {
+                setRenameValue(name);
+                setRenameError(null);
+                setRenameOpen(true);
+              }}
+            >
+              Rename
+            </Button>
+            <Button variant="quiet" onClick={() => setDeleteOpen(true)}>
+              Delete list
+            </Button>
+          </>
+        )}
       </div>
+
+      {shareState === 'copied' && (
+        <p role="status" className="text-sm text-ink-secondary">
+          Invite link copied. Anyone who opens it signed in joins this list. It
+          works for 7 days.
+        </p>
+      )}
+      {shareState === 'shown' && shareUrl && (
+        <p role="status" className="text-sm text-ink-secondary break-all">
+          Copy this invite link (works for 7 days): {shareUrl}
+        </p>
+      )}
+      {shareError && (
+        <p role="alert" className="text-sm text-danger">
+          {shareError}
+        </p>
+      )}
 
       {error && (
         <p role="alert" className="text-sm text-danger">

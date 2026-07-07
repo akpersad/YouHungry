@@ -66,12 +66,48 @@ export interface GuestDoc {
   claimedByUserId?: ObjectId;
 }
 
+/**
+ * One browser's web-push registration. The field names are v1's — prod user
+ * docs migrated with subscriptions under exactly this shape, and
+ * notifications.ts already reads/prunes it — so v2 adopts them verbatim.
+ */
+export interface UserPushSubscriptionDoc {
+  endpoint: string;
+  keys: { p256dh: string; auth: string };
+}
+
+/**
+ * Channel opt-outs for the one notification v2 sends ("We're going here.").
+ * Absent means ON — v1 stored explicit false for opt-outs and the send path
+ * (notifications.ts) keeps that reading, so migrated opt-outs stay honored.
+ */
+export interface UserNotificationSettings {
+  pushEnabled?: boolean;
+  emailEnabled?: boolean;
+}
+
+/**
+ * Where this user's restaurant searches anchor when they haven't shared
+ * live location — the v2 answer to v1's city/state profile fields, but
+ * geocoded once at save so search bias is a point, not a string. Without
+ * it a text search for a chain answers with results from anywhere in the
+ * country.
+ */
+export interface UserSearchAnchorDoc {
+  /** Google's normalized formatted address — what the account page shows. */
+  label: string;
+  location: { type: 'Point'; coordinates: [number, number] }; // [lng, lat]
+}
+
 /** Lean v2 view of a user doc (v1 owns the full shape until cutover). */
 export interface V2UserDoc {
   _id: ObjectId;
   clerkId: string;
   email: string;
   name: string;
+  searchAnchor?: UserSearchAnchorDoc;
+  pushSubscriptions?: UserPushSubscriptionDoc[];
+  preferences?: { notificationSettings?: UserNotificationSettings };
   createdAt: Date;
   updatedAt: Date;
 }
@@ -122,6 +158,13 @@ export interface ListDoc {
   ownerId: ObjectId;
   name: string;
   placeIds: ObjectId[];
+  /**
+   * Accounts invited by the owner's signed invite link (owner ask
+   * 2026-07-06: "groups need shared lists"). Collaborators save/remove
+   * places and fork the list; rename/delete/share stay owner-only.
+   * Absent means none — existing docs need no migration.
+   */
+  collaboratorIds?: ObjectId[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -239,7 +282,12 @@ const V2_INDEXES: Record<string, IndexDescription[]> = {
     // Self-cleaning: markers older than 30 days are dead weight either way.
     { key: { fetchedAt: 1 }, expireAfterSeconds: 60 * 60 * 24 * 30 },
   ],
-  [V2_COLLECTIONS.lists]: [{ key: { ownerId: 1, updatedAt: -1 } }],
+  [V2_COLLECTIONS.lists]: [
+    { key: { ownerId: 1, updatedAt: -1 } },
+    // Shared lists: the collaborator half of the member filter (sparse —
+    // most lists are never shared).
+    { key: { collaboratorIds: 1 }, sparse: true },
+  ],
   [V2_COLLECTIONS.crews]: [{ key: { memberIds: 1 } }],
   [V2_COLLECTIONS.guests]: [
     { key: { guestId: 1 }, unique: true },

@@ -47,9 +47,15 @@ export function AppHeader() {
           {isLoaded &&
             (isSignedIn ? (
               <>
-                <span className="hidden text-sm text-ink-muted sm:inline">
-                  {user?.firstName}
-                </span>
+                {/* The name is the door to /account — visible on every
+                    width; a phone must not lose the only path in. */}
+                <Link
+                  href="/account"
+                  aria-label="Account"
+                  className="inline-block max-w-24 truncate rounded-md text-sm font-semibold text-ink-muted outline-none transition-colors hover:text-ink focus-visible:ring-2 focus-visible:ring-focus motion-safe:duration-100"
+                >
+                  {user?.firstName ?? 'Account'}
+                </Link>
                 <button
                   type="button"
                   onClick={() => signOut(() => router.push('/'))}

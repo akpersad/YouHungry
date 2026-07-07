@@ -21,6 +21,8 @@ export interface ListSummary {
   id: string;
   name: string;
   placeCount: number;
+  /** Owner or invited collaborator — shapes which controls render. */
+  role: 'owner' | 'collaborator';
 }
 
 export function SaveToListDialog({

@@ -44,19 +44,35 @@ or the owner's hands (credentials, money, destructive actions)._
   lie.
 - **Demo GIF for the README.** Needs a recording pass (Kap/Gifski).
   The four stills carry the story meanwhile. **OWNER** taste call.
+- **Place photos via server proxy** (owner call 2026-07-06: "Later",
+  demoted from Kill). `photoRef` is persisted for all cached places; a
+  server route can stream Place Photos with the key server-side and
+  long CDN caching, behind the existing billing gate (~$7/1k uncached
+  loads). The discovery cards ship text-forward meanwhile.
+- **Crew-attached shared lists** (the second half of the owner's
+  2026-07-06 "Both" answer). Invite-link collaborators shipped; a list
+  attached to a crew (every member auto-collaborates, membership tracks
+  the crew) is the follow-up. Design question to settle: what happens
+  to the list when the crew is deleted.
+- **Start a NEW fork for an existing crew** (flagged 2026-07-06). Crew
+  forks today only come from "Run it back" (same ballot). A fresh
+  ballot built at /new can't be crew-attached, so it misses the shared
+  weight history and the fork-started push. Needs a crew picker on
+  /new (or a "new fork" action on the crew page).
 
 ## Kill (decided dead — do not resurrect without new evidence)
 
-- **In-app notification center.** WORKPLAN bias held: push + email, one
-  trigger ("We're going here."). Nothing since has argued otherwise.
+- **In-app notification center.** WORKPLAN bias held: push + email,
+  two triggers ("We're going here." + the crew fork-started heads-up,
+  owner charter amendment 2026-07-06). Still no center.
 - **CSV/JSON history export.** "Only if it earns its sentence" — it
   never did. Decision history lives on the crew page where it means
   something.
 - **SMS anything.** Cost + carrier compliance killed it in the charter;
   guests-via-link removed the need.
-- **Photos in the UI.** Legacy photo URLs embed the API key client-side,
-  and the text-forward identity doesn't want them. `photoRef` stays
-  persisted if a future card design earns it.
+- ~~**Photos in the UI.**~~ Moved to Later (owner call 2026-07-06): a
+  server proxy keeps the key out of the client, so the original
+  blocker is gone; only the identity/taste question remains.
 - **Social login (Google/Apple).** Owner decision on record
   (2026-07-02): not without Apple, and Apple costs money. Email/password
   and guest links carry the load. Revisit only if the Apple economics

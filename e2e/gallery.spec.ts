@@ -6,6 +6,7 @@
  */
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+import { gotoResilient } from './clerk-resilience';
 
 test.use({ storageState: { cookies: [], origins: [] } });
 
@@ -13,7 +14,7 @@ test.describe('v2 /gallery', () => {
   test('@smoke shows the identity and the reveal locks gold', async ({
     page,
   }) => {
-    await page.goto('/gallery');
+    await gotoResilient(page, '/gallery');
 
     await expect(
       page.getByRole('heading', { name: "Tonight's board" })
@@ -44,7 +45,7 @@ test.describe('v2 /gallery', () => {
 
   test('reduced motion goes straight to the result', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
-    await page.goto('/gallery');
+    await gotoResilient(page, '/gallery');
     const reveal = page
       .locator('section')
       .filter({ has: page.getByRole('heading', { name: 'The reveal' }) });
@@ -57,7 +58,7 @@ test.describe('v2 /gallery', () => {
   test('dialog and sheet open and close on the platform affordances', async ({
     page,
   }) => {
-    await page.goto('/gallery');
+    await gotoResilient(page, '/gallery');
 
     await page.getByRole('button', { name: 'Open dialog' }).click();
     const dialog = page.getByRole('dialog', { name: 'Delete this list?' });
@@ -74,7 +75,7 @@ test.describe('v2 /gallery', () => {
 
   for (const mode of ['light', 'dark'] as const) {
     test(`axe scan passes in ${mode} mode`, async ({ page }) => {
-      await page.goto('/gallery');
+      await gotoResilient(page, '/gallery');
       // Let the reveal settle so the scan sees the locked result state.
       await expect(page.getByText("We're going here.")).toBeVisible({
         timeout: 5_000,
