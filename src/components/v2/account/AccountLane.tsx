@@ -4,6 +4,7 @@ import { useState, type FormEvent } from 'react';
 import { Button, Input } from '@/components/v2/ui';
 import type { AccountView } from '@/lib/v2/account';
 import { EmailSection } from './EmailSection';
+import { HomeBaseSection } from './HomeBaseSection';
 import { PasswordSection } from './PasswordSection';
 import { NotificationsSection } from './NotificationsSection';
 
@@ -91,6 +92,7 @@ export function AccountLane({ account }: { account: AccountView }) {
             Save name
           </Button>
         </form>
+        <HomeBaseSection initialLabel={account.searchAnchorLabel} />
         <div className="flex flex-col gap-4 rounded-2xl border border-line bg-surface p-4">
           <EmailSection initialEmail={account.email} />
           <div className="border-t border-line" />
