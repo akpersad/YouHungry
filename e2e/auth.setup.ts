@@ -19,9 +19,10 @@ async function signInAndSave(browser: Browser, role: string) {
   await page.getByLabel('Password').fill(SQUAD_PASSWORD);
   await page.getByRole('button', { name: 'Sign in' }).click();
 
-  // The form lands on the fork lane home (safeNextPath default).
+  // The form lands on the fork lane home (safeNextPath default). The
+  // signed-in shell signal is the account door (sign-out lives on /account).
   await page.waitForURL('/', { timeout: 30000 });
-  await expect(page.getByRole('button', { name: 'Sign out' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Account' })).toBeVisible();
 
   await context.storageState({ path: storageStateFor(role) });
   await context.close();
