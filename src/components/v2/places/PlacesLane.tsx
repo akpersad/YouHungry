@@ -65,7 +65,7 @@ function BrowseChip({
       aria-pressed={selected}
       onClick={onClick}
       className={cx(
-        'h-9 rounded-full border px-4 text-sm font-semibold outline-none',
+        'tap-target h-9 rounded-full border px-4 text-sm font-semibold outline-none',
         'motion-safe:transition-colors motion-safe:duration-100',
         'focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-canvas',
         selected
@@ -125,7 +125,9 @@ function ListRow({ list }: { list: ListSummary }) {
       href={`/places/l/${list.id}`}
       className="flex items-center justify-between gap-3 rounded-xl border border-line bg-surface px-4 py-3 outline-none transition-colors hover:bg-sunken focus-visible:ring-2 focus-visible:ring-focus motion-safe:duration-100"
     >
-      <span className="truncate font-semibold text-ink">{list.name}</span>
+      <span className="min-w-0 truncate font-semibold text-ink">
+        {list.name}
+      </span>
       <span className="tnum shrink-0 text-sm text-ink-muted">
         {list.placeCount === 1 ? '1 place' : `${list.placeCount} places`}
       </span>

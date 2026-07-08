@@ -139,7 +139,9 @@ export function CrewRoom({ initial }: { initial: CrewView }) {
             {initial.weights.map((row) => (
               <li key={row.placeId} className="flex flex-col gap-1">
                 <div className="flex items-baseline justify-between gap-3">
-                  <p className="truncate font-semibold text-ink">{row.name}</p>
+                  <p className="min-w-0 truncate font-semibold text-ink">
+                    {row.name}
+                  </p>
                   <p className="tnum shrink-0 text-sm text-ink-muted">
                     picked {daysAgo(row.lastPickedAt)} ·{' '}
                     {Math.round(row.weight * 100)}%
@@ -183,7 +185,7 @@ export function CrewRoom({ initial }: { initial: CrewView }) {
                   href={`/f/${fork.code}`}
                   className="flex items-center justify-between gap-3 rounded-lg py-3 outline-none transition-colors hover:bg-sunken focus-visible:ring-2 focus-visible:ring-focus motion-safe:duration-100"
                 >
-                  <p className="truncate font-semibold text-ink">
+                  <p className="min-w-0 truncate font-semibold text-ink">
                     {fork.winnerName}
                   </p>
                   <p className="tnum shrink-0 text-sm text-ink-muted">

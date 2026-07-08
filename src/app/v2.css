@@ -148,6 +148,36 @@ body {
   font-family: var(--font-sans);
 }
 
+/* App-chrome touch polish: no gray tap flash, no double-tap-zoom delay
+ * reserved on controls. Scoped to interactive elements — body text keeps
+ * normal gesture behavior. */
+a,
+button,
+input,
+select,
+textarea,
+label,
+[role='button'] {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* Extends a visually-small control's hit area to 44px (Apple HIG) without
+ * growing it. Adjacent controls need >=8px gaps so extended areas meet but
+ * never cross a neighbor's visible edge. */
+.tap-target {
+  position: relative;
+}
+.tap-target::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  height: max(100%, 44px);
+  width: max(100%, 44px);
+  transform: translate(-50%, -50%);
+}
+
 /* Data never jitters. */
 .tnum {
   font-variant-numeric: tabular-nums;

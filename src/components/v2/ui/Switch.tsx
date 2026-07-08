@@ -63,7 +63,7 @@ export function Switch({
           if (!busy) onChange(!checked);
         }}
         className={cx(
-          'relative h-7 w-12 shrink-0 rounded-full border outline-none',
+          'tap-target relative h-7 w-12 shrink-0 rounded-full border outline-none',
           'focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-canvas',
           'disabled:cursor-not-allowed disabled:opacity-55',
           'motion-safe:transition-colors motion-safe:duration-150 motion-safe:ease-snap',

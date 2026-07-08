@@ -44,7 +44,7 @@ export default async function JoinListPage({
     <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-8 px-4 py-10 sm:px-6 sm:py-14">
       <div className="flex flex-col gap-2">
         <p className="type-board text-sm text-ink-muted">List invite</p>
-        <h1 className="type-board text-4xl text-ink sm:text-5xl">
+        <h1 className="type-board text-4xl break-words text-ink sm:text-5xl">
           {invite.list.name}
         </h1>
         <p className="max-w-lg text-ink-secondary">

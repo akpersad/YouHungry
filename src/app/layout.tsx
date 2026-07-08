@@ -84,7 +84,9 @@ export default function V2RootLayout({
           <div className="flex min-h-dvh flex-col">
             <AppHeader />
             {children}
-            <footer className="border-t border-line px-4 py-6 sm:px-6">
+            {/* pb clears the iOS home indicator in standalone mode
+                (viewport-fit=cover); desktop insets resolve to 0. */}
+            <footer className="border-t border-line px-4 pt-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] sm:px-6">
               <div className="mx-auto flex w-full max-w-3xl items-center justify-between text-xs text-ink-muted">
                 <span>Fork In The Road</span>
                 <Link
@@ -92,7 +94,7 @@ export default function V2RootLayout({
                   // A static footer target on every page: prefetching it
                   // costs a request per pageview for no felt difference.
                   prefetch={false}
-                  className="text-brass underline underline-offset-2 hover:text-ink"
+                  className="tap-target inline-block rounded text-brass underline underline-offset-2 hover:text-ink"
                 >
                   Privacy
                 </Link>

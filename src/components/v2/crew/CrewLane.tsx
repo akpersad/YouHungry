@@ -159,7 +159,7 @@ export function CrewLane({
                   href={`/crew/${crew.id}`}
                   className="flex items-center justify-between gap-3 rounded-xl border border-line bg-surface px-4 py-3 outline-none transition-colors hover:bg-sunken focus-visible:ring-2 focus-visible:ring-focus motion-safe:duration-100"
                 >
-                  <span className="truncate font-semibold text-ink">
+                  <span className="min-w-0 truncate font-semibold text-ink">
                     {crew.name}
                   </span>
                   <span className="tnum shrink-0 text-sm text-ink-muted">

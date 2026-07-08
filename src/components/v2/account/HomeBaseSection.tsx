@@ -234,7 +234,7 @@ export function HomeBaseSection({
                   onMouseDown={(event) => event.preventDefault()}
                   onClick={() => pick(suggestion)}
                   className={cx(
-                    'w-full px-3 py-2.5 text-left text-sm text-ink outline-none',
+                    'min-h-11 w-full px-3 py-2.5 text-left text-sm text-ink outline-none',
                     'motion-safe:transition-colors motion-safe:duration-100',
                     index === activeIndex ? 'bg-sunken' : 'hover:bg-sunken'
                   )}

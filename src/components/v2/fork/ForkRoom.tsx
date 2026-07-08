@@ -258,7 +258,7 @@ export function ForkRoom({
           <button
             type="button"
             onClick={copyLink}
-            className="h-9 rounded-md px-2 text-sm font-semibold text-brass outline-none hover:underline focus-visible:ring-2 focus-visible:ring-focus"
+            className="tap-target h-9 shrink-0 rounded-md px-2 text-sm font-semibold text-brass outline-none hover:underline focus-visible:ring-2 focus-visible:ring-focus"
           >
             {copied ? 'Copied' : 'Copy link'}
           </button>
@@ -507,7 +507,7 @@ export function ForkRoom({
               Voting as {viewer.displayName ?? name}.{' '}
               <a
                 href={`/sign-up?next=${encodeURIComponent(`/f/${fork.code}`)}`}
-                className="font-semibold text-brass underline-offset-2 hover:underline"
+                className="tap-target inline-block font-semibold text-brass underline-offset-2 hover:underline"
               >
                 Create an account
               </a>{' '}

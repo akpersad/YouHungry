@@ -23,7 +23,7 @@ export function PlaceMeta({ place }: { place: PlaceSummary }) {
         target="_blank"
         rel="noopener noreferrer"
         aria-label={`See ${place.name} on Google Maps`}
-        className="rounded underline underline-offset-2 outline-none hover:text-ink focus-visible:ring-2 focus-visible:ring-focus"
+        className="tap-target inline-block rounded underline underline-offset-2 outline-none hover:text-ink focus-visible:ring-2 focus-visible:ring-focus"
       >
         See on Google
       </a>
