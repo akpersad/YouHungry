@@ -1,6 +1,6 @@
 # Session Handoff — Fork In The Road portfolio upgrade
 
-**Last updated:** 2026-07-08 (branch `v2/mobile-pwa-audit`: C1–C3 COMMITTED locally, awaiting owner review + push go-ahead; see CURRENT below)
+**Last updated:** 2026-07-08 (branch `v2/mobile-pwa-audit`: C1–C3 PUSHED on owner go-ahead 2026-07-08; PR creation/merge is the owner's; see CURRENT below)
 **Read this first, then:** `promptFiles/v2/CHARTER.md` + `promptFiles/v2/WORKPLAN.md` (the authoritative plan for all v2 work — supersedes `phased-execution-plan.md` phases 4–8), `promptFiles/v2/IDENTITY.md` (the committed v2 design direction), `promptFiles/v2/BACKLOG.md` (post-launch triage + remaining owner items), `CLAUDE.md` (repo guide).
 
 ## CURRENT: mobile PWA audit (branch `v2/mobile-pwa-audit`, built 2026-07-08)
