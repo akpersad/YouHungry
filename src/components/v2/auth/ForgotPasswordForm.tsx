@@ -131,7 +131,7 @@ export function ForgotPasswordForm({
             setPassword('');
             setError(null);
           }}
-          className="self-start rounded text-sm font-semibold text-brass underline-offset-4 outline-none hover:underline focus-visible:ring-2 focus-visible:ring-focus"
+          className="tap-target self-start rounded text-sm font-semibold text-brass underline-offset-4 outline-none hover:underline focus-visible:ring-2 focus-visible:ring-focus"
         >
           Use a different email
         </button>
@@ -172,7 +172,7 @@ export function ForgotPasswordForm({
       <button
         type="button"
         onClick={onBack}
-        className="self-start rounded text-sm font-semibold text-brass underline-offset-4 outline-none hover:underline focus-visible:ring-2 focus-visible:ring-focus"
+        className="tap-target self-start rounded text-sm font-semibold text-brass underline-offset-4 outline-none hover:underline focus-visible:ring-2 focus-visible:ring-focus"
       >
         Back to sign in
       </button>

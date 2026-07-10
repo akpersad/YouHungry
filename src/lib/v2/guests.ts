@@ -117,12 +117,15 @@ export async function claimGuest(
 /**
  * Guest identities a user has claimed — the claim pointer, followed by
  * weight-history and viewer-identity queries. Bounded: one browser per
- * device ever claims, so this is a handful of ids at most.
+ * device ever claims, so this is a handful of ids at most. Most-recent
+ * first, so a heavy cookie-clearer (or the e2e squad account, which claims
+ * a fresh guest every run) never has a new claim fall off the window.
  */
 export async function getClaimedGuestIds(userId: ObjectId): Promise<string[]> {
   const { guests } = await getV2Db();
   const docs = await guests
     .find({ claimedByUserId: userId })
+    .sort({ lastSeenAt: -1 })
     .limit(20)
     .toArray();
   return docs.map((doc) => doc.guestId);

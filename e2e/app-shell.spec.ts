@@ -41,9 +41,9 @@ test.describe('app shell', () => {
       await expect(
         page.getByRole('heading', { name: 'Where are we eating?' })
       ).toBeVisible();
-      await expect(
-        page.getByRole('button', { name: 'Sign out' })
-      ).toBeVisible();
+      // The signed-in shell shows the account door; sign-out lives on
+      // /account (a phone-width header has no room for a rare action).
+      await expect(page.getByRole('link', { name: 'Account' })).toBeVisible();
 
       const cookies = await context.cookies();
       expect(

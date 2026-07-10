@@ -88,7 +88,7 @@ export function Reveal({
       {locked ? (
         <>
           <div className="mt-3 rounded-xl bg-gold px-4 py-3 text-gold-ink">
-            <p className="type-board text-3xl leading-none sm:text-4xl">
+            <p className="type-board text-3xl leading-none break-words sm:text-4xl">
               {winner}
             </p>
           </div>
@@ -110,7 +110,7 @@ export function Reveal({
           >
             <p
               key={tick}
-              className="type-board motion-safe:animate-flap text-3xl leading-none sm:text-4xl"
+              className="type-board motion-safe:animate-flap text-3xl leading-none break-words sm:text-4xl"
             >
               {pool[tick % pool.length]}
             </p>

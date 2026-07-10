@@ -1,9 +1,72 @@
 # Session Handoff — Fork In The Road portfolio upgrade
 
-**Last updated:** 2026-07-07 (branch `v2/account`: C1–C12 PUSHED on owner go-ahead 2026-07-07; C13 coverage-gate fix COMMITTED locally awaiting push go-ahead; see CURRENT below)
+**Last updated:** 2026-07-08 (branch `v2/mobile-pwa-audit`: C1–C3 PUSHED on owner go-ahead 2026-07-08; PR creation/merge is the owner's; see CURRENT below)
 **Read this first, then:** `promptFiles/v2/CHARTER.md` + `promptFiles/v2/WORKPLAN.md` (the authoritative plan for all v2 work — supersedes `phased-execution-plan.md` phases 4–8), `promptFiles/v2/IDENTITY.md` (the committed v2 design direction), `promptFiles/v2/BACKLOG.md` (post-launch triage + remaining owner items), `CLAUDE.md` (repo guide).
 
-## CURRENT: post-launch gap fix — the account surface (branch `v2/account`, built 2026-07-06)
+## CURRENT: mobile PWA audit (branch `v2/mobile-pwa-audit`, built 2026-07-08)
+
+Owner ask: the app is primarily an installed PWA on phones — comb through
+every surface at iPhone 13 Pro size (390x844) and make it work for all
+major mobile sizes. Method: full static sweep of every lane + primitive
+against the DESIGN manual's mobile bars (44px targets, safe areas, dvh,
+overflow), PLUS a live evidence pass — `scripts/v2/mobile-audit.ts`
+(new, reusable) drives a chromium iPhone-13-Pro profile through every
+surface signed-out/signed-in/guest, screenshots them, and measures
+horizontal overflow + sub-44px targets per page.
+
+Commit ledger:
+
+1. `C1` **Phone-first shell.** The signed-in header genuinely did not fit
+   390px (wordmark wrapped to four clipped lines, name truncated to one
+   letter, Sign out wrapped). Now: wordmark condenses to "Fork" below sm,
+   nav links get 44px hit areas, ThemeToggle is icon-register (sun/moon,
+   accessible names still Light/Dark so the e2e mode-switch helpers hold),
+   and **Sign out moved to a Session section on /account** (the name stays
+   the door; a rare settings action has no seat in a phone-width row —
+   fits at 360px with 44px targets now). auth.setup + app-shell e2e
+   re-pinned to the Account door.
+2. `C2` **Touch + overflow sweep, every lane.** New `.tap-target` utility
+   (v2.css): extends a visually-small control's hit area to 44px via
+   ::after — applied to Button `sm`, all chips (QuickSpin vibes, NewFork
+   list/timer/ballot chips, discovery browse), Switch (28px track),
+   copy-link, "See on Google", footer Privacy, auth text-links. Global
+   `-webkit-tap-highlight-color: transparent` + `touch-action:
+manipulation` on interactive elements. Dialog gained
+   `max-h-[85dvh] overflow-y-auto overscroll-contain` (tall
+   SaveToListDialog no longer clips off-screen — native <dialog> clips
+   rather than scrolls) + body scroll-lock while open (Sheet too) +
+   title break-words. Overflow guards on user content: list/crew names
+   (`min-w-0` on truncating flex children), list-detail + join h1
+   `break-words`, Reveal board names, ballot chips truncate, admin table
+   `overflow-x-auto` + error rows break, footer safe-area-inset-bottom.
+   HomeBase combobox rows min-h-11. AccountLane unit test pins the new
+   Session section.
+3. `C3` **Claim-window root fix (found by e2e, pre-existing on main).**
+   The claim journey failed deterministically: `getClaimedGuestIds` caps
+   at 20 UNSORTED docs, and the e2e claim spec mints + claims a fresh
+   guest every run — past 20 accumulated claims the newest guest fell off
+   the window and the reloaded fork no longer attributed the ballot
+   (25 residue docs in dev). Fix = sort `lastSeenAt: -1` (a fresh claim
+   can never fall off; also protects real heavy cookie-clearers) + the
+   seed's per-run reset now deletes squad-claimed guest residue.
+
+**Validation (2026-07-08):** full pre-push green (tsc / eslint
+--max-warnings=0 / prettier / Jest 40 suites 468 tests / production
+build). **Full e2e 46 passed, 1 flaky** (manifest fetch, the documented
+Clerk-dev/parallel-load class, passed on retry) against a fresh
+production build + reseeded dev DB — includes both-mode axe scans and
+the mobile-chrome smoke lane. The mobile walkthrough re-run confirms:
+zero horizontal overflow on any surface at 390px, header one clean row,
+tap-target extensions verified live via elementFromPoint probes.
+
+**Owner actions for this gate:**
+
+1. Review the branch (note the two product-visible calls: Sign out now
+   lives on /account, and the color-mode toggle is icon-only) — then
+   give the push go-ahead; PR creation/merge stays yours.
+2. None of this touches env, billing, or prod data.
+
+## Previous: post-launch gap fix — the account surface (branch `v2/account`, built 2026-07-06)
 
 Owner-identified miss (2026-07-06): the v1 profile section died in the
 Phase 7 purge with no v2 replacement — no way to edit personal info, no

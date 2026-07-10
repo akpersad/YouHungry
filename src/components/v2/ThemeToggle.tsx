@@ -66,18 +66,56 @@ export function ThemeToggle() {
           key={m}
           type="button"
           aria-pressed={mode === m}
+          aria-label={m === 'light' ? 'Light' : 'Dark'}
+          title={m === 'light' ? 'Light' : 'Dark'}
           onClick={() => apply(m)}
           className={
-            'h-9 rounded-md px-3 text-sm font-semibold outline-none transition-colors motion-safe:duration-100 ' +
+            'tap-target flex h-9 w-9 items-center justify-center rounded-md outline-none transition-colors motion-safe:duration-100 ' +
             'focus-visible:ring-2 focus-visible:ring-focus ' +
             (mode === m
               ? 'bg-ink text-canvas'
               : 'text-ink-muted hover:text-ink')
           }
         >
-          {m === 'light' ? 'Light' : 'Dark'}
+          {m === 'light' ? <SunIcon /> : <MoonIcon />}
         </button>
       ))}
     </div>
+  );
+}
+
+/* Icon register keeps the control phone-sized; the accessible names stay
+ * "Light"/"Dark". One family, one stroke weight. */
+function SunIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      className="size-4.5"
+    >
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M19.1 4.9l-1.8 1.8M6.7 17.3l-1.8 1.8" />
+    </svg>
+  );
+}
+
+function MoonIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="size-4.5"
+    >
+      <path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11Z" />
+    </svg>
   );
 }

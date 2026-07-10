@@ -76,30 +76,32 @@ export default async function AdminPage() {
                 No billed API calls in the window.
               </p>
             ) : (
-              <table className="w-full text-left text-sm">
-                <thead>
-                  <tr className="text-ink-muted">
-                    <th scope="col" className="py-1 pr-4 font-normal">
-                      API
-                    </th>
-                    <th scope="col" className="py-1 pr-4 font-normal">
-                      Calls
-                    </th>
-                    <th scope="col" className="py-1 font-normal">
-                      Est. cost
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="font-mono">
-                  {rows.map(([apiType, row]) => (
-                    <tr key={apiType} className="border-t border-line">
-                      <td className="py-1.5 pr-4">{apiType}</td>
-                      <td className="py-1.5 pr-4">{row.count}</td>
-                      <td className="py-1.5">${row.cost.toFixed(3)}</td>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-sm">
+                  <thead>
+                    <tr className="text-ink-muted">
+                      <th scope="col" className="py-1 pr-4 font-normal">
+                        API
+                      </th>
+                      <th scope="col" className="py-1 pr-4 font-normal">
+                        Calls
+                      </th>
+                      <th scope="col" className="py-1 font-normal">
+                        Est. cost
+                      </th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="font-mono">
+                    {rows.map(([apiType, row]) => (
+                      <tr key={apiType} className="border-t border-line">
+                        <td className="py-1.5 pr-4">{apiType}</td>
+                        <td className="py-1.5 pr-4">{row.count}</td>
+                        <td className="py-1.5">${row.cost.toFixed(3)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             )}
           </div>
         </Card>
@@ -120,10 +122,12 @@ export default async function AdminPage() {
                     key={entry._id?.toString()}
                     className="border-t border-line pt-2 first:border-t-0 first:pt-0"
                   >
-                    <p className="font-mono text-xs text-ink-muted">
+                    <p className="font-mono text-xs break-all text-ink-muted">
                       {entry.at.toISOString()} · {entry.route}
                     </p>
-                    <p className="text-sm text-ink">{entry.message}</p>
+                    <p className="text-sm break-words text-ink">
+                      {entry.message}
+                    </p>
                   </li>
                 ))}
               </ul>

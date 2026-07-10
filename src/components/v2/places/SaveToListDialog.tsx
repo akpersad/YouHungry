@@ -152,7 +152,7 @@ export function SaveToListDialog({
                   loading={busyListId === list.id}
                   onClick={() => saveTo(list)}
                 >
-                  <span className="truncate">{list.name}</span>
+                  <span className="min-w-0 truncate">{list.name}</span>
                   <span className="tnum text-sm text-ink-muted">
                     {list.placeCount}
                   </span>

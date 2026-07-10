@@ -487,8 +487,23 @@ async function main() {
           : '')
     );
 
-    // One unclaimed guest for guest-identity flows.
+    // Drop guest identities the squad claimed in prior e2e runs. The claim
+    // journey mints + claims a FRESH guest every run, so a squad account
+    // accumulates claims without bound; past ~20 the viewer-identity window
+    // (getClaimedGuestIds) can miss the newest claim and the claim spec
+    // fails on data residue, not code.
     const guests = db.collection<GuestDoc>(V2_COLLECTIONS.guests);
+    const squadIds = [...userIdByRole.values()];
+    const claimResidue = await guests.deleteMany({
+      claimedByUserId: { $in: squadIds },
+    });
+    if (claimResidue.deletedCount > 0) {
+      console.log(
+        `mongo: ${claimResidue.deletedCount} claimed e2e guest(s) removed`
+      );
+    }
+
+    // One unclaimed guest for guest-identity flows.
     await retryOnDuplicate(() =>
       guests.updateOne(
         { guestId: 'seed-guest-gabi' },

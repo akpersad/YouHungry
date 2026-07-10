@@ -3,6 +3,12 @@ import userEvent from '@testing-library/user-event';
 import { AccountLane } from '../AccountLane';
 import type { AccountView } from '@/lib/v2/account';
 
+// Sign out (relocated here from the header) routes home after Clerk ends
+// the session; jsdom has no app router mounted.
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({ push: jest.fn() }),
+}));
+
 const ACCOUNT: AccountView = {
   firstName: 'Sam',
   name: 'Sam Squad',
@@ -45,6 +51,10 @@ describe('AccountLane', () => {
       'href',
       '/privacy'
     );
+    // Sign out lives here, not in the header (phone-width shell).
+    expect(
+      screen.getByRole('button', { name: 'Sign out' })
+    ).toBeInTheDocument();
   });
 
   it('keeps Save name disabled until the name actually changes', async () => {

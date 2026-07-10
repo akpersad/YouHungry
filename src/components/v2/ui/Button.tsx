@@ -36,7 +36,8 @@ const variants: Record<NonNullable<ButtonProps['variant']>, string> = {
 };
 
 const sizes: Record<NonNullable<ButtonProps['size']>, string> = {
-  sm: 'h-9 px-3 text-sm',
+  // sm stays visually 36px but hits at 44px (tap-target) — phone-first.
+  sm: 'tap-target h-9 px-3 text-sm',
   md: 'h-11 px-4 text-base',
   lg: 'h-12 px-6 text-base',
 };

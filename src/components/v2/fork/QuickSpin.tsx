@@ -174,7 +174,7 @@ export function QuickSpin() {
               aria-pressed={selected}
               onClick={() => setVibe(chip.key)}
               className={cx(
-                'h-9 rounded-full border px-4 text-sm font-semibold outline-none',
+                'tap-target h-9 rounded-full border px-4 text-sm font-semibold outline-none',
                 'motion-safe:transition-colors motion-safe:duration-100',
                 'focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-canvas',
                 selected

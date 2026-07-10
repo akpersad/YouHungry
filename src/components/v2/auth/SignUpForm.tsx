@@ -116,7 +116,7 @@ export function SignUpForm() {
             setCode('');
             setError(null);
           }}
-          className="self-start rounded text-sm font-semibold text-brass underline-offset-4 outline-none hover:underline focus-visible:ring-2 focus-visible:ring-focus"
+          className="tap-target self-start rounded text-sm font-semibold text-brass underline-offset-4 outline-none hover:underline focus-visible:ring-2 focus-visible:ring-focus"
         >
           Use a different email
         </button>
@@ -171,7 +171,7 @@ export function SignUpForm() {
         Already have one?{' '}
         <Link
           href={`/sign-in?next=${encodeURIComponent(nextPath)}`}
-          className="rounded font-semibold text-brass underline-offset-4 outline-none hover:underline focus-visible:ring-2 focus-visible:ring-focus"
+          className="tap-target inline-block rounded font-semibold text-brass underline-offset-4 outline-none hover:underline focus-visible:ring-2 focus-visible:ring-focus"
         >
           Sign in
         </Link>

@@ -293,7 +293,7 @@ export function NewFork({ initialListId }: { initialListId?: string }) {
 
   const chipClass = (selected: boolean) =>
     cx(
-      'h-9 rounded-full border px-4 text-sm font-semibold outline-none',
+      'tap-target h-9 max-w-full rounded-full border px-4 text-sm font-semibold outline-none',
       'motion-safe:transition-colors motion-safe:duration-100',
       'focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-canvas',
       selected
@@ -403,7 +403,9 @@ export function NewFork({ initialListId }: { initialListId?: string }) {
                             onClick={() => openList(list.id)}
                             className={chipClass(activeListId === list.id)}
                           >
-                            {list.name} · {list.placeCount}
+                            <span className="block max-w-full truncate">
+                              {list.name} · {list.placeCount}
+                            </span>
                           </button>
                         ))}
                       </div>
@@ -491,10 +493,13 @@ export function NewFork({ initialListId }: { initialListId?: string }) {
                   <button
                     type="button"
                     onClick={() => remove(place.id)}
-                    className="inline-flex h-8 items-center gap-1.5 rounded-full border border-line-strong bg-surface px-3 text-sm font-semibold text-ink outline-none hover:bg-canvas focus-visible:ring-2 focus-visible:ring-focus"
+                    className="tap-target inline-flex h-9 max-w-full items-center gap-1.5 rounded-full border border-line-strong bg-surface px-3 text-sm font-semibold text-ink outline-none hover:bg-canvas focus-visible:ring-2 focus-visible:ring-focus"
                   >
-                    {place.name}
-                    <span aria-hidden="true" className="text-ink-muted">
+                    <span className="min-w-0 truncate">{place.name}</span>
+                    <span
+                      aria-hidden="true"
+                      className="shrink-0 text-ink-muted"
+                    >
                       ×
                     </span>
                     <span className="sr-only">(remove)</span>

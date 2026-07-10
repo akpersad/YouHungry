@@ -206,10 +206,12 @@ describe('claimGuest', () => {
 });
 
 describe('getClaimedGuestIds', () => {
-  it('returns the guestIds claimed by the user', async () => {
+  it('returns the guestIds claimed by the user, most recent first', async () => {
     const userId = uniqueId();
+    const sort = jest.fn().mockReturnThis();
     const guests = mockGuests({
       find: jest.fn().mockReturnValue({
+        sort,
         limit: jest.fn().mockReturnThis(),
         toArray: jest
           .fn()
@@ -222,6 +224,9 @@ describe('getClaimedGuestIds', () => {
 
     expect(await getClaimedGuestIds(userId)).toEqual(['g-1', 'g-2']);
     expect(guests.find).toHaveBeenCalledWith({ claimedByUserId: userId });
+    // Most-recent-first: a fresh claim must never fall off the bounded
+    // window behind stale identities (the e2e squad claims one per run).
+    expect(sort).toHaveBeenCalledWith({ lastSeenAt: -1 });
   });
 });
 

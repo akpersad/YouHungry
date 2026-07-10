@@ -38,6 +38,16 @@ export function Sheet({
     }
   }, [open]);
 
+  // iOS keeps scrolling the page behind a modal <dialog>; lock it while open.
+  useEffect(() => {
+    if (!open) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, [open]);
+
   return (
     <dialog
       ref={ref}

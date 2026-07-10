@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, type FormEvent } from 'react';
+import { useRouter } from 'next/navigation';
+import { useClerk } from '@clerk/nextjs';
 import { Button, Input } from '@/components/v2/ui';
 import type { AccountView } from '@/lib/v2/account';
 import { EmailSection } from './EmailSection';
@@ -15,6 +17,9 @@ import { NotificationsSection } from './NotificationsSection';
  * account is upkeep, not a decision moment.
  */
 export function AccountLane({ account }: { account: AccountView }) {
+  const router = useRouter();
+  const { signOut } = useClerk();
+  const [signingOut, setSigningOut] = useState(false);
   const [firstName, setFirstName] = useState(account.firstName);
   const [savedName, setSavedName] = useState(account.firstName);
   const [saving, setSaving] = useState(false);
@@ -104,6 +109,34 @@ export function AccountLane({ account }: { account: AccountView }) {
         initialSettings={account.notifications}
         registeredEndpoints={account.pushEndpoints}
       />
+
+      {/* Signing out lives here, not the header: the name in the shell is
+          the door in, and a phone-width header has no room for a rare,
+          settings-register action. */}
+      <section
+        aria-label="Session"
+        className="flex flex-col gap-3 rounded-2xl border border-line bg-surface p-4"
+      >
+        <div>
+          <h2 className="text-xl font-semibold text-ink">Signed in</h2>
+          <p className="text-sm text-ink-secondary">
+            Ends your session on this device only.
+          </p>
+        </div>
+        <Button
+          variant="quiet"
+          size="md"
+          type="button"
+          className="self-start"
+          loading={signingOut}
+          onClick={() => {
+            setSigningOut(true);
+            void signOut(() => router.push('/'));
+          }}
+        >
+          Sign out
+        </Button>
+      </section>
 
       <p className="text-sm text-ink-muted">
         Want everything gone? Account deletion is handled by hand for now: ask

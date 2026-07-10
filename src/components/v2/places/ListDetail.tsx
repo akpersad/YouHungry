@@ -161,7 +161,9 @@ export function ListDetail({ initial }: { initial: ListDetailData }) {
           / list
         </p>
         <div className="flex flex-wrap items-baseline justify-between gap-3">
-          <h1 className="type-board text-4xl text-ink sm:text-5xl">{name}</h1>
+          <h1 className="type-board min-w-0 text-4xl break-words text-ink sm:text-5xl">
+            {name}
+          </h1>
           <p className="tnum text-sm text-ink-muted">
             {places.length === 1 ? '1 place' : `${places.length} places`}
           </p>

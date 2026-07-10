@@ -40,6 +40,16 @@ export function Dialog({
     }
   }, [open]);
 
+  // iOS keeps scrolling the page behind a modal <dialog>; lock it while open.
+  useEffect(() => {
+    if (!open) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, [open]);
+
   return (
     <dialog
       ref={ref}
@@ -51,6 +61,10 @@ export function Dialog({
       }}
       className={cx(
         'm-auto w-[calc(100%-2rem)] max-w-sm rounded-3xl bg-surface p-6 text-ink shadow-float',
+        // Tall content scrolls inside the panel — a phone keyboard can halve
+        // the visual viewport, and a native <dialog> clips rather than
+        // scrolls overflow on its own.
+        'max-h-[85dvh] overflow-y-auto overscroll-contain',
         'scale-95 opacity-0 transition-[opacity,transform,display,overlay] transition-discrete duration-200 ease-snap',
         'open:scale-100 open:opacity-100 starting:open:scale-95 starting:open:opacity-0',
         'backdrop:bg-board/50 backdrop:opacity-0 backdrop:transition-[opacity,display,overlay] backdrop:transition-discrete backdrop:duration-200',
@@ -59,7 +73,7 @@ export function Dialog({
       )}
     >
       <div className="flex items-start justify-between gap-4">
-        <h2 id={titleId} className="text-xl font-semibold">
+        <h2 id={titleId} className="min-w-0 text-xl font-semibold break-words">
           {title}
         </h2>
         <button
