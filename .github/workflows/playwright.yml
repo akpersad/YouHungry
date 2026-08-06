@@ -1,13 +1,11 @@
 name: Playwright E2E Tests
 
+# MANUAL-ONLY since 2026-08-06: automatic push/PR runs plus the nightly
+# cron were burning the account's free 2,000 Actions min/month (the
+# Paladex repo's 10x-billed macOS jobs share the same pool). Run the
+# suites locally before merging, or trigger this from the Actions tab.
 on:
-  push:
-    branches: [main, develop]
-  pull_request:
-    branches: [main, develop]
-  schedule:
-    # Nightly full run at 2 AM UTC
-    - cron: '0 2 * * *'
+  workflow_dispatch:
 
 jobs:
   # Smoke lane - fastest signal, intended as a required PR check
@@ -15,7 +13,7 @@ jobs:
     name: E2E Smoke
     timeout-minutes: 15
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request' || github.event_name == 'push'
+    if: github.event_name == 'pull_request' || github.event_name == 'push' || github.event_name == 'workflow_dispatch'
 
     steps:
       - uses: actions/checkout@v7
@@ -72,7 +70,7 @@ jobs:
     name: PR Tests (Chromium + Mobile Chrome)
     timeout-minutes: 30
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request' || github.event_name == 'push'
+    if: github.event_name == 'pull_request' || github.event_name == 'push' || github.event_name == 'workflow_dispatch'
 
     steps:
       - uses: actions/checkout@v7
@@ -123,7 +121,7 @@ jobs:
     name: Nightly Tests
     timeout-minutes: 45
     runs-on: ubuntu-latest
-    if: github.event_name == 'schedule'
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
 
     steps:
       - uses: actions/checkout@v7
@@ -174,7 +172,7 @@ jobs:
     name: Accessibility Tests
     timeout-minutes: 15
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request' || github.event_name == 'push'
+    if: github.event_name == 'pull_request' || github.event_name == 'push' || github.event_name == 'workflow_dispatch'
 
     steps:
       - uses: actions/checkout@v7
@@ -223,7 +221,7 @@ jobs:
     name: Lighthouse Performance
     timeout-minutes: 30
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request' || (github.ref == 'refs/heads/main' && github.event_name == 'push')
+    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' || (github.ref == 'refs/heads/main' && github.event_name == 'push')
 
     steps:
       - uses: actions/checkout@v7

@@ -1,10 +1,11 @@
 name: CI
 
+# MANUAL-ONLY since 2026-08-06: automatic runs were burning the account's
+# free 2,000 Actions min/month (shared pool with the Paladex repo's
+# 10x-billed macOS jobs). Run checks locally before merging, or trigger
+# this from the Actions tab.
 on:
-  push:
-    branches: [main, develop]
-  pull_request:
-    branches: [main, develop]
+  workflow_dispatch:
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
